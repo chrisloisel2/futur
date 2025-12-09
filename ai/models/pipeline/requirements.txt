@@ -1,0 +1,31 @@
+# ============================================
+# PIPELINE - Data Collection & Processing
+# ============================================
+
+# Core dependencies for data collection
+aiohttp>=3.9.0
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+fake-useragent>=1.4.0
+
+# Data processing and storage
+pandas>=2.1.0
+numpy>=1.24.0
+pyarrow>=14.0.0
+
+# Database
+pymongo>=4.8.0
+
+# API frameworks for data serving
+fastapi>=0.104.0
+uvicorn>=0.24.0
+websockets>=12.0
+
+# Utilities
+python-dotenv>=1.0.0
+rich>=13.7.0
+
+# Optional visualization (for data exploration)
+matplotlib>=3.8.0
+seaborn>=0.13.0
+plotly>=5.18.0

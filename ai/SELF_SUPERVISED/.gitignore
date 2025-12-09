@@ -1,0 +1,23 @@
+# Checkpoints
+checkpoints/
+*.pt
+*.pth
+
+# Data
+data/
+*.parquet
+
+# Logs
+*.log
+
+# Cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

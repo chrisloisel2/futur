@@ -1,0 +1,259 @@
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  padding: 20px;
+  color: #fff;
+}
+
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header h1 {
+  margin: 0 0 20px 0;
+  font-size: 2.5rem;
+  background: linear-gradient(90deg, #00d4ff, #00ff9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-stats {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, #00d4ff, #9d00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 20px;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.chart-card h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  color: #00d4ff;
+}
+
+.ws-status {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ws-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.ws-status-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ws-status-subtitle {
+  color: #9fb3c8;
+  font-size: 0.9rem;
+}
+
+.ws-runtime {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ws-status-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ws-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.ws-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ws-card-name {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.status-ok {
+  background: rgba(0, 255, 157, 0.15);
+  color: #5af2c2;
+  border-color: rgba(0, 255, 157, 0.35);
+}
+
+.status-neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: #d9e0e7;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.status-error {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff7b8a;
+  border-color: rgba(255, 71, 87, 0.35);
+}
+
+.ws-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.ws-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ws-row span {
+  color: #9fb3c8;
+}
+
+.ws-error {
+  margin-top: 8px;
+  color: #ff7b8a;
+  font-size: 0.85rem;
+}
+
+.ws-status-message {
+  color: #9fb3c8;
+}
+
+.ws-status-message.error {
+  color: #ff7b8a;
+}
+
+.ws-start-btn {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ws-start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chart-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.symbol-selector {
+  margin-bottom: 15px;
+}
+
+.symbol-selector select {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.symbol-selector select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #00d4ff;
+}
+
+.symbol-selector select option {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+  color: #00d4ff;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .header-stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
