@@ -1,0 +1,357 @@
+.live-crypto-market {
+  padding: 20px;
+}
+
+.live-crypto-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 20px;
+}
+
+.live-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.live-title {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.live-subtitle {
+  font-size: 14px;
+  color: #9CA3AF;
+  margin: 5px 0 0 0;
+}
+
+.ws-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+  color: #D1D5DB;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-connected {
+  background: #10B981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-connecting {
+  background: #F59E0B;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.status-disconnected {
+  background: #EF4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.crypto-live-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
+}
+
+.crypto-live-card {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    rgba(139, 92, 246, 0.05) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.crypto-live-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.crypto-live-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+}
+
+.crypto-live-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.crypto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.crypto-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #F9FAFB;
+  margin: 0;
+}
+
+.crypto-symbol {
+  font-size: 13px;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.price-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-badge.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.price-badge.negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.current-price-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.current-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: #F9FAFB;
+  font-family: 'SF Mono', 'Consolas', monospace;
+  margin-bottom: 8px;
+}
+
+.price-change {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.price-change .positive {
+  color: #10B981;
+}
+
+.price-change .negative {
+  color: #EF4444;
+}
+
+.stats-24h {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 14px;
+  color: #F9FAFB;
+  font-weight: 600;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.predictions-section {
+  margin-bottom: 16px;
+}
+
+.predictions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.predictions-header span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8B5CF6;
+}
+
+.predictions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prediction-item {
+  display: grid;
+  grid-template-columns: 50px 1fr 80px 60px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  transition: all 0.2s ease;
+}
+
+.prediction-item:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateX(4px);
+}
+
+.prediction-time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8B5CF6;
+  text-align: center;
+}
+
+.prediction-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F9FAFB;
+  font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+.prediction-change {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.prediction-change.positive {
+  color: #10B981;
+}
+
+.prediction-change.negative {
+  color: #EF4444;
+}
+
+.prediction-confidence {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.last-update {
+  text-align: center;
+  font-size: 11px;
+  color: #6B7280;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crypto-live-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .live-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-24h {
+    grid-template-columns: 1fr;
+  }
+
+  .prediction-item {
+    grid-template-columns: 45px 1fr 70px 50px;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .current-price {
+    font-size: 28px;
+  }
+}

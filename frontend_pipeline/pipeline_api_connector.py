@@ -9,9 +9,10 @@ import logging
 from datetime import datetime
 
 # Ajouter le path de la pipeline
-sys.path.insert(0, str(Path(__file__).parent))
+pipeline_path = Path(__file__).parent.parent / "ai" / "models" / "pipeline"
+sys.path.insert(0, str(pipeline_path))
 
-from pipeline.realtime_pipeline import RealTimePipeline
+from realtime_pipeline import RealTimePipeline
 import json
 
 logging.basicConfig(level=logging.INFO)

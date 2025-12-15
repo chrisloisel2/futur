@@ -1,0 +1,40 @@
+{
+  "window_size": 100,
+  "buffer_size": 1000,
+  "storage_path": "datasets/realtime",
+  "update_interval": 1,
+  "collectors": {
+    "yahoo": {
+      "enabled": true,
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "BNBUSDT",
+        "SOLUSDT",
+        "XRPUSDT",
+        "ADAUSDT",
+        "DOGEUSDT",
+        "MATICUSDT"
+      ],
+      "interval": 5
+    },
+    "generic_public": {
+      "enabled": true,
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT"
+      ],
+      "interval": 3
+    }
+  },
+  "model": {
+    "enabled": false,
+    "model_path": null
+  },
+  "features": {
+    "technical_indicators": true,
+    "market_sentiment": false,
+    "volume_analysis": true
+  }
+}

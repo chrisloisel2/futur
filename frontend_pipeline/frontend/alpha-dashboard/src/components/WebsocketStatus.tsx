@@ -64,9 +64,13 @@ const WebsocketStatus: React.FC = () => {
       setStarting(true);
       await DataService.startPipeline();
       await loadStatus();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error starting pipeline', err);
-      setError("Impossible de démarrer la pipeline (vérifie l'API).");
+      if (err.message?.includes('503') || err.message?.includes('Service Unavailable')) {
+        setError("Pipeline non configuré. Utilisez le Dataset Explorer pour visualiser les données S3 !");
+      } else {
+        setError("Impossible de démarrer la pipeline (vérifie l'API).");
+      }
     } finally {
       setStarting(false);
     }

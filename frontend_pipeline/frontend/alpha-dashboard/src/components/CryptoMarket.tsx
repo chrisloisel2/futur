@@ -117,24 +117,24 @@ const CryptoMarket: React.FC = () => {
       <div className="market-stats">
         <div className="stat-card">
           <div className="stat-label">Total Cryptos</div>
-          <div className="stat-value">{marketData.stats.total_cryptos}</div>
+          <div className="stat-value">{marketData?.stats?.total_cryptos || 0}</div>
         </div>
         <div className="stat-card stat-positive">
           <div className="stat-label">Gainers 24h</div>
-          <div className="stat-value">📈 {marketData.stats.gainers}</div>
+          <div className="stat-value">📈 {marketData?.stats?.gainers || 0}</div>
         </div>
         <div className="stat-card stat-negative">
           <div className="stat-label">Losers 24h</div>
-          <div className="stat-value">📉 {marketData.stats.losers}</div>
+          <div className="stat-value">📉 {marketData?.stats?.losers || 0}</div>
         </div>
-        {marketData.stats.top_gainer && (
+        {marketData?.stats?.top_gainer && (
           <div className="stat-card stat-positive">
             <div className="stat-label">Top Gainer</div>
             <div className="stat-value">{marketData.stats.top_gainer.name}</div>
             <div className="stat-sublabel">+{marketData.stats.top_gainer.h24_change_pct.toFixed(2)}%</div>
           </div>
         )}
-        {marketData.stats.top_loser && (
+        {marketData?.stats?.top_loser && (
           <div className="stat-card stat-negative">
             <div className="stat-label">Top Loser</div>
             <div className="stat-value">{marketData.stats.top_loser.name}</div>

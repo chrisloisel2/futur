@@ -101,4 +101,90 @@ export class DataService {
     if (!response.ok) throw new Error('Failed to start pipeline');
     return response.json();
   }
+
+  // ============================================================================
+  // TRAINING MANAGEMENT METHODS
+  // ============================================================================
+
+  static async getTrainingConfigs() {
+    const response = await fetch(`${API_BASE_URL}/training/configs`);
+    if (!response.ok) throw new Error('Failed to fetch training configs');
+    return response.json();
+  }
+
+  static async startTraining(
+    config: string,
+    device: string = 'auto',
+    debugMode: boolean = false,
+    useAws: boolean = true,
+    instanceType: string = 'g4dn.xlarge',
+    awsRegion: string = 'eu-west-3'
+  ) {
+    const response = await fetch(`${API_BASE_URL}/training/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config,
+        device,
+        debug_mode: debugMode,
+        use_aws: useAws,
+        instance_type: instanceType,
+        aws_region: awsRegion
+      }),
+    });
+    if (!response.ok) throw new Error('Failed to start training');
+    return response.json();
+  }
+
+  static async getAllTrainingJobs() {
+    const response = await fetch(`${API_BASE_URL}/training/jobs`);
+    if (!response.ok) throw new Error('Failed to get training jobs');
+    return response.json();
+  }
+
+  static async getTrainingStatus(jobId: string) {
+    const response = await fetch(`${API_BASE_URL}/training/status/${jobId}`);
+    if (!response.ok) throw new Error('Failed to get training status');
+    return response.json();
+  }
+
+  static async stopTraining(jobId: string) {
+    const response = await fetch(`${API_BASE_URL}/training/stop/${jobId}`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to stop training');
+    return response.json();
+  }
+
+  static async getTrainingLogs(jobId: string, lines: number = 100) {
+    const response = await fetch(`${API_BASE_URL}/training/logs/${jobId}?lines=${lines}`);
+    if (!response.ok) throw new Error('Failed to get logs');
+    return response.json();
+  }
+
+  static async getModelVersions() {
+    const response = await fetch(`${API_BASE_URL}/training/models`);
+    if (!response.ok) throw new Error('Failed to get model versions');
+    return response.json();
+  }
+
+  static async setProductionModel(filename: string) {
+    const response = await fetch(`${API_BASE_URL}/training/models/${filename}/set-production`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to set production model');
+    return response.json();
+  }
+
+  static async getModelMetadata(filename: string) {
+    const response = await fetch(`${API_BASE_URL}/training/models/${filename}/metadata`);
+    if (!response.ok) throw new Error('Failed to get model metadata');
+    return response.json();
+  }
+
+  static async getTrainingCost(jobId: string) {
+    const response = await fetch(`${API_BASE_URL}/training/aws-cost/${jobId}`);
+    if (!response.ok) throw new Error('Failed to get training cost');
+    return response.json();
+  }
 }
