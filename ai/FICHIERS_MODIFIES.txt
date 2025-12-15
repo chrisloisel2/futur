@@ -1,0 +1,124 @@
+================================================================================
+                    FICHIERS CRÉÉS ET MODIFIÉS
+================================================================================
+
+Date: 2025-12-14
+Objectif: Modifier le script d'entraînement pour charger les données depuis S3
+
+================================================================================
+FICHIERS CRÉÉS (NOUVEAUX)
+================================================================================
+
+1. ai/TRAIN/data/s3_data_source.py
+   → Module pour charger les données depuis AWS S3
+   → Gère le téléchargement, cache local, conversion de format
+
+2. ai/configs/train_s3.yaml
+   → Configuration pour entraînement avec données S3
+   → Paramètres: bucket, années, symboles, cache
+
+3. ai/configs/train_ccxt.yaml
+   → Configuration pour ancien comportement CCXT
+   → Assure la rétrocompatibilité
+
+4. ai/test_s3_data_source.py
+   → Script de test pour le module S3DataSource
+   → Vérifie chargement, cache, intégrité des données
+
+5. ai/test_pipeline_s3.py
+   → Script de test pour l'intégration pipeline complète
+   → Vérifie feature engineering et DataLoaders
+
+6. ai/quick_start.sh
+   → Script interactif pour lancer tests et entraînements
+   → 5 options: tests et différents modes d'entraînement
+
+7. ai/README_S3_TRAINING.md
+   → Documentation complète du système S3
+   → Guide d'utilisation, exemples, troubleshooting
+
+8. ai/MODIFICATIONS_SUMMARY.md
+   → Résumé technique détaillé des modifications
+   → Architecture, résultats de tests
+
+9. ai/LANCEMENT_RAPIDE.md
+   → Guide de démarrage rapide
+   → Commandes essentielles, exemples
+
+10. ai/FICHIERS_MODIFIES.txt
+    → Ce fichier
+
+================================================================================
+FICHIERS MODIFIÉS
+================================================================================
+
+1. ai/TRAIN/data/pipeline.py
+   Modifications:
+   - Ajout paramètres S3 dans __init__() (lignes 46-53)
+   - Nouvelle méthode _fetch_ohlcv_from_s3() (lignes 83-122)
+   - Modification _fetch_ohlcv() pour router S3/CCXT (lignes 124-151)
+
+2. ai/TRAIN/requirements.txt
+   Ajouts:
+   - pyarrow>=14.0.0
+   - fastparquet>=2023.10.0
+   - boto3>=1.26.0
+   - s3fs>=2023.1.0
+
+================================================================================
+FICHIERS INCHANGÉS (utilisés tels quels)
+================================================================================
+
+- ai/train.py (script principal - fonctionne via config YAML)
+- ai/TRAIN/data/__init__.py
+- ai/TRAIN/data/alternative_sources.py
+- ai/models/multi_modal_trading.py
+- ai/training/trainer.py
+- ai/utils/config.py
+- ai/utils/metrics.py
+
+================================================================================
+TESTS EFFECTUÉS - TOUS RÉUSSIS ✅
+================================================================================
+
+1. Test S3DataSource (ai/test_s3_data_source.py)
+   ✓ Listage années: 9 années trouvées (2017-2025)
+   ✓ Listage symboles: 337 symboles pour 2024
+   ✓ Chargement BTCUSDT 2024: 527,040 lignes
+   ✓ Chargement multi-années ETHUSDT 2023-2024: 1,052,560 lignes
+   ✓ Chargement multi-symboles: 1,581,120 lignes (3 symboles)
+
+2. Test Pipeline complet (ai/test_pipeline_s3.py)
+   ✓ Chargement S3: 2 symboles, 1,054,080 lignes
+   ✓ Feature engineering: 52 features générées
+   ✓ DataLoaders créés: 23,048 batches (train)
+   ✓ Format batch: (32, 50, 52) correct
+
+================================================================================
+UTILISATION RAPIDE
+================================================================================
+
+# Option 1: Script interactif
+./ai/quick_start.sh
+
+# Option 2: Tests
+python ai/test_s3_data_source.py
+python ai/test_pipeline_s3.py
+
+# Option 3: Entraînement DEBUG
+python ai/train.py --config ai/configs/train_s3.yaml --device mps --debug_mode
+
+# Option 4: Entraînement COMPLET
+python ai/train.py --config ai/configs/train_s3.yaml --device mps
+
+================================================================================
+DOCUMENTATION
+================================================================================
+
+Pour plus de détails, consultez:
+
+1. LANCEMENT_RAPIDE.md      → Guide de démarrage rapide
+2. README_S3_TRAINING.md    → Documentation complète
+3. MODIFICATIONS_SUMMARY.md → Détails techniques
+
+================================================================================

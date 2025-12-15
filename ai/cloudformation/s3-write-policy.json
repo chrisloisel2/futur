@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadCodeAndData",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::qbia/code/*",
+        "arn:aws:s3:::qbia/bourse/*",
+        "arn:aws:s3:::qbia"
+      ]
+    },
+    {
+      "Sid": "WriteModels",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::qbia/models/*"
+      ]
+    }
+  ]
+}

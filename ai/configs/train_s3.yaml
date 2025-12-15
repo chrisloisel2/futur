@@ -1,0 +1,60 @@
+# Configuration pour l'entraînement avec données S3
+# Utilisation: python ai/train.py --config ai/configs/train_s3.yaml --device mps
+
+data:
+  # Source de données (s3 ou ccxt)
+  data_source: "s3"
+
+  # Configuration S3
+  s3_bucket: "qbia"
+  s3_prefix: "bourse/mintrad"
+  start_year: 2020
+  end_year: 2024
+
+  # Filtrer les symboles à charger (vide = tous les symboles disponibles)
+  symbols_filter:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "BNBUSDT"
+    - "ADAUSDT"
+    - "SOLUSDT"
+    - "XRPUSDT"
+    - "DOGEUSDT"
+    - "MATICUSDT"
+
+  # Cache local pour éviter de re-télécharger les données
+  local_cache_dir: "/tmp/trading_data_cache"
+
+  # Paramètres de split des données
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+
+  # Paramètres de séquence et features
+  lookback_window: 100
+  feature_dim: 52  # Automatiquement ajusté selon les features générées
+  batch_size: 32
+
+  # Autres paramètres
+  shuffle: true
+  use_synthetic_data: false
+
+model:
+  type: "multi_modal"
+  params:
+    d_model: 512
+    n_heads: 8
+    n_layers: 6
+    dropout: 0.1
+    feature_dim: 52  # Sera synchronisé avec data.feature_dim
+
+training:
+  epochs: 50
+  learning_rate: 0.0001
+  checkpoint_dir: "checkpoints_s3"
+  gradient_accumulation_steps: 4
+
+  # Paramètres optionnels pour le debugging
+  # debug_mode: true
+  # fast_dev_run: true
+  # limit_batches: 10

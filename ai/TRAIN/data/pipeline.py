@@ -43,6 +43,15 @@ class DataPipeline:
         self.shuffle = bool(config.get("shuffle", True))
         self.use_synthetic = bool(config.get("use_synthetic_data", False))
 
+        # S3 configuration
+        self.data_source_type = config.get("data_source", "ccxt")
+        self.s3_bucket = config.get("s3_bucket")
+        self.s3_prefix = config.get("s3_prefix", "bourse/mintrad")
+        self.start_year = int(config.get("start_year", 2020))
+        self.end_year = int(config.get("end_year", 2024))
+        self.local_cache_dir = config.get("local_cache_dir")
+        self.symbols_filter = config.get("symbols_filter", [])
+
     def _build_synthetic_dataset(self, n_samples: int) -> TensorDataset:
         """
         Build a synthetic sequence dataset shaped (batch, lookback, feature_dim).
@@ -71,23 +80,75 @@ class DataPipeline:
 
         return _loader(train_ds, shuffle=self.shuffle), _loader(val_ds), _loader(test_ds)
 
-    def _fetch_ohlcv(self) -> pd.DataFrame:
-        source = CcxtDataSource()
-        end = datetime.utcnow()
-        start = end - timedelta(days=self.history_days)
-        frames: List[pd.DataFrame] = []
-        for sym in self.symbols:
-            try:
-                raw = source.fetch_historical_range(sym, timeframe=self.timeframe, start=start, end=end)
-                df = ohlcv_to_df(raw)
-                df["symbol"] = sym
-                frames.append(df)
-            except Exception as exc:
-                logger.warning("Failed to fetch %s: %s", sym, exc)
-        if not frames:
+    def _fetch_ohlcv_from_s3(self) -> pd.DataFrame:
+        """
+        Fetch OHLCV data from S3 bucket.
+
+        Returns:
+            DataFrame with columns: timestamp, open, high, low, close, volume, symbol
+        """
+        from .s3_data_source import S3DataSource
+
+        if not self.s3_bucket:
+            raise ValueError("s3_bucket must be specified when data_source='s3'")
+
+        s3_source = S3DataSource(
+            bucket=self.s3_bucket,
+            prefix=self.s3_prefix,
+            cache_dir=self.local_cache_dir
+        )
+
+        # Determine symbols to load
+        if self.symbols_filter:
+            symbols = self.symbols_filter
+            logger.info(f"Using filtered symbols: {symbols}")
+        else:
+            # Load all available symbols for the end year
+            symbols = s3_source.list_available_symbols(self.end_year)
+            logger.info(f"Auto-discovered {len(symbols)} symbols from S3")
+
+        if not symbols:
+            logger.warning("No symbols found to load from S3")
             return pd.DataFrame()
-        full = pd.concat(frames).sort_values("timestamp")
-        return full
+
+        # Load data for all symbols across the year range
+        df = s3_source.fetch_all_symbols_range(
+            symbols=symbols,
+            start_year=self.start_year,
+            end_year=self.end_year
+        )
+
+        logger.info(f"Loaded {len(df)} rows from S3 for {len(symbols)} symbols ({self.start_year}-{self.end_year})")
+        return df
+
+    def _fetch_ohlcv(self) -> pd.DataFrame:
+        """
+        Fetch OHLCV data from configured source (S3 or CCXT).
+
+        Returns:
+            DataFrame with columns: timestamp, open, high, low, close, volume, symbol
+        """
+        if self.data_source_type == "s3":
+            logger.info("Using S3 data source")
+            return self._fetch_ohlcv_from_s3()
+        else:
+            logger.info("Using CCXT data source")
+            source = CcxtDataSource()
+            end = datetime.utcnow()
+            start = end - timedelta(days=self.history_days)
+            frames: List[pd.DataFrame] = []
+            for sym in self.symbols:
+                try:
+                    raw = source.fetch_historical_range(sym, timeframe=self.timeframe, start=start, end=end)
+                    df = ohlcv_to_df(raw)
+                    df["symbol"] = sym
+                    frames.append(df)
+                except Exception as exc:
+                    logger.warning("Failed to fetch %s: %s", sym, exc)
+            if not frames:
+                return pd.DataFrame()
+            full = pd.concat(frames).sort_values("timestamp")
+            return full
 
     def _build_feature_dataset(self, df: pd.DataFrame) -> TensorDataset:
         logger.info(

@@ -1,0 +1,24 @@
+=========================================
+   Quick Start - Entraînement avec S3
+=========================================
+
+[0;34m[ÉTAPE][0m Vérification des dépendances...
+[0;32m[✓][0m Python3 trouvé
+[0;32m[✓][0m boto3 installé
+[0;34m[ÉTAPE][0m Vérification des credentials AWS...
+[0;32m[✓][0m Accès S3 OK
+
+=========================================
+   Options de test/entraînement
+=========================================
+
+Que voulez-vous faire ?
+
+  1) Test rapide du chargement S3
+  2) Test du pipeline complet
+  3) Entraînement DEBUG (1 epoch, 2 symboles, 2024)
+  4) Entraînement QUICK (10 epochs, 5 symboles, 2023-2024)
+  5) Entraînement COMPLET (50 epochs, 8 symboles, 2020-2024)
+
+[0;34m[ÉTAPE][0m Lancement de l'entraînement QUICK...
+[1;33m[INFO][0m Configuration: 5 symboles, 2023-2024, 10 epochs

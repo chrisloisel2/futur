@@ -1,0 +1,43 @@
+# Configuration pour l'entraînement avec données CCXT (ancien comportement)
+# Utilisation: python ai/train.py --config ai/configs/train_ccxt.yaml --device mps
+
+data:
+  # Source de données (s3 ou ccxt)
+  data_source: "ccxt"
+
+  # Configuration CCXT
+  symbols:
+    - "BTC/USDT"
+    - "ETH/USDT"
+    - "BNB/USDT"
+  timeframe: "1h"
+  history_days: 180
+
+  # Paramètres de split des données
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+
+  # Paramètres de séquence et features
+  lookback_window: 100
+  feature_dim: 128
+  batch_size: 32
+
+  # Autres paramètres
+  shuffle: true
+  use_synthetic_data: false
+
+model:
+  type: "multi_modal"
+  params:
+    d_model: 512
+    n_heads: 8
+    n_layers: 6
+    dropout: 0.1
+    feature_dim: 128
+
+training:
+  epochs: 50
+  learning_rate: 0.0001
+  checkpoint_dir: "checkpoints_ccxt"
+  gradient_accumulation_steps: 4

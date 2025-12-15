@@ -1,0 +1,52 @@
+# Configuration OPTIMISÉE pour éviter les problèmes de mémoire
+# Utilisation: python ai/train.py --config ai/configs/train_s3_light.yaml --device mps
+
+data:
+  # Source de données
+  data_source: "s3"
+  s3_bucket: "qbia"
+  s3_prefix: "bourse/mintrad"
+
+  # OPTIMISATION: Une seule année pour réduire la charge mémoire
+  start_year: 2024
+  end_year: 2024
+
+  # OPTIMISATION: Réduction drastique des symboles pour limiter la RAM
+  symbols_filter:
+    - "BTCUSDT"  # 1 seul symbole pour passer sans OOM
+
+  # Cache local
+  local_cache_dir: "/tmp/trading_data_cache"
+
+  # Paramètres de split
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+
+  # OPTIMISATION: Réduction du lookback et batch size
+  lookback_window: 30      # Réduction agressive pour limiter les séquences
+  feature_dim: 52
+  batch_size: 8            # Réduction agressive pour limiter la RAM
+
+  # Autres paramètres
+  shuffle: true
+  use_synthetic_data: false
+
+model:
+  type: "multi_modal"
+  params:
+    d_model: 256           # Réduit de 512 à 256
+    n_heads: 8
+    n_layers: 4            # Réduit de 6 à 4
+    dropout: 0.1
+    feature_dim: 52
+
+training:
+  epochs: 5                # Réduction pour les runs légers
+  learning_rate: 0.0001
+  checkpoint_dir: "checkpoints_light"
+  gradient_accumulation_steps: 16  # Compense batch 8 pour garder un batch effectif plus grand
+  limit_batches: 200               # Sécurise l'usage mémoire sur les runs debug/rapides
+
+  # Limite le nombre de batches en mode debug
+  # limit_batches: 100

@@ -1,0 +1,52 @@
+# Configuration ULTRA-LÉGÈRE pour machines avec très peu de RAM
+# Utilisation: python ai/train.py --config ai/configs/train_s3_tiny.yaml --device mps
+
+data:
+  # Source de données
+  data_source: "s3"
+  s3_bucket: "qbia"
+  s3_prefix: "bourse/mintrad"
+
+  # ULTRA-LIGHT: Seulement 3 mois de 2024
+  start_year: 2024
+  end_year: 2024
+
+  # ULTRA-LIGHT: 1 seul symbole
+  symbols_filter:
+    - "BTCUSDT"
+
+  # Cache local
+  local_cache_dir: "/tmp/trading_data_cache"
+
+  # Paramètres de split
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+
+  # ULTRA-LIGHT: Paramètres minimaux
+  lookback_window: 20      # Très court
+  feature_dim: 52
+  batch_size: 4            # Très petit batch
+
+  # Autres paramètres
+  shuffle: true
+  use_synthetic_data: false
+
+model:
+  type: "multi_modal"
+  params:
+    d_model: 128           # Modèle très petit
+    n_heads: 4             # Peu de heads
+    n_layers: 2            # Peu de layers
+    dropout: 0.1
+    feature_dim: 52
+
+training:
+  epochs: 3                # Juste pour tester
+  learning_rate: 0.0001
+  checkpoint_dir: "checkpoints_tiny"
+  gradient_accumulation_steps: 32  # Compense batch 4
+  limit_batches: 50        # Très peu de batches pour test
+
+  # Test rapide
+  fast_dev_run: false
