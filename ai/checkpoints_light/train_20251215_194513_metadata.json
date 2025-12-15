@@ -1,0 +1,23 @@
+{
+  "job_id": "train_20251215_194513",
+  "status": "stopped",
+  "config_path": "/home/qbee/Bureau/Bourse/futur/ai/configs/train_s3_tiny.yaml",
+  "device": "cuda",
+  "debug_mode": false,
+  "is_aws": true,
+  "instance_type": "g4dn.xlarge",
+  "aws_region": "eu-west-3",
+  "start_time": "2025-12-15T18:45:13.404938",
+  "end_time": "2025-12-15T18:45:38.457533",
+  "current_epoch": 0,
+  "total_epochs": 50,
+  "progress_pct": 0.0,
+  "current_loss": 0.0,
+  "current_val_loss": 0.0,
+  "current_sharpe": 0.0,
+  "log_file": "/tmp/training_aws_train_20251215_194513.log",
+  "error": null,
+  "aws_instance_id": null,
+  "aws_public_ip": null,
+  "aws_s3_path": null
+}

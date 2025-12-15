@@ -87,13 +87,21 @@ class TinyRecursiveModel(nn.Module):
         # 4. Output head
         if output_mode == 'return':
             # Predict continuous return value
+            # CRITICAL: Add tanh() and scale based on target normalization
             self.output_head = nn.Sequential(
                 nn.Linear(latent_dim, hidden_dim),
                 nn.LayerNorm(hidden_dim),
                 nn.ReLU(),
                 nn.Dropout(dropout),
-                nn.Linear(hidden_dim, 1)
+                nn.Linear(hidden_dim, 1),
+                nn.Tanh()  # Output in [-1, 1]
             )
+            # CRITICAL: Scale output to match normalized target range
+            # Targets are normalized to mean=0, std=1
+            # tanh gives ±1, we scale CONSERVATIVELY to ±0.5 to avoid gradient explosion in early training
+            # Model can saturate gradually as it learns
+            self.output_scale = 0.5
+            logger.info(f"Output scale set to {self.output_scale:.2f} (normalized targets)")
         elif output_mode == 'classification':
             # Predict direction (up/down/neutral)
             self.output_head = nn.Sequential(
@@ -119,14 +127,25 @@ class TinyRecursiveModel(nn.Module):
 
     def _init_weights(self):
         """
-        Initialize weights with small values for stability.
+        Initialize weights with STRICT stability constraints.
+        - Xavier uniform for Linear layers
+        - Orthogonal for GRU weights (prevents gradient explosion)
+        - Zero bias everywhere
         """
         for name, param in self.named_parameters():
-            if 'weight' in name:
+            # GRU weights: use orthogonal initialization
+            if 'reasoning_cell' in name and 'weight' in name:
+                if 'weight_hh' in name or 'weight_ih' in name:
+                    nn.init.orthogonal_(param)
+                else:
+                    nn.init.xavier_uniform_(param, gain=0.5)
+            # Linear weights: Xavier uniform
+            elif 'weight' in name:
                 if len(param.shape) >= 2:
                     nn.init.xavier_uniform_(param, gain=0.5)
                 else:
                     nn.init.normal_(param, mean=0, std=0.01)
+            # All biases: zero
             elif 'bias' in name:
                 nn.init.zeros_(param)
 
@@ -173,9 +192,10 @@ class TinyRecursiveModel(nn.Module):
         context: torch.Tensor
     ) -> Tuple[torch.Tensor, list[torch.Tensor]]:
         """
-        Perform recursive reasoning iterations.
+        Perform recursive reasoning iterations with STRICT activation clamping.
 
         Each iteration refines the latent state using the GRU cell with shared weights.
+        CRITICAL: Clamp activations to [-1, 1] to prevent explosion.
 
         Args:
             initial_state: [batch, latent_dim] - initial hidden state
@@ -185,12 +205,14 @@ class TinyRecursiveModel(nn.Module):
             final_state: [batch, latent_dim]
             state_history: List of states at each iteration (for analysis)
         """
-        h = initial_state
+        h = initial_state.clamp(-1.0, 1.0)
         state_history = [h]
 
         for t in range(self.num_iterations):
             # Update state: h_{t+1} = GRU(h_t, context)
             h = self.reasoning_cell(context, h)
+            # CRITICAL: Clamp hidden state to prevent internal amplification
+            h = h.clamp(-1.0, 1.0)
             state_history.append(h)
 
         return h, state_history
@@ -228,6 +250,11 @@ class TinyRecursiveModel(nn.Module):
 
         if self.output_mode == 'return':
             output = output.squeeze(-1)  # [batch]
+            # CRITICAL: Scale tanh output from [-1,1] to match normalized target range
+            output = output * self.output_scale
+            # SAFETY: Clamp to ±5 in normalized space (extreme outliers only)
+            max_output = 5.0
+            output = output.clamp(-max_output, max_output)
 
         if return_states:
             return output, state_history

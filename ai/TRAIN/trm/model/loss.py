@@ -21,10 +21,19 @@ class DirectionalLoss(nn.Module):
     Loss that penalizes incorrect direction predictions.
 
     Focuses on sign(prediction) vs sign(true_return), not magnitude.
+
+    NOTE: Uses tanh() instead of sign() for differentiability!
     """
 
-    def __init__(self):
+    def __init__(self, temperature: float = 10.0):
+        """
+        Args:
+            temperature: Controls how sharp the tanh approximation is.
+                        Higher = closer to sign(), but may cause gradient issues.
+                        Lower = smoother gradients, but less directional focus.
+        """
         super().__init__()
+        self.temperature = temperature
 
     def forward(
         self,
@@ -39,11 +48,12 @@ class DirectionalLoss(nn.Module):
         Returns:
             loss: scalar
         """
-        # Direction agreement: +1 if same sign, -1 if opposite
-        pred_direction = torch.sign(pred_return)
-        true_direction = torch.sign(true_return)
+        # Differentiable direction approximation using tanh
+        # tanh(temperature * x) ≈ sign(x) but with gradients
+        pred_direction = torch.tanh(self.temperature * pred_return)
+        true_direction = torch.tanh(self.temperature * true_return)
 
-        # Agreement: 1 for correct, 0 for neutral, -1 for wrong
+        # Agreement: 1 for correct, -1 for wrong
         agreement = pred_direction * true_direction
 
         # Loss: negative average agreement (minimize when directions match)
@@ -215,12 +225,12 @@ class SharpeRatioLoss(nn.Module):
 
         Returns:
             loss: scalar (negative Sharpe ratio)
-        """
-        # Predicted positions
-        positions = torch.sign(pred_return)
 
-        # Realized returns
-        realized_returns = positions * true_return
+        CORRECTED: Uses y_pred * y_target instead of sign(y_pred) * y_target
+        """
+        # Realized returns: prediction strength * actual direction
+        # This rewards correct magnitude AND direction
+        realized_returns = pred_return * true_return
 
         # Mean and std of returns
         mean_return = realized_returns.mean()

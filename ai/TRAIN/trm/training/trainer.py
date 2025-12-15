@@ -40,7 +40,7 @@ class TRMTrainer:
         grad_clip_norm: float = 1.0,
         device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
         checkpoint_dir: Optional[str] = None,
-        use_amp: bool = True  # Automatic Mixed Precision
+        use_amp: bool = False  # DISABLED: AMP causes numerical instability
     ):
         """
         Args:
@@ -65,12 +65,16 @@ class TRMTrainer:
         self.max_epochs = max_epochs
         self.patience = patience
         self.grad_clip_norm = grad_clip_norm
-        self.use_amp = use_amp and device == 'cuda'
+        # FORCE AMP TO FALSE - numerical instability
+        self.use_amp = False
+        self.learning_rate = learning_rate
+        self.warmup_epochs = 2  # WARMUP: start with 10% LR for 2 epochs
 
         # Optimizer (AdamW with weight decay)
+        # START with 10% of target LR for warmup
         self.optimizer = optim.AdamW(
             model.parameters(),
-            lr=learning_rate,
+            lr=learning_rate * 0.1,  # Warmup LR
             weight_decay=weight_decay
         )
 
@@ -81,8 +85,7 @@ class TRMTrainer:
             eta_min=learning_rate * 0.01
         )
 
-        # AMP scaler (if using mixed precision)
-        self.scaler = torch.cuda.amp.GradScaler() if self.use_amp else None
+        # AMP scaler REMOVED - causes gradient instability
 
         # Checkpoint directory
         if checkpoint_dir:
@@ -118,34 +121,85 @@ class TRMTrainer:
         epoch_components = {}
         num_batches = 0
 
+        # DEBUG: Track gradient stats
+        total_grad_norm = 0.0
+        total_param_norm = 0.0
+
         start_time = time.time()
 
         for batch_idx, (X, y) in enumerate(self.train_loader):
             X, y = X.to(self.device), y.to(self.device)
 
-            # Forward pass (with mixed precision if enabled)
-            if self.use_amp:
-                with torch.cuda.amp.autocast():
-                    pred = self.model(X)
-                    loss, components = self.loss_fn(pred, y)
-            else:
-                pred = self.model(X)
-                loss, components = self.loss_fn(pred, y)
+            # Forward pass (NO AMP - pure FP32)
+            pred = self.model(X)
+            loss, components = self.loss_fn(pred, y)
+
+            # DEBUG: MANDATORY stats logging
+            if batch_idx == 0:
+                logger.info(f"[DEBUG Epoch {self.current_epoch}] First batch:")
+                logger.info(f"  X stats: mean={X.mean().item():.6f}, std={X.std().item():.6f}, min={X.min().item():.6f}, max={X.max().item():.6f}")
+                logger.info(f"  y stats: mean={y.mean().item():.6f}, std={y.std().item():.6f}, min={y.min().item():.6f}, max={y.max().item():.6f}")
+                logger.info(f"  pred stats: mean={pred.mean().item():.6f}, std={pred.std().item():.6f}, min={pred.min().item():.6f}, max={pred.max().item():.6f}")
+                logger.info(f"  pred[0:5]: {pred[:5].detach().cpu().numpy()}")
+                logger.info(f"  y[0:5]: {y[:5].detach().cpu().numpy()}")
+                logger.info(f"  loss: {loss.item():.6f}")
 
             # Backward pass
             self.optimizer.zero_grad()
+            loss.backward()
 
-            if self.use_amp:
-                self.scaler.scale(loss).backward()
-                # Gradient clipping
-                self.scaler.unscale_(self.optimizer)
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip_norm)
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip_norm)
-                self.optimizer.step()
+            # CRITICAL: Check for NaN/Inf BEFORE clipping
+            has_nan_or_inf = False
+            total_grad_before_clip = 0.0
+
+            for name, param in self.model.named_parameters():
+                if param.grad is not None:
+                    if torch.isnan(param.grad).any() or torch.isinf(param.grad).any():
+                        logger.error(f"[GRADIENT EXPLOSION] NaN/Inf detected in {name}")
+                        logger.error(f"  Grad: {param.grad}")
+                        logger.error(f"  Param: {param.data}")
+                        has_nan_or_inf = True
+
+                    grad_val = param.grad.norm().item()
+                    total_grad_before_clip += grad_val
+
+                    # Log detailed gradient info in first epoch
+                    if batch_idx == 0 and self.current_epoch <= 2:
+                        logger.info(f"    {name}: grad_norm={grad_val:.6f}")
+
+            # Log total gradient norm
+            if batch_idx == 0:
+                logger.info(f"  Total gradient norm (before clip): {total_grad_before_clip:.6f}")
+
+            # STOP training if NaN/Inf detected
+            if has_nan_or_inf:
+                logger.error("STOPPING TRAINING - NaN/Inf gradients detected!")
+                raise RuntimeError("NaN/Inf gradients - training stopped")
+
+            # STOP if gradient norm explodes
+            if total_grad_before_clip > 10.0:
+                logger.error(f"GRADIENT EXPLOSION: norm={total_grad_before_clip:.2f} > 10.0")
+                logger.error("STOPPING TRAINING - gradient explosion detected!")
+                raise RuntimeError(f"Gradient explosion: norm={total_grad_before_clip:.2f}")
+
+            # Gradient clipping
+            grad_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip_norm)
+
+            # AGGRESSIVE LR reduction if gradients are large
+            if grad_norm > 0.5:
+                current_lr = self.optimizer.param_groups[0]['lr']
+                # Reduce by 50% each time gradients exceed threshold
+                new_lr = max(current_lr * 0.5, 1e-6)  # Floor at 1e-6
+                for param_group in self.optimizer.param_groups:
+                    param_group['lr'] = new_lr
+                logger.warning(f"[LR REDUCTION] grad_norm={grad_norm:.4f} > 0.5 → LR: {current_lr:.2e} → {new_lr:.2e}")
+
+            self.optimizer.step()
+
+            # DEBUG: Track gradient and parameter norms
+            total_grad_norm += grad_norm.item()
+            param_norm = sum(p.data.norm().item() for p in self.model.parameters())
+            total_param_norm += param_norm
 
             # Accumulate metrics
             epoch_loss += loss.item()
@@ -161,12 +215,21 @@ class TRMTrainer:
         for key in epoch_components:
             epoch_components[key] /= num_batches
 
+        # DEBUG: Log gradient stats
+        avg_grad_norm = total_grad_norm / num_batches
+        avg_param_norm = total_param_norm / num_batches
+        if self.current_epoch <= 3:
+            logger.info(f"[DEBUG Epoch {self.current_epoch}] Avg gradient norm: {avg_grad_norm:.6f}")
+            logger.info(f"[DEBUG Epoch {self.current_epoch}] Avg parameter norm: {avg_param_norm:.6f}")
+
         elapsed_time = time.time() - start_time
 
         metrics = {
             'epoch': self.current_epoch,
             'loss': epoch_loss,
             'time': elapsed_time,
+            'grad_norm': avg_grad_norm,
+            'param_norm': avg_param_norm,
             **epoch_components
         }
 
@@ -185,23 +248,28 @@ class TRMTrainer:
         epoch_components = {}
         num_batches = 0
 
-        # Collect all predictions and targets for Sharpe calculation
+        # Track statistics for Sharpe without storing full tensors
+        sharpe_sum = 0.0
+        sharpe_sum_sq = 0.0
+        sharpe_count = 0
+
+        # DEBUG: Track validation predictions
         all_preds = []
         all_targets = []
 
         start_time = time.time()
 
-        for X, y in self.val_loader:
+        for batch_idx, (X, y) in enumerate(self.val_loader):
             X, y = X.to(self.device), y.to(self.device)
 
-            # Forward pass
-            if self.use_amp:
-                with torch.cuda.amp.autocast():
-                    pred = self.model(X)
-                    loss, components = self.loss_fn(pred, y)
-            else:
-                pred = self.model(X)
-                loss, components = self.loss_fn(pred, y)
+            # Forward pass (NO AMP)
+            pred = self.model(X)
+            loss, components = self.loss_fn(pred, y)
+
+            # DEBUG: Store predictions for first few batches
+            if batch_idx < 5 and self.current_epoch <= 2:
+                all_preds.append(pred.cpu().numpy())
+                all_targets.append(y.cpu().numpy())
 
             # Accumulate metrics
             epoch_loss += loss.item()
@@ -210,9 +278,12 @@ class TRMTrainer:
                     epoch_components[key] = 0.0
                 epoch_components[key] += val
 
-            # Store predictions and targets
-            all_preds.append(pred.cpu())
-            all_targets.append(y.cpu())
+            # Update Sharpe statistics (pred * true_return)
+            # CORRECTED: Use pred * y instead of sign(pred) * y
+            realized = pred * y
+            sharpe_sum += realized.sum().item()
+            sharpe_sum_sq += (realized ** 2).sum().item()
+            sharpe_count += realized.numel()
 
             num_batches += 1
 
@@ -221,10 +292,18 @@ class TRMTrainer:
         for key in epoch_components:
             epoch_components[key] /= num_batches
 
-        # Compute validation Sharpe ratio
-        all_preds = torch.cat(all_preds)
-        all_targets = torch.cat(all_targets)
-        sharpe = self._compute_sharpe(all_preds, all_targets)
+        sharpe = self._compute_sharpe_from_stats(sharpe_sum, sharpe_sum_sq, sharpe_count)
+
+        # DEBUG: Log validation prediction stats
+        if self.current_epoch <= 2 and len(all_preds) > 0:
+            import numpy as np
+            preds_concat = np.concatenate(all_preds)
+            targets_concat = np.concatenate(all_targets)
+            logger.info(f"[DEBUG Epoch {self.current_epoch}] Val predictions (first 5 batches):")
+            logger.info(f"  pred mean={preds_concat.mean():.6f}, std={preds_concat.std():.6f}")
+            logger.info(f"  pred min={preds_concat.min():.6f}, max={preds_concat.max():.6f}")
+            logger.info(f"  target mean={targets_concat.mean():.6f}, std={targets_concat.std():.6f}")
+            logger.info(f"  Sharpe components: sum={sharpe_sum:.6f}, sum_sq={sharpe_sum_sq:.6f}, count={sharpe_count}")
 
         elapsed_time = time.time() - start_time
 
@@ -238,36 +317,30 @@ class TRMTrainer:
 
         return metrics
 
-    def _compute_sharpe(
-        self,
-        pred_returns: torch.Tensor,
-        true_returns: torch.Tensor
-    ) -> float:
+    def _compute_sharpe_from_stats(self, sum_returns: float, sum_squares: float, count: int) -> float:
         """
-        Compute Sharpe ratio from predictions.
+        Compute the Sharpe ratio from aggregated statistics with ANOMALY DETECTION.
 
-        Args:
-            pred_returns: Predicted returns
-            true_returns: Actual returns
-
-        Returns:
-            Sharpe ratio
+        CRITICAL: Sharpe > 3.0 in validation is flagged as numerical anomaly.
         """
-        # Positions from predictions
-        positions = torch.sign(pred_returns)
+        if count == 0:
+            return 0.0
 
-        # Realized returns
-        realized_returns = positions * true_returns
-
-        # Sharpe ratio
-        mean_return = realized_returns.mean().item()
-        std_return = realized_returns.std().item() + 1e-8
+        mean_return = sum_returns / count
+        mean_square = sum_squares / count
+        variance = max(mean_square - mean_return ** 2, 1e-12)
+        std_return = variance ** 0.5
 
         sharpe = mean_return / std_return
 
         # Annualize (assume 1-minute bars, 252 trading days, 6.5 hours/day)
         annualization_factor = (252 * 6.5 * 60) ** 0.5
         sharpe *= annualization_factor
+
+        # CRITICAL: Flag unrealistic Sharpe as anomaly
+        if abs(sharpe) > 3.0:
+            logger.warning(f"[ANOMALY] Unrealistic Sharpe={sharpe:.2f} detected (predictions may be saturating)")
+            logger.warning(f"  Mean return: {mean_return:.8f}, Std return: {std_return:.8f}")
 
         return sharpe
 
@@ -342,9 +415,18 @@ class TRMTrainer:
             val_metrics = self.validate_epoch()
             self.val_history.append(val_metrics)
 
-            # Learning rate step
-            self.scheduler.step()
-            current_lr = self.scheduler.get_last_lr()[0]
+            # WARMUP: Gradually increase LR for first epochs
+            if self.current_epoch <= self.warmup_epochs:
+                warmup_factor = self.current_epoch / self.warmup_epochs
+                target_lr = self.learning_rate * warmup_factor
+                for param_group in self.optimizer.param_groups:
+                    param_group['lr'] = target_lr
+                current_lr = target_lr
+                logger.info(f"[WARMUP] Epoch {self.current_epoch}/{self.warmup_epochs}: LR={current_lr:.2e}")
+            else:
+                # Learning rate step (after warmup)
+                self.scheduler.step()
+                current_lr = self.scheduler.get_last_lr()[0]
 
             # Log metrics
             logger.info(

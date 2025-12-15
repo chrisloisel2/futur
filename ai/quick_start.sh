@@ -3,6 +3,9 @@
 
 set -e  # Exit on error
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 echo "========================================="
 echo "   Quick Start - Entraînement avec S3"
 echo "========================================="
@@ -17,13 +20,13 @@ NC='\033[0m' # No Color
 # Paramètres d'optimisation (ajustés par les questions interactives)
 TRAIN_DEVICE="auto"
 TRAIN_PREFIX=()
-TRAIN_EXTRA_ARGS=()
 MPS_MEMORY_FRACTION=""
 MATMUL_PRECISION="high"
 CPU_THREADS_LIMIT=""
 USE_LIGHT_CONFIG=1
-CONFIG_MAIN_LIGHT="configs/train_s3_light.yaml"
-CONFIG_MAIN_FULL="configs/train_s3.yaml"
+TRM_TRAIN_SCRIPT="$SCRIPT_DIR/TRAIN/trm/train_trm.py"
+CONFIG_MAIN_LIGHT="$SCRIPT_DIR/TRAIN/trm/config_light.yaml"
+CONFIG_MAIN_FULL="$SCRIPT_DIR/TRAIN/trm/config.yaml"
 
 # Fonction pour afficher les étapes
 step() {
@@ -51,7 +54,6 @@ apply_mac_m3_optimizations() {
         TRAIN_DEVICE="mps"
         MPS_MEMORY_FRACTION="${MPS_MEMORY_FRACTION:-0.60}"
         export PYTORCH_ENABLE_MPS_FALLBACK=1
-        TRAIN_EXTRA_ARGS+=(--mps_memory_fraction "$MPS_MEMORY_FRACTION")
         info "Optimisations M3 activées (device=mps, mémoire max=${MPS_MEMORY_FRACTION})"
     else
         TRAIN_DEVICE="auto"
@@ -79,7 +81,6 @@ configure_cpu_limit() {
     fi
 
     CPU_THREADS_LIMIT=$threads
-    TRAIN_EXTRA_ARGS+=(--cpu_threads "$CPU_THREADS_LIMIT")
     TRAIN_PREFIX=(nice -n 10)
 
     export OMP_NUM_THREADS="$CPU_THREADS_LIMIT"
@@ -94,7 +95,6 @@ configure_cpu_limit() {
 
 # Activer les optimisations math Torch pour de meilleurs résultats
 enable_precision_optimizations() {
-    TRAIN_EXTRA_ARGS+=(--matmul_precision "$MATMUL_PRECISION")
     info "Précision matricielle ${MATMUL_PRECISION} activée (torch.set_float32_matmul_precision)."
 }
 
@@ -102,13 +102,18 @@ enable_precision_optimizations() {
 run_train() {
     local config_path="$1"
     shift
-    PYTHONPATH=/Users/christopher/Desktop/futur/ai/TRAIN:$PYTHONPATH \
+    local args=(--config "$config_path" --device "$TRAIN_DEVICE" --matmul_precision "$MATMUL_PRECISION")
+    if [[ -n "$CPU_THREADS_LIMIT" ]]; then
+        args+=(--cpu_threads "$CPU_THREADS_LIMIT")
+    fi
+    if [[ -n "$MPS_MEMORY_FRACTION" ]]; then
+        args+=(--mps_memory_fraction "$MPS_MEMORY_FRACTION")
+    fi
+
+    PYTHONPATH="$SCRIPT_DIR/TRAIN:$PYTHONPATH" \
         "${TRAIN_PREFIX[@]}" \
-        python3 train.py \
-        --config "$config_path" \
-        --device "$TRAIN_DEVICE" \
-        --log_level INFO \
-        "${TRAIN_EXTRA_ARGS[@]}" \
+        python3 "$TRM_TRAIN_SCRIPT" \
+        "${args[@]}" \
         "$@"
 }
 
@@ -192,23 +197,23 @@ echo "Que voulez-vous faire ?"
 echo ""
 echo "  1) Test rapide du chargement S3"
 echo "  2) Test du pipeline complet"
-echo "  3) Entraînement DEBUG (1 epoch, 2 symboles, 2024)"
-echo "  4) Entraînement QUICK (10 epochs, 5 symboles, 2023-2024)"
-echo "  5) Entraînement COMPLET (50 epochs, 8 symboles, 2020-2024)"
+echo "  3) Entraînement TRM DEBUG (1 epoch)"
+echo "  4) Entraînement TRM QUICK (10 epochs)"
+echo "  5) Entraînement TRM COMPLET (config complète)"
 echo ""
 read -p "Votre choix (1-5) : " choice
 
 case $choice in
     1)
         step "Test du chargement S3..."
-        cd /Users/christopher/Desktop/futur
+        cd "$PROJECT_ROOT"
         python3 ai/test_s3_data_source.py
         success "Test S3 terminé!"
         ;;
 
     2)
         step "Test du pipeline complet..."
-        cd /Users/christopher/Desktop/futur
+        cd "$PROJECT_ROOT"
         python3 ai/test_pipeline_s3.py
         success "Test pipeline terminé!"
         ;;
@@ -216,16 +221,16 @@ case $choice in
     3)
         step "Lancement de l'entraînement DEBUG..."
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
-            info "Mode allégé: 3 symboles (2024), 1 epoch (debug)"
+            info "Mode TRM allégé: 3 symboles (2024), 1 epoch (debug)"
         else
-            info "Mode complet: configuration principale, 1 epoch (debug)"
+            info "Mode TRM complet: configuration principale, 1 epoch (debug)"
         fi
-        cd /Users/christopher/Desktop/futur/ai
+        cd "$SCRIPT_DIR"
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
             info "Mode allégé actif -> utilisation de ${CONFIG_MAIN_LIGHT}"
-            run_train "$CONFIG_MAIN_LIGHT" --debug_mode --fast_dev_run
+            run_train "$CONFIG_MAIN_LIGHT" --epochs 1
         else
-            run_train "$CONFIG_MAIN_FULL" --debug_mode
+            run_train "$CONFIG_MAIN_FULL" --epochs 1
         fi
         success "Entraînement DEBUG terminé!"
         ;;
@@ -233,71 +238,29 @@ case $choice in
     4)
         step "Lancement de l'entraînement QUICK..."
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
-            info "Mode allégé: 3 symboles, 2024, batch 16, 10 epochs"
+            info "Mode TRM allégé: 3 symboles, 2024, 10 epochs"
         else
-            info "Configuration: 5 symboles, 2023-2024, 10 epochs"
+            info "Mode TRM complet: configuration principale, 10 epochs"
         fi
 
-        cd /Users/christopher/Desktop/futur/ai
+        cd "$SCRIPT_DIR"
 
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
-            info "Mode allégé actif -> utilisation de ${CONFIG_MAIN_LIGHT} (3 symboles, 2024, batch 16)"
-            run_train "$CONFIG_MAIN_LIGHT"
+            info "Mode allégé actif -> utilisation de ${CONFIG_MAIN_LIGHT}"
+            run_train "$CONFIG_MAIN_LIGHT" --epochs 10
         else
-            # Créer config temporaire
-            cat > /tmp/train_quick.yaml << 'EOF'
-data:
-  data_source: "s3"
-  s3_bucket: "qbia"
-  s3_prefix: "bourse/mintrad"
-  start_year: 2023
-  end_year: 2024
-  symbols_filter:
-    - "BTCUSDT"
-    - "ETHUSDT"
-    - "BNBUSDT"
-    - "SOLUSDT"
-    - "XRPUSDT"
-  local_cache_dir: "/tmp/trading_data_cache"
-  train_split: 0.7
-  val_split: 0.15
-  test_split: 0.15
-  lookback_window: 100
-  feature_dim: 52
-  batch_size: 32
-  shuffle: true
-  use_synthetic_data: false
-
-model:
-  type: "multi_modal"
-  params:
-    d_model: 512
-    n_heads: 8
-    n_layers: 6
-    dropout: 0.1
-    feature_dim: 52
-
-training:
-  epochs: 10
-  learning_rate: 0.0001
-  checkpoint_dir: "checkpoints_quick"
-  gradient_accumulation_steps: 4
-EOF
-
-            run_train /tmp/train_quick.yaml
-
-            rm /tmp/train_quick.yaml
+            run_train "$CONFIG_MAIN_FULL" --epochs 10
         fi
         success "Entraînement QUICK terminé!"
-        info "Checkpoints sauvegardés dans: checkpoints_quick/"
+        info "Checkpoints TRM sauvegardés dans le dossier défini par la config."
         ;;
 
     5)
         step "Lancement de l'entraînement COMPLET..."
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
-            info "Mode allégé: 3 symboles, 2024, 20 epochs (config light)"
+            info "Mode TRM allégé: 3 symboles, 2024 (config light)"
         else
-            info "Configuration: 8 symboles, 2020-2024, 50 epochs"
+            info "Mode TRM complet: configuration principale sur l'historique complet"
         fi
         info "⚠️  Cela peut prendre plusieurs heures!"
 
@@ -307,7 +270,7 @@ EOF
             exit 0
         fi
 
-        cd /Users/christopher/Desktop/futur/ai
+        cd "$SCRIPT_DIR"
         if [[ $USE_LIGHT_CONFIG -eq 1 ]]; then
             info "Mode allégé actif -> utilisation de ${CONFIG_MAIN_LIGHT}"
             run_train "$CONFIG_MAIN_LIGHT"
@@ -316,7 +279,7 @@ EOF
         fi
 
         success "Entraînement COMPLET terminé!"
-        info "Checkpoints sauvegardés dans: checkpoints_s3/"
+        info "Checkpoints TRM sauvegardés dans le dossier défini par la config."
         ;;
 
     *)

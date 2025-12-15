@@ -120,8 +120,19 @@ echo "$FRONTEND_PID" > /tmp/alpha_frontend.pid
 
 # Ouvrir le navigateur
 if command -v open &> /dev/null; then
-    sleep 2
-    open http://localhost:3000
+# Ouvrir le navigateur
+	sleep 2
+
+	if command -v xdg-open >/dev/null 2>&1; then
+		xdg-open http://localhost:3000 >/dev/null 2>&1 &
+	elif command -v open >/dev/null 2>&1; then
+		open http://localhost:3000 >/dev/null 2>&1 &
+	elif command -v start >/dev/null 2>&1; then
+		start http://localhost:3000 >/dev/null 2>&1 &
+	fi
+
+	echo -e "${GREEN}✓ Ouverture du navigateur déclenchée${NC}"
+
 fi
 
 echo -e "${GREEN}✓ Le navigateur va s'ouvrir automatiquement...${NC}"
