@@ -22,6 +22,10 @@ interface TrainingJob {
   aws_instance_id?: string;
   aws_public_ip?: string;
   aws_s3_path?: string;
+  is_remote?: boolean;
+  remote_host?: string;
+  remote_user?: string;
+  remote_work_dir?: string;
 }
 
 const TrainingJobCard: React.FC<{ job: TrainingJob; onRefresh: () => void }> = ({ job, onRefresh }) => {
@@ -183,6 +187,33 @@ const TrainingJobCard: React.FC<{ job: TrainingJob; onRefresh: () => void }> = (
                 <span className="cost-detail">
                   ({cost.duration_hours.toFixed(1)}h @ ${cost.hourly_rate_usd}/h)
                 </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {job.is_remote && (
+          <div className="remote-info">
+            <div className="remote-badge">
+              <span className="location-icon">🖥️</span>
+              <span>Remote Server</span>
+            </div>
+            {job.remote_host && (
+              <div className="info-item">
+                <span className="info-label">Host:</span>
+                <span className="info-value">{job.remote_host}</span>
+              </div>
+            )}
+            {job.remote_user && (
+              <div className="info-item">
+                <span className="info-label">User:</span>
+                <span className="info-value">{job.remote_user}</span>
+              </div>
+            )}
+            {job.remote_work_dir && (
+              <div className="info-item">
+                <span className="info-label">Work Directory:</span>
+                <span className="info-value">{job.remote_work_dir}</span>
               </div>
             )}
           </div>

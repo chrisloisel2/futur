@@ -6,9 +6,11 @@ const TrainingControl: React.FC = () => {
   const [selectedConfig, setSelectedConfig] = useState('');
   const [device, setDevice] = useState('auto');
   const [debugMode, setDebugMode] = useState(false);
-  const [useAws, setUseAws] = useState(true); // Default to AWS
+  const [trainingLocation, setTrainingLocation] = useState<'aws' | 'remote' | 'local'>('aws'); // Default to AWS
   const [instanceType, setInstanceType] = useState('g4dn.xlarge');
   const [awsRegion, setAwsRegion] = useState('eu-west-3');
+  const [remoteHost, setRemoteHost] = useState('100.118.183.51');
+  const [remoteUser, setRemoteUser] = useState('qbee');
   const [loading, setLoading] = useState(false);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +50,18 @@ const TrainingControl: React.FC = () => {
         selectedConfig,
         device,
         debugMode,
-        useAws,
+        trainingLocation,
         instanceType,
-        awsRegion
+        awsRegion,
+        remoteHost,
+        remoteUser
       );
-      const location = result.is_aws ? `AWS EC2 (${result.instance_type})` : 'local machine';
+      let location = 'local machine';
+      if (result.is_aws) {
+        location = `AWS EC2 (${result.instance_type})`;
+      } else if (result.is_remote) {
+        location = `Remote Server (${result.remote_host})`;
+      }
       setSuccess(`Training started on ${location}! Job ID: ${result.job_id}`);
 
       // Reset form after 5 seconds
@@ -116,24 +125,59 @@ const TrainingControl: React.FC = () => {
       </div>
 
       <div className="form-group">
-        <label className="form-checkbox aws-checkbox">
-          <input
-            type="checkbox"
-            checked={useAws}
-            onChange={(e) => setUseAws(e.target.checked)}
-            disabled={loading}
-          />
-          <span className="checkbox-label">
-            <span className="aws-icon">☁️</span>
-            <span>Use AWS (Recommended for GPU acceleration)</span>
-          </span>
-        </label>
+        <label className="form-label">Training Location</label>
+        <div className="radio-group">
+          <label className="form-radio aws-radio">
+            <input
+              type="radio"
+              name="trainingLocation"
+              value="aws"
+              checked={trainingLocation === 'aws'}
+              onChange={(e) => setTrainingLocation('aws')}
+              disabled={loading}
+            />
+            <span className="radio-label">
+              <span className="location-icon">☁️</span>
+              <span>AWS EC2 (GPU Recommended)</span>
+            </span>
+          </label>
+          <label className="form-radio remote-radio">
+            <input
+              type="radio"
+              name="trainingLocation"
+              value="remote"
+              checked={trainingLocation === 'remote'}
+              onChange={(e) => setTrainingLocation('remote')}
+              disabled={loading}
+            />
+            <span className="radio-label">
+              <span className="location-icon">🖥️</span>
+              <span>Remote Server (100.118.183.51)</span>
+            </span>
+          </label>
+          <label className="form-radio local-radio">
+            <input
+              type="radio"
+              name="trainingLocation"
+              value="local"
+              checked={trainingLocation === 'local'}
+              onChange={(e) => setTrainingLocation('local')}
+              disabled={loading}
+            />
+            <span className="radio-label">
+              <span className="location-icon">💻</span>
+              <span>Local Machine</span>
+            </span>
+          </label>
+        </div>
         <p className="form-help">
-          Train on AWS EC2 with GPU for 10-50x faster training
+          {trainingLocation === 'aws' && 'Train on AWS EC2 with GPU for 10-50x faster training'}
+          {trainingLocation === 'remote' && 'Train on your remote server via SSH'}
+          {trainingLocation === 'local' && 'Train on your local machine'}
         </p>
       </div>
 
-      {useAws ? (
+      {trainingLocation === 'aws' ? (
         <>
           <div className="form-group">
             <label htmlFor="instance-select" className="form-label">
@@ -173,6 +217,64 @@ const TrainingControl: React.FC = () => {
             </select>
             <p className="form-help">
               Select the AWS region closest to you
+            </p>
+          </div>
+        </>
+      ) : trainingLocation === 'remote' ? (
+        <>
+          <div className="form-group">
+            <label htmlFor="remote-host" className="form-label">
+              Remote Host
+            </label>
+            <input
+              id="remote-host"
+              type="text"
+              className="form-input"
+              value={remoteHost}
+              onChange={(e) => setRemoteHost(e.target.value)}
+              disabled={loading}
+              placeholder="100.118.183.51"
+            />
+            <p className="form-help">
+              SSH host address of the remote training server
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="remote-user" className="form-label">
+              SSH User
+            </label>
+            <input
+              id="remote-user"
+              type="text"
+              className="form-input"
+              value={remoteUser}
+              onChange={(e) => setRemoteUser(e.target.value)}
+              disabled={loading}
+              placeholder="qbee"
+            />
+            <p className="form-help">
+              SSH username for the remote server
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="device-select" className="form-label">
+              Device
+            </label>
+            <select
+              id="device-select"
+              className="form-select"
+              value={device}
+              onChange={(e) => setDevice(e.target.value)}
+              disabled={loading}
+            >
+              <option value="auto">Auto (Recommended)</option>
+              <option value="cuda">CUDA (NVIDIA GPU)</option>
+              <option value="cpu">CPU</option>
+            </select>
+            <p className="form-help">
+              Device to use on the remote server
             </p>
           </div>
         </>

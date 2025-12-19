@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Dashboard from './components/Dashboard';
 import S3DataExplorer from './components/S3DataExplorer';
+import DatasetExplorer from './components/DatasetExplorer';
 import RealtimePredictions from './components/RealtimePredictions';
 import PortfolioTracker from './components/PortfolioTracker';
 import AIMetrics from './components/AIMetrics';
 import TrainingDashboard from './components/TrainingDashboard';
 import { DataService } from './services/DataService';
 
-type View = 'dashboard' | 's3-explorer' | 'predictions' | 'portfolio' | 'ai-metrics' | 'training';
+type View = 'dashboard' | 's3-explorer' | 'dataset-explorer' | 'predictions' | 'portfolio' | 'ai-metrics' | 'training';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -28,6 +29,8 @@ function App() {
         return <Dashboard />;
       case 's3-explorer':
         return <S3DataExplorer />;
+      case 'dataset-explorer':
+        return <DatasetExplorer />;
       case 'predictions':
         return <RealtimePredictions />;
       case 'portfolio':
@@ -108,7 +111,15 @@ function App() {
                 onClick={() => setCurrentView('s3-explorer')}
               >
                 <span className="nav-icon">🗂️</span>
-                <span>Data Explorer</span>
+                <span>S3 Data</span>
+              </button>
+
+              <button
+                className={`nav-link ${currentView === 'dataset-explorer' ? 'active' : ''}`}
+                onClick={() => setCurrentView('dataset-explorer')}
+              >
+                <span className="nav-icon">📊</span>
+                <span>Dataset Integrity</span>
               </button>
 
               <button

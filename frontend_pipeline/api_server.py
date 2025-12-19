@@ -28,6 +28,9 @@ from pymongo.errors import PyMongoError
 sys.path.insert(0, str(Path(__file__).parent.parent / "ai" / "TRAIN"))
 from data.s3_data_source import S3DataSource
 
+# Import data integrity analyzer
+from data_integrity_analyzer import DataIntegrityAnalyzer
+
 app = FastAPI(title="Alpha Trading API", version="2.0")
 
 # ============================================================================
@@ -150,9 +153,11 @@ class TrainingStartRequest(BaseModel):
     config: str
     device: str = "auto"
     debug_mode: bool = False
-    use_aws: bool = True  # Par défaut, utiliser AWS
-    instance_type: str = "g4dn.xlarge"  # GPU T4, ~$0.50/h
-    aws_region: str = "eu-west-3"  # AWS region
+    training_location: str = "aws"  # "aws", "remote", or "local"
+    instance_type: str = "g4dn.xlarge"  # GPU T4, ~$0.50/h (for AWS)
+    aws_region: str = "eu-west-3"  # AWS region (for AWS)
+    remote_host: str = "100.118.183.51"  # Remote server host (for remote)
+    remote_user: str = "qbee"  # Remote server SSH user (for remote)
 
 
 # ============================================================================
@@ -526,6 +531,296 @@ def monitor_aws_training(job_id: str):
 
         # Wait before next check
         threading.Event().wait(10)
+
+
+# ============================================================================
+# REMOTE SERVER TRAINING HELPER FUNCTIONS
+# ============================================================================
+
+def launch_remote_training(job_id: str, config: str, remote_host: str, remote_user: str, device: str, debug_mode: bool) -> Dict:
+    """Launch training on remote server via SSH."""
+
+    # Local paths
+    project_root = Path(__file__).parent.parent
+    config_path = project_root / "ai" / "configs" / config
+
+    # Remote paths
+    remote_work_dir = f"/tmp/training_{job_id}"
+    remote_log_path = f"{remote_work_dir}/training.log"
+
+    # Local log file
+    log_file = Path(f"/tmp/training_remote_{job_id}.log")
+
+    try:
+        # Create a launch script that will:
+        # 1. Create remote working directory
+        # 2. Transfer necessary files (config, training scripts, requirements)
+        # 3. Setup Python environment if needed
+        # 4. Launch training in background
+
+        logger.info(f"Setting up remote training on {remote_user}@{remote_host}")
+
+        # SSH key path (to bypass Tailscale SSH)
+        ssh_key = os.path.expanduser("~/.ssh/id_rsa")
+        ssh_base_args = [
+            "-i", ssh_key,
+            "-o", "StrictHostKeyChecking=no",
+            "-o", "PreferredAuthentications=publickey"
+        ]
+
+        # Step 1: Create remote directory
+        ssh_cmd = ["ssh"] + ssh_base_args + [
+            f"{remote_user}@{remote_host}",
+            f"mkdir -p {remote_work_dir}"
+        ]
+        subprocess.run(ssh_cmd, check=True, timeout=10)
+
+        # Step 2: Transfer the entire ai directory (configs, train.py, etc.)
+        logger.info(f"Transferring training files to remote server...")
+        rsync_cmd = [
+            "rsync",
+            "-avz",
+            "-e", f"ssh -i {ssh_key} -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey",
+            "--exclude", "__pycache__",
+            "--exclude", "*.pyc",
+            "--exclude", ".git",
+            "--exclude", "checkpoints*",
+            "--exclude", "datasets",
+            str(project_root / "ai") + "/",
+            f"{remote_user}@{remote_host}:{remote_work_dir}/ai/"
+        ]
+        subprocess.run(rsync_cmd, check=True, timeout=120)
+
+        # Step 3: Build and execute training command on remote server
+        debug_flag = "--debug_mode" if debug_mode else ""
+        remote_train_cmd = f"""
+cd {remote_work_dir}/ai && \
+nohup python train.py \
+    --config configs/{config} \
+    --device {device} \
+    {debug_flag} \
+    > {remote_log_path} 2>&1 &
+echo $!
+"""
+
+        logger.info(f"Starting training on remote server...")
+        ssh_launch = ["ssh"] + ssh_base_args + [
+            f"{remote_user}@{remote_host}",
+            remote_train_cmd
+        ]
+
+        result = subprocess.run(
+            ssh_launch,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"Failed to launch remote training: {result.stderr}")
+
+        # Get the remote process PID
+        remote_pid = result.stdout.strip().split('\n')[-1]
+        logger.info(f"Remote training started with PID {remote_pid}")
+
+        # Write initial log
+        with open(log_file, 'w') as f:
+            f.write(f"Remote training launched on {remote_host}\n")
+            f.write(f"Remote work directory: {remote_work_dir}\n")
+            f.write(f"Remote PID: {remote_pid}\n")
+            f.write(f"Config: {config}\n")
+            f.write(f"Device: {device}\n\n")
+
+        return {
+            "log_file": str(log_file),
+            "remote_log_path": remote_log_path,
+            "remote_work_dir": remote_work_dir,
+            "remote_pid": remote_pid,
+            "is_remote": True
+        }
+
+    except Exception as e:
+        logger.error(f"Error launching remote training: {e}")
+        raise
+
+
+def monitor_remote_training(job_id: str):
+    """Background thread to monitor remote training job."""
+    with training_lock:
+        if job_id not in training_jobs:
+            return
+        job = training_jobs[job_id]
+
+    remote_host = job["remote_host"]
+    remote_user = job["remote_user"]
+    remote_log_path = job["remote_log_path"]
+    remote_work_dir = job["remote_work_dir"]
+
+    # Update status to running
+    with training_lock:
+        job["status"] = "running"
+
+    logger.info(f"Monitoring remote training job {job_id} on {remote_host}")
+
+    # SSH key path (to bypass Tailscale SSH)
+    ssh_key = os.path.expanduser("~/.ssh/id_rsa")
+
+    consecutive_errors = 0
+    max_consecutive_errors = 5
+
+    while True:
+        try:
+            # Fetch logs from remote server
+            ssh_cmd = [
+                "ssh",
+                "-i", ssh_key,
+                "-o", "StrictHostKeyChecking=no",
+                "-o", "PreferredAuthentications=publickey",
+                "-o", "ConnectTimeout=5",
+                f"{remote_user}@{remote_host}",
+                f"tail -50 {remote_log_path} 2>/dev/null || echo 'Log not ready'"
+            ]
+
+            result = subprocess.run(
+                ssh_cmd,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+
+            if result.returncode == 0 and "Log not ready" not in result.stdout:
+                consecutive_errors = 0  # Reset error counter
+
+                # Parse logs for metrics
+                metrics = parse_training_log_from_text(result.stdout)
+
+                with training_lock:
+                    job["current_epoch"] = metrics["current_epoch"]
+                    job["total_epochs"] = metrics["total_epochs"] or job["total_epochs"]
+                    job["current_loss"] = metrics["train_loss"]
+                    job["current_val_loss"] = metrics["val_loss"]
+                    job["current_sharpe"] = metrics["val_sharpe"]
+
+                    if job["total_epochs"] > 0:
+                        job["progress_pct"] = (metrics["current_epoch"] / job["total_epochs"]) * 100.0
+
+                # Check if training is complete by looking for completion markers
+                if "Training completed" in result.stdout or "All epochs completed" in result.stdout:
+                    logger.info(f"Remote training job {job_id} completed!")
+
+                    # Retrieve the trained model
+                    retrieve_remote_model(job_id, job)
+
+                    with training_lock:
+                        job["status"] = "completed"
+                        job["end_time"] = datetime.utcnow()
+                        save_training_metadata(job_id)
+                    break
+
+            else:
+                consecutive_errors += 1
+                if consecutive_errors >= max_consecutive_errors:
+                    logger.error(f"Too many consecutive errors monitoring job {job_id}")
+                    with training_lock:
+                        job["status"] = "failed"
+                        job["error"] = "Lost connection to remote server"
+                        job["end_time"] = datetime.utcnow()
+                    break
+
+        except subprocess.TimeoutExpired:
+            logger.warning(f"SSH timeout for remote job {job_id}")
+            consecutive_errors += 1
+        except Exception as e:
+            logger.error(f"Error monitoring remote training job {job_id}: {e}")
+            consecutive_errors += 1
+
+        if consecutive_errors >= max_consecutive_errors:
+            with training_lock:
+                job["status"] = "failed"
+                job["error"] = f"Monitoring failed after {max_consecutive_errors} consecutive errors"
+                job["end_time"] = datetime.utcnow()
+            break
+
+        # Wait before next check
+        threading.Event().wait(10)
+
+
+def retrieve_remote_model(job_id: str, job: Dict):
+    """Retrieve trained model from remote server using scp."""
+    remote_host = job["remote_host"]
+    remote_user = job["remote_user"]
+    remote_work_dir = job["remote_work_dir"]
+
+    # Local checkpoint directory
+    local_checkpoint_dir = Path(__file__).parent.parent / "ai" / "checkpoints_light"
+    local_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info(f"Retrieving model from remote server for job {job_id}")
+
+    # SSH key path (to bypass Tailscale SSH)
+    ssh_key = os.path.expanduser("~/.ssh/id_rsa")
+
+    try:
+        # Find the latest checkpoint on remote server
+        ssh_find = [
+            "ssh",
+            "-i", ssh_key,
+            "-o", "StrictHostKeyChecking=no",
+            "-o", "PreferredAuthentications=publickey",
+            f"{remote_user}@{remote_host}",
+            f"ls -t {remote_work_dir}/ai/checkpoints_light/*.pt 2>/dev/null | head -1"
+        ]
+
+        result = subprocess.run(
+            ssh_find,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode != 0 or not result.stdout.strip():
+            logger.warning(f"No model file found on remote server for job {job_id}")
+            return
+
+        remote_model_path = result.stdout.strip()
+        model_filename = Path(remote_model_path).name
+        local_model_path = local_checkpoint_dir / model_filename
+
+        # Use scp to retrieve the model
+        logger.info(f"Downloading {model_filename} from remote server...")
+        scp_cmd = [
+            "scp",
+            "-i", ssh_key,
+            "-o", "StrictHostKeyChecking=no",
+            "-o", "PreferredAuthentications=publickey",
+            f"{remote_user}@{remote_host}:{remote_model_path}",
+            str(local_model_path)
+        ]
+
+        subprocess.run(scp_cmd, check=True, timeout=120)
+
+        logger.info(f"Successfully retrieved model: {local_model_path}")
+
+        with training_lock:
+            job["model_path"] = str(local_model_path)
+            job["model_filename"] = model_filename
+
+        # Cleanup remote directory (optional)
+        cleanup_cmd = [
+            "ssh",
+            "-i", ssh_key,
+            "-o", "StrictHostKeyChecking=no",
+            "-o", "PreferredAuthentications=publickey",
+            f"{remote_user}@{remote_host}",
+            f"rm -rf {remote_work_dir}"
+        ]
+        subprocess.run(cleanup_cmd, timeout=10)
+        logger.info(f"Cleaned up remote directory: {remote_work_dir}")
+
+    except Exception as e:
+        logger.error(f"Error retrieving model from remote server: {e}")
+        with training_lock:
+            job["error"] = f"Model retrieval failed: {str(e)}"
 
 
 def _portfolio_collection():
@@ -1549,7 +1844,7 @@ async def get_training_configs():
 
 @app.post("/training/start")
 async def start_training(request: TrainingStartRequest):
-    """Start a new training job - AWS or local."""
+    """Start a new training job - AWS, Remote Server, or Local."""
     try:
         # Validate config file exists
         config_path = Path(__file__).parent.parent / "ai" / "configs" / request.config
@@ -1559,7 +1854,7 @@ async def start_training(request: TrainingStartRequest):
         # Generate unique job ID
         job_id = f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-        if request.use_aws:
+        if request.training_location == "aws":
             # Launch on AWS EC2
             logger.info(f"Launching AWS training job {job_id} on {request.instance_type}")
 
@@ -1611,8 +1906,67 @@ async def start_training(request: TrainingStartRequest):
                 "job_id": job_id,
                 "status": "launching",
                 "is_aws": True,
+                "is_remote": False,
                 "instance_type": request.instance_type,
                 "message": f"Training launching on AWS EC2 ({request.instance_type})"
+            }
+
+        elif request.training_location == "remote":
+            # Launch on remote server via SSH
+            logger.info(f"Launching remote training job {job_id} on {request.remote_host}")
+
+            remote_result = launch_remote_training(
+                job_id,
+                request.config,
+                request.remote_host,
+                request.remote_user,
+                request.device,
+                request.debug_mode
+            )
+
+            # Create job entry for remote server
+            job = {
+                "job_id": job_id,
+                "status": "launching",
+                "config_path": str(config_path),
+                "device": request.device,
+                "debug_mode": request.debug_mode,
+                "is_aws": False,
+                "is_remote": True,
+                "remote_host": request.remote_host,
+                "remote_user": request.remote_user,
+                "process": remote_result.get("process"),
+                "start_time": datetime.utcnow(),
+                "end_time": None,
+                "current_epoch": 0,
+                "total_epochs": 50,
+                "progress_pct": 0.0,
+                "current_loss": 0.0,
+                "current_val_loss": 0.0,
+                "current_sharpe": 0.0,
+                "log_file": remote_result["log_file"],
+                "remote_log_path": remote_result["remote_log_path"],
+                "remote_work_dir": remote_result["remote_work_dir"],
+                "error": None
+            }
+
+            with training_lock:
+                training_jobs[job_id] = job
+
+            # Start remote monitoring thread
+            monitor_thread = threading.Thread(target=monitor_remote_training, args=(job_id,), daemon=True)
+            monitor_thread.start()
+
+            logger.info(f"Started remote training job {job_id} on {request.remote_host}")
+
+            return {
+                "success": True,
+                "job_id": job_id,
+                "status": "launching",
+                "is_aws": False,
+                "is_remote": True,
+                "remote_host": request.remote_host,
+                "message": f"Training launching on remote server ({request.remote_host})"
             }
 
         else:
@@ -1676,6 +2030,7 @@ async def start_training(request: TrainingStartRequest):
                 "job_id": job_id,
                 "status": "running",
                 "is_aws": False,
+                "is_remote": False,
                 "message": f"Training started locally with config {request.config}"
             }
 
@@ -2336,6 +2691,110 @@ async def get_model_architecture():
             "last_trained": "2024-12-14"
         }
     }
+
+# ============================================================================
+# DATA INTEGRITY ENDPOINTS
+# ============================================================================
+
+@app.get("/data-integrity/all")
+async def get_all_data_integrity():
+    """Analyse l'intégrité de toutes les cryptos."""
+    try:
+        analyzer = DataIntegrityAnalyzer()
+        results = analyzer.analyze_all_cryptos()
+        return results
+    except Exception as e:
+        logger.error(f"Error analyzing data integrity: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/data-integrity/{crypto}")
+async def get_crypto_data_integrity(crypto: str):
+    """Analyse l'intégrité d'une crypto spécifique."""
+    try:
+        analyzer = DataIntegrityAnalyzer()
+        result = analyzer.analyze_crypto_data(crypto.upper())
+        return result
+    except Exception as e:
+        logger.error(f"Error analyzing {crypto}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/data-integrity/available-cryptos")
+async def get_available_cryptos():
+    """Liste les cryptos disponibles dans le cache."""
+    try:
+        analyzer = DataIntegrityAnalyzer()
+        cryptos = analyzer.get_available_cryptos()
+        return {
+            "cryptos": cryptos,
+            "count": len(cryptos)
+        }
+    except Exception as e:
+        logger.error(f"Error getting available cryptos: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/dataset/crypto-data/{crypto}")
+async def get_crypto_historical_data(
+    crypto: str,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    limit: int = 1000
+):
+    """Récupère les données historiques d'une crypto avec prix et métadonnées."""
+    try:
+        s3_cache_path = Path("ai/cache/s3_data")
+        pattern = f"{crypto.upper()}USDT_*.parquet"
+        files = list(s3_cache_path.glob(pattern))
+
+        if not files:
+            raise HTTPException(status_code=404, detail=f"No data found for {crypto}")
+
+        # Charger les données
+        dfs = []
+        for file in sorted(files):
+            df = pd.read_parquet(file)
+            dfs.append(df)
+
+        full_df = pd.concat(dfs, ignore_index=True)
+
+        # Filtrer par date si nécessaire
+        if 'timestamp' in full_df.columns:
+            full_df['timestamp'] = pd.to_datetime(full_df['timestamp'])
+
+            # Filtrer les dates futures
+            now = pd.Timestamp.now(tz='UTC')
+            full_df = full_df[full_df['timestamp'] <= now]
+
+            full_df = full_df.sort_values('timestamp')
+
+            if start_date:
+                full_df = full_df[full_df['timestamp'] >= start_date]
+            if end_date:
+                full_df = full_df[full_df['timestamp'] <= end_date]
+
+        # Limiter le nombre de lignes
+        if len(full_df) > limit:
+            # Prendre des échantillons uniformément répartis
+            indices = np.linspace(0, len(full_df) - 1, limit, dtype=int)
+            full_df = full_df.iloc[indices]
+
+        # Convertir en JSON
+        data = full_df.to_dict('records')
+
+        # Convertir les timestamps en strings
+        for record in data:
+            if 'timestamp' in record:
+                record['timestamp'] = str(record['timestamp'])
+
+        return {
+            "crypto": crypto.upper(),
+            "total_rows": len(data),
+            "data": data,
+            "columns": full_df.columns.tolist()
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching crypto data for {crypto}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

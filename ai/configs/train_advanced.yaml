@@ -1,0 +1,74 @@
+# Configuration for Advanced Training Pipeline
+# TinyRecursiveMarketModel with 30+ KPIs tracking
+
+# =====================================
+# DATA CONFIGURATION
+# =====================================
+data:
+  bucket: "qbia"
+  base_prefix: "bourse/processed/market/interval=1m/quote=USDT/symbol=BTCUSDT"
+
+  # Years to use for training (will be split 90% train / 10% val internally if needed)
+  years_train: [2017, 2018, 2019, 2020, 2021, 2022, 2023]
+
+  # Years to use for testing (final evaluation)
+  years_test: [2024]
+
+# =====================================
+# MODEL CONFIGURATION
+# =====================================
+model:
+  # Windowing
+  lookback: 256        # Number of timesteps to look back (256 minutes = ~4.3 hours)
+  horizon: 12          # Number of timesteps to predict ahead (12 minutes)
+  stride: 1            # Stride for sliding window
+
+  # Architecture
+  d_model: 128         # Hidden dimension
+  n_heads: 4           # Number of attention heads
+  d_ff: 256            # Feedforward hidden dimension
+  dropout: 0.10        # Dropout rate
+
+  # Recursive Memory Module
+  mem_dim: 128         # Memory dimension
+  mem_update_iters: 2  # Number of recursive refinement iterations
+
+# =====================================
+# TRAINING CONFIGURATION
+# =====================================
+training:
+  # Batch and data loading
+  batch_size: 256          # Batch size (reduce to 128 or 64 if OOM)
+  shuffle_buffer: 50000    # Shuffle buffer size
+  prefetch: 2              # Number of batches to prefetch
+
+  # Optimizer
+  lr: 0.0003               # Base learning rate (with cosine warmup schedule)
+  weight_decay: 0.0001     # AdamW weight decay
+  clip_norm: 1.0           # Gradient clipping norm
+
+  # Training schedule
+  epochs: 20               # Number of epochs
+  steps_per_epoch: 2000    # Steps per epoch (adjust based on data size)
+  val_steps: 200           # Validation steps per epoch
+
+  # Reproducibility
+  seed: 1337
+
+# =====================================
+# LOSS WEIGHTS
+# =====================================
+loss_weights:
+  w_ret: 1.0    # Returns prediction weight
+  w_dir: 0.6    # Direction classification weight
+  w_rv: 0.4     # Realized volatility prediction weight
+
+# =====================================
+# OUTPUT CONFIGURATION
+# =====================================
+output:
+  base_dir: "training_output"
+  tensorboard_dir: "training_output/tensorboard"
+  checkpoints_dir: "training_output/checkpoints"
+  metrics_dir: "training_output/metrics"
+  logs_dir: "training_output/logs"

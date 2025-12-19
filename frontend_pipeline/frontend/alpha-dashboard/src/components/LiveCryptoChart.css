@@ -1,0 +1,446 @@
+.live-crypto-chart {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crypto-selector {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.crypto-selector label {
+  font-size: 14px;
+  color: #a0aec0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.crypto-dropdown {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+}
+
+.crypto-dropdown:hover {
+  border-color: rgba(59, 130, 246, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.crypto-dropdown:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.crypto-dropdown option {
+  background: #1a1a2e;
+  color: #fff;
+  padding: 10px;
+}
+
+.prediction-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #a0aec0;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.checkbox-label:hover {
+  color: #fff;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #10b981;
+  border-radius: 4px;
+}
+
+.ws-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #a0aec0;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.status-connected {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-dot.status-connecting {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.status-dot.status-disconnected {
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Prix actuel */
+.price-stats {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.current-price-display {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+}
+
+.crypto-name-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.crypto-name-display h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.symbol-display {
+  background: rgba(59, 130, 246, 0.2);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.price-value {
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.price-change {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.price-change.positive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.price-change.negative {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* Stats du jour */
+.day-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.stat-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+/* Graphique */
+.chart-container {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.legend-line {
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.legend-line.historical {
+  background: #3b82f6;
+}
+
+.legend-line.predicted {
+  background: #10b981;
+  background-image: repeating-linear-gradient(
+    to right,
+    #10b981,
+    #10b981 5px,
+    transparent 5px,
+    transparent 10px
+  );
+}
+
+.price-chart-canvas {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Prédictions détaillées */
+.predictions-details {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+}
+
+.predictions-details h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.predictions-timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.prediction-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.prediction-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+}
+
+.pred-time {
+  font-size: 11px;
+  color: #10b981;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pred-price {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+}
+
+.pred-change {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.pred-change.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.pred-change.negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.pred-confidence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confidence-bar-container {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.confidence-text {
+  font-size: 11px;
+  color: #a0aec0;
+  font-weight: 600;
+  min-width: 35px;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .live-crypto-chart {
+    padding: 20px;
+  }
+
+  .price-value {
+    font-size: 36px;
+  }
+
+  .price-change {
+    font-size: 14px;
+  }
+
+  .predictions-timeline {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .price-chart-canvas {
+    width: 100%;
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .crypto-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .crypto-dropdown {
+    width: 100%;
+  }
+
+  .price-main {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .price-value {
+    font-size: 32px;
+  }
+
+  .day-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .predictions-timeline {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}

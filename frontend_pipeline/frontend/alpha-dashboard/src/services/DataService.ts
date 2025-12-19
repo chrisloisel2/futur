@@ -116,9 +116,11 @@ export class DataService {
     config: string,
     device: string = 'auto',
     debugMode: boolean = false,
-    useAws: boolean = true,
+    trainingLocation: 'aws' | 'remote' | 'local' = 'aws',
     instanceType: string = 'g4dn.xlarge',
-    awsRegion: string = 'eu-west-3'
+    awsRegion: string = 'eu-west-3',
+    remoteHost: string = '100.118.183.51',
+    remoteUser: string = 'qbee'
   ) {
     const response = await fetch(`${API_BASE_URL}/training/start`, {
       method: 'POST',
@@ -127,9 +129,11 @@ export class DataService {
         config,
         device,
         debug_mode: debugMode,
-        use_aws: useAws,
+        training_location: trainingLocation,
         instance_type: instanceType,
-        aws_region: awsRegion
+        aws_region: awsRegion,
+        remote_host: remoteHost,
+        remote_user: remoteUser
       }),
     });
     if (!response.ok) throw new Error('Failed to start training');

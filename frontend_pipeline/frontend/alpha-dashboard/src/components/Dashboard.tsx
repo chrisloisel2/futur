@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DataService } from '../services/DataService';
 import CryptoMarket from './CryptoMarket';
-import LiveCryptoMarket from './LiveCryptoMarket';
+import CandlestickChart from './CandlestickChart';
 import WebsocketStatus from './WebsocketStatus';
 import FearGreedGauge from './charts/FearGreedGauge';
 import './Dashboard.css';
@@ -89,10 +89,10 @@ const Dashboard: React.FC = () => {
       </header>
 
       <div className="dashboard-modern-grid">
-        {/* Live Crypto Market with WebSocket & AI Predictions */}
+        {/* Candlestick Chart with Zoom & Time Selection */}
         <div className="modern-card full-width">
           <div className="card-body-modern" style={{ padding: 0 }}>
-            <LiveCryptoMarket />
+            <CandlestickChart />
           </div>
         </div>
 
