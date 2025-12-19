@@ -21,7 +21,7 @@ model:
   # Windowing
   lookback: 256        # Number of timesteps to look back (256 minutes = ~4.3 hours)
   horizon: 12          # Number of timesteps to predict ahead (12 minutes)
-  stride: 1            # Stride for sliding window
+  stride: 12           # Stride for sliding window (12 = moins de windows, moins de RAM)
 
   # Architecture
   d_model: 128         # Hidden dimension
@@ -38,8 +38,8 @@ model:
 # =====================================
 training:
   # Batch and data loading
-  batch_size: 256          # Batch size (reduce to 128 or 64 if OOM)
-  shuffle_buffer: 50000    # Shuffle buffer size
+  batch_size: 128          # Batch size (réduit pour économiser RAM)
+  shuffle_buffer: 10000    # Shuffle buffer size (réduit pour RAM)
   prefetch: 2              # Number of batches to prefetch
 
   # Optimizer
@@ -49,8 +49,8 @@ training:
 
   # Training schedule
   epochs: 20               # Number of epochs
-  steps_per_epoch: 2000    # Steps per epoch (adjust based on data size)
-  val_steps: 200           # Validation steps per epoch
+  steps_per_epoch: 500     # Steps per epoch (réduit pour test rapide)
+  val_steps: 100           # Validation steps per epoch
 
   # Reproducibility
   seed: 1337
