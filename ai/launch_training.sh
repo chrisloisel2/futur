@@ -71,6 +71,9 @@ echo "  Starting Training..."
 echo "=========================================="
 echo ""
 
+# Set XLA flags to enable CUDA driver fallback (fixes ptxas/nvlink not found)
+export XLA_FLAGS="--xla_gpu_unsafe_fallback_to_driver_on_ptxas_not_found=true"
+
 # Run training
 python3 ai/train_advanced.py --config "$CONFIG_FILE"
 
