@@ -4,7 +4,10 @@ Script d'Entraînement Avancé pour TinyRecursiveMarketModel
 Charge données année par année depuis S3, compute 30+ KPIs, TensorBoard logging
 """
 
+# IMPORTANT: Set XLA flags BEFORE importing TensorFlow
 import os
+os.environ['XLA_FLAGS'] = '--xla_gpu_unsafe_fallback_to_driver_on_ptxas_not_found=true'
+
 import sys
 import json
 import argparse
