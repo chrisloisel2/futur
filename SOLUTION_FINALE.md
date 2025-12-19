@@ -223,15 +223,20 @@ loss_weights:
 - Ancien: `y_rv` en `[N, 12]`
 - Nouveau: `y_rv` en `[N]`
 
-**Suppression obligatoire:**
+**DERNIÈRE CORRECTION APPLIQUÉE:**
+Le fichier `ai/data_pipeline_memory_efficient.py` a été corrigé pour charger RV comme scalaire:
+```python
+# Ligne 75: CORRECTED
+'rv': tf.TensorSpec(shape=(), dtype=tf.float32),  # Scalar RV (pas (horizon,))
+```
+
+**Suppression obligatoire sur le serveur:**
 
 ```bash
-# Option 1: Script automatique
-./ai/force_regenerate_windows.sh
+# Option 1: Script automatique (RECOMMANDÉ)
+./cleanup_server_windows.sh
 
 # Option 2: Manuel
-rm -rf training_output/
-rm -rf training_output_returns_only/
 rm -rf training_output_corrected/
 ```
 
@@ -240,6 +245,8 @@ rm -rf training_output_corrected/
 ValueError: Dimensions must be equal, but are 128 and 12 for rv_loss
 Input shapes: [128], [128,12]
 ```
+
+**Après nettoyage, les windows seront régénérées automatiquement avec la bonne structure.**
 
 ### Étape 2: Lancer l'Entraînement
 

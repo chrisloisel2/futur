@@ -72,7 +72,7 @@ def build_tf_dataset_from_disk_efficient(
             {
                 'ret': tf.TensorSpec(shape=(horizon,), dtype=tf.float32),
                 'dir': tf.TensorSpec(shape=(), dtype=tf.int32),
-                'rv': tf.TensorSpec(shape=(horizon,), dtype=tf.float32),
+                'rv': tf.TensorSpec(shape=(), dtype=tf.float32),  # CORRECTED: Scalar RV
             }
         )
     )
