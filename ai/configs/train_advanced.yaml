@@ -23,15 +23,15 @@ model:
   horizon: 12          # Number of timesteps to predict ahead (12 minutes)
   stride: 12           # Stride for sliding window (12 = moins de windows, moins de RAM)
 
-  # Architecture
-  d_model: 128         # Hidden dimension
-  n_heads: 4           # Number of attention heads
-  d_ff: 256            # Feedforward hidden dimension
-  dropout: 0.10        # Dropout rate
+  # Architecture (RÉDUIT pour éviter overfitting)
+  d_model: 64          # Hidden dimension (réduit de 128 → 64)
+  n_heads: 2           # Number of attention heads (réduit de 4 → 2)
+  d_ff: 128            # Feedforward hidden dimension (réduit de 256 → 128)
+  dropout: 0.20        # Dropout rate (augmenté de 0.10 → 0.20 pour régularisation)
 
   # Recursive Memory Module
-  mem_dim: 128         # Memory dimension
-  mem_update_iters: 2  # Number of recursive refinement iterations
+  mem_dim: 64          # Memory dimension (réduit de 128 → 64)
+  mem_update_iters: 1  # Number of recursive refinement iterations (réduit de 2 → 1)
 
 # =====================================
 # TRAINING CONFIGURATION
@@ -43,9 +43,9 @@ training:
   prefetch: 2              # Number of batches to prefetch
 
   # Optimizer
-  lr: 0.0003               # Base learning rate (with cosine warmup schedule)
-  weight_decay: 0.0001     # AdamW weight decay
-  clip_norm: 1.0           # Gradient clipping norm
+  lr: 0.001                # Base learning rate (AUGMENTÉ de 0.0003 → 0.001 pour convergence plus rapide)
+  weight_decay: 0.001      # AdamW weight decay (AUGMENTÉ de 0.0001 → 0.001 pour régularisation)
+  clip_norm: 0.5           # Gradient clipping norm (RÉDUIT de 1.0 → 0.5 pour stabilité)
 
   # Training schedule
   epochs: 20               # Number of epochs
@@ -60,8 +60,8 @@ training:
 # =====================================
 loss_weights:
   w_ret: 1.0    # Returns prediction weight
-  w_dir: 0.6    # Direction classification weight
-  w_rv: 0.4     # Realized volatility prediction weight
+  w_dir: 1.5    # Direction classification weight (AUGMENTÉ - focus sur direction)
+  w_rv: 0.0     # Realized volatility DÉSACTIVÉ (impossible à prédire depuis le passé)
 
 # =====================================
 # OUTPUT CONFIGURATION
