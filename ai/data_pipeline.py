@@ -32,11 +32,11 @@ from ai.s3_parquet_loader import (
 
 @dataclass
 class WindowsData:
-    """Container pour les windows d'une année"""
+    """Container pour les windows d'une année (CORRECTED)"""
     Xw: np.ndarray  # [N, lookback, F]
     y_ret: np.ndarray  # [N, horizon]
-    y_dir: np.ndarray  # [N]
-    y_rv: np.ndarray  # [N, horizon]
+    y_dir: np.ndarray  # [N] - BINARY: 0=DOWN, 1=UP
+    y_rv: np.ndarray  # [N] - SCALAR: RMS aggregated volatility
     year: int
     n_samples: int
 
@@ -167,7 +167,8 @@ def create_windows_for_year(
     # Crée les windows
     if verbose:
         print(f"    Creating windows (lookback={lookback}, horizon={horizon})...")
-    Xw, y_ret_h, y_dir, y_rv_h = make_windows(
+    # CORRECTED: make_windows now returns y_rv_agg (scalar) instead of y_rv_h (multi-horizon)
+    Xw, y_ret_h, y_dir, y_rv_agg = make_windows(
         X, y_ret, y_rv,
         lookback=lookback,
         horizon=horizon,
@@ -181,7 +182,7 @@ def create_windows_for_year(
         Xw=Xw,
         y_ret=y_ret_h,
         y_dir=y_dir,
-        y_rv=y_rv_h,
+        y_rv=y_rv_agg,  # CHANGED: Now scalar
         year=year_data.year,
         n_samples=Xw.shape[0]
     )
