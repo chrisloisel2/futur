@@ -259,11 +259,11 @@ def make_windows(
     stride: int,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Génère:
+    CORRECTED VERSION:
     Xw: [N, lookback, F]
     y_ret_h: [N, horizon]      (log_ret futurs)
-    y_dir: [N]                 (0 down, 1 flat, 2 up) basé sur somme log_ret
-    y_rv_h: [N, horizon]       (rv_60 futurs)
+    y_dir: [N]                 (0=DOWN, 1=UP) - BINAIRE basé sur signe du cumul
+    y_rv_agg: [N]              (RV agrégée RMS) - SCALAIRE
     """
     T = X.shape[0]
     F = X.shape[1]
@@ -273,7 +273,7 @@ def make_windows(
 
     Xw = np.zeros((N, lookback, F), dtype=np.float32)
     y_ret_h = np.zeros((N, horizon), dtype=np.float32)
-    y_rv_h = np.zeros((N, horizon), dtype=np.float32)
+    y_rv_agg = np.zeros((N,), dtype=np.float32)  # CHANGED: Scalar aggregated RV
     y_dir = np.zeros((N,), dtype=np.int32)
 
     idx = 0
@@ -282,20 +282,17 @@ def make_windows(
         fut_ret = y_ret[s + lookback : s + lookback + horizon]
         fut_rv = y_rv[s + lookback : s + lookback + horizon]
         y_ret_h[idx] = fut_ret
-        y_rv_h[idx] = fut_rv
 
-        # direction = signe du cumul futur (log_ret)
+        # CORRECTED: RV agrégée (RMS volatility)
+        y_rv_agg[idx] = float(np.sqrt(np.mean(fut_rv ** 2)))
+
+        # CORRECTED: Direction binaire stricte (suppression classe FLAT)
         cum = float(np.sum(fut_ret))
-        if cum > 1e-4:
-            y_dir[idx] = 2
-        elif cum < -1e-4:
-            y_dir[idx] = 0
-        else:
-            y_dir[idx] = 1
+        y_dir[idx] = 1 if cum >= 0.0 else 0  # UP=1, DOWN=0
 
         idx += 1
 
-    return Xw, y_ret_h, y_dir, y_rv_h
+    return Xw, y_ret_h, y_dir, y_rv_agg  # Note: y_rv_agg is now 1D
 
 
 def tf_dataset_from_windows(
@@ -450,18 +447,18 @@ class TinyRecursiveMarketModel(tf.keras.Model):
             tf.keras.layers.Dense(cfg.horizon),
         ])
 
-        # rv head (régression positive)
+        # rv head (régression scalaire agrégée)
         self.rv_head = tf.keras.Sequential([
             tf.keras.layers.Dense(cfg.d_model, activation="gelu"),
-            tf.keras.layers.Dense(cfg.horizon),
+            tf.keras.layers.Dense(1),  # CHANGED: Scalar output
             tf.keras.layers.Activation("softplus"),
         ])
 
-        # dir head (classification)
+        # dir head (classification binaire)
         self.dir_head = tf.keras.Sequential([
             tf.keras.layers.Dense(cfg.d_model, activation="gelu"),
             tf.keras.layers.Dropout(cfg.dropout),
-            tf.keras.layers.Dense(3),
+            tf.keras.layers.Dense(2),  # CHANGED: Binary (2 classes)
             tf.keras.layers.Activation("softmax", dtype="float32"),  # force float32
         ])
 
@@ -483,11 +480,12 @@ class TinyRecursiveMarketModel(tf.keras.Model):
         shared = self.head_shared(pooled, training=training)
 
         y_ret = self.ret_head(shared, training=training)     # [B, H]
-        y_rv = self.rv_head(shared, training=training)       # [B, H]
-        y_dir = self.dir_head(shared, training=training)     # [B, 3]
+        y_rv = self.rv_head(shared, training=training)       # [B, 1]
+        y_dir = self.dir_head(shared, training=training)     # [B, 2]
 
         # ret en float32 pour stabilité loss
         y_ret = tf.cast(y_ret, tf.float32)
+        y_rv = tf.squeeze(y_rv, axis=-1)  # CHANGED: [B, 1] -> [B]
         y_rv = tf.cast(y_rv, tf.float32)
 
         return {"ret": y_ret, "dir": y_dir, "rv": y_rv}
@@ -532,10 +530,12 @@ def huber_loss(y_true, y_pred, delta=1.0):
     return tf.keras.losses.Huber(delta=delta)(y_true, y_pred)
 
 def rv_loss(y_true, y_pred):
-    # log-space mse pour stabiliser la volatilité
-    y_true = tf.maximum(y_true, 1e-8)
-    y_pred = tf.maximum(y_pred, 1e-8)
-    return tf.reduce_mean(tf.square(tf.math.log(y_pred) - tf.math.log(y_true)))
+    """
+    CORRECTED: Huber loss avec clipping pour stabilité
+    """
+    y_true = tf.clip_by_value(y_true, 1e-6, 1.0)
+    y_pred = tf.clip_by_value(y_pred, 1e-6, 1.0)
+    return tf.keras.losses.Huber(delta=0.01)(y_true, y_pred)
 
 def directional_accuracy(y_true_dir, y_pred_probs):
     y_pred = tf.argmax(y_pred_probs, axis=-1, output_type=tf.int32)
@@ -583,18 +583,18 @@ def train_trm(
     model = TinyRecursiveMarketModel(cfg, feature_dim=Xw_train.shape[-1])
     opt = make_optimizer(cfg)
 
-    # losses pondérées
+    # losses pondérées (CORRECTED: Binary classification avec labels sparse)
     losses = {
         "ret": lambda yt, yp: huber_loss(yt, yp, delta=1.0),
-        "dir": tf.keras.losses.SparseCategoricalCrossentropy(),
+        "dir": tf.keras.losses.SparseCategoricalCrossentropy(),  # Sparse pour labels entiers 0/1
         "rv": rv_loss,
     }
     loss_weights = {"ret": cfg.w_ret, "dir": cfg.w_dir, "rv": cfg.w_rv}
 
-    # metrics
+    # metrics (CORRECTED: Binary accuracy sparse)
     metrics = {
         "ret": [tf.keras.metrics.MeanAbsoluteError(name="mae")],
-        "dir": [tf.keras.metrics.SparseCategoricalAccuracy(name="acc")],
+        "dir": [tf.keras.metrics.SparseCategoricalAccuracy(name="acc")],  # Sparse pour labels entiers
         "rv": [tf.keras.metrics.MeanAbsoluteError(name="mae")],
     }
 

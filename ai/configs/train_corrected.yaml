@@ -1,0 +1,76 @@
+# Configuration Mathématiquement Corrigée
+# Direction: Binaire (UP/DOWN) - Suppression classe FLAT
+# RV: Agrégée scalaire (RMS)
+# Loss: Équilibrée et stable
+
+# =====================================
+# DATA CONFIGURATION
+# =====================================
+data:
+  bucket: "qbia"
+  base_prefix: "bourse/processed/market/interval=1m/quote=USDT/symbol=BTCUSDT"
+
+  # Years to use for training
+  years_train: [2017, 2018, 2019, 2020, 2021, 2022, 2023]
+
+  # Years to use for testing (final evaluation)
+  years_test: [2024]
+
+# =====================================
+# MODEL CONFIGURATION
+# =====================================
+model:
+  # Windowing
+  lookback: 256        # Number of timesteps to look back (256 minutes = ~4.3 hours)
+  horizon: 12          # Number of timesteps to predict ahead (12 minutes)
+  stride: 12           # Stride for sliding window (12 = less windows, less RAM)
+
+  # Architecture: Capacité suffisante restaurée
+  d_model: 128         # Hidden dimension (restored from 64)
+  n_heads: 4           # Number of attention heads (restored from 2)
+  d_ff: 256            # Feedforward hidden dimension (restored from 128)
+  dropout: 0.15        # Dropout rate (modéré)
+
+  # Recursive Memory Module
+  mem_dim: 128         # Memory dimension (restored from 64)
+  mem_update_iters: 2  # Number of recursive refinement iterations (restored from 1)
+
+# =====================================
+# TRAINING CONFIGURATION
+# =====================================
+training:
+  # Batch and data loading
+  batch_size: 128          # Batch size
+  shuffle_buffer: 10000    # Shuffle buffer size
+  prefetch: 2              # Number of batches to prefetch
+
+  # Optimizer: Configuration stable
+  lr: 0.0003               # Base learning rate (REDUCED to stable value)
+  weight_decay: 0.0001     # AdamW weight decay (REDUCED for better signal)
+  clip_norm: 1.0           # Gradient clipping norm (restored to 1.0)
+
+  # Training schedule
+  epochs: 20               # Number of epochs
+  steps_per_epoch: 500     # Steps per epoch
+  val_steps: 100           # Validation steps per epoch
+
+  # Reproducibility
+  seed: 1337
+
+# =====================================
+# LOSS WEIGHTS (CORRECTED)
+# =====================================
+loss_weights:
+  w_ret: 1.0    # Returns prediction weight (multi-horizon regression)
+  w_dir: 0.8    # Direction weight (REDUCED from 1.5 - binary classification)
+  w_rv: 0.3     # RV weight (REDUCED from 0.4 - scalar aggregated regression)
+
+# =====================================
+# OUTPUT CONFIGURATION
+# =====================================
+output:
+  base_dir: "training_output_corrected"
+  tensorboard_dir: "training_output_corrected/tensorboard"
+  checkpoints_dir: "training_output_corrected/checkpoints"
+  metrics_dir: "training_output_corrected/metrics"
+  logs_dir: "training_output_corrected/logs"
