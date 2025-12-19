@@ -31,7 +31,9 @@ from ai.s3_parquet_loader import S3ParquetLoader
 from ai.data_pipeline import (
     fit_scaler_streaming,
     save_windows_to_disk,
-    build_tf_dataset_from_disk,
+)
+from ai.data_pipeline_memory_efficient import (
+    build_tf_dataset_from_disk_efficient,
 )
 from ai.training_callbacks import build_callbacks
 from ai.advanced_metrics import compute_all_metrics, print_metrics_summary
@@ -215,10 +217,10 @@ def main(config_path: str):
     # 5. BUILD TF.DATA DATASETS
     # ========================================
     logger.info("\n" + "="*80)
-    logger.info("PHASE 4/4: BUILDING TENSORFLOW DATASETS")
+    logger.info("PHASE 4/4: BUILDING TENSORFLOW DATASETS (MEMORY EFFICIENT)")
     logger.info("="*80)
 
-    ds_train = build_tf_dataset_from_disk(
+    ds_train = build_tf_dataset_from_disk_efficient(
         windows_dir=windows_train_dir,
         years=years_train,
         batch_size=trm_config.batch_size,
@@ -228,7 +230,7 @@ def main(config_path: str):
         verbose=True
     )
 
-    ds_val = build_tf_dataset_from_disk(
+    ds_val = build_tf_dataset_from_disk_efficient(
         windows_dir=windows_test_dir,
         years=years_test,
         batch_size=trm_config.batch_size,

@@ -19,6 +19,16 @@ import tensorflow as tf
 import psutil
 
 from ai.advanced_metrics import compute_all_metrics, print_metrics_summary
+from ai.evaluation_suite import (
+    generate_evaluation_report,
+    print_evaluation_summary,
+    save_evaluation_report
+)
+from ai.training_callbacks_extended import (
+    DetailedEvaluationCallback,
+    EpochProgressLogger,
+    BestModelTracker
+)
 
 
 class TradingMetricsCallback(tf.keras.callbacks.Callback):
@@ -372,8 +382,30 @@ def build_callbacks(
     for d in [checkpoint_dir, tensorboard_dir, metrics_dir, logs_dir, analysis_dir]:
         os.makedirs(d, exist_ok=True)
 
+    # Create evaluation output directory
+    evaluation_dir = os.path.join(output_base_dir, "evaluation")
+    os.makedirs(evaluation_dir, exist_ok=True)
+
     callbacks = [
-        # 1. Trading Metrics Callback
+        # 1. Epoch Progress Logger (shows detailed epoch info)
+        EpochProgressLogger(
+            total_epochs=config.epochs
+        ),
+
+        # 2. Detailed Evaluation Callback (comprehensive prediction analysis)
+        DetailedEvaluationCallback(
+            validation_data=validation_data,
+            output_dir=evaluation_dir,
+            evaluate_every=1,  # Evaluate every epoch
+            verbose=True
+        ),
+
+        # 3. Best Model Tracker (tracks best metrics achieved)
+        BestModelTracker(
+            metrics_to_track=['val_loss', 'val_dir_acc', 'val_ret_mae']
+        ),
+
+        # 4. Trading Metrics Callback (30+ KPIs)
         TradingMetricsCallback(
             validation_data=validation_data,
             log_dir=tensorboard_dir,
@@ -381,13 +413,13 @@ def build_callbacks(
             verbose=True
         ),
 
-        # 2. Memory Monitor
+        # 5. Memory Monitor
         MemoryMonitorCallback(
             log_dir=tensorboard_dir,
             verbose=True
         ),
 
-        # 3. Prediction Analysis
+        # 6. Prediction Analysis (visualizations)
         PredictionAnalysisCallback(
             validation_data=validation_data,
             output_dir=analysis_dir,
@@ -395,7 +427,7 @@ def build_callbacks(
             save_every=5
         ),
 
-        # 4. Model Checkpoint (val_loss)
+        # 7. Model Checkpoint (val_loss)
         tf.keras.callbacks.ModelCheckpoint(
             filepath=os.path.join(checkpoint_dir, "best_val_loss.keras"),
             monitor='val_loss',
@@ -404,7 +436,7 @@ def build_callbacks(
             verbose=1
         ),
 
-        # 5. Model Checkpoint (epoch)
+        # 8. Model Checkpoint (epoch)
         tf.keras.callbacks.ModelCheckpoint(
             filepath=os.path.join(checkpoint_dir, "epoch_{epoch:03d}.keras"),
             save_freq='epoch',
@@ -412,7 +444,7 @@ def build_callbacks(
             verbose=0
         ),
 
-        # 6. Early Stopping
+        # 9. Early Stopping
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
             patience=5,
@@ -420,15 +452,15 @@ def build_callbacks(
             verbose=1
         ),
 
-        # 7. Terminate on NaN
+        # 10. Terminate on NaN
         tf.keras.callbacks.TerminateOnNaN(),
 
-        # 8. Detailed CSV Logger
+        # 11. Detailed CSV Logger
         DetailedCSVLogger(
             filename=os.path.join(metrics_dir, "training_log.csv")
         ),
 
-        # 9. TensorBoard (standard)
+        # 12. TensorBoard (standard)
         tf.keras.callbacks.TensorBoard(
             log_dir=tensorboard_dir,
             histogram_freq=0,
