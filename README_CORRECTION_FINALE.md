@@ -158,18 +158,26 @@ En-dessous = le modèle n'apprend pas de signal.
    - ✅ Bug dimension costs corrigé
    - ✅ Logique trading binaire (0=DOWN, 1=UP)
 
-5. **[ai/configs/train_corrected.yaml](ai/configs/train_corrected.yaml)**
+5. **[ai/models/model.py](ai/models/model.py)** ⭐ ARCHITECTURE HYBRIDE CNN-TRANSFORMER
+   - ✅ Module TemporalCNN multi-scale (kernels 3, 5, 9)
+   - ✅ Fusion Transformer + CNN pour signal directionnel
+   - ✅ Causalité stricte (pas de leakage)
+   - ✅ Objectif: dir_acc 0.51 → 0.55-0.58
+
+6. **[ai/configs/train_corrected.yaml](ai/configs/train_corrected.yaml)**
    - ✅ Loss weights: w_dir=0.8, w_rv=0.3
    - ✅ Hyperparams: lr=0.0003, d_model=128
 
 ### Scripts & Documentation
 
-6. **[ai/verify_correction.py](ai/verify_correction.py)** - Vérifie toutes les corrections
-7. **[cleanup_server_windows.sh](cleanup_server_windows.sh)** - Nettoyage automatique
-8. **[SOLUTION_FINALE.md](SOLUTION_FINALE.md)** - Documentation complète
-9. **[FINAL_FIX_SUMMARY.md](FINAL_FIX_SUMMARY.md)** - Résumé de la correction
-10. **[CORRECTIONS_APPLIQUEES.md](CORRECTIONS_APPLIQUEES.md)** - Détails mathématiques
-11. **[EVALUATION_SUITE_FIX.md](EVALUATION_SUITE_FIX.md)** - Fix evaluation callback
+7. **[ai/verify_correction.py](ai/verify_correction.py)** - Vérifie toutes les corrections
+8. **[ai/test_cnn_hybrid.py](ai/test_cnn_hybrid.py)** - Test architecture CNN-Transformer
+9. **[cleanup_server_windows.sh](cleanup_server_windows.sh)** - Nettoyage automatique
+10. **[SOLUTION_FINALE.md](SOLUTION_FINALE.md)** - Documentation complète
+11. **[FINAL_FIX_SUMMARY.md](FINAL_FIX_SUMMARY.md)** - Résumé de la correction
+12. **[CORRECTIONS_APPLIQUEES.md](CORRECTIONS_APPLIQUEES.md)** - Détails mathématiques
+13. **[EVALUATION_SUITE_FIX.md](EVALUATION_SUITE_FIX.md)** - Fix evaluation callback
+14. **[CNN_HYBRID_ARCHITECTURE.md](CNN_HYBRID_ARCHITECTURE.md)** - Architecture hybride CNN-Transformer
 
 ---
 

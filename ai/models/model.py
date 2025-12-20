@@ -408,6 +408,136 @@ class TinyRecursiveMemory(tf.keras.layers.Layer):
         return seq, mem
 
 
+# =========================
+# TEMPORAL CNN MODULE
+# =========================
+class TemporalCNN(tf.keras.layers.Layer):
+    """
+    Multi-scale Temporal CNN for local pattern extraction
+
+    Architecture:
+        Input [B, T, F] → 3 parallel branches (kernel 3, 5, 9)
+        → Each branch: Conv1D → LayerNorm → GELU → Dropout
+        → Concatenate branches → GlobalPooling → Projection
+        → Output [B, d_out]
+
+    Mathematical properties:
+        - Causal convolutions (no future leakage)
+        - Multi-scale receptive fields: 3-9 timesteps
+        - Parameter efficient: ~10-20K params
+    """
+
+    def __init__(
+        self,
+        d_out: int = 128,
+        kernels: list = None,
+        n_filters: int = 64,
+        dropout: float = 0.15,
+        name: str = "temporal_cnn",
+        **kwargs
+    ):
+        super().__init__(name=name, **kwargs)
+
+        if kernels is None:
+            kernels = [3, 5, 9]
+
+        self.d_out = d_out
+        self.kernels = kernels
+        self.n_filters = n_filters
+        self.dropout_rate = dropout
+
+        # Multi-scale convolutional branches
+        self.conv_branches = []
+        for k in kernels:
+            branch = tf.keras.Sequential([
+                # Causal Conv1D: only sees past
+                tf.keras.layers.Conv1D(
+                    filters=n_filters,
+                    kernel_size=k,
+                    padding='causal',
+                    activation=None,
+                    kernel_initializer='glorot_uniform',
+                    name=f'conv1d_k{k}'
+                ),
+                # Stabilization
+                tf.keras.layers.LayerNormalization(epsilon=1e-6),
+                tf.keras.layers.Activation('gelu'),
+                tf.keras.layers.Dropout(dropout),
+            ], name=f'branch_k{k}')
+            self.conv_branches.append(branch)
+
+        # Aggregation strategy: use BOTH pooling types
+        # - GlobalMax captures salient local events (spikes, bursts)
+        # - GlobalAverage captures sustained patterns (trends)
+        self.global_max_pool = tf.keras.layers.GlobalMaxPooling1D()
+        self.global_avg_pool = tf.keras.layers.GlobalAveragePooling1D()
+
+        # Fusion and projection
+        # Input: concatenated [max_pool, avg_pool] from all branches
+        # → Total dim: len(kernels) * n_filters * 2
+        fusion_dim = len(kernels) * n_filters * 2
+
+        self.fusion = tf.keras.Sequential([
+            tf.keras.layers.Dense(d_out * 2, activation='gelu'),
+            tf.keras.layers.LayerNormalization(epsilon=1e-6),
+            tf.keras.layers.Dropout(dropout),
+            tf.keras.layers.Dense(d_out),
+        ], name='cnn_fusion')
+
+    def call(self, x, training=False):
+        """
+        Args:
+            x: [B, T, F] - Input features (T=lookback, F=feature_dim)
+            training: bool
+
+        Returns:
+            cnn_embedding: [B, d_out] - Aggregated CNN features
+
+        Shapes:
+            Input:  [B, 256, 44]
+            Conv3:  [B, 256, 64]  (causal padding preserves length)
+            Conv5:  [B, 256, 64]
+            Conv9:  [B, 256, 64]
+            After pooling (each branch): [B, 64]
+            Max+Avg concatenated (each): [B, 128]
+            All branches concat: [B, 384]  (3 kernels × 128)
+            After fusion: [B, 128]
+        """
+        # Apply each convolutional branch
+        branch_outputs = []
+        for branch in self.conv_branches:
+            # Conv1D: [B, T, F] → [B, T, n_filters]
+            conv_out = branch(x, training=training)
+
+            # Dual pooling strategy
+            max_pool = self.global_max_pool(conv_out)  # [B, n_filters]
+            avg_pool = self.global_avg_pool(conv_out)  # [B, n_filters]
+
+            # Concatenate both pooling strategies
+            pooled = tf.concat([max_pool, avg_pool], axis=-1)  # [B, n_filters*2]
+            branch_outputs.append(pooled)
+
+        # Concatenate all branches
+        # [B, len(kernels) * n_filters * 2]
+        concat_features = tf.concat(branch_outputs, axis=-1)
+
+        # Project to final embedding dimension
+        cnn_embedding = self.fusion(concat_features, training=training)
+        # [B, d_out]
+
+        return cnn_embedding
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'd_out': self.d_out,
+            'kernels': self.kernels,
+            'n_filters': self.n_filters,
+            'dropout': self.dropout_rate,
+        })
+        return config
+
+
 class TinyRecursiveMarketModel(tf.keras.Model):
     """
     Entrée: [B, L, F]
@@ -431,8 +561,28 @@ class TinyRecursiveMarketModel(tf.keras.Model):
         # module récursif
         self.mem = TinyRecursiveMemory(cfg.d_model, cfg.mem_dim, cfg.mem_update_iters, cfg.dropout)
 
-        # pooling multi-échelles
-        self.pool_ln = tf.keras.layers.LayerNormalization(epsilon=1e-5)
+        # ========================================
+        # TEMPORAL CNN (NEW!)
+        # ========================================
+        self.temporal_cnn = TemporalCNN(
+            d_out=cfg.d_model,
+            kernels=[3, 5, 9],
+            n_filters=64,
+            dropout=cfg.dropout,
+            name="temporal_cnn"
+        )
+
+        # ========================================
+        # FUSION LAYER (MODIFIED)
+        # ========================================
+        # Concatenate [transformer_mean, transformer_last, mem, cnn_embedding]
+        # Dimension: d_model + d_model + mem_dim + d_model
+        self.fusion_norm = tf.keras.layers.LayerNormalization(epsilon=1e-5)
+        self.fusion_proj = tf.keras.layers.Dense(
+            cfg.d_model,
+            activation='gelu',
+            name='fusion_projection'
+        )
 
         # heads
         self.head_shared = tf.keras.Sequential([
@@ -463,7 +613,26 @@ class TinyRecursiveMarketModel(tf.keras.Model):
         ])
 
     def call(self, x, training=False):
+        """
+        MODIFIED FORWARD PASS WITH CNN INTEGRATION
+
+        Args:
+            x: [B, lookback, F] - Input features
+            training: bool
+
+        Returns:
+            dict with keys 'ret', 'dir', 'rv'
+
+        Tensor flow:
+            1. Transformer path: x → projection → transformer → pooling
+            2. CNN path (NEW): x → temporal_cnn → embedding
+            3. Fusion: [transformer_mean, transformer_last, mem, cnn_emb] → shared
+            4. Heads: shared → ret, dir, rv
+        """
         # x: [B, L, F]
+        # ========================================
+        # 1. TRANSFORMER PATH (global dependencies)
+        # ========================================
         h = self.in_proj(x)
         h = self.in_ln(h)
         h = self.in_drop(h, training=training)
@@ -472,12 +641,27 @@ class TinyRecursiveMarketModel(tf.keras.Model):
         h, mem = self.mem(h, training=training)
         h = self.block2(h, training=training)
 
-        # pooling: mean + last token
-        mean = tf.reduce_mean(h, axis=1)
-        last = h[:, -1, :]
-        pooled = self.pool_ln(tf.concat([mean, last, mem], axis=-1))
+        # Pooling: mean + last token
+        mean = tf.reduce_mean(h, axis=1)  # [B, d_model]
+        last = h[:, -1, :]                 # [B, d_model]
 
-        shared = self.head_shared(pooled, training=training)
+        # ========================================
+        # 2. CNN PATH (local patterns) - NEW!
+        # ========================================
+        # CRITICAL: Apply CNN to ORIGINAL features x, not to h
+        # Rationale: CNN needs raw temporal structure
+        cnn_embedding = self.temporal_cnn(x, training=training)  # [B, d_model]
+
+        # ========================================
+        # 3. FUSION (MODIFIED)
+        # ========================================
+        # Concatenate all representations
+        fused = tf.concat([mean, last, mem, cnn_embedding], axis=-1)
+        # [B, d_model + d_model + mem_dim + d_model]
+
+        # Normalize and project to common dimension
+        fused = self.fusion_norm(fused)
+        shared = self.fusion_proj(fused)  # [B, d_model]
 
         y_ret = self.ret_head(shared, training=training)     # [B, H]
         y_rv = self.rv_head(shared, training=training)       # [B, 1]
