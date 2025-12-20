@@ -151,20 +151,25 @@ En-dessous = le modèle n'apprend pas de signal.
    - ✅ WindowsData.y_rv: `[N,H]` → `[N]`
    - ✅ create_windows_for_year: utilise `y_rv_agg`
 
-3. **[ai/data_pipeline_memory_efficient.py](ai/data_pipeline_memory_efficient.py)** ⭐ DERNIÈRE CORRECTION
+3. **[ai/data_pipeline_memory_efficient.py](ai/data_pipeline_memory_efficient.py)** ⭐ CORRECTION CRITIQUE
    - ✅ TensorSpec RV: `(horizon,)` → `()` (scalaire)
 
-4. **[ai/configs/train_corrected.yaml](ai/configs/train_corrected.yaml)**
+4. **[ai/evaluation_suite.py](ai/evaluation_suite.py)** ⭐ CORRECTION RÉCENTE
+   - ✅ Bug dimension costs corrigé
+   - ✅ Logique trading binaire (0=DOWN, 1=UP)
+
+5. **[ai/configs/train_corrected.yaml](ai/configs/train_corrected.yaml)**
    - ✅ Loss weights: w_dir=0.8, w_rv=0.3
    - ✅ Hyperparams: lr=0.0003, d_model=128
 
 ### Scripts & Documentation
 
-5. **[ai/verify_correction.py](ai/verify_correction.py)** - Vérifie toutes les corrections
-6. **[cleanup_server_windows.sh](cleanup_server_windows.sh)** - Nettoyage automatique
-7. **[SOLUTION_FINALE.md](SOLUTION_FINALE.md)** - Documentation complète
-8. **[FINAL_FIX_SUMMARY.md](FINAL_FIX_SUMMARY.md)** - Résumé de la correction
-9. **[CORRECTIONS_APPLIQUEES.md](CORRECTIONS_APPLIQUEES.md)** - Détails mathématiques
+6. **[ai/verify_correction.py](ai/verify_correction.py)** - Vérifie toutes les corrections
+7. **[cleanup_server_windows.sh](cleanup_server_windows.sh)** - Nettoyage automatique
+8. **[SOLUTION_FINALE.md](SOLUTION_FINALE.md)** - Documentation complète
+9. **[FINAL_FIX_SUMMARY.md](FINAL_FIX_SUMMARY.md)** - Résumé de la correction
+10. **[CORRECTIONS_APPLIQUEES.md](CORRECTIONS_APPLIQUEES.md)** - Détails mathématiques
+11. **[EVALUATION_SUITE_FIX.md](EVALUATION_SUITE_FIX.md)** - Fix evaluation callback
 
 ---
 

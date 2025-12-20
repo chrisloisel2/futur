@@ -93,9 +93,10 @@ def compute_profit_simulation(
     else:
         pred_dir_label = y_pred_dir
 
-    # Trading strategy: long if UP (2), short if DOWN (0), neutral if FLAT (1)
-    positions = np.where(pred_dir_label == 2, 1.0,  # Long
-                        np.where(pred_dir_label == 0, -1.0, 0.0))  # Short or Neutral
+    # Trading strategy: long if UP (1), short if DOWN (0)
+    # CORRECTED: Binary classification (0=DOWN, 1=UP)
+    positions = np.where(pred_dir_label == 1, 1.0,   # Long if UP
+                        np.where(pred_dir_label == 0, -1.0, 0.0))  # Short if DOWN
 
     # Calculate returns with transaction costs
     strategy_returns = positions * true_returns
@@ -103,7 +104,8 @@ def compute_profit_simulation(
     # Transaction costs on position changes
     position_changes = np.diff(np.concatenate([[0], positions]))
     costs = np.abs(position_changes) * transaction_cost
-    strategy_returns_net = strategy_returns - np.concatenate([[0], costs])
+    # costs already has same length as strategy_returns (N)
+    strategy_returns_net = strategy_returns - costs
 
     # Cumulative returns
     cumulative_returns = np.cumprod(1 + strategy_returns_net)
