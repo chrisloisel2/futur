@@ -112,7 +112,7 @@ STORAGE_PATH = 'data/raw_articles'
 DATABASE_URL = 'sqlite:///data/scraped_articles.db'
 
 # MongoDB Configuration (for VPN storage)
-MONGODB_URI = 'mongodb://localhost:27017/'
+MONGODB_URI = 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//'
 MONGODB_DATABASE = 'scrapers_db'
 MONGODB_VPN_COLLECTION = 'vpn_proxies'
 
@@ -170,6 +170,24 @@ API_KEYS = {
     'newsapi': None,  # Set via environment
     'cryptocompare': None,
 }
+
+# ============================================================================
+# BLOCKCHAIN WHALE TRACKING SETTINGS (FREE SYSTEM)
+# ============================================================================
+
+# MongoDB pour transactions whale
+BLOCKCHAIN_MONGODB_URI = 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/'
+BLOCKCHAIN_MONGODB_DATABASE = 'whale_data'
+
+# Seuil de valeur minimale pour qualifier une transaction de "whale"
+WHALE_MIN_USD_VALUE = 100000  # $100,000 USD
+
+# API Keys pour blockchains (toutes gratuites)
+ETHERSCAN_API_KEY = None  # Gratuit: https://etherscan.io/apis
+SOLSCAN_API_TOKEN = None  # Optionnel: https://docs.solscan.io/
+
+# Blockchains activées
+ENABLED_BLOCKCHAINS = ['bitcoin', 'ethereum', 'solana']
 
 # Metadata extraction config
 EXTRACT_SENTIMENT = True

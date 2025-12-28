@@ -19,7 +19,7 @@ from pymongo.operations import ReplaceOne
 # Connection settings (override with env vars if needed)
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
-    "mongodb://localhost:27017/",
+    "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//",
 )
 MONGODB_DB = os.getenv("MONGODB_DB", "trader")
 HISTORICAL_COLLECTION = os.getenv("MONGODB_HIST_COLLECTION", "historical_ohlcv")

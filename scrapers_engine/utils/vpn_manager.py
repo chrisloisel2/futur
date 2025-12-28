@@ -25,7 +25,7 @@ class VPNManager:
 
     def __init__(
         self,
-        mongo_uri='mongodb://localhost:27017/',
+        mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
         mongo_db='scrapers_db',
         collection_name='vpn_proxies'
     ):
@@ -388,7 +388,7 @@ _vpn_manager = None
 
 
 def get_vpn_manager(
-    mongo_uri='mongodb://localhost:27017/',
+    mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
     mongo_db='scrapers_db',
     collection_name='vpn_proxies'
 ) -> VPNManager:

@@ -44,7 +44,7 @@ class VPNMongoDBPipeline:
     def from_crawler(cls, crawler):
         """Initialize from crawler settings"""
         return cls(
-            mongo_uri=crawler.settings.get('MONGODB_URI', 'mongodb://localhost:27017/'),
+            mongo_uri=crawler.settings.get('MONGODB_URI', 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//'),
             mongo_db=crawler.settings.get('MONGODB_DATABASE', 'scrapers_db'),
             collection_name=crawler.settings.get('MONGODB_VPN_COLLECTION', 'vpn_proxies'),
         )
@@ -274,7 +274,7 @@ class VPNCleanupPipeline:
     def from_crawler(cls, crawler):
         """Initialize from crawler settings"""
         return cls(
-            mongo_uri=crawler.settings.get('MONGODB_URI', 'mongodb://localhost:27017/'),
+            mongo_uri=crawler.settings.get('MONGODB_URI', 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//'),
             mongo_db=crawler.settings.get('MONGODB_DATABASE', 'scrapers_db'),
             collection_name=crawler.settings.get('MONGODB_VPN_COLLECTION', 'vpn_proxies'),
         )

@@ -1,0 +1,67 @@
+# 🐋 WHALE ALERT - COMMANDES RAPIDES
+
+## INSTALLATION
+cd /Users/christopher/Desktop/futur/scrapers_engine
+pip install -r requirements.txt
+
+## TESTS
+python test_whale_alert.py
+
+## RÉCUPÉRATION DONNÉES
+
+# Avec variable d'environnement
+export WHALE_ALERT_API_KEY="your_key_here"
+python fetch_whale_data.py
+
+# Avec paramètre
+python fetch_whale_data.py --api-key "your_key_here"
+
+# Période personnalisée
+python fetch_whale_data.py --api-key "your_key" --start-date 2024-01-01 --end-date 2024-12-31
+
+# Ethereum au lieu de Bitcoin
+python fetch_whale_data.py --api-key "your_key" --currency eth
+
+# Valeur minimale personnalisée (1M USD)
+python fetch_whale_data.py --api-key "your_key" --min-value 1000000
+
+# Test sans exécution
+python fetch_whale_data.py --api-key "your_key" --dry-run
+
+## VISUALISATION
+python view_whale_data.py
+
+## SCRAPY DIRECT
+scrapy crawl whale_alert_api -a api_key=YOUR_KEY -a start_date=2019-01-01
+
+## MONGODB
+
+# Connexion
+mongosh "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/"
+
+# Utiliser la base
+use whale_data
+
+# Compter les transactions
+db.whale_transactions.countDocuments()
+
+# Dernières transactions
+db.whale_transactions.find({symbol: 'BTC'}).sort({timestamp: -1}).limit(10)
+
+# Top transactions
+db.whale_transactions.find().sort({amount_usd: -1}).limit(10)
+
+# Sorties d'exchanges (bullish)
+db.whale_transactions.find({transaction_type: 'exchange_to_wallet'}).sort({timestamp: -1})
+
+# Entrées vers exchanges (bearish)
+db.whale_transactions.find({transaction_type: 'wallet_to_exchange'}).sort({timestamp: -1})
+
+## OBTENIR CLÉ API
+https://whale-alert.io/
+
+## DOCUMENTATION
+- scrapers_engine/WHALE_INDEX.md - Navigation
+- scrapers_engine/QUICK_START_WHALE.md - Démarrage rapide
+- scrapers_engine/WHALE_ALERT_README.md - Vue d'ensemble
+- scrapers_engine/WHALE_ALERT_GUIDE.md - Guide complet

@@ -1,0 +1,13 @@
+checks:
+  required_fields: [event_time, recv_time, event_time_aligned, symbol, venue, source, event_type]
+  max_skew_ms: 2000
+  staleness_ms: 30000
+  outlier_z: 6.0
+  outlier_window: 50
+  max_spread_bps: 200.0
+  min_depth: 1
+  toxic_spread_bps: 400.0
+  cross_source_bps: 50.0
+  halt_no_trade_s: 300
+  seq_tolerance: 1
+  watermark_ms: 5000

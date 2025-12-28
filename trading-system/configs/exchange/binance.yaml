@@ -1,0 +1,11 @@
+symbol_map:
+  BTCUSDT: BTCUSDT
+channels:
+  - trades
+  - book
+  - ohlcv
+rate_limits:
+  weight_per_min: 1200
+reconnect:
+  backoff_s: 5
+  max_backoff_s: 60

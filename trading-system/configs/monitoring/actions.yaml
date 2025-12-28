@@ -1,0 +1,3 @@
+actions:
+  freeze_ttl_seconds: 900
+  rate_limit_seconds: 300

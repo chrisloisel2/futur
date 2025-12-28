@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "OrdersPlanSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "orders_json", "type": "string"},
+    {"name": "stops_json", "type": "string"},
+    {"name": "time_stops_json", "type": "string"},
+    {"name": "risk_state_ref", "type": "string"},
+    {"name": "run_id", "type": "string"}
+  ]
+}

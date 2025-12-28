@@ -22,7 +22,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # Check if MongoDB is running
-if python3 -c "from pymongo import MongoClient; MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=2000).admin.command('ping')" 2>/dev/null; then
+if python3 -c "from pymongo import MongoClient; MongoClient('mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//', serverSelectionTimeoutMS=2000).admin.command('ping')" 2>/dev/null; then
     echo -e "${GREEN}✓${NC} MongoDB is running"
 else
     echo -e "${RED}✗${NC} MongoDB is NOT running"
@@ -63,7 +63,7 @@ if [ $ERRORS -eq 0 ]; then
 from pymongo import MongoClient
 
 try:
-    client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=2000)
+    client = MongoClient('mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//', serverSelectionTimeoutMS=2000)
     db = client['scrapers_db']
     collection = db['vpn_proxies']
 

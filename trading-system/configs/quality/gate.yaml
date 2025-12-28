@@ -1,0 +1,34 @@
+gate:
+  mode: batch
+  rolling_window_s: 300
+  watermark_ms: 5000
+  reject_policy: hard
+  quarantine_path: s3://my-bucket/data/quarantine
+  output_clean_path: s3://my-bucket/data/clean
+  output_flags_path: s3://my-bucket/data/clean/quality_flags
+  check_version: 1
+  mongo_buffer:
+    uri: mongodb://localhost:27017
+    db: market
+    collection: buffer_quality_flags
+    ttl_seconds: 3600
+checks:
+  required_fields: [event_time, recv_time, event_time_aligned, symbol, venue, source, event_type]
+  max_skew_ms: 2000
+  staleness_ms: 30000
+  outlier_z: 6.0
+  outlier_window: 50
+  max_spread_bps: 200.0
+  min_depth: 1
+  toxic_spread_bps: 400.0
+  cross_source_bps: 50.0
+  halt_no_trade_s: 300
+  seq_tolerance: 1
+cross_source:
+  spot_ref: binance
+  futures_ref: bybit
+  index_ref: okx
+  max_premium_bps: 50.0
+  max_basis_bps: 75.0
+  max_diff_abs: 5.0
+  fallback: allow_missing

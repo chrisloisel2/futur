@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "PerformanceReport",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "run_id", "type": "string"},
+    {"name": "perf_json", "type": "string"}
+  ]
+}

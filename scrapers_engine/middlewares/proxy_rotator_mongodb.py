@@ -35,7 +35,7 @@ class MongoDBProxyRotatorMiddleware:
     def __init__(
         self,
         proxy_enabled=True,
-        mongo_uri='mongodb://localhost:27017/',
+        mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
         mongo_db='scrapers_db',
         collection_name='vpn_proxies',
         max_proxies=200,
@@ -73,7 +73,7 @@ class MongoDBProxyRotatorMiddleware:
             raise NotConfigured('Proxy rotation is disabled')
 
         # MongoDB settings
-        mongo_uri = crawler.settings.get('MONGODB_URI', 'mongodb://localhost:27017/')
+        mongo_uri = crawler.settings.get('MONGODB_URI', 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//')
         mongo_db = crawler.settings.get('MONGODB_DATABASE', 'scrapers_db')
         collection_name = crawler.settings.get('MONGODB_VPN_COLLECTION', 'vpn_proxies')
 

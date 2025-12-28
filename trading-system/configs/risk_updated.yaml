@@ -1,0 +1,45 @@
+# Updated Risk Configuration with FIXED defaults
+# Date: 2024-12-28
+# Changes: Conservative killswitch, realistic Kelly, proper CVaR
+
+risk:
+  controller:
+    var_method: "parametric"  # or "historical"
+    alpha: 0.95
+
+  # FIXED: Conservative killswitch defaults
+  killswitch:
+    max_drawdown_pct: 10.0              # 10% max drawdown (was 100%!)
+    daily_loss_limit_pct: 2.0           # 2% daily loss (was infinite)
+    hourly_loss_limit_pct: 1.0          # 1% hourly loss (new)
+    max_consecutive_losses: 3           # 3 consecutive losses (new)
+
+  # FIXED: Conservative Kelly sizing
+  kelly:
+    kelly_cap: 0.10                     # Max 10% per trade (was 50%)
+    shrinkage: 0.25                     # Heavy shrinkage (was 50%)
+
+  # Scenario testing
+  scenarios:
+    flash_crash:
+      enabled: true
+      price_drop_pct: 20.0
+      duration_seconds: 300
+    exchange_outage:
+      enabled: true
+      duration_seconds: 1800
+    low_liquidity:
+      enabled: true
+      depth_multiplier: 0.1
+
+  # Cluster exposure limits
+  clusters:
+    BTC:
+      max_exposure_usd: 50_000
+      symbols: ["BTCUSDT", "BTCUSD"]
+    ETH:
+      max_exposure_usd: 30_000
+      symbols: ["ETHUSDT", "ETHUSD"]
+    ALTS:
+      max_exposure_usd: 20_000
+      symbols: ["*"]  # Everything else

@@ -18,7 +18,7 @@ import pandas as pd
 from pymongo import MongoClient
 
 # Paramètres par défaut (surcharge avec --uri/--db)
-DEFAULT_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+DEFAULT_URI = os.getenv("MONGO_URI", "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//")
 DEFAULT_DB = os.getenv("MONGO_DB", "trader")
 COLLECTION = "historical_ohlcv"
 

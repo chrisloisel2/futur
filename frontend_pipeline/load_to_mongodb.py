@@ -27,7 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//")
 DATABASE_NAME = os.getenv("MONGO_DB", "trader")
 
 # Chemins des datasets

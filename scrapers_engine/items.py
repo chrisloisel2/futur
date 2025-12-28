@@ -98,6 +98,29 @@ class TransactionAlertItem(scrapy.Item):
     source = scrapy.Field()
     url = scrapy.Field()
 
+    # Extended fields for blockchain tracking
+    block_number = scrapy.Field()  # Block height
+    fees = scrapy.Field()  # Transaction fees in native currency
+    fees_usd = scrapy.Field()  # Transaction fees in USD
+
+    # Ethereum specific
+    gas_price = scrapy.Field()  # Gas price in gwei
+    gas_used = scrapy.Field()  # Gas used
+    tx_type = scrapy.Field()  # transfer, contract_call, etc.
+
+    # Token info (for ERC20/SPL tokens)
+    token_address = scrapy.Field()  # Contract address if token transfer
+    token_symbol = scrapy.Field()  # Token symbol if different from main symbol
+
+    # Labels from identification service
+    labels_from = scrapy.Field()  # List of labels for from_address
+    labels_to = scrapy.Field()  # List of labels for to_address
+    from_type = scrapy.Field()  # exchange, wallet, contract, unknown
+    to_type = scrapy.Field()  # exchange, wallet, contract, unknown
+
+    # Price tracking
+    price_usd = scrapy.Field()  # Price of asset at transaction time
+
 
 class ForumPostItem(scrapy.Item):
     """Forum discussion post"""

@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "AllocatorDecisionSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "book_weights", "type": "string"},
+    {"name": "book_caps_applied", "type": "string"},
+    {"name": "cluster_caps_applied", "type": "string"},
+    {"name": "dropped_targets", "type": "string"},
+    {"name": "reasons", "type": "string"}
+  ]
+}

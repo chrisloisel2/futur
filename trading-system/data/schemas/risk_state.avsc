@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "RiskStateSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "portfolio_var95_usd", "type": "double"},
+    {"name": "portfolio_cvar95_usd", "type": "double"},
+    {"name": "portfolio_leverage", "type": "double"},
+    {"name": "killswitch_active", "type": "boolean"},
+    {"name": "risk_off_mode", "type": "boolean"},
+    {"name": "book_risk_json", "type": "string"},
+    {"name": "scenario_results_json", "type": "string"},
+    {"name": "caps_applied_json", "type": "string"},
+    {"name": "actions_taken_json", "type": "string"},
+    {"name": "run_id", "type": "string"}
+  ]
+}
