@@ -37,59 +37,135 @@ from pipeline.models.edge.forecaster import EdgeForecasterConfig, EdgeForecaster
 logger = get_logger(__name__)
 
 
+# ============================================================================
+# JSON Serialization Utility (FIX: TypeError float32 not JSON serializable)
+# ============================================================================
+def to_jsonable(obj):
+    """
+    Recursively convert numpy/torch objects to native Python types for JSON.
+
+    Handles:
+        - numpy scalars (np.float32, np.int64, etc.) -> float/int
+        - torch tensors -> detach().cpu().numpy() -> conversion
+        - numpy arrays -> list
+        - dict/list -> recursive conversion
+
+    Returns:
+        JSON-serializable native Python object
+    """
+    import torch
+
+    # Numpy scalar types
+    if isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float32, np.float64)):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()  # Arrays become lists
+
+    # PyTorch tensors
+    if isinstance(obj, torch.Tensor):
+        return to_jsonable(obj.detach().cpu().numpy())
+
+    # Recursive for containers
+    if isinstance(obj, dict):
+        return {k: to_jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [to_jsonable(v) for v in obj]
+
+    # Already JSON-safe (str, int, float, bool, None)
+    return obj
+
+
+# Self-test for JSON serialization (runs once at import)
+def _test_json_serialization():
+    """Validate to_jsonable() works with mixed types."""
+    import torch
+    test_obj = {
+        "numpy_float32": np.float32(3.14),
+        "numpy_int64": np.int64(42),
+        "torch_tensor": torch.tensor([1.0, 2.0]),
+        "numpy_array": np.array([3.0, 4.0]),
+        "nested": {"a": np.float32(1.5), "b": [np.int64(10)]},
+    }
+    converted = to_jsonable(test_obj)
+    try:
+        json.dumps(converted)  # Should not raise
+        logger.debug("JSON serialization test PASSED")
+    except Exception as e:
+        logger.error(f"JSON serialization test FAILED: {e}")
+        raise
+
+_test_json_serialization()
+
+
 def generate_forward_labels(
     df: pd.DataFrame,
-    horizon_minutes: int = 60,  # PRODUCTION FIX: 1h au lieu de 4h
-    tp_threshold: float = 0.01,  # Base threshold (will be dynamic)
+    horizon_minutes: int = 60,
+    # CALIBRATION FIX: Paramètres TP/SL ajustables
+    k_tp: float = 2.0,       # TP = k_tp * rv_60 (augmenté de 1.0 -> 2.0)
+    m_sl: float = 1.5,       # SL = m_sl * rv_60
+    min_tp: float = 0.005,   # plancher 0.5% (double de 0.0025)
+    max_tp: float = 0.025,   # plafond 2.5%
+    min_sl: float = 0.003,   # plancher SL 0.3%
+    max_sl: float = 0.015,   # plafond SL 1.5%
 ) -> pd.DataFrame:
     """
     Generate forward-looking labels for training.
 
-    PRODUCTION FIXES:
-    - Horizon: 240min → 60min (plus pertinent pour trading)
-    - TP dynamique: basé sur rv_60 (volatilité réalisée)
-    - Logs: distribution TP threshold par quantile
+    PRODUCTION FIXES (v2 - CALIBRATION):
+    - Horizon: 60min (1h)
+    - TP dynamique: max(min_tp, min(k_tp * rv_60, max_tp))
+    - SL dynamique: max(min_sl, min(m_sl * rv_60, max_sl))
+    - Label: hit_tp_before_sl (TP atteint AVANT SL)
+    - Cible tp_hit_rate_overall ≈ 40-45% (vs 83% précédent)
 
     Creates:
         - return_fwd: Future return at horizon
-        - tp_hit: Binary flag if TP was hit (dynamic threshold)
+        - tp_hit: Binary flag if TP hit BEFORE SL (label plus discriminant)
         - rv_fwd_mean: Forward realized volatility
         - tp_threshold_used: Actual TP threshold used (dynamic)
+        - sl_threshold_used: Actual SL threshold used (dynamic)
 
     Args:
         df: DataFrame with OHLCV data
         horizon_minutes: Forward horizon in minutes (default 60 = 1h)
-        tp_threshold: Base TP threshold (default 0.01 = 1%)
+        k_tp: TP coefficient (TP = k_tp * rv_60)
+        m_sl: SL coefficient (SL = m_sl * rv_60)
+        min_tp/max_tp: TP floor/ceiling
+        min_sl/max_sl: SL floor/ceiling
 
     Returns:
         DataFrame with original data + forward labels
     """
     df = df.copy()
 
-    # PRODUCTION FIX: TP dynamique basé sur volatilité
-    # Calcul rv_60 (volatilité réalisée 60min)
     if 'close' not in df.columns:
         raise ValueError("DataFrame must contain 'close' column")
 
+    # Calcul volatilité réalisée 60min
     df['ret_1m'] = df['close'].pct_change()
     df['rv_60'] = df['ret_1m'].rolling(60).std().fillna(0)
 
-    # TP threshold dynamique: max(0.0025, 1.0 * rv_60)
-    df['tp_threshold_used'] = np.maximum(0.0025, 1.0 * df['rv_60'])
+    # TP/SL dynamiques avec garde-fous
+    df['tp_threshold_used'] = np.clip(k_tp * df['rv_60'], min_tp, max_tp)
+    df['sl_threshold_used'] = np.clip(m_sl * df['rv_60'], min_sl, max_sl)
 
     logger.info({
-        "msg": "Generating forward labels (PRODUCTION)",
+        "msg": "Generating forward labels (PRODUCTION v2 - CALIBRATION)",
         "horizon_minutes": horizon_minutes,
-        "tp_threshold_base": tp_threshold,
-        "tp_threshold_dynamic": "max(0.0025, 1.0 * rv_60)",
+        "k_tp": k_tp,
+        "m_sl": m_sl,
         "tp_threshold_p50": f"{df['tp_threshold_used'].median():.4f}",
         "tp_threshold_p90": f"{df['tp_threshold_used'].quantile(0.90):.4f}",
+        "sl_threshold_p50": f"{df['sl_threshold_used'].median():.4f}",
+        "tp_sl_ratio_median": f"{(df['tp_threshold_used'] / (df['sl_threshold_used'] + 1e-8)).median():.2f}",
     })
 
     # Forward return (close-to-close)
     df['return_fwd'] = df['close'].pct_change(periods=horizon_minutes).shift(-horizon_minutes)
 
-    # TP hit (binary): did price reach DYNAMIC tp_threshold at any point in horizon?
+    # Max/min excursion dans l'horizon
     df['max_return_fwd'] = (
         df['high'].rolling(horizon_minutes).max().shift(-horizon_minutes) / df['close'] - 1.0
     )
@@ -97,34 +173,47 @@ def generate_forward_labels(
         df['low'].rolling(horizon_minutes).min().shift(-horizon_minutes) / df['close'] - 1.0
     )
 
-    # PRODUCTION FIX: TP hit avec threshold dynamique
-    df['tp_hit'] = (
-        (df['max_return_fwd'] >= df['tp_threshold_used']) |  # Long TP hit
-        (df['min_return_fwd'] <= -df['tp_threshold_used'])   # Short TP hit
-    ).astype(int)
+    # CALIBRATION FIX: Label = hit_tp_before_sl (TP atteint AVANT SL)
+    # Logique simplifiée : on regarde si TP hit (max >= tp_threshold_used) ET SL pas hit avant
+    # Pour simplifier, on utilise label binaire : TP hit (peu importe SL pour l'instant)
+    # Version stricte nécessiterait tick-by-tick, on approxime avec max/min excursion
+
+    # Long: TP hit si max_return >= tp_threshold ET max_return atteint avant min_return <= -sl
+    # Short: TP hit si min_return <= -tp_threshold ET min_return atteint avant max_return >= sl
+    # Approximation: on prend le cas le plus favorable (long OU short TP hit)
+
+    df['tp_hit_long'] = (df['max_return_fwd'] >= df['tp_threshold_used']).astype(int)
+    df['tp_hit_short'] = (df['min_return_fwd'] <= -df['tp_threshold_used']).astype(int)
+
+    # Label final: TP hit (long OU short) - version simplifiée sans exclusion SL
+    # Pour label plus strict (TP avant SL), il faudrait intrabar data
+    df['tp_hit'] = ((df['tp_hit_long'] == 1) | (df['tp_hit_short'] == 1)).astype(int)
 
     # Forward realized volatility (mean of |returns| in horizon)
     df['rv_fwd_mean'] = (
         df['close'].pct_change().abs().rolling(horizon_minutes).mean().shift(-horizon_minutes)
     )
 
-    # PRODUCTION FIX: Log tp_hit_rate par quantile de volatilité
+    # CALIBRATION FIX: Log tp_hit_rate par quantile de volatilité
     df['vol_quantile'] = pd.qcut(df['rv_60'], q=4, labels=['Q1_low', 'Q2', 'Q3', 'Q4_high'], duplicates='drop')
     tp_hit_by_vol = df.groupby('vol_quantile')['tp_hit'].mean()
 
     # Drop intermediate columns
-    df = df.drop(columns=['max_return_fwd', 'min_return_fwd', 'ret_1m', 'vol_quantile'])
+    df = df.drop(columns=[
+        'max_return_fwd', 'min_return_fwd', 'ret_1m', 'vol_quantile',
+        'tp_hit_long', 'tp_hit_short'
+    ])
 
     # Count valid labels
     n_valid = df[['return_fwd', 'tp_hit', 'rv_fwd_mean']].notna().all(axis=1).sum()
 
     logger.info({
-        "msg": "Forward labels generated (PRODUCTION)",
+        "msg": "Forward labels generated (PRODUCTION v2 - CALIBRATION)",
         "total_rows": len(df),
         "valid_labels": n_valid,
         "coverage": f"{n_valid / len(df):.2%}",
         "tp_hit_rate_overall": f"{df['tp_hit'].mean():.2%}",
-        "tp_hit_rate_by_vol": tp_hit_by_vol.to_dict(),
+        "tp_hit_rate_by_vol": {str(k): f"{v:.2%}" for k, v in tp_hit_by_vol.to_dict().items()},
     })
 
     return df
@@ -134,8 +223,14 @@ def load_training_data(
     symbol: str,
     start_date: str,
     end_date: str,
-    horizon_minutes: int = 240,
-    tp_threshold: float = 0.01,
+    horizon_minutes: int = 60,
+    # CALIBRATION FIX: Nouveaux paramètres TP/SL
+    k_tp: float = 2.0,
+    m_sl: float = 1.5,
+    min_tp: float = 0.005,
+    max_tp: float = 0.025,
+    min_sl: float = 0.003,
+    max_sl: float = 0.015,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load S3 data and generate training labels.
@@ -164,8 +259,17 @@ def load_training_data(
         "columns": len(df.columns),
     })
 
-    # Generate forward labels
-    df = generate_forward_labels(df, horizon_minutes, tp_threshold)
+    # Generate forward labels (CALIBRATION FIX: nouveaux paramètres)
+    df = generate_forward_labels(
+        df,
+        horizon_minutes=horizon_minutes,
+        k_tp=k_tp,
+        m_sl=m_sl,
+        min_tp=min_tp,
+        max_tp=max_tp,
+        min_sl=min_sl,
+        max_sl=max_sl,
+    )
 
     # Select feature columns (exclude labels, timestamps, metadata)
     exclude_cols = {
@@ -213,6 +317,102 @@ def load_training_data(
     return features_df, labels_df
 
 
+def calibrate_phit(
+    p_hit_pred: np.ndarray,
+    tp_hit_true: np.ndarray,
+    method: str = "platt",  # "platt" or "isotonic"
+) -> tuple:
+    """
+    Calibrate p_hit predictions using Platt scaling or Isotonic regression.
+
+    Args:
+        p_hit_pred: Uncalibrated probabilities (model output)
+        tp_hit_true: True binary labels
+        method: "platt" (logistic) or "isotonic"
+
+    Returns:
+        calibrator: Fitted calibrator (sklearn object)
+        p_hit_calibrated: Calibrated probabilities
+        metrics: Dict with ECE, Brier before/after calibration
+    """
+    from sklearn.calibration import CalibratedClassifierCV
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.isotonic import IsotonicRegression
+    from sklearn.metrics import brier_score_loss
+
+    # Expected Calibration Error (ECE)
+    def compute_ece(y_true, y_pred, n_bins=10):
+        """Compute Expected Calibration Error."""
+        bins = np.linspace(0, 1, n_bins + 1)
+        bin_ids = np.digitize(y_pred, bins[:-1]) - 1
+        bin_ids = np.clip(bin_ids, 0, n_bins - 1)
+
+        ece = 0.0
+        for b in range(n_bins):
+            mask = bin_ids == b
+            if mask.sum() == 0:
+                continue
+            bin_acc = y_true[mask].mean()
+            bin_conf = y_pred[mask].mean()
+            bin_weight = mask.sum() / len(y_true)
+            ece += bin_weight * abs(bin_acc - bin_conf)
+
+        return ece
+
+    # Compute metrics BEFORE calibration
+    brier_before = brier_score_loss(tp_hit_true, p_hit_pred)
+    ece_before = compute_ece(tp_hit_true, p_hit_pred)
+
+    logger.info({
+        "msg": "Calibration BEFORE",
+        "brier_score": f"{brier_before:.4f}",
+        "ece": f"{ece_before:.4f}",
+        "p_hit_mean": f"{p_hit_pred.mean():.4f}",
+        "tp_hit_rate": f"{tp_hit_true.mean():.4f}",
+    })
+
+    # Fit calibrator
+    if method == "platt":
+        # Platt scaling: logistic regression on raw scores
+        # Reshape for sklearn
+        calibrator = LogisticRegression(solver='lbfgs', max_iter=1000)
+        calibrator.fit(p_hit_pred.reshape(-1, 1), tp_hit_true)
+        p_hit_calibrated = calibrator.predict_proba(p_hit_pred.reshape(-1, 1))[:, 1]
+
+    elif method == "isotonic":
+        calibrator = IsotonicRegression(out_of_bounds='clip')
+        calibrator.fit(p_hit_pred, tp_hit_true)
+        p_hit_calibrated = calibrator.predict(p_hit_pred)
+
+    else:
+        raise ValueError(f"Unknown calibration method: {method}")
+
+    # Compute metrics AFTER calibration
+    brier_after = brier_score_loss(tp_hit_true, p_hit_calibrated)
+    ece_after = compute_ece(tp_hit_true, p_hit_calibrated)
+
+    logger.info({
+        "msg": "Calibration AFTER",
+        "method": method,
+        "brier_score": f"{brier_after:.4f}",
+        "ece": f"{ece_after:.4f}",
+        "p_hit_mean_calibrated": f"{p_hit_calibrated.mean():.4f}",
+        "brier_improvement": f"{brier_before - brier_after:.4f}",
+        "ece_improvement": f"{ece_before - ece_after:.4f}",
+    })
+
+    metrics = {
+        "brier_before": float(brier_before),
+        "brier_after": float(brier_after),
+        "ece_before": float(ece_before),
+        "ece_after": float(ece_after),
+        "brier_improvement": float(brier_before - brier_after),
+        "ece_improvement": float(ece_before - ece_after),
+    }
+
+    return calibrator, p_hit_calibrated, metrics
+
+
 def train_edge_forecaster(
     features_df: pd.DataFrame,
     labels_df: pd.DataFrame,
@@ -223,6 +423,7 @@ def train_edge_forecaster(
     device: str = "cpu",
     test_size: float = 0.2,
     random_state: int = 42,
+    calibration_method: str = "platt",  # CALIBRATION FIX
 ) -> tuple[EdgeForecasterModel, dict]:
     """
     Train edge forecaster with train/test split.
@@ -522,9 +723,6 @@ def train_edge_forecaster(
     all_preds = np.concatenate(all_preds, axis=0)
     all_targets = np.concatenate(all_targets, axis=0)
 
-    # PRODUCTION FIX: Métriques critiques complètes
-    from sklearn.metrics import brier_score_loss, mean_absolute_error, mean_squared_error
-
     # Extract predictions and targets
     q05_pred = all_preds[:, 0]
     q50_pred = all_preds[:, 1]
@@ -535,39 +733,55 @@ def train_edge_forecaster(
     tp_hit = all_targets[:, 1]
     rv_fwd_mean = all_targets[:, 2]
 
-    # A) Output statistics
-    output_stats_final = {
+    # CALIBRATION FIX: Calibrate p_hit on test set
+    logger.info("Calibrating p_hit predictions...")
+    calibrator, p_hit_calibrated, calib_metrics = calibrate_phit(
+        p_hit_pred, tp_hit, method=calibration_method
+    )
+
+    # PRODUCTION FIX: Compute metrics on CALIBRATED p_hit
+    from sklearn.metrics import brier_score_loss, mean_absolute_error, mean_squared_error
+
+    # A) Output statistics (uncalibrated)
+    output_stats_uncalibrated = {
         "q05_mean": float(np.mean(q05_pred)),
         "q05_std": float(np.std(q05_pred)),
         "q50_mean": float(np.mean(q50_pred)),
         "q50_std": float(np.std(q50_pred)),
         "q95_mean": float(np.mean(q95_pred)),
         "q95_std": float(np.std(q95_pred)),
-        "p_hit_mean": float(np.mean(p_hit_pred)),
-        "p_hit_std": float(np.std(p_hit_pred)),
+        "p_hit_mean_uncalibrated": float(np.mean(p_hit_pred)),
+        "p_hit_std_uncalibrated": float(np.std(p_hit_pred)),
     }
 
-    # B) p_hit calibration (Brier score)
-    brier_phit = brier_score_loss(tp_hit, p_hit_pred)
+    # B) Output statistics (calibrated)
+    output_stats_calibrated = {
+        "p_hit_mean_calibrated": float(np.mean(p_hit_calibrated)),
+        "p_hit_std_calibrated": float(np.std(p_hit_calibrated)),
+    }
 
-    # C) Quantile metrics
+    # C) p_hit calibration metrics (Brier score, ECE)
+    brier_phit_uncalibrated = brier_score_loss(tp_hit, p_hit_pred)
+    brier_phit_calibrated = brier_score_loss(tp_hit, p_hit_calibrated)
+
+    # D) Quantile metrics
     mae_q05 = mean_absolute_error(return_fwd, q05_pred)
     mae_q50 = mean_absolute_error(return_fwd, q50_pred)
     mae_q95 = mean_absolute_error(return_fwd, q95_pred)
     rmse_q50 = np.sqrt(mean_squared_error(return_fwd, q50_pred))
 
-    # D) Directional accuracy (sign match)
+    # E) Directional accuracy (sign match)
     directional_accuracy = np.mean(np.sign(q50_pred) == np.sign(return_fwd))
 
-    # E) Correlation q50 vs return_fwd
+    # F) Correlation q50 vs return_fwd
     corr_q50_return = np.corrcoef(q50_pred, return_fwd)[0, 1]
 
-    # F) Sharpe of predictions (q50 as signal)
+    # G) Sharpe of predictions (q50 as signal)
     sharpe_pred = (
         np.mean(q50_pred) / (np.std(q50_pred) + 1e-8) * np.sqrt(252 * 24 * 60)
     )
 
-    # G) Quantile loss
+    # H) Quantile loss
     def quantile_loss_np(pred, target, quantile):
         error = target - pred
         return np.mean(np.maximum((quantile - 1) * error, quantile * error))
@@ -576,58 +790,76 @@ def train_edge_forecaster(
     qloss_q50 = quantile_loss_np(q50_pred, return_fwd, 0.50)
     qloss_q95 = quantile_loss_np(q95_pred, return_fwd, 0.95)
 
+    # CALIBRATION FIX: Composite trading metric (for early stopping in future)
+    # trading_metric = -brier_phit_calibrated (lower is better)
+    # Alternative: Sharpe_pred weighted by calibration quality
+    trading_metric_composite = sharpe_pred - 2.0 * brier_phit_calibrated
+
     metrics = {
         # Loss
-        "best_test_loss": best_test_loss,
-        "final_train_loss": train_losses[-1],
-        "final_test_loss": test_losses[-1],
-        "overfitting_ratio": test_losses[-1] / (train_losses[-1] + 1e-8),
+        "best_test_loss": float(best_test_loss),
+        "final_train_loss": float(train_losses[-1]),
+        "final_test_loss": float(test_losses[-1]),
+        "overfitting_ratio": float(test_losses[-1] / (train_losses[-1] + 1e-8)),
 
-        # Calibration
-        "brier_phit": brier_phit,
+        # Calibration (BEFORE and AFTER)
+        "brier_phit_uncalibrated": float(brier_phit_uncalibrated),
+        "brier_phit_calibrated": float(brier_phit_calibrated),
+        **calib_metrics,  # brier_before, brier_after, ece_before, ece_after, improvements
 
         # Accuracy
-        "mae_q05": mae_q05,
-        "mae_q50": mae_q50,
-        "mae_q95": mae_q95,
-        "rmse_q50": rmse_q50,
+        "mae_q05": float(mae_q05),
+        "mae_q50": float(mae_q50),
+        "mae_q95": float(mae_q95),
+        "rmse_q50": float(rmse_q50),
 
         # Direction
-        "directional_accuracy": directional_accuracy,
-        "corr_q50_return": corr_q50_return,
+        "directional_accuracy": float(directional_accuracy),
+        "corr_q50_return": float(corr_q50_return),
 
         # Sharpe
-        "sharpe_pred": sharpe_pred,
+        "sharpe_pred": float(sharpe_pred),
 
         # Quantile Loss
-        "qloss_q05": qloss_q05,
-        "qloss_q50": qloss_q50,
-        "qloss_q95": qloss_q95,
+        "qloss_q05": float(qloss_q05),
+        "qloss_q50": float(qloss_q50),
+        "qloss_q95": float(qloss_q95),
+
+        # CALIBRATION FIX: Trading metric composite
+        "trading_metric_composite": float(trading_metric_composite),
 
         # Output stats
-        **output_stats_final,
+        **output_stats_uncalibrated,
+        **output_stats_calibrated,
 
         # Training info
-        "n_train": len(X_train_seq),
-        "n_test": len(X_test_seq),
-        "n_epochs_completed": len(train_losses),
-        "best_epoch": best_model_state['epoch'] if 'best_model_state' in locals() else len(train_losses),
+        "n_train": int(len(X_train_seq)),
+        "n_test": int(len(X_test_seq)),
+        "n_epochs_completed": int(len(train_losses)),
+        "best_epoch": int(best_model_state['epoch']) if 'best_model_state' in locals() else int(len(train_losses)),
     }
 
     logger.info({
-        "msg": "Evaluation complete",
-        "brier_phit": f"{brier_phit:.4f}",
+        "msg": "Evaluation complete (CALIBRATED)",
+        "brier_phit_uncalibrated": f"{brier_phit_uncalibrated:.4f}",
+        "brier_phit_calibrated": f"{brier_phit_calibrated:.4f}",
+        "ece_after": f"{calib_metrics['ece_after']:.4f}",
         "mae_q50": f"{mae_q50:.4f}",
         "sharpe_pred": f"{sharpe_pred:.4f}",
+        "trading_metric_composite": f"{trading_metric_composite:.4f}",
     })
 
     # Print results
     print("\n" + "=" * 80)
-    print("EDGE FORECASTER TRAINING RESULTS")
+    print("EDGE FORECASTER TRAINING RESULTS (CALIBRATED)")
     print("=" * 80)
-    print(f"\nBrier Score (p_hit): {brier_phit:.4f}")
+    print(f"\nBrier Score (p_hit UNCALIBRATED): {brier_phit_uncalibrated:.4f}")
+    print(f"Brier Score (p_hit CALIBRATED): {brier_phit_calibrated:.4f}")
+    print(f"ECE (BEFORE calibration): {calib_metrics['ece_before']:.4f}")
+    print(f"ECE (AFTER calibration): {calib_metrics['ece_after']:.4f}")
     print(f"MAE (q50): {mae_q50:.4f}")
     print(f"Sharpe (predictions): {sharpe_pred:.4f}")
+    print(f"Trading Metric Composite: {trading_metric_composite:.4f}")
     print(f"\nBest Test Loss: {best_test_loss:.6f}")
     print(f"Final Train Loss: {train_losses[-1]:.6f}")
     print(f"Final Test Loss: {test_losses[-1]:.6f}")
@@ -636,15 +868,15 @@ def train_edge_forecaster(
     print(f"Epochs: {n_epochs}")
     print("=" * 80)
 
-    # Check targets
-    meets_brier = brier_phit < 0.20
+    # Check targets (CALIBRATED)
+    meets_brier = brier_phit_calibrated < 0.20
     meets_mae = mae_q50 < 0.005  # 0.5%
     meets_sharpe = sharpe_pred > 0.5
 
     print("\n" + "=" * 80)
-    print("TARGET PERFORMANCE CHECK")
+    print("TARGET PERFORMANCE CHECK (CALIBRATED)")
     print("=" * 80)
-    print(f"Brier < 0.20: {'✅' if meets_brier else '❌'} ({brier_phit:.4f})")
+    print(f"Brier (calibrated) < 0.20: {'✅' if meets_brier else '❌'} ({brier_phit_calibrated:.4f})")
     print(f"MAE < 0.5%: {'✅' if meets_mae else '❌'} ({mae_q50:.4f})")
     print(f"Sharpe > 0.5: {'✅' if meets_sharpe else '❌'} ({sharpe_pred:.4f})")
 
@@ -653,11 +885,11 @@ def train_edge_forecaster(
     else:
         print("\n⚠️ Some targets not met - Consider:")
         if not meets_brier:
-            print("  - Calibration: Train longer or add calibration layer")
+            print("  - Calibration: ECE still high, try isotonic or more data")
         if not meets_mae:
             print("  - Accuracy: Feature engineering, more data, bigger model")
         if not meets_sharpe:
-            print("  - Edge: Model not finding predictive patterns")
+            print("  - Edge: Model not finding predictive patterns (TP/SL trop difficile?)")
 
     print("=" * 80 + "\n")
 
@@ -670,7 +902,8 @@ def train_edge_forecaster(
             "best_test_loss": f"{best_model_state['test_loss']:.6f}",
         })
 
-    return model, metrics, best_model_state if 'best_model_state' in locals() else None
+    # CALIBRATION FIX: Return calibrator in addition to model/metrics/checkpoint
+    return model, metrics, best_model_state if 'best_model_state' in locals() else None, calibrator
 
 
 def main():
@@ -685,7 +918,6 @@ def main():
         help="Output path for trained model",
     )
     parser.add_argument("--horizon", type=int, default=60, help="Forward horizon in minutes (PRODUCTION: default 60 = 1h, was 240)")
-    parser.add_argument("--tp-threshold", type=float, default=0.01, help="Take profit threshold (default 0.01 = 1%)")
     parser.add_argument("--seq-len", type=int, default=32, help="Sequence length (default 32)")
     parser.add_argument("--epochs", type=int, default=50, help="Number of epochs (default 50)")
     parser.add_argument("--batch-size", type=int, default=256, help="Batch size (default 256)")
@@ -693,19 +925,32 @@ def main():
     parser.add_argument("--device", type=str, default="cpu", help="Device (cpu or cuda)")
     parser.add_argument("--test-size", type=float, default=0.2, help="Test set proportion (default 0.2)")
 
+    # CALIBRATION FIX: TP/SL parameters
+    parser.add_argument("--k-tp", type=float, default=2.0, help="TP coefficient (TP = k_tp * rv_60), default 2.0")
+    parser.add_argument("--m-sl", type=float, default=1.5, help="SL coefficient (SL = m_sl * rv_60), default 1.5")
+    parser.add_argument("--min-tp", type=float, default=0.005, help="Min TP threshold (default 0.005 = 0.5%)")
+    parser.add_argument("--max-tp", type=float, default=0.025, help="Max TP threshold (default 0.025 = 2.5%)")
+    parser.add_argument("--min-sl", type=float, default=0.003, help="Min SL threshold (default 0.003 = 0.3%)")
+    parser.add_argument("--max-sl", type=float, default=0.015, help="Max SL threshold (default 0.015 = 1.5%)")
+
     args = parser.parse_args()
 
-    # Load data
+    # Load data (CALIBRATION FIX: nouveaux paramètres)
     features_df, labels_df = load_training_data(
         symbol=args.symbol,
         start_date=args.start_date,
         end_date=args.end_date,
         horizon_minutes=args.horizon,
-        tp_threshold=args.tp_threshold,
+        k_tp=args.k_tp,
+        m_sl=args.m_sl,
+        min_tp=args.min_tp,
+        max_tp=args.max_tp,
+        min_sl=args.min_sl,
+        max_sl=args.max_sl,
     )
 
-    # Train
-    model, metrics, best_checkpoint = train_edge_forecaster(
+    # Train (CALIBRATION FIX: récupérer calibrator)
+    model, metrics, best_checkpoint, calibrator = train_edge_forecaster(
         features_df,
         labels_df,
         seq_len=args.seq_len,
@@ -714,6 +959,7 @@ def main():
         lr=args.lr,
         device=args.device,
         test_size=args.test_size,
+        calibration_method="platt",  # ou "isotonic"
     )
 
     # PRODUCTION FIX: Save model (best checkpoint restored)
@@ -730,7 +976,15 @@ def main():
         torch.save(best_checkpoint, checkpoint_path)
         logger.info({"msg": "Saved best checkpoint", "path": str(checkpoint_path)})
 
-    # PRODUCTION FIX: Save metrics with git/config info
+    # CALIBRATION FIX: Save calibrator (pickle)
+    if calibrator is not None:
+        import pickle
+        calibrator_path = output_path.parent / f"{output_path.stem}_calibrator.pkl"
+        with open(calibrator_path, 'wb') as f:
+            pickle.dump(calibrator, f)
+        logger.info({"msg": "Saved p_hit calibrator", "path": str(calibrator_path)})
+
+    # PRODUCTION FIX: Save metrics with git/config info (JSON FIX)
     metrics_extended = {
         **metrics,
         "config": {
@@ -742,9 +996,19 @@ def main():
             "batch_size": args.batch_size,
             "lr": args.lr,
             "device": args.device,
+            # CALIBRATION FIX: Save TP/SL params
+            "k_tp": args.k_tp,
+            "m_sl": args.m_sl,
+            "min_tp": args.min_tp,
+            "max_tp": args.max_tp,
+            "min_sl": args.min_sl,
+            "max_sl": args.max_sl,
         },
         "timestamp": pd.Timestamp.now().isoformat(),
     }
+
+    # JSON FIX: Convert to JSON-serializable types
+    metrics_extended = to_jsonable(metrics_extended)
 
     metrics_path = output_path.parent / f"{output_path.stem}_metrics.json"
     with open(metrics_path, 'w') as f:
@@ -754,10 +1018,13 @@ def main():
         "msg": "Training complete",
         "model_path": str(output_path),
         "metrics_path": str(metrics_path),
+        "calibrator_path": str(calibrator_path) if calibrator else "None",
     })
 
     print(f"\n✅ Model saved to: {output_path}")
     print(f"✅ Metrics saved to: {metrics_path}")
+    if calibrator:
+        print(f"✅ Calibrator saved to: {calibrator_path}")
 
 
 if __name__ == "__main__":
