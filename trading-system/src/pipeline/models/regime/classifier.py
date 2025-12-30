@@ -41,7 +41,13 @@ class RegimeClassifierModel(BaseModel):
             self._class_priors = self._class_priors / self._class_priors.sum()
             self._sk_model = None
             return
-        model = LogisticRegression(max_iter=500, multi_class="auto")
+        # PRODUCTION FIX: class_weight='balanced' pour corriger class collapse (impulse recall 19.5%)
+        model = LogisticRegression(
+            max_iter=500,
+            class_weight="balanced",  # Critical fix pour impulse recall
+            C=2.0,                     # Régularisation plus faible
+            n_jobs=-1,
+        )
         model.fit(Xn, y)
         self._sk_model = model
 

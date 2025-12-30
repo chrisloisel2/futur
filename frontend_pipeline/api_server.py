@@ -31,7 +31,13 @@ from data.s3_data_source import S3DataSource
 # Import data integrity analyzer
 from data_integrity_analyzer import DataIntegrityAnalyzer
 
+# Import ML endpoints
+from ml_endpoints import ml_router
+
 app = FastAPI(title="Alpha Trading API", version="2.0")
+
+# Include ML architecture router
+app.include_router(ml_router)
 
 # ============================================================================
 # TRAINING JOB MANAGEMENT

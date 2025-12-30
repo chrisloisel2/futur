@@ -1,0 +1,378 @@
+{"split": "train", "ep": 1, "step": 0, "loss": 0.15623338520526886, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.75, "ts": 1766334421.869763}
+{"split": "train", "ep": 1, "step": 50, "loss": 0.05167219042778015, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334422.1214287}
+{"split": "train", "ep": 1, "step": 100, "loss": 1.3134205341339111, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334422.355813}
+{"split": "train", "ep": 1, "step": 150, "loss": 0.6947014331817627, "acc_trade": 1.0, "roi_trade": 6.916718482971191, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334422.5889966}
+{"split": "train", "ep": 1, "step": 200, "loss": 0.5327696204185486, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334422.8220658}
+{"split": "train", "ep": 1, "step": 250, "loss": 0.5338437557220459, "acc_trade": 1.0, "roi_trade": 7.481363296508789, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334423.0560057}
+{"split": "train", "ep": 1, "step": 300, "loss": 0.03163830190896988, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334423.2874587}
+{"split": "train", "ep": 1, "step": 350, "loss": 0.6013364195823669, "acc_trade": 1.0, "roi_trade": 6.621860504150391, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334423.5208924}
+{"split": "train", "ep": 1, "step": 400, "loss": 0.8370481729507446, "acc_trade": 0.0, "roi_trade": -6.6922407150268555, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334423.7525256}
+{"split": "val", "ep": 1, "step": 400, "acc_trade": 0.1943150711505576, "roi_trade": -0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.47319342880357507, "ts": 1766334555.189402}
+{"split": "train", "ep": 1, "step": 450, "loss": 0.8212618827819824, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334555.4396567}
+{"split": "train", "ep": 1, "step": 500, "loss": 0.6702314019203186, "acc_trade": 1.0, "roi_trade": 7.027622222900391, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334555.672439}
+{"split": "train", "ep": 1, "step": 550, "loss": 0.03590637445449829, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334555.9027603}
+{"split": "train", "ep": 1, "step": 600, "loss": 3.1301069259643555, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334556.134264}
+{"split": "train", "ep": 1, "step": 650, "loss": 2.07720685005188, "acc_trade": 0.0, "roi_trade": -7.34116268157959, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334556.3715665}
+{"split": "train", "ep": 1, "step": 700, "loss": 0.24842774868011475, "acc_trade": 1.0, "roi_trade": 6.960842132568359, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334556.6046631}
+{"split": "train", "ep": 1, "step": 750, "loss": 0.9679361581802368, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334556.8352935}
+{"split": "train", "ep": 1, "step": 800, "loss": 0.03749854862689972, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334557.0666277}
+{"split": "val", "ep": 1, "step": 800, "acc_trade": 0.19454676422388686, "roi_trade": -0.11851134775204555, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.5705648232784887, "ts": 1766334680.07124}
+{"split": "train", "ep": 1, "step": 850, "loss": 1.0474835634231567, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334680.3416953}
+{"split": "train", "ep": 1, "step": 900, "loss": 0.5755721926689148, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334680.734559}
+{"split": "train", "ep": 1, "step": 950, "loss": 1.2803772687911987, "acc_trade": 0.0, "roi_trade": -7.508236408233643, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334681.1140525}
+{"split": "train", "ep": 1, "step": 1000, "loss": 1.0289301872253418, "acc_trade": 0.0, "roi_trade": -7.766964435577393, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334681.4938803}
+{"split": "train", "ep": 1, "step": 1050, "loss": 0.8026648759841919, "acc_trade": 1.0, "roi_trade": 7.289668083190918, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334681.8840227}
+{"split": "train", "ep": 1, "step": 1100, "loss": 1.0169121026992798, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334682.2681127}
+{"split": "train", "ep": 1, "step": 1150, "loss": 0.9971208572387695, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334682.6601226}
+{"split": "train", "ep": 1, "step": 1200, "loss": 0.8809356689453125, "acc_trade": 0.0, "roi_trade": -7.838222026824951, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334683.039254}
+{"split": "val", "ep": 1, "step": 1200, "acc_trade": 0.1943150711505576, "roi_trade": -0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.059805377818403414, "ts": 1766334805.797958}
+{"split": "train", "ep": 1, "step": 1250, "loss": 0.04633276164531708, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334806.0492368}
+{"split": "train", "ep": 1, "step": 1300, "loss": 0.6642470955848694, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334806.416568}
+{"split": "train", "ep": 1, "step": 1350, "loss": 0.5172995924949646, "acc_trade": 1.0, "roi_trade": 6.355197906494141, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334806.800074}
+{"split": "train", "ep": 1, "step": 1400, "loss": 0.7799203991889954, "acc_trade": 0.5, "roi_trade": -0.4002656936645508, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334807.1714985}
+{"split": "train", "ep": 1, "step": 1450, "loss": 0.047649163752794266, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334807.558467}
+{"split": "train", "ep": 1, "step": 1500, "loss": 0.42945170402526855, "acc_trade": 1.0, "roi_trade": 6.6893310546875, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334807.9439232}
+{"split": "train", "ep": 1, "step": 1550, "loss": 0.029133526608347893, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334808.328862}
+{"split": "train", "ep": 1, "step": 1600, "loss": 0.05263780802488327, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334808.719022}
+{"split": "val", "ep": 1, "step": 1600, "acc_trade": 0.19813097899440293, "roi_trade": -0.06783925723191786, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.19824040219378428, "ts": 1766334935.0171518}
+{"split": "train", "ep": 1, "step": 1650, "loss": 0.7690491080284119, "acc_trade": 1.0, "roi_trade": 7.429838180541992, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334935.250592}
+{"split": "train", "ep": 1, "step": 1700, "loss": 1.6589417457580566, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334935.482189}
+{"split": "train", "ep": 1, "step": 1750, "loss": 0.324042946100235, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334935.7126472}
+{"split": "train", "ep": 1, "step": 1800, "loss": 1.3356441259384155, "acc_trade": 0.0, "roi_trade": -6.791213035583496, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766334935.9436083}
+{"split": "train", "ep": 1, "step": 1850, "loss": 0.06195887178182602, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334936.1762807}
+{"split": "train", "ep": 1, "step": 1900, "loss": 0.8429220914840698, "acc_trade": 1.0, "roi_trade": 7.548403263092041, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766334936.4087708}
+{"split": "train", "ep": 1, "step": 1950, "loss": 0.06326574832201004, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766334936.6382132}
+{"split": "train", "ep": 1, "step": 2000, "loss": 0.4025098383426666, "acc_trade": 1.0, "roi_trade": 7.586469650268555, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766334936.8693802}
+{"split": "val", "ep": 1, "step": 2000, "acc_trade": 0.18971627347909856, "roi_trade": -0.18907202861063513, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.32645871419865935, "ts": 1766335059.4927928}
+{"split": "train", "ep": 1, "step": 2050, "loss": 0.06049187108874321, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335059.7285545}
+{"split": "train", "ep": 1, "step": 2100, "loss": 2.1059792041778564, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335059.9599998}
+{"split": "train", "ep": 1, "step": 2150, "loss": 0.49090129137039185, "acc_trade": 1.0, "roi_trade": 6.2556023597717285, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335060.1940224}
+{"split": "train", "ep": 1, "step": 2200, "loss": 0.7087969779968262, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335060.4381466}
+{"split": "train", "ep": 1, "step": 2250, "loss": 0.7794538140296936, "acc_trade": 0.5, "roi_trade": 0.9062840938568115, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335060.8048158}
+{"split": "train", "ep": 1, "step": 2300, "loss": 1.0804369449615479, "acc_trade": 0.3333333432674408, "roi_trade": -2.070237398147583, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335061.201988}
+{"split": "train", "ep": 1, "step": 2350, "loss": 0.5306427478790283, "acc_trade": 1.0, "roi_trade": 7.462862491607666, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335061.5904346}
+{"split": "train", "ep": 1, "step": 2400, "loss": 0.29791271686553955, "acc_trade": 1.0, "roi_trade": 7.2898268699646, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335061.9845142}
+{"split": "val", "ep": 1, "step": 2400, "acc_trade": 0.1914297140345489, "roi_trade": -0.16369169974699996, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.6001993195206176, "ts": 1766335185.3518333}
+{"split": "train", "ep": 1, "step": 2450, "loss": 1.0539346933364868, "acc_trade": 0.3333333432674408, "roi_trade": -1.72356379032135, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335185.6442366}
+{"split": "train", "ep": 1, "step": 2500, "loss": 0.6083149313926697, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335186.0361903}
+{"split": "train", "ep": 1, "step": 2550, "loss": 0.6226176023483276, "acc_trade": 1.0, "roi_trade": 7.162791728973389, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335186.4130368}
+{"split": "train", "ep": 1, "step": 2600, "loss": 0.720443606376648, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335186.7884705}
+{"split": "train", "ep": 1, "step": 2650, "loss": 0.020792849361896515, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335187.1799932}
+{"split": "train", "ep": 1, "step": 2700, "loss": 1.1174068450927734, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335187.5805159}
+{"split": "train", "ep": 1, "step": 2750, "loss": 0.6951402425765991, "acc_trade": 0.0, "roi_trade": -6.879535675048828, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335187.9169357}
+{"split": "train", "ep": 1, "step": 2800, "loss": 0.6007025837898254, "acc_trade": 1.0, "roi_trade": 6.225453853607178, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335188.3097239}
+{"split": "val", "ep": 1, "step": 2800, "acc_trade": 0.10829533749584827, "roi_trade": -1.3741269276581256, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.9437334958358724, "ts": 1766335313.6899078}
+{"split": "train", "ep": 1, "step": 2850, "loss": 0.829706072807312, "acc_trade": 0.5, "roi_trade": 0.5821225643157959, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335313.94994}
+{"split": "train", "ep": 1, "step": 2900, "loss": 1.053101897239685, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335314.336104}
+{"split": "train", "ep": 1, "step": 2950, "loss": 0.8254254460334778, "acc_trade": 0.0, "roi_trade": -6.894225597381592, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335314.721935}
+{"split": "train", "ep": 1, "step": 3000, "loss": 0.9819066524505615, "acc_trade": 0.3333333432674408, "roi_trade": -2.5999505519866943, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335315.10167}
+{"split": "train", "ep": 1, "step": 3050, "loss": 0.6320974230766296, "acc_trade": 1.0, "roi_trade": 7.1723222732543945, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335315.491555}
+{"split": "train", "ep": 1, "step": 3100, "loss": 1.03982675075531, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335315.873361}
+{"split": "train", "ep": 1, "step": 3150, "loss": 0.6720705032348633, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335316.1379664}
+{"split": "train", "ep": 1, "step": 3200, "loss": 0.9733632802963257, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335316.3873231}
+{"split": "val", "ep": 1, "step": 3200, "acc_trade": 0.10101186245658668, "roi_trade": -1.4797404434793182, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.8403952112533009, "ts": 1766335441.2936766}
+{"split": "train", "ep": 1, "step": 3250, "loss": 0.4383900761604309, "acc_trade": 1.0, "roi_trade": 6.342403888702393, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335441.575605}
+{"split": "train", "ep": 1, "step": 3300, "loss": 0.9301643371582031, "acc_trade": 0.3333333432674408, "roi_trade": -2.6205077171325684, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335441.9797251}
+{"split": "train", "ep": 1, "step": 3350, "loss": 0.8857444524765015, "acc_trade": 0.5, "roi_trade": 0.2591822147369385, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335442.3514178}
+{"split": "train", "ep": 1, "step": 3400, "loss": 0.8000156879425049, "acc_trade": 0.0, "roi_trade": -7.176080226898193, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335442.7253428}
+{"split": "train", "ep": 1, "step": 3450, "loss": 0.7769707441329956, "acc_trade": 0.6666666865348816, "roi_trade": 2.080660581588745, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335443.1027746}
+{"split": "train", "ep": 1, "step": 3500, "loss": 1.3986473083496094, "acc_trade": 0.0, "roi_trade": -7.986198902130127, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335443.4793913}
+{"split": "train", "ep": 1, "step": 3550, "loss": 0.9548110961914062, "acc_trade": 0.0, "roi_trade": -7.380455493927002, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335443.873016}
+{"split": "train", "ep": 1, "step": 3600, "loss": 0.7887259721755981, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335444.2585535}
+{"split": "val", "ep": 1, "step": 3600, "acc_trade": 0.15165008392193297, "roi_trade": -0.741281610066247, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.5753510308754824, "ts": 1766335576.1125565}
+{"split": "train", "ep": 1, "step": 3650, "loss": 0.7278600335121155, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335576.3845143}
+{"split": "train", "ep": 1, "step": 3700, "loss": 0.3117193579673767, "acc_trade": 1.0, "roi_trade": 7.089059352874756, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335576.775757}
+{"split": "train", "ep": 1, "step": 3750, "loss": 0.9962292909622192, "acc_trade": 0.6666666865348816, "roi_trade": 2.675863027572632, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335577.1541176}
+{"split": "train", "ep": 1, "step": 3800, "loss": 0.5562143325805664, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335577.5309234}
+{"split": "train", "ep": 1, "step": 3850, "loss": 1.0493865013122559, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335577.9231908}
+{"split": "train", "ep": 1, "step": 3900, "loss": 0.06632854044437408, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335578.30704}
+{"split": "train", "ep": 1, "step": 3950, "loss": 1.106056809425354, "acc_trade": 0.6666666865348816, "roi_trade": 2.5441994667053223, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335578.697084}
+{"split": "train", "ep": 1, "step": 4000, "loss": 0.7871021628379822, "acc_trade": 0.5, "roi_trade": 0.2049875259399414, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335579.0898108}
+{"split": "val", "ep": 1, "step": 4000, "acc_trade": 0.09893536051345954, "roi_trade": -1.508899910208621, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.6061916006500102, "ts": 1766335701.9053504}
+{"split": "train", "ep": 1, "step": 4050, "loss": 0.5656894445419312, "acc_trade": 1.0, "roi_trade": 6.952667713165283, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335702.1685}
+{"split": "train", "ep": 1, "step": 4100, "loss": 1.0079336166381836, "acc_trade": 0.3333333432674408, "roi_trade": -2.5970146656036377, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335702.5612285}
+{"split": "train", "ep": 1, "step": 4150, "loss": 0.7706025838851929, "acc_trade": 1.0, "roi_trade": 7.798886775970459, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335702.947682}
+{"split": "train", "ep": 1, "step": 4200, "loss": 0.8211537003517151, "acc_trade": 0.0, "roi_trade": -6.322266101837158, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335703.3303363}
+{"split": "train", "ep": 1, "step": 4250, "loss": 0.7371478080749512, "acc_trade": 1.0, "roi_trade": 7.544183731079102, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335703.7175434}
+{"split": "train", "ep": 1, "step": 4300, "loss": 0.8992835879325867, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335704.1006927}
+{"split": "train", "ep": 1, "step": 4350, "loss": 1.0807486772537231, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335704.4927313}
+{"split": "train", "ep": 1, "step": 4400, "loss": 0.8983901739120483, "acc_trade": 0.5, "roi_trade": 0.034856319427490234, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335704.8797364}
+{"split": "val", "ep": 1, "step": 4400, "acc_trade": 0.16626116601595506, "roi_trade": -0.5278272040442946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.8509102681291896, "ts": 1766335829.9072142}
+{"split": "train", "ep": 1, "step": 4450, "loss": 0.04994557425379753, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335830.1435528}
+{"split": "train", "ep": 1, "step": 4500, "loss": 0.875578761100769, "acc_trade": 1.0, "roi_trade": 7.820394992828369, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335830.3755136}
+{"split": "train", "ep": 1, "step": 4550, "loss": 0.0789300873875618, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335830.609411}
+{"split": "train", "ep": 1, "step": 4600, "loss": 0.05313645675778389, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335830.8460417}
+{"split": "train", "ep": 1, "step": 4650, "loss": 0.046042222529649734, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335831.1677027}
+{"split": "train", "ep": 1, "step": 4700, "loss": 0.9693874716758728, "acc_trade": 0.0, "roi_trade": -7.629156589508057, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335831.544248}
+{"split": "train", "ep": 1, "step": 4750, "loss": 1.0196912288665771, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335831.93172}
+{"split": "train", "ep": 1, "step": 4800, "loss": 0.6971545815467834, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335832.3096883}
+{"split": "val", "ep": 1, "step": 4800, "acc_trade": 0.08724315773159198, "roi_trade": -1.680324043967352, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.9517792758480601, "ts": 1766335958.929505}
+{"split": "train", "ep": 1, "step": 4850, "loss": 0.041109535843133926, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335959.1660557}
+{"split": "train", "ep": 1, "step": 4900, "loss": 0.8326646685600281, "acc_trade": 0.5, "roi_trade": -0.12483501434326172, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335959.5021484}
+{"split": "train", "ep": 1, "step": 4950, "loss": 0.9498041868209839, "acc_trade": 0.6666666865348816, "roi_trade": 2.155611753463745, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335959.890431}
+{"split": "train", "ep": 1, "step": 5000, "loss": 0.8959645628929138, "acc_trade": 0.6666666865348816, "roi_trade": 1.7362509965896606, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766335960.2695775}
+{"split": "train", "ep": 1, "step": 5050, "loss": 0.05205994471907616, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766335960.6572044}
+{"split": "train", "ep": 1, "step": 5100, "loss": 0.7916326522827148, "acc_trade": 0.0, "roi_trade": -7.249070167541504, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335961.0404782}
+{"split": "train", "ep": 1, "step": 5150, "loss": 0.445908784866333, "acc_trade": 1.0, "roi_trade": 6.260305881500244, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766335961.4291592}
+{"split": "train", "ep": 1, "step": 5200, "loss": 0.5308775305747986, "acc_trade": 1.0, "roi_trade": 7.132912635803223, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766335961.8208654}
+{"split": "val", "ep": 1, "step": 5200, "acc_trade": 0.09925734285146404, "roi_trade": -1.5061101485478874, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.9373793926467601, "ts": 1766336086.101998}
+{"split": "train", "ep": 1, "step": 5250, "loss": 1.2874424457550049, "acc_trade": 0.0, "roi_trade": -6.707869529724121, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336086.351588}
+{"split": "train", "ep": 1, "step": 5300, "loss": 0.8844030499458313, "acc_trade": 0.5, "roi_trade": 0.8401930332183838, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336086.7306457}
+{"split": "train", "ep": 1, "step": 5350, "loss": 0.6521739363670349, "acc_trade": 1.0, "roi_trade": 7.758502960205078, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336087.115527}
+{"split": "train", "ep": 1, "step": 5400, "loss": 0.8583088517189026, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336087.4842288}
+{"split": "train", "ep": 1, "step": 5450, "loss": 0.03334911912679672, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336087.8660684}
+{"split": "train", "ep": 1, "step": 5500, "loss": 0.04812167212367058, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336088.2580817}
+{"split": "train", "ep": 1, "step": 5550, "loss": 0.7674258351325989, "acc_trade": 0.0, "roi_trade": -6.874403953552246, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336088.648797}
+{"split": "train", "ep": 1, "step": 5600, "loss": 1.2568602561950684, "acc_trade": 0.0, "roi_trade": -7.153086185455322, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336089.0343595}
+{"split": "val", "ep": 1, "step": 5600, "acc_trade": 0.1614907068967904, "roi_trade": -0.5994247810605996, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.23570168088563884, "ts": 1766336211.3099873}
+{"split": "train", "ep": 1, "step": 5650, "loss": 1.5000776052474976, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336211.5534873}
+{"split": "train", "ep": 1, "step": 5700, "loss": 0.5315021872520447, "acc_trade": 1.0, "roi_trade": 6.67805814743042, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336211.8858128}
+{"split": "train", "ep": 1, "step": 5750, "loss": 0.04150218889117241, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336212.2769048}
+{"split": "train", "ep": 1, "step": 5800, "loss": 1.1044502258300781, "acc_trade": 0.5, "roi_trade": 0.28019261360168457, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336212.6484582}
+{"split": "train", "ep": 1, "step": 5850, "loss": 0.45803186297416687, "acc_trade": 1.0, "roi_trade": 6.537746906280518, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336213.004199}
+{"split": "train", "ep": 1, "step": 5900, "loss": 0.6790109872817993, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336213.3858175}
+{"split": "train", "ep": 1, "step": 5950, "loss": 0.8413232564926147, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336213.777204}
+{"split": "train", "ep": 1, "step": 6000, "loss": 0.04196605086326599, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336214.1625526}
+{"split": "val", "ep": 1, "step": 6000, "acc_trade": 0.06088256169615263, "roi_trade": -2.064105778831929, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.7666945967905748, "ts": 1766336337.117829}
+{"split": "train", "ep": 1, "step": 6050, "loss": 0.9725290536880493, "acc_trade": 0.6666666865348816, "roi_trade": 2.2164318561553955, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336337.3517}
+{"split": "train", "ep": 1, "step": 6100, "loss": 0.7140283584594727, "acc_trade": 1.0, "roi_trade": 7.3596296310424805, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336337.5834749}
+{"split": "train", "ep": 1, "step": 6150, "loss": 0.6958677172660828, "acc_trade": 1.0, "roi_trade": 7.684467792510986, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336337.813879}
+{"split": "train", "ep": 1, "step": 6200, "loss": 0.4548919200897217, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336338.0433404}
+{"split": "train", "ep": 1, "step": 6250, "loss": 0.8305453658103943, "acc_trade": 0.5, "roi_trade": -0.21912074089050293, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336338.276868}
+{"split": "train", "ep": 1, "step": 6300, "loss": 0.6712936162948608, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336338.5090792}
+{"split": "train", "ep": 1, "step": 6350, "loss": 0.8287228345870972, "acc_trade": 0.5, "roi_trade": 0.8580496311187744, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336338.744731}
+{"split": "train", "ep": 1, "step": 6400, "loss": 1.195852279663086, "acc_trade": 0.0, "roi_trade": -7.313398361206055, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336339.0825083}
+{"split": "val", "ep": 1, "step": 6400, "acc_trade": 0.19438921898057093, "roi_trade": -0.12152103315255651, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.344007084095064, "ts": 1766336469.321914}
+{"split": "train", "ep": 1, "step": 6450, "loss": 0.659238338470459, "acc_trade": 1.0, "roi_trade": 7.4782280921936035, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336469.5570078}
+{"split": "train", "ep": 1, "step": 6500, "loss": 0.04770469665527344, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336469.7864697}
+{"split": "train", "ep": 1, "step": 6550, "loss": 0.4050656855106354, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336470.0157063}
+{"split": "train", "ep": 1, "step": 6600, "loss": 0.8658409118652344, "acc_trade": 0.5, "roi_trade": 0.7563021183013916, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336470.248695}
+{"split": "train", "ep": 1, "step": 6650, "loss": 0.9036074876785278, "acc_trade": 0.75, "roi_trade": 3.895650863647461, "trade_rate": 0.5, "pred_trade_rate": 0.0, "ts": 1766336470.4812665}
+{"split": "train", "ep": 1, "step": 6700, "loss": 1.2560021877288818, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336470.7118943}
+{"split": "train", "ep": 1, "step": 6750, "loss": 0.6332956552505493, "acc_trade": 1.0, "roi_trade": 7.022170066833496, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336470.941636}
+{"split": "train", "ep": 1, "step": 6800, "loss": 0.7958587408065796, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336471.1737115}
+{"split": "val", "ep": 1, "step": 6800, "acc_trade": 0.1707774126475059, "roi_trade": -0.4606763091409004, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.6541266758074344, "ts": 1766336592.8280013}
+{"split": "train", "ep": 1, "step": 6850, "loss": 0.056927379220724106, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336593.0733669}
+{"split": "train", "ep": 1, "step": 6900, "loss": 0.7328481674194336, "acc_trade": 0.5, "roi_trade": 0.4179959297180176, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336593.4475577}
+{"split": "train", "ep": 1, "step": 6950, "loss": 1.0102828741073608, "acc_trade": 0.0, "roi_trade": -6.803089141845703, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336593.8374398}
+{"split": "train", "ep": 1, "step": 7000, "loss": 0.03455255925655365, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336594.2185504}
+{"split": "train", "ep": 1, "step": 7050, "loss": 0.7421053647994995, "acc_trade": 0.0, "roi_trade": -6.75393533706665, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336594.6063712}
+{"split": "train", "ep": 1, "step": 7100, "loss": 0.6260591149330139, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336594.9846299}
+{"split": "train", "ep": 1, "step": 7150, "loss": 1.1122486591339111, "acc_trade": 0.3333333432674408, "roi_trade": -2.9041950702667236, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336595.3789704}
+{"split": "train", "ep": 1, "step": 7200, "loss": 1.2137423753738403, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336595.7634323}
+{"split": "val", "ep": 1, "step": 7200, "acc_trade": 0.18570509659235745, "roi_trade": -0.24673559322136732, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.5904618626853545, "ts": 1766336719.8946273}
+{"split": "train", "ep": 1, "step": 7250, "loss": 0.7871233820915222, "acc_trade": 0.5, "roi_trade": 0.57924485206604, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336720.1707425}
+{"split": "train", "ep": 1, "step": 7300, "loss": 0.849139928817749, "acc_trade": 0.0, "roi_trade": -7.421096324920654, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336720.5679526}
+{"split": "train", "ep": 1, "step": 7350, "loss": 0.06868462264537811, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766336720.9531417}
+{"split": "train", "ep": 1, "step": 7400, "loss": 0.8543417453765869, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336721.3506377}
+{"split": "train", "ep": 1, "step": 7450, "loss": 0.6365200281143188, "acc_trade": 1.0, "roi_trade": 6.749444484710693, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336721.7424395}
+{"split": "train", "ep": 1, "step": 7500, "loss": 0.781696081161499, "acc_trade": 1.0, "roi_trade": 7.510342121124268, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336722.134351}
+{"split": "train", "ep": 1, "step": 7550, "loss": 0.4931873083114624, "acc_trade": 1.0, "roi_trade": 6.394547939300537, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336722.5307255}
+{"split": "train", "ep": 1, "step": 7600, "loss": 0.9191424250602722, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336722.9224968}
+{"split": "val", "ep": 1, "step": 7600, "acc_trade": 0.18561882757387485, "roi_trade": -0.2471866340179881, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.16736491976437132, "ts": 1766336845.6961424}
+{"split": "train", "ep": 1, "step": 7650, "loss": 0.5911887288093567, "acc_trade": 1.0, "roi_trade": 7.569871425628662, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336845.9395792}
+{"split": "train", "ep": 1, "step": 7700, "loss": 0.8818819522857666, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336846.286048}
+{"split": "train", "ep": 1, "step": 7750, "loss": 2.0742268562316895, "acc_trade": 0.0, "roi_trade": -6.716331958770752, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336846.678443}
+{"split": "train", "ep": 1, "step": 7800, "loss": 1.3037561178207397, "acc_trade": 0.0, "roi_trade": -7.2709879875183105, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336847.046763}
+{"split": "train", "ep": 1, "step": 7850, "loss": 1.070702075958252, "acc_trade": 0.6666666865348816, "roi_trade": 2.605682849884033, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336847.437237}
+{"split": "train", "ep": 1, "step": 7900, "loss": 0.6822851300239563, "acc_trade": 1.0, "roi_trade": 6.9445929527282715, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336847.8219478}
+{"split": "train", "ep": 1, "step": 7950, "loss": 0.8358017206192017, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336848.2194955}
+{"split": "train", "ep": 1, "step": 8000, "loss": 0.7202000021934509, "acc_trade": 1.0, "roi_trade": 7.217109203338623, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336848.606699}
+{"split": "val", "ep": 1, "step": 8000, "acc_trade": 0.20932657570486785, "roi_trade": 0.1040600834807569, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0047989031078610606, "ts": 1766336973.437605}
+{"split": "train", "ep": 1, "step": 8050, "loss": 0.8877180814743042, "acc_trade": 0.5, "roi_trade": 0.23614859580993652, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336973.6954203}
+{"split": "train", "ep": 1, "step": 8100, "loss": 1.0659034252166748, "acc_trade": 0.3333333432674408, "roi_trade": -2.775303602218628, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336974.0772142}
+{"split": "train", "ep": 1, "step": 8150, "loss": 0.540335476398468, "acc_trade": 1.0, "roi_trade": 7.745180130004883, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336974.4682884}
+{"split": "train", "ep": 1, "step": 8200, "loss": 0.8772827386856079, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336974.8535511}
+{"split": "train", "ep": 1, "step": 8250, "loss": 0.7411834001541138, "acc_trade": 0.5, "roi_trade": -0.5367188453674316, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336975.2438793}
+{"split": "train", "ep": 1, "step": 8300, "loss": 0.8112380504608154, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766336975.6350508}
+{"split": "train", "ep": 1, "step": 8350, "loss": 0.9329324960708618, "acc_trade": 0.6666666865348816, "roi_trade": 2.6666667461395264, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766336976.02413}
+{"split": "train", "ep": 1, "step": 8400, "loss": 0.6460095643997192, "acc_trade": 0.5, "roi_trade": 0.344437837600708, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766336976.4115102}
+{"split": "val", "ep": 1, "step": 8400, "acc_trade": 0.11518374032456531, "roi_trade": -1.2715529949108615, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.08424741011578306, "ts": 1766337098.2868335}
+{"split": "train", "ep": 1, "step": 8450, "loss": 0.047458257526159286, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337098.5228667}
+{"split": "train", "ep": 1, "step": 8500, "loss": 0.673780083656311, "acc_trade": 1.0, "roi_trade": 6.780938148498535, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337098.7541077}
+{"split": "train", "ep": 1, "step": 8550, "loss": 0.8216774463653564, "acc_trade": 0.6666666865348816, "roi_trade": 2.1096458435058594, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337098.9853382}
+{"split": "train", "ep": 1, "step": 8600, "loss": 0.4525420367717743, "acc_trade": 1.0, "roi_trade": 6.12695837020874, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337099.2179184}
+{"split": "train", "ep": 1, "step": 8650, "loss": 1.0146045684814453, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337099.4505818}
+{"split": "train", "ep": 1, "step": 8700, "loss": 0.5914716720581055, "acc_trade": 1.0, "roi_trade": 6.114943981170654, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337099.6804423}
+{"split": "train", "ep": 1, "step": 8750, "loss": 0.6147274374961853, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337099.9114807}
+{"split": "train", "ep": 1, "step": 8800, "loss": 0.5686080455780029, "acc_trade": 1.0, "roi_trade": 7.4502410888671875, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337100.14274}
+{"split": "val", "ep": 1, "step": 8800, "acc_trade": 0.07910826732598437, "roi_trade": -1.799081701368378, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.7650441803778184, "ts": 1766337224.5703585}
+{"split": "train", "ep": 1, "step": 8850, "loss": 0.43932271003723145, "acc_trade": 1.0, "roi_trade": 7.050845146179199, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337224.8030016}
+{"split": "train", "ep": 1, "step": 8900, "loss": 0.7740970849990845, "acc_trade": 0.0, "roi_trade": -7.469141960144043, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337225.0348363}
+{"split": "train", "ep": 1, "step": 8950, "loss": 0.47503578662872314, "acc_trade": 1.0, "roi_trade": 7.0311713218688965, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337225.2720475}
+{"split": "train", "ep": 1, "step": 9000, "loss": 0.06867232173681259, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337225.627992}
+{"split": "train", "ep": 1, "step": 9050, "loss": 0.7326748371124268, "acc_trade": 0.0, "roi_trade": -6.168920516967773, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337226.00821}
+{"split": "train", "ep": 1, "step": 9100, "loss": 0.7122526168823242, "acc_trade": 1.0, "roi_trade": 7.00477933883667, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337226.392653}
+{"split": "train", "ep": 1, "step": 9150, "loss": 1.3217138051986694, "acc_trade": 0.0, "roi_trade": -7.359772682189941, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337226.7887354}
+{"split": "train", "ep": 1, "step": 9200, "loss": 0.6304517984390259, "acc_trade": 1.0, "roi_trade": 6.772292613983154, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337227.1802447}
+{"split": "val", "ep": 1, "step": 9200, "acc_trade": 0.050049482270993526, "roi_trade": -2.2217938287118186, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.8664559211862686, "ts": 1766337351.9003427}
+{"split": "train", "ep": 1, "step": 9250, "loss": 0.4825878441333771, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337352.132001}
+{"split": "train", "ep": 1, "step": 9300, "loss": 0.5015697479248047, "acc_trade": 1.0, "roi_trade": 7.298072814941406, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337352.3629327}
+{"split": "train", "ep": 1, "step": 9350, "loss": 0.5093704462051392, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337352.5979533}
+{"split": "train", "ep": 1, "step": 9400, "loss": 0.6344524621963501, "acc_trade": 1.0, "roi_trade": 6.32646369934082, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337352.9157853}
+{"split": "train", "ep": 1, "step": 9450, "loss": 0.9611130952835083, "acc_trade": 0.0, "roi_trade": -6.465663433074951, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337353.2953174}
+{"split": "train", "ep": 1, "step": 9500, "loss": 0.9508310556411743, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337353.6856217}
+{"split": "train", "ep": 1, "step": 9550, "loss": 0.04298567771911621, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337354.0804043}
+{"split": "train", "ep": 1, "step": 9600, "loss": 0.7308268547058105, "acc_trade": 0.6666666865348816, "roi_trade": 2.9367027282714844, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337354.478243}
+{"split": "val", "ep": 1, "step": 9600, "acc_trade": 0.06176163514396136, "roi_trade": -2.0506233469854185, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.7470451198456226, "ts": 1766337477.554954}
+{"split": "train", "ep": 1, "step": 9650, "loss": 0.056377530097961426, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337477.8347638}
+{"split": "train", "ep": 1, "step": 9700, "loss": 0.626679003238678, "acc_trade": 1.0, "roi_trade": 6.288340091705322, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337478.1491315}
+{"split": "train", "ep": 1, "step": 9750, "loss": 0.05478260666131973, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337478.3961954}
+{"split": "train", "ep": 1, "step": 9800, "loss": 0.04259771108627319, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337478.6789975}
+{"split": "train", "ep": 1, "step": 9850, "loss": 0.04157048463821411, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337479.0724852}
+{"split": "train", "ep": 1, "step": 9900, "loss": 0.044344305992126465, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337479.4689877}
+{"split": "train", "ep": 1, "step": 9950, "loss": 1.1223552227020264, "acc_trade": 0.0, "roi_trade": -7.089181900024414, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337479.8578706}
+{"split": "train", "ep": 1, "step": 10000, "loss": 0.7967374324798584, "acc_trade": 1.0, "roi_trade": 7.626991271972656, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337480.2401252}
+{"split": "val", "ep": 1, "step": 10000, "acc_trade": 0.10982230518194093, "roi_trade": -1.3514386810630594, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.006423928498882795, "ts": 1766337610.6434195}
+{"split": "train", "ep": 1, "step": 10050, "loss": 0.041183922439813614, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337610.9123564}
+{"split": "train", "ep": 1, "step": 10100, "loss": 0.049081120640039444, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337611.3045237}
+{"split": "train", "ep": 1, "step": 10150, "loss": 0.7452458739280701, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337611.6918957}
+{"split": "train", "ep": 1, "step": 10200, "loss": 0.8569326996803284, "acc_trade": 0.6666666865348816, "roi_trade": 2.6064465045928955, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337612.0801938}
+{"split": "train", "ep": 1, "step": 10250, "loss": 0.4780324697494507, "acc_trade": 1.0, "roi_trade": 6.420994281768799, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337612.4625843}
+{"split": "train", "ep": 1, "step": 10300, "loss": 0.8345783948898315, "acc_trade": 0.5, "roi_trade": 0.25811100006103516, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337612.8485334}
+{"split": "train", "ep": 1, "step": 10350, "loss": 1.064512848854065, "acc_trade": 0.6666666865348816, "roi_trade": 2.0799477100372314, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337613.234478}
+{"split": "train", "ep": 1, "step": 10400, "loss": 0.5250712037086487, "acc_trade": 1.0, "roi_trade": 7.476574420928955, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337613.6228254}
+{"split": "val", "ep": 1, "step": 10400, "acc_trade": 0.09899596647321028, "roi_trade": -1.5086290546368561, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.013819063579118425, "ts": 1766337740.348293}
+{"split": "train", "ep": 1, "step": 10450, "loss": 0.8854005336761475, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337740.5967555}
+{"split": "train", "ep": 1, "step": 10500, "loss": 0.03969677910208702, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337740.983926}
+{"split": "train", "ep": 1, "step": 10550, "loss": 0.9415090084075928, "acc_trade": 0.6666666865348816, "roi_trade": 2.5931341648101807, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766337741.375663}
+{"split": "train", "ep": 1, "step": 10600, "loss": 0.6908776164054871, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337741.7635422}
+{"split": "train", "ep": 1, "step": 10650, "loss": 0.037138838320970535, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337742.155418}
+{"split": "train", "ep": 1, "step": 10700, "loss": 0.04047759249806404, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337742.552977}
+{"split": "train", "ep": 1, "step": 10750, "loss": 1.11385977268219, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337742.9385228}
+{"split": "train", "ep": 1, "step": 10800, "loss": 0.6147692799568176, "acc_trade": 1.0, "roi_trade": 7.756180286407471, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337743.3307793}
+{"split": "val", "ep": 1, "step": 10800, "acc_trade": 0.20309716056772795, "roi_trade": 0.012740292761375718, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.003488091610806419, "ts": 1766337884.3815548}
+{"split": "train", "ep": 1, "step": 10850, "loss": 0.9701454639434814, "acc_trade": 0.5, "roi_trade": -0.6667671203613281, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337884.6271691}
+{"split": "train", "ep": 1, "step": 10900, "loss": 0.673514723777771, "acc_trade": 1.0, "roi_trade": 7.207129955291748, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337884.8604157}
+{"split": "train", "ep": 1, "step": 10950, "loss": 0.7607623338699341, "acc_trade": 0.5, "roi_trade": 0.25426650047302246, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337885.1178677}
+{"split": "train", "ep": 1, "step": 11000, "loss": 0.036121923476457596, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766337885.505196}
+{"split": "train", "ep": 1, "step": 11050, "loss": 0.7235185503959656, "acc_trade": 1.0, "roi_trade": 7.267877578735352, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766337885.8998373}
+{"split": "train", "ep": 1, "step": 11100, "loss": 0.8460530638694763, "acc_trade": 0.0, "roi_trade": -6.45394229888916, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337886.2876022}
+{"split": "train", "ep": 1, "step": 11150, "loss": 0.6350106000900269, "acc_trade": 1.0, "roi_trade": 7.821823596954346, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337886.6683917}
+{"split": "train", "ep": 1, "step": 11200, "loss": 0.6299492716789246, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766337887.0578606}
+{"split": "val", "ep": 1, "step": 11200, "acc_trade": 0.20873898514282552, "roi_trade": 0.09614851645536596, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.00048560329067641683, "ts": 1766338009.5116196}
+{"split": "train", "ep": 1, "step": 11250, "loss": 0.06866070628166199, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338009.7974176}
+{"split": "train", "ep": 1, "step": 11300, "loss": 0.9508213996887207, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338010.1809487}
+{"split": "train", "ep": 1, "step": 11350, "loss": 0.5301604866981506, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338010.568654}
+{"split": "train", "ep": 1, "step": 11400, "loss": 1.1024177074432373, "acc_trade": 0.6666666865348816, "roi_trade": 2.4645516872406006, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338010.9536853}
+{"split": "train", "ep": 1, "step": 11450, "loss": 0.034825630486011505, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338011.3225145}
+{"split": "train", "ep": 1, "step": 11500, "loss": 0.03669209033250809, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338011.6989093}
+{"split": "train", "ep": 1, "step": 11550, "loss": 1.2447335720062256, "acc_trade": 0.3333333432674408, "roi_trade": -2.6666667461395264, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338012.0910962}
+{"split": "train", "ep": 1, "step": 11600, "loss": 0.6766061782836914, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338012.4728065}
+{"split": "val", "ep": 1, "step": 11600, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0, "ts": 1766338137.684133}
+{"split": "train", "ep": 1, "step": 11650, "loss": 0.337397038936615, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338137.9980452}
+{"split": "train", "ep": 1, "step": 11700, "loss": 1.382388949394226, "acc_trade": 0.0, "roi_trade": -7.42480993270874, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338138.3912032}
+{"split": "train", "ep": 1, "step": 11750, "loss": 0.033810246735811234, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338138.7213032}
+{"split": "train", "ep": 1, "step": 11800, "loss": 0.8646180629730225, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338138.965914}
+{"split": "train", "ep": 1, "step": 11850, "loss": 1.006316065788269, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338139.2638009}
+{"split": "train", "ep": 1, "step": 11900, "loss": 0.7585364580154419, "acc_trade": 1.0, "roi_trade": 7.10521125793457, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338139.6631327}
+{"split": "train", "ep": 1, "step": 11950, "loss": 1.2259973287582397, "acc_trade": 0.5, "roi_trade": -0.3620346784591675, "trade_rate": 0.5, "pred_trade_rate": 0.0, "ts": 1766338140.0546854}
+{"split": "train", "ep": 1, "step": 12000, "loss": 0.0406944639980793, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338140.4294426}
+{"split": "val", "ep": 1, "step": 12000, "acc_trade": 0.20091540679689734, "roi_trade": -0.018542449098824243, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0036118728417631526, "ts": 1766338264.9171972}
+{"split": "train", "ep": 1, "step": 12050, "loss": 0.5701096057891846, "acc_trade": 1.0, "roi_trade": 7.541433811187744, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338265.1476278}
+{"split": "train", "ep": 1, "step": 12100, "loss": 0.04278891533613205, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338265.3785694}
+{"split": "train", "ep": 1, "step": 12150, "loss": 0.04555414989590645, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338265.6970499}
+{"split": "train", "ep": 1, "step": 12200, "loss": 0.02939988113939762, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338266.0767393}
+{"split": "train", "ep": 1, "step": 12250, "loss": 0.8013548851013184, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338266.4774752}
+{"split": "train", "ep": 1, "step": 12300, "loss": 0.05579003691673279, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338266.8579159}
+{"split": "train", "ep": 1, "step": 12350, "loss": 0.569541871547699, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338267.2242591}
+{"split": "train", "ep": 1, "step": 12400, "loss": 0.36323776841163635, "acc_trade": 1.0, "roi_trade": 6.202845096588135, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338267.5782712}
+{"split": "val", "ep": 1, "step": 12400, "acc_trade": 0.21031942510481363, "roi_trade": 0.11949048900650257, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.008842423319114362, "ts": 1766338393.3927076}
+{"split": "train", "ep": 1, "step": 12450, "loss": 0.037791959941387177, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338393.6278594}
+{"split": "train", "ep": 1, "step": 12500, "loss": 0.03959786891937256, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338393.876702}
+{"split": "train", "ep": 1, "step": 12550, "loss": 0.04590119794011116, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338394.251859}
+{"split": "train", "ep": 1, "step": 12600, "loss": 0.6432702541351318, "acc_trade": 1.0, "roi_trade": 7.299631595611572, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338394.6319785}
+{"split": "train", "ep": 1, "step": 12650, "loss": 0.4091450572013855, "acc_trade": 1.0, "roi_trade": 6.522368431091309, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338395.0252273}
+{"split": "train", "ep": 1, "step": 12700, "loss": 0.053228240460157394, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338395.407785}
+{"split": "train", "ep": 1, "step": 12750, "loss": 1.269624948501587, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338395.8032963}
+{"split": "train", "ep": 1, "step": 12800, "loss": 0.7431391477584839, "acc_trade": 0.5, "roi_trade": 0.8663761615753174, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338396.1903415}
+{"split": "val", "ep": 1, "step": 12800, "acc_trade": 0.20532274407433188, "roi_trade": 0.04673873679911052, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.021829930936420883, "ts": 1766338520.3604014}
+{"split": "train", "ep": 1, "step": 12850, "loss": 0.2619355320930481, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338520.611608}
+{"split": "train", "ep": 1, "step": 12900, "loss": 0.7956622838973999, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338520.9942622}
+{"split": "train", "ep": 1, "step": 12950, "loss": 2.7893216609954834, "acc_trade": 0.0, "roi_trade": -7.701037406921387, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338521.3805952}
+{"split": "train", "ep": 1, "step": 13000, "loss": 0.5376583337783813, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338521.7520938}
+{"split": "train", "ep": 1, "step": 13050, "loss": 0.2316444218158722, "acc_trade": 1.0, "roi_trade": 6.5876545906066895, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338522.1342711}
+{"split": "train", "ep": 1, "step": 13100, "loss": 0.8659777045249939, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338522.5150387}
+{"split": "train", "ep": 1, "step": 13150, "loss": 0.5939829349517822, "acc_trade": 1.0, "roi_trade": 7.508787631988525, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338522.9010532}
+{"split": "train", "ep": 1, "step": 13200, "loss": 0.5876718759536743, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338523.291329}
+{"split": "val", "ep": 1, "step": 13200, "acc_trade": 0.1741824695663029, "roi_trade": -0.40874167632522707, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.5233343489742027, "ts": 1766338651.1009095}
+{"split": "train", "ep": 1, "step": 13250, "loss": 0.05187525972723961, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338651.3338642}
+{"split": "train", "ep": 1, "step": 13300, "loss": 0.7782773971557617, "acc_trade": 0.5, "roi_trade": 0.3286149501800537, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338651.5638294}
+{"split": "train", "ep": 1, "step": 13350, "loss": 2.306471347808838, "acc_trade": 0.0, "roi_trade": -6.358978748321533, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338651.7947965}
+{"split": "train", "ep": 1, "step": 13400, "loss": 0.04343632236123085, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338652.0240464}
+{"split": "train", "ep": 1, "step": 13450, "loss": 0.9859200716018677, "acc_trade": 0.6666666865348816, "roi_trade": 2.095762252807617, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338652.2552824}
+{"split": "train", "ep": 1, "step": 13500, "loss": 1.0210556983947754, "acc_trade": 0.5, "roi_trade": -0.38391804695129395, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338652.4848986}
+{"split": "train", "ep": 1, "step": 13550, "loss": 0.4411218762397766, "acc_trade": 1.0, "roi_trade": 6.917382717132568, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338652.7161713}
+{"split": "train", "ep": 1, "step": 13600, "loss": 0.8152934312820435, "acc_trade": 0.6666666865348816, "roi_trade": 3.1719322204589844, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338652.9471753}
+{"split": "val", "ep": 1, "step": 13600, "acc_trade": 0.1754719707411121, "roi_trade": -0.3895215438181323, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.4994731362990047, "ts": 1766338777.1313488}
+{"split": "train", "ep": 1, "step": 13650, "loss": 0.6909797191619873, "acc_trade": 0.5, "roi_trade": -0.9347732067108154, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338777.3661647}
+{"split": "train", "ep": 1, "step": 13700, "loss": 0.6722658276557922, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338777.596499}
+{"split": "train", "ep": 1, "step": 13750, "loss": 0.17652498185634613, "acc_trade": 1.0, "roi_trade": 6.601452827453613, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338777.8255668}
+{"split": "train", "ep": 1, "step": 13800, "loss": 0.3133161962032318, "acc_trade": 1.0, "roi_trade": 7.069658279418945, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338778.0547757}
+{"split": "train", "ep": 1, "step": 13850, "loss": 0.03077482432126999, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338778.2870188}
+{"split": "train", "ep": 1, "step": 13900, "loss": 2.249951124191284, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338778.516618}
+{"split": "train", "ep": 1, "step": 13950, "loss": 2.1868011951446533, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338778.7453344}
+{"split": "train", "ep": 1, "step": 14000, "loss": 0.4547019600868225, "acc_trade": 1.0, "roi_trade": 7.29024076461792, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338778.9742417}
+{"split": "val", "ep": 1, "step": 14000, "acc_trade": 0.16522469846923346, "roi_trade": -0.5410873288235364, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.7941708561852528, "ts": 1766338911.2347248}
+{"split": "train", "ep": 1, "step": 14050, "loss": 0.47242748737335205, "acc_trade": 1.0, "roi_trade": 7.553586006164551, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338911.5126867}
+{"split": "train", "ep": 1, "step": 14100, "loss": 0.7233779430389404, "acc_trade": 1.0, "roi_trade": 7.354362487792969, "trade_rate": 0.5, "pred_trade_rate": 0.0, "ts": 1766338911.9158432}
+{"split": "train", "ep": 1, "step": 14150, "loss": 0.5888042449951172, "acc_trade": 0.5, "roi_trade": 0.39191174507141113, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338912.298814}
+{"split": "train", "ep": 1, "step": 14200, "loss": 0.7593041658401489, "acc_trade": 0.6666666865348816, "roi_trade": 1.7526264190673828, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766338912.684098}
+{"split": "train", "ep": 1, "step": 14250, "loss": 0.047452472150325775, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766338913.0624392}
+{"split": "train", "ep": 1, "step": 14300, "loss": 0.3438073992729187, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338913.4533286}
+{"split": "train", "ep": 1, "step": 14350, "loss": 1.2949320077896118, "acc_trade": 0.5, "roi_trade": -0.18379664421081543, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766338913.8469737}
+{"split": "train", "ep": 1, "step": 14400, "loss": 0.5227162837982178, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766338914.2393568}
+{"split": "val", "ep": 1, "step": 14400, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.8275600497664026, "ts": 1766339047.1989143}
+{"split": "train", "ep": 1, "step": 14450, "loss": 0.05097142979502678, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339047.4768648}
+{"split": "train", "ep": 1, "step": 14500, "loss": 0.020375804975628853, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339047.866761}
+{"split": "train", "ep": 1, "step": 14550, "loss": 0.2039811611175537, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339048.2563062}
+{"split": "train", "ep": 1, "step": 14600, "loss": 0.46783098578453064, "acc_trade": 1.0, "roi_trade": 6.562899589538574, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339048.6426105}
+{"split": "train", "ep": 1, "step": 14650, "loss": 0.04275887832045555, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339049.0346231}
+{"split": "train", "ep": 1, "step": 14700, "loss": 0.04910633713006973, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339049.4249053}
+{"split": "train", "ep": 1, "step": 14750, "loss": 1.0475060939788818, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339049.8234067}
+{"split": "train", "ep": 1, "step": 14800, "loss": 0.8186279535293579, "acc_trade": 0.5, "roi_trade": 0.0, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339050.2184305}
+{"split": "val", "ep": 1, "step": 14800, "acc_trade": 0.2100522148311471, "roi_trade": 0.1148308100447092, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0735006601665651, "ts": 1766339178.4029953}
+{"split": "train", "ep": 1, "step": 14850, "loss": 1.3839199542999268, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339178.6809278}
+{"split": "train", "ep": 1, "step": 14900, "loss": 0.5076291561126709, "acc_trade": 1.0, "roi_trade": 7.529114723205566, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339179.0720932}
+{"split": "train", "ep": 1, "step": 14950, "loss": 0.2713254690170288, "acc_trade": 1.0, "roi_trade": 6.4228129386901855, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339179.4577267}
+{"split": "train", "ep": 1, "step": 15000, "loss": 1.2030633687973022, "acc_trade": 0.0, "roi_trade": -7.765705108642578, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339179.8414738}
+{"split": "train", "ep": 1, "step": 15050, "loss": 1.2550466060638428, "acc_trade": 0.3333333432674408, "roi_trade": -2.1528029441833496, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339180.2269971}
+{"split": "train", "ep": 1, "step": 15100, "loss": 1.415509581565857, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339180.6044939}
+{"split": "train", "ep": 1, "step": 15150, "loss": 0.044728491455316544, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339181.0002546}
+{"split": "train", "ep": 1, "step": 15200, "loss": 1.2700245380401611, "acc_trade": 0.0, "roi_trade": -7.386353969573975, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339181.3947487}
+{"split": "val", "ep": 1, "step": 15200, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0, "ts": 1766339304.5458088}
+{"split": "train", "ep": 1, "step": 15250, "loss": 1.8511699438095093, "acc_trade": 0.0, "roi_trade": -7.17165994644165, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339304.82872}
+{"split": "train", "ep": 1, "step": 15300, "loss": 0.0548437125980854, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339305.2268007}
+{"split": "train", "ep": 1, "step": 15350, "loss": 0.6519185304641724, "acc_trade": 0.5, "roi_trade": 0.5620977878570557, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339305.705393}
+{"split": "train", "ep": 1, "step": 15400, "loss": 0.9014506340026855, "acc_trade": 0.6666666865348816, "roi_trade": 2.7029001712799072, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339306.0044901}
+{"split": "train", "ep": 1, "step": 15450, "loss": 1.1387277841567993, "acc_trade": 0.75, "roi_trade": 4.152007102966309, "trade_rate": 0.5, "pred_trade_rate": 0.0, "ts": 1766339306.394477}
+{"split": "train", "ep": 1, "step": 15500, "loss": 1.3274738788604736, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.125, "ts": 1766339306.7561028}
+{"split": "train", "ep": 1, "step": 15550, "loss": 0.049455493688583374, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339307.147048}
+{"split": "train", "ep": 1, "step": 15600, "loss": 0.7297790050506592, "acc_trade": 0.0, "roi_trade": -6.733929634094238, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339307.5262244}
+{"split": "val", "ep": 1, "step": 15600, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0, "ts": 1766339431.8324833}
+{"split": "train", "ep": 1, "step": 15650, "loss": 0.5456011891365051, "acc_trade": 1.0, "roi_trade": 7.491676330566406, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339432.1073039}
+{"split": "train", "ep": 1, "step": 15700, "loss": 1.6371711492538452, "acc_trade": 0.0, "roi_trade": -7.4762797355651855, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339432.4969995}
+{"split": "train", "ep": 1, "step": 15750, "loss": 0.773605227470398, "acc_trade": 0.6666666865348816, "roi_trade": 2.127100706100464, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339432.8830962}
+{"split": "train", "ep": 1, "step": 15800, "loss": 1.57072114944458, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339433.261177}
+{"split": "train", "ep": 1, "step": 15850, "loss": 0.8847935795783997, "acc_trade": 0.3333333432674408, "roi_trade": -3.1575164794921875, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339433.647488}
+{"split": "train", "ep": 1, "step": 15900, "loss": 1.54230797290802, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339434.033618}
+{"split": "train", "ep": 1, "step": 15950, "loss": 0.9636833667755127, "acc_trade": 0.5, "roi_trade": -0.49599313735961914, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339434.4320261}
+{"split": "train", "ep": 1, "step": 16000, "loss": 0.6026601195335388, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339434.8268692}
+{"split": "val", "ep": 1, "step": 16000, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0, "ts": 1766339565.4773939}
+{"split": "train", "ep": 1, "step": 16050, "loss": 0.056861624121665955, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339565.732073}
+{"split": "train", "ep": 1, "step": 16100, "loss": 1.0296821594238281, "acc_trade": 0.3333333432674408, "roi_trade": -2.217371702194214, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339566.1046798}
+{"split": "train", "ep": 1, "step": 16150, "loss": 0.7720535397529602, "acc_trade": 0.0, "roi_trade": -6.628262996673584, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339566.4928896}
+{"split": "train", "ep": 1, "step": 16200, "loss": 1.1162538528442383, "acc_trade": 0.0, "roi_trade": -7.389253616333008, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339566.8691108}
+{"split": "train", "ep": 1, "step": 16250, "loss": 1.9961190223693848, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339567.26368}
+{"split": "train", "ep": 1, "step": 16300, "loss": 0.05154040455818176, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339567.6586578}
+{"split": "train", "ep": 1, "step": 16350, "loss": 1.1843582391738892, "acc_trade": 0.5, "roi_trade": -0.4520392417907715, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339568.0447235}
+{"split": "train", "ep": 1, "step": 16400, "loss": 0.5211887359619141, "acc_trade": 1.0, "roi_trade": 8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339568.4299114}
+{"split": "val", "ep": 1, "step": 16400, "acc_trade": 0.2105193794009745, "roi_trade": 0.12219302420714946, "trade_rate": 0.22040041641275646, "pred_trade_rate": 0.0, "ts": 1766339741.961243}
+{"split": "train", "ep": 1, "step": 16450, "loss": 1.286718487739563, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339742.2107902}
+{"split": "train", "ep": 1, "step": 16500, "loss": 1.7032757997512817, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339742.4463334}
+{"split": "train", "ep": 1, "step": 16550, "loss": 0.07894178479909897, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339742.6811523}
+{"split": "train", "ep": 1, "step": 16600, "loss": 0.8189805150032043, "acc_trade": 0.6666666865348816, "roi_trade": 3.1599111557006836, "trade_rate": 0.375, "pred_trade_rate": 0.0, "ts": 1766339742.9153125}
+{"split": "train", "ep": 1, "step": 16650, "loss": 0.18417739868164062, "acc_trade": 1.0, "roi_trade": 6.1572675704956055, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339743.1500053}
+{"split": "train", "ep": 1, "step": 16700, "loss": 1.254262924194336, "acc_trade": 0.0, "roi_trade": -7.365653991699219, "trade_rate": 0.25, "pred_trade_rate": 0.0, "ts": 1766339743.3807402}
+{"split": "train", "ep": 1, "step": 16750, "loss": 0.8562196493148804, "acc_trade": 0.0, "roi_trade": -8.0, "trade_rate": 0.125, "pred_trade_rate": 0.0, "ts": 1766339743.6163576}
+{"split": "train", "ep": 1, "step": 16800, "loss": 0.044287215918302536, "acc_trade": 0.0, "roi_trade": 0.0, "trade_rate": 0.0, "pred_trade_rate": 0.0, "ts": 1766339743.8492718}

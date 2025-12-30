@@ -1,220 +1,274 @@
-# Prochaines Étapes - Fix du Modèle
+# Prochaines Étapes Immédiates
 
-## 🎯 Problème Identifié
-
-Votre modèle donnait **5.19% direction accuracy** (catastrophique).
-
-**Cause:** Configuration d'entraînement instable, PAS un problème de données.
-
-✅ Labels corrects
-✅ Classes équilibrées (46% DOWN, 47% UP)
-✅ Pas de temporal leakage
-❌ Modèle trop petit + lr trop élevé + over-régularisation
+Date : 2025-12-29
 
 ---
 
-## 📋 Solution: Entraînement en 2 Phases
+## ✅ Fait
 
-### Phase 1: Returns Only (MAINTENANT)
-
-**Objectif:** Vérifier que le modèle apprend correctement le signal temporel
-
-**Config:** `ai/configs/train_returns_only.yaml`
-
-**Changements:**
-- ✅ Capacité du modèle **restaurée** (d_model=128, n_heads=4)
-- ✅ Learning rate **réduit** (0.0003 au lieu de 0.001)
-- ✅ Régularisation **réduite** (weight_decay=0.0001)
-- ✅ Direction **désactivée** (w_dir=0.0) temporairement
-
-**Lancement:**
-```bash
-cd /Users/christopher/Desktop/futur
-./ai/quick_start_returns.sh
-```
-
-**Métriques attendues (après 5 epochs):**
-- ✅ `ret_mae` validation < 0.01
-- ✅ `loss` train ≈ loss val (pas d'overfitting)
-- ✅ Sharpe Ratio > 0.5
-
-**Si succès:**
-→ Passer à Phase 2
-
-**Si échec:**
-→ Problème plus profond à investiguer
+- Architecture corrigée : régimes binaires {calm, reversal}
+- Impulse réintroduit comme EVENT detector
+- Gates production mis à jour
+- Scripts shell adaptés (`train_regime.sh`, `train_all.sh`)
+- Tests validés (5/5)
+- Documentation complète
 
 ---
 
-### Phase 2: Réactiver Direction (SI PHASE 1 OK)
+## 🚀 À Faire Maintenant
 
-**Config:** `ai/configs/train_with_direction.yaml` (à créer)
+### 1) Adapter `scripts/train_regime_classifier.py` (PRIORITÉ)
 
-**Changements:**
-```yaml
-loss_weights:
-  w_ret: 1.0
-  w_dir: 0.5    # Réactivé graduellement (au lieu de 1.5)
-  w_rv: 0.0
-```
+**Fichier** : `trading-system/scripts/train_regime_classifier.py`
 
-**Ajouter class weights** pour compenser FLAT minority:
+**Changements requis** :
+
 ```python
-class_weight = {
-    0: 1.0,   # DOWN (46%)
-    1: 7.0,   # FLAT (7%) - poids augmenté
-    2: 1.0    # UP (47%)
-}
+# 1. Ajouter flag --binary
+parser.add_argument('--binary', action='store_true',
+                    help='Use binary regime classification (calm vs reversal)')
+
+# 2. Importer modules corrigés
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "ai/models/training/common"))
+
+from regime_classifier_v2 import (
+    train_calibrated_regime_classifier,
+    evaluate_regime_classifier,
+    production_gates,
+)
+from production_gates import RegimeClassifierGates
+
+# 3. Filtrer labels si --binary
+if args.binary:
+    # Supprimer impulse (supposé label=1)
+    mask = labels != 1
+    features_df = features_df[mask]
+    labels = labels[mask]
+    labels = labels.replace(2, 1)  # Remapper reversal: 2→1
+    class_names = ['calm', 'reversal']
+else:
+    class_names = ['calm', 'impulse', 'reversal']
+
+# 4. Utiliser nouvelles fonctions
+clf = train_calibrated_regime_classifier(
+    X_train, y_train, class_names=class_names
+)
+
+metrics = evaluate_regime_classifier(
+    clf, X_val, y_val, class_names=class_names
+)
+
+# 5. Valider avec nouvelles gates
+gates = RegimeClassifierGates()
+passed, reason = gates.validate(metrics)
+
+if not passed:
+    logger.error(f"Production gates failed: {reason}")
+    # Save to failed/ directory
+    sys.exit(1)
 ```
 
-**Métriques attendues:**
-- ✅ `dir_accuracy` validation > 40%
-- ✅ `ret_mae` reste stable
-- ✅ Pas d'overfitting
+**Référence complète** : `trading-system/SCRIPT_UPDATES_REQUIRED.md`
 
 ---
 
-## 🚀 Commandes Rapides
+### 2) Re-entraîner le Modèle (CRITIQUE)
 
-### Lancer Phase 1
 ```bash
-./ai/quick_start_returns.sh
+cd trading-system
+
+# Training binaire
+./train_regime.sh
+
+# Attendu :
+# ✅ BINARY REGIME CLASSIFIER TRAINING COMPLETE
+# Accuracy: >60% (vs 46% avant)
+# Calm recall: >50%
+# Reversal recall: >50%
+# ECE: <0.10
 ```
 
-### Monitorer TensorBoard
+**Si ça échoue** : Le script appelle `train_regime_classifier.py` avec `--binary`, donc il faut d'abord faire l'étape 1.
+
+---
+
+### 3) Générer Impulse Features (IMPORTANT)
+
+Créer `scripts/add_impulse_features.py` :
+
+```python
+"""Add impulse event features to dataset."""
+import sys
+from pathlib import Path
+import pandas as pd
+import argparse
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "ai/models/training/common"))
+from impulse_detector import create_impulse_features_batch
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input', required=True, help='Input parquet file')
+    parser.add_argument('--output', required=True, help='Output parquet file')
+    args = parser.parse_args()
+
+    df = pd.read_parquet(args.input)
+    df = create_impulse_features_batch(df)
+    df.to_parquet(args.output)
+
+    print(f"✅ Impulse features added: impulse_score, is_impulse")
+    print(f"   Saved to: {args.output}")
+
+if __name__ == '__main__':
+    main()
+```
+
+**Utilisation** :
 ```bash
-tensorboard --logdir=training_output_returns_only/tensorboard/ --port=6006
-# Ouvrir: http://localhost:6006
+python scripts/add_impulse_features.py \
+    --input data/processed/btcusdt_2019_2023.parquet \
+    --output data/processed/btcusdt_2019_2023_impulse.parquet
 ```
 
-### Vérifier métriques
+---
+
+### 4) Valider Impulse Gates (VALIDATION)
+
+Créer `scripts/validate_impulse_gates.py` :
+
+```python
+"""Validate impulse event metrics."""
+import sys
+from pathlib import Path
+import pandas as pd
+import argparse
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "ai/models/training/common"))
+from impulse_detector import ImpulseDetector
+from impulse_gates import validate_impulse_production
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data', required=True)
+    parser.add_argument('--start-date', required=True)
+    parser.add_argument('--end-date', required=True)
+    args = parser.parse_args()
+
+    df = pd.read_parquet(args.data)
+    df = df[(df['datetime'] >= args.start_date) &
+            (df['datetime'] <= args.end_date)]
+
+    detector = ImpulseDetector(threshold=0.7)
+    total_days = (df['datetime'].max() - df['datetime'].min()).days
+
+    # Compute metrics from is_impulse column (already computed)
+    if 'is_impulse' in df.columns:
+        detector.events = [
+            {'timestamp': row['datetime'], 'score': row['impulse_score']}
+            for _, row in df[df['is_impulse']].iterrows()
+        ]
+
+    metrics = detector.get_event_metrics(total_days=total_days)
+    passed, report = validate_impulse_production(metrics)
+
+    print(f"\nStatus: {'✅ PASSED' if passed else '❌ FAILED'}")
+    print(f"\nMetrics:")
+    for k, v in metrics.items():
+        print(f"  {k}: {v}")
+
+    if not passed:
+        print(f"\nFailures:")
+        for f in report['failures']:
+            print(f"  - {f}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
+```
+
+---
+
+### 5) Backtest Complet (FINAL)
+
+Après re-entraînement :
+
 ```bash
-# Pendant l'entraînement
-tail -f training_output_returns_only/logs/train_*.log
+# Full backtest avec régimes binaires
+python scripts/backtest_regime_binary.py \
+    --start-date 2019-01-01 \
+    --end-date 2023-12-31 \
+    --model artifacts/models/regime/production_binary_v1.pkl
 
-# Après l'entraînement
-cat training_output_returns_only/metrics/final_metrics.json
+# Attendu :
+# - Accuracy >65%
+# - Calm/Reversal recall >60%
+# - Sharpe ratio amélioration vs 3-class
 ```
 
 ---
 
-## 📊 Fichiers Créés
+## 📋 Checklist
 
-### Diagnostic
-- [`DIAGNOSTIC_REPORT.md`](DIAGNOSTIC_REPORT.md) - Rapport complet des tests
+### Phase 1 (Aujourd'hui)
+- [ ] Modifier `scripts/train_regime_classifier.py` (ajouter --binary)
+- [ ] Tester training : `./train_regime.sh`
+- [ ] Valider accuracy >60%
 
-### Configuration
-- [`ai/configs/train_returns_only.yaml`](ai/configs/train_returns_only.yaml) - Config Phase 1
+### Phase 2 (Court terme)
+- [ ] Créer `scripts/add_impulse_features.py`
+- [ ] Créer `scripts/validate_impulse_gates.py`
+- [ ] Générer impulse features sur données historiques
+- [ ] Valider impulse gates
 
-### Scripts
-- [`ai/quick_start_returns.sh`](ai/quick_start_returns.sh) - Lancement rapide
-- [`ai/test_direction_labels.py`](ai/test_direction_labels.py) - Tests validation labels
-- [`ai/analyze_s3_direction_distribution.py`](ai/analyze_s3_direction_distribution.py) - Analyse distribution
-- [`ai/check_temporal_leakage.py`](ai/check_temporal_leakage.py) - Check temporal leakage
-
----
-
-## 📈 Interprétation des Résultats
-
-### ✅ Succès Phase 1 (Returns)
-
-Si après 10 epochs:
-- `val_ret_mae` < 0.01
-- `val_loss` stable (pas de divergence)
-- Sharpe Ratio > 0.5
-
-→ **Le modèle apprend correctement!**
-→ Passer à Phase 2 (réactiver direction)
-
-### ❌ Échec Phase 1 (Returns)
-
-Si après 10 epochs:
-- `val_ret_mae` stagne > 0.02
-- `val_loss` > `train_loss` (overfitting)
-- Sharpe Ratio < 0
-
-→ **Problème plus profond:**
-- Vérifier features (temporal leakage?)
-- Vérifier données (qualité S3?)
-- Vérifier modèle (architecture?)
+### Phase 3 (Moyen terme)
+- [ ] Backtest complet 2019-2023
+- [ ] Comparer performances vs 3-class
+- [ ] Ajuster thresholds si nécessaire
+- [ ] Paper trading 7-30 jours
 
 ---
 
-## 🔍 Debugging
+## 🔍 Vérification Rapide
 
-Si problèmes pendant l'entraînement:
+```bash
+# Status actuel
+bash CHECK_STATUS.sh
 
-### OOM (Out of Memory)
-```yaml
-# Dans train_returns_only.yaml, réduire:
-batch_size: 64        # au lieu de 128
-shuffle_buffer: 5000  # au lieu de 10000
-```
+# Tests modules
+cd ai/models/training/common
+python3 test_integration.py  # 5/5 doivent passer
 
-### Loss = NaN
-```yaml
-# Réduire learning rate encore plus:
-lr: 0.0001  # au lieu de 0.0003
-```
-
-### Overfitting immédiat
-```yaml
-# Augmenter dropout:
-dropout: 0.20  # au lieu de 0.15
+# Demo pipeline
+python3 pipeline_integration_example.py
 ```
 
 ---
 
-## 📞 Questions Fréquentes
+## 📖 Documentation
 
-**Q: Pourquoi désactiver direction?**
-A: Pour isoler le problème. Si returns marche mais pas direction, on sait que c'est un problème de classification, pas de feature engineering.
-
-**Q: Combien de temps Phase 1?**
-A: ~4-6 heures pour 20 epochs (CPU), ~1-2h (GPU si CUDA marche)
-
-**Q: Que faire si Phase 1 échoue?**
-A: Analyser les logs, vérifier data quality, peut-être le signal est trop bruité pour 1-minute data.
-
-**Q: Peut-on skip Phase 1?**
-A: Non recommandé. Returns est plus simple que direction. Si ça marche pas sur returns, ça marchera pas sur direction.
+**Guide complet** : `ai/models/MIGRATION_GUIDE.md`
+**Updates scripts** : `trading-system/SCRIPT_UPDATES_REQUIRED.md`
+**Synthèse** : `FINAL_SUMMARY.md`
 
 ---
 
-## ✅ Checklist
+## 🎯 Objectifs
 
-Avant de lancer:
-- [ ] Lire [DIAGNOSTIC_REPORT.md](DIAGNOSTIC_REPORT.md)
-- [ ] Vérifier config: `cat ai/configs/train_returns_only.yaml`
-- [ ] Nettoyer cache: `rm -rf training_output/`
-- [ ] Lancer: `./ai/quick_start_returns.sh`
-- [ ] Ouvrir TensorBoard pendant l'entraînement
-- [ ] Surveiller `ret_mae` et `loss`
+**Immédiat** :
+- Training binaire fonctionnel
+- Accuracy >60% (vs 46%)
 
-Après 5 epochs:
-- [ ] `ret_mae` diminue? → Continue
-- [ ] `loss` explose? → Stop, debug
-- [ ] `overfitting`? → Augmenter dropout
+**Court terme** :
+- Impulse features intégrés
+- Gates validés
 
-Après 20 epochs:
-- [ ] Check `final_metrics.json`
-- [ ] Si succès → Préparer Phase 2
-- [ ] Si échec → Analyser logs détaillés
+**Moyen terme** :
+- Production deployment
+- Sharpe ratio amélioration mesurable
 
 ---
 
-## 🎓 Apprentissage
-
-Ce diagnostic a montré que:
-
-1. **Debugging méthodique** > tâtonner avec hyperparams
-2. **Tester labels** AVANT d'entraîner
-3. **Vérifier data quality** (class balance, leakage)
-4. **Simplifier d'abord** (returns only) puis complexifier (direction)
-5. **Configuration stable** > "optimisations" agressives
-
-**Règle d'or:** Si accuracy < random → Bug dans data/config, PAS dans le modèle.
-
----
-
-Bonne chance! 🚀
+*Créé le 2025-12-29*
+*Tout est prêt, il ne reste que l'adaptation des scripts Python*

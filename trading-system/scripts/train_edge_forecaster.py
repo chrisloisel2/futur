@@ -39,38 +39,57 @@ logger = get_logger(__name__)
 
 def generate_forward_labels(
     df: pd.DataFrame,
-    horizon_minutes: int = 240,  # 4 hours
-    tp_threshold: float = 0.01,  # 1% take profit
+    horizon_minutes: int = 60,  # PRODUCTION FIX: 1h au lieu de 4h
+    tp_threshold: float = 0.01,  # Base threshold (will be dynamic)
 ) -> pd.DataFrame:
     """
     Generate forward-looking labels for training.
 
+    PRODUCTION FIXES:
+    - Horizon: 240min → 60min (plus pertinent pour trading)
+    - TP dynamique: basé sur rv_60 (volatilité réalisée)
+    - Logs: distribution TP threshold par quantile
+
     Creates:
         - return_fwd: Future return at horizon
-        - tp_hit: Binary flag if TP was hit
+        - tp_hit: Binary flag if TP was hit (dynamic threshold)
         - rv_fwd_mean: Forward realized volatility
+        - tp_threshold_used: Actual TP threshold used (dynamic)
 
     Args:
         df: DataFrame with OHLCV data
-        horizon_minutes: Forward horizon in minutes (default 240 = 4h)
-        tp_threshold: Take profit threshold (default 0.01 = 1%)
+        horizon_minutes: Forward horizon in minutes (default 60 = 1h)
+        tp_threshold: Base TP threshold (default 0.01 = 1%)
 
     Returns:
         DataFrame with original data + forward labels
     """
     df = df.copy()
 
+    # PRODUCTION FIX: TP dynamique basé sur volatilité
+    # Calcul rv_60 (volatilité réalisée 60min)
+    if 'close' not in df.columns:
+        raise ValueError("DataFrame must contain 'close' column")
+
+    df['ret_1m'] = df['close'].pct_change()
+    df['rv_60'] = df['ret_1m'].rolling(60).std().fillna(0)
+
+    # TP threshold dynamique: max(0.0025, 1.0 * rv_60)
+    df['tp_threshold_used'] = np.maximum(0.0025, 1.0 * df['rv_60'])
+
     logger.info({
-        "msg": "Generating forward labels",
+        "msg": "Generating forward labels (PRODUCTION)",
         "horizon_minutes": horizon_minutes,
-        "tp_threshold": tp_threshold,
+        "tp_threshold_base": tp_threshold,
+        "tp_threshold_dynamic": "max(0.0025, 1.0 * rv_60)",
+        "tp_threshold_p50": f"{df['tp_threshold_used'].median():.4f}",
+        "tp_threshold_p90": f"{df['tp_threshold_used'].quantile(0.90):.4f}",
     })
 
     # Forward return (close-to-close)
     df['return_fwd'] = df['close'].pct_change(periods=horizon_minutes).shift(-horizon_minutes)
 
-    # TP hit (binary): did price reach tp_threshold at any point in horizon?
-    # Approximation: max return in next horizon periods
+    # TP hit (binary): did price reach DYNAMIC tp_threshold at any point in horizon?
     df['max_return_fwd'] = (
         df['high'].rolling(horizon_minutes).max().shift(-horizon_minutes) / df['close'] - 1.0
     )
@@ -78,9 +97,10 @@ def generate_forward_labels(
         df['low'].rolling(horizon_minutes).min().shift(-horizon_minutes) / df['close'] - 1.0
     )
 
+    # PRODUCTION FIX: TP hit avec threshold dynamique
     df['tp_hit'] = (
-        (df['max_return_fwd'] >= tp_threshold) |  # Long TP hit
-        (df['min_return_fwd'] <= -tp_threshold)   # Short TP hit
+        (df['max_return_fwd'] >= df['tp_threshold_used']) |  # Long TP hit
+        (df['min_return_fwd'] <= -df['tp_threshold_used'])   # Short TP hit
     ).astype(int)
 
     # Forward realized volatility (mean of |returns| in horizon)
@@ -88,18 +108,23 @@ def generate_forward_labels(
         df['close'].pct_change().abs().rolling(horizon_minutes).mean().shift(-horizon_minutes)
     )
 
+    # PRODUCTION FIX: Log tp_hit_rate par quantile de volatilité
+    df['vol_quantile'] = pd.qcut(df['rv_60'], q=4, labels=['Q1_low', 'Q2', 'Q3', 'Q4_high'], duplicates='drop')
+    tp_hit_by_vol = df.groupby('vol_quantile')['tp_hit'].mean()
+
     # Drop intermediate columns
-    df = df.drop(columns=['max_return_fwd', 'min_return_fwd'])
+    df = df.drop(columns=['max_return_fwd', 'min_return_fwd', 'ret_1m', 'vol_quantile'])
 
     # Count valid labels
     n_valid = df[['return_fwd', 'tp_hit', 'rv_fwd_mean']].notna().all(axis=1).sum()
 
     logger.info({
-        "msg": "Forward labels generated",
+        "msg": "Forward labels generated (PRODUCTION)",
         "total_rows": len(df),
         "valid_labels": n_valid,
         "coverage": f"{n_valid / len(df):.2%}",
-        "tp_hit_rate": f"{df['tp_hit'].mean():.2%}",
+        "tp_hit_rate_overall": f"{df['tp_hit'].mean():.2%}",
+        "tp_hit_rate_by_vol": tp_hit_by_vol.to_dict(),
     })
 
     return df
@@ -305,8 +330,13 @@ def train_edge_forecaster(
     _ = model.predict(first_batch_df)  # Initialize network
 
     # Training loop
-    optimizer = torch.optim.AdamW(model.net.parameters(), lr=lr, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=n_epochs)
+    # PRODUCTION FIX: weight_decay augmenté pour réduire overfitting
+    optimizer = torch.optim.AdamW(model.net.parameters(), lr=lr, weight_decay=1e-2)
+
+    # PRODUCTION FIX: ReduceLROnPlateau au lieu de CosineAnnealing
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", factor=0.5, patience=2
+    )
 
     device_torch = torch.device(device)
 
@@ -356,7 +386,10 @@ def train_edge_forecaster(
 
     logger.info("Starting training...")
 
+    # PRODUCTION FIX: Early stopping
     best_test_loss = float('inf')
+    patience = 5
+    patience_counter = 0
     train_losses = []
     test_losses = []
 
@@ -402,20 +435,65 @@ def train_edge_forecaster(
         test_loss_epoch /= n_test_batches
         test_losses.append(test_loss_epoch)
 
-        scheduler.step()
+        # PRODUCTION FIX: Step scheduler with test_loss
+        scheduler.step(test_loss_epoch)
 
-        # Log progress
+        # PRODUCTION FIX: Compute output statistics pour détecter NaN/Inf
+        with torch.no_grad():
+            # Sample a batch for stats
+            X_sample, y_sample = next(iter(test_loader))
+            X_sample = X_sample.to(device_torch)
+            outputs_sample = model.net(X_sample, regime_vec=None)
+            q05_s, q50_s, q95_s, p_hit_s, rv_mean_s, sigma_tail_s = outputs_sample
+
+            output_stats = {
+                "q05_mean": q05_s.mean().item(),
+                "q05_std": q05_s.std().item(),
+                "q50_mean": q50_s.mean().item(),
+                "q50_std": q50_s.std().item(),
+                "q95_mean": q95_s.mean().item(),
+                "q95_std": q95_s.std().item(),
+                "p_hit_mean": p_hit_s.mean().item(),
+                "p_hit_std": p_hit_s.std().item(),
+                "nan_count": torch.isnan(q50_s).sum().item(),
+                "inf_count": torch.isinf(q50_s).sum().item(),
+            }
+
+        # Log progress with output stats
         if (epoch + 1) % 10 == 0 or epoch == 0:
             logger.info({
                 "epoch": epoch + 1,
                 "train_loss": f"{train_loss_epoch:.6f}",
                 "test_loss": f"{test_loss_epoch:.6f}",
-                "lr": f"{scheduler.get_last_lr()[0]:.6f}",
+                "lr": f"{optimizer.param_groups[0]['lr']:.6f}",
+                **output_stats,
             })
 
-        # Save best model
+        # PRODUCTION FIX: Early stopping + best model checkpointing
         if test_loss_epoch < best_test_loss:
             best_test_loss = test_loss_epoch
+            patience_counter = 0
+
+            # PRODUCTION FIX: Save best model checkpoint
+            best_model_state = {
+                'epoch': epoch + 1,
+                'model_state_dict': model.net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'test_loss': test_loss_epoch,
+                'train_loss': train_loss_epoch,
+                'config': cfg.__dict__,
+            }
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                logger.info({
+                    "msg": "Early stopping triggered",
+                    "epoch": epoch + 1,
+                    "patience": patience,
+                    "best_test_loss": f"{best_test_loss:.6f}",
+                    "best_epoch": best_model_state['epoch'],
+                })
+                break
 
     logger.info({
         "msg": "Training complete",
@@ -444,31 +522,96 @@ def train_edge_forecaster(
     all_preds = np.concatenate(all_preds, axis=0)
     all_targets = np.concatenate(all_targets, axis=0)
 
-    # Metrics
-    from sklearn.metrics import brier_score_loss, mean_absolute_error
+    # PRODUCTION FIX: Métriques critiques complètes
+    from sklearn.metrics import brier_score_loss, mean_absolute_error, mean_squared_error
 
-    # p_hit calibration (Brier score)
-    brier_phit = brier_score_loss(all_targets[:, 1], all_preds[:, 3])
+    # Extract predictions and targets
+    q05_pred = all_preds[:, 0]
+    q50_pred = all_preds[:, 1]
+    q95_pred = all_preds[:, 2]
+    p_hit_pred = all_preds[:, 3]
 
-    # q50 accuracy (MAE)
-    mae_q50 = mean_absolute_error(all_targets[:, 0], all_preds[:, 1])
+    return_fwd = all_targets[:, 0]
+    tp_hit = all_targets[:, 1]
+    rv_fwd_mean = all_targets[:, 2]
 
-    # Sharpe of predictions (q50 as signal)
-    predicted_returns = all_preds[:, 1]
+    # A) Output statistics
+    output_stats_final = {
+        "q05_mean": float(np.mean(q05_pred)),
+        "q05_std": float(np.std(q05_pred)),
+        "q50_mean": float(np.mean(q50_pred)),
+        "q50_std": float(np.std(q50_pred)),
+        "q95_mean": float(np.mean(q95_pred)),
+        "q95_std": float(np.std(q95_pred)),
+        "p_hit_mean": float(np.mean(p_hit_pred)),
+        "p_hit_std": float(np.std(p_hit_pred)),
+    }
+
+    # B) p_hit calibration (Brier score)
+    brier_phit = brier_score_loss(tp_hit, p_hit_pred)
+
+    # C) Quantile metrics
+    mae_q05 = mean_absolute_error(return_fwd, q05_pred)
+    mae_q50 = mean_absolute_error(return_fwd, q50_pred)
+    mae_q95 = mean_absolute_error(return_fwd, q95_pred)
+    rmse_q50 = np.sqrt(mean_squared_error(return_fwd, q50_pred))
+
+    # D) Directional accuracy (sign match)
+    directional_accuracy = np.mean(np.sign(q50_pred) == np.sign(return_fwd))
+
+    # E) Correlation q50 vs return_fwd
+    corr_q50_return = np.corrcoef(q50_pred, return_fwd)[0, 1]
+
+    # F) Sharpe of predictions (q50 as signal)
     sharpe_pred = (
-        np.mean(predicted_returns) / (np.std(predicted_returns) + 1e-8) * np.sqrt(252 * 24 * 60)
+        np.mean(q50_pred) / (np.std(q50_pred) + 1e-8) * np.sqrt(252 * 24 * 60)
     )
 
+    # G) Quantile loss
+    def quantile_loss_np(pred, target, quantile):
+        error = target - pred
+        return np.mean(np.maximum((quantile - 1) * error, quantile * error))
+
+    qloss_q05 = quantile_loss_np(q05_pred, return_fwd, 0.05)
+    qloss_q50 = quantile_loss_np(q50_pred, return_fwd, 0.50)
+    qloss_q95 = quantile_loss_np(q95_pred, return_fwd, 0.95)
+
     metrics = {
-        "brier_phit": brier_phit,
-        "mae_q50": mae_q50,
-        "sharpe_pred": sharpe_pred,
+        # Loss
         "best_test_loss": best_test_loss,
         "final_train_loss": train_losses[-1],
         "final_test_loss": test_losses[-1],
+        "overfitting_ratio": test_losses[-1] / (train_losses[-1] + 1e-8),
+
+        # Calibration
+        "brier_phit": brier_phit,
+
+        # Accuracy
+        "mae_q05": mae_q05,
+        "mae_q50": mae_q50,
+        "mae_q95": mae_q95,
+        "rmse_q50": rmse_q50,
+
+        # Direction
+        "directional_accuracy": directional_accuracy,
+        "corr_q50_return": corr_q50_return,
+
+        # Sharpe
+        "sharpe_pred": sharpe_pred,
+
+        # Quantile Loss
+        "qloss_q05": qloss_q05,
+        "qloss_q50": qloss_q50,
+        "qloss_q95": qloss_q95,
+
+        # Output stats
+        **output_stats_final,
+
+        # Training info
         "n_train": len(X_train_seq),
         "n_test": len(X_test_seq),
-        "n_epochs": n_epochs,
+        "n_epochs_completed": len(train_losses),
+        "best_epoch": best_model_state['epoch'] if 'best_model_state' in locals() else len(train_losses),
     }
 
     logger.info({
@@ -518,7 +661,16 @@ def train_edge_forecaster(
 
     print("=" * 80 + "\n")
 
-    return model, metrics
+    # PRODUCTION FIX: Restore best model state before returning
+    if 'best_model_state' in locals() and best_model_state is not None:
+        model.net.load_state_dict(best_model_state['model_state_dict'])
+        logger.info({
+            "msg": "Restored best model state",
+            "best_epoch": best_model_state['epoch'],
+            "best_test_loss": f"{best_model_state['test_loss']:.6f}",
+        })
+
+    return model, metrics, best_model_state if 'best_model_state' in locals() else None
 
 
 def main():
@@ -532,7 +684,7 @@ def main():
         default="artifacts/models/edge/production_v1.pt",
         help="Output path for trained model",
     )
-    parser.add_argument("--horizon", type=int, default=240, help="Forward horizon in minutes (default 240 = 4h)")
+    parser.add_argument("--horizon", type=int, default=60, help="Forward horizon in minutes (PRODUCTION: default 60 = 1h, was 240)")
     parser.add_argument("--tp-threshold", type=float, default=0.01, help="Take profit threshold (default 0.01 = 1%)")
     parser.add_argument("--seq-len", type=int, default=32, help="Sequence length (default 32)")
     parser.add_argument("--epochs", type=int, default=50, help="Number of epochs (default 50)")
@@ -553,7 +705,7 @@ def main():
     )
 
     # Train
-    model, metrics = train_edge_forecaster(
+    model, metrics, best_checkpoint = train_edge_forecaster(
         features_df,
         labels_df,
         seq_len=args.seq_len,
@@ -564,17 +716,39 @@ def main():
         test_size=args.test_size,
     )
 
-    # Save model
+    # PRODUCTION FIX: Save model (best checkpoint restored)
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    logger.info({"msg": "Saving model", "path": str(output_path)})
+    logger.info({"msg": "Saving model (best checkpoint)", "path": str(output_path)})
     model.save(str(output_path))
 
-    # Save metrics
+    # PRODUCTION FIX: Save best checkpoint separately
+    if best_checkpoint is not None:
+        checkpoint_path = output_path.parent / f"{output_path.stem}_best_checkpoint.pt"
+        import torch
+        torch.save(best_checkpoint, checkpoint_path)
+        logger.info({"msg": "Saved best checkpoint", "path": str(checkpoint_path)})
+
+    # PRODUCTION FIX: Save metrics with git/config info
+    metrics_extended = {
+        **metrics,
+        "config": {
+            "symbol": args.symbol,
+            "start_date": args.start_date,
+            "end_date": args.end_date,
+            "horizon_minutes": args.horizon,
+            "seq_len": args.seq_len,
+            "batch_size": args.batch_size,
+            "lr": args.lr,
+            "device": args.device,
+        },
+        "timestamp": pd.Timestamp.now().isoformat(),
+    }
+
     metrics_path = output_path.parent / f"{output_path.stem}_metrics.json"
     with open(metrics_path, 'w') as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(metrics_extended, f, indent=2)
 
     logger.info({
         "msg": "Training complete",

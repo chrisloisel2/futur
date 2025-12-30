@@ -335,13 +335,46 @@ def main():
         random_state=args.random_state,
     )
 
-    # Save model
-    output_path = Path(args.output)
+    # HARD GATE: Vérifier critères production avant sauvegarde
+    accuracy = metrics["accuracy"]
+    avg_brier_score = metrics["avg_brier_score"]
+    report = metrics["classification_report"]
+
+    # Impulse recall critique
+    impulse_recall = report.get("impulse", {}).get("recall", 0.0)
+
+    # Critères production
+    passed = (
+        accuracy >= 0.48
+        and avg_brier_score <= 0.20
+        and impulse_recall >= 0.35
+    )
+
+    # Déterminer chemin de sauvegarde
+    if passed:
+        output_path = Path(args.output)
+        print("\n✅ PRODUCTION GATE PASSED - Saving to production path")
+    else:
+        # Sauver dans failed/ avec timestamp
+        from datetime import datetime
+        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        failed_dir = Path(args.output).parent / "failed"
+        failed_dir.mkdir(parents=True, exist_ok=True)
+        output_path = failed_dir / f"failed_{run_id}.pkl"
+
+        print("\n❌ PRODUCTION GATE FAILED - Saving to failed/")
+        print(f"   Accuracy: {accuracy:.4f} (need >= 0.48)")
+        print(f"   Brier: {avg_brier_score:.4f} (need <= 0.20)")
+        print(f"   Impulse recall: {impulse_recall:.4f} (need >= 0.35)")
+        print(f"\n⚠️  Model NOT saved to production path: {args.output}")
+        print(f"   Instead saved to: {output_path}")
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info({
         "msg": "Saving model",
         "path": str(output_path),
+        "passed_gate": passed,
     })
 
     model.save(str(output_path))

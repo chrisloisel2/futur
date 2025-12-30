@@ -191,4 +191,62 @@ export class DataService {
     if (!response.ok) throw new Error('Failed to get training cost');
     return response.json();
   }
+
+  // ============================================================================
+  // ML ARCHITECTURE METHODS
+  // ============================================================================
+
+  static async getMLArchitectureData() {
+    const response = await fetch(`${API_BASE_URL}/ml/architecture/status`);
+    if (!response.ok) throw new Error('Failed to fetch ML architecture data');
+    return response.json();
+  }
+
+  static async getLevel0Data() {
+    const response = await fetch(`${API_BASE_URL}/ml/level0/gating`);
+    if (!response.ok) throw new Error('Failed to fetch Level 0 data');
+    return response.json();
+  }
+
+  static async getLevel1Data() {
+    const response = await fetch(`${API_BASE_URL}/ml/level1/contexts`);
+    if (!response.ok) throw new Error('Failed to fetch Level 1 data');
+    return response.json();
+  }
+
+  static async getLevel2Data() {
+    const response = await fetch(`${API_BASE_URL}/ml/level2/specialists`);
+    if (!response.ok) throw new Error('Failed to fetch Level 2 data');
+    return response.json();
+  }
+
+  static async getLevel3Data() {
+    const response = await fetch(`${API_BASE_URL}/ml/level3/aggregators`);
+    if (!response.ok) throw new Error('Failed to fetch Level 3 data');
+    return response.json();
+  }
+
+  static async getLevel4Data() {
+    const response = await fetch(`${API_BASE_URL}/ml/level4/policy`);
+    if (!response.ok) throw new Error('Failed to fetch Level 4 data');
+    return response.json();
+  }
+
+  static async getLatestPrediction() {
+    const response = await fetch(`${API_BASE_URL}/ml/predictions/latest`);
+    if (!response.ok) throw new Error('Failed to fetch latest prediction');
+    return response.json();
+  }
+
+  static async getPipelineThroughput() {
+    const response = await fetch(`${API_BASE_URL}/ml/flow/throughput`);
+    if (!response.ok) throw new Error('Failed to fetch pipeline throughput');
+    return response.json();
+  }
+
+  static async getLevelMetrics(levelId: number) {
+    const response = await fetch(`${API_BASE_URL}/ml/level/${levelId}/metrics`);
+    if (!response.ok) throw new Error(`Failed to fetch Level ${levelId} metrics`);
+    return response.json();
+  }
 }

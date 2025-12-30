@@ -7,9 +7,10 @@ import RealtimePredictions from './components/RealtimePredictions';
 import PortfolioTracker from './components/PortfolioTracker';
 import AIMetrics from './components/AIMetrics';
 import TrainingDashboard from './components/TrainingDashboard';
+import MLArchitectureView from './components/MLArchitecture/MLArchitectureView';
 import { DataService } from './services/DataService';
 
-type View = 'dashboard' | 's3-explorer' | 'dataset-explorer' | 'predictions' | 'portfolio' | 'ai-metrics' | 'training';
+type View = 'dashboard' | 's3-explorer' | 'dataset-explorer' | 'predictions' | 'portfolio' | 'ai-metrics' | 'training' | 'ml-architecture';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -27,6 +28,8 @@ function App() {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard />;
+      case 'ml-architecture':
+        return <MLArchitectureView />;
       case 's3-explorer':
         return <S3DataExplorer />;
       case 'dataset-explorer':
@@ -80,6 +83,14 @@ function App() {
               >
                 <span className="nav-icon">📊</span>
                 <span>Dashboard</span>
+              </button>
+
+              <button
+                className={`nav-link ${currentView === 'ml-architecture' ? 'active' : ''}`}
+                onClick={() => setCurrentView('ml-architecture')}
+              >
+                <span className="nav-icon">🏗️</span>
+                <span>ML Architecture</span>
               </button>
 
               <button
