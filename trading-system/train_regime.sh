@@ -34,10 +34,11 @@ python3 scripts/train_regime_classifier_binary.py \
   --start-date 2019-01-01 \
   --end-date 2023-12-31 \
   --symbol BTCUSDT \
-  --output artifacts/models/regime/production_binary_v1.pkl \
-  --test-size 0.2 \
-  --random-state 42 \
-  --binary
+  --output artifacts/models/regime/production_binary_v1 \
+  --train-end 2022-12-31 \
+  --val-start 2023-01-01 \
+  --embargo-minutes 60 \
+  --label-horizon 60
 
 EXIT_CODE=$?
 
@@ -49,11 +50,11 @@ if [ $EXIT_CODE -eq 0 ]; then
     echo ""
 
     # Check if model passed gate (saved to production path)
-    if [ -f "artifacts/models/regime/production_binary_v1.pkl" ]; then
+    if [ -f "artifacts/models/regime/production_binary_v1/model.pkl" ]; then
         echo "✅ PRODUCTION GATE PASSED"
         echo ""
-        echo "Model saved to: artifacts/models/regime/production_binary_v1.pkl"
-        echo "Metrics saved to: artifacts/models/regime/production_binary_v1_metrics.json"
+        echo "Model saved to: artifacts/models/regime/production_binary_v1/model.pkl"
+        echo "Metrics saved to: artifacts/models/regime/production_binary_v1/metrics.json"
         echo ""
         echo "Classes: calm, reversal (BINARY)"
         echo ""
