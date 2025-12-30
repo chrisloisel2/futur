@@ -18,6 +18,10 @@ class RegimeClassifierGates:
 
     CRITICAL: impulse is NO LONGER a regime class.
     It has been moved to event detection (see impulse_detector.py).
+
+    EXCELLENCE GATES (2024-12-30):
+    - Removed entropy gate (confidence is not a quality metric)
+    - Added precision, PR-AUC, base-rate consistency for rare class handling
     """
 
     # Macro metrics (BINARY classification)
@@ -33,9 +37,17 @@ class RegimeClassifierGates:
     # Calibration (stricter for binary)
     max_ece: float = 0.10  # Relaxed slightly from 0.08 for initial rollout
 
-    # Stability (adjusted for binary)
-    min_entropy: float = 0.50  # Binary entropy range is smaller
-    max_entropy: float = 0.75  # log(2) = 0.693 for perfect uniform binary
+    # EXCELLENCE GATES for rare class (reversal)
+    min_reversal_precision: float = 0.25  # Minimum precision for reversal class
+    min_pr_auc_reversal: float = 0.25  # Minimum PR-AUC for reversal detection
+
+    # Base-rate consistency (pred_rate vs true_rate)
+    min_rate_ratio: float = 0.5  # pred_rate / true_rate >= 0.5
+    max_rate_ratio: float = 2.0  # pred_rate / true_rate <= 2.0
+
+    # Non-degenerate prediction bounds
+    min_pred_rate: float = 0.01  # Avoid "never reversal"
+    max_pred_rate: float = 0.30  # Avoid "reversal spam"
 
     def validate(self, metrics: Dict[str, Any]) -> Tuple[bool, str]:
         """
@@ -54,8 +66,8 @@ class RegimeClassifierGates:
         if macro_f1 < self.min_macro_f1:
             return False, f"Macro F1 {macro_f1:.3f} < {self.min_macro_f1}"
 
-        # Brier
-        brier = metrics.get('brier', 1.0)
+        # Brier (accept both 'brier' and 'multiclass_brier' for compatibility)
+        brier = metrics.get('brier', metrics.get('multiclass_brier', 1.0))
         if brier > self.max_brier:
             return False, f"Brier {brier:.4f} > {self.max_brier}"
 
@@ -77,12 +89,32 @@ class RegimeClassifierGates:
         if ece > self.max_ece:
             return False, f"ECE {ece:.4f} > {self.max_ece} (POOR CALIBRATION)"
 
-        # Entropy bounds (adjusted for binary)
-        entropy = metrics.get('entropy', 0)
-        if entropy < self.min_entropy:
-            return False, f"Entropy {entropy:.3f} < {self.min_entropy} (TOO CONFIDENT)"
-        if entropy > self.max_entropy:
-            return False, f"Entropy {entropy:.3f} > {self.max_entropy} (TOO UNIFORM)"
+        # EXCELLENCE GATES: Reversal precision (rare class quality)
+        precision = metrics.get('precision_per_class', {})
+        reversal_precision = precision.get('reversal', 0)
+        if reversal_precision < self.min_reversal_precision:
+            return False, f"Reversal precision {reversal_precision:.3f} < {self.min_reversal_precision} (LOW QUALITY)"
+
+        # EXCELLENCE GATES: PR-AUC for reversal detection
+        pr_auc_reversal = metrics.get('pr_auc_reversal', 0)
+        if pr_auc_reversal < self.min_pr_auc_reversal:
+            return False, f"PR-AUC reversal {pr_auc_reversal:.3f} < {self.min_pr_auc_reversal} (POOR DETECTION)"
+
+        # EXCELLENCE GATES: Base-rate consistency
+        pred_rate = metrics.get('pred_rate_reversal', 0)
+        true_rate = metrics.get('true_rate_reversal', 1e-9)
+        rate_ratio = pred_rate / max(true_rate, 1e-9)
+
+        if rate_ratio < self.min_rate_ratio:
+            return False, f"Rate ratio {rate_ratio:.2f} < {self.min_rate_ratio} (UNDERPREDICTING)"
+        if rate_ratio > self.max_rate_ratio:
+            return False, f"Rate ratio {rate_ratio:.2f} > {self.max_rate_ratio} (OVERPREDICTING)"
+
+        # EXCELLENCE GATES: Non-degenerate predictions
+        if pred_rate < self.min_pred_rate:
+            return False, f"Pred rate {pred_rate:.4f} < {self.min_pred_rate} (DEGENERATE NEGATIVE)"
+        if pred_rate > self.max_pred_rate:
+            return False, f"Pred rate {pred_rate:.4f} > {self.max_pred_rate} (DEGENERATE POSITIVE)"
 
         return True, ""
 
