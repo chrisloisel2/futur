@@ -1,0 +1,336 @@
+#!/bin/bash
+# Train Edge Forecaster - PERFECT WALK-FORWARD (V4.2 SAFE + ARG AUTODETECT)
+#
+# Fixes:
+# - Uses the correct training script (v4.2 boosted nan-safe if present)
+# - Passes V4 flags: --tp-k / --sl-k (not V3 --k-tp / --m-sl)
+# - Adds amp/grad-accum/max-grad-norm/warmup-pct/ema-decay if supported
+# - Avoids failing if paper_test_trained doesn't support --gating
+#
+# Usage:
+#   bash train_edge.sh > metric2.log 2>&1
+
+set -Eeuo pipefail
+
+# -----------------------------------------------------------------------------
+# CONFIG
+# -----------------------------------------------------------------------------
+SYMBOL="BTCUSDT"
+
+TRAIN_START="2019-01-01"
+TRAIN_END="2022-12-31"
+
+CAL_START="2023-01-01"
+CAL_END="2023-09-30"
+
+OOS_START="2023-10-01"
+OOS_END="2023-12-31"
+
+FULL_START="2023-01-01"
+FULL_END="2023-12-31"
+
+HORIZON=60
+SEQ_LEN=48
+EPOCHS=120
+BATCH_SIZE=192
+LR="0.0003"
+DEVICE="cuda"
+VAL_SIZE="0.20"
+
+TP_K="5.0"
+SL_K="3.5"
+ADAPTIVE_TP="0"
+
+# NOTE: min_tp/max_tp/min_sl/max_sl are now auto-computed from percentiles (p5/p95)
+# in the production-grade training script. No need to pass them manually.
+# TP_K/SL_K scaled for 60min horizon (sqrt(60) ≈ 7.75x multiplier from 1min ATR)
+
+# Training stability knobs (safe defaults)
+AMP="1"
+GRAD_ACCUM="2"
+EMA_DECAY="0.9995"
+WARMUP_PCT="0.08"
+MAX_GRAD_NORM="0.8"
+COMPILE="0"
+
+CAL_METHOD="isotonic"
+
+ENTRY_THRESHOLD="0.60"
+GATING="calibrated"
+COOLDOWN_MINUTES="120"
+MIN_EDGE="0.10"
+
+OUT_DIR_MODELS="artifacts/models/edge"
+OUT_DIR_PAPER="artifacts/paper"
+
+MODEL_TAG="production_v4_2"
+MODEL_BASE="${OUT_DIR_MODELS}/${MODEL_TAG}"
+MODEL_MAIN="${MODEL_BASE}.pt"
+MODEL_BEST_TRADING="${MODEL_BASE}_best_trading.pt"
+MODEL_BEST_VALLOSS="${MODEL_BASE}_best_val_loss.pt"
+METRICS_JSON="${MODEL_BASE}_metrics.json"
+
+CAL_TMP="${MODEL_BASE}_calibrator_2023.pkl"
+CAL_MAIN="${MODEL_BASE}_calibrator.pkl"
+
+PAPER_OOS_DIR="${OUT_DIR_PAPER}/${MODEL_TAG}_2023q4_oos"
+PAPER_FULL_DIR="${OUT_DIR_PAPER}/${MODEL_TAG}_2023_full"
+
+# -----------------------------------------------------------------------------
+# HELPERS
+# -----------------------------------------------------------------------------
+die() { echo "❌ $*" >&2; exit 1; }
+ok()  { echo "✅ $*"; }
+
+on_err() { echo "❌ ERROR at line $1" >&2; exit 1; }
+trap 'on_err $LINENO' ERR
+
+require() { command -v "$1" >/dev/null 2>&1 || die "Missing dependency: $1"; }
+
+has_arg() {
+  local script="$1"
+  local flag="$2"
+  python3 "$script" -h 2>&1 | grep -qE "(^|[[:space:]])${flag}([[:space:]]|,|$)"
+}
+
+# -----------------------------------------------------------------------------
+# PRE-FLIGHT
+# -----------------------------------------------------------------------------
+require python3
+require jq
+
+mkdir -p "$OUT_DIR_MODELS" "$OUT_DIR_PAPER"
+export PYTHONPATH="$(pwd)/src:${PYTHONPATH:-}"
+
+# Select training script (prefer your new nan-safe v4.2 file if present)
+TRAIN_SCRIPT="scripts/train_edge_forecaster.py"
+if [[ -f "scripts/train_edge_forecaster_v4_boosted_nan_safe.py" ]]; then
+  TRAIN_SCRIPT="scripts/train_edge_forecaster_v4_boosted_nan_safe.py"
+elif [[ -f "scripts/train_edge_forecaster_v4_boosted.py" ]]; then
+  TRAIN_SCRIPT="scripts/train_edge_forecaster_v4_boosted.py"
+fi
+
+echo "========================================================================"
+echo "TRAINING EDGE FORECASTER - PERFECT WALK-FORWARD"
+echo "========================================================================"
+echo "SYMBOL: ${SYMBOL}"
+echo "TRAIN SCRIPT: ${TRAIN_SCRIPT}"
+echo ""
+echo "STRATEGY:"
+echo "  1) Train:       ${TRAIN_START} → ${TRAIN_END}"
+echo "  2) Recalibrate: ${CAL_START} → ${CAL_END} (${CAL_METHOD})"
+echo "  3) OOS Test:    ${OOS_START} → ${OOS_END}"
+echo "  4) Full 2023:   ${FULL_START} → ${FULL_END}"
+echo ""
+echo "ARTIFACTS:"
+echo "  - model_main:        ${MODEL_MAIN}"
+echo "  - best_trading:      ${MODEL_BEST_TRADING}"
+echo "  - best_val_loss:     ${MODEL_BEST_VALLOSS}"
+echo "  - metrics:           ${METRICS_JSON}"
+echo "  - calibrator_active: ${CAL_MAIN}"
+echo ""
+
+# CUDA check (non-blocking)
+if command -v nvidia-smi >/dev/null 2>&1; then
+  if nvidia-smi >/dev/null 2>&1; then
+    ok "CUDA detected"
+    nvidia-smi --query-gpu=name,memory.total,compute_cap --format=csv,noheader || true
+    echo ""
+  else
+    echo "⚠️  nvidia-smi failed - training will still try CUDA"
+    echo ""
+  fi
+else
+  echo "⚠️  nvidia-smi not found - training will still try CUDA"
+  echo ""
+fi
+
+# -----------------------------------------------------------------------------
+# STEP 1: TRAIN 2019-2022
+# -----------------------------------------------------------------------------
+echo "========================================================================"
+echo "STEP 1/4: TRAIN 2019-2022"
+echo "========================================================================"
+
+TRAIN_ARGS=(
+  --start-date "$TRAIN_START"
+  --end-date "$TRAIN_END"
+  --symbol "$SYMBOL"
+  --output "$MODEL_MAIN"
+  --horizon "$HORIZON"
+  --tp-k "$TP_K"
+  --sl-k "$SL_K"
+  --adaptive-tp "$ADAPTIVE_TP"
+  --seq-len "$SEQ_LEN"
+  --epochs "$EPOCHS"
+  --batch-size "$BATCH_SIZE"
+  --lr "$LR"
+  --device "$DEVICE"
+  --val-size "$VAL_SIZE"
+)
+
+# Add boost args only if supported by the selected script
+if has_arg "$TRAIN_SCRIPT" "--amp"; then TRAIN_ARGS+=( --amp "$AMP" ); fi
+if has_arg "$TRAIN_SCRIPT" "--grad-accum"; then TRAIN_ARGS+=( --grad-accum "$GRAD_ACCUM" ); fi
+if has_arg "$TRAIN_SCRIPT" "--ema-decay"; then TRAIN_ARGS+=( --ema-decay "$EMA_DECAY" ); fi
+if has_arg "$TRAIN_SCRIPT" "--warmup-pct"; then TRAIN_ARGS+=( --warmup-pct "$WARMUP_PCT" ); fi
+if has_arg "$TRAIN_SCRIPT" "--max-grad-norm"; then TRAIN_ARGS+=( --max-grad-norm "$MAX_GRAD_NORM" ); fi
+if has_arg "$TRAIN_SCRIPT" "--compile"; then TRAIN_ARGS+=( --compile "$COMPILE" ); fi
+
+python3 "$TRAIN_SCRIPT" "${TRAIN_ARGS[@]}"
+
+[[ -f "$MODEL_BEST_TRADING" ]] || die "Missing checkpoint: $MODEL_BEST_TRADING"
+[[ -f "$METRICS_JSON" ]] || die "Missing metrics: $METRICS_JSON"
+ok "Training complete + checkpoints present"
+
+# Deploy exact best_trading as production base BEFORE calibration
+cp "$MODEL_BEST_TRADING" "$MODEL_MAIN"
+ok "Deployed best_trading → $MODEL_MAIN"
+echo ""
+
+# -----------------------------------------------------------------------------
+# STEP 2: RECALIBRATE 2023 Q1-Q3 ON DEPLOYED MODEL
+# -----------------------------------------------------------------------------
+echo "========================================================================"
+echo "STEP 2/4: RECALIBRATION 2023 Q1-Q3 (${CAL_METHOD})"
+echo "========================================================================"
+
+python3 scripts/recalibrate_model.py \
+  --model-path "$MODEL_MAIN" \
+  --calibrator-output "$CAL_TMP" \
+  --start-date "$CAL_START" \
+  --end-date "$CAL_END" \
+  --symbol "$SYMBOL" \
+  --method "$CAL_METHOD"
+
+[[ -f "$CAL_TMP" ]] || die "Missing recalibration output: $CAL_TMP"
+
+cp "$CAL_TMP" "$CAL_MAIN"
+ok "Calibrator installed → $CAL_MAIN"
+echo ""
+
+# -----------------------------------------------------------------------------
+# STEP 3: OOS PAPER TEST 2023 Q4
+# -----------------------------------------------------------------------------
+echo "========================================================================"
+echo "STEP 3/4: OOS PAPER TEST 2023 Q4"
+echo "========================================================================"
+
+PAPER_ARGS=(
+  --symbol "$SYMBOL"
+  --start "$OOS_START"
+  --end "$OOS_END"
+  --entry-threshold "$ENTRY_THRESHOLD"
+  --use-shorts
+  --cooldown-minutes "$COOLDOWN_MINUTES"
+  --min-edge "$MIN_EDGE"
+  --output-dir "$PAPER_OOS_DIR"
+)
+
+# gating is optional in some versions
+if has_arg "scripts/paper_test_trained.py" "--gating"; then
+  PAPER_ARGS+=( --gating "$GATING" )
+fi
+
+set +e
+python3 scripts/paper_test_trained.py "${PAPER_ARGS[@]}"
+RC=$?
+set -e
+
+if [[ $RC -ne 0 ]]; then
+  echo "⚠️  paper_test_trained failed. Retrying with safest args."
+
+  PAPER_ARGS_SAFE=(
+    --symbol "$SYMBOL"
+    --start "$OOS_START"
+    --end "$OOS_END"
+    --entry-threshold "$ENTRY_THRESHOLD"
+    --use-shorts
+    --cooldown-minutes "$COOLDOWN_MINUTES"
+    --min-edge "$MIN_EDGE"
+    --output-dir "$PAPER_OOS_DIR"
+  )
+  python3 scripts/paper_test_trained.py "${PAPER_ARGS_SAFE[@]}" || true
+fi
+
+ok "OOS paper test complete → $PAPER_OOS_DIR"
+echo ""
+
+# -----------------------------------------------------------------------------
+# STEP 4: FULL 2023 PAPER TEST
+# -----------------------------------------------------------------------------
+echo "========================================================================"
+echo "STEP 4/4: FULL 2023 PAPER TEST"
+echo "========================================================================"
+
+PAPER_ARGS_FULL=(
+  --symbol "$SYMBOL"
+  --start "$FULL_START"
+  --end "$FULL_END"
+  --entry-threshold "$ENTRY_THRESHOLD"
+  --use-shorts
+  --cooldown-minutes "$COOLDOWN_MINUTES"
+  --min-edge "$MIN_EDGE"
+  --output-dir "$PAPER_FULL_DIR"
+)
+
+if has_arg "scripts/paper_test_trained.py" "--gating"; then
+  PAPER_ARGS_FULL+=( --gating "$GATING" )
+fi
+
+set +e
+python3 scripts/paper_test_trained.py "${PAPER_ARGS_FULL[@]}"
+RC=$?
+set -e
+
+if [[ $RC -ne 0 ]]; then
+  echo "⚠️  paper_test_trained failed. Retrying with safest args."
+
+  PAPER_ARGS_FULL_SAFE=(
+    --symbol "$SYMBOL"
+    --start "$FULL_START"
+    --end "$FULL_END"
+    --entry-threshold "$ENTRY_THRESHOLD"
+    --use-shorts
+    --cooldown-minutes "$COOLDOWN_MINUTES"
+    --min-edge "$MIN_EDGE"
+    --output-dir "$PAPER_FULL_DIR"
+  )
+  python3 scripts/paper_test_trained.py "${PAPER_ARGS_FULL_SAFE[@]}" || true
+fi
+
+ok "Full 2023 paper test complete → $PAPER_FULL_DIR"
+echo ""
+
+# -----------------------------------------------------------------------------
+# SUMMARY + METRICS QUICK VIEW
+# -----------------------------------------------------------------------------
+echo "========================================================================"
+echo "✅ TRAINING COMPLETE - PERFECT WALK-FORWARD"
+echo "========================================================================"
+echo ""
+echo "Models:"
+echo "  - $MODEL_MAIN (best_trading deployed)"
+echo "  - $MODEL_BEST_TRADING"
+echo "  - $MODEL_BEST_VALLOSS"
+echo "  - $CAL_MAIN (recalibrated on 2023 Q1-Q3)"
+echo ""
+echo "Metrics:"
+echo "  - $METRICS_JSON"
+echo ""
+echo "Paper test results:"
+echo "  - OOS 2023 Q4: $PAPER_OOS_DIR"
+echo "  - Full 2023:  $PAPER_FULL_DIR"
+echo ""
+
+echo "Validation checks (from training metrics):"
+if [[ -f "$METRICS_JSON" ]]; then
+  jq '.' "$METRICS_JSON" | head -n 80 || true
+else
+  echo "⚠️ Missing $METRICS_JSON"
+fi
+
+echo ""
+echo "NEXT:"
+echo "  - Threshold sweep on full 2023 to choose entry_threshold"
+echo "========================================================================"

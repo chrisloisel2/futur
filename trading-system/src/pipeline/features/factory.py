@@ -52,7 +52,17 @@ class FeatureFactory:
         # Forward fill (causal, up to limit)
         out = out.ffill(limit=self.ffill_limit)
 
-        # Fill remaining NaN with 0
+        # CRITICAL FIX: Use median fill for volatility features, not zero
+        # Zero volatility = false "calm" signal
+        volatility_cols = [col for col in out.columns if any(x in col.lower() for x in ['vol', 'rv', 'atr', 'std'])]
+
+        for col in volatility_cols:
+            if col in out.columns and out[col].isna().any():
+                median_val = out[col].median()
+                if pd.notna(median_val) and median_val > 0:
+                    out[col] = out[col].fillna(median_val)
+
+        # Fill remaining NaN with 0 (for non-volatility features)
         out = out.fillna(0.0)
 
         out["feature_set"] = self.feature_set

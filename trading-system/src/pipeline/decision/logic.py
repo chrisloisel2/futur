@@ -27,7 +27,7 @@ class DecisionLogic:
         # Thresholds (to be calibrated)
         min_composite_score: float = 0.60,  # Was implicit from threshold cascade
         min_confidence: float = 0.50,       # Was 0.55 (too high)
-        max_entropy: float = 2.0,           # Was 1.5 (too low, crypto is volatile)
+        max_entropy: float = 0.70,          # FIXED: Binary entropy max = log(2) = 0.693
         max_novelty: float = 4.0,           # Was 3.0 (reasonable)
         max_disagreement: float = 1.5,      # Was 1.0 (too strict)
     ):

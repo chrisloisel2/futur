@@ -1,0 +1,53 @@
+{"level": "INFO", "logger": "__main__", "time": "2026-01-05 21:09:10,593", "msg": "Loading training data from S3", "symbol": "BTCUSDT", "start": "2024-12-01", "end": "2024-12-31"}
+{"level": "INFO", "logger": "aiobotocore.credentials", "message": "Found credentials in shared credentials file: ~/.aws/credentials", "time": "2026-01-05 21:09:10,605"}
+Traceback (most recent call last):
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 768, in _lsdir
+    async for c in self._iterdir(
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 819, in _iterdir
+    async for i in it:
+  File "/home/qbee/.local/lib/python3.10/site-packages/aiobotocore/paginate.py", line 39, in __anext__
+    response = await self._make_request(current_kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/aiobotocore/context.py", line 36, in wrapper
+    return await func(*args, **kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/aiobotocore/paginate.py", line 19, in _make_request
+    return await self._method(**current_kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/aiobotocore/context.py", line 36, in wrapper
+    return await func(*args, **kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/aiobotocore/client.py", line 424, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (InvalidAccessKeyId) when calling the ListObjectsV2 operation: The AWS Access Key Id you provided does not exist in our records.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/scripts/train_edge_forecaster.py", line 2351, in <module>
+    main()
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/scripts/train_edge_forecaster.py", line 2054, in main
+    features_df, labels_df, feature_cols, _exclude_cols, df_full = load_training_data(
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/scripts/train_edge_forecaster.py", line 980, in load_training_data
+    df_raw = loader.load_raw_ohlcv(symbol, start_date, end_date)
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/src/infra/data/s3_loader.py", line 315, in load_raw_ohlcv
+    df_full = self._load_internal(symbol, start_date, end_date, columns=required_cols)
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/src/infra/data/s3_loader.py", line 412, in _load_internal
+    year_df = self._load_year(symbol, year, columns=columns)
+  File "/home/qbee/Bureau/Bourse/futur/trading-system/src/infra/data/s3_loader.py", line 453, in _load_year
+    files = self.fs.glob(pattern)
+  File "/home/qbee/.local/lib/python3.10/site-packages/fsspec/asyn.py", line 118, in wrapper
+    return sync(self.loop, func, *args, **kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/fsspec/asyn.py", line 103, in sync
+    raise return_result
+  File "/home/qbee/.local/lib/python3.10/site-packages/fsspec/asyn.py", line 56, in _runner
+    result[0] = await coro
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 848, in _glob
+    return await super()._glob(path, **kwargs)
+  File "/home/qbee/.local/lib/python3.10/site-packages/fsspec/asyn.py", line 813, in _glob
+    allpaths = await self._find(
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 878, in _find
+    return await super()._find(
+  File "/home/qbee/.local/lib/python3.10/site-packages/fsspec/asyn.py", line 853, in _find
+    if withdirs and path != "" and await self._isdir(path):
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 1592, in _isdir
+    return bool(await self._lsdir(path))
+  File "/home/qbee/.local/lib/python3.10/site-packages/s3fs/core.py", line 782, in _lsdir
+    raise translate_boto_error(e)
+PermissionError: The AWS Access Key Id you provided does not exist in our records.

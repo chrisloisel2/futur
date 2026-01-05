@@ -65,8 +65,15 @@ class ProductionPipeline:
         self.optimize_for_sharpe = optimize_for_sharpe
 
         # Initialize components
-        # Note: QualityGate needs extensive config, skip for now
-        self.quality_gate = None  # TODO: Initialize with proper config
+        # CRITICAL: Quality gate MUST be initialized for production safety
+        if use_quality_gate:
+            from pipeline.quality.gate import QualityGate
+            self.quality_gate = QualityGate()
+            logger.info("Quality gate ENABLED (production mode)")
+        else:
+            self.quality_gate = None
+            logger.warning("Quality gate DISABLED - only use for testing!")
+
         self.feature_factory = FeatureFactory(ffill_limit=5)
 
         # ML Models (with fallbacks)
