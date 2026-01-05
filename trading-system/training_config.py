@@ -77,11 +77,11 @@ class EdgeForecasterConfig:
     # Training
     epochs: int = 40
     batch_size: int = 256
-    lr: float = 2e-4
+    lr: float = 3e-4
     weight_decay: float = 1e-5
-    warmup_pct: float = 0.05                # LR warmup
+    warmup_pct: float = 0.10                # LR warmup
     label_smoothing: float = 0.02           # Prevent overconfidence
-    grad_clip: float = 1.0                  # Gradient clipping
+    grad_clip: float = 5.0                  # Gradient clipping
 
     # Optimization
     optimizer: str = "adamw"
@@ -91,8 +91,8 @@ class EdgeForecasterConfig:
     compile: bool = False                   # torch.compile (slower first run)
 
     # Early stopping
-    patience: int = 10
-    min_delta: float = 1e-4
+    patience: int = 15
+    min_delta: float = 5e-5
 
     # Calibration
     temperature_scaling: bool = True        # Platt scaling for probabilities

@@ -937,6 +937,36 @@ def train_edge_forecaster(
 
             scheduler.step()
             batch_loss = float(loss.item())
+
+            # Protection contre divergence (NaN/Inf)
+            if not np.isfinite(batch_loss) or np.isnan(batch_loss) or np.isinf(batch_loss):
+                logger.error(f"\n⚠️  DIVERGENCE DETECTED at epoch {epoch + 1}, batch {batch_idx + 1}")
+                logger.error(f"   Loss value: {batch_loss} (NaN: {np.isnan(batch_loss)}, Inf: {np.isinf(batch_loss)})")
+                logger.error("   Stopping training and saving last known good state...")
+
+                # Sauvegarde d'urgence du dernier état sain
+                emergency_path = Path(cfg.output_dir) / "emergency" / f"{cfg.run_id}_divergence_epoch_{epoch+1}.pt"
+                emergency_path.parent.mkdir(parents=True, exist_ok=True)
+
+                checkpoint_emergency = {
+                    "epoch": int(epoch + 1),
+                    "batch": int(batch_idx),
+                    "model_state_dict": net.state_dict(),
+                    "ema_state_dict": ema["net"].state_dict() if ema else None,
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "config": asdict(edge_cfg),
+                    "input_dim": int(input_dim),
+                    "feature_cols": feature_cols,
+                    "divergence_info": {
+                        "loss_value": str(batch_loss),
+                        "is_nan": bool(np.isnan(batch_loss)),
+                        "is_inf": bool(np.isinf(batch_loss)),
+                    }
+                }
+                torch.save(checkpoint_emergency, emergency_path)
+                logger.error(f"   Emergency checkpoint saved: {emergency_path}")
+                raise RuntimeError(f"Training diverged with loss={batch_loss}")
+
             train_loss += batch_loss
             batch_losses.append(batch_loss)
 
@@ -1238,6 +1268,7 @@ def main():
     parser.add_argument("--device", type=str, help="Override device")
     parser.add_argument("--run-id", type=str, help="Override run ID")
     parser.add_argument("--log-level", type=str, default="INFO", help="Logging level")
+    parser.add_argument("--debug-overfit", action="store_true", help="Enable debug overfit mode")
     args = parser.parse_args()
 
     global logger
@@ -1257,6 +1288,22 @@ def main():
         cfg.edge.device = args.device
     if args.run_id:
         cfg.run_id = args.run_id
+
+    # Debug overfit mode configuration
+    if args.debug_overfit:
+        logger.info("=== DEBUG OVERFIT MODE ENABLED ===")
+        cfg.edge.dropout = 0.0
+        cfg.edge.weight_decay = 0.0
+        cfg.edge.grad_clip = 1000.0
+        cfg.edge.lr = 1e-3
+        cfg.edge.epochs = min(cfg.edge.epochs, 20)  # Limit to prevent excessive training
+        cfg.edge.batch_size = 256  # Keep batch size reasonable
+        cfg.run_id = f"{cfg.run_id}_debug_overfit"
+        cfg._debug_overfit = True  # Flag pour plus tard
+        logger.info(f"Debug overfit config: lr={cfg.edge.lr}, epochs={cfg.edge.epochs}, grad_clip={cfg.edge.grad_clip}")
+        logger.info(f"Disabled: dropout={cfg.edge.dropout}, weight_decay={cfg.edge.weight_decay}")
+    else:
+        cfg._debug_overfit = False
 
     seed_everything(cfg.seed, cfg.deterministic)
 
@@ -1291,6 +1338,12 @@ def main():
     # df_features is indexed by datetime and contains ONLY the 39 features
     assert_monotonic_time_index(df_features)
     logger.info(f"Loaded processed features: rows={len(df_features)} cols={df_features.shape[1]}")
+
+    # Debug overfit mode: limit dataset to 256 samples
+    if hasattr(cfg, '_debug_overfit') and cfg._debug_overfit:
+        original_len = len(df_features)
+        df_features = df_features.tail(256).copy()
+        logger.info(f"DEBUG OVERFIT: Limited dataset from {original_len} to {len(df_features)} samples")
 
     # CHECKPOINT 1: Verify no duplicates after loading
     assert_no_duplicate_columns(df_features, context="after load_processed_features")
