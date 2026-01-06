@@ -859,7 +859,7 @@ def train_edge_forecaster(
 
     optimizer = torch.optim.AdamW(
         net.parameters(),
-        lr=cfg.edge.lr,
+        lr=cfg.edge.lr / 10.0,  # Start with LR/10, scheduler will ramp up to max_lr
         weight_decay=cfg.edge.weight_decay,
     )
 
@@ -870,12 +870,16 @@ def train_edge_forecaster(
         total_steps=total_steps,
         pct_start=cfg.edge.warmup_pct,
         anneal_strategy="cos",
+        div_factor=10.0,        # initial_lr = max_lr / div_factor
+        final_div_factor=100.0, # final_lr = initial_lr / final_div_factor
     )
 
     logger.info(f"  Optimizer:    AdamW")
+    logger.info(f"  Initial LR:   {cfg.edge.lr / 10.0:.6f} (warmup start)")
     logger.info(f"  Max LR:       {cfg.edge.lr:.6f}")
+    logger.info(f"  Final LR:     {cfg.edge.lr / 1000.0:.6f} (annealing end)")
     logger.info(f"  Weight decay: {cfg.edge.weight_decay:.6f}")
-    logger.info(f"  Scheduler:    OneCycleLR")
+    logger.info(f"  Scheduler:    OneCycleLR (cosine)")
     logger.info(f"  Total steps:  {total_steps:,}")
     logger.info(f"  Warmup:       {cfg.edge.warmup_pct:.1%} ({int(total_steps * cfg.edge.warmup_pct)} steps)")
     logger.info(f"  Grad clip:    {cfg.edge.grad_clip}")

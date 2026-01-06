@@ -77,7 +77,7 @@ class EdgeForecasterConfig:
     # Training
     epochs: int = 40
     batch_size: int = 256
-    lr: float = 3e-4
+    lr: float = 1e-3                        # Increased from 3e-4 to 1e-3 (3.3x higher)
     weight_decay: float = 1e-5
     warmup_pct: float = 0.10                # LR warmup
     label_smoothing: float = 0.02           # Prevent overconfidence
