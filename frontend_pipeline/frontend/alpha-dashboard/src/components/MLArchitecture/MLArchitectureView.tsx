@@ -15,6 +15,7 @@ interface LevelData {
   level2?: any;
   level3?: any;
   level4?: any;
+  [key: string]: any; // Allow dynamic level access
 }
 
 const MLArchitectureView: React.FC = () => {

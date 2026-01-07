@@ -110,7 +110,7 @@ if [ ! -f "$CONFIG" ]; then
 fi
 
 # Construction de la commande
-CMD="python train.py"
+CMD="python3 train.py"
 CMD="$CMD --config $CONFIG"
 CMD="$CMD --run-id $RUN_ID"
 

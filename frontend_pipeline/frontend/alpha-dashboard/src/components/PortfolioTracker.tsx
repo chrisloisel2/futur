@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import './PortfolioTracker.css';
+import { PortfolioCache } from '../services/PortfolioCache';
+
+interface TradingConfig {
+  selectedModel: string;
+  selectedCrypto: string;
+  confidenceThreshold: number;
+  strengthThreshold: number;
+  stopLoss: number;
+  takeProfit: number;
+  temperature: number;
+  maxPositionSize: number;
+}
 
 interface Position {
   symbol: string;
@@ -60,16 +72,57 @@ interface PortfolioApiState {
   stats?: any;
 }
 
-const PortfolioTracker: React.FC = () => {
-  const [initialCapital, setInitialCapital] = useState<number>(10000); // $10,000 initial capital
-  const [cash, setCash] = useState<number>(10000);
-  const [positions, setPositions] = useState<Position[]>([]);
-  const [tradeHistory, setTradeHistory] = useState<Trade[]>([]);
-  const [stats, setStats] = useState<PortfolioStats | null>(null);
-  const [predictions, setPredictions] = useState<AIPrediction[]>([]);
-  const [portfolioHistory, setPortfolioHistory] = useState<{time: Date, value: number}[]>([]);
+const AVAILABLE_MODELS = [
+  { id: 'production_v1', name: 'Production V1 - Baseline', path: 'trading-system/artifacts/models/edge/production_v1.pt' },
+  { id: 'production_v1_best_trading', name: 'Production V1 - Best Trading', path: 'trading-system/artifacts/models/edge/production_v1_best_trading.pt' },
+  { id: 'production_v3', name: 'Production V3', path: 'trading-system/artifacts/models/edge/production_v3.pt' },
+  { id: 'production_v3_best_trading', name: 'Production V3 - Best Trading', path: 'trading-system/artifacts/models/edge/production_v3_best_trading.pt' },
+  { id: 'production_v4_2', name: 'Production V4.2 (Latest)', path: 'trading-system/artifacts/models/edge/production_v4_2.pt' },
+  { id: 'production_v4_2_best_trading', name: 'Production V4.2 - Best Trading', path: 'trading-system/artifacts/models/edge/production_v4_2_best_trading.pt' },
+];
 
-  const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+const CRYPTO_LIST = [
+  { symbol: 'BTCUSDT', name: 'Bitcoin', emoji: '₿' },
+  { symbol: 'ETHUSDT', name: 'Ethereum', emoji: 'Ξ' },
+  { symbol: 'BNBUSDT', name: 'Binance Coin', emoji: '🔶' },
+  { symbol: 'SOLUSDT', name: 'Solana', emoji: '◎' },
+  { symbol: 'XRPUSDT', name: 'Ripple', emoji: '✖' },
+];
+
+const PortfolioTracker: React.FC = () => {
+  // Charger le cache au démarrage pour restauration instantanée
+  const loadCachedData = () => {
+    const cached = PortfolioCache.load();
+    if (cached) {
+      const hydrated = PortfolioCache.hydrate(cached);
+      return hydrated;
+    }
+    return null;
+  };
+
+  const cachedData = loadCachedData();
+
+  const [initialCapital, setInitialCapital] = useState<number>(cachedData?.initialCapital || 10000);
+  const [cash, setCash] = useState<number>(cachedData?.cash || 10000);
+  const [positions, setPositions] = useState<Position[]>(cachedData?.positions || []);
+  const [tradeHistory, setTradeHistory] = useState<Trade[]>(cachedData?.tradeHistory || []);
+  const [stats, setStats] = useState<PortfolioStats | null>(null);
+  const [predictions, setPredictions] = useState<AIPrediction[]>(cachedData?.predictions || []);
+  const [portfolioHistory, setPortfolioHistory] = useState<{time: Date, value: number}[]>(cachedData?.portfolioHistory || []);
+  const [showConfig, setShowConfig] = useState<boolean>(false);
+  const [autoTradeEnabled, setAutoTradeEnabled] = useState<boolean>(true);
+
+  // Configuration du trading
+  const [config, setConfig] = useState<TradingConfig>(cachedData?.config || {
+    selectedModel: 'production_v4_2_best_trading',
+    selectedCrypto: 'BTCUSDT',
+    confidenceThreshold: 0.7,
+    strengthThreshold: 0.6,
+    stopLoss: 2.0,
+    takeProfit: 5.0,
+    temperature: 0.5,
+    maxPositionSize: 0.2, // 20% du capital max par position
+  });
 
   const applyPortfolioState = (data: PortfolioApiState) => {
     if (!data) return;
@@ -142,85 +195,8 @@ const PortfolioTracker: React.FC = () => {
     loadPortfolioState();
   }, []);
 
-  const normalizePredictionAction = (
-    rawSignal?: string,
-    fallback: 'BUY' | 'SELL' | 'HOLD' = 'HOLD'
-  ): 'BUY' | 'SELL' | 'HOLD' => {
-    const signal = (rawSignal || '').toString().toUpperCase();
-    if (['BUY', 'LONG', 'BULLISH'].includes(signal)) return 'BUY';
-    if (['SELL', 'SHORT', 'BEARISH'].includes(signal)) return 'SELL';
-    return fallback;
-  };
-
-  const buildReason = (pred: any): string => {
-    if (pred.reason) return pred.reason;
-    if (pred.indicators && typeof pred.indicators === 'object') {
-      const keys = Object.keys(pred.indicators);
-      if (keys.length > 0) {
-        return `Signal basé sur ${keys.slice(0, 2).join(', ')}`;
-      }
-    }
-    return 'AI model prediction';
-  };
-
-  const determineAction = (pred: any): 'BUY' | 'SELL' | 'HOLD' => {
-    const predicted = pred.predicted_price ?? pred.predictedPrice ?? pred.price ?? 0;
-    const current = pred.current_price ?? pred.currentPrice ?? pred.price ?? 0;
-    if (!current) return 'HOLD';
-
-    const changePercent = ((predicted - current) / current) * 100;
-
-    if (changePercent > 1) return 'BUY';
-    if (changePercent < -1) return 'SELL';
-    return 'HOLD';
-  };
-
-  const normalizePredictions = (data: any): AIPrediction[] => {
-    const rawPredictions = data?.predictions;
-    if (!rawPredictions) return [];
-
-    const arrayPredictions = Array.isArray(rawPredictions)
-      ? rawPredictions
-      : typeof rawPredictions === 'object'
-        ? Object.entries(rawPredictions).map(([symbol, pred]) => {
-            const predObj = pred && typeof pred === 'object'
-              ? pred
-              : { price: Number(pred) };
-            return { symbol, ...predObj };
-          })
-        : [];
-
-    return arrayPredictions
-      .map((pred: any) => {
-        const symbol = pred.symbol || pred.ticker || pred.pair;
-        if (!symbol) return null;
-
-        const currentPrice = Number(pred.current_price ?? pred.price ?? pred.last_price ?? 0);
-        const predictedPrice = Number(pred.predicted_price ?? pred.target_price ?? currentPrice);
-        const confidence = clamp01(
-          Number(pred.confidence ?? pred.score ?? pred.probability ?? 0.5)
-        );
-        const changePctRaw = pred.change_pct ??
-          ((predictedPrice - currentPrice) / (currentPrice || 1)) * 100;
-        const changePct = isNaN(changePctRaw) ? 0 : changePctRaw;
-        const strengthFromMove = Math.abs(changePct) / 5; // 5% move → full strength
-        const strength = clamp01(Math.max(strengthFromMove, confidence));
-
-        return {
-          symbol,
-          predictedPrice: isNaN(predictedPrice) ? 0 : predictedPrice,
-          currentPrice: isNaN(currentPrice) ? 0 : currentPrice,
-          confidence: isNaN(confidence) ? 0.5 : confidence,
-          action: normalizePredictionAction(
-            pred.signal || pred.action || pred.direction,
-            determineAction({ predicted_price: predictedPrice, current_price: currentPrice })
-          ),
-          reason: buildReason(pred),
-          strength: isNaN(strength) ? 0.5 : strength
-        };
-      })
-      .filter((p): p is AIPrediction => Boolean(p));
-  };
+  // Note: Old helper functions (normalizePredictionAction, buildReason, determineAction, clamp01, normalizePredictions)
+  // have been replaced by transformMLPipelineToSignals which works with the full ML pipeline architecture
 
   const generateSimulatedPredictions = (): AIPrediction[] => {
     const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT'];
@@ -235,38 +211,210 @@ const PortfolioTracker: React.FC = () => {
     }));
   };
 
-  // Fetch AI predictions
+  /**
+   * Transforme les données de la pipeline ML complète en signaux de trading
+   * Pipeline: Global Gating → Context Detectors → Specialists → Aggregators → Meta-Decider
+   */
+  const transformMLPipelineToSignals = (mlData: any, currentPrice: number): AIPrediction => {
+    const symbol = config.selectedCrypto;
+
+    // Level 0: Global Gating - Vérifier si le marché est tradeable
+    const level0 = mlData.level0 || {};
+    const isTradeable = level0.is_tradeable ?? true;
+
+    // Level 1: Context Detectors - Détecter la direction
+    const level1 = mlData.level1 || {};
+    const detectors = level1.detectors || {};
+    const directionDetector = detectors.direction || {};
+    const directionOutput = directionDetector.output || {};
+    const directionConfidence = directionDetector.confidence || 0.5;
+
+    // Probabilités de direction
+    const upProb = directionOutput.up || 0.33;
+    const downProb = directionOutput.down || 0.33;
+    const flatProb = directionOutput.flat || 0.34;
+
+    // Level 2: Conditional Specialists - Prédiction de retour
+    const level2 = mlData.level2 || {};
+    const predictedReturn = level2.predicted_return || 0;
+    const predictedVolatility = level2.predicted_volatility || 0.02;
+    const activeExpert = level2.active_expert || 'unknown';
+
+    // Level 3: Aggregators - Décision finale
+    const level3 = mlData.level3 || {};
+    const decision = level3.decision || 'DELAY';
+    const eventClassifier = level3.event_classifier || {};
+    const pairwiseComparator = level3.pairwise_comparator || {};
+    const eventType = eventClassifier.predicted_class || 'NORMAL';
+    const consensusScore = pairwiseComparator.consensus_score || 0.5;
+
+    // Level 4: Meta-Decider - Action recommandée
+    const level4 = mlData.level4 || {};
+    const actor = level4.actor || {};
+    const actionProbs = actor.action_probabilities || { BUY: 0.33, SELL: 0.33, WAIT: 0.34 };
+    const selectedAction = actor.selected_action || 'WAIT';
+
+    // Calculer le prix prédit basé sur le retour prédit
+    const predictedPrice = currentPrice * (1 + predictedReturn);
+
+    // Déterminer l'action finale basée sur toute la pipeline
+    let finalAction: 'BUY' | 'SELL' | 'HOLD' = 'HOLD';
+    let finalConfidence = 0.5;
+    let finalStrength = 0.5;
+    let reason = '';
+
+    // Si le marché n'est pas tradeable, HOLD
+    if (!isTradeable) {
+      finalAction = 'HOLD';
+      reason = 'Market not tradeable (Global Gating)';
+      finalConfidence = 0.3;
+      finalStrength = 0.1;
+    }
+    // Si la décision est INVALIDATE, HOLD
+    else if (decision === 'INVALIDATE') {
+      finalAction = 'HOLD';
+      reason = `Signal invalidated: ${eventType} (Aggregator)`;
+      finalConfidence = 0.2;
+      finalStrength = 0.1;
+    }
+    // Si la décision est DELAY, HOLD
+    else if (decision === 'DELAY') {
+      finalAction = 'HOLD';
+      reason = `Signal delayed: ${eventType} (Aggregator)`;
+      finalConfidence = 0.4;
+      finalStrength = 0.3;
+    }
+    // Si CONFIRM, utiliser la recommandation du Meta-Decider
+    else if (decision === 'CONFIRM') {
+      if (selectedAction === 'BUY' && predictedReturn > 0) {
+        finalAction = 'BUY';
+        finalConfidence = Math.max(actionProbs.BUY, upProb, directionConfidence);
+        finalStrength = Math.abs(predictedReturn) / predictedVolatility; // Signal-to-noise ratio
+        reason = `${activeExpert} specialist: ${eventType} detected, ${(predictedReturn * 100).toFixed(2)}% expected return`;
+      } else if (selectedAction === 'SELL' && predictedReturn < 0) {
+        finalAction = 'SELL';
+        finalConfidence = Math.max(actionProbs.SELL, downProb, directionConfidence);
+        finalStrength = Math.abs(predictedReturn) / predictedVolatility;
+        reason = `${activeExpert} specialist: ${eventType} detected, ${(predictedReturn * 100).toFixed(2)}% expected return`;
+      } else {
+        finalAction = 'HOLD';
+        finalConfidence = actionProbs.WAIT || flatProb;
+        finalStrength = 0.3;
+        reason = `Weak signal: consensus ${(consensusScore * 100).toFixed(0)}%`;
+      }
+    }
+
+    // Ajuster la confiance basée sur le consensus
+    finalConfidence = finalConfidence * consensusScore;
+
+    // Normaliser strength entre 0 et 1
+    finalStrength = Math.min(1, Math.max(0, finalStrength));
+
+    return {
+      symbol,
+      predictedPrice,
+      currentPrice,
+      confidence: finalConfidence,
+      action: finalAction,
+      reason,
+      strength: finalStrength
+    };
+  };
+
+  // Fetch AI predictions depuis la pipeline ML complète
   useEffect(() => {
     const fetchPredictions = async () => {
       try {
-        const response = await fetch('http://localhost:8000/pipeline/predictions');
-        const data = await response.json();
+        // Prix par défaut pour fallback (approximatifs au 3 jan 2026)
+        const fallbackPrices: { [key: string]: number } = {
+          'BTCUSDT': 93000,
+          'ETHUSDT': 3400,
+          'BNBUSDT': 680,
+          'SOLUSDT': 200,
+          'XRPUSDT': 2.5
+        };
 
-        const formattedPredictions = normalizePredictions(data);
-        if (formattedPredictions.length > 0) {
-          setPredictions(formattedPredictions);
-        } else {
-          setPredictions(generateSimulatedPredictions());
+        // 1. Récupérer le prix actuel du crypto sélectionné
+        let currentPrice = 0;
+        try {
+          const tickerResponse = await fetch(`http://localhost:8000/market/ticker?symbol=${config.selectedCrypto}`);
+          if (tickerResponse.ok) {
+            const tickerData = await tickerResponse.json();
+            currentPrice = parseFloat(tickerData.lastPrice || tickerData.price || '0');
+          }
+        } catch (err) {
+          console.warn('Ticker API unavailable, using fallback price');
         }
+
+        // Utiliser le prix de fallback si l'API a échoué
+        if (!currentPrice || currentPrice === 0) {
+          currentPrice = fallbackPrices[config.selectedCrypto] || 50000;
+          console.log(`Using fallback price for ${config.selectedCrypto}: $${currentPrice}`);
+        }
+
+        // 2. Récupérer les données de toute la pipeline ML (5 niveaux)
+        const mlResponse = await fetch('http://localhost:8000/ml/architecture/status');
+        const mlData = await mlResponse.json();
+
+        // 3. Transformer les données ML en signal de trading pour le crypto sélectionné
+        const mainSignal = transformMLPipelineToSignals(mlData, currentPrice);
+
+        // 4. Pour les autres cryptos, on peut soit :
+        //    - Les ignorer (afficher seulement le crypto sélectionné)
+        //    - Utiliser des données simulées
+        //    - Faire des appels séparés (plus coûteux)
+        // Pour l'instant, on se concentre sur le crypto principal
+        const allPredictions: AIPrediction[] = [mainSignal];
+
+        // Optionnel: ajouter des prédictions pour les autres cryptos (pour l'affichage)
+        const otherCryptos = CRYPTO_LIST.filter(c => c.symbol !== config.selectedCrypto).slice(0, 2);
+        for (const crypto of otherCryptos) {
+          let otherPrice = fallbackPrices[crypto.symbol] || 1000;
+
+          try {
+            const otherTickerResponse = await fetch(`http://localhost:8000/market/ticker?symbol=${crypto.symbol}`);
+            if (otherTickerResponse.ok) {
+              const otherTickerData = await otherTickerResponse.json();
+              const fetchedPrice = parseFloat(otherTickerData.lastPrice || otherTickerData.price || '0');
+              if (fetchedPrice > 0) {
+                otherPrice = fetchedPrice;
+              }
+            }
+          } catch (err) {
+            // Utiliser le fallback
+          }
+
+          // Utiliser la même pipeline ML mais pour un autre crypto
+          const otherSignal = transformMLPipelineToSignals(mlData, otherPrice);
+          allPredictions.push({ ...otherSignal, symbol: crypto.symbol });
+        }
+
+        setPredictions(allPredictions);
+        console.log('✅ ML Pipeline signals updated:', allPredictions);
+
       } catch (error) {
-        console.log('Pipeline not available, using simulated predictions');
+        console.warn('ML Pipeline not available, using simulated predictions', error);
         setPredictions(generateSimulatedPredictions());
       }
     };
 
     fetchPredictions();
-    const interval = setInterval(fetchPredictions, 5000); // Update every 5s
+    const interval = setInterval(fetchPredictions, 30000); // Update every 30s
     return () => clearInterval(interval);
-  }, []);
+  }, [config.selectedCrypto, config.selectedModel, config.temperature]);
 
-  // Auto trading based on AI predictions
+  // Auto trading based on AI predictions avec paramètres configurables
   useEffect(() => {
-    if (predictions.length === 0) return;
+    if (!autoTradeEnabled || predictions.length === 0) return;
 
     const runAutoTrades = async () => {
       for (const pred of predictions) {
-        if (pred.confidence > 0.7) { // Only trade with high confidence
-          if (pred.action === 'BUY' && pred.strength > 0.6) {
+        // Filtrer par crypto sélectionnée
+        if (pred.symbol !== config.selectedCrypto) continue;
+
+        // Appliquer les seuils configurés
+        if (pred.confidence > config.confidenceThreshold) {
+          if (pred.action === 'BUY' && pred.strength > config.strengthThreshold) {
             await executeBuy(pred.symbol, pred.currentPrice, pred.confidence, pred.reason);
           } else if (pred.action === 'SELL') {
             await executeSell(pred.symbol, pred.currentPrice, pred.confidence, pred.reason);
@@ -276,9 +424,9 @@ const PortfolioTracker: React.FC = () => {
     };
 
     runAutoTrades();
-  }, [predictions]);
+  }, [predictions, autoTradeEnabled, config.confidenceThreshold, config.strengthThreshold, config.selectedCrypto]);
 
-  // Update current prices for existing positions
+  // Update current prices for existing positions + vérifier stop loss / take profit
   useEffect(() => {
     if (predictions.length === 0) return;
 
@@ -291,6 +439,17 @@ const PortfolioTracker: React.FC = () => {
           const pnlPercent = ((currentPrice - pos.entryPrice) / pos.entryPrice) * 100;
           const value = currentPrice * pos.quantity;
 
+          // Vérifier stop loss / take profit
+          if (autoTradeEnabled) {
+            if (pnlPercent <= -config.stopLoss) {
+              console.log(`🛑 Stop Loss hit for ${pos.symbol} at ${pnlPercent.toFixed(2)}%`);
+              executeSell(pos.symbol, currentPrice, 1.0, `Stop Loss triggered at ${pnlPercent.toFixed(2)}%`);
+            } else if (pnlPercent >= config.takeProfit) {
+              console.log(`🎯 Take Profit hit for ${pos.symbol} at ${pnlPercent.toFixed(2)}%`);
+              executeSell(pos.symbol, currentPrice, 1.0, `Take Profit triggered at ${pnlPercent.toFixed(2)}%`);
+            }
+          }
+
           return {
             ...pos,
             currentPrice,
@@ -302,7 +461,7 @@ const PortfolioTracker: React.FC = () => {
         return pos;
       })
     );
-  }, [predictions]);
+  }, [predictions, autoTradeEnabled, config.stopLoss, config.takeProfit]);
 
   // Calculate portfolio stats
   useEffect(() => {
@@ -363,12 +522,31 @@ const PortfolioTracker: React.FC = () => {
       maxDrawdown
     });
 
-    // Update portfolio history
+    // Update portfolio history (removed from dependencies to prevent infinite loop)
     if (portfolioHistory.length === 0 ||
-        Date.now() - portfolioHistory[portfolioHistory.length - 1].time.getTime() > 5000) {
+        Date.now() - portfolioHistory[portfolioHistory.length - 1].time.getTime() > 30000) {
       setPortfolioHistory(prev => [...prev, { time: new Date(), value: totalValue }]);
     }
-  }, [cash, positions, tradeHistory, initialCapital, portfolioHistory]);
+  }, [cash, positions, tradeHistory, initialCapital]); // Removed portfolioHistory from dependencies
+
+  // Auto-save to cache whenever important data changes
+  useEffect(() => {
+    const saveToCache = () => {
+      PortfolioCache.save({
+        initialCapital,
+        cash,
+        positions,
+        tradeHistory,
+        portfolioHistory,
+        predictions,
+        config
+      });
+    };
+
+    // Debounce: sauvegarder après 1 seconde d'inactivité
+    const timeoutId = setTimeout(saveToCache, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [initialCapital, cash, positions, tradeHistory, portfolioHistory, predictions, config]);
 
   const calculateMaxDrawdown = (history: {time: Date, value: number}[]): number => {
     if (history.length < 2) return 0;
@@ -417,19 +595,25 @@ const PortfolioTracker: React.FC = () => {
     executeTrade('SELL', symbol, price, confidence, reason);
 
   const resetPortfolio = async () => {
-    if (!window.confirm('Reset portfolio to initial capital? This will close all positions.')) return;
+    if (!window.confirm('Reset portfolio to initial capital? This will close all positions and clear cache.')) return;
 
     try {
       const response = await fetch('http://localhost:8000/portfolio/reset', { method: 'POST' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || 'Reset failed');
       applyPortfolioState(data);
+
+      // Effacer le cache
+      PortfolioCache.clear();
     } catch (error) {
       console.error('Reset failed', error);
       setCash(initialCapital);
       setPositions([]);
       setTradeHistory([]);
       setPortfolioHistory([]);
+
+      // Effacer le cache même en cas d'erreur
+      PortfolioCache.clear();
     }
   };
 
@@ -509,16 +693,213 @@ const PortfolioTracker: React.FC = () => {
     };
   };
 
+  // Indicateur de cache
+  const cacheAge = PortfolioCache.getCacheAge();
+  const cacheIndicator = cacheAge !== null
+    ? `💾 Cached (${Math.round(cacheAge / 1000 / 60)}m ago)`
+    : '📭 No cache';
+
   return (
     <div className="portfolio-tracker">
       {/* Header with overall stats */}
       <div className="portfolio-header">
         <div className="portfolio-title">
           <h2>💼 Portfolio Trading Simulator</h2>
-          <div className="auto-trade-toggle">
-            <span className="auto-trade-pill active">Auto-Trading IA actif</span>
+          <div className="header-controls">
+            <button
+              className={`config-toggle-btn ${showConfig ? 'active' : ''}`}
+              onClick={() => setShowConfig(!showConfig)}
+            >
+              ⚙️ Configuration
+            </button>
+            <div className="auto-trade-toggle">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={autoTradeEnabled}
+                  onChange={(e) => setAutoTradeEnabled(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+              <span className={`auto-trade-pill ${autoTradeEnabled ? 'active' : 'inactive'}`}>
+                {autoTradeEnabled ? '🤖 Auto-Trading ON' : '⏸️ Auto-Trading OFF'}
+              </span>
+              <span style={{ marginLeft: '10px', fontSize: '0.85em', color: '#9ca3af' }}>
+                {cacheIndicator}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Configuration Panel */}
+        {showConfig && (
+          <div className="config-panel">
+            <div className="config-section">
+              <h3>🎯 Modèle & Crypto</h3>
+              <div className="config-row">
+                <div className="config-item">
+                  <label>Modèle IA:</label>
+                  <select
+                    value={config.selectedModel}
+                    onChange={(e) => setConfig({...config, selectedModel: e.target.value})}
+                    className="config-select"
+                  >
+                    {AVAILABLE_MODELS.map(model => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="config-item">
+                  <label>Cryptomonnaie:</label>
+                  <select
+                    value={config.selectedCrypto}
+                    onChange={(e) => setConfig({...config, selectedCrypto: e.target.value})}
+                    className="config-select"
+                  >
+                    {CRYPTO_LIST.map(crypto => (
+                      <option key={crypto.symbol} value={crypto.symbol}>
+                        {crypto.emoji} {crypto.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="config-section">
+              <h3>📊 Hyperparamètres de Trading</h3>
+              <div className="config-row">
+                <div className="config-item">
+                  <label>
+                    Confiance Min: {(config.confidenceThreshold * 100).toFixed(0)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={config.confidenceThreshold}
+                    onChange={(e) => setConfig({...config, confidenceThreshold: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>Seuil de confiance minimum pour exécuter un trade</small>
+                </div>
+                <div className="config-item">
+                  <label>
+                    Force Signal: {(config.strengthThreshold * 100).toFixed(0)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={config.strengthThreshold}
+                    onChange={(e) => setConfig({...config, strengthThreshold: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>Force minimum du signal pour les achats</small>
+                </div>
+              </div>
+
+              <div className="config-row">
+                <div className="config-item">
+                  <label>
+                    Stop Loss: {config.stopLoss.toFixed(1)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="10"
+                    step="0.5"
+                    value={config.stopLoss}
+                    onChange={(e) => setConfig({...config, stopLoss: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>Perte maximale avant vente automatique</small>
+                </div>
+                <div className="config-item">
+                  <label>
+                    Take Profit: {config.takeProfit.toFixed(1)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    step="0.5"
+                    value={config.takeProfit}
+                    onChange={(e) => setConfig({...config, takeProfit: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>Gain cible avant vente automatique</small>
+                </div>
+              </div>
+
+              <div className="config-row">
+                <div className="config-item">
+                  <label>
+                    Température: {config.temperature.toFixed(2)}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={config.temperature}
+                    onChange={(e) => setConfig({...config, temperature: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>Randomness des prédictions (0=déterministe, 1=aléatoire)</small>
+                </div>
+                <div className="config-item">
+                  <label>
+                    Taille Position Max: {(config.maxPositionSize * 100).toFixed(0)}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.5"
+                    step="0.05"
+                    value={config.maxPositionSize}
+                    onChange={(e) => setConfig({...config, maxPositionSize: parseFloat(e.target.value)})}
+                    className="config-slider"
+                  />
+                  <small>% maximum du capital par position</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="config-actions">
+              <button
+                className="config-save-btn"
+                onClick={() => {
+                  setShowConfig(false);
+                  console.log('Configuration saved:', config);
+                }}
+              >
+                ✅ Sauvegarder & Appliquer
+              </button>
+              <button
+                className="config-reset-btn"
+                onClick={() => {
+                  setConfig({
+                    selectedModel: 'production_v4_2_best_trading',
+                    selectedCrypto: 'BTCUSDT',
+                    confidenceThreshold: 0.7,
+                    strengthThreshold: 0.6,
+                    stopLoss: 2.0,
+                    takeProfit: 5.0,
+                    temperature: 0.5,
+                    maxPositionSize: 0.2,
+                  });
+                }}
+              >
+                🔄 Réinitialiser
+              </button>
+            </div>
+          </div>
+        )}
 
         {stats && (
           <div className="portfolio-overview">

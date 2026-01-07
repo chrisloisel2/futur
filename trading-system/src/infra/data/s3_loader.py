@@ -295,7 +295,7 @@ class S3MarketDataLoader:
     def __init__(
         self,
         bucket: str = "qbia",
-        base_path: str = "bourse/processed/market",
+        base_path: str = "bourse/processed/market_v2",  # Updated to market_v2
         interval: str = "1m",
         quote: str = "USDT",
     ):

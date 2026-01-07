@@ -122,8 +122,8 @@ def generate_level2_data():
     expert_data = {}
     for i, expert in enumerate(experts):
         expert_data[expert] = {
-            "predicted_return": random.uniform(-0.03, 0.03),
-            "predicted_volatility": random.uniform(0.01, 0.05),
+            "predicted_return": random.uniform(-0.05, 0.05),  # Augmenté de ±3% à ±5%
+            "predicted_volatility": random.uniform(0.015, 0.04),  # Ajusté
             "confidence": normalized_weights[i],
             "active": normalized_weights[i] > 0.2
         }
@@ -150,18 +150,32 @@ def generate_level2_data():
 
 def generate_level3_data():
     """Génère des données mock pour Level 3 - Aggregators."""
-    event_classes = ['NORMAL', 'EVENT_UP', 'EVENT_DOWN', 'VOL_SHOCK']
-    event_probs = [random.uniform(0, 1) for _ in range(4)]
-    total_event = sum(event_probs)
-    event_probs = [p / total_event for p in event_probs]
+    # Biaiser fortement vers NORMAL et EVENT_UP/EVENT_DOWN (80% du temps)
+    rand_event = random.random()
+    if rand_event < 0.4:  # 40% NORMAL
+        event_probs = [0.7, 0.1, 0.1, 0.1]
+        event_class = 'NORMAL'
+    elif rand_event < 0.7:  # 30% EVENT_UP
+        event_probs = [0.1, 0.7, 0.1, 0.1]
+        event_class = 'EVENT_UP'
+    elif rand_event < 0.9:  # 20% EVENT_DOWN
+        event_probs = [0.1, 0.1, 0.7, 0.1]
+        event_class = 'EVENT_DOWN'
+    else:  # 10% VOL_SHOCK
+        event_probs = [0.1, 0.1, 0.1, 0.7]
+        event_class = 'VOL_SHOCK'
 
-    pairwise_classes = ['CONSISTENT', 'WEAKENING', 'CONTRADICTION']
-    pairwise_probs = [random.uniform(0, 1) for _ in range(3)]
-    total_pairwise = sum(pairwise_probs)
-    pairwise_probs = [p / total_pairwise for p in pairwise_probs]
-
-    event_class = event_classes[event_probs.index(max(event_probs))]
-    pairwise_class = pairwise_classes[pairwise_probs.index(max(pairwise_probs))]
+    # Biaiser vers CONSISTENT pour avoir plus de signaux confirmés (70% du temps)
+    rand = random.random()
+    if rand < 0.7:  # 70% CONSISTENT
+        pairwise_probs = [0.7, 0.2, 0.1]
+        pairwise_class = 'CONSISTENT'
+    elif rand < 0.9:  # 20% WEAKENING
+        pairwise_probs = [0.2, 0.7, 0.1]
+        pairwise_class = 'WEAKENING'
+    else:  # 10% CONTRADICTION
+        pairwise_probs = [0.1, 0.2, 0.7]
+        pairwise_class = 'CONTRADICTION'
 
     if pairwise_class == 'CONSISTENT' and event_class in ['NORMAL', 'EVENT_UP', 'EVENT_DOWN']:
         decision = 'CONFIRM'

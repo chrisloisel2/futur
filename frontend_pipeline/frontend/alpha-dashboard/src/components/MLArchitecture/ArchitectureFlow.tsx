@@ -34,7 +34,7 @@ const ArchitectureFlow: React.FC<ArchitectureFlowProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [particles, setParticles] = useState<FlowParticle[]>([]);
   const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;

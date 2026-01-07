@@ -44,9 +44,10 @@ const TIME_INTERVALS = [
   { value: '1d', label: '1 jour', limit: 90 },
 ];
 
-// Cache pour stocker les données de la journée
+// Cache persistant pour stocker les données (ne sera jamais vidé automatiquement)
+// Utilise un Map avec clé basée sur crypto + intervalle
 const dataCache = new Map<string, { data: CandleData[]; timestamp: number }>();
-const CACHE_DURATION = 60000; // 1 minute
+const CACHE_DURATION = 300000; // 5 minutes (au lieu de 1 minute pour éviter les rechargements fréquents)
 
 const CandlestickChart: React.FC = () => {
   const [selectedCrypto, setSelectedCrypto] = useState<string>('BTCUSDT');
@@ -75,9 +76,11 @@ const CandlestickChart: React.FC = () => {
       const cached = dataCache.get(cacheKey);
       const now = Date.now();
 
+      // Utiliser le cache si disponible et encore valide
+      // Le cache persiste maintenant plus longtemps (5 minutes au lieu de 1)
       if (cached && (now - cached.timestamp) < CACHE_DURATION) {
-        console.log('📦 Utilisation du cache pour', cacheKey);
-        console.log('📊 Données:', cached.data.length, 'chandelles');
+        console.log('📦 Cache HIT pour', cacheKey, '- Âge:', Math.round((now - cached.timestamp) / 1000), 'secondes');
+        console.log('📊 Données en cache:', cached.data.length, 'chandelles');
         if (cached.data.length > 0) {
           const lastCandle = cached.data[cached.data.length - 1];
           console.log('⏰ Dernière chandelle:', new Date(lastCandle.time).toLocaleString());
@@ -89,6 +92,8 @@ const CandlestickChart: React.FC = () => {
         setLoading(false);
         return;
       }
+
+      console.log('🔄 Cache MISS pour', cacheKey, '- Rechargement depuis l\'API');
 
       console.log('🔄 Chargement depuis API pour', cacheKey);
       const response = await fetch(
@@ -169,7 +174,7 @@ const CandlestickChart: React.FC = () => {
 
           setCurrentPrice(newPrice);
 
-          // Mettre à jour la dernière chandelle
+          // Mettre à jour la dernière chandelle ET le cache
           setCandleData(prev => {
             if (prev.length === 0) return prev;
             const updated = [...prev];
@@ -180,7 +185,6 @@ const CandlestickChart: React.FC = () => {
             const candleTime = lastCandle.time;
 
             // Si la dernière chandelle est trop vieille, ne pas la modifier
-            // (elle devrait être mise à jour par un rechargement de données)
             if (now - candleTime > 3600000) { // Plus d'1 heure
               console.log('⚠️ Chandelle trop ancienne, rechargement nécessaire');
               return prev;
@@ -193,6 +197,14 @@ const CandlestickChart: React.FC = () => {
             lastCandle.volume = newVolume;
 
             updated[updated.length - 1] = lastCandle;
+
+            // IMPORTANT: Mettre à jour le cache avec les nouvelles données
+            const cacheKey = `${selectedCrypto}_${selectedInterval}`;
+            dataCache.set(cacheKey, {
+              data: updated,
+              timestamp: Date.now(), // Rafraîchir le timestamp du cache
+            });
+
             return updated;
           });
         } catch (error) {
