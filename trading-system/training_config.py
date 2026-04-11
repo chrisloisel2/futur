@@ -54,7 +54,7 @@ class DataConfig:
 class EdgeForecasterConfig:
     """Edge forecaster (Transformer) hyperparameters"""
     # Architecture
-    seq_len: int = 32                       # Sequence length (bars)
+    seq_len: int = 64                       # Sequence length (bars) — 64 bars de contexte pour un horizon 60 min
     d_model: int = 192                      # Model dimension
     n_heads: int = 6                        # Attention heads
     n_layers: int = 5                       # Transformer layers
@@ -64,12 +64,11 @@ class EdgeForecasterConfig:
 
     # Multi-task outputs
     quantiles: List[float] = field(default_factory=lambda: [0.05, 0.25, 0.50, 0.75, 0.95])
-    horizon_minutes: int = 15               # Forecast horizon (reduced from 60 to get balanced labels)
+    horizon_minutes: int = 60               # Horizon unique : 60 min (aligné avec Level 0 et aggregate_features)
 
     # Labels (TP/SL)
-    # CRITICAL: For 1m crypto data with 15min horizon
-    # Median ATR ~0.05%, so tp_k=3.0 → ~0.15% TP threshold
-    # This should give ~40-60% hit rate over 15 minutes
+    # Pour 1m crypto data avec horizon 60min
+    # Median ATR ~0.05%, tp_k=3.0 → ~0.15% TP threshold sur 60 min
     tp_k: float = 3.0                       # TP = tp_k * ATR
     sl_k: float = 2.0                       # SL = sl_k * ATR
     adaptive_tp: bool = False               # Regime-adaptive TP
@@ -222,8 +221,6 @@ class UnifiedTrainingConfig:
     # Components to train
     train_regime: bool = True
     train_edge: bool = True
-    train_specialists: bool = False         # Not implemented yet
-    train_gating: bool = False              # Not implemented yet
 
     # Walk-forward
     use_walk_forward: bool = False          # Multi-fold temporal validation

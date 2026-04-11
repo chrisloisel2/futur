@@ -208,33 +208,23 @@ def main():
     models_trained = []
 
     try:
-        # === LEVEL 0: Regime Classifier PRODUCTION (with impulse recall gate) ===
+        # === LEVEL 0: Global Gating + Regime Classifier (binaire: calm/reversal) ===
         run(
             [python_exe, "training/train_regime_classifier_production.py", *common],
-            description="🔵 LEVEL 0: Regime Classifier PRODUCTION (SGD + calibration + impulse recall gate >= 0.35)"
+            description="LEVEL 0: Regime Classifier PRODUCTION (calm/reversal, SGD + calibration)"
         )
         models_trained.append("regime_classifier_prod")
 
-        # === LEVEL 1: Specialists (depends on event_classifier) ===
+        # === LEVEL 1: Event Classifier ===
         run(
-            [python_exe, "training/train_specialists.py", *common],
-            description="🟢 LEVEL 1: Conditional Specialists (regime-specific forecasters)"
+            [python_exe, "training/train_event_classifier.py", *common],
+            description="LEVEL 1: Event Classifier (régimes de marché)"
         )
-        models_trained.append("specialists")
+        models_trained.append("event_classifier")
 
-        # === LEVEL 2: Pairwise Comparator (depends on scaler) ===
-        run(
-            [python_exe, "training/train_pairwise_comparator.py", *common],
-            description="🟡 LEVEL 2: Pairwise Comparator (prediction consistency checker)"
-        )
-        models_trained.append("pairwise")
-
-        # === LEVEL 3: Meta Scaler (depends on all previous models) ===
-        run(
-            [python_exe, "training/train_meta_scaler.py", *common],
-            description="🔴 LEVEL 3: Meta Scaler (final signal scaling)"
-        )
-        models_trained.append("meta_scaler")
+        # === LEVEL 2: Edge Forecaster (PyTorch Transformer) ===
+        # Entraîné séparément via trading-system/scripts/train_edge_forecaster.py
+        # horizon=60min, seq_len=64
 
     except subprocess.CalledProcessError as e:
         print(f"\n{'='*80}")

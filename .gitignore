@@ -1,6 +1,64 @@
+# ── Données volumineuses ─────────────────────────────────────────────────────
+data/
+datasets/
+ML-DL/
+
+# ── Artefacts ML / checkpoints ────────────────────────────────────────────────
 training_output_corrected/
 ai/models/.venv/
 ai/cache/
 ai/models/runs/
 ai/checkpoints/
 ai/checkpoints_light/
+ai/models/level_*/checkpoints/
+ai/models/level_*/__pycache__/
+
+# ── Artefacts trading-system ─────────────────────────────────────────────────
+trading-system/artifacts/
+trading-system/.venv/
+trading-system/__pycache__/
+
+# ── Fichiers de données lourds (toutes extensions) ───────────────────────────
+*.csv
+*.csv.gz
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.pt
+*.pth
+*.onnx
+*.ckpt
+*.bin
+*.npy
+*.npz
+*.zip
+*.gz
+*.tar
+*.tar.gz
+*.7z
+*.rar
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# ── Système ───────────────────────────────────────────────────────────────────
+.DS_Store
+.env
+*.log
+.vscode/settings.json

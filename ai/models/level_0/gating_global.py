@@ -185,7 +185,7 @@ def rms_vol(fut_rv: np.ndarray) -> float:
 @dataclass(frozen=True)
 class GatingConfig:
     lookback: int = 256
-    horizon: int = 12
+    horizon: int = 60
     feature_keys: Tuple[str, ...] = tuple(FEATURE_KEYS)
 
     # Online quantiles (train only)
@@ -208,7 +208,7 @@ class GatingConfig:
 
     # Warmup / memory
     warmup: int = 2048
-    max_buffer: int = 4096  # ring buffer cap (>= lookback + horizon + warmup margin)
+    max_buffer: int = 4096  # ring buffer cap (>= lookback=256 + horizon=60 + warmup=2048 + margin)
 
     # Numeric stability
     eps: float = 1e-12
@@ -571,7 +571,7 @@ if __name__ == "__main__":
 
     cfg = GatingConfig(
         lookback=256,
-        horizon=12,
+        horizon=60,
         warmup=2048,
         max_buffer=4096,
         use_trinary_label=True,

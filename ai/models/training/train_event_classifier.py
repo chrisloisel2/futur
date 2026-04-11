@@ -50,7 +50,7 @@ else:
 @dataclass(frozen=True)
 class CFG:
     lookback: int = 256
-    horizon: int = 12
+    horizon: int = 60
     stride: int = 1
 
     train_frac: float = 0.80
