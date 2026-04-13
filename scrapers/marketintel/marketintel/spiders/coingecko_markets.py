@@ -26,6 +26,10 @@ class CoinGeckoMarketsSpider(scrapy.Spider):
         self.from_date = from_date
         self.to_date = to_date
 
+    async def start(self):
+        for request in self.start_requests():
+            yield request
+
     def start_requests(self):
         if self.from_date:
             # ── Historique : chunks annuels par coin ─────────────────────────

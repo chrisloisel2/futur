@@ -11,6 +11,10 @@ class MempoolSpaceSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
         self.from_date = from_date
 
+    async def start(self):
+        for request in self.start_requests():
+            yield request
+
     def start_requests(self):
         if self.from_date:
             # mempool.space = snapshot temps réel, pas de données historiques

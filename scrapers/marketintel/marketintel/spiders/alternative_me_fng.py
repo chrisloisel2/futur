@@ -17,6 +17,10 @@ class AlternativeMeFearGreedSpider(scrapy.Spider):
         self.from_date = from_date
         self.to_date = to_date
 
+    async def start(self):
+        for request in self.start_requests():
+            yield request
+
     def start_requests(self):
         limit = _HISTORY_LIMIT if self.from_date else _LIVE_LIMIT
         url = f"https://api.alternative.me/fng/?limit={limit}&format=json"

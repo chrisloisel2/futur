@@ -39,6 +39,10 @@ class WaybackRssSpider(scrapy.Spider):
 
     # ── Routing ───────────────────────────────────────────────────────────────
 
+    async def start(self):
+        for request in self.start_requests():
+            yield request
+
     def start_requests(self):
         if self._historical:
             yield from self._cdx_requests()

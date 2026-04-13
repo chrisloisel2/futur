@@ -23,7 +23,7 @@ class MongoPipeline:
             mongo_db=crawler.settings.get("MONGO_DATABASE", "market_intel"),
         )
 
-    def open_spider(self, spider):
+    def open_spider(self, spider=None):
         self.client = MongoClient(self.mongo_uri)
         self.db = self.client[self.mongo_db]
         self.collection = self.db[self.collection_name]
@@ -34,25 +34,35 @@ class MongoPipeline:
         self.collection.create_index("asset")
         self.collection.create_index("published_at")
         self.collection.create_index("feature_name")
+        self.collection.create_index("scraped_at")
 
-    def close_spider(self, spider):
+    def close_spider(self, spider=None):
         if self.buffer:
             self.collection.bulk_write(self.buffer, ordered=False)
             self.buffer.clear()
         if self.client:
             self.client.close()
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider=None):
         adapter = ItemAdapter(item)
 
-        adapter["scraped_at"] = datetime.now(timezone.utc).isoformat()
+        scraped_at = datetime.now(timezone.utc).isoformat()
+        adapter["scraped_at"] = scraped_at
+
+        # Données sans published_at (snapshots live) → utiliser scraped_at
+        # pour garantir un fingerprint unique à chaque run (série temporelle)
+        if not adapter.get("published_at"):
+            adapter["published_at"] = scraped_at
 
         if not adapter.get("fingerprint"):
+            published_at = adapter.get("published_at", "")
             raw_key = "|".join([
                 str(adapter.get("source", "")),
+                str(adapter.get("source_type", "")),
+                str(adapter.get("asset", "")),
                 str(adapter.get("url", "")),
                 str(adapter.get("title", "")),
-                str(adapter.get("published_at", "")),
+                str(published_at),
                 str(adapter.get("feature_name", "")),
                 str(adapter.get("value", "")),
             ])

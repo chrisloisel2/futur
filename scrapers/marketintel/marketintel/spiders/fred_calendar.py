@@ -26,6 +26,10 @@ class FredCalendarSpider(scrapy.Spider):
         self.from_date = from_date
         self.to_date = to_date
 
+    async def start(self):
+        for request in self.start_requests():
+            yield request
+
     def start_requests(self):
         api_key = os.getenv("FRED_API_KEY", "")
         if not api_key:

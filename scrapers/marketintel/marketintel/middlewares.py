@@ -15,6 +15,16 @@ from scrapy.exceptions import NotConfigured
 
 log = logging.getLogger(__name__)
 
+# Spiders qui font des appels API directs → PAS de proxy (latence + fiabilité)
+# Les proxies sont réservés aux spiders HTML/RSS (news)
+_API_SPIDERS = frozenset({
+    "binance_funding",
+    "coingecko_markets",
+    "alternative_me_fng",
+    "fred_calendar",
+    "mempool_space",
+})
+
 
 # ── User Agents ───────────────────────────────────────────────────────────────
 
@@ -96,6 +106,7 @@ class MongoProxyMiddleware:
     def from_crawler(cls, crawler):
         enabled = crawler.settings.getbool("PROXY_ENABLED", True)
         inst = cls(enabled)
+        inst._crawler = crawler
         crawler.signals.connect(inst._on_open,  signal=signals.spider_opened)
         crawler.signals.connect(inst._on_close, signal=signals.spider_closed)
         return inst
@@ -133,7 +144,12 @@ class MongoProxyMiddleware:
 
     # ── Hooks requête ─────────────────────────────────────────────────────────
 
-    def process_request(self, request, spider):
+    def process_request(self, request):
+        spider = self._crawler.spider
+        # Pas de proxy pour les spiders API : inutile et destructeur de performance
+        if spider.name in _API_SPIDERS:
+            return None
+
         if not self._pool or "proxy" in request.meta:
             return None
 
@@ -144,11 +160,12 @@ class MongoProxyMiddleware:
             self._req_count += 1
         return None
 
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response):
         # Pas de retrait sur succès : on garde le proxy dans le pool
         return response
 
-    def process_exception(self, request, exception, spider):
+    def process_exception(self, request, exception):
+        spider = self._crawler.spider
         proxy_url = request.meta.get("_proxy_url")
         if proxy_url and self._pool:
             self._pool.mark_failed(proxy_url)
@@ -170,7 +187,7 @@ class MongoProxyMiddleware:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class RandomUserAgentMiddleware:
-    def process_request(self, request, spider):
+    def process_request(self, request):
         request.headers["User-Agent"] = random.choice(_USER_AGENTS)
 
 
@@ -179,7 +196,7 @@ class RandomUserAgentMiddleware:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class HeadersRotatorMiddleware:
-    def process_request(self, request, spider):
+    def process_request(self, request):
         request.headers["Accept-Language"] = random.choice(_ACCEPT_LANGUAGES)
         request.headers["Accept-Encoding"] = "gzip, deflate, br"
         request.headers["Connection"] = "keep-alive"
