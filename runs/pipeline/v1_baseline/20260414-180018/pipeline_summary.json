@@ -1,0 +1,193 @@
+{
+  "run_id": "20260414-180018",
+  "mode": "long",
+  "data": "data/BTCUSD_1h_features.csv",
+  "test_from": 2024,
+  "config": {
+    "tradeable_quantile": 0.7,
+    "cost_pct": 0.001,
+    "filter_threshold_long": 0.52,
+    "direction_threshold_long": 0.54,
+    "filter_threshold_short": 0.52,
+    "direction_threshold_short": 0.55,
+    "initial_equity": 10000.0,
+    "risk_per_trade_long": 0.002,
+    "max_consecutive_losses_long": 3,
+    "cooldown_bars_long": 2,
+    "daily_loss_limit_pct": 0.02,
+    "risk_per_trade_short": 0.001,
+    "max_consecutive_losses_short": 2,
+    "cooldown_bars_short": 3,
+    "enable_long": true,
+    "enable_short": false
+  },
+  "label_stats": {
+    "thr_long": 0.005409,
+    "thr_long_raw_quantile": 0.005409,
+    "thr_short_raw": 0.008251,
+    "thr_short_with_cost": 0.009751,
+    "cost_pct_long": 0.001,
+    "cost_pct_short": 0.0015,
+    "tradeable_quantile_long": 0.7,
+    "tradeable_quantile_short": 0.82,
+    "n_total": 75766,
+    "n_tradeable": 14886,
+    "n_long": 1723,
+    "n_short": 789,
+    "n_long_gray": 7901,
+    "n_short_gray": 3304,
+    "n_reversal_rejected": 2894,
+    "n_reversal_long_rejected": 7307,
+    "n_long_net": 7690,
+    "n_short_net": 3535,
+    "frac_long": 0.0227,
+    "frac_short": 0.0104,
+    "long_vs_short_ratio": 2.1838,
+    "regime_distribution": {
+      "NEUTRAL": 35287,
+      "SHORTABLE": 23103,
+      "NO_SHORT": 17376
+    },
+    "regime_long_distribution": {
+      "NEUTRAL": 35590,
+      "LONGABLE": 27491,
+      "NO_LONG": 12685
+    },
+    "warning_low_long": false,
+    "warning_low_short": false,
+    "warning_imbalanced": false,
+    "warning_short_too_rare": true
+  },
+  "filter_metrics": {
+    "model": "HistGBT",
+    "val_acc": 0.88925676447083,
+    "val_f1": 0.23981191222570533,
+    "val_auc": 0.7480124432218028,
+    "recall_not_tradeable": 0.9574921630094044,
+    "recall_tradeable": 0.1951530612244898,
+    "confusion_matrix": [
+      [
+        7636,
+        339
+      ],
+      [
+        631,
+        153
+      ]
+    ],
+    "scale_pos_weight": 3.13,
+    "calibrated_threshold_long": 0.52,
+    "calibrated_threshold_short": 0.52
+  },
+  "regime_report": {
+    "val": {
+      "n_total": 8759,
+      "pct_no_short": 0.237,
+      "pct_shortable": 0.272,
+      "pct_neutral": 0.491,
+      "short_rate_no_short": 0.0059,
+      "short_rate_shortable": 0.0047,
+      "short_rate_neutral": 0.0038
+    },
+    "test": {
+      "n_total": 20026,
+      "pct_no_short": 0.231,
+      "pct_shortable": 0.296,
+      "pct_neutral": 0.473,
+      "short_rate_no_short": 0.0059,
+      "short_rate_shortable": 0.0102,
+      "short_rate_neutral": 0.0059
+    }
+  },
+  "edge_long_metrics": [
+    {
+      "model": "Logistic",
+      "side": "long",
+      "acc": 0.8833,
+      "macro_f1": 0.5016,
+      "auc": 0.6584,
+      "precision_long": 0.0369,
+      "recall_long": 0.2881,
+      "confusion_matrix": [
+        [
+          7319,
+          887
+        ],
+        [
+          84,
+          34
+        ]
+      ]
+    },
+    {
+      "model": "HistGBT",
+      "side": "long",
+      "acc": 0.9234,
+      "macro_f1": 0.5136,
+      "auc": 0.7027,
+      "precision_long": 0.0406,
+      "recall_long": 0.1949,
+      "confusion_matrix": [
+        [
+          7663,
+          543
+        ],
+        [
+          95,
+          23
+        ]
+      ]
+    }
+  ],
+  "edge_short_metrics": null,
+  "short_calibration": null,
+  "short_wf_robustness": null,
+  "backtest_long": {
+    "n_tested": 20026,
+    "n_trades": 659,
+    "profit_factor": 0.9543,
+    "max_drawdown": 0.0261,
+    "sharpe_annualized": -1.5916,
+    "win_rate": 0.519,
+    "avg_win": 5.7603,
+    "avg_loss": -6.5124,
+    "expectancy_per_trade": -0.1433,
+    "initial_equity": 10000.0,
+    "final_equity": 9905.6,
+    "total_return_pct": -0.94,
+    "by_year": {
+      "2024": {
+        "trades": 361,
+        "pnl_sum": -51.81,
+        "pf": 0.955,
+        "win_rate": 0.507
+      },
+      "2025": {
+        "trades": 200,
+        "pnl_sum": -129.23,
+        "pf": 0.806,
+        "win_rate": 0.53
+      },
+      "2026": {
+        "trades": 98,
+        "pnl_sum": 86.64,
+        "pf": 1.361,
+        "win_rate": 0.541
+      }
+    },
+    "side": "long",
+    "model": "HistGBT_long",
+    "filter_threshold": 0.52,
+    "direction_threshold": 0.54,
+    "cost_pct": 0.001,
+    "skipped_filter": 17962,
+    "skipped_direction": 1023,
+    "skipped_risk": 382,
+    "risk_per_trade": 0.002
+  },
+  "backtest_short": null,
+  "backtest_combined": null,
+  "short_disabled_reason": null,
+  "auto_calibrate_used": true,
+  "elapsed_sec": 9.9
+}

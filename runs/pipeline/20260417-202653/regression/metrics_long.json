@@ -1,0 +1,26 @@
+{
+  "side": "long",
+  "label": "y_long_pnl",
+  "fee": 0.001,
+  "margin_calibrated": 0.001,
+  "top_pct": 0.01,
+  "n_bars_test": 20087,
+  "n_trades": 4,
+  "trade_rate": 0.0002,
+  "profit_factor": 1.8319,
+  "win_rate": 0.75,
+  "avg_pnl": 0.003379,
+  "total_pnl": 0.013517,
+  "sharpe_annualized": 25.9687,
+  "max_drawdown": 0.016,
+  "label_stats": {
+    "mean": -0.001962,
+    "std": 0.007797,
+    "pct_positive": 0.299,
+    "p25": -0.004479,
+    "p75": 0.000666,
+    "max": 0.15828,
+    "min": -0.203034
+  },
+  "n_features": 53
+}

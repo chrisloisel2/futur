@@ -1,0 +1,305 @@
+{
+  "run_id": "20260414-161526",
+  "mode": "combined",
+  "data": "data/datasets/binance_vision_downloads/data/spot/monthly/klines/BTCUSDT/1m",
+  "test_from": 2024,
+  "config": {
+    "tradeable_quantile": 0.7,
+    "cost_pct": 0.001,
+    "filter_threshold_long": 0.5,
+    "direction_threshold_long": 0.52,
+    "filter_threshold_short": 0.5,
+    "direction_threshold_short": 0.55,
+    "initial_equity": 10000.0,
+    "risk_per_trade_long": 0.002,
+    "max_consecutive_losses_long": 3,
+    "cooldown_bars_long": 2,
+    "daily_loss_limit_pct": 0.02,
+    "risk_per_trade_short": 0.001,
+    "max_consecutive_losses_short": 2,
+    "cooldown_bars_short": 3,
+    "enable_long": true,
+    "enable_short": true
+  },
+  "label_stats": {
+    "thr_long": 0.005411,
+    "thr_long_raw_quantile": 0.005411,
+    "thr_short_raw": 0.008255,
+    "thr_short_with_cost": 0.009755,
+    "cost_pct_long": 0.001,
+    "cost_pct_short": 0.0015,
+    "tradeable_quantile_long": 0.7,
+    "tradeable_quantile_short": 0.82,
+    "n_total": 73284,
+    "n_tradeable": 14513,
+    "n_long": 1682,
+    "n_short": 768,
+    "n_long_gray": 7694,
+    "n_short_gray": 3226,
+    "n_reversal_rejected": 2837,
+    "n_reversal_long_rejected": 7119,
+    "n_long_net": 7499,
+    "n_short_net": 3457,
+    "frac_long": 0.023,
+    "frac_short": 0.0105,
+    "long_vs_short_ratio": 2.1901,
+    "regime_distribution": {
+      "NEUTRAL": 34159,
+      "SHORTABLE": 22209,
+      "NO_SHORT": 16916
+    },
+    "regime_long_distribution": {
+      "NEUTRAL": 34294,
+      "LONGABLE": 26810,
+      "NO_LONG": 12180
+    },
+    "warning_low_long": false,
+    "warning_low_short": false,
+    "warning_imbalanced": false,
+    "warning_short_too_rare": true
+  },
+  "filter_metrics": {
+    "model": "HistGBT",
+    "val_acc": 0.8852608745290558,
+    "val_f1": 0.2516753536857781,
+    "val_auc": 0.7472456976521016,
+    "recall_not_tradeable": 0.9510971786833856,
+    "recall_tradeable": 0.21556122448979592,
+    "confusion_matrix": [
+      [
+        7585,
+        390
+      ],
+      [
+        615,
+        169
+      ]
+    ],
+    "scale_pos_weight": 3.13,
+    "calibrated_threshold_long": 0.5,
+    "calibrated_threshold_short": 0.5
+  },
+  "regime_report": {
+    "val": {
+      "n_total": 8759,
+      "pct_no_short": 0.237,
+      "pct_shortable": 0.272,
+      "pct_neutral": 0.491,
+      "short_rate_no_short": 0.0059,
+      "short_rate_shortable": 0.0047,
+      "short_rate_neutral": 0.0038
+    },
+    "test": {
+      "n_total": 17543,
+      "pct_no_short": 0.238,
+      "pct_shortable": 0.286,
+      "pct_neutral": 0.475,
+      "short_rate_no_short": 0.0058,
+      "short_rate_shortable": 0.0095,
+      "short_rate_neutral": 0.0057
+    }
+  },
+  "edge_long_metrics": [
+    {
+      "model": "Logistic",
+      "side": "long",
+      "acc": 0.8826,
+      "macro_f1": 0.5003,
+      "auc": 0.655,
+      "precision_long": 0.0357,
+      "recall_long": 0.2773,
+      "confusion_matrix": [
+        [
+          7315,
+          891
+        ],
+        [
+          86,
+          33
+        ]
+      ]
+    },
+    {
+      "model": "HistGBT",
+      "side": "long",
+      "acc": 0.919,
+      "macro_f1": 0.5209,
+      "auc": 0.694,
+      "precision_long": 0.0502,
+      "recall_long": 0.2605,
+      "confusion_matrix": [
+        [
+          7620,
+          586
+        ],
+        [
+          88,
+          31
+        ]
+      ]
+    }
+  ],
+  "edge_short_metrics": [
+    {
+      "model": "Logistic",
+      "side": "short",
+      "acc": 0.881,
+      "macro_f1": 0.4788,
+      "auc": 0.7058,
+      "precision_short": 0.0109,
+      "recall_short": 0.2821,
+      "confusion_matrix": [
+        [
+          7605,
+          1001
+        ],
+        [
+          28,
+          11
+        ]
+      ]
+    },
+    {
+      "model": "HistGBT",
+      "side": "short",
+      "acc": 0.9166,
+      "macro_f1": 0.4864,
+      "auc": 0.6202,
+      "precision_short": 0.0086,
+      "recall_short": 0.1538,
+      "confusion_matrix": [
+        [
+          7918,
+          688
+        ],
+        [
+          33,
+          6
+        ]
+      ]
+    }
+  ],
+  "short_calibration": {
+    "threshold_calibrated": 0.65,
+    "method": "platt"
+  },
+  "short_wf_robustness": null,
+  "backtest_long": {
+    "n_tested": 17543,
+    "n_trades": 662,
+    "profit_factor": 0.7503,
+    "max_drawdown": 0.0638,
+    "sharpe_annualized": -9.5192,
+    "win_rate": 0.4909,
+    "avg_win": 5.2165,
+    "avg_loss": -6.7047,
+    "expectancy_per_trade": -0.8522,
+    "initial_equity": 10000.0,
+    "final_equity": 9435.87,
+    "total_return_pct": -5.64,
+    "by_year": {
+      "2024": {
+        "trades": 413,
+        "pnl_sum": -336.13,
+        "pf": 0.761,
+        "win_rate": 0.487
+      },
+      "2025": {
+        "trades": 249,
+        "pnl_sum": -228.0,
+        "pf": 0.732,
+        "win_rate": 0.498
+      }
+    },
+    "side": "long",
+    "model": "HistGBT_long",
+    "filter_threshold": 0.5,
+    "direction_threshold": 0.52,
+    "cost_pct": 0.001,
+    "skipped_filter": 15543,
+    "skipped_direction": 914,
+    "skipped_risk": 424,
+    "risk_per_trade": 0.002
+  },
+  "backtest_short": {
+    "n_tested": 17543,
+    "n_trades": 382,
+    "profit_factor": 0.6275,
+    "max_drawdown": 0.029,
+    "sharpe_annualized": -16.8758,
+    "win_rate": 0.3874,
+    "avg_win": 3.202,
+    "avg_loss": -3.2271,
+    "expectancy_per_trade": -0.7363,
+    "initial_equity": 10000.0,
+    "final_equity": 9718.74,
+    "total_return_pct": -2.81,
+    "by_year": {
+      "2024": {
+        "trades": 220,
+        "pnl_sum": -145.71,
+        "pf": 0.663,
+        "win_rate": 0.391
+      },
+      "2025": {
+        "trades": 162,
+        "pnl_sum": -135.55,
+        "pf": 0.581,
+        "win_rate": 0.383
+      }
+    },
+    "side": "short",
+    "model": "HistGBT_short",
+    "filter_threshold": 0.5,
+    "direction_threshold": 0.55,
+    "cost_pct": 0.001,
+    "skipped_filter": 15543,
+    "skipped_direction": 281,
+    "skipped_risk": 307,
+    "risk_per_trade": 0.001,
+    "skipped_regime": 1030,
+    "n_bear_activated": 970,
+    "regime_threshold": 0.8600000000000004,
+    "regime_model_used": true
+  },
+  "backtest_combined": {
+    "n_tested": 17543,
+    "n_trades": 896,
+    "profit_factor": 0.7105,
+    "max_drawdown": 0.0825,
+    "sharpe_annualized": -10.9532,
+    "win_rate": 0.4576,
+    "avg_win": 4.612,
+    "avg_loss": -5.4765,
+    "expectancy_per_trade": -0.8601,
+    "initial_equity": 10000.0,
+    "final_equity": 9229.35,
+    "total_return_pct": -7.71,
+    "by_year": {
+      "2024": {
+        "trades": 545,
+        "pnl_sum": -435.73,
+        "pf": 0.732,
+        "win_rate": 0.455
+      },
+      "2025": {
+        "trades": 351,
+        "pnl_sum": -334.91,
+        "pf": 0.677,
+        "win_rate": 0.462
+      }
+    },
+    "side": "combined",
+    "model": "Combined",
+    "n_long": 662,
+    "n_short": 234,
+    "long_pf": 0.7502,
+    "short_pf": 0.4995,
+    "skipped_filter": 15543,
+    "skipped_direction": 1106,
+    "skipped_risk": 574
+  },
+  "short_disabled_reason": null,
+  "auto_calibrate_used": true,
+  "elapsed_sec": 15.4
+}

@@ -3,7 +3,9 @@ API SERVER FOR ALPHA DASHBOARD
 ===============================
 Serveur FastAPI pour exposer les données de trading alpha au frontend React.
 """
+import asyncio
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
@@ -20,21 +22,49 @@ import threading
 import glob
 from pydantic import BaseModel
 
+# ── Chemin projet racine (pour importer ai.*) ─────────────────────────────────
+_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(_ROOT))
+sys.path.insert(0, str(_ROOT / "ai" / "TRAIN"))
 
 from mongo_utils import fetch_historical_from_mongo, normalize_symbol, get_db
 from pymongo.errors import PyMongoError
 
-# Add TRAIN to path for S3 access
-sys.path.insert(0, str(Path(__file__).parent.parent / "ai" / "TRAIN"))
+# Add TRAIN to path for S3 access (déjà ajouté au-dessus)
 from data.s3_data_source import S3DataSource
 
 # Import data integrity analyzer
 from data_integrity_analyzer import DataIntegrityAnalyzer
 
+# ── PredictionEngine (inférence live) ────────────────────────────────────────
+from prediction_engine import engine as _prediction_engine, init_engine
+
+
+async def _background_refresh_loop() -> None:
+    """Rafraîchit la prédiction toutes les 60 secondes."""
+    while True:
+        await asyncio.sleep(60)
+        await _prediction_engine.refresh()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa: F811
+    # Startup
+    logger = logging.getLogger("api_server")
+    try:
+        await init_engine()
+        logger.info("PredictionEngine initialisé")
+    except Exception as e:
+        logger.error(f"PredictionEngine non disponible: {e}")
+    asyncio.create_task(_background_refresh_loop())
+    yield
+    # Shutdown (rien à faire)
+
+
 # Import ML endpoints
 from ml_endpoints import ml_router
 
-app = FastAPI(title="Alpha Trading API", version="2.0")
+app = FastAPI(title="Alpha Trading API", version="2.0", lifespan=lifespan)
 
 # Include ML architecture router
 app.include_router(ml_router)
@@ -1660,178 +1690,145 @@ async def health_check():
         }
 
 # ============================================================================
-# REAL-TIME PIPELINE ENDPOINTS
+# BACKTEST HISTORY — données historiques du dernier run
 # ============================================================================
 
-# Import du connector (optionnel)
-try:
-    from pipeline_api_connector import pipeline_connector
-    PIPELINE_AVAILABLE = True
-except ImportError:
-    PIPELINE_AVAILABLE = False
-    logger.warning("Pipeline connector not available - prediction endpoints will be disabled")
+def _latest_run_dir() -> Optional[Path]:
+    runs = _ROOT / "runs" / "pipeline"
+    if not runs.exists():
+        return None
+    for d in sorted(runs.iterdir(), reverse=True):
+        if d.is_dir() and (d / "pipeline_summary.json").exists():
+            return d
+    return None
+
+
+@app.get("/backtest/history")
+async def get_backtest_history():
+    """Données backtest du dernier run : trades long + short + equity + stats."""
+    run_dir = _latest_run_dir()
+    if not run_dir:
+        raise HTTPException(status_code=404, detail="Aucun run trouvé")
+
+    result = {"run_id": run_dir.name, "long": None, "short": None}
+
+    for side in ("long", "short"):
+        bd = run_dir / f"backtest_{side}"
+        if not bd.exists():
+            continue
+        try:
+            summary = json.loads((bd / "summary.json").read_text()) if (bd / "summary.json").exists() else {}
+            trades  = json.loads((bd / "trades.json").read_text())  if (bd / "trades.json").exists() else []
+            equity  = json.loads((bd / "equity_curve.json").read_text()) if (bd / "equity_curve.json").exists() else []
+            result[side] = {"summary": summary, "trades": trades, "equity": equity}
+        except Exception as e:
+            logger.warning(f"backtest {side}: {e}")
+
+    return result
+
+
+# ============================================================================
+# REAL-TIME PIPELINE ENDPOINTS — PredictionEngine (vrais modèles ML)
+# ============================================================================
 
 @app.post("/pipeline/start")
-async def start_pipeline(config: Optional[Dict] = None):
-    """Démarrer la pipeline temps réel."""
-    if not PIPELINE_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Pipeline connector not available")
+async def start_pipeline():
+    """Démarre / force un refresh immédiat du moteur d'inférence."""
     try:
-        result = await pipeline_connector.start_pipeline(config)
-        return result
+        await _prediction_engine.refresh()
+        return {"status": "started", "message": "Prédiction rafraîchie"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/pipeline/stop")
 async def stop_pipeline():
-    """Arrêter la pipeline."""
-    if not PIPELINE_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Pipeline connector not available")
-    try:
-        result = await pipeline_connector.stop_pipeline()
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """No-op — le moteur tourne en continu."""
+    return {"status": "stopped", "message": "Le moteur continue en arrière-plan"}
+
 
 @app.get("/pipeline/status")
 async def get_pipeline_status():
-    """Obtenir le statut et les stats de la pipeline."""
-    if not PIPELINE_AVAILABLE:
-        return {"status": "unavailable", "message": "Pipeline connector not configured"}
-    try:
-        stats = pipeline_connector.get_stats()
-        return stats
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Statut du moteur d'inférence."""
+    return _prediction_engine.status()
+
 
 @app.get("/pipeline/predictions")
 async def get_all_predictions():
-    """Obtenir toutes les prédictions actuelles."""
-    if not PIPELINE_AVAILABLE:
-        return {"count": 0, "predictions": [], "message": "Pipeline not available"}
-    try:
-        predictions = pipeline_connector.get_predictions()
-        return {
-            "count": len(predictions),
-            "predictions": predictions,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Dernière prédiction du pipeline (format compat frontend)."""
+    pred = _prediction_engine.last_prediction
+    if pred is None:
+        # Premier appel : forcer un refresh
+        try:
+            await _prediction_engine.refresh()
+            pred = _prediction_engine.last_prediction
+        except Exception as e:
+            return {
+                "count": 0,
+                "predictions": [],
+                "message": f"Initialisation en cours: {e}",
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+    if pred is None:
+        return {"count": 0, "predictions": [], "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "count": 1,
+        "predictions": [pred],
+        "timestamp": pred.get("refreshed_at", datetime.utcnow().isoformat()),
+    }
+
+
+@app.get("/pipeline/signal")
+async def get_signal():
+    """Prédiction complète avec cascade pipeline — utilisé par le nouveau frontend."""
+    pred = _prediction_engine.last_prediction
+    if pred is None:
+        try:
+            await _prediction_engine.refresh()
+            pred = _prediction_engine.last_prediction
+        except Exception as e:
+            raise HTTPException(status_code=503, detail=f"Modèle non disponible: {e}")
+    if pred is None:
+        raise HTTPException(status_code=503, detail="Aucune prédiction disponible")
+    return {
+        **pred,
+        "history": _prediction_engine.prediction_history[-50:],
+    }
+
 
 @app.get("/pipeline/prediction/{symbol}")
-async def get_prediction(symbol: str):
-    """Obtenir la prédiction pour un symbole spécifique."""
-    if not PIPELINE_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Pipeline connector not available")
-    try:
-        prediction = pipeline_connector.get_prediction(symbol.upper())
-        return prediction
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def get_prediction_by_symbol(symbol: str):
+    """Prédiction pour un symbole spécifique (BTCUSDT uniquement pour l'instant)."""
+    pred = _prediction_engine.last_prediction
+    if pred is None:
+        raise HTTPException(status_code=404, detail="Aucune prédiction disponible")
+    return pred
 
-@app.get("/pipeline/features/{symbol}")
-async def get_features(symbol: str):
-    """Obtenir les features calculées pour un symbole."""
-    if not PIPELINE_AVAILABLE:
-        raise HTTPException(status_code=503, detail="Pipeline connector not available")
-    try:
-        features = pipeline_connector.get_features(symbol.upper())
-        if not features:
-            raise HTTPException(status_code=404, detail=f"No features available for {symbol}")
-        return features
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/pipeline/symbols")
 async def get_active_symbols():
-    """Obtenir la liste des symboles actifs."""
-    if not PIPELINE_AVAILABLE:
-        return {"count": 0, "symbols": []}
-    try:
-        symbols = pipeline_connector.get_active_symbols()
-        return {
-            "count": len(symbols),
-            "symbols": symbols
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Symboles actifs."""
+    return {"count": 1, "symbols": ["BTCUSDT"]}
 
 @app.get("/pipeline/predictions/future/{symbol}")
 async def get_future_predictions(symbol: str, minutes: int = 5):
-    """Obtenir les prédictions pour les N prochaines minutes."""
-    if not PIPELINE_AVAILABLE:
-        # Générer des prédictions basiques si pipeline non disponible
-        current_time = datetime.utcnow()
-        predictions = []
-
-        # Prix de base estimé (on pourrait le récupérer d'une API publique)
-        base_prices = {
-            "BTCUSDT": 42000,
-            "ETHUSDT": 2200,
-            "BNBUSDT": 300,
-            "SOLUSDT": 100,
-            "XRPUSDT": 0.60
-        }
-        base_price = base_prices.get(symbol.upper(), 100)
-
-        for i in range(1, minutes + 1):
-            # Simuler une petite variation (-0.5% à +0.5% par minute)
-            variation = (random.random() - 0.5) * 0.01
-            predicted_price = base_price * (1 + variation * i)
-            confidence = 0.5 + random.random() * 0.3  # 50-80% confiance
-
-            predictions.append({
-                "minute": i,
-                "timestamp": (current_time + timedelta(minutes=i)).isoformat(),
-                "predicted_price": round(predicted_price, 6),
-                "confidence": round(confidence, 2),
-                "change_pct": round(variation * i * 100, 3)
-            })
-
-        return {
-            "symbol": symbol.upper(),
-            "current_time": current_time.isoformat(),
-            "predictions": predictions,
-            "source": "simulated"
-        }
-
-    try:
-        # Obtenir la prédiction actuelle
-        current_pred = pipeline_connector.get_prediction(symbol.upper())
-        current_time = datetime.utcnow()
-        predictions = []
-
-        # Estimer le prix actuel
-        current_price = current_pred.get("price", 0)
-        confidence = current_pred.get("confidence", 0.5)
-
-        # Générer des prédictions pour les prochaines minutes
-        for i in range(1, minutes + 1):
-            # Utiliser une variation basée sur la tendance actuelle
-            trend = (random.random() - 0.5) * 0.008  # -0.4% à +0.4% par minute
-            predicted_price = current_price * (1 + trend * i)
-
-            predictions.append({
-                "minute": i,
-                "timestamp": (current_time + timedelta(minutes=i)).isoformat(),
-                "predicted_price": round(predicted_price, 6),
-                "confidence": round(confidence * (1 - i * 0.05), 2),  # Confiance diminue avec le temps
-                "change_pct": round(trend * i * 100, 3)
-            })
-
-        return {
-            "symbol": symbol.upper(),
-            "current_time": current_time.isoformat(),
-            "current_price": current_price,
-            "predictions": predictions,
-            "source": "pipeline"
-        }
-    except Exception as e:
-        logger.error(f"Error generating future predictions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    """Prédictions futures indicatives basées sur le dernier signal."""
+    pred  = _prediction_engine.last_prediction
+    price = pred["current_price"] if pred else 84000.0
+    conf  = pred["confidence"] if pred else 0.5
+    now   = datetime.utcnow()
+    preds = []
+    for i in range(1, minutes + 1):
+        drift = (random.random() - 0.5) * 0.004
+        preds.append({
+            "minute": i,
+            "timestamp": (now + timedelta(minutes=i)).isoformat(),
+            "predicted_price": round(price * (1 + drift * i), 2),
+            "confidence": round(max(0.3, conf * (1 - i * 0.04)), 3),
+            "change_pct": round(drift * i * 100, 3),
+        })
+    return {"symbol": symbol.upper(), "current_price": price,
+            "predictions": preds, "source": "signal_extrapolation"}
 
 
 # ============================================================================

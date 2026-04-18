@@ -1,7 +1,9 @@
 """
 ML ARCHITECTURE ENDPOINTS
 =========================
-Endpoints pour exposer les données des 5 niveaux de l'architecture ML.
+Endpoints pour exposer les données des niveaux de l'architecture ML.
+Les levels 0, 1 et 2 utilisent les vraies données du PredictionEngine.
+Les levels 3 et 4 restent des stubs (non entraînés).
 """
 import random
 from datetime import datetime
@@ -12,140 +14,101 @@ import json
 
 ml_router = APIRouter(prefix="/ml", tags=["ML Architecture"])
 
-# ============================================================================
-# MOCK DATA GENERATORS (À remplacer par les vrais modèles)
-# ============================================================================
+# Import du moteur d'inférence (disponible après init_engine au startup)
+try:
+    from prediction_engine import engine as _engine
+    _ENGINE_AVAILABLE = True
+except ImportError:
+    _ENGINE_AVAILABLE = False
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _get_pred() -> dict:
+    """Retourne la dernière prédiction ou un dict vide."""
+    if _ENGINE_AVAILABLE and _engine.last_prediction:
+        return _engine.last_prediction
+    return {}
+
+
+# ── Générateurs basés sur les vraies données ──────────────────────────────────
 
 def generate_level0_data():
-    """Génère des données mock pour Level 0 - Global Gating."""
-    score = random.uniform(0.3, 0.9)
-    threshold = 0.5
-
+    """Level 0 — Filtre tradeable (données réelles)."""
+    pred = _get_pred()
+    p    = pred.get("p_filter", random.uniform(0.3, 0.9))
+    thr  = pred.get("filter_thr_long", 0.40)
     return {
-        "tradeability_score": score,
-        "is_tradeable": score > threshold,
-        "threshold": threshold,
+        "tradeability_score": p,
+        "is_tradeable": pred.get("filter_passed_long", p > thr),
+        "threshold": thr,
+        "threshold_short": pred.get("filter_thr_short", 0.45),
+        "passed_long":  pred.get("filter_passed_long",  p > thr),
+        "passed_short": pred.get("filter_passed_short", p > 0.45),
         "features": {
-            "realized_return": random.uniform(-0.02, 0.02),
-            "realized_volatility": random.uniform(0.01, 0.05),
-            "max_drawdown": random.uniform(-0.1, -0.01)
+            "rsi_14":    pred.get("rsi", 50.0),
+            "dist_ema50":pred.get("dist_ema50", 0.0),
         },
-        "quantiles": {
-            "p10": random.uniform(0.1, 0.3),
-            "p50": random.uniform(0.4, 0.6),
-            "p90": random.uniform(0.7, 0.9)
-        },
-        "window_size": 256,
-        "horizon": 12,
-        "status": "active",
-        "history": [
-            {
-                "timestamp": datetime.now().isoformat(),
-                "score": random.uniform(0.3, 0.9),
-                "tradeable": random.choice([True, False])
-            }
-            for _ in range(20)
-        ]
+        "window_size": 350,
+        "horizon": 1,
+        "status": "active" if pred else "initializing",
     }
 
+
 def generate_level1_data():
-    """Génère des données mock pour Level 1 - Context Detectors."""
-    direction_pred = random.choice(['down', 'flat', 'up'])
-    patterns = random.sample(['impulse', 'reversal', 'breakout', 'squeeze'], k=random.randint(1, 3))
+    """Level 1 — Régime de marché (données réelles)."""
+    pred   = _get_pred()
+    regime = pred.get("regime", "NEUTRAL")
+    rsi    = pred.get("rsi", 50.0)
+    d50    = pred.get("dist_ema50", 0.0)
+
+    is_shortable = regime == "SHORTABLE"
+    is_no_short  = regime == "NO_SHORT"
 
     return {
         "detectors": {
-            "tradeability": {
-                "name": "Tradeability Detector",
-                "type": "binary",
-                "output": {"tradeable": random.choice([True, False])},
-                "confidence": random.uniform(0.6, 0.95),
-                "active": True
+            "regime": {
+                "name":       "Regime Filter (déterministe)",
+                "type":       "3-class",
+                "output":     {"predicted": regime},
+                "confidence": 1.0,
+                "active":     True,
             },
-            "direction": {
-                "name": "Direction Detector",
-                "type": "3-class",
-                "output": {
-                    "predicted": direction_pred,
-                    "down": random.uniform(0.1, 0.8),
-                    "flat": random.uniform(0.1, 0.8),
-                    "up": random.uniform(0.1, 0.8)
-                },
-                "confidence": random.uniform(0.6, 0.95),
-                "active": True
-            },
-            "pattern": {
-                "name": "Pattern Detector",
-                "type": "multi-label",
-                "output": {
-                    "impulse": random.uniform(0.2, 0.9),
-                    "reversal": random.uniform(0.2, 0.9),
-                    "breakout": random.uniform(0.2, 0.9),
-                    "squeeze": random.uniform(0.2, 0.9)
-                },
-                "confidence": random.uniform(0.6, 0.95),
-                "active": True
-            },
-            "event": {
-                "name": "Event Detector",
-                "type": "rare_events",
-                "output": {"type": random.choice(["volume_spike", "tail_risk", "none"])},
-                "confidence": random.uniform(0.6, 0.95),
-                "active": True
-            },
-            "pairwise": {
-                "name": "Pairwise Context",
-                "type": "4-class",
-                "output": {
-                    "trending": random.uniform(0.2, 0.8),
-                    "mean_reverting": random.uniform(0.2, 0.8),
-                    "high_vol": random.uniform(0.2, 0.8),
-                    "low_vol": random.uniform(0.2, 0.8)
-                },
-                "confidence": random.uniform(0.6, 0.95),
-                "active": True
-            }
         },
-        "direction": direction_pred,
-        "active_patterns": patterns,
-        "regime": random.choice(["trending", "mean_reverting", "high_vol", "low_vol"]),
-        "status": "active"
+        "regime":  regime,
+        "is_shortable": is_shortable,
+        "is_no_short":  is_no_short,
+        "features": {
+            "rsi_14":         round(rsi, 2),
+            "dist_ema_50":    round(d50, 4),
+        },
+        "status": "active" if pred else "initializing",
     }
 
+
 def generate_level2_data():
-    """Génère des données mock pour Level 2 - Conditional Specialists."""
-    experts = ['impulse', 'reversal', 'breakout', 'squeeze']
-    weights = [random.uniform(0, 1) for _ in range(4)]
-    total_weight = sum(weights)
-    normalized_weights = [w / total_weight for w in weights]
-
-    expert_data = {}
-    for i, expert in enumerate(experts):
-        expert_data[expert] = {
-            "predicted_return": random.uniform(-0.05, 0.05),  # Augmenté de ±3% à ±5%
-            "predicted_volatility": random.uniform(0.015, 0.04),  # Ajusté
-            "confidence": normalized_weights[i],
-            "active": normalized_weights[i] > 0.2
-        }
-
+    """Level 2 — Edge scoring long / short (données réelles)."""
+    pred   = _get_pred()
+    p_long  = pred.get("p_long",  0.0)
+    p_short = pred.get("p_short", 0.0)
+    thr_l   = pred.get("thr_edge_long",  0.55)
+    thr_s   = pred.get("thr_edge_short", 0.65)
     return {
-        "router": {
-            "mode": random.choice(["soft", "hard"]),
-            "weights": {
-                "impulse": normalized_weights[0],
-                "reversal": normalized_weights[1],
-                "breakout": normalized_weights[2],
-                "squeeze": normalized_weights[3]
-            },
-            "selected_expert": experts[normalized_weights.index(max(normalized_weights))]
+        "long": {
+            "p":          round(p_long, 4),
+            "threshold":  thr_l,
+            "signal":     pred.get("long_signal",  False),
+            "active":     pred.get("filter_passed_long", False),
         },
-        "experts": expert_data,
-        "predicted_return": sum(expert_data[e]["predicted_return"] * normalized_weights[i]
-                                for i, e in enumerate(experts)),
-        "predicted_volatility": sum(expert_data[e]["predicted_volatility"] * normalized_weights[i]
-                                     for i, e in enumerate(experts)),
-        "active_expert": experts[normalized_weights.index(max(normalized_weights))],
-        "status": "active"
+        "short": {
+            "p":          round(p_short, 4),
+            "threshold":  thr_s,
+            "signal":     pred.get("short_signal", False),
+            "active":     (pred.get("filter_passed_short", False)
+                           and pred.get("regime", "NEUTRAL") != "NO_SHORT"),
+        },
+        "action": pred.get("action", "HOLD"),
+        "status": "active" if pred else "initializing",
     }
 
 def generate_level3_data():
@@ -324,15 +287,24 @@ async def get_level_metrics(level_id: int):
 
 @ml_router.get("/predictions/latest")
 async def get_latest_prediction():
-    """Récupère la dernière prédiction complète (tous les niveaux)."""
+    """Dernière prédiction complète (niveaux 0-2 réels, 3-4 stubs)."""
+    pred = _get_pred()
     return {
-        "timestamp": datetime.now().isoformat(),
-        "symbol": "BTCUSDT",
-        "level0": generate_level0_data(),
-        "level1": generate_level1_data(),
-        "level2": generate_level2_data(),
-        "level3": generate_level3_data(),
-        "level4": generate_level4_data()
+        "timestamp": pred.get("refreshed_at", datetime.now().isoformat()),
+        "symbol":    "BTCUSDT",
+        "action":    pred.get("action", "HOLD"),
+        "level0":    generate_level0_data(),
+        "level1":    generate_level1_data(),
+        "level2":    generate_level2_data(),
+        "level3":    generate_level3_data(),
+        "level4":    generate_level4_data(),
+        # Champs de commodité pour l'UI
+        "current_price": pred.get("current_price", 0),
+        "p_long":        pred.get("p_long", 0),
+        "p_short":       pred.get("p_short", 0),
+        "regime":        pred.get("regime", "NEUTRAL"),
+        "stop_price":    pred.get("stop_price", 0),
+        "take_profit":   pred.get("take_profit", 0),
     }
 
 @ml_router.get("/flow/throughput")
