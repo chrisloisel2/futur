@@ -1,0 +1,33 @@
+{
+  "config": {
+    "equity": 10000.0,
+    "risk_per_trade": 0.002,
+    "max_gross_exposure": 1.0,
+    "max_position_notional": 1.0,
+    "use_atr": true,
+    "atr_key": "atr_14",
+    "rv_key": "rv_60",
+    "stop_atr_mult": 2.5,
+    "stop_rv_mult": 3.0,
+    "min_stop_pct": 0.001,
+    "max_stop_pct": 0.03,
+    "rr": 1.5,
+    "min_abs_edge": 0.05,
+    "min_scale": 0.15,
+    "cooldown_bars": 3,
+    "daily_loss_limit_pct": 0.02,
+    "max_consecutive_losses": 3
+  },
+  "state": {
+    "equity": 9591.746068164164,
+    "day_start_equity": 9591.746068164164,
+    "day_pnl": 0.0,
+    "day_trades": 0,
+    "current_day": "2024-12-30",
+    "last_trade_bar": 40938,
+    "consecutive_losses": 0,
+    "total_trades": 240,
+    "total_wins": 91,
+    "total_losses": 149
+  }
+}

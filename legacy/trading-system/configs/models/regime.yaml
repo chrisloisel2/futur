@@ -1,0 +1,10 @@
+regimes: [impulse, reversal, breakout, squeeze, calm, chop]
+model:
+  type: baseline
+  features:
+    - x_mid_ret_1m
+    - x_mid_rv_5m
+    - s_slow_funding_z
+calibration:
+  method: isotonic
+  n_bins: 10

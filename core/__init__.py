@@ -1,5 +1,5 @@
 # core/__init__.py
-from .constants import (
+from .features.constants import (
     HORIZON_BARS, HORIZON_MINUTES, BAR_FREQUENCY,
     COST_PCT, COST_PCT_STRESS, COST_SHORT_MULT,
     TRADEABLE_QUANTILE, TRADEABLE_QUANTILE_LONG, TRADEABLE_QUANTILE_SHORT,
@@ -19,5 +19,7 @@ from .labels import (
     compute_short_reversal_col, compute_long_reversal_col,
     compute_regime_col, compute_long_regime_col,
 )
-from .preprocessing import fit_scaler, get_X, chronological_split
-from .feature_engineering import compute_long_features, compute_short_features
+from .features.preprocessing import fit_scaler, get_X, chronological_split
+from .features.engineering import compute_long_features, compute_short_features, compute_flow_features
+from .features.live import compute_live_features, compute_macro_features, MACRO_BUNDLE_COLS
+from .settings import AppPaths, AppSettings, ServiceSettings, get_settings, configure_project_imports

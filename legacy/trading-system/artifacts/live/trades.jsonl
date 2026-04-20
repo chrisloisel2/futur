@@ -1,0 +1,4 @@
+{"type": "session_start", "symbol": "BTCUSDT", "balance": 100.0, "equity": 100.0, "dry_run": true}
+{"type": "session_end", "summary": {"n_trades": 0, "equity_init": 100.0, "equity_final": 100.0, "total_pnl": 0.0, "win_rate": 0.0, "profit_factor": 0.0, "sharpe": 0.0, "max_drawdown_pct": 0.0, "total_signals": 0, "total_rejected": 0}}
+{"type": "session_start", "symbol": "BTCUSDT", "balance": 100.0, "equity": 100.0, "dry_run": true}
+{"type": "session_end", "summary": {"n_trades": 0, "equity_init": 100.0, "equity_final": 100.0, "total_pnl": 0.0, "win_rate": 0.0, "profit_factor": 0.0, "sharpe": 0.0, "max_drawdown_pct": 0.0, "total_signals": 0, "total_rejected": 0}}

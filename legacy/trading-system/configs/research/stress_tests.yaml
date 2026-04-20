@@ -1,0 +1,45 @@
+s3:
+  clean_prefix: s3://qbia/bourse/data/clean
+artifacts:
+  stress_dir: artifacts/stress_tests
+costs:
+  fee_bps: 2.0
+  spread_bps: 0.5
+  slippage_bps: 1.0
+  impact_bps: 0.3
+  adverse_bps: 0.2
+execution:
+  mode: taker
+  fill_probability: 0.9
+  latency_ms: 80
+  cancel_probability: 0.05
+  partial_fill_probability: 0.2
+  slippage_bps: 2.0
+backtest:
+  mode: taker
+  artifacts_dir: artifacts/backtests
+scenarios:
+  - name: flash_crash
+    type: flash_crash
+    magnitude: 0.1
+    duration_s: 30
+  - name: wick
+    type: wick
+    magnitude: 0.05
+    duration_s: 10
+  - name: gap
+    type: gap
+    magnitude: 0.02
+    duration_s: 0
+  - name: spreadx10
+    type: spread_x10
+    magnitude: 0.001
+    duration_s: 0
+  - name: outage
+    type: outage
+    magnitude: 0.0
+    duration_s: 120
+  - name: partial_fills
+    type: partial_fills
+    magnitude: 0.0
+    duration_s: 0

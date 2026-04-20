@@ -1,0 +1,13 @@
+{
+  "TREND_LONG": {
+    "auc": 0.5397,
+    "macro_f1": 0.5341,
+    "acc": 0.9827,
+    "precision_pos": 0.1429,
+    "recall_pos": 0.0526,
+    "n_train": 3622,
+    "n_val": 1391,
+    "label": "y_long",
+    "context": "TREND_LONG"
+  }
+}

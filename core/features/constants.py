@@ -1,0 +1,21 @@
+# compat shim — implémentation dans level_0/constants.py
+# noqa: F401, F403
+from core.settings import configure_project_imports
+
+configure_project_imports()
+
+from ai.level_0.constants import *  # noqa: F401, F403
+from ai.level_0.constants import (
+    HORIZON_BARS, HORIZON_MINUTES, BAR_FREQUENCY,
+    COST_PCT, COST_PCT_STRESS, COST_PCT_PESSIMISTIC,
+    TRADEABLE_QUANTILE, TRADEABLE_QUANTILE_LONG, TRADEABLE_QUANTILE_SHORT,
+    LONG_MIN_ABS_RETURN, NON_REVERSAL_WINDOW_LONG, NON_REVERSAL_THRESHOLD_FACTOR_LONG,
+    GRAY_ZONE_FACTOR_LONG, TARGET_REVERSAL_COL_LONG, REGIME_COL_LONG,
+    COST_SHORT_MULT, NON_REVERSAL_WINDOW, NON_REVERSAL_THRESHOLD_FACTOR,
+    GRAY_ZONE_FACTOR_SHORT,
+    INITIAL_EQUITY,
+    TRAIN_END_YEAR, VAL_YEAR, TEST_FROM_YEAR,
+    TARGET_COL, TARGET_REVERSAL_COL, ATR_COL, RV_COL, CLOSE_COL,
+    DATETIME_COL, REGIME_COL,
+    assert_horizon, assert_feature_col,
+)

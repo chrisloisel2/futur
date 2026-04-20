@@ -1,0 +1,19 @@
+{
+  "n_trades": 176,
+  "equity_init": 10000.0,
+  "equity_final": 9748.31,
+  "total_pnl": -251.6858,
+  "total_return_pct": -2.52,
+  "win_rate": 0.409,
+  "profit_factor": 0.743,
+  "sharpe": -2.352,
+  "max_drawdown_pct": -2.78,
+  "avg_win": 10.1243,
+  "avg_loss": -9.4292,
+  "exits_tp": 72,
+  "exits_sl": 104,
+  "exits_time": 0,
+  "total_signals": 23499,
+  "total_rejected": 3,
+  "elapsed_sec": 3.9
+}

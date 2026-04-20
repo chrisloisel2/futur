@@ -1,0 +1,76 @@
+{
+  "horizon": 60,
+  "n_samples": 2096878,
+  "atr_pct_median": 0.0009467823767100648,
+  "atr_pct_p75": 0.0014450020623372256,
+  "mfe_pct_percentiles": {
+    "p10": 0.0005398988723754883,
+    "p25": 0.001409769058227539,
+    "p50": 0.0031490325927734375,
+    "p75": 0.006275177001953125,
+    "p90": 0.011237025260925293,
+    "p95": 0.01586903929710387,
+    "p99": 0.02975263953208923
+  },
+  "mae_pct_percentiles": {
+    "p01": 3.2782554626464844e-06,
+    "p05": 0.00024312734603881836,
+    "p10": 0.0005451440811157227,
+    "p25": 0.0014352202415466309,
+    "p50": 0.003230154514312744,
+    "p75": 0.006529688835144043,
+    "p90": 0.011877596378326416
+  },
+  "mfe_in_atr_percentiles": {
+    "p10": NaN,
+    "p25": NaN,
+    "p50": NaN,
+    "p75": NaN,
+    "p90": NaN,
+    "p95": NaN,
+    "p99": NaN
+  },
+  "mae_in_atr_percentiles": {
+    "p01": NaN,
+    "p05": NaN,
+    "p10": NaN,
+    "p25": NaN,
+    "p50": NaN,
+    "p75": NaN,
+    "p90": NaN
+  },
+  "recommendations": {
+    "conservative": {
+      "tp_k": NaN,
+      "sl_k": NaN,
+      "description": "Low risk: p25 MFE for TP, p75 MAE for SL",
+      "expected_tp_hit_rate": 0.75,
+      "expected_sl_hit_rate": 0.25
+    },
+    "moderate": {
+      "tp_k": NaN,
+      "sl_k": NaN,
+      "description": "Medium risk: p50 MFE for TP, p50 MAE for SL",
+      "expected_tp_hit_rate": 0.5,
+      "expected_sl_hit_rate": 0.5
+    },
+    "aggressive": {
+      "tp_k": NaN,
+      "sl_k": NaN,
+      "description": "High risk: p75 MFE for TP, p25 MAE for SL",
+      "expected_tp_hit_rate": 0.25,
+      "expected_sl_hit_rate": 0.75
+    },
+    "current_v42": {
+      "tp_k": 5.0,
+      "sl_k": 3.5,
+      "description": "Current production_v4_2 values"
+    }
+  },
+  "validation_current_v42": {
+    "tp_k": 5.0,
+    "sl_k": 3.5,
+    "estimated_tp_hit_rate": 0.3251820086814779,
+    "estimated_sl_hit_rate": 0.49457908376166854
+  }
+}

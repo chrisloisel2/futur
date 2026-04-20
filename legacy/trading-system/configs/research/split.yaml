@@ -1,0 +1,19 @@
+s3:
+  raw_prefix: s3://qbia/bourse/data/raw
+  clean_prefix: s3://qbia/bourse/data/clean
+mongo:
+  uri: mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/
+  db: market
+  collection: buffer_events
+  lookback_minutes: 60
+walk_forward:
+  train_days: 30
+  test_days: 7
+  step_days: 7
+purged_kfold:
+  n_splits: 5
+purge_minutes: 10
+embargo_minutes: 5
+horizons_s: [60, 300, 900]
+artifacts:
+  splits_dir: artifacts/splits

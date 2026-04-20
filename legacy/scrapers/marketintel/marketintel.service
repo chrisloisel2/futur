@@ -1,0 +1,31 @@
+[Unit]
+Description=MarketIntel Data Collection Service
+Documentation=https://github.com/your-repo/marketintel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ia
+Group=ia
+WorkingDirectory=/home/ia/futur/scrapers/marketintel
+
+# Variables d'environnement — surcharge les valeurs de config.py
+EnvironmentFile=-/home/ia/futur/scrapers/marketintel/.env
+
+ExecStart=/usr/bin/python3 /home/ia/futur/scrapers/marketintel/service.py
+
+# Restart automatique en cas de crash
+Restart=on-failure
+RestartSec=30s
+
+# Logs via journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=marketintel
+
+# Limites
+TimeoutStopSec=60s
+
+[Install]
+WantedBy=multi-user.target

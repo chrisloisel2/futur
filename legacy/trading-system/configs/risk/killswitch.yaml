@@ -1,0 +1,5 @@
+daily_loss_limit_usd: -20000
+max_drawdown: 0.2
+max_consecutive_slippage_breaches: 3
+data_integrity_fail_action: freeze
+exchange_outage_seconds_to_kill: 300
