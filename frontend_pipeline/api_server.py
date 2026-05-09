@@ -4014,6 +4014,130 @@ async def get_scraper_logs(name: str, lines: int = 100):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/system/deployment-status")
+async def get_deployment_status():
+    """
+    Statut de déploiement du système.
+    Source de vérité unique pour savoir si le bot peut trader.
+    """
+    try:
+        from config.deployment_status import (
+            LIVE_ENABLED, PAPER_ENABLED, SHORT_ENABLED as _SHORT,
+            COMBINED_ENABLED, DEPLOYMENT_STATUS, DEPLOYMENT_REASON,
+            LONG_KNOWN_METRICS, MIN_LONG_TRADES_FOR_PAPER, MIN_LONG_TRADES_FOR_LIVE,
+        )
+        from config.strategy_flags import MIN_LONG_TRADES_FOR_DEPLOY
+
+        # Essaie de lire les derniers résultats de backtest si disponibles
+        long_status = LONG_KNOWN_METRICS.copy()
+        run_dir = _latest_run_dir()
+        if run_dir:
+            try:
+                summary_path = run_dir / "pipeline_summary.json"
+                if summary_path.exists():
+                    with open(summary_path) as f:
+                        summary = json.load(f)
+                    bt = summary.get("backtest_long", {})
+                    if bt:
+                        long_status = {
+                            "n_trades":            bt.get("n_trades", 0),
+                            "profit_factor":       bt.get("profit_factor", 0),
+                            "win_rate":            bt.get("win_rate", 0),
+                            "expectancy_per_trade": bt.get("expectancy_per_trade", 0),
+                            "sharpe_annualized":   bt.get("sharpe_annualized", 0),
+                            "max_drawdown_pct":    bt.get("max_drawdown", 0) * 100,
+                            "total_return_pct":    bt.get("total_return_pct", 0),
+                            "run_id":              run_dir.name,
+                            "note":                "Sharpe irréaliste si n_trades < 50." if bt.get("n_trades", 0) < 50 else "",
+                        }
+            except Exception:
+                pass
+
+        n_trades = long_status.get("n_trades", 0)
+        deployable_long = (
+            n_trades >= MIN_LONG_TRADES_FOR_DEPLOY
+            and long_status.get("profit_factor", 0) >= 1.20
+            and long_status.get("expectancy_per_trade", 0) > 0
+        )
+
+        if n_trades < MIN_LONG_TRADES_FOR_PAPER:
+            long_status_str = "promising_but_insufficient_sample"
+            long_reason     = f"only {n_trades} trades, minimum required {MIN_LONG_TRADES_FOR_PAPER}"
+        elif deployable_long:
+            long_status_str = "deployable_paper"
+            long_reason     = "paper trading gate passed"
+        else:
+            long_status_str = "backtest_failed_validation"
+            long_reason     = "validation gates not met"
+
+        return {
+            "live_enabled":     LIVE_ENABLED,
+            "paper_enabled":    PAPER_ENABLED and deployable_long,
+            "short_enabled":    False,
+            "combined_enabled": False,
+            "deployment_status": DEPLOYMENT_STATUS if not deployable_long else "PAPER_ONLY",
+            "reason":           DEPLOYMENT_REASON if not deployable_long else "long_only_paper_validated",
+            "short_disabled_reason": "unstable PF < 1 across tested years, negative expectancy",
+            "combined_disabled_reason": "COMBINED rejected: SHORT component fails validation",
+            "long_only": {
+                "status":            long_status_str,
+                "deployable":        deployable_long,
+                "reason":            long_reason,
+                "n_trades":          n_trades,
+                "min_required_paper": MIN_LONG_TRADES_FOR_PAPER,
+                "min_required_live":  MIN_LONG_TRADES_FOR_LIVE,
+                "metrics":           long_status,
+            },
+            "warnings": [
+                "Sharpe irréaliste si n_trades < 50 — ne pas utiliser comme indicateur de performance."
+                if n_trades < 50 else None,
+            ],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except ImportError as e:
+        return {
+            "live_enabled": False,
+            "paper_enabled": False,
+            "short_enabled": False,
+            "combined_enabled": False,
+            "deployment_status": "NOT_DEPLOYABLE",
+            "reason": f"deployment_status config missing: {e}",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+
+@app.get("/backtest/long-only")
+async def get_long_only_backtest_summary():
+    """Résumé du dernier backtest LONG-only."""
+    run_dir = _latest_run_dir()
+    if not run_dir:
+        raise HTTPException(status_code=404, detail="Aucun run trouvé")
+    try:
+        with open(run_dir / "pipeline_summary.json") as f:
+            summary = json.load(f)
+        bt = summary.get("backtest_long", {})
+        if not bt:
+            return {"status": "no_backtest_long", "deployable": False}
+        n = bt.get("n_trades", 0)
+        from config.strategy_flags import MIN_LONG_TRADES_FOR_DEPLOY, MIN_PROFIT_FACTOR
+        deployable = (
+            n >= MIN_LONG_TRADES_FOR_DEPLOY
+            and bt.get("profit_factor", 0) >= MIN_PROFIT_FACTOR
+            and bt.get("expectancy_per_trade", 0) > 0
+        )
+        return {
+            "status":     "promising_but_insufficient_sample" if n < MIN_LONG_TRADES_FOR_DEPLOY else ("deployable" if deployable else "failed_validation"),
+            "deployable": deployable,
+            "n_trades":   n,
+            "min_required": MIN_LONG_TRADES_FOR_DEPLOY,
+            "run_id":     run_dir.name,
+            "metrics":    bt,
+            "warning":    f"Sharpe={bt.get('sharpe_annualized', 0):.1f} est irréaliste avec {n} trades." if n < 50 else None,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("🚀 ALPHA TRADING API SERVER")

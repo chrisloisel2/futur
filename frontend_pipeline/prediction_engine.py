@@ -41,6 +41,8 @@ from ai.level_0.feature_engineering import compute_long_features, compute_short_
 from ai.level_0.features import FEATURES_LONG, FEATURES_SHORT
 from ai.level_1.rules import REGIME_NO_SHORT, REGIME_SHORTABLE, REGIME_NEUTRAL
 from ai.level_7.config import make_long_risk_config, make_short_risk_config
+from config.strategy_flags import SHORT_ENABLED
+from risk.uncertainty_gate import gate_signal as _gate_signal
 
 # Features du modèle de régime (chargées dynamiquement depuis bear_regime_metrics.json)
 REGIME_MODEL_DEFAULT_FEATURES = [
@@ -334,11 +336,12 @@ class PredictionEngine:
             )
             long_signal = p_long >= self.thr_edge_long
 
-        # ── Level 2 : signal short ───────────────────────────────────────────
+        # ── Level 2 : signal short (désactivé si SHORT_ENABLED=False) ─────────
         p_short_raw = 0.0
         p_short     = 0.0
         short_signal = False
-        if (self.clf_short and passes_short
+        if (SHORT_ENABLED
+                and self.clf_short and passes_short
                 and not long_signal
                 and regime == REGIME_SHORTABLE):
             x_s         = self._row_to_array(row, FEATURES_SHORT)
@@ -350,16 +353,27 @@ class PredictionEngine:
             p_short      = _apply_calibrator(self.cal_short, p_short_raw)
             short_signal = p_short >= self.thr_edge_short
 
-        # ── Décision ──────────────────────────────────────────────────────────
+        # ── Décision brute ────────────────────────────────────────────────────
         if long_signal:
-            action = "LONG"
-            cfg    = self._risk_long
+            action_raw = "LONG"
+            cfg        = self._risk_long
         elif short_signal:
-            action = "SHORT"
-            cfg    = self._risk_short
+            action_raw = "SHORT"
+            cfg        = self._risk_short
         else:
-            action = "HOLD"
-            cfg    = None
+            action_raw = "HOLD"
+            cfg        = None
+
+        # ── Uncertainty gate (Level filtre post-signal) ───────────────────────
+        rv_24 = float(row.get("rv_24", 0.03))
+        _ug_input = {"p_long": p_long, "rv_24": rv_24}
+        _ug_result = _gate_signal(_ug_input, width_threshold=0.30)
+        uncertainty_info = _ug_result.get("uncertainty", {})
+
+        action = action_raw
+        if action_raw == "LONG" and not uncertainty_info.get("allow_trade", True):
+            action = "WAIT"
+        size_multiplier = uncertainty_info.get("size_multiplier", 1.0) if action == "LONG" else 0.0
 
         # ── Level 7 : risk sizing ─────────────────────────────────────────────
         qty = stop_price = take_profit = 0.0
@@ -400,8 +414,10 @@ class PredictionEngine:
             "refreshed_at":  datetime.now(timezone.utc).isoformat(),
             # Prix
             "current_price": current_price,
-            # Décision finale
-            "action":  action,
+            # Décision finale (avec uncertainty gate appliqué)
+            "action_raw":   action_raw,
+            "action":       action,
+            "action_final": action,
             "reason":  reason,
             # Level 0
             "p_filter":           round(p_filter, 4),
@@ -415,8 +431,11 @@ class PredictionEngine:
             "rsi":        round(rsi, 2),
             # Level 2
             "p_long":       round(p_long, 4),
-            "p_short":      round(p_short, 4),
+            "p_short":      round(p_short, 4) if SHORT_ENABLED else 0.0,
             "p_short_raw":  round(p_short_raw, 4),
+            # Uncertainty gate
+            "uncertainty": uncertainty_info,
+            "size_multiplier": round(size_multiplier, 4),
             "thr_edge_long":  self.thr_edge_long,
             "thr_edge_short": self.thr_edge_short,
             "long_signal":  long_signal,
@@ -506,5 +525,7 @@ async def init_engine(run_dir: Optional[Path] = None) -> None:
     try:
         engine.load(run_dir)
         await engine.refresh()
+    except ValueError as e:
+        logger.warning(f"PredictionEngine non initialisé: {e}")
     except Exception as e:
         logger.error(f"Impossible d'initialiser PredictionEngine: {e}", exc_info=True)

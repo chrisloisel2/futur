@@ -1,0 +1,92 @@
+{
+  "BTCUSDT": {
+    "status": "backtest_failed_validation",
+    "deployable": false,
+    "reason": "PF=0.84 < 1.2; expectancy=-0.3211 <= 0; yearly_pf_fail={'2018': 0.683, '2019': 0.731, '2020': 0.86, '2021': 0.835, '2022': 0.824, '2025': 0.938, '2026': 0.875}",
+    "n_trades": 2355,
+    "win_rate": 0.383,
+    "profit_factor": 0.84,
+    "expectancy": -0.3211,
+    "gross_profit": 3969.66,
+    "gross_loss": -4725.78,
+    "total_fees_usd": 895.83,
+    "total_return_pct": -7.56,
+    "final_equity": 9243.87,
+    "sharpe": -10.086,
+    "sortino": -11.085,
+    "calmar": -0.871,
+    "max_drawdown_pct": -8.68,
+    "exposure_pct": 19.17,
+    "turnover": 0.08571,
+    "yearly_profit_factor": {
+      "2017": 1.029,
+      "2018": 0.683,
+      "2019": 0.731,
+      "2020": 0.86,
+      "2021": 0.835,
+      "2022": 0.824,
+      "2023": 1.726,
+      "2024": 1.061,
+      "2025": 0.938,
+      "2026": 0.875
+    },
+    "benchmark_bh_pct": 1754.01,
+    "fees_pct": "0.050% maker / 0.10% taker",
+    "slippage_pct": "0.02%",
+    "gate_report": {
+      "total_bars": 76341,
+      "rejected_by_tradeable_filter": 56051,
+      "rejected_by_direction_threshold": 12558,
+      "rejected_by_uncertainty_gate": 10,
+      "rejected_by_risk_gate": 1786,
+      "rejected_by_regime_gate": 0,
+      "accepted_trade_setups": 7722,
+      "executed_trades": 2355
+    },
+    "symbol": "BTCUSDT"
+  },
+  "ETHUSDT": {
+    "status": "backtest_failed_validation",
+    "deployable": false,
+    "reason": "PF=0.76 < 1.2; expectancy=-0.5062 <= 0; yearly_pf_fail={'2024': 0.813, '2025': 0.694, '2026': 0.787}",
+    "n_trades": 682,
+    "win_rate": 0.3607,
+    "profit_factor": 0.763,
+    "expectancy": -0.5062,
+    "gross_profit": 1112.51,
+    "gross_loss": -1457.72,
+    "total_fees_usd": 268.69,
+    "total_return_pct": -3.45,
+    "final_equity": 9654.79,
+    "sharpe": -11.729,
+    "sortino": -13.924,
+    "calmar": -0.9,
+    "max_drawdown_pct": -3.83,
+    "exposure_pct": 18.24,
+    "turnover": 0.025525,
+    "yearly_profit_factor": {
+      "2023": 1.047,
+      "2024": 0.813,
+      "2025": 0.694,
+      "2026": 0.787
+    },
+    "benchmark_bh_pct": 90.96,
+    "fees_pct": "0.050% maker / 0.10% taker",
+    "slippage_pct": "0.02%",
+    "gate_report": {
+      "total_bars": 29367,
+      "rejected_by_tradeable_filter": 22874,
+      "rejected_by_direction_threshold": 4556,
+      "rejected_by_uncertainty_gate": 0,
+      "rejected_by_risk_gate": 403,
+      "rejected_by_regime_gate": 0,
+      "accepted_trade_setups": 1937,
+      "executed_trades": 682
+    },
+    "symbol": "ETHUSDT"
+  },
+  "SOLUSDT": {
+    "status": "no_data",
+    "deployable": false
+  }
+}
