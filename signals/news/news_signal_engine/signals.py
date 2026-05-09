@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import List, Optional
 import numpy as np
 
-from models import NewsWindowAggregation, NewsSignal, EventType, EventStatus, SurpriseLevel, GeographicScope
+from .models import NewsWindowAggregation, NewsSignal, EventType, EventStatus, SurpriseLevel, GeographicScope
 from enrichment import MetricsCalculator
 from config import (
     MIN_ARTICLES_FOR_SIGNAL,

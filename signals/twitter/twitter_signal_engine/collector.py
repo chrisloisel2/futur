@@ -9,7 +9,7 @@ from typing import List, Optional, Callable
 import time
 import logging
 
-from models import RawTweet
+from .models import RawTweet
 from config import (
     ALL_ENTITIES,
     RATE_LIMIT_REQUESTS_PER_15MIN,

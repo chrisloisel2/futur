@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import List, Dict
 import logging
 
-from models import RawNewsArticle, ProcessedNewsArticle, IngestionStats, EventType
+from .models import RawNewsArticle, ProcessedNewsArticle, IngestionStats, EventType
 from filters import NewsFilter, SourceClassifier, EntityExtractor, GeographicScopeDetector
 from enrichment import NewsEnricher, EventClustering
 from classification import SemanticProcessor
@@ -101,7 +101,7 @@ class NewsSignalPipeline:
 
             # Geo scope
             geo_scope = self.geo_detector.detect(article, entities)
-            from models import GeographicScope
+            from .models import GeographicScope
             processed.geographic_scope = GeographicScope(geo_scope)
 
             # Analyse sémantique

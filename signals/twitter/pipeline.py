@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import List, Dict
 import logging
 
-from models import RawTweet, ProcessedTweet, IngestionStats
+from .models import RawTweet, ProcessedTweet, IngestionStats
 from filters import TweetFilter, EntityExtractor
 from enrichment import TweetEnricher
 from sentiment import SemanticProcessor

@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from models import RawTweet
+from .models import RawTweet
 from config import (
     ACCOUNT_MIN_AGE_DAYS,
     ACCOUNT_MIN_FOLLOWERS,

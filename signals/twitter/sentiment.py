@@ -8,7 +8,7 @@ from typing import Tuple
 from transformers import pipeline
 import torch
 
-from models import SentimentDirection, InformationType, CertaintyLevel, RawTweet
+from .models import SentimentDirection, InformationType, CertaintyLevel, RawTweet
 
 
 class SentimentAnalyzer:

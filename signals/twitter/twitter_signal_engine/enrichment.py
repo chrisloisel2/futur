@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Optional
 import numpy as np
 
-from models import RawTweet, ProcessedTweet
+from .models import RawTweet, ProcessedTweet
 from config import (
     ENGAGEMENT_WEIGHTS,
     CREDIBILITY_WEIGHTS,

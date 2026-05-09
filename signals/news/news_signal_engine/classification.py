@@ -8,7 +8,7 @@ from typing import List, Tuple
 from transformers import pipeline
 import spacy
 
-from models import EventType, EventStatus, SurpriseLevel, RawNewsArticle
+from .models import EventType, EventStatus, SurpriseLevel, RawNewsArticle
 from config import EVENT_TYPES
 
 

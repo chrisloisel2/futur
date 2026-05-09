@@ -9,10 +9,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+import numpy as np
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import uvicorn
 import logging
 import sys
@@ -23,7 +24,7 @@ import glob
 from pydantic import BaseModel
 
 # ── Chemin projet racine (pour importer ai.*) ─────────────────────────────────
-_ROOT = Path(__file__).parent.parent
+_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
 sys.path.insert(0, str(_ROOT / "ai" / "TRAIN"))
 
@@ -44,7 +45,154 @@ async def _background_refresh_loop() -> None:
     """Rafraîchit la prédiction toutes les 60 secondes."""
     while True:
         await asyncio.sleep(60)
-        await _prediction_engine.refresh()
+        if _prediction_engine.ready:
+            await _prediction_engine.refresh()
+
+
+async def _autonomous_trading_loop() -> None:
+    """Boucle autonome : trade toutes les 60 s à partir de la dernière prédiction."""
+    await asyncio.sleep(5)   # laisser le temps au engine de s'initialiser
+    while True:
+        try:
+            await _run_autonomous_trade()
+        except Exception as exc:
+            logging.getLogger("api_server").error(f"[Autonomous] erreur: {exc}", exc_info=True)
+        await asyncio.sleep(60)
+
+
+async def _fetch_ema_signal(symbol: str = "BTCUSDT") -> dict:
+    """
+    Signal de fallback basé sur EMA 7/25 (données Binance 1h).
+    Retourne dict(action, price, confidence, reason) ou None si erreur réseau.
+    """
+    try:
+        import httpx, pandas as pd
+        async with httpx.AsyncClient(timeout=15) as c:
+            r = await c.get(
+                "https://api.binance.com/api/v3/klines",
+                params={"symbol": symbol, "interval": "1h", "limit": 50},
+            )
+            r.raise_for_status()
+        candles = r.json()
+        closes = [float(k[4]) for k in candles]
+        price  = closes[-1]
+
+        def ema(series, n):
+            k = 2 / (n + 1)
+            e = series[0]
+            for v in series[1:]:
+                e = v * k + e * (1 - k)
+            return e
+
+        ema7  = ema(closes[-7:],  7)
+        ema25 = ema(closes[-25:], 25)
+        ema7_prev  = ema(closes[-8:-1],  7)
+        ema25_prev = ema(closes[-26:-1], 25)
+
+        spread = abs(ema7 - ema25) / ema25
+        bullish = ema7 > ema25
+
+        # État courant : LONG si haussier, SHORT si baissier
+        if bullish:
+            action = "LONG"
+            reason = f"EMA7({ema7:.0f}) > EMA25({ema25:.0f}) — tendance haussière (spread {spread*100:.2f}%)"
+            confidence = min(0.9, 0.55 + spread * 15)
+        else:
+            action = "SHORT"
+            reason = f"EMA7({ema7:.0f}) < EMA25({ema25:.0f}) — tendance baissière (spread {spread*100:.2f}%)"
+            confidence = min(0.9, 0.55 + spread * 15)
+
+        return {"action": action, "price": price, "confidence": confidence, "reason": reason}
+    except Exception as exc:
+        logging.getLogger("api_server").warning(f"[EMA fallback] erreur: {exc}")
+        return None
+
+
+async def _run_autonomous_trade() -> None:
+    """Exécute une itération de trading autonome.
+
+    Priorité 1 : signal du PredictionEngine ML (si modèles chargés).
+    Priorité 2 : signal EMA 7/25 de fallback (Binance direct).
+    """
+    log = logging.getLogger("api_server")
+
+    pred = _prediction_engine.last_prediction if _prediction_engine.ready else None
+    signal = "UNAVAILABLE"
+    action_taken = "NONE"
+    symbol = "BTCUSDT"
+    price = 0.0
+    confidence = 0.0
+    reason = "Pas de prédiction"
+    signal_source = "ML"
+
+    if pred:
+        signal     = pred.get("action", "HOLD")
+        price      = float(pred.get("current_price", 0))
+        confidence = float(pred.get("confidence", 0))
+        reason     = pred.get("reason", "AI autonome")
+        symbol     = pred.get("symbol", "BTCUSDT")
+    else:
+        # Fallback : EMA 7/25
+        signal_source = "EMA"
+        fb = await _fetch_ema_signal(symbol)
+        if fb:
+            signal     = fb["action"]
+            price      = fb["price"]
+            confidence = fb["confidence"]
+            reason     = fb["reason"]
+            log.info(f"[Fallback EMA] {signal} @ {price:.0f} — {reason}")
+
+    state = _load_portfolio_state()
+
+    # Mettre à jour les prix courants
+    if price > 0:
+        for pos in state.get("positions", []):
+            if pos.get("symbol") == symbol:
+                pos["current_price"] = price
+
+    # Vérifier stop-loss / take-profit
+    if price > 0:
+        for pos in list(state.get("positions", [])):
+            if pos.get("symbol") != symbol:
+                continue
+            entry_price = float(pos.get("entry_price", 0))
+            if entry_price <= 0:
+                continue
+            pnl_pct = (price - entry_price) / entry_price * 100
+            if pnl_pct <= -AUTONOMOUS_STOP_LOSS_PCT:
+                state = _apply_trade_logic(state, symbol, "SELL", price, 1.0,
+                                           f"Stop Loss {pnl_pct:.1f}%")
+                action_taken = "STOP_LOSS"
+                log.info(f"[Autonomous] STOP_LOSS {symbol} pnl={pnl_pct:.1f}%")
+                break
+            elif pnl_pct >= AUTONOMOUS_TAKE_PROFIT_PCT:
+                state = _apply_trade_logic(state, symbol, "SELL", price, 1.0,
+                                           f"Take Profit +{pnl_pct:.1f}%")
+                action_taken = "TAKE_PROFIT"
+                log.info(f"[Autonomous] TAKE_PROFIT {symbol} pnl=+{pnl_pct:.1f}%")
+                break
+
+    # Exécuter le signal AI (seulement si pas de stop/TP déclenché)
+    if action_taken == "NONE" and price > 0 and signal not in ("HOLD", "UNAVAILABLE"):
+        existing = next(
+            (p for p in state.get("positions", []) if p.get("symbol") == symbol), None)
+        if signal == "LONG" and not existing:
+            state = _apply_trade_logic(state, symbol, "BUY", price, confidence, reason)
+            action_taken = "BUY"
+            log.info(f"[Autonomous] BUY {symbol} @ {price} conf={confidence:.3f}")
+        elif signal == "SHORT" and existing:
+            state = _apply_trade_logic(state, symbol, "SELL", price, confidence, reason)
+            action_taken = "SELL"
+            log.info(f"[Autonomous] SELL {symbol} @ {price} conf={confidence:.3f}")
+
+    # Snapshot minute
+    _append_history(state, signal=signal, action_taken=action_taken)
+    _persist_portfolio_state(state)
+    stats = _calculate_stats(state)
+    log.info(
+        f"[Autonomous/{signal_source}] signal={signal} action={action_taken} "
+        f"price={price:.0f} value=${stats['total_value']:.0f} pnl={stats['total_pnl_percent']:.2f}%"
+    )
 
 
 @asynccontextmanager
@@ -53,10 +201,14 @@ async def lifespan(app: FastAPI):  # noqa: F811
     logger = logging.getLogger("api_server")
     try:
         await init_engine()
-        logger.info("PredictionEngine initialisé")
+        if _prediction_engine.ready:
+            logger.info("PredictionEngine initialisé")
+        else:
+            logger.warning("PredictionEngine non chargé: aucun run ML valide disponible")
     except Exception as e:
         logger.error(f"PredictionEngine non disponible: {e}")
     asyncio.create_task(_background_refresh_loop())
+    asyncio.create_task(_autonomous_trading_loop())
     yield
     # Shutdown (rien à faire)
 
@@ -86,13 +238,28 @@ logger = logging.getLogger(__name__)
 
 PORTFOLIO_COLLECTION = os.getenv("PORTFOLIO_COLLECTION", "portfolio_state")
 PORTFOLIO_DOC_ID = "default"
-PORTFOLIO_INITIAL_CAPITAL = float(os.getenv("PORTFOLIO_INITIAL_CAPITAL", "10000"))
+PORTFOLIO_INITIAL_CAPITAL = float(os.getenv("PORTFOLIO_INITIAL_CAPITAL", "100000"))
+AUTONOMOUS_STOP_LOSS_PCT  = float(os.getenv("AUTONOMOUS_STOP_LOSS_PCT",  "3.0"))
+AUTONOMOUS_TAKE_PROFIT_PCT = float(os.getenv("AUTONOMOUS_TAKE_PROFIT_PCT", "6.0"))
+
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_PORT = int(os.getenv("API_PORT", "8000"))
+FRONTEND_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip()
+]
+FRONTEND_ORIGIN_REGEX = os.getenv("FRONTEND_ORIGIN_REGEX", r"https?://.*:3000")
 
 
 # CORS pour permettre les requêtes depuis React
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_origins=FRONTEND_ORIGINS,
+    allow_origin_regex=FRONTEND_ORIGIN_REGEX or None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -186,14 +353,36 @@ class TradeRequest(BaseModel):
     reason: Optional[str] = None
 
 class TrainingStartRequest(BaseModel):
-    config: str
-    device: str = "auto"
+    config: str = "pipeline"
+    device: str = "auto"          # "cpu", "cuda", "auto"
     debug_mode: bool = False
-    training_location: str = "aws"  # "aws", "remote", or "local"
-    instance_type: str = "g4dn.xlarge"  # GPU T4, ~$0.50/h (for AWS)
-    aws_region: str = "eu-west-3"  # AWS region (for AWS)
-    remote_host: str = "100.118.183.51"  # Remote server host (for remote)
-    remote_user: str = "qbee"  # Remote server SSH user (for remote)
+    mode: str = "combined"        # "long", "short", "combined"
+    data_path: Optional[str] = None
+    test_from: int = 2024
+    auto_calibrate: bool = True
+    skip_tcn: bool = False
+    require_short_stability: bool = True
+    tradeable_q: float = 0.70
+    cost: float = 0.001
+    filter_threshold_long: float = 0.40
+    direction_threshold_long: float = 0.52
+    filter_threshold_short: float = 0.45
+    direction_threshold_short: float = 0.55
+    risk_long: float = 0.002
+    risk_short: float = 0.001
+    max_losses_long: int = 3
+    max_losses_short: int = 2
+    cooldown_long: int = 2
+    cooldown_short: int = 3
+    grid: bool = False
+    compare_models: bool = False
+    regression: bool = False
+    top_pct: float = 0.01
+    margin: float = 0.001
+    epochs: int = 100
+    batch_size: int = 128
+    learning_rate: float = 0.001
+    symbol: str = "BTCUSDT"
 
 
 # ============================================================================
@@ -228,15 +417,15 @@ def parse_training_log(log_file_path: str) -> Dict[str, any]:
                     metrics["current_epoch"] = int(epoch_match.group(1))
                     metrics["total_epochs"] = int(epoch_match.group(2))
 
-                train_loss_match = re.search(r'Train Loss: ([\d.]+)', line)
+                train_loss_match = re.search(r'Train Loss: (-?[\d.]+)', line)
                 if train_loss_match:
                     metrics["train_loss"] = float(train_loss_match.group(1))
 
-                val_loss_match = re.search(r'Val Loss: ([\d.]+)', line)
+                val_loss_match = re.search(r'Val Loss: (-?[\d.]+)', line)
                 if val_loss_match:
                     metrics["val_loss"] = float(val_loss_match.group(1))
 
-                sharpe_match = re.search(r'Val Sharpe: ([\d.]+)', line)
+                sharpe_match = re.search(r'Val Sharpe: (-?[\d.]+)', line)
                 if sharpe_match:
                     metrics["val_sharpe"] = float(sharpe_match.group(1))
 
@@ -269,17 +458,19 @@ def monitor_training_process(job_id: str):
             if poll_result is not None:
                 # Process has finished
                 with training_lock:
+                    if job.get("status") == "stopped":
+                        job["end_time"] = job.get("end_time") or datetime.utcnow()
+                        logger.info(f"Training job {job_id} already stopped")
+                        break
                     job["end_time"] = datetime.utcnow()
-                    if poll_result == 0:
+                    validation = _finalize_training_validation(job, poll_result)
+                    if poll_result == 0 and validation["status"] in {"passed", "warning"}:
                         job["status"] = "completed"
                         logger.info(f"Training job {job_id} completed successfully")
                     else:
                         job["status"] = "failed"
-                        job["error"] = f"Process exited with code {poll_result}"
-                        logger.error(f"Training job {job_id} failed with code {poll_result}")
-
-                    # Save final metadata
-                    save_training_metadata(job_id)
+                        job["error"] = validation["message"]
+                        logger.error(f"Training job {job_id} failed validation: {validation['message']}")
                 break
 
             # Update metrics from log file
@@ -290,18 +481,26 @@ def monitor_training_process(job_id: str):
                 job["current_loss"] = metrics["train_loss"]
                 job["current_val_loss"] = metrics["val_loss"]
                 job["current_sharpe"] = metrics["val_sharpe"]
+                _refresh_training_components(job, final=False)
 
                 if job["total_epochs"] > 0:
-                    job["progress_pct"] = (metrics["current_epoch"] / job["total_epochs"]) * 100.0
+                    epoch_progress = (metrics["current_epoch"] / job["total_epochs"]) * 100.0
+                    job["progress_pct"] = max(_component_progress(job), epoch_progress)
+                else:
+                    job["progress_pct"] = _component_progress(job)
 
             # Sleep for 2 seconds before next check
             threading.Event().wait(2.0)
+
+        save_training_metadata(job_id)
 
     except Exception as e:
         logger.error(f"Error monitoring training job {job_id}: {e}")
         with training_lock:
             job["status"] = "failed"
             job["error"] = str(e)
+            _set_component_status(job, "full_pipeline", "failed", str(e))
+        save_training_metadata(job_id)
 
 
 def save_training_metadata(job_id: str):
@@ -341,6 +540,514 @@ def get_available_configs() -> List[str]:
 
     config_files = list(configs_dir.glob("train_*.yaml"))
     return [f.name for f in sorted(config_files)]
+
+
+TRAINING_SYMBOL_UNIVERSE = [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "BNBUSDT",
+    "XRPUSDT",
+    "ADAUSDT",
+    "DOGEUSDT",
+    "AVAXUSDT",
+    "LINKUSDT",
+    "MATICUSDT",
+]
+
+TRAINING_COMPONENT_SPECS = [
+    {
+        "id": "data_contract",
+        "name": "Données + split chrono",
+        "required_modes": ("long", "short", "combined"),
+    },
+    {
+        "id": "labels",
+        "name": "Labels long/short/tradeable",
+        "required_modes": ("long", "short", "combined"),
+    },
+    {
+        "id": "filter",
+        "name": "Filtre tradeable",
+        "required_modes": ("long", "short", "combined"),
+    },
+    {
+        "id": "edge_long",
+        "name": "Edge model LONG",
+        "required_modes": ("long", "combined"),
+    },
+    {
+        "id": "edge_short",
+        "name": "Edge model SHORT",
+        "required_modes": ("short", "combined"),
+    },
+    {
+        "id": "regime",
+        "name": "Gate régime bear",
+        "required_modes": (),
+    },
+    {
+        "id": "specialists",
+        "name": "Experts par contexte",
+        "required_modes": (),
+    },
+    {
+        "id": "backtest_long",
+        "name": "Backtest LONG",
+        "required_modes": ("long", "combined"),
+    },
+    {
+        "id": "backtest_short",
+        "name": "Backtest SHORT",
+        "required_modes": ("short", "combined"),
+    },
+    {
+        "id": "backtest_combined",
+        "name": "Backtest pipeline complet",
+        "required_modes": ("combined",),
+    },
+    {
+        "id": "full_pipeline",
+        "name": "Contrat artefacts + synthèse",
+        "required_modes": ("long", "short", "combined"),
+    },
+]
+
+TRAINING_STAGE_MARKERS = [
+    ("data_contract", ("CHARGEMENT DES DONNÉES", "SPLIT CHRONOLOGIQUE")),
+    ("labels", ("CONSTRUCTION DES LABELS",)),
+    ("filter", ("STAGE 1", "FILTRE TRADEABLE")),
+    ("edge_long", ("EDGE MODEL LONG",)),
+    ("edge_short", ("EDGE MODEL SHORT",)),
+    ("regime", ("META-MODÈLE RÉGIME BEAR",)),
+    ("specialists", ("STAGE 3", "EXPERTS PAR CONTEXTE")),
+    ("backtest_long", ("BACKTEST LONG",)),
+    ("backtest_short", ("BACKTEST SHORT", "WALK-FORWARD SHORT")),
+    ("backtest_combined", ("BACKTEST COMBINÉ",)),
+    ("full_pipeline", ("Pipeline terminé", "pipeline_summary.json")),
+]
+
+
+def _utc_now_iso() -> str:
+    return datetime.utcnow().isoformat()
+
+
+def _normalise_training_mode(mode: str) -> str:
+    mode = (mode or "combined").lower().strip()
+    if mode not in {"long", "short", "combined"}:
+        raise HTTPException(status_code=400, detail=f"Training mode invalide: {mode}")
+    return mode
+
+
+def _symbol_base(symbol: str) -> str:
+    symbol = normalize_symbol(symbol).replace("/", "").upper()
+    return symbol[:-4] if symbol.endswith("USDT") else symbol
+
+
+def _training_data_candidates(symbol: str) -> List[Path]:
+    symbol = normalize_symbol(symbol).replace("/", "").upper()
+    base = _symbol_base(symbol)
+    return [
+        _ROOT / "data" / f"{symbol}_1h_features.csv",
+        _ROOT / "data" / f"{base}USDT_1h_features.csv",
+        _ROOT / "data" / f"{base}USD_1h_features.csv",
+        _ROOT / "data" / f"bundle_{base.lower()}" / "features_merged.parquet",
+        _ROOT / "data" / f"bundle_{base.lower()}" / "raw" / "base_ohlcv.parquet",
+    ]
+
+
+def resolve_training_data(
+    symbol: str,
+    raise_on_missing: bool = True,
+    data_path: Optional[str] = None,
+) -> Optional[Path]:
+    """Resolve a local dataset with enough history for the canonical pipeline."""
+    symbol_key = normalize_symbol(symbol).replace("/", "").upper()
+    if data_path:
+        candidate = Path(data_path).expanduser()
+        if not candidate.is_absolute():
+            candidate = _ROOT / candidate
+        if candidate.exists():
+            return candidate
+        if raise_on_missing:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset demandé introuvable pour {symbol_key}: {candidate}",
+            )
+        return None
+
+    env_keys = [
+        f"FUTUR_TRAINING_DATA_{symbol_key}",
+        f"FUTUR_TRAINING_DATA_{_symbol_base(symbol_key)}",
+        "FUTUR_TRAINING_DATA",
+    ]
+    for env_key in env_keys:
+        raw = os.getenv(env_key)
+        if not raw:
+            continue
+        candidate = Path(raw).expanduser()
+        if not candidate.is_absolute():
+            candidate = _ROOT / candidate
+        if candidate.exists():
+            return candidate
+
+    for candidate in _training_data_candidates(symbol_key):
+        if candidate.exists():
+            return candidate
+
+    if raise_on_missing:
+        checked = ", ".join(str(p.relative_to(_ROOT)) for p in _training_data_candidates(symbol_key))
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Aucun dataset d'entraînement local trouvé pour {symbol_key}. "
+                f"Chemins essayés: {checked}. Ajoute FUTUR_TRAINING_DATA_{symbol_key} "
+                "ou charge un historique complet avant de lancer ce symbole."
+            ),
+        )
+    return None
+
+
+def _build_training_components(mode: str) -> List[Dict[str, Any]]:
+    mode = _normalise_training_mode(mode)
+    components: List[Dict[str, Any]] = []
+    for idx, spec in enumerate(TRAINING_COMPONENT_SPECS):
+        required = mode in spec["required_modes"]
+        components.append({
+            "id": spec["id"],
+            "name": spec["name"],
+            "status": "pending" if required else "skipped",
+            "required": required,
+            "order": idx,
+            "message": "En attente" if required else "Optionnel pour ce mode",
+            "metrics": {},
+            "started_at": None,
+            "ended_at": None,
+        })
+    return components
+
+
+def _component(job: Dict[str, Any], component_id: str) -> Optional[Dict[str, Any]]:
+    for component in job.get("components", []):
+        if component.get("id") == component_id:
+            return component
+    return None
+
+
+def _set_component_status(
+    job: Dict[str, Any],
+    component_id: str,
+    status: str,
+    message: Optional[str] = None,
+    metrics: Optional[Dict[str, Any]] = None,
+) -> None:
+    component = _component(job, component_id)
+    if component is None:
+        return
+
+    terminal = {"passed", "failed", "warning", "skipped"}
+    if component.get("status") in terminal and status == "running":
+        return
+
+    component["status"] = status
+    if message is not None:
+        component["message"] = message
+    if metrics:
+        component["metrics"] = {**component.get("metrics", {}), **metrics}
+    if status == "running" and not component.get("started_at"):
+        component["started_at"] = _utc_now_iso()
+    if status in terminal and not component.get("ended_at"):
+        component["ended_at"] = _utc_now_iso()
+
+
+def _safe_read_json(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding="utf-8") as handle:
+            data = json.load(handle)
+        return data if isinstance(data, dict) else None
+    except Exception as exc:
+        logger.warning(f"Impossible de lire {path}: {exc}")
+        return None
+
+
+def _tail_log_text(log_file: str, max_lines: int = 400) -> str:
+    path = Path(log_file)
+    if not path.exists():
+        return ""
+    try:
+        with open(path, encoding="utf-8", errors="replace") as handle:
+            return "".join(handle.readlines()[-max_lines:])
+    except Exception:
+        return ""
+
+
+def _mark_running_stage_from_logs(job: Dict[str, Any]) -> None:
+    text = _tail_log_text(job.get("log_file", ""))
+    if not text:
+        return
+
+    last_component = None
+    last_pos = -1
+    for component_id, markers in TRAINING_STAGE_MARKERS:
+        positions = [text.rfind(marker) for marker in markers]
+        pos = max(positions) if positions else -1
+        if pos > last_pos:
+            last_pos = pos
+            last_component = component_id
+
+    if last_component:
+        _set_component_status(job, last_component, "running", "Étape active dans les logs")
+
+    lowered = text.lower()
+    if "split chronologique impossible" in lowered or "colonnes manquantes" in lowered:
+        _set_component_status(job, "data_contract", "failed", "Contrat dataset invalide")
+    if "traceback" in lowered or "pipeline failed" in lowered:
+        active = last_component or "full_pipeline"
+        _set_component_status(job, active, "failed", "Erreur détectée dans les logs")
+
+
+def _best_edge_metrics(metrics: Optional[Dict[str, Any]], side: str) -> Dict[str, Any]:
+    if not metrics:
+        return {}
+    models = metrics.get("models") if isinstance(metrics.get("models"), list) else []
+    if not models:
+        return {}
+    best = max(models, key=lambda item: float(item.get("macro_f1", 0.0) or 0.0))
+    return {
+        "model": best.get("model"),
+        "auc": best.get("auc"),
+        "macro_f1": best.get("macro_f1"),
+        f"precision_{side}": best.get(f"precision_{side}"),
+        f"recall_{side}": best.get(f"recall_{side}"),
+    }
+
+
+def _summarise_backtest(summary: Dict[str, Any]) -> Tuple[str, str, Dict[str, Any]]:
+    metrics = {
+        "trades": summary.get("n_trades", 0),
+        "profit_factor": summary.get("profit_factor"),
+        "sharpe": summary.get("sharpe_annualized"),
+        "max_drawdown": summary.get("max_drawdown"),
+        "total_return_pct": summary.get("total_return_pct"),
+        "win_rate": summary.get("win_rate"),
+    }
+
+    trades = int(summary.get("n_trades", 0) or 0)
+    pf = float(summary.get("profit_factor", 0.0) or 0.0)
+    max_dd = float(summary.get("max_drawdown", 0.0) or 0.0)
+
+    warnings = []
+    if trades <= 0:
+        warnings.append("aucun trade")
+    if pf < 1.0:
+        warnings.append("profit factor < 1.0")
+    if max_dd > 0.25:
+        warnings.append("drawdown > 25%")
+
+    if warnings:
+        return "warning", "Backtest produit, gates prudents non satisfaits: " + ", ".join(warnings), metrics
+    return "passed", "Backtest produit et contrôles de base OK", metrics
+
+
+def _short_disabled_reason(run_dir: Path) -> Optional[str]:
+    summary = _safe_read_json(run_dir / "pipeline_summary.json") or {}
+    return summary.get("short_disabled_reason")
+
+
+def _refresh_training_components(job: Dict[str, Any], final: bool = False) -> None:
+    """Update component states from logs and generated artifacts."""
+    if not job.get("components"):
+        job["components"] = _build_training_components(job.get("mode", "combined"))
+
+    _mark_running_stage_from_logs(job)
+
+    run_dir = Path(job.get("run_dir", ""))
+    mode = job.get("mode", "combined")
+    short_disabled = _short_disabled_reason(run_dir) if run_dir.exists() else None
+
+    if not run_dir.exists():
+        if final:
+            _set_component_status(job, "data_contract", "failed", "Dossier de run introuvable")
+        return
+
+    labels = _safe_read_json(run_dir / "labels.json")
+    if labels:
+        try:
+            from core.artifacts import validate_pipeline_label_stats
+            validate_pipeline_label_stats(labels)
+            _set_component_status(job, "data_contract", "passed", "Dataset chargé et split chronologique exécuté")
+            _set_component_status(job, "labels", "passed", "Contrat de labels validé", {
+                "n_total": labels.get("n_total"),
+                "n_long": labels.get("n_long"),
+                "n_short": labels.get("n_short"),
+            })
+        except Exception as exc:
+            _set_component_status(job, "labels", "failed", f"Contrat labels invalide: {exc}")
+    elif final:
+        _set_component_status(job, "data_contract", "failed", "Chargement/split non validé")
+        _set_component_status(job, "labels", "failed", "labels.json absent")
+
+    try:
+        from core.artifacts.pipeline import (
+            component_enabled,
+            resolve_edge_component,
+            resolve_filter_component,
+            resolve_regime_component,
+        )
+
+        filter_component = resolve_filter_component(run_dir)
+        filter_meta = _safe_read_json(filter_component.metadata) if filter_component.metadata else None
+        if filter_component.model and filter_component.scaler:
+            _set_component_status(job, "filter", "passed", "Modèle filtre et scaler présents", {
+                "val_auc": filter_meta.get("val_auc") if filter_meta else None,
+                "val_f1": filter_meta.get("val_f1") if filter_meta else None,
+                "thr_long": filter_meta.get("threshold_long") if filter_meta else None,
+                "thr_short": filter_meta.get("threshold_short") if filter_meta else None,
+            })
+        elif final:
+            _set_component_status(job, "filter", "failed", "Artefacts filtre incomplets")
+
+        for side in ("long", "short"):
+            component_id = f"edge_{side}"
+            required = bool(_component(job, component_id) and _component(job, component_id).get("required"))
+            edge_component = resolve_edge_component(run_dir, side)
+            edge_meta = _safe_read_json(edge_component.metadata) if edge_component.metadata else None
+            edge_metrics = _safe_read_json((edge_component.directory or run_dir / component_id) / "metrics.json")
+
+            if edge_component.model and edge_component.scaler:
+                enabled = component_enabled(edge_meta, default=True)
+                status = "passed" if enabled else "warning"
+                message = "Artefacts edge présents"
+                if not enabled:
+                    message = edge_meta.get("disabled_reason") if edge_meta else None
+                    message = f"Entraîné mais non déployé: {message or 'gate de robustesse'}"
+                _set_component_status(job, component_id, status, message, _best_edge_metrics(edge_metrics, side))
+            elif final and required:
+                if side == "short" and short_disabled:
+                    _set_component_status(job, component_id, "warning", f"SHORT rejeté par robustesse: {short_disabled}")
+                else:
+                    _set_component_status(job, component_id, "failed", f"Artefacts edge {side} absents")
+
+        regime_component = resolve_regime_component(run_dir)
+        if regime_component.model and regime_component.scaler:
+            _set_component_status(job, "regime", "passed", "Gate régime bear disponible")
+        elif final:
+            _set_component_status(job, "regime", "skipped", "Gate régime non produit")
+    except Exception as exc:
+        logger.warning(f"Validation artefacts modèle impossible: {exc}")
+        if final:
+            _set_component_status(job, "full_pipeline", "failed", f"Validation artefacts impossible: {exc}")
+
+    specialists_dir = run_dir / "specialists"
+    if specialists_dir.exists() and any(specialists_dir.iterdir()):
+        _set_component_status(job, "specialists", "passed", "Experts de contexte produits")
+    elif final:
+        _set_component_status(job, "specialists", "skipped", "Experts absents ou non retenus")
+
+    for bt_id in ("backtest_long", "backtest_short", "backtest_combined"):
+        component = _component(job, bt_id)
+        required = bool(component and component.get("required"))
+        summary_path = run_dir / bt_id / "summary.json"
+        bt_summary = _safe_read_json(summary_path)
+        if bt_summary:
+            status, message, metrics = _summarise_backtest(bt_summary)
+            _set_component_status(job, bt_id, status, message, metrics)
+        elif final and required:
+            if "short" in bt_id and short_disabled:
+                _set_component_status(job, bt_id, "warning", f"Non produit car SHORT rejeté: {short_disabled}")
+            elif bt_id == "backtest_combined" and short_disabled and mode == "combined":
+                _set_component_status(job, bt_id, "warning", f"Combiné non produit car SHORT rejeté: {short_disabled}")
+            else:
+                _set_component_status(job, bt_id, "failed", "Résumé backtest absent")
+
+    manifest_ok = (run_dir / "manifest.json").exists()
+    summary_ok = (run_dir / "pipeline_summary.json").exists()
+    if manifest_ok and summary_ok:
+        status = "passed"
+        message = "Manifest et synthèse pipeline présents"
+        if any(c.get("status") == "warning" and c.get("required") for c in job.get("components", [])):
+            status = "warning"
+            message = "Pipeline terminé avec gates non déployables à revoir"
+        _set_component_status(job, "full_pipeline", status, message, {
+            "run_dir": str(run_dir),
+        })
+    elif final:
+        _set_component_status(job, "full_pipeline", "failed", "Manifest ou pipeline_summary manquant")
+
+
+def _component_progress(job: Dict[str, Any]) -> float:
+    components = [c for c in job.get("components", []) if c.get("required")]
+    if not components:
+        return 0.0
+    terminal = {"passed", "warning", "failed", "skipped"}
+    done = sum(1 for c in components if c.get("status") in terminal)
+    running_bonus = 0.35 if any(c.get("status") == "running" for c in components) else 0.0
+    return min(100.0, ((done + running_bonus) / len(components)) * 100.0)
+
+
+def _finalize_training_validation(job: Dict[str, Any], process_exit_code: int) -> Dict[str, Any]:
+    _refresh_training_components(job, final=True)
+    components = job.get("components", [])
+    required = [c for c in components if c.get("required")]
+    failed = [c for c in required if c.get("status") == "failed"]
+    warnings = [c for c in required if c.get("status") == "warning"]
+
+    if process_exit_code != 0:
+        status = "failed"
+        message = f"Process exited with code {process_exit_code}"
+    elif failed:
+        status = "failed"
+        message = "Validation rejetée: " + ", ".join(c["name"] for c in failed)
+    elif warnings:
+        status = "warning"
+        message = "Pipeline terminé, mais certains gates ne sont pas déployables"
+    else:
+        status = "passed"
+        message = "Toutes les validations requises sont passées"
+
+    validation = {
+        "status": status,
+        "message": message,
+        "required": len(required),
+        "passed": sum(1 for c in required if c.get("status") == "passed"),
+        "warnings": len(warnings),
+        "failed": len(failed),
+        "run_dir": job.get("run_dir"),
+    }
+    job["validation_summary"] = validation
+    job["progress_pct"] = 100.0
+    return validation
+
+
+def _training_cli_settings(request: TrainingStartRequest) -> Dict[str, Any]:
+    """Serializable snapshot of all front-driven pipeline controls."""
+    return {
+        "mode": request.mode,
+        "data_path": request.data_path,
+        "test_from": request.test_from,
+        "auto_calibrate": request.auto_calibrate,
+        "skip_tcn": request.skip_tcn,
+        "require_short_stability": request.require_short_stability,
+        "tradeable_q": request.tradeable_q,
+        "cost": request.cost,
+        "filter_threshold_long": request.filter_threshold_long,
+        "direction_threshold_long": request.direction_threshold_long,
+        "filter_threshold_short": request.filter_threshold_short,
+        "direction_threshold_short": request.direction_threshold_short,
+        "risk_long": request.risk_long,
+        "risk_short": request.risk_short,
+        "max_losses_long": request.max_losses_long,
+        "max_losses_short": request.max_losses_short,
+        "cooldown_long": request.cooldown_long,
+        "cooldown_short": request.cooldown_short,
+        "grid": request.grid,
+        "compare_models": request.compare_models,
+        "regression": request.regression,
+        "top_pct": request.top_pct,
+        "margin": request.margin,
+    }
 
 
 # ============================================================================
@@ -442,15 +1149,15 @@ def parse_training_log_from_text(log_text: str) -> Dict[str, any]:
                     metrics["current_epoch"] = int(epoch_match.group(1))
                     metrics["total_epochs"] = int(epoch_match.group(2))
 
-                train_loss_match = re.search(r'Train Loss: ([\d.]+)', line)
+                train_loss_match = re.search(r'Train Loss: (-?[\d.]+)', line)
                 if train_loss_match:
                     metrics["train_loss"] = float(train_loss_match.group(1))
 
-                val_loss_match = re.search(r'Val Loss: ([\d.]+)', line)
+                val_loss_match = re.search(r'Val Loss: (-?[\d.]+)', line)
                 if val_loss_match:
                     metrics["val_loss"] = float(val_loss_match.group(1))
 
-                sharpe_match = re.search(r'Val Sharpe: ([\d.]+)', line)
+                sharpe_match = re.search(r'Val Sharpe: (-?[\d.]+)', line)
                 if sharpe_match:
                     metrics["val_sharpe"] = float(sharpe_match.group(1))
 
@@ -884,12 +1591,12 @@ def _default_portfolio_state():
 
 def _load_portfolio_state():
     coll = _portfolio_collection()
-    if not coll:
+    if coll is None:
         return _default_portfolio_state()
 
     try:
         state = coll.find_one({"_id": PORTFOLIO_DOC_ID})
-        if not state:
+        if state is None:
             state = _default_portfolio_state()
             coll.insert_one(state)
         return state
@@ -920,7 +1627,7 @@ def _calculate_stats(state: Dict):
     }
 
 
-def _append_history(state: Dict):
+def _append_history(state: Dict, signal: str = "HOLD", action_taken: str = "NONE"):
     stats = _calculate_stats(state)
     history = state.get("history", [])
     history.append({
@@ -930,15 +1637,17 @@ def _append_history(state: Dict):
         "invested": stats["invested"],
         "pnl": stats["total_pnl"],
         "pnl_percent": stats["total_pnl_percent"],
+        "signal": signal,
+        "action_taken": action_taken,
     })
-    state["history"] = history[-500:]
+    state["history"] = history[-2000:]
 
 
 def _persist_portfolio_state(state: Dict):
     coll = _portfolio_collection()
     state["updated_at"] = datetime.utcnow()
 
-    if not coll:
+    if coll is None:
         return state
     try:
         coll.update_one({"_id": PORTFOLIO_DOC_ID}, {"$set": state}, upsert=True)
@@ -985,12 +1694,14 @@ def _format_state_for_response(state: Dict):
     history = []
     for h in state.get("history", []):
         history.append({
-            "timestamp": _iso(h.get("timestamp")),
+            "timestamp":   _iso(h.get("timestamp")),
             "total_value": float(h.get("total_value", 0)),
-            "cash": float(h.get("cash", 0)),
-            "invested": float(h.get("invested", 0)),
-            "pnl": float(h.get("pnl", 0)),
+            "cash":        float(h.get("cash", 0)),
+            "invested":    float(h.get("invested", 0)),
+            "pnl":         float(h.get("pnl", 0)),
             "pnl_percent": float(h.get("pnl_percent", 0)),
+            "signal":      h.get("signal", "HOLD"),
+            "action_taken": h.get("action_taken", "NONE"),
         })
 
     stats = _calculate_stats(state)
@@ -1006,86 +1717,64 @@ def _format_state_for_response(state: Dict):
     }
 
 
-def _apply_trade(state: Dict, payload: TradeRequest):
-    symbol = payload.symbol.upper()
-    price = float(payload.price)
-    action = payload.action.upper()
-    confidence = float(payload.confidence or 0)
-    reason = payload.reason or "AI signal"
+def _apply_trade_logic(state: Dict, symbol: str, action: str, price: float,
+                       confidence: float = 0.0, reason: str = "AI signal") -> Dict:
+    """Pure trade logic — no history append, no MongoDB persist."""
+    symbol = symbol.upper()
+    action = action.upper()
     now = datetime.utcnow()
-
     positions = state.get("positions", [])
     cash = float(state.get("cash", 0))
 
     if action == "BUY":
-        investment = cash * 0.1
-        if investment < 10 or investment > cash or price <= 0:
-            return state  # Not enough cash or invalid price
+        investment = cash * 0.10
+        if investment < 10 or price <= 0:
+            return state
         quantity = investment / price
-
         existing = next((p for p in positions if p.get("symbol") == symbol), None)
         if existing:
             old_qty = float(existing.get("quantity", 0))
             new_qty = old_qty + quantity
-            entry_price = (
-                float(existing.get("entry_price", 0)) * old_qty + price * quantity
-            ) / new_qty
-            existing.update({
-                "quantity": new_qty,
-                "entry_price": entry_price,
-                "current_price": price,
-                "entry_time": existing.get("entry_time", now),
-            })
+            entry_price = (float(existing.get("entry_price", 0)) * old_qty + price * quantity) / new_qty
+            existing.update({"quantity": new_qty, "entry_price": entry_price, "current_price": price})
         else:
-            positions.append({
-                "symbol": symbol,
-                "quantity": quantity,
-                "entry_price": price,
-                "current_price": price,
-                "entry_time": now,
-            })
-
+            positions.append({"symbol": symbol, "quantity": quantity,
+                               "entry_price": price, "current_price": price, "entry_time": now})
         cash -= investment
-
-        trade_total = quantity * price
         state["trades"] = [{
             "id": f"{int(now.timestamp() * 1000)}-{symbol}",
-            "timestamp": now,
-            "symbol": symbol,
-            "action": "BUY",
-            "quantity": quantity,
-            "price": price,
-            "total": trade_total,
-            "reason": reason,
-            "confidence": confidence,
-        }] + state.get("trades", [])[:199]
+            "timestamp": now, "symbol": symbol, "action": "BUY",
+            "quantity": quantity, "price": price, "total": quantity * price,
+            "reason": reason, "confidence": confidence,
+        }] + state.get("trades", [])[:999]
 
     elif action == "SELL":
         existing = next((p for p in positions if p.get("symbol") == symbol), None)
         if not existing:
-            return state  # Nothing to sell
+            return state
         quantity = float(existing.get("quantity", 0))
         trade_total = quantity * price
         cash += trade_total
         positions = [p for p in positions if p.get("symbol") != symbol]
-
         state["trades"] = [{
             "id": f"{int(now.timestamp() * 1000)}-{symbol}",
-            "timestamp": now,
-            "symbol": symbol,
-            "action": "SELL",
-            "quantity": quantity,
-            "price": price,
-            "total": trade_total,
-            "reason": reason,
-            "confidence": confidence,
-        }] + state.get("trades", [])[:199]
+            "timestamp": now, "symbol": symbol, "action": "SELL",
+            "quantity": quantity, "price": price, "total": trade_total,
+            "reason": reason, "confidence": confidence,
+        }] + state.get("trades", [])[:999]
 
-    # Refresh state
     state["positions"] = positions
     state["cash"] = cash
+    return state
 
-    # Update history
+
+def _apply_trade(state: Dict, payload: TradeRequest):
+    """Trade + history snapshot + MongoDB persist (used by HTTP endpoints)."""
+    state = _apply_trade_logic(
+        state,
+        payload.symbol, payload.action, float(payload.price),
+        float(payload.confidence or 0), payload.reason or "AI signal",
+    )
     _append_history(state)
     _persist_portfolio_state(state)
     return state
@@ -1113,9 +1802,48 @@ async def post_portfolio_trade(payload: TradeRequest):
 @app.post("/portfolio/reset")
 async def reset_portfolio():
     state = _default_portfolio_state()
-    _append_history(state)
+    _append_history(state, signal="RESET", action_taken="RESET")
     _persist_portfolio_state(state)
     return _format_state_for_response(state)
+
+
+@app.get("/portfolio/events")
+async def get_portfolio_events():
+    """Retourne tous les événements (trades + snapshots) triés par timestamp pour le replay."""
+    state = _load_portfolio_state()
+
+    def _iso(dt):
+        return dt.isoformat() if isinstance(dt, datetime) else (dt or "")
+
+    events = []
+    for t in state.get("trades", []):
+        events.append({
+            "type": "trade",
+            "timestamp": _iso(t.get("timestamp")),
+            "symbol": t.get("symbol"),
+            "action": t.get("action"),
+            "price": float(t.get("price", 0)),
+            "quantity": float(t.get("quantity", 0)),
+            "total": float(t.get("total", 0)),
+            "reason": t.get("reason", ""),
+            "confidence": float(t.get("confidence", 0)),
+        })
+
+    for h in state.get("history", []):
+        events.append({
+            "type": "snapshot",
+            "timestamp": _iso(h.get("timestamp")),
+            "total_value": float(h.get("total_value", 0)),
+            "cash": float(h.get("cash", 0)),
+            "invested": float(h.get("invested", 0)),
+            "pnl": float(h.get("pnl", 0)),
+            "pnl_percent": float(h.get("pnl_percent", 0)),
+            "signal": h.get("signal", "HOLD"),
+            "action_taken": h.get("action_taken", "NONE"),
+        })
+
+    events.sort(key=lambda x: x["timestamp"])
+    return {"events": events, "count": len(events)}
 
 
 @app.get("/dataset/signals")
@@ -1625,7 +2353,7 @@ async def get_orderbook(symbol: str = "BTCUSDT", depth: int = 20):
 
 @app.get("/market/trades")
 async def get_recent_trades(symbol: str = "BTCUSDT", limit: int = 50):
-    """Générer des trades récents simulés."""
+    """Trades récents depuis OHLCV (prix VWAP par candle, volume réel)."""
     try:
         dataset_path = get_latest_dataset_path()
         ohlcv_file = dataset_path / "binance_ohlcv.parquet"
@@ -1634,37 +2362,27 @@ async def get_recent_trades(symbol: str = "BTCUSDT", limit: int = 50):
             raise HTTPException(status_code=404, detail="OHLCV data not found")
 
         df = pd.read_parquet(ohlcv_file)
-        df_symbol = df[df['symbol'] == symbol].sort_values('timestamp').tail(10)
+        df_symbol = df[df['symbol'] == symbol].sort_values('timestamp').tail(limit)
 
         if len(df_symbol) == 0:
             raise HTTPException(status_code=404, detail=f"Symbol {symbol} not found")
 
-        import random
         trades = []
+        for i, (_, row) in enumerate(df_symbol.iterrows()):
+            vwap = float(row.get("vwap_60m", (float(row["high"]) + float(row["low"])) / 2))
+            volume = float(row.get("volume", 0))
+            timestamp = row["timestamp"]
+            time_ms = int(timestamp.timestamp() * 1000) if hasattr(timestamp, "timestamp") else int(pd.Timestamp(timestamp).timestamp() * 1000)
+            trades.append({
+                "id":          time_ms + i,
+                "price":       f"{vwap:.2f}",
+                "quantity":    f"{volume:.4f}",
+                "time":        time_ms,
+                "isBuyerMaker": bool(row.get("taker_buy_ratio_base", 0.5) < 0.5),
+                "source":      "ohlcv_candle",
+            })
 
-        for _, row in df_symbol.iterrows():
-            # Générer quelques trades par candle
-            for i in range(5):
-                price_range = float(row['high']) - float(row['low'])
-                price = float(row['low']) + random.random() * price_range
-                quantity = random.uniform(0.01, 2.0)
-
-                timestamp = row['timestamp']
-                if hasattr(timestamp, 'timestamp'):
-                    time_ms = int(timestamp.timestamp() * 1000) + i * 1000
-                else:
-                    time_ms = int(pd.Timestamp(timestamp).timestamp() * 1000) + i * 1000
-
-                trades.append({
-                    "id": time_ms,
-                    "price": f"{price:.2f}",
-                    "quantity": f"{quantity:.4f}",
-                    "time": time_ms,
-                    "isBuyerMaker": random.choice([True, False])
-                })
-
-        # Trier par temps et limiter
-        trades.sort(key=lambda x: x['time'], reverse=True)
+        trades.sort(key=lambda x: x["time"], reverse=True)
         return trades[:limit]
 
     except HTTPException:
@@ -1808,27 +2526,83 @@ async def get_prediction_by_symbol(symbol: str):
 @app.get("/pipeline/symbols")
 async def get_active_symbols():
     """Symboles actifs."""
-    return {"count": 1, "symbols": ["BTCUSDT"]}
+    return {"count": 3, "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT"]}
+
+
+# ─── Multi-symbol signal engine ──────────────────────────────────────────────
+try:
+    from signal_engine import get_signal as _get_signal_v2, get_all_signals as _get_all_signals
+    _SIGNAL_ENGINE_OK = True
+except Exception as _e:
+    logger.warning(f"signal_engine non disponible: {_e}")
+    _SIGNAL_ENGINE_OK = False
+
+
+@app.get("/v2/signal/{symbol}")
+async def get_signal_v2(symbol: str):
+    """Signal technique complet pour un symbole (BTC/ETH/SOL)."""
+    if not _SIGNAL_ENGINE_OK:
+        raise HTTPException(status_code=503, detail="Signal engine non disponible")
+    try:
+        return _get_signal_v2(symbol.upper())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/v2/signals/all")
+async def get_all_signals_v2():
+    """Signaux BTC + ETH + SOL en un seul appel."""
+    if not _SIGNAL_ENGINE_OK:
+        raise HTTPException(status_code=503, detail="Signal engine non disponible")
+    try:
+        return _get_all_signals()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── Backtest endpoint ───────────────────────────────────────────────────────
+_backtest_cache: Dict = {}
+_backtest_running = False
+
+@app.get("/backtest/full")
+async def run_full_backtest(symbol: str = "BTC/USDT", since: str = "2021-01-01", force: bool = False):
+    """Backtest end-to-end Level 0→7 sur données historiques MongoDB."""
+    global _backtest_running
+    cache_key = f"{symbol}:{since}"
+
+    if not force and cache_key in _backtest_cache:
+        return _backtest_cache[cache_key]
+
+    if _backtest_running:
+        return {"status": "running", "message": "Backtest déjà en cours, réessaie dans 30s"}
+
+    try:
+        sys.path.insert(0, str(_ROOT / "scripts"))
+        from backtest_engine import run_backtest
+        _backtest_running = True
+        result = await asyncio.get_event_loop().run_in_executor(
+            None, lambda: run_backtest(symbol, since)
+        )
+        _backtest_cache[cache_key] = result
+        return result
+    except Exception as e:
+        logger.error(f"Backtest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        _backtest_running = False
 
 @app.get("/pipeline/predictions/future/{symbol}")
 async def get_future_predictions(symbol: str, minutes: int = 5):
-    """Prédictions futures indicatives basées sur le dernier signal."""
-    pred  = _prediction_engine.last_prediction
-    price = pred["current_price"] if pred else 84000.0
-    conf  = pred["confidence"] if pred else 0.5
-    now   = datetime.utcnow()
-    preds = []
-    for i in range(1, minutes + 1):
-        drift = (random.random() - 0.5) * 0.004
-        preds.append({
-            "minute": i,
-            "timestamp": (now + timedelta(minutes=i)).isoformat(),
-            "predicted_price": round(price * (1 + drift * i), 2),
-            "confidence": round(max(0.3, conf * (1 - i * 0.04)), 3),
-            "change_pct": round(drift * i * 100, 3),
-        })
-    return {"symbol": symbol.upper(), "current_price": price,
-            "predictions": preds, "source": "signal_extrapolation"}
+    """Prédictions futures — désactivé : extrapolation aléatoire supprimée."""
+    return {
+        "status":     "disabled",
+        "deployable": False,
+        "reason":     "model_not_connected",
+        "action":     "WAIT",
+        "confidence": 0,
+        "symbol":     symbol.upper(),
+        "note":       "Future price extrapolation requires a calibrated model output, not random drift.",
+    }
 
 
 # ============================================================================
@@ -1837,27 +2611,129 @@ async def get_future_predictions(symbol: str, minutes: int = 5):
 
 @app.get("/training/configs")
 async def get_training_configs():
-    """Get list of available training configurations."""
     configs = get_available_configs()
+    return {"success": True, "configs": configs or ["pipeline", "pipeline_1m", "regime_only"],
+            "count": len(configs) or 3}
+
+
+@app.get("/training/symbols")
+async def get_training_symbols():
+    """Symboles proposés par l'UI, avec disponibilité du dataset local."""
+    symbols = []
+    for symbol in TRAINING_SYMBOL_UNIVERSE:
+        data_path = resolve_training_data(symbol, raise_on_missing=False)
+        symbols.append({
+            "symbol": symbol,
+            "base": _symbol_base(symbol),
+            "ready": data_path is not None,
+            "data_path": str(data_path) if data_path else None,
+        })
     return {
         "success": True,
-        "configs": configs,
-        "count": len(configs)
+        "symbols": symbols,
+        "count": len(symbols),
+    }
+
+
+@app.get("/training/architecture")
+async def get_model_architecture():
+    """Architecture réelle du modèle ML."""
+    from pymongo import MongoClient as _MC
+    try:
+        db  = _MC("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)["trader"]
+        n_bars   = db["historical_ohlcv"].count_documents({})
+        n_1m     = db["ohlcv_1m"].count_documents({})
+        doc      = db["historical_ohlcv"].find_one() or {}
+        n_feats  = len([k for k in doc.keys() if k not in ("_id","timestamp","symbol","interval","source","ingested_at")])
+    except Exception:
+        n_bars, n_1m, n_feats = 76341, 0, 88
+
+    return {
+        "data": {
+            "bars_1h":   n_bars,
+            "bars_1m":   n_1m,
+            "features":  n_feats,
+            "period":    "2017-2026",
+            "symbols":   TRAINING_SYMBOL_UNIVERSE,
+        },
+        "levels": [
+            {
+                "id":   0,
+                "name": "Global Gate",
+                "type": "Quantile Calibration",
+                "inputs": 24,
+                "outputs": 1,
+                "desc": "Filtre tradeable / wait",
+                "params": {"features": 24, "threshold_long": 0.40, "threshold_short": 0.45, "warmup": 512},
+                "color": "#6366f1",
+            },
+            {
+                "id":   1,
+                "name": "Event Classifier",
+                "type": "TCN Dilated Causal",
+                "inputs": 53,
+                "outputs": 5,
+                "desc": "Régime CHOP / UP / DOWN + tradeability + entropy",
+                "params": {"d_model": 64, "n_layers": 3, "n_regimes": 3, "dropout": 0.2, "dilation": "1×2×4"},
+                "color": "#8b5cf6",
+            },
+            {
+                "id":   2,
+                "name": "Edge Scorer",
+                "type": "TCN + Dual Head",
+                "inputs": 53,
+                "outputs": 2,
+                "desc": "Score directionnel + volatilité prédite",
+                "params": {"d_model": 96, "n_layers": 3, "dropout": 0.15, "dilation": "1×2×4", "heads": ["edge", "rv"]},
+                "color": "#06b6d4",
+            },
+            {
+                "id":   3,
+                "name": "Specialist Router",
+                "type": "XGBoost × 6",
+                "inputs": 53,
+                "outputs": 6,
+                "desc": "6 experts spécialisés par régime de marché",
+                "params": {
+                    "specialists": ["TREND_LONG", "TREND_SHORT", "MEAN_REVERSION", "BREAKOUT", "HIGH_VOL", "NEUTRAL"],
+                    "features_long": 53, "features_short": 50, "min_samples": 300
+                },
+                "color": "#10b981",
+            },
+            {
+                "id":   7,
+                "name": "Risk Controller",
+                "type": "Rules + Kelly",
+                "inputs": 4,
+                "outputs": 4,
+                "desc": "Sizing Kelly + Stop ATR + Kill-switch quotidien",
+                "params": {
+                    "risk_per_trade": "0.2%", "stop_atr_mult": 2.5,
+                    "max_stop_pct": "3%", "daily_stop": "-2%", "max_consec_losses": 3
+                },
+                "color": "#f59e0b",
+            },
+        ],
+        "timestamp": datetime.utcnow().isoformat(),
     }
 
 @app.post("/training/start")
 async def start_training(request: TrainingStartRequest):
-    """Start a new training job - AWS, Remote Server, or Local."""
+    """Lance un entraînement LOCAL uniquement."""
     try:
-        # Validate config file exists
-        config_path = Path(__file__).parent.parent / "ai" / "configs" / request.config
-        if not config_path.exists():
-            raise HTTPException(status_code=404, detail=f"Config file {request.config} not found")
+        mode = _normalise_training_mode(request.mode)
+        symbol = normalize_symbol(request.symbol).replace("/", "").upper()
+        if request.test_from <= 2023:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Split chronologique invalide: le test doit commencer en 2024 "
+                    "ou plus tard, car le train utilise ≤2022 et la validation 2023."
+                ),
+            )
+        job_id = f"train_{symbol.lower()}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
 
-        # Generate unique job ID
-        job_id = f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-
-        if request.training_location == "aws":
+        if False:  # no-op block — garde les fonctions AWS pour ne pas casser les imports
             # Launch on AWS EC2
             logger.info(f"Launching AWS training job {job_id} on {request.instance_type}")
 
@@ -1914,7 +2790,7 @@ async def start_training(request: TrainingStartRequest):
                 "message": f"Training launching on AWS EC2 ({request.instance_type})"
             }
 
-        elif request.training_location == "remote":
+        elif False and request.training_location == "remote":
             # Launch on remote server via SSH
             logger.info(f"Launching remote training job {job_id} on {request.remote_host}")
 
@@ -1973,70 +2849,132 @@ async def start_training(request: TrainingStartRequest):
             }
 
         else:
-            # Launch locally (original code)
-            # Create log file
-            log_dir = Path("/tmp")
-            log_file = log_dir / f"training_{job_id}.log"
+            # LOCAL — seul mode supporté
+            log_file = Path(f"/tmp/training_{job_id}.log")
+            data_path = resolve_training_data(symbol, data_path=request.data_path)
+            train_script = _ROOT / "train.py"
+            run_root = _ROOT / "runs" / "pipeline"
+            run_dir = run_root / job_id
 
-            # Build training command
-            train_script = Path(__file__).parent.parent / "ai" / "train.py"
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(_ROOT)
+            env["PYTHONUNBUFFERED"] = "1"
+            env["FUTUR_MONGO_URI"] = "mongodb://localhost:27017"
+            env["FUTUR_MONGO_DB"]  = "trader"
+
             cmd = [
-                "python",
+                sys.executable,
                 str(train_script),
-                "--config", str(config_path),
-                "--device", request.device,
+                "pipeline",
+                "--data", str(data_path),
+                "--out", str(run_root),
+                "--run-id", job_id,
+                "--mode", mode,
+                "--test-from", str(request.test_from),
+                "--tradeable-q", str(request.tradeable_q),
+                "--cost", str(request.cost),
+                "--filter-thr-long", str(request.filter_threshold_long),
+                "--direction-thr-long", str(request.direction_threshold_long),
+                "--filter-thr-short", str(request.filter_threshold_short),
+                "--direction-thr-short", str(request.direction_threshold_short),
+                "--risk-long", str(request.risk_long),
+                "--risk-short", str(request.risk_short),
+                "--max-losses-long", str(request.max_losses_long),
+                "--max-losses-short", str(request.max_losses_short),
+                "--cooldown-long", str(request.cooldown_long),
+                "--cooldown-short", str(request.cooldown_short),
+                "--top-pct", str(request.top_pct),
+                "--margin", str(request.margin),
             ]
 
-            if request.debug_mode:
-                cmd.append("--debug_mode")
+            if request.auto_calibrate:
+                cmd.append("--auto-calibrate")
 
-            # Start subprocess
+            if request.require_short_stability and mode in {"short", "combined"}:
+                cmd.append("--require-short-stability")
+
+            if request.skip_tcn:
+                cmd.append("--skip-tcn")
+
+            if request.grid:
+                cmd.append("--grid")
+
+            if request.compare_models:
+                cmd.append("--compare-models")
+
+            if request.regression:
+                cmd.append("--regression")
+
             process = subprocess.Popen(
                 cmd,
-                stdout=open(log_file, 'w'),
+                stdout=open(log_file, "w", buffering=1),
                 stderr=subprocess.STDOUT,
-                cwd=str(Path(__file__).parent.parent)
+                cwd=str(_ROOT),
+                env=env,
             )
 
-            # Create job entry
             job = {
-                "job_id": job_id,
-                "status": "running",
-                "config_path": str(config_path),
-                "device": request.device,
-                "debug_mode": request.debug_mode,
-                "is_aws": False,
-                "process": process,
-                "start_time": datetime.utcnow(),
-                "end_time": None,
+                "job_id":        job_id,
+                "config":        request.config,
+                "symbol":        symbol,
+                "mode":          mode,
+                "device":        request.device,
+                "epochs":        request.epochs,
+                "batch_size":    request.batch_size,
+                "learning_rate": request.learning_rate,
+                "debug_mode":    request.debug_mode,
+                "skip_tcn":      request.skip_tcn,
+                "require_short_stability": request.require_short_stability,
+                "cli_settings":  _training_cli_settings(request),
+                "status":        "running",
+                "is_aws":        False,
+                "is_remote":     False,
+                "process":       process,
+                "start_time":    datetime.utcnow(),
+                "end_time":      None,
                 "current_epoch": 0,
-                "total_epochs": 50,
-                "progress_pct": 0.0,
-                "current_loss": 0.0,
+                "total_epochs":  0,
+                "progress_pct":  0.0,
+                "current_loss":  0.0,
                 "current_val_loss": 0.0,
                 "current_sharpe": 0.0,
-                "log_file": str(log_file),
-                "error": None
+                "log_file":      str(log_file),
+                "data_path":     str(data_path),
+                "run_root":      str(run_root),
+                "run_dir":       str(run_dir),
+                "command":       cmd,
+                "components":    _build_training_components(mode),
+                "validation_summary": {
+                    "status": "running",
+                    "message": "Validation en attente des artefacts",
+                    "required": 0,
+                    "passed": 0,
+                    "warnings": 0,
+                    "failed": 0,
+                    "run_dir": str(run_dir),
+                },
+                "error":         None,
             }
+            _set_component_status(job, "data_contract", "running", "Chargement dataset et split chronologique")
 
             with training_lock:
                 training_jobs[job_id] = job
 
-            # Start monitoring thread
-            monitor_thread = threading.Thread(target=monitor_training_process, args=(job_id,), daemon=True)
-            monitor_thread.start()
-
-            logger.info(f"Started local training job {job_id} with config {request.config}")
+            threading.Thread(target=monitor_training_process, args=(job_id,), daemon=True).start()
+            logger.info(f"Training local démarré: {job_id} ({symbol}, mode={mode})")
 
             return {
-                "success": True,
-                "job_id": job_id,
-                "status": "running",
-                "is_aws": False,
+                "success":   True,
+                "job_id":    job_id,
+                "status":    "running",
+                "is_aws":    False,
                 "is_remote": False,
-                "message": f"Training started locally with config {request.config}"
+                "run_dir":   str(run_dir),
+                "message":   f"Entraînement local démarré ({symbol}, mode={mode})"
             }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error starting training: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2089,6 +3027,26 @@ async def get_training_status(job_id: str):
     return {
         "success": True,
         "job": job
+    }
+
+
+@app.get("/training/verification/{job_id}")
+async def get_training_verification(job_id: str):
+    """Retourne la vérification composant par composant d'un job."""
+    with training_lock:
+        if job_id not in training_jobs:
+            raise HTTPException(status_code=404, detail=f"Training job {job_id} not found")
+        job = training_jobs[job_id]
+        _refresh_training_components(job, final=job.get("status") not in {"running", "launching"})
+        job_copy = job.copy()
+        job_copy.pop("process", None)
+
+    return {
+        "success": True,
+        "job_id": job_id,
+        "components": job_copy.get("components", []),
+        "validation_summary": job_copy.get("validation_summary", {}),
+        "run_dir": job_copy.get("run_dir"),
     }
 
 @app.post("/training/stop/{job_id}")
@@ -2539,26 +3497,36 @@ async def get_s3_latest_data(symbol: str, limit: int = 1000):
 
 @app.get("/ai/model-metrics")
 async def get_model_metrics():
-    """Obtenir les métriques de performance du modèle IA."""
-    # En production, ces métriques viendraient du modèle entraîné
-    # Pour l'instant, on retourne des métriques simulées mais réalistes
+    """Métriques du modèle IA — lit les vrais résultats de backtest si disponibles."""
     try:
-        metrics = {
-            "accuracy": 0.68 + random.random() * 0.1,
-            "precision": 0.72 + random.random() * 0.08,
-            "recall": 0.65 + random.random() * 0.1,
-            "f1_score": 0.68 + random.random() * 0.08,
-            "sharpe_ratio": 1.2 + random.random() * 0.4,
-            "total_predictions": random.randint(500, 1000),
-            "correct_predictions": random.randint(350, 700),
-            "avg_confidence": 0.65 + random.random() * 0.15,
-            "model_version": "MultiModalTransformer-v1.0",
-            "last_updated": datetime.utcnow().isoformat()
-        }
-
+        run_dir = _latest_run_dir()
+        if run_dir:
+            summary_file = run_dir / "pipeline_summary.json"
+            if summary_file.exists():
+                with open(summary_file) as f:
+                    summary = json.load(f)
+                bt_long = summary.get("backtest_long", {})
+                return {
+                    "success": True,
+                    "source": "backtest",
+                    "deployable": bt_long.get("deployable", False),
+                    "metrics": {
+                        "profit_factor":  bt_long.get("profit_factor"),
+                        "win_rate":       bt_long.get("win_rate"),
+                        "expectancy":     bt_long.get("expectancy"),
+                        "n_trades":       bt_long.get("n_trades"),
+                        "max_drawdown":   bt_long.get("max_drawdown_pct"),
+                        "sharpe_ratio":   bt_long.get("sharpe"),
+                        "model_version":  summary.get("model_version", "unknown"),
+                        "last_updated":   summary.get("timestamp", run_dir.name),
+                    },
+                }
         return {
-            "success": True,
-            "metrics": metrics
+            "success": False,
+            "status": "disabled",
+            "deployable": False,
+            "reason": "model_not_connected",
+            "note": "No backtest run found. Train a model first.",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching model metrics: {str(e)}")
@@ -2587,86 +3555,32 @@ async def get_feature_importance():
 
 @app.get("/ai/decision-explanation/{symbol}")
 async def get_decision_explanation(symbol: str):
-    """Obtenir l'explication détaillée d'une décision de trading pour un symbole."""
+    """Explication de la décision — basée sur la vraie prédiction courante."""
     try:
-        # En production, cela viendrait de l'analyse du modèle (attention weights, gradients, etc.)
-        # Pour l'instant, on génère une explication simulée mais cohérente
-
-        # Essayer d'obtenir la prédiction actuelle
-        prediction = None
-        if PIPELINE_AVAILABLE:
-            try:
-                prediction = pipeline_connector.get_prediction(symbol.upper())
-            except:
-                pass
-
-        # Générer l'explication
-        price_change = random.random() * 4 - 2  # -2% à +2%
-        action = "BUY" if price_change > 1 else "SELL" if price_change < -1 else "HOLD"
-
-        features = [
-            {
-                "name": "Price Momentum",
-                "value": price_change > 0 and 0.78 or -0.65,
-                "weight": 0.24,
-                "impact": price_change > 0 and "positive" or "negative"
-            },
-            {
-                "name": "Volume Profile",
-                "value": random.random() * 0.8 - 0.4,
-                "weight": 0.19,
-                "impact": random.random() > 0.5 and "positive" or "negative"
-            },
-            {
-                "name": "RSI (14)",
-                "value": price_change < 0 and 0.55 or -0.42,
-                "weight": 0.15,
-                "impact": price_change < 0 and "positive" or "negative"
-            },
-            {
-                "name": "MACD Signal",
-                "value": random.random() * 0.6 - 0.3,
-                "weight": 0.13,
-                "impact": random.random() > 0.5 and "positive" or "negative"
-            },
-            {
-                "name": "Order Book",
-                "value": price_change > 0 and 0.35 or -0.28,
-                "weight": 0.09,
-                "impact": price_change > 0 and "positive" or "negative"
+        pred = _prediction_engine.last_prediction if _prediction_engine else None
+        if not pred:
+            return {
+                "status":     "disabled",
+                "deployable": False,
+                "reason":     "model_not_connected",
+                "symbol":     symbol.upper(),
+                "action":     "WAIT",
+                "confidence": 0,
+                "note":       "No live prediction available. Engine not running.",
             }
-        ]
 
-        reasoning = []
-        if price_change > 1:
-            reasoning = [
-                "Strong upward momentum detected across multiple timeframes",
-                "Volume profile shows increasing buyer interest",
-                "Technical indicators align for bullish continuation",
-                "Transformer attention weights focus on recent price action"
-            ]
-        elif price_change < -1:
-            reasoning = [
-                "Downward pressure from weakening momentum",
-                "RSI indicates overbought conditions",
-                "Negative divergence in volume patterns",
-                "Risk-off sentiment in correlated assets"
-            ]
-        else:
-            reasoning = [
-                "Market in consolidation phase",
-                "Mixed signals across technical indicators",
-                "Waiting for clearer directional bias"
-            ]
-
+        action     = pred.get("action", "HOLD")
+        confidence = pred.get("confidence", 0.0)
         return {
-            "success": True,
-            "symbol": symbol.upper(),
-            "action": action,
-            "confidence": 0.5 + random.random() * 0.3,
-            "timestamp": datetime.utcnow().isoformat(),
-            "features": features,
-            "reasoning": reasoning
+            "success":   True,
+            "symbol":    symbol.upper(),
+            "action":    action,
+            "confidence": round(confidence, 4),
+            "timestamp": pred.get("refreshed_at", datetime.utcnow().isoformat()),
+            "source":    "live_prediction_engine",
+            "p_long":    pred.get("p_long", 0),
+            "regime":    pred.get("regime", "NEUTRAL"),
+            "note":      "SHAP/attention explanations not yet implemented.",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating explanation: {str(e)}")
@@ -2800,12 +3714,312 @@ async def get_crypto_historical_data(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================================================
+# MONGODB STATS ENDPOINTS
+# ============================================================================
+
+@app.get("/data/mongodb/stats")
+async def get_mongodb_stats():
+    """Statistiques des collections MongoDB et fraicheur des données."""
+    try:
+        db = get_db()
+
+        # Ping MongoDB
+        mongo_ok = True
+        try:
+            db.client.admin.command("ping")
+        except Exception:
+            mongo_ok = False
+
+        # Collections à surveiller: (collection_name, display, icon, db_name)
+        targets = [
+            # OHLCV multi-timeframe
+            ("historical_ohlcv",    "OHLCV 1h (2017→)",     "📊", None),
+            ("ohlcv_1m",            "OHLCV 1m (BTC+ETH+SOL)","⚡", None),
+            ("ohlcv_5m",            "OHLCV 5m",             "📈", None),
+            ("ohlcv_15m",           "OHLCV 15m",            "📈", None),
+            ("ohlcv_4h",            "OHLCV 4h",             "📈", None),
+            ("ohlcv_1d",            "OHLCV 1d",             "📈", None),
+            # Alpha / Derivatives
+            ("derivatives_funding", "Funding Rates",         "💹", None),
+            ("derivatives_oi",      "Open Interest",         "📉", None),
+            ("derivatives_ls",      "L/S Ratio Global",      "⚖️",  None),
+            ("derivatives_ls_top",  "L/S Top Traders",       "🏆", None),
+            ("options_btc",         "Options BTC (Deribit)", "🎯", None),
+            # Sentiment / Macro
+            ("sentiment_fng",       "Fear & Greed",          "😱", None),
+            ("macro_global",        "Macro (DXY/SPX/VIX)",   "🌍", None),
+            ("coingecko_global",    "CoinGecko Global",      "🦎", None),
+            ("coingecko_coins",     "CoinGecko Coins",       "🪙", None),
+            # On-chain
+            ("whale_transactions",  "Whale Transactions",    "🐋", None),
+            ("onchain_btc",         "On-chain BTC",          "⛓️",  None),
+            # News / Intel
+            ("articles",            "News Articles",         "📰", "market_intel"),
+            ("signals",             "Intel Signals",         "📡", "market_intel"),
+            # Portfolio
+            ("portfolio_state",     "Portfolio State",       "💼", None),
+        ]
+
+        collections_info = []
+        for coll_name, display, icon, alt_db in targets:
+            try:
+                if alt_db:
+                    coll = db.client[alt_db][coll_name]
+                else:
+                    coll = db[coll_name]
+
+                count = coll.estimated_document_count()
+
+                last_update = None
+                for ts_field in ["timestamp", "created_at", "updated_at", "date", "time", "fetched_at"]:
+                    doc = coll.find_one(
+                        {ts_field: {"$exists": True}},
+                        sort=[(ts_field, -1)],
+                        projection={ts_field: 1},
+                    )
+                    if doc:
+                        ts_val = doc[ts_field]
+                        if hasattr(ts_val, "isoformat"):
+                            last_update = ts_val.isoformat()
+                        else:
+                            last_update = str(ts_val)
+                        break
+
+                collections_info.append({
+                    "name": coll_name,
+                    "display": display,
+                    "icon": icon,
+                    "count": count,
+                    "last_update": last_update,
+                    "status": "ok",
+                })
+            except Exception as e:
+                collections_info.append({
+                    "name": coll_name,
+                    "display": display,
+                    "icon": icon,
+                    "count": 0,
+                    "last_update": None,
+                    "status": "error",
+                    "error": str(e),
+                })
+
+        return {
+            "mongo_connected": mongo_ok,
+            "collections": collections_info,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"MongoDB stats error: {e}")
+        return {
+            "mongo_connected": False,
+            "collections": [],
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+
+# ============================================================================
+# SCRAPER MONITORING ENDPOINTS
+# ============================================================================
+
+# Global scraper process registry
+_scraper_processes: Dict[str, Dict] = {}
+_scraper_lock = threading.Lock()
+
+_PY3 = "/usr/bin/python3"   # Python système avec tous les packages
+
+SCRAPERS_REGISTRY = {
+    "data_daemon": {
+        "display": "Data Daemon",
+        "description": "Multi-source auto: Binance 1m/5m/15m/4h, Bybit, OKX, Deribit IV, Mempool, Macro, CoinGecko",
+        "cmd": [_PY3, str(_ROOT / "scripts" / "data_daemon.py")],
+        "cwd": str(_ROOT),
+        "icon": "⚡",
+        "category": "data",
+    },
+    "ohlcv_1m_history": {
+        "display": "OHLCV 1m History",
+        "description": "Télécharge BTC 1m depuis 2021 → ~2.5M bars haute résolution",
+        "cmd": [_PY3, str(_ROOT / "scripts" / "fetch_1m_history.py")],
+        "cwd": str(_ROOT),
+        "icon": "📊",
+        "category": "data",
+    },
+    "alpha_ingest": {
+        "display": "Alpha Ingest",
+        "description": "Funding 2020→, Fear&Greed 2018→, OI, L/S, enrichissement OHLCV",
+        "cmd": [_PY3, str(_ROOT / "scripts" / "ingest_alpha_data.py"), "--update"],
+        "cwd": str(_ROOT),
+        "icon": "🔬",
+        "category": "data",
+    },
+    "whale_mempool": {
+        "display": "Whale On-Chain",
+        "description": "Transactions BTC >100 BTC depuis mempool.space + Blockchair (100% gratuit)",
+        "cmd": [_PY3, str(_ROOT / "scripts" / "fetch_whale_onchain.py")],
+        "cwd": str(_ROOT),
+        "icon": "🐋",
+        "category": "data",
+    },
+    "news_rss": {
+        "display": "News RSS + NLP",
+        "description": "17 sources RSS (CoinTelegraph, Decrypt, Bitcoin Mag, Google News…) + VADER sentiment",
+        "cmd": [_PY3, str(_ROOT / "scripts" / "fetch_news.py"), "--update"],
+        "cwd": str(_ROOT),
+        "icon": "📰",
+        "category": "news",
+    },
+    "api_collectors": {
+        "display": "API Collectors",
+        "description": "Fear & Greed + Funding + CoinGecko markets (collecte continue)",
+        "cmd": [_PY3, str(_ROOT / "scrapers" / "marketintel" / "api_collectors" / "run_api_collectors.py")],
+        "cwd": str(_ROOT),
+        "icon": "📡",
+        "category": "api",
+    },
+}
+
+
+def _scraper_status(name: str) -> str:
+    info = _scraper_processes.get(name, {})
+    proc = info.get("process")
+    if proc is None:
+        return "stopped"
+    rc = proc.poll()
+    if rc is None:
+        return "running"
+    return "completed" if rc == 0 else "error"
+
+
+@app.get("/scrapers/list")
+async def list_scrapers():
+    """Liste tous les scrapers avec leur statut courant."""
+    result = []
+    with _scraper_lock:
+        for name, info in SCRAPERS_REGISTRY.items():
+            proc_info = _scraper_processes.get(name, {})
+            status = _scraper_status(name)
+
+            log_file = proc_info.get("log_file", f"/tmp/scraper_{name}.log")
+            last_lines: list = []
+            try:
+                lp = Path(log_file)
+                if lp.exists():
+                    with open(lp) as f:
+                        last_lines = [l.rstrip() for l in f.readlines()[-15:]]
+            except Exception:
+                pass
+
+            started_at = proc_info.get("started_at")
+            result.append({
+                "name": name,
+                "display": info["display"],
+                "description": info["description"],
+                "icon": info["icon"],
+                "category": info["category"],
+                "status": status,
+                "pid": proc_info.get("process").pid if proc_info.get("process") and proc_info["process"].poll() is None else None,
+                "started_at": started_at.isoformat() if started_at else None,
+                "last_lines": last_lines,
+            })
+    return {"scrapers": result, "timestamp": datetime.utcnow().isoformat()}
+
+
+@app.post("/scrapers/{name}/start")
+async def start_scraper(name: str):
+    """Lance un scraper en tâche de fond."""
+    if name not in SCRAPERS_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Scraper '{name}' inconnu")
+
+    with _scraper_lock:
+        if _scraper_status(name) == "running":
+            return {"success": False, "message": f"Scraper '{name}' déjà en cours"}
+
+    info = SCRAPERS_REGISTRY[name]
+    log_file = Path(f"/tmp/scraper_{name}.log")
+
+    try:
+        env = os.environ.copy()
+        cwd = info.get("cwd", str(_ROOT))
+        process = subprocess.Popen(
+            info["cmd"],
+            stdout=open(log_file, "w"),
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+            env=env,
+        )
+        with _scraper_lock:
+            _scraper_processes[name] = {
+                "process": process,
+                "log_file": str(log_file),
+                "started_at": datetime.utcnow(),
+            }
+        logger.info(f"Scraper '{name}' démarré PID={process.pid}")
+        return {"success": True, "message": f"Scraper '{name}' démarré", "pid": process.pid}
+    except Exception as e:
+        logger.error(f"Erreur démarrage scraper '{name}': {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/scrapers/{name}/stop")
+async def stop_scraper(name: str):
+    """Arrête un scraper en cours."""
+    if name not in SCRAPERS_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Scraper '{name}' inconnu")
+
+    with _scraper_lock:
+        proc_info = _scraper_processes.get(name, {})
+        proc = proc_info.get("process")
+
+    if proc is None or proc.poll() is not None:
+        return {"success": False, "message": f"Scraper '{name}' n'est pas en cours"}
+
+    try:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+        logger.info(f"Scraper '{name}' arrêté")
+        return {"success": True, "message": f"Scraper '{name}' arrêté"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/scrapers/{name}/logs")
+async def get_scraper_logs(name: str, lines: int = 100):
+    """Récupère les dernières lignes de logs d'un scraper."""
+    if name not in SCRAPERS_REGISTRY:
+        raise HTTPException(status_code=404, detail=f"Scraper '{name}' inconnu")
+
+    with _scraper_lock:
+        proc_info = _scraper_processes.get(name, {})
+    log_file = proc_info.get("log_file", f"/tmp/scraper_{name}.log")
+
+    try:
+        lp = Path(log_file)
+        if not lp.exists():
+            return {"name": name, "logs": [], "message": "Aucun log disponible"}
+        with open(lp) as f:
+            all_lines = f.readlines()
+        return {
+            "name": name,
+            "logs": [l.rstrip() for l in all_lines[-lines:]],
+            "total_lines": len(all_lines),
+            "log_file": str(lp),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     print("\n" + "=" * 80)
     print("🚀 ALPHA TRADING API SERVER")
     print("=" * 80)
-    print("\nStarting server on http://localhost:8000")
-    print("API Documentation: http://localhost:8000/docs")
+    print(f"\nStarting server on http://{API_HOST}:{API_PORT}")
+    print(f"API Documentation: http://{API_HOST}:{API_PORT}/docs")
     print("\n📊 MARKET DATA ENDPOINTS:")
     print("  - GET /market/all-cryptos      - All cryptos with current & previous prices")
     print("  - GET /market/ticker           - Ticker data for a symbol")
@@ -2830,4 +4044,4 @@ if __name__ == "__main__":
     print("  - GET /pipeline/symbols        - Active symbols")
     print("\n" + "=" * 80 + "\n")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=API_HOST, port=API_PORT)

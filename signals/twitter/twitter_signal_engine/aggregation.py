@@ -8,7 +8,7 @@ from typing import List, Dict
 from collections import defaultdict
 import numpy as np
 
-from models import ProcessedTweet, WindowAggregation, SentimentDirection
+from .models import ProcessedTweet, WindowAggregation, SentimentDirection
 from config import WINDOWS, BASELINE_WINDOW_DAYS, BURST_ZSCORE_THRESHOLD
 
 

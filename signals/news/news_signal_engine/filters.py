@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from models import RawNewsArticle, SourceTier
+from .models import RawNewsArticle, SourceTier
 from config import (
     SOURCE_TIERS,
     OFFICIAL_SOURCES,

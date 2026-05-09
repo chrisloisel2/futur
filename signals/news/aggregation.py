@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from collections import defaultdict
 import numpy as np
 
-from models import ProcessedNewsArticle, NewsWindowAggregation, EventType, SurpriseLevel, GeographicScope
+from .models import ProcessedNewsArticle, NewsWindowAggregation, EventType, SurpriseLevel, GeographicScope
 from enrichment import MetricsCalculator
 from config import WINDOWS, BASELINE_WINDOW_DAYS
 

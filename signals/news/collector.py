@@ -9,7 +9,7 @@ from typing import List, Optional
 import time
 import logging
 
-from models import RawNewsArticle
+from .models import RawNewsArticle
 from config import (
     ALL_ENTITIES,
     NEWS_API_RATE_LIMIT,

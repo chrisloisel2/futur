@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import Optional, List, Dict
 import numpy as np
 
-from models import RawNewsArticle, ProcessedNewsArticle, SourceTier, GeographicScope
+from .models import RawNewsArticle, ProcessedNewsArticle, SourceTier, GeographicScope
 from config import ORIGINALITY_WEIGHTS, MIN_INDEPENDENT_SOURCES
 
 

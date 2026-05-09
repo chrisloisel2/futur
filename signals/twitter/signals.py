@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import List, Optional
 import numpy as np
 
-from models import WindowAggregation, TradingSignal, SentimentDirection
+from .models import WindowAggregation, TradingSignal, SentimentDirection
 from enrichment import MetricsCalculator
 from config import (
     MIN_TWEETS_FOR_SIGNAL,
