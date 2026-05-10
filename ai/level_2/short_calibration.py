@@ -48,13 +48,14 @@ COST_STRESS = 0.0015    # 15 bps
 COST_EXTREME = 0.0020   # 20 bps
 
 # Grille de seuils à balayer
-_THR_LO = 0.10   # adapté aux probabilités compressées de HistGBT (p90 ≈ 0.12-0.20)
+_THR_LO = 0.38   # LightGBM DART p90≈0.50 → seuils > 0.38 = top 15% des signaux
 _THR_HI = 0.82
 _THR_STEP = 0.01
 
-# Contraintes minimales pour valider un seuil
+# Contraintes minimales et maximales pour valider un seuil
 _MIN_N_TRADES = 10
-_MIN_PF = 1.10
+_MAX_N_TRADES_FRAC = 0.08   # max 8% des barres val → évite threshold trop bas
+_MIN_PF = 1.20               # relevé de 1.10 → filtre les seuils marginaux
 _MAX_SQUEEZE = MAX_SQUEEZE_LOSS_RATE
 
 
@@ -288,6 +289,9 @@ def calibrate_short_thresholds(
 
             n_sig = int(sig.sum())
             if n_sig < _MIN_N_TRADES:
+                continue
+            # Plafond : si le threshold capture plus de 5% du contexte → trop bas
+            if n_sig > max(_MIN_N_TRADES, int(n_ctx * _MAX_N_TRADES_FRAC)):
                 continue
 
             sim = simulate_short_trades(ret_ctx, sig, costs)

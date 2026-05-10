@@ -168,6 +168,7 @@ SQUEEZE_COL = "squeeze_reject_4h"
 LABEL_COL = "y_short_clean"
 CONTEXT_COL = "short_context_name"
 GATE_COL = "no_short"
+MACRO_BEAR_COL = "macro_bear_ok"  # True = régime bear → SHORT autorisé
 
 # Poids ensemble
 W_TRANSFORMER = 0.40
@@ -274,12 +275,50 @@ def load_all_assets(
 # 2. Feature engineering par actif (évite contamination cross-actif)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _compute_macro_bear_gate(df: pd.DataFrame) -> pd.Series:
+    """
+    Gate macro bear par-actif : True = régime bear confirmé → SHORT autorisé.
+
+    Condition (les DEUX doivent être vraies) :
+      1. Close < EMA(4800)  — sous la moyenne mobile 200 jours (4800 barres 1h)
+      2. mom_720h < -0.05   — rendement 30 jours < -5% (tendance baissière établie)
+
+    min_periods=720 (30 jours) pour que l'EMA soit significative.
+    Avant 720 barres : macro_bear = False par défaut (pas de short sans contexte).
+
+    Pourquoi EMA(4800) ?
+      200 jours × 24h = 4800 barres 1h = vrai EMA 200 jours.
+      C'est LE référentiel institutionnel pour distinguer bull/bear macro.
+    """
+    close = df["Close"].values.astype(np.float64)
+
+    # EMA 200 jours sur barres 1h
+    alpha   = 2.0 / (4800 + 1)
+    ema200d = np.full(len(close), np.nan)
+    ema200d[0] = close[0]
+    for i in range(1, len(close)):
+        ema200d[i] = alpha * close[i] + (1 - alpha) * ema200d[i - 1]
+    # invalider les 720 premières barres (< 30j de données)
+    ema200d[:720] = np.nan
+
+    # Momentum 30 jours (720 barres)
+    mom_720 = np.full(len(close), np.nan)
+    mom_720[720:] = np.log(close[720:] / close[:-720])
+
+    # Gate : Close < EMA200d ET mom_30j < -10% (baisse significative sur 30 jours)
+    # -10% filtre les corrections mineures dans un bull macro et cible les vrais bears
+    macro_bear = (close < ema200d) & (mom_720 < -0.10)
+
+    return pd.Series(macro_bear.astype(float), index=df.index, name=MACRO_BEAR_COL)
+
+
 def enrich_asset(df_asset: pd.DataFrame) -> pd.DataFrame:
     """
     Applique sur un actif individuel :
       1. compute_all_short_features(df)
       2. compute_all_proxy_features(df)
       3. compute_short_label_columns(df) [forward-looking, sur tout le df]
+      4. _compute_macro_bear_gate(df)    [gate régime bear par-actif]
     Retourne df enrichi.
     """
     # 1. Features SHORT spécifiques
@@ -304,6 +343,13 @@ def enrich_asset(df_asset: pd.DataFrame) -> pd.DataFrame:
         except Exception as e:
             print(f"    WARN compute_short_label_columns : {e}")
 
+    # 4. Gate macro bear par-actif (EMA 200 jours)
+    try:
+        df_asset[MACRO_BEAR_COL] = _compute_macro_bear_gate(df_asset)
+    except Exception as e:
+        print(f"    WARN macro_bear_gate : {e}")
+        df_asset[MACRO_BEAR_COL] = 0.0
+
     return df_asset
 
 
@@ -324,6 +370,46 @@ def enrich_all_assets(df_combined: pd.DataFrame) -> pd.DataFrame:
         groups.append(grp_enriched)
 
     result = pd.concat(groups, axis=0).reset_index(drop=True)
+
+    # ── Gate BTC cross-actif ──────────────────────────────────────────────────
+    # Quand BTC est en fort bull (mom_720 > +5% sur 30j), les rallies BTC
+    # squeezeront tous les shorts altcoins → bloquer.
+    # On extrait la série BTC mom_720 et on la broadcast à tous les actifs.
+    BTC_SYMBOLS = ["BTCUSD", "BTCUSDT"]
+    btc_mask = result["symbol"].isin(BTC_SYMBOLS) if "symbol" in result.columns else pd.Series(False, index=result.index)
+    btc_rows  = result[btc_mask]
+
+    if len(btc_rows) > 0 and "datetime" in btc_rows.columns:
+        # Calculer le momentum 720h de BTC
+        btc_dt = pd.to_datetime(btc_rows["datetime"]).dt.tz_localize(None)
+        btc_close = pd.Series(btc_rows["Close"].values, index=btc_dt).sort_index()
+        btc_mom720 = np.full(len(btc_close), np.nan)
+        c = btc_close.values
+        btc_mom720[720:] = np.log(c[720:] / c[:-720])
+        btc_mom720_series = pd.Series(btc_mom720, index=btc_close.index)
+
+        # BTC confirme le bear : mom_720 < -0.05 (BTC en baisse 5%+ sur 30j)
+        # Condition positive : BTC doit aussi baisser, pas juste "ne pas monter".
+        # Élimine les shorts en période de consolidation BTC dans un macro bull.
+        btc_also_declining = (btc_mom720_series < -0.05)
+        # Mapper sur tous les actifs via datetime (naive)
+        result_dt = pd.to_datetime(result["datetime"]).dt.tz_localize(None) \
+                    if "datetime" in result.columns else pd.to_datetime(result.index).tz_localize(None)
+        result_dt_floored = result_dt.dt.floor("h")
+        # Aligner par timestamp — forward fill au plus proche
+        btc_declining_reindexed = btc_also_declining.reindex(result_dt_floored, method="nearest", tolerance=pd.Timedelta("2h"))
+        btc_declining_map = btc_declining_reindexed.values
+
+        if MACRO_BEAR_COL in result.columns:
+            # SHORT autorisé seulement si asset en bear ET BTC aussi en baisse
+            btc_ok_arr = pd.Series(btc_declining_map).fillna(False).values  # default=False (bloqué si BTC inconnu)
+            result[MACRO_BEAR_COL] = result[MACRO_BEAR_COL].values * btc_ok_arr.astype(float)
+            n_btc_allowed = int(btc_ok_arr.sum())
+            n_total = len(result)
+            print(f"  [btc_gate] BTC declining confirme {n_btc_allowed:,}/{n_total:,} barres ({n_btc_allowed/n_total*100:.1f}%)")
+    else:
+        print("  [btc_gate] BTC non trouvé — gate cross-actif désactivée")
+
     return result
 
 
@@ -621,9 +707,18 @@ def _backtest_fold(
     if len(df_test) == 0 or RET_COL not in df_test.columns:
         return _empty_fold_metrics()
 
-    # Gate no_short
-    gate = df_test[GATE_COL].values.astype(bool) if GATE_COL in df_test.columns \
-           else np.zeros(len(df_test), dtype=bool)
+    # Gate no_short (technique)
+    gate_tech = df_test[GATE_COL].values.astype(bool) if GATE_COL in df_test.columns \
+                else np.zeros(len(df_test), dtype=bool)
+
+    # Gate macro bear : True = régime bear → SHORT AUTORISÉ (inverser pour bloquer)
+    if MACRO_BEAR_COL in df_test.columns:
+        macro_bear = df_test[MACRO_BEAR_COL].values.astype(bool)
+        gate_macro  = ~macro_bear  # True = PAS en bear → BLOQUER
+    else:
+        gate_macro = np.zeros(len(df_test), dtype=bool)  # pas de blocage macro par défaut
+
+    gate = gate_tech | gate_macro  # bloqué si technique OU pas en régime bear
 
     # Contexte par barre
     ctx_col = df_test[CONTEXT_COL].values if CONTEXT_COL in df_test.columns \
@@ -638,7 +733,7 @@ def _backtest_fold(
     trade_mask = np.zeros(len(df_test), dtype=bool)
     for i, ctx in enumerate(ctx_col):
         if gate[i]:
-            continue  # bloqué par la gate
+            continue  # bloqué par la gate (technique ou macro bull)
         thr = _get_threshold(thresholds, ctx)
         if thr is not None and p_test[i] >= thr:
             trade_mask[i] = True
@@ -963,10 +1058,25 @@ def run_fold(
 
     if _HAS_CALIBRATION and RET_COL in df.columns:
         try:
+            # Calibrer uniquement sur les barres val en régime bear (macro_bear_ok=1)
+            df_val_full = df[val_mask].reset_index(drop=True)
+            p_val_full  = p_ensemble[val_mask]
+            y_val_full  = y[val_mask]
+
+            if MACRO_BEAR_COL in df_val_full.columns:
+                bear_val = df_val_full[MACRO_BEAR_COL].values.astype(bool)
+                n_bear   = int(bear_val.sum())
+                pct_bear = n_bear / max(len(bear_val), 1) * 100
+                print(f"  [calibration] Barres val en régime bear : {n_bear:,}/{len(bear_val):,} ({pct_bear:.1f}%)")
+                if n_bear >= 50:
+                    df_val_full = df_val_full[bear_val].reset_index(drop=True)
+                    p_val_full  = p_val_full[bear_val]
+                    y_val_full  = y_val_full[bear_val]
+
             thresholds = calibrate_short_thresholds(
-                df_val=df[val_mask].reset_index(drop=True),
-                y_val=y[val_mask],
-                p_short=p_ensemble[val_mask],
+                df_val=df_val_full,
+                y_val=y_val_full,
+                p_short=p_val_full,
                 context_col=CONTEXT_COL,
                 costs=COST_NORMAL,
             )
@@ -1026,9 +1136,8 @@ def run_fold(
         and sq <= MAX_SQUEEZE_LOSS_RATE
     )
     fold_catastrophic = (
-        pf < SHORT_CATASTROPHIC_PF
-        or dd > MAX_SHORT_DD
-        or sq > 0.50
+        n_tr >= MIN_SHORT_TRADES_PER_VALID_FOLD   # seulement si assez de trades
+        and (pf < SHORT_CATASTROPHIC_PF or dd > MAX_SHORT_DD or sq > 0.50)
     )
     fold_status = (
         "CATASTROPHIC" if fold_catastrophic
