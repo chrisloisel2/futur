@@ -91,6 +91,7 @@ FEATURES_COMMON: List[str] = [
 
 FEATURES_LONG_EXTRA: List[str] = [
     # ── Groupe 1 : Price structure — returns & trend ──────────────────────────
+    "mom_logret_4",    # 4h momentum — aligné sur l'horizon de prédiction
     "mom_logret_6",
     "mom_logret_12",
     "mom_logret_24",
@@ -118,8 +119,15 @@ FEATURES_LONG_EXTRA: List[str] = [
     # ── Groupe 4 : Events — liquidations ─────────────────────────────────────
     "liq_short_spike_12",   # short squeezes = carburant pour les longs
     "liq_imbalance",        # négatif = plus de shorts liquidés = bullish
+    # ── Groupe 5 : Event-driven — EMA crossover ───────────────────────────────
+    "days_since_golden_cross",  # ancienneté du golden cross (frais vs établi)
+    "gc_fresh",                 # binary : golden cross < 7j (fort signal)
+    "dist_ema200_atr",          # dist EMA200 normée par ATR (adapté au régime vol.)
+    # ── Groupe 6 : VWAP — proxy institutionnel intraday ──────────────────────
+    "dist_vwap_pct",    # (Close - VWAP) / VWAP — pression acheteuse vs vendeurs
+    "above_vwap_4h",    # fraction des 4 dernières barres au-dessus du VWAP
 ]
-# Groupe 5 : Positioning / sentiment (bundle)
+# Groupe 7 : Positioning / sentiment (bundle)
 FEATURES_LONG_EXTRA = list(dict.fromkeys(FEATURES_LONG_EXTRA + FEATURES_MACRO_LONG))
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -251,6 +259,77 @@ def get_feature_overlap() -> dict:
         "n_short":            len(FEATURES_SHORT),
         "n_regime":           len(FEATURES_REGIME),
     }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FEATURES SHORT GAMECHANGER — calculées par ai/level_0/short_features.py
+# ─────────────────────────────────────────────────────────────────────────────
+# Ces features sont spécifiques au SHORT stress/breakdown/crowding.
+# Ne pas les utiliser pour le LONG — elles mesurent des phénomènes asymétriques.
+# Toutes calculables en live sans lookahead.
+
+FEATURES_SHORT_GAMECHANGER: List[str] = [
+    # ── Crowding ──────────────────────────────────────────────────────────────
+    "funding_extreme_positive",
+    "funding_accel_24",
+    "funding_accel_72",
+    "long_short_extreme",
+    "open_interest_expansion",
+    "oi_price_divergence",
+    "oi_up_price_flat",
+    "oi_up_price_down",
+    "fear_greed_extreme",
+    "long_crowding_score",
+    # ── Breakdown ─────────────────────────────────────────────────────────────
+    "breakdown_strength_24",
+    "breakdown_strength_168",
+    "below_vwap_4h",
+    "below_vwap_12h",
+    "vwap_loss_event",
+    "below_ema20",
+    "below_ema50",
+    "below_ema200",
+    "ema_stack_bearish",
+    "local_low_break_24",
+    "local_low_break_168",
+    "downside_vol_ratio_24",
+    "rv_downside_24",
+    "breakdown_score",
+    # ── Failed breakout ───────────────────────────────────────────────────────
+    "failed_high_6",
+    "failed_high_12",
+    "failed_high_24",
+    "upper_wick_pct",
+    "upper_wick_z_24",
+    "close_rejection_from_high",
+    "volume_exhaustion_high",
+    "taker_buy_exhaustion",
+    "bull_trap_score",
+    "failed_breakout_score",
+    # ── Liquidity stress ──────────────────────────────────────────────────────
+    "liq_long_spike_12",
+    "liq_long_spike_24",
+    "liq_imbalance_short",
+    "spread_proxy",
+    "range_expansion_6",
+    "range_expansion_24",
+    "downside_range_expansion",
+    "sell_volume_shock",
+    "taker_sell_cumul_12",
+    "taker_sell_pressure",
+    # ── Squeeze risk ──────────────────────────────────────────────────────────
+    "squeeze_risk_score",
+    "positive_momentum_accel",
+    "price_above_vwap",
+    "funding_negative_squeeze",
+    "taker_buy_pressure",
+    "reclaim_vwap_event",
+    "rsi_recovery_from_oversold",
+    "short_late_entry_risk",
+    # ── Scores composites ─────────────────────────────────────────────────────
+    "bear_continuation_score",
+    "weak_bounce_score",
+]
 
 
 def validate_features(df: "pd.DataFrame", feature_list: List[str],

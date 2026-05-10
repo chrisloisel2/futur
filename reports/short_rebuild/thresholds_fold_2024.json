@@ -1,0 +1,66 @@
+{
+  "bear_continuation": {
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
+  },
+  "breakdown": {
+    "enabled": true,
+    "threshold": 0.11,
+    "val_pf": 1.3454,
+    "val_expectancy": 0.002515,
+    "n_val_trades": 13,
+    "squeeze_loss_rate": 0.1538,
+    "max_drawdown": 375.4458,
+    "cost_stress_pf": 1.2669,
+    "avg_mae": 0.009237,
+    "score": -74.9779
+  },
+  "failed_breakout": {
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
+  },
+  "general_short": {
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
+  },
+  "liquidity_stress": {
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
+  }
+}

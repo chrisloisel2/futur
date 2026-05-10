@@ -1,0 +1,247 @@
+{
+  "verdict": "SHORT_REJECTED",
+  "reasons": [
+    "1 fold(s) catastrophique(s) : [2022]",
+    "seulement 2/5 folds OK (min=5)"
+  ],
+  "n_folds": 5,
+  "n_folds_ok": 2,
+  "n_folds_catastrophic": 1,
+  "total_trades": 1212,
+  "median_pf": 0.9495,
+  "median_expectancy": -0.000412,
+  "median_squeeze_rate": 0.0118,
+  "median_stress_pf": 0.8916,
+  "folds": [
+    {
+      "year": 2022,
+      "fold_status": "CATASTROPHIC",
+      "ok": false,
+      "catastrophic": true,
+      "n_train": 1698,
+      "n_val": 8747,
+      "n_test": 8760,
+      "n_pos_train": 232,
+      "threshold_by_context": {
+        "bear_continuation": null,
+        "breakdown": 0.15,
+        "failed_breakout": 0.12,
+        "general_short": null,
+        "liquidity_stress": 0.2
+      },
+      "n_trades": 172,
+      "pf": 0.6099,
+      "expectancy": -0.004155,
+      "wr": 0.4186,
+      "avg_win": 0.015517,
+      "avg_loss": -0.01832,
+      "max_drawdown": 0.0759,
+      "squeeze_loss_rate": 0.0174,
+      "cost_normal_pf": 0.6099,
+      "cost_stress_pf": 0.5746,
+      "cost_extreme_pf": 0.5418,
+      "context_contribution": {
+        "failed_breakout": {
+          "n_trades": 144,
+          "pf": 0.6702,
+          "expectancy": -0.00311
+        },
+        "breakdown": {
+          "n_trades": 26,
+          "pf": 0.4072,
+          "expectancy": -0.010809
+        },
+        "liquidity_stress": {
+          "n_trades": 2,
+          "pf": 14121301.7039,
+          "expectancy": 0.007061
+        }
+      },
+      "total_return_pct": -0.0715
+    },
+    {
+      "year": 2023,
+      "fold_status": "OK",
+      "ok": true,
+      "catastrophic": false,
+      "n_train": 10445,
+      "n_val": 8760,
+      "n_test": 8759,
+      "n_pos_train": 1386,
+      "threshold_by_context": {
+        "bear_continuation": 0.21,
+        "breakdown": 0.19,
+        "failed_breakout": 0.1,
+        "general_short": 0.26,
+        "liquidity_stress": 0.1
+      },
+      "n_trades": 341,
+      "pf": 1.3827,
+      "expectancy": 0.001892,
+      "wr": 0.5396,
+      "avg_win": 0.012667,
+      "avg_loss": -0.010736,
+      "max_drawdown": 0.0152,
+      "squeeze_loss_rate": 0.0088,
+      "cost_normal_pf": 1.3827,
+      "cost_stress_pf": 1.2687,
+      "cost_extreme_pf": 1.1643,
+      "context_contribution": {
+        "failed_breakout": {
+          "n_trades": 174,
+          "pf": 1.486,
+          "expectancy": 0.002224
+        },
+        "liquidity_stress": {
+          "n_trades": 137,
+          "pf": 1.2433,
+          "expectancy": 0.001454
+        },
+        "breakdown": {
+          "n_trades": 25,
+          "pf": 1.6603,
+          "expectancy": 0.001712
+        },
+        "bear_continuation": {
+          "n_trades": 4,
+          "pf": 139.1526,
+          "expectancy": 0.005445
+        },
+        "general_short": {
+          "n_trades": 1,
+          "pf": 0.0,
+          "expectancy": -0.005712
+        }
+      },
+      "total_return_pct": 0.0645
+    },
+    {
+      "year": 2024,
+      "fold_status": "OK",
+      "ok": true,
+      "catastrophic": false,
+      "n_train": 19205,
+      "n_val": 8759,
+      "n_test": 8784,
+      "n_pos_train": 2556,
+      "threshold_by_context": {
+        "bear_continuation": null,
+        "breakdown": 0.11,
+        "failed_breakout": null,
+        "general_short": null,
+        "liquidity_stress": null
+      },
+      "n_trades": 51,
+      "pf": 1.7849,
+      "expectancy": 0.003755,
+      "wr": 0.5098,
+      "avg_win": 0.016749,
+      "avg_loss": -0.00976,
+      "max_drawdown": 0.0068,
+      "squeeze_loss_rate": 0.0196,
+      "cost_normal_pf": 1.7849,
+      "cost_stress_pf": 1.6472,
+      "cost_extreme_pf": 1.5223,
+      "context_contribution": {
+        "breakdown": {
+          "n_trades": 51,
+          "pf": 1.7849,
+          "expectancy": 0.003755
+        }
+      },
+      "total_return_pct": 0.0192
+    },
+    {
+      "year": 2025,
+      "fold_status": "WEAK",
+      "ok": false,
+      "catastrophic": false,
+      "n_train": 27964,
+      "n_val": 8784,
+      "n_test": 8760,
+      "n_pos_train": 3702,
+      "threshold_by_context": {
+        "bear_continuation": 0.2,
+        "breakdown": 0.21,
+        "failed_breakout": null,
+        "general_short": null,
+        "liquidity_stress": 0.1
+      },
+      "n_trades": 170,
+      "pf": 0.8996,
+      "expectancy": -0.000985,
+      "wr": 0.4882,
+      "avg_win": 0.01808,
+      "avg_loss": -0.019174,
+      "max_drawdown": 0.0428,
+      "squeeze_loss_rate": 0.0118,
+      "cost_normal_pf": 0.8996,
+      "cost_stress_pf": 0.8525,
+      "cost_extreme_pf": 0.8079,
+      "context_contribution": {
+        "liquidity_stress": {
+          "n_trades": 130,
+          "pf": 0.8964,
+          "expectancy": -0.001022
+        },
+        "breakdown": {
+          "n_trades": 14,
+          "pf": 1.0411,
+          "expectancy": 0.000524
+        },
+        "bear_continuation": {
+          "n_trades": 26,
+          "pf": 0.7977,
+          "expectancy": -0.001614
+        }
+      },
+      "total_return_pct": -0.0168
+    },
+    {
+      "year": 2026,
+      "fold_status": "WEAK",
+      "ok": false,
+      "catastrophic": false,
+      "n_train": 36748,
+      "n_val": 8760,
+      "n_test": 3099,
+      "n_pos_train": 4859,
+      "threshold_by_context": {
+        "bear_continuation": null,
+        "breakdown": 0.11,
+        "failed_breakout": 0.18,
+        "general_short": 0.24,
+        "liquidity_stress": 0.16
+      },
+      "n_trades": 478,
+      "pf": 0.9495,
+      "expectancy": -0.000412,
+      "wr": 0.4833,
+      "avg_win": 0.016017,
+      "avg_loss": -0.015776,
+      "max_drawdown": 0.0758,
+      "squeeze_loss_rate": 0.0063,
+      "cost_normal_pf": 0.9495,
+      "cost_stress_pf": 0.8916,
+      "cost_extreme_pf": 0.8373,
+      "context_contribution": {
+        "breakdown": {
+          "n_trades": 465,
+          "pf": 0.974,
+          "expectancy": -0.000209
+        },
+        "liquidity_stress": {
+          "n_trades": 10,
+          "pf": 0.6047,
+          "expectancy": -0.003732
+        },
+        "failed_breakout": {
+          "n_trades": 3,
+          "pf": 0.0,
+          "expectancy": -0.020783
+        }
+      },
+      "total_return_pct": -0.0197
+    }
+  ]
+}
