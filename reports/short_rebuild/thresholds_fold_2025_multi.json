@@ -1,0 +1,63 @@
+{
+  "bear_continuation": {
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
+  },
+  "breakdown": {
+    "enabled": true,
+    "threshold": 0.69,
+    "val_pf": 1.4045,
+    "val_expectancy": 0.007757,
+    "n_val_trades": 24,
+    "squeeze_loss_rate": 0.3333,
+    "max_drawdown": 325.5794,
+    "cost_stress_pf": 1.3744,
+    "avg_mae": 0.031137,
+    "score": -65.008038
+  },
+  "failed_breakout": {
+    "enabled": true,
+    "threshold": 0.7,
+    "val_pf": 2.3294,
+    "val_expectancy": 0.020989,
+    "n_val_trades": 74,
+    "squeeze_loss_rate": 0.2703,
+    "max_drawdown": 42.6435,
+    "cost_stress_pf": 2.2845,
+    "avg_mae": 0.023093,
+    "score": -8.006422
+  },
+  "general_short": {
+    "enabled": true,
+    "threshold": 0.71,
+    "val_pf": 1.6566,
+    "val_expectancy": 0.011051,
+    "n_val_trades": 14,
+    "squeeze_loss_rate": 0.2143,
+    "max_drawdown": 281.2772,
+    "cost_stress_pf": 1.623,
+    "avg_mae": 0.024648,
+    "score": -56.025993
+  },
+  "liquidity_stress": {
+    "enabled": true,
+    "threshold": 0.72,
+    "val_pf": 1.7764,
+    "val_expectancy": 0.015772,
+    "n_val_trades": 50,
+    "squeeze_loss_rate": 0.28,
+    "max_drawdown": 58.9687,
+    "cost_stress_pf": 1.7452,
+    "avg_mae": 0.034732,
+    "score": -11.478921
+  }
+}

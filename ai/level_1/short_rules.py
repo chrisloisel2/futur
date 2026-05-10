@@ -127,6 +127,15 @@ def compute_no_short_gate(
     if liq_stress is None or (liq_stress == 0.0).all():
         liq_stress = _get(df, "squeeze_risk_score", 0.0)
 
+    # ── Features momentum long terme ────────────────────────────────────────
+    dist_ema50   = _get(df, "dist_ema_50",        0.0)   # (Close-EMA50)/EMA50
+    mom_24       = _get(df, "mom_logret_24",       0.0)
+    # mom_168 = 7 jours: si absent, on l'approche par 2× mom_72
+    if "mom_logret_168" in df.columns:
+        mom_168 = df["mom_logret_168"].values.astype(np.float64)
+    else:
+        mom_168 = _get(df, "mom_logret_72", 0.0) * 2  # approximation
+
     # ── Bull trend sain : TOUTES les conditions doivent être vérifiées ────────
     bull_trend_sain = (
         (ema_spread > 0)
@@ -137,15 +146,27 @@ def compute_no_short_gate(
         & (breakdown < p85_break)
     )
 
+    # ── Macro bull kill switch : tendance haussière forte sur 7+ jours ───────
+    # Bloque les shorts même lors des pullbacks temporaires dans un bull market.
+    # Condition : EMA haussière + prix > EMA50 + momentum 7j fort
+    macro_bull = (
+        (ema_spread > 0)
+        & (dist_ema50 > 0.01)   # close > EMA50 de plus de 1%
+        & (mom_168 > 0.03)      # +3% sur 7 jours (momentum soutenu)
+    )
+
     # ── Exception short : AU MOINS UNE condition ─────────────────────────────
+    crowding_extreme = crowding > p90_crowd
     exception_short = (
-        (crowding  > p90_crowd)
+        crowding_extreme
         | (failed_bo > p85_failed)
         | (liq_stress > p85_liq)
     )
 
     # ── Gate finale ──────────────────────────────────────────────────────────
-    no_short = bull_trend_sain & ~exception_short
+    # Bloqué si : bull trend sain sans exception
+    #          OU macro bull sans crowding extrême (protection contre pullback)
+    no_short = (bull_trend_sain & ~exception_short) | (macro_bull & ~crowding_extreme)
 
     return no_short.rename("no_short")
 
