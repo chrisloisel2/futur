@@ -26,17 +26,16 @@
     "reason": "no_threshold_passed_constraints"
   },
   "failed_breakout": {
-    "enabled": false,
-    "threshold": null,
-    "val_pf": null,
-    "val_expectancy": null,
-    "n_val_trades": 0,
-    "squeeze_loss_rate": null,
-    "max_drawdown": null,
-    "cost_stress_pf": null,
-    "avg_mae": null,
-    "score": null,
-    "reason": "no_threshold_passed_constraints"
+    "enabled": true,
+    "threshold": 0.54,
+    "val_pf": 2.3533,
+    "val_expectancy": 0.009959,
+    "n_val_trades": 80,
+    "squeeze_loss_rate": 0.2125,
+    "max_drawdown": 65.2973,
+    "cost_stress_pf": 2.2576,
+    "avg_mae": 0.01279,
+    "score": -12.606225
   },
   "general_short": {
     "enabled": false,
@@ -53,14 +52,14 @@
   },
   "liquidity_stress": {
     "enabled": true,
-    "threshold": 0.57,
-    "val_pf": 1.7941,
-    "val_expectancy": 0.007282,
-    "n_val_trades": 13,
-    "squeeze_loss_rate": 0.3077,
-    "max_drawdown": 97.8534,
-    "cost_stress_pf": 1.7243,
-    "avg_mae": 0.015964,
-    "score": -19.34448
+    "threshold": 0.58,
+    "val_pf": 2.9586,
+    "val_expectancy": 0.009766,
+    "n_val_trades": 11,
+    "squeeze_loss_rate": 0.1818,
+    "max_drawdown": 53.805,
+    "cost_stress_pf": 2.814,
+    "avg_mae": 0.009857,
+    "score": -10.240797
   }
 }

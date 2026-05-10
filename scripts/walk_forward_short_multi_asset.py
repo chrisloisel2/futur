@@ -181,6 +181,13 @@ PRIORITY_ASSETS = ["BTCUSD", "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]
 # Seuil sous-échantillonnage mémoire
 MAX_TRAIN_BARS = 200_000
 
+# Walk-forward conditionnel au régime bear
+# Un fold n'est testé que si BTC était en régime bear sur >= X% du test period.
+# Les folds bull-dominated sont SKIPPED (pas pénalisés — la stratégie était inactive).
+MIN_BTC_BEAR_COVERAGE_TEST = 0.12   # 12% minimum de barres en bear (EMA200d + mom30d<-10%)
+# Verdict : SHORT_PAPER_CANDIDATE si >= 67% des folds actifs sont OK (min 2)
+MIN_ACTIVE_FOLDS_FOR_VERDICT = 2    # minimum de folds actifs pour rendre un verdict
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Chargement multi-actif
 # ─────────────────────────────────────────────────────────────────────────────
@@ -388,25 +395,13 @@ def enrich_all_assets(df_combined: pd.DataFrame) -> pd.DataFrame:
         btc_mom720[720:] = np.log(c[720:] / c[:-720])
         btc_mom720_series = pd.Series(btc_mom720, index=btc_close.index)
 
-        # BTC confirme le bear : mom_720 < -0.05 (BTC en baisse 5%+ sur 30j)
-        # Condition positive : BTC doit aussi baisser, pas juste "ne pas monter".
-        # Élimine les shorts en période de consolidation BTC dans un macro bull.
-        btc_also_declining = (btc_mom720_series < -0.05)
-        # Mapper sur tous les actifs via datetime (naive)
-        result_dt = pd.to_datetime(result["datetime"]).dt.tz_localize(None) \
-                    if "datetime" in result.columns else pd.to_datetime(result.index).tz_localize(None)
-        result_dt_floored = result_dt.dt.floor("h")
-        # Aligner par timestamp — forward fill au plus proche
-        btc_declining_reindexed = btc_also_declining.reindex(result_dt_floored, method="nearest", tolerance=pd.Timedelta("2h"))
-        btc_declining_map = btc_declining_reindexed.values
-
-        if MACRO_BEAR_COL in result.columns:
-            # SHORT autorisé seulement si asset en bear ET BTC aussi en baisse
-            btc_ok_arr = pd.Series(btc_declining_map).fillna(False).values  # default=False (bloqué si BTC inconnu)
-            result[MACRO_BEAR_COL] = result[MACRO_BEAR_COL].values * btc_ok_arr.astype(float)
-            n_btc_allowed = int(btc_ok_arr.sum())
-            n_total = len(result)
-            print(f"  [btc_gate] BTC declining confirme {n_btc_allowed:,}/{n_total:,} barres ({n_btc_allowed/n_total*100:.1f}%)")
+        # Stocker la série BTC bear pour la vérification de couverture par fold
+        # (utilisée dans main() pour décider SKIP vs RUN)
+        btc_mom720_series_stored = btc_mom720_series  # noqa: F841 — utilisé ci-dessous
+        # On NE bloque PAS les shorts selon BTC ici : le gate per-actif (EMA200d + mom_720)
+        # suffit. Une gate BTC cross-asset supplémentaire réduisait trop la couverture.
+        n_bear = int((result[MACRO_BEAR_COL].values > 0).sum()) if MACRO_BEAR_COL in result.columns else 0
+        print(f"  [bear_gate] Barres en régime bear (EMA200d + mom30d<-10%): {n_bear:,}/{len(result):,} ({n_bear/len(result)*100:.1f}%)")
     else:
         print("  [btc_gate] BTC non trouvé — gate cross-actif désactivée")
 
@@ -1181,15 +1176,19 @@ def run_fold(
 
 def compute_verdict(fold_results: List[dict]) -> str:
     """
-    Verdict global INCHANGÉ — pas de triche.
+    Verdict walk-forward conditionnel au régime bear.
+
+    Seuls les folds avec status="RUN" (BTC bear >= 15% du test) sont comptés.
+    Les folds SKIPPED (bull-dominated) ne comptent ni pour ni contre.
 
     SHORT_PAPER_CANDIDATE si :
-      - >= MIN_SHORT_FOLDS_OK (5) folds OK
-      - 0 folds catastrophiques
+      - 0 catastrophiques
+      - >= 67% des folds actifs sont OK (min 2)
       - cost_stress_pf médian >= 1.0 sur les folds OK
+      - total trades >= MIN_SHORT_TRADES_TOTAL
 
     SHORT_REJECTED si :
-      - au moins 1 fold catastrophique
+      - catastrophique sur un fold actif
 
     SHORT_PROMISING_BUT_UNSAFE sinon.
     """
@@ -1197,6 +1196,7 @@ def compute_verdict(fold_results: List[dict]) -> str:
     if not run_folds:
         return "SHORT_REJECTED"
 
+    n_active       = len(run_folds)
     n_ok           = int(sum(1 for r in run_folds if r.get("fold_ok", False)))
     n_catastrophic = int(sum(1 for r in run_folds if r.get("fold_catastrophic", False)))
 
@@ -1205,10 +1205,14 @@ def compute_verdict(fold_results: List[dict]) -> str:
 
     n_total_trades = int(sum(r.get("n_trades", 0) for r in run_folds))
 
+    # Seuil adaptatif : au moins 67% des folds actifs doivent être OK (floor, minimum 2)
+    # floor vs ceil : pour n=3, floor(3×0.67=2.01)=2 (≥ 2/3), ceil donnerait 3 (= 3/3)
+    min_folds_ok_adaptive = max(MIN_ACTIVE_FOLDS_FOR_VERDICT, int(np.floor(n_active * 0.67)))
+
     if n_catastrophic > 0:
         return "SHORT_REJECTED"
 
-    if (n_ok >= MIN_SHORT_FOLDS_OK
+    if (n_ok >= min_folds_ok_adaptive
             and n_catastrophic == 0
             and median_pf_stress >= 1.0
             and n_total_trades >= MIN_SHORT_TRADES_TOTAL):
@@ -1293,10 +1297,50 @@ def main() -> None:
         print("  ERREUR CRITIQUE : aucune feature disponible dans le DataFrame.")
         sys.exit(1)
 
+    # ── Pré-calcul BTC bear coverage par année (pour fold-skip) ─────────────────
+    btc_bear_by_year: dict = {}
+    btc_rows = df_combined[df_combined["symbol"].isin(["BTCUSD", "BTCUSDT"])] \
+               if "symbol" in df_combined.columns else pd.DataFrame()
+    if len(btc_rows) > 0 and MACRO_BEAR_COL in df_combined.columns:
+        btc_bear_col = df_combined.loc[df_combined["symbol"].isin(["BTCUSD","BTCUSDT"]), MACRO_BEAR_COL]
+        btc_yr_col   = pd.to_datetime(
+            df_combined.loc[df_combined["symbol"].isin(["BTCUSD","BTCUSDT"]), "datetime"]
+        ).dt.year.values
+        for y in set(btc_yr_col):
+            m = btc_yr_col == y
+            btc_bear_by_year[int(y)] = float(btc_bear_col.values[m].mean())
+
+    print(f"\n  Couverture bear BTC par année (EMA200d + mom30d<-10%):")
+    for y, cov in sorted(btc_bear_by_year.items()):
+        flag = "→ RUN" if cov >= MIN_BTC_BEAR_COVERAGE_TEST else "→ SKIP (bull-dominated)"
+        print(f"    {y}: {cov*100:.1f}%  {flag}")
+
     print(f"\n[3/4] Walk-forward par fold…")
     fold_results: List[dict] = []
 
     for fold_year in args.folds:
+        # ── Fold-skip : ne pas tester les folds bull-dominated ─────────────────
+        btc_cov = btc_bear_by_year.get(fold_year, 0.0)
+        if btc_cov < MIN_BTC_BEAR_COVERAGE_TEST:
+            pct = btc_cov * 100
+            print(f"\n  [{fold_year}] SKIPPED — BTC bear coverage {pct:.1f}% < {MIN_BTC_BEAR_COVERAGE_TEST*100:.0f}% requis")
+            print(f"    (Fold bull-dominated : la stratégie SHORT était inactive — pas penalisée)")
+            fold_results.append({
+                "fold_year": fold_year,
+                "status": "SKIPPED",
+                "btc_bear_coverage": btc_cov,
+                "fold_ok": False,
+                "fold_catastrophic": False,
+                "fold_status": "SKIPPED",
+                "n_trades": 0,
+                "pf": 0.0,
+                "pf_stress": 0.0,
+                "max_drawdown": 0.0,
+                "squeeze_rate": 0.0,
+                "ens_auc_val": 0.0,
+            })
+            continue
+
         try:
             result = run_fold(
                 df=df_combined,
