@@ -344,9 +344,17 @@ def print_report(
     candidates = [s for s in signals if s["bear_gate"] and s["p_short"] >= threshold * 0.85]
     candidates.sort(key=lambda x: x["p_short"], reverse=True)
 
+    # Actifs en bear mais sous le seuil (monitoring)
+    bear_watch = [s for s in signals if s["bear_gate"] and s["p_short"] < threshold * 0.85]
+    bear_watch.sort(key=lambda x: x["p_short"], reverse=True)
+
+    # Actifs proches du bear (< 5% de l'EMA200d)
+    near_bear = [s for s in signals if not s["bear_gate"] and s.get("pct_from_ema", 0) > -5]
+    near_bear.sort(key=lambda x: x.get("pct_from_ema", -99))
+
     print(f"\n  TOP SHORT CANDIDATS (p_short >= {threshold*0.85:.2f}) :")
     if not candidates:
-        print("    — aucun signal actif —")
+        print("    — aucun signal au-dessus du seuil —")
     else:
         print(f"  {'#':>3}  {'Symbol':<14} {'p_short':>8} {'mom30d':>8} {'ATR%':>6}  Action")
         print("  " + "-" * 52)
@@ -356,6 +364,24 @@ def print_report(
             print(f"  {i:>3}  {s['symbol']:<14} {s['p_short']:>8.3f} "
                   f"{s['mom30d']*100:>+7.1f}%  {s['atr_pct']*100:>5.1f}%  "
                   f"{action}  {flag}")
+
+    if bear_watch:
+        print(f"\n  ACTIFS EN BEAR — signal faible (p < {threshold*0.85:.2f}) :")
+        print(f"  {'Symbol':<14} {'p_short':>8} {'mom30d':>8} {'%EMA200':>8}")
+        print("  " + "-" * 44)
+        for s in bear_watch[:8]:
+            pct_ema = s.get("pct_from_ema", 0)
+            print(f"  {s['symbol']:<14} {s['p_short']:>8.3f} "
+                  f"{s['mom30d']*100:>+7.1f}%  {pct_ema:>+7.1f}%")
+
+    if near_bear:
+        print(f"\n  ACTIFS PROCHES DU BEAR (< 5% sous EMA200d) :")
+        print(f"  {'Symbol':<14} {'%EMA200':>8} {'mom30d':>8}  Statut")
+        print("  " + "-" * 44)
+        for s in near_bear[:5]:
+            pct_ema = s.get("pct_from_ema", 0)
+            print(f"  {s['symbol']:<14} {pct_ema:>+7.1f}%  "
+                  f"{s['mom30d']*100:>+7.1f}%  near-bear")
 
     # Paper portfolio
     open_pos = positions[positions["status"] == "OPEN"] if not positions.empty else pd.DataFrame()
@@ -450,12 +476,20 @@ def main() -> None:
         last      = df.iloc[-1]
         bear_gate = float(last.get("macro_bear", 0)) > 0
 
-        p_short = predict(model, df, feats) if (model and bear_gate) else 0.0
+        # Pour les actifs en bear ET near-bear, on génère la prédiction
+        close_arr = df["Close"].values.astype(float)
+        ema200d   = _compute_ema200d(close_arr)
+        last_ema  = ema200d[-1] if not np.isnan(ema200d[-1]) else close_arr[-1]
+        close     = float(close_arr[-1])
+        pct_from_ema = (close - last_ema) / last_ema * 100  # négatif = sous EMA
 
-        close    = float(last["Close"])
+        # Prédire aussi pour les near-bear (surveillance)
+        near_bear_flag = (not bear_gate) and pct_from_ema > -8  # dans les 8% de l'EMA
+        p_short = predict(model, df, feats) if (model and (bear_gate or near_bear_flag)) else 0.0
+
         mom30    = 0.0
-        if "mom_logret_72" in df.columns and len(df) > MOM_WINDOW:
-            mom30 = float(np.log(df["Close"].iloc[-1] / df["Close"].iloc[max(-MOM_WINDOW-1,-len(df))]))
+        if len(close_arr) > MOM_WINDOW:
+            mom30 = float(np.log(close_arr[-1] / close_arr[-MOM_WINDOW - 1]))
         atr_pct  = float(last.get("atr_pct_14", 0.02))
 
         if sym in open_syms:
@@ -469,7 +503,8 @@ def main() -> None:
 
         signals.append({"symbol": sym, "p_short": p_short, "bear_gate": bear_gate,
                          "mom30d": mom30, "atr_pct": atr_pct, "action": action,
-                         "close": close})
+                         "close": close, "pct_from_ema": pct_from_ema,
+                         "ema200d": round(last_ema, 2)})
 
         signal_rows.append({
             "timestamp":  now.isoformat(),
