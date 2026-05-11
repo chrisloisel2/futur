@@ -2,7 +2,7 @@
 
 ## Walk-Forward Multi-Actif
 
-**Date** : 2026-05-11T01:24:14.568730
+**Date** : 2026-05-11T10:23:09.975516
 
 **Verdict** : `SHORT_PAPER_CANDIDATE`
 

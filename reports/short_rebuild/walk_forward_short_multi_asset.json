@@ -1,6 +1,6 @@
 {
   "verdict": "SHORT_PAPER_CANDIDATE",
-  "run_date": "2026-05-11T01:24:14.568730",
+  "run_date": "2026-05-11T10:23:09.975516",
   "n_assets": 50,
   "folds_requested": [
     2022,
@@ -53,7 +53,7 @@
       "ens_auc_val": 0.6324,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 188.2
+      "duration_s": 187.5
     },
     {
       "fold_year": 2023,
@@ -108,7 +108,7 @@
       "ens_auc_val": 0.744,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 179.9
+      "duration_s": 178.9
     },
     {
       "fold_year": 2026,
@@ -135,8 +135,8 @@
       "ens_auc_val": 0.7279,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 149.8
+      "duration_s": 149.9
     }
   ],
-  "duration_total_s": 1085.8
+  "duration_total_s": 1095.3
 }

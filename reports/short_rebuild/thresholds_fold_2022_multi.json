@@ -22,7 +22,7 @@
     "max_drawdown": 4.6885,
     "cost_stress_pf": 15.596,
     "avg_mae": 0.009996,
-    "score": 0.693134
+    "score": 0.602183
   },
   "failed_breakout": {
     "enabled": true,
@@ -34,7 +34,7 @@
     "max_drawdown": 1088.4538,
     "cost_stress_pf": 1.269,
     "avg_mae": 0.023051,
-    "score": -217.624702
+    "score": -217.635165
   },
   "general_short": {
     "enabled": true,
@@ -46,7 +46,7 @@
     "max_drawdown": 83.2304,
     "cost_stress_pf": 9.814,
     "avg_mae": 0.007439,
-    "score": -15.402671
+    "score": -15.442245
   },
   "liquidity_stress": {
     "enabled": true,
@@ -58,6 +58,6 @@
     "max_drawdown": 26.3254,
     "cost_stress_pf": 2.3754,
     "avg_mae": 0.016741,
-    "score": -4.811049
+    "score": -4.842953
   }
 }

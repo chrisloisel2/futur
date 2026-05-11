@@ -35,7 +35,7 @@
     "max_drawdown": 111.3011,
     "cost_stress_pf": 1.2324,
     "avg_mae": 0.016718,
-    "score": -22.170705
+    "score": -22.198988
   },
   "general_short": {
     "enabled": true,
@@ -47,7 +47,7 @@
     "max_drawdown": 52.1556,
     "cost_stress_pf": 1.8184,
     "avg_mae": 0.015325,
-    "score": -10.03298
+    "score": -10.149618
   },
   "liquidity_stress": {
     "enabled": true,
@@ -59,6 +59,6 @@
     "max_drawdown": 18.738,
     "cost_stress_pf": 6.1528,
     "avg_mae": 0.009673,
-    "score": -2.733214
+    "score": -2.770244
   }
 }

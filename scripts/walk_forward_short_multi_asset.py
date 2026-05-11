@@ -161,11 +161,11 @@ REPORT_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR = ROOT / "data"
 
 # Colonnes cibles
-RET_COL = "future_ret_short_4h"
+RET_COL = "future_ret_short_4h"    # horizon 4h — même que LONG
 MFE_COL = "mfe_short_4h"
 MAE_COL = "mae_short_4h"
 SQUEEZE_COL = "squeeze_reject_4h"
-LABEL_COL = "y_short_clean"
+LABEL_COL = "y_short_clean"        # meilleur label entre 4h et 8h
 CONTEXT_COL = "short_context_name"
 GATE_COL = "no_short"
 MACRO_BEAR_COL = "macro_bear_ok"  # True = régime bear → SHORT autorisé
@@ -179,7 +179,7 @@ W_TRM = 0.25
 PRIORITY_ASSETS = ["BTCUSD", "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]
 
 # Seuil sous-échantillonnage mémoire
-MAX_TRAIN_BARS = 200_000
+MAX_TRAIN_BARS = 200_000    # cap sur train : régularisation temporelle (données récentes > données anciennes)
 
 # Walk-forward conditionnel au régime bear
 # Un fold n'est testé que si BTC était en régime bear sur >= X% du test period.
@@ -737,7 +737,7 @@ def _backtest_fold(
     if n_trades == 0:
         return _empty_fold_metrics()
 
-    # P&L : future_ret_short_4h est déjà du signe court (positif = short profite)
+    # P# P&L : future_ret_short_4h est déjà du signe court (positif = short profite)L : future_ret_short_8h déjà inversé (positif = short profite sur 8h)
     net_rets = ret_arr[trade_mask] - costs  # net du coût round-trip
     wins   = net_rets[net_rets > 0]
     losses = net_rets[net_rets <= 0]
@@ -879,7 +879,7 @@ def run_fold(
 
     n_pos_train = int((y_train == 1).sum())
     n_pos_val   = int((y_val   == 1).sum())
-    print(f"  y_short_clean : pos_train={n_pos_train:,}  pos_val={n_pos_val:,}")
+    print(f"  y_short_8h : pos_train={n_pos_train:,}  pos_val={n_pos_val:,}")
 
     if n_pos_train < 50:
         print(f"  SKIP : trop peu de positifs en train ({n_pos_train})")
@@ -1048,16 +1048,44 @@ def run_fold(
     print(f"  [ensemble] p_val : mean={p_val_ens.mean():.3f}  p90={np.percentile(p_val_ens, 90):.3f}")
 
     # ── Calibration seuils sur val ────────────────────────────────────────────
+    # Stratégie : calibrer sur les barres bear du val standard (T-1).
+    # Si val standard a < 15% bear coverage → utiliser l'année la plus bear du train
+    # comme val de calibration (bear-targeted calibration).
     print(f"\n  [calibration] Calibration seuils sur val…")
     thresholds: dict = {}
 
     if _HAS_CALIBRATION and RET_COL in df.columns:
         try:
-            # Calibrer uniquement sur les barres val en régime bear (macro_bear_ok=1)
             df_val_full = df[val_mask].reset_index(drop=True)
             p_val_full  = p_ensemble[val_mask]
             y_val_full  = y[val_mask]
 
+            # Coverage bear du val standard
+            val_bear_frac = 0.0
+            if MACRO_BEAR_COL in df_val_full.columns:
+                val_bear_frac = float(df_val_full[MACRO_BEAR_COL].mean())
+
+            # Fallback bear-targeted : si val a < 15% bear, chercher la meilleure année bear dans train
+            MIN_VAL_BEAR_FRAC = 0.15
+            if val_bear_frac < MIN_VAL_BEAR_FRAC and MACRO_BEAR_COL in df.columns and "datetime" in df.columns:
+                years_in_train = df.loc[train_mask, "datetime"].dt.year.values if hasattr(df.loc[train_mask, "datetime"], 'dt') \
+                                 else pd.to_datetime(df.loc[train_mask, "datetime"]).dt.year.values
+                best_bear_yr, best_bear_frac = None, 0.0
+                for yr in np.unique(years_in_train):
+                    yr_mask  = train_mask & (pd.to_datetime(df["datetime"]).dt.year.values == yr)
+                    bear_frac = float(df.loc[yr_mask, MACRO_BEAR_COL].mean())
+                    if bear_frac > best_bear_frac:
+                        best_bear_frac = bear_frac
+                        best_bear_yr   = yr
+
+                if best_bear_yr is not None and best_bear_frac >= MIN_VAL_BEAR_FRAC:
+                    bear_yr_mask = train_mask & (pd.to_datetime(df["datetime"]).dt.year.values == best_bear_yr)
+                    print(f"  [calibration] Val bear trop faible ({val_bear_frac*100:.1f}%) → bear-targeted : année {best_bear_yr} ({best_bear_frac*100:.1f}% bear)")
+                    df_val_full = df[bear_yr_mask].reset_index(drop=True)
+                    p_val_full  = p_ensemble[bear_yr_mask]
+                    y_val_full  = y[bear_yr_mask]
+
+            # Filtrer sur les barres bear uniquement
             if MACRO_BEAR_COL in df_val_full.columns:
                 bear_val = df_val_full[MACRO_BEAR_COL].values.astype(bool)
                 n_bear   = int(bear_val.sum())

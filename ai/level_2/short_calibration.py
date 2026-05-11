@@ -156,8 +156,11 @@ def _score(
     le drawdown et le taux de squeeze. Le log(PF) compense les seuils très
     restrictifs qui auraient peu de trades mais une qualité élevée.
     """
+    # log(n) au lieu de sqrt(n) : pénalise moins les seuils stricts (peu de trades)
+    # Avec sqrt(n), le score favorise les n élevés → thresholds bas → dégradation test.
+    # Avec log(n), un n=20 à E=0.02 bat un n=200 à E=0.008 → thresholds plus élevés.
     return (
-        expectancy * math.sqrt(max(n_trades, 1))
+        expectancy * math.log(max(n_trades, 1) + 1)
         + 0.50 * math.log(max(pf, 1e-6))
         - 0.20 * max_dd
         - 0.30 * squeeze_loss_rate

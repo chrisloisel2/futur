@@ -35,7 +35,7 @@
     "max_drawdown": 65.2973,
     "cost_stress_pf": 2.2576,
     "avg_mae": 0.01279,
-    "score": -12.606225
+    "score": -12.651536
   },
   "general_short": {
     "enabled": false,
@@ -60,6 +60,6 @@
     "max_drawdown": 53.805,
     "cost_stress_pf": 2.814,
     "avg_mae": 0.009857,
-    "score": -10.240797
+    "score": -10.24892
   }
 }
