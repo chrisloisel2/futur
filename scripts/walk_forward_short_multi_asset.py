@@ -402,6 +402,26 @@ def enrich_all_assets(df_combined: pd.DataFrame) -> pd.DataFrame:
         # suffit. Une gate BTC cross-asset supplémentaire réduisait trop la couverture.
         n_bear = int((result[MACRO_BEAR_COL].values > 0).sum()) if MACRO_BEAR_COL in result.columns else 0
         print(f"  [bear_gate] Barres en régime bear (EMA200d + mom30d<-10%): {n_bear:,}/{len(result):,} ({n_bear/len(result)*100:.1f}%)")
+
+    # ── Market Breadth feature ────────────────────────────────────────────────
+    # Fraction d'actifs en bear simultanément = signal cross-asset très puissant.
+    # En 2022 bear réel: breadth ≈ 0.6-0.8 | En correction isolée: breadth ≈ 0.05-0.15
+    # Cette feature donne au modèle l'information sur la sévérité systémique.
+    if MACRO_BEAR_COL in result.columns and "datetime" in result.columns:
+        dt_col = pd.to_datetime(result["datetime"]).dt.tz_localize(None).dt.floor("h")
+        bear_col = result[MACRO_BEAR_COL].values.astype(float)
+        # Calculer la fraction d'actifs en bear par timestamp
+        bear_df = pd.DataFrame({"dt": dt_col, "bear": bear_col})
+        breadth = bear_df.groupby("dt")["bear"].mean().rename("global_bear_breadth")
+        # Broadcaster à toutes les barres
+        result_dt = dt_col.values
+        breadth_mapped = pd.Series(result_dt, name="dt").map(breadth.to_dict())
+        result["global_bear_breadth"] = breadth_mapped.values
+        # Feature dérivée : breadth élevé = confirmation systémique
+        result["bear_breadth_high"]   = (result["global_bear_breadth"] > 0.30).astype(float)
+        result["bear_breadth_medium"] = (result["global_bear_breadth"] > 0.15).astype(float)
+        n_high = int((result["global_bear_breadth"] > 0.30).sum())
+        print(f"  [breadth] global_bear_breadth : {n_high:,} barres avec >30% actifs en bear")
     else:
         print("  [btc_gate] BTC non trouvé — gate cross-actif désactivée")
 
@@ -713,7 +733,15 @@ def _backtest_fold(
     else:
         gate_macro = np.zeros(len(df_test), dtype=bool)  # pas de blocage macro par défaut
 
-    gate = gate_tech | gate_macro  # bloqué si technique OU pas en régime bear
+    # Gate breadth : SHORT uniquement si >= 15% actifs en bear simultanément
+    # Élimine les bears isolés (signal faible) et favorise les bears systémiques
+    if "global_bear_breadth" in df_test.columns:
+        breadth = df_test["global_bear_breadth"].values
+        gate_breadth = (breadth < 0.15) | np.isnan(breadth)  # bloquer si breadth trop faible
+    else:
+        gate_breadth = np.zeros(len(df_test), dtype=bool)
+
+    gate = gate_tech | gate_macro | gate_breadth
 
     # Contexte par barre
     ctx_col = df_test[CONTEXT_COL].values if CONTEXT_COL in df_test.columns \
