@@ -1,6 +1,6 @@
 {
   "verdict": "SHORT_PAPER_CANDIDATE",
-  "run_date": "2026-05-11T11:25:25.259838",
+  "run_date": "2026-05-11T11:51:28.486544",
   "n_assets": 50,
   "folds_requested": [
     2022,
@@ -13,8 +13,8 @@
   "n_folds_ok": 2,
   "n_catastrophic": 0,
   "pf_median": 1.3056,
-  "pf_stress_median": 1.5924,
-  "n_total_trades": 289,
+  "pf_stress_median": 1.7876,
+  "n_total_trades": 283,
   "thresholds_used": {
     "SHORT_DEPLOY_PF": 1.3,
     "MIN_SHORT_FOLDS_OK": 5,
@@ -53,7 +53,7 @@
       "ens_auc_val": 0.6324,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 189.2
+      "duration_s": 187.9
     },
     {
       "fold_year": 2023,
@@ -108,7 +108,7 @@
       "ens_auc_val": 0.744,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 180.4
+      "duration_s": 179.7
     },
     {
       "fold_year": 2026,
@@ -121,22 +121,22 @@
       "n_test": 142391,
       "n_pos_train": 267828,
       "n_pos_val": 36703,
-      "n_trades": 38,
-      "pf": 1.9816,
-      "pf_stress": 1.9121,
-      "pf_extreme": 1.8452,
-      "expectancy": 0.009939,
-      "wr": 0.5526,
-      "avg_win": 0.036305,
-      "avg_loss": -0.022632,
-      "max_drawdown": 0.0092,
-      "squeeze_rate": 0.2632,
+      "n_trades": 32,
+      "pf": 2.3891,
+      "pf_stress": 2.3025,
+      "pf_extreme": 2.2198,
+      "expectancy": 0.01291,
+      "wr": 0.5312,
+      "avg_win": 0.041796,
+      "avg_loss": -0.019827,
+      "max_drawdown": 0.0135,
+      "squeeze_rate": 0.2812,
       "gate_blocked_pct": 0.6905,
       "ens_auc_val": 0.7279,
       "tr_best_auc": null,
       "tr_best_epoch": null,
-      "duration_s": 151.9
+      "duration_s": 151.3
     }
   ],
-  "duration_total_s": 1090.3
+  "duration_total_s": 1086.6
 }

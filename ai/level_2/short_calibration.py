@@ -55,7 +55,7 @@ _THR_STEP = 0.01
 # Contraintes minimales et maximales pour valider un seuil
 _MIN_N_TRADES = 10
 _MAX_N_TRADES_FRAC = 0.08   # max 8% des barres val → évite threshold trop bas
-_MIN_PF = 1.20               # relevé de 1.10 → filtre les seuils marginaux
+_MIN_PF = 1.30               # = seuil fold-OK : la val doit avoir même qualité que le test cible
 _MAX_SQUEEZE = MAX_SQUEEZE_LOSS_RATE
 
 
@@ -156,14 +156,15 @@ def _score(
     le drawdown et le taux de squeeze. Le log(PF) compense les seuils très
     restrictifs qui auraient peu de trades mais une qualité élevée.
     """
-    # log(n) au lieu de sqrt(n) : pénalise moins les seuils stricts (peu de trades)
-    # Avec sqrt(n), le score favorise les n élevés → thresholds bas → dégradation test.
-    # Avec log(n), un n=20 à E=0.02 bat un n=200 à E=0.008 → thresholds plus élevés.
+    # Score centré sur le PF : maximise la qualité des trades, pas le volume.
+    # PF élevé + squeeze faible = priorité. DD pénalisé. n sert juste de filtre (MIN_N).
+    # Pourquoi : avec expectancy×log(n), la calibration favorise n élevé → seuils bas
+    # → trop de trades → PF dégradé en test. Ici on maximise la qualité directement.
     return (
-        expectancy * math.log(max(n_trades, 1) + 1)
-        + 0.50 * math.log(max(pf, 1e-6))
-        - 0.20 * max_dd
-        - 0.30 * squeeze_loss_rate
+        math.log(max(pf, 1e-6))               # maximiser PF (principal)
+        - 0.40 * squeeze_loss_rate             # pénaliser squeeze fortement
+        - 0.10 * max_dd                        # pénaliser drawdown
+        + 0.10 * math.log(max(n_trades, 1))   # légère préférence pour plus de trades
     )
 
 
