@@ -1,56 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import AlphaSignal from './components/AlphaSignal';
-import TrainingDashboard from './components/TrainingDashboard';
+import { SignalView, TradesView, ModelView } from './components/PaperDashboard';
+import { API_BASE_URL } from './config/api';
 
-type View = 'signal' | 'training';
+type View = 'signal' | 'trades' | 'model';
+
+const NAV: { id: View; label: string; icon: string }[] = [
+  { id: 'signal', label: 'Signal Live',   icon: '▲' },
+  { id: 'trades', label: 'Trades',         icon: '◆' },
+  { id: 'model',  label: 'Modèle',         icon: '⊞' },
+];
 
 function App() {
-  const [currentView, setCurrentView] = useState<View>('signal');
+  const [view, setView] = useState<View>('signal');
+  const [apiOnline, setApiOnline] = useState<boolean | null>(null);
+  const [clock, setClock] = useState('');
+
+  useEffect(() => {
+    const tick = () => setClock(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const r = await fetch(`${API_BASE_URL}/health`);
+        setApiOnline(r.ok);
+      } catch {
+        setApiOnline(false);
+      }
+    };
+    check();
+    const t = setInterval(check, 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   const renderView = () => {
-    switch (currentView) {
-      case 'signal':
-        return <AlphaSignal />;
-      case 'training':
-        return <TrainingDashboard />;
-      default:
-        return <AlphaSignal />;
+    switch (view) {
+      case 'signal': return <SignalView />;
+      case 'trades': return <TradesView />;
+      case 'model':  return <ModelView />;
     }
   };
 
   return (
-    <div className="App">
-      <nav className="top-nav">
-        <div className="nav-brand">
-          <div className="brand-icon">⚡</div>
-          <div className="brand-text">
-            <span className="brand-title">Alpha Trading</span>
-            <span className="brand-subtitle">BTC/USDT · 1h</span>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-logo">⚡</div>
+          <div className="brand-info">
+            <span className="brand-name">Alpha Trading</span>
+            <span className="brand-tag">BTC+ETH · LONG · Paper</span>
           </div>
         </div>
 
-        <div className="nav-links">
-          <button
-            className={`nav-link ${currentView === 'signal' ? 'active' : ''}`}
-            onClick={() => setCurrentView('signal')}
-          >
-            <span className="nav-icon">⚡</span>
-            <span>Signal</span>
-          </button>
+        <nav className="sidebar-nav">
+          {NAV.map(item => (
+            <button
+              key={item.id}
+              className={`nav-item ${view === item.id ? 'active' : ''}`}
+              onClick={() => setView(item.id)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
 
-          <button
-            className={`nav-link ${currentView === 'training' ? 'active' : ''}`}
-            onClick={() => setCurrentView('training')}
-          >
-            <span className="nav-icon">🎓</span>
-            <span>Training</span>
-          </button>
+        <div className="sidebar-footer">
+          <div className={`api-status ${apiOnline === true ? 'online' : apiOnline === false ? 'offline' : 'checking'}`}>
+            <span className="status-dot" />
+            <span className="status-text">
+              {apiOnline === true ? 'API Online' : apiOnline === false ? 'API Offline' : 'Connecting…'}
+            </span>
+          </div>
         </div>
-      </nav>
+      </aside>
 
-      <main className="main-content">
-        {renderView()}
+      <main className="main-area">
+        <div className="page-header">
+          <div className="page-title-row">
+            <span className="page-icon">{NAV.find(n => n.id === view)?.icon}</span>
+            <h1 className="page-title">{NAV.find(n => n.id === view)?.label}</h1>
+          </div>
+          <div className="header-right">
+            <span className="paper-mode-tag">PAPER</span>
+            <span className="header-clock">{clock}</span>
+          </div>
+        </div>
+
+        <div className="page-content">
+          {renderView()}
+        </div>
       </main>
     </div>
   );
