@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { SignalView, TradesView, ModelView } from './components/PaperDashboard';
+import { FleetView } from './components/FleetView';
 import { API_BASE_URL } from './config/api';
 
-type View = 'signal' | 'trades' | 'model';
+type View = 'fleet' | 'signal' | 'trades' | 'model';
 
 const NAV: { id: View; label: string; icon: string }[] = [
-  { id: 'signal', label: 'Signal Live',   icon: '▲' },
-  { id: 'trades', label: 'Trades',         icon: '◆' },
-  { id: 'model',  label: 'Modèle',         icon: '⊞' },
+  { id: 'fleet',  label: 'Fleet TOP 10',  icon: '◈' },
+  { id: 'signal', label: 'Signal BTC',    icon: '▲' },
+  { id: 'trades', label: 'Trades',        icon: '◆' },
+  { id: 'model',  label: 'Modèle',        icon: '⊞' },
 ];
 
 function App() {
-  const [view, setView] = useState<View>('signal');
+  const [view, setView] = useState<View>('fleet');
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
   const [clock, setClock] = useState('');
 
   useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    const tick = () =>
+      setClock(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
@@ -39,6 +42,7 @@ function App() {
 
   const renderView = () => {
     switch (view) {
+      case 'fleet':  return <FleetView />;
       case 'signal': return <SignalView />;
       case 'trades': return <TradesView />;
       case 'model':  return <ModelView />;
@@ -52,7 +56,7 @@ function App() {
           <div className="brand-logo">⚡</div>
           <div className="brand-info">
             <span className="brand-name">Alpha Trading</span>
-            <span className="brand-tag">BTC+ETH · LONG · Paper</span>
+            <span className="brand-tag">TOP 10 · LONG · Paper</span>
           </div>
         </div>
 
@@ -70,10 +74,18 @@ function App() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className={`api-status ${apiOnline === true ? 'online' : apiOnline === false ? 'offline' : 'checking'}`}>
+          <div
+            className={`api-status ${
+              apiOnline === true ? 'online' : apiOnline === false ? 'offline' : 'checking'
+            }`}
+          >
             <span className="status-dot" />
             <span className="status-text">
-              {apiOnline === true ? 'API Online' : apiOnline === false ? 'API Offline' : 'Connecting…'}
+              {apiOnline === true
+                ? 'API Online'
+                : apiOnline === false
+                ? 'API Offline'
+                : 'Connecting…'}
             </span>
           </div>
         </div>
