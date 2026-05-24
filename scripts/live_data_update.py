@@ -290,6 +290,12 @@ def update_enriched(symbol: str, dry_run: bool = False) -> int:
         include_sequence_features=False,
     )
     df_enriched = df_enriched.reset_index()
+    # compute_enriched_ohlcv_features nomme l'index "timestamp" — normaliser en "datetime"
+    if "datetime" not in df_enriched.columns:
+        for cand in ("timestamp", "index", "level_0"):
+            if cand in df_enriched.columns:
+                df_enriched = df_enriched.rename(columns={cand: "datetime"})
+                break
     df_enriched["datetime"] = pd.to_datetime(df_enriched["datetime"], utc=True)
 
     df_enriched = _apply_feature_aliases(df_enriched)

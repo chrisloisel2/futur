@@ -181,8 +181,28 @@ def _compute_gates(state: dict) -> List[dict]:
 
 # ─── Helpers fleet multi-asset ────────────────────────────────────────────────
 
+MODELS_DIR = REPORT_DIR / ".models"
+
+
 def _asset_dir(symbol: str) -> Path:
     return REPORT_DIR / symbol
+
+
+def _load_model_meta(symbol: str) -> dict:
+    """Lit le meta.json du modèle entraîné pour cet asset (si disponible)."""
+    from datetime import datetime, timezone
+    current_year = datetime.now(timezone.utc).year
+    train_end    = current_year - 2
+    meta_f = MODELS_DIR / f"{symbol}_{train_end}_meta.json"
+    if meta_f.exists():
+        try:
+            m = json.loads(meta_f.read_text())
+            if m.get("val_pf") is not None:
+                m["val_pf"] = min(float(m["val_pf"]), 999.0)
+            return m
+        except Exception:
+            pass
+    return {}
 
 
 def _load_fleet_summary() -> dict:
@@ -214,15 +234,28 @@ def _load_fleet_summary() -> dict:
                     latest_signal = df.fillna("").to_dict("records")[0]
             except Exception:
                 pass
+        meta = _load_model_meta(sym)
+        current_year = datetime.now(timezone.utc).year
+        model_trained = (MODELS_DIR / f"{sym}_{current_year - 2}.pkl").exists()
         assets.append({
-            "symbol":       sym,
-            "available":    True,
-            "action":       latest_signal.get("action", "PENDING"),
-            "p_long":       latest_signal.get("p_long"),
-            "timestamp":    latest_signal.get("timestamp"),
-            "total_trades": state.get("total_trades", 0),
-            "max_dd_pct":   state.get("max_dd_pct", 0.0),
-            "cumulative_pnl_pct": state.get("cumulative_pnl_pct", 0.0),
+            "symbol":            sym,
+            "available":         True,
+            "model_trained":     model_trained,
+            "val_pf":            meta.get("val_pf"),
+            "val_wr":            meta.get("val_wr"),
+            "val_n":             meta.get("val_n"),
+            "n_features":        meta.get("n_features"),
+            "trained_at":        meta.get("trained_at"),
+            "action":            latest_signal.get("action", "PENDING"),
+            "p_long":            latest_signal.get("p_long"),
+            "threshold":         latest_signal.get("threshold"),
+            "sup_level":         latest_signal.get("sup_level"),
+            "size_mult":         latest_signal.get("size_mult"),
+            "timestamp":         latest_signal.get("timestamp"),
+            "total_trades":      state.get("total_trades", 0),
+            "max_dd_pct":        state.get("max_dd_pct", 0.0),
+            "cumulative_pnl_pct":state.get("cumulative_pnl_pct", 0.0),
+            "start_date":        state.get("start_date"),
         })
     btc = _fetch_btc_market()
     return {
@@ -268,6 +301,10 @@ def _load_asset_detail(symbol: str) -> dict:
 
     gates    = _compute_gates(state)
     all_ok   = all(g["ok"] for g in gates)
+    meta     = _load_model_meta(symbol)
+    from datetime import timezone as _tz
+    current_year  = datetime.now(_tz.utc).year
+    model_trained = (MODELS_DIR / f"{symbol}_{current_year - 2}.pkl").exists()
 
     return {
         "symbol":              symbol,
@@ -288,6 +325,14 @@ def _load_asset_detail(symbol: str) -> dict:
         "gates":               gates,
         "all_gates_ok":        all_ok,
         "verdict":             "LIVE_CANDIDATE" if all_ok else "PAPER_ONLY",
+        "model_trained":       model_trained,
+        "val_pf":              meta.get("val_pf"),
+        "val_wr":              meta.get("val_wr"),
+        "val_n":               meta.get("val_n"),
+        "n_features":          meta.get("n_features"),
+        "trained_at":          meta.get("trained_at"),
+        "val_year":            meta.get("val_year"),
+        "train_end":           meta.get("train_end"),
     }
 
 

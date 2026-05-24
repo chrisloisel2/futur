@@ -92,6 +92,13 @@ export interface AssetSummary {
   size_mult?: number;
   close?: number | null;
   start_date?: string | null;
+  // Model metadata
+  model_trained?: boolean;
+  val_pf?: number | null;
+  val_wr?: number | null;
+  val_n?: number;
+  n_features?: number;
+  trained_at?: string | null;
 }
 
 export interface FleetSummary {
@@ -111,6 +118,15 @@ export interface AssetDetail extends PaperState {
   symbol: string;
   available: boolean;
   latest_signal: Signal;
+  // Model metadata
+  model_trained?: boolean;
+  val_pf?: number | null;
+  val_wr?: number | null;
+  val_n?: number;
+  n_features?: number;
+  trained_at?: string | null;
+  val_year?: number | null;
+  train_end?: string | null;
 }
 
 export interface FleetRunStatus {

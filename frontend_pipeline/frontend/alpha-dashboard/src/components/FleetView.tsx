@@ -144,6 +144,23 @@ function AssetCard({
         </div>
       )}
 
+      {/* Model quality badge */}
+      {asset.model_trained && (asset.val_pf != null || asset.val_n != null) && (
+        <div className="ac-model-row">
+          {asset.val_pf != null && (
+            <span className={`ac-model-badge ${asset.val_pf >= 1.3 ? 'good' : asset.val_pf >= 1.0 ? 'ok' : 'weak'}`}>
+              val PF {asset.val_pf.toFixed(2)}
+            </span>
+          )}
+          {asset.val_wr != null && (
+            <span className="ac-model-badge ok">WR {(asset.val_wr * 100).toFixed(0)}%</span>
+          )}
+          {asset.val_n != null && (
+            <span className="ac-model-badge neu">{asset.val_n}t</span>
+          )}
+        </div>
+      )}
+
       <div className="ac-stats">
         {asset.total_trades != null && (
           <span className="ac-stat">{asset.total_trades}t</span>
@@ -254,6 +271,44 @@ function AssetPanel({
               <strong className={sign(detail.cumulative_pnl_pct)}>{fmtPct(detail.cumulative_pnl_pct)}</strong>
             </div>
           </div>
+
+          {/* Model quality */}
+          {detail.model_trained && (
+            <div className="ap-section">
+              <span className="ap-section-title">Modèle — validation 2025</span>
+              <div className="ap-metrics">
+                {detail.val_pf != null && (
+                  <div className="ap-metric">
+                    <span>PF val</span>
+                    <strong className={detail.val_pf >= 1.3 ? 'pos' : detail.val_pf < 1.0 ? 'neg' : ''}>
+                      {detail.val_pf.toFixed(3)}
+                    </strong>
+                  </div>
+                )}
+                {detail.val_wr != null && (
+                  <div className="ap-metric">
+                    <span>WR val</span>
+                    <strong>{(detail.val_wr * 100).toFixed(0)}%</strong>
+                  </div>
+                )}
+                {detail.val_n != null && (
+                  <div className="ap-metric">
+                    <span>Trades val</span>
+                    <strong className={detail.val_n < 30 ? 'neg' : 'pos'}>{detail.val_n}</strong>
+                  </div>
+                )}
+                {detail.n_features != null && (
+                  <div className="ap-metric">
+                    <span>Features</span>
+                    <strong>{detail.n_features}</strong>
+                  </div>
+                )}
+              </div>
+              {detail.trained_at && (
+                <div className="ap-model-ts">Entraîné le {ts(detail.trained_at)}</div>
+              )}
+            </div>
+          )}
 
           {/* Gates */}
           <div className="ap-section">
