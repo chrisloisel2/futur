@@ -1,0 +1,93 @@
+[
+  {
+    "bar": 1555,
+    "date": "2024-03-05",
+    "year": 2024,
+    "side": "long",
+    "p_tradeable": 0.808,
+    "p_side": 0.9836,
+    "fut_ret": 0.05217,
+    "pnl_net_pct": 0.05117,
+    "pnl_abs": 34.1111,
+    "equity": 10034.11,
+    "notional": 666.67
+  },
+  {
+    "bar": 1880,
+    "date": "2024-03-19",
+    "year": 2024,
+    "side": "long",
+    "p_tradeable": 0.7733,
+    "p_side": 0.9208,
+    "fut_ret": 0.05611,
+    "pnl_net_pct": 0.05511,
+    "pnl_abs": 36.8653,
+    "equity": 10070.98,
+    "notional": 668.94
+  },
+  {
+    "bar": 9577,
+    "date": "2025-02-03",
+    "year": 2025,
+    "side": "long",
+    "p_tradeable": 0.8672,
+    "p_side": 0.5462,
+    "fut_ret": -0.06669,
+    "pnl_net_pct": -0.06769,
+    "pnl_abs": -45.4479,
+    "equity": 10025.53,
+    "notional": 671.4
+  },
+  {
+    "bar": 15573,
+    "date": "2025-10-10",
+    "year": 2025,
+    "side": "long",
+    "p_tradeable": 0.8436,
+    "p_side": 0.53,
+    "fut_ret": -0.11493,
+    "pnl_net_pct": -0.11593,
+    "pnl_abs": -77.4839,
+    "equity": 9948.04,
+    "notional": 668.37
+  },
+  {
+    "bar": 15575,
+    "date": "2025-10-10",
+    "year": 2025,
+    "side": "long",
+    "p_tradeable": 0.8654,
+    "p_side": 0.5293,
+    "fut_ret": 0.03967,
+    "pnl_net_pct": 0.03867,
+    "pnl_abs": 25.6429,
+    "equity": 9973.69,
+    "notional": 663.2
+  },
+  {
+    "bar": 15576,
+    "date": "2025-10-11",
+    "year": 2025,
+    "side": "short",
+    "p_tradeable": 0.869,
+    "p_side": 0.6253,
+    "fut_ret": 0.06714,
+    "pnl_net_pct": -0.06814,
+    "pnl_abs": -22.6533,
+    "equity": 9951.03,
+    "notional": 332.46
+  },
+  {
+    "bar": 16263,
+    "date": "2025-11-08",
+    "year": 2025,
+    "side": "long",
+    "p_tradeable": 0.7969,
+    "p_side": 0.5424,
+    "fut_ret": 0.01424,
+    "pnl_net_pct": 0.01324,
+    "pnl_abs": 8.7866,
+    "equity": 9959.82,
+    "notional": 663.4
+  }
+]

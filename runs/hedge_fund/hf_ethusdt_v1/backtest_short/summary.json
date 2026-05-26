@@ -1,0 +1,35 @@
+{
+  "n_tested": 20877,
+  "n_trades": 2,
+  "profit_factor": 0.8924,
+  "max_drawdown": 0.0009,
+  "sharpe_annualized": -5.3207,
+  "win_rate": 0.5,
+  "avg_win": 8.1304,
+  "avg_loss": -9.1105,
+  "expectancy_per_trade": -0.4901,
+  "initial_equity": 10000.0,
+  "final_equity": 9999.02,
+  "total_return_pct": -0.01,
+  "by_year": {
+    "2024": {
+      "trades": 2,
+      "pnl_sum": -0.98,
+      "pf": 0.892,
+      "win_rate": 0.5
+    }
+  },
+  "side": "short",
+  "model": "XGBoost_short",
+  "filter_threshold": 0.45,
+  "direction_threshold": 0.55,
+  "cost_pct": 0.001,
+  "skipped_filter": 18840,
+  "skipped_direction": 1028,
+  "skipped_risk": 0,
+  "risk_per_trade": 0.001,
+  "skipped_regime": 1007,
+  "n_bear_activated": 1030,
+  "regime_threshold": 0.5600000000000002,
+  "regime_model_used": true
+}

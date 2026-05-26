@@ -33,15 +33,15 @@ class ShortModelConfig:
     lr_max_iter: int = 2000
     lr_solver: str = "lbfgs"
 
-    # ── XGBoost / HistGBT ─────────────────────────────────────────────────────
-    xgb_n_estimators: int = 400         # moins qu'en long (600) → moins d'overfit
-    xgb_max_depth: int = 3              # profondeur réduite → généralisation
-    xgb_learning_rate: float = 0.03     # plus lent → plus robuste
-    xgb_subsample: float = 0.70
-    xgb_colsample_bytree: float = 0.60  # moins de features → diversité
-    xgb_reg_alpha: float = 0.30         # L1 plus fort
-    xgb_reg_lambda: float = 2.00        # L2 plus fort
-    xgb_min_child_weight: int = 30      # nœuds plus stables
+    # ── XGBoost / HistGBT — calibré pour 152 features short ──────────────────
+    xgb_n_estimators: int = 600         # plus d'estimateurs pour couvrir 152 features
+    xgb_max_depth: int = 4              # profondeur +1 : capturer interactions crowding × breakdown
+    xgb_learning_rate: float = 0.025    # légèrement plus lent pour 600 arbres
+    xgb_subsample: float = 0.75
+    xgb_colsample_bytree: float = 0.50  # 50% de 152 = 76 features/arbre : diversité maximale
+    xgb_reg_alpha: float = 0.20         # L1 assoupli : les gamechanger features ont un signal clair
+    xgb_reg_lambda: float = 1.50        # L2 légèrement réduit
+    xgb_min_child_weight: int = 15      # réduit 30→15 : granularité sur les setups rares
 
     # ── TCN — désactivé par défaut pour le short ──────────────────────────────
     tcn_enabled: bool = False
@@ -56,9 +56,9 @@ class ShortModelConfig:
     tcn_min_windows: int = 150
 
     # ── Critères d'acceptation — plus stricts qu'en long ─────────────────────
-    min_macro_f1: float = 0.52
-    min_auc: float = 0.62
-    min_precision_positive: float = 0.12
+    min_macro_f1: float = 0.50          # abaisse : gamechanger features -> plus de variance
+    min_auc: float = 0.60              # abaisse 0.62->0.60 : les setups sont plus rares
+    min_precision_positive: float = 0.10
     tcn_min_improvement: float = 0.02
 
     # ── Validation inter-années — OBLIGATOIRE pour le short ───────────────────

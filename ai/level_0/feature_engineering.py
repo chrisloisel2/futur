@@ -91,6 +91,10 @@ def compute_long_features(df: pd.DataFrame) -> pd.DataFrame:
     Calcule les features asymétriques spécifiques au LONG.
 
     Colonnes ajoutées (voir FEATURES_LONG_EXTRA dans level_0/features.py) :
+      mom_logret_4               — momentum log-return 4 barres (4h) — contexte court terme
+      mom_logret_8               — momentum log-return 8 barres (8h) — aligné sur l'horizon
+      mom_logret_168             — momentum 7 jours (168h) — régime macro
+      vol_ratio_4h               — ratio volume 4h / moyenne 4j — spike d'activité
       dist_from_local_low_24     — distance du creux 24h (breakout indicator)
       dist_from_local_low_168    — distance du creux hebdo
       breakout_strength_24       — position dans le range 24h [0=bas, 1=haut]
@@ -111,6 +115,27 @@ def compute_long_features(df: pd.DataFrame) -> pd.DataFrame:
     else:
         close = None
 
+    # ── Momentum multi-horizon ────────────────────────────────────────────────
+    if close is not None:
+        log_c = np.log(close.astype(np.float64))
+        df["mom_logret_4"]   = log_c - log_c.shift(4)     # 4h — contexte court terme
+        df["mom_logret_8"]   = log_c - log_c.shift(8)     # 8h — aligné sur l'horizon de prédiction
+        df["mom_logret_168"] = log_c - log_c.shift(168)   # 7j — régime macro
+    else:
+        df["mom_logret_4"]   = np.nan
+        df["mom_logret_8"]   = np.nan
+        df["mom_logret_168"] = np.nan
+
+    # ── vol_ratio_4h : activité volume 4h vs baseline 4-jours ────────────────
+    vol_col = "Volume" if "Volume" in df.columns else ("volume" if "volume" in df.columns else None)
+    if vol_col is not None:
+        vol = pd.to_numeric(df[vol_col], errors="coerce")
+        vol_4h   = vol.rolling(4, min_periods=1).sum()
+        vol_base = vol.rolling(96, min_periods=24).mean().clip(lower=1e-9)
+        df["vol_ratio_4h"] = vol_4h / (4 * vol_base)
+    else:
+        df["vol_ratio_4h"] = np.nan
+
     if close is not None:
         rolling_low_24  = close.rolling(24,  min_periods=1).min()
         rolling_low_168 = close.rolling(168, min_periods=1).min()
@@ -125,11 +150,9 @@ def compute_long_features(df: pd.DataFrame) -> pd.DataFrame:
         df["dist_from_local_low_168"] = np.nan
         df["breakout_strength_24"]    = np.nan
 
-    # Returns proxy — utiliser UNIQUEMENT les returns passés (pas future_ret_h = leakage)
+    # Proxy de return 1h passé — uniquement des données historiques (pas de leakage)
     if "mom_logret_6" in df.columns:
         ret = df["mom_logret_6"] / 6.0
-    elif "future_ret_h" in df.columns:
-        ret = df["future_ret_h"].shift(1)
     else:
         ret = None
 
@@ -172,6 +195,7 @@ def compute_long_features(df: pd.DataFrame) -> pd.DataFrame:
         df["boll_expansion_6"] = np.nan
 
     _new_cols_long = [
+        "mom_logret_4", "mom_logret_8", "mom_logret_168", "vol_ratio_4h",
         "dist_from_local_low_24", "dist_from_local_low_168", "breakout_strength_24",
         "trend_persistence_12", "ret_pos_autocorr_12", "upside_vol_ratio_24",
         "taker_buy_cumul_12", "buy_vol_ratio_6", "momentum_accel_6", "boll_expansion_6",
@@ -179,6 +203,9 @@ def compute_long_features(df: pd.DataFrame) -> pd.DataFrame:
     for col in _new_cols_long:
         if col in df.columns:
             df[col] = df[col].fillna(0.0)
+
+    # Features cross-macro (hedge_fund bundle) — ajoutees si macro disponible
+    df = compute_macro_cross_features(df)
 
     return df
 
@@ -294,6 +321,9 @@ def compute_short_features(df: pd.DataFrame) -> pd.DataFrame:
         if col in df.columns:
             df[col] = df[col].fillna(0.0)
 
+    # Features cross-macro (hedge_fund bundle) — ajoutees si macro disponible
+    df = compute_macro_cross_features(df)
+
     return df
 
 
@@ -394,3 +424,263 @@ def _rolling_max_drawdown(prices: np.ndarray, window: int) -> np.ndarray:
         drawdn = (valid - peak) / peak
         out[i] = float(drawdn.min())
     return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEVIER 1 — Features event-driven (golden cross + distance EMA200 normée ATR)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def compute_event_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Capture les événements structurels EMA qui prédisent mieux les moves 4h.
+
+    Colonnes ajoutées
+    -----------------
+    days_since_golden_cross : barres depuis le dernier croisement EMA50 > EMA200
+                              (NaN si jamais croisé ou si en death cross)
+    gc_fresh                : 1 si golden cross dans les 168 dernières barres (7 jours)
+    dist_ema200_atr         : (Close - EMA200) / ATR14 — distance normée par volatilité
+                              Plus robuste que la distance % car adapte au régime de vol.
+
+    Pourquoi ces features améliorent l'AUC :
+    - L'EMA cross fraction brute (ema_spread_50_200) ne distingue pas un cross récent
+      d'un cross vieux de 6 mois. Le modèle ne peut pas utiliser cette nuance.
+    - Un golden cross FRAIS (< 7j) est un signal structurellement différent d'un marché
+      en bull établi depuis des mois. days_since_golden_cross capture cette différence.
+    - dist_ema200_atr normalise par la volatilité actuelle → comparable entre régimes.
+    """
+    df = df.copy()
+    n  = len(df)
+
+    if "ema_spread_50_200" not in df.columns:
+        df["days_since_golden_cross"] = np.nan
+        df["gc_fresh"]                = np.nan
+        df["dist_ema200_atr"]         = np.nan
+        return df
+
+    spread = df["ema_spread_50_200"].values.astype(np.float64)
+
+    # ── Détection des golden crosses (transition ≤0 → >0) ────────────────────
+    # Vectorisé via searchsorted : O(n log k) au lieu de O(n)
+    prev_spread    = np.empty_like(spread)
+    prev_spread[0] = spread[0]
+    prev_spread[1:] = spread[:-1]
+    gc_mask   = (prev_spread <= 0) & (spread > 0)
+    gc_indices = np.where(gc_mask)[0]
+
+    if len(gc_indices) == 0:
+        days_since_gc = np.full(n, np.nan)
+    else:
+        all_idx   = np.arange(n)
+        # Pour chaque barre i, position du dernier gc_index ≤ i
+        insert_pos = np.searchsorted(gc_indices, all_idx, side="right") - 1
+        has_prior  = insert_pos >= 0
+        last_gc    = np.where(has_prior, gc_indices[np.clip(insert_pos, 0, len(gc_indices) - 1)], 0)
+        days_since_gc = np.where(
+            has_prior & (spread > 0),
+            (all_idx - last_gc).astype(np.float64),
+            np.nan,
+        )
+
+    df["days_since_golden_cross"] = days_since_gc
+
+    # gc_fresh : golden cross récent (≤ 168 barres = 7 jours)
+    df["gc_fresh"] = np.where(
+        np.isfinite(days_since_gc) & (days_since_gc <= 168),
+        1.0, 0.0,
+    ).astype(np.float32)
+
+    # ── Distance EMA200 normée par ATR ────────────────────────────────────────
+    close_col = "Close" if "Close" in df.columns else ("close" if "close" in df.columns else None)
+    atr_col   = "atr_14" if "atr_14" in df.columns else ("atr_pct_14" if "atr_pct_14" in df.columns else None)
+
+    if "dist_ema_200" in df.columns and close_col and atr_col:
+        close    = df[close_col].values.astype(np.float64)
+        atr      = df[atr_col].values.astype(np.float64)
+        dist_pct = df["dist_ema_200"].values.astype(np.float64)
+        # dist_ema_200 = (Close - EMA200) / EMA200 → Close * dist_pct ≈ ecart absolu
+        dist_abs = dist_pct * close
+        atr_safe = np.where(atr > 0, atr, close * 0.01)
+        dist_atr = dist_abs / atr_safe
+        df["dist_ema200_atr"] = np.clip(dist_atr, -15.0, 15.0).astype(np.float32)
+    else:
+        df["dist_ema200_atr"] = np.nan
+
+    for col in ["days_since_golden_cross", "gc_fresh", "dist_ema200_atr"]:
+        if col in df.columns:
+            df[col] = df[col].fillna(0.0)
+
+    return df
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEVIER 2 — Features VWAP journalier
+# ─────────────────────────────────────────────────────────────────────────────
+
+def compute_vwap_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    VWAP (Volume-Weighted Average Price) journalier et dérivés.
+
+    Colonnes ajoutées
+    -----------------
+    vwap_daily      : VWAP cumulatif du jour (reset à minuit UTC)
+    dist_vwap_pct   : (Close - VWAP) / VWAP — position relative au VWAP
+    above_vwap_4h   : fraction des 4 dernières barres au-dessus du VWAP [0,1]
+
+    Pourquoi ces features améliorent l'AUC :
+    - Le VWAP est le prix de référence des institutionnels intraday.
+      Un long LONG au-dessus du VWAP signale que les acheteurs contrôlent la journée.
+    - dist_vwap_pct capture si le prix est "étiré" ou "ancré" par rapport aux volumes.
+    - above_vwap_4h mesure la persistance de la pression acheteuse sur 4h —
+      directement aligné avec l'horizon de prédiction.
+    """
+    df   = df.copy()
+    n    = len(df)
+
+    # Colonnes sources
+    c_map = {}
+    for field in ["Close", "High", "Low", "Volume"]:
+        if field in df.columns:
+            c_map[field.lower()] = field
+        elif field.lower() in df.columns:
+            c_map[field.lower()] = field.lower()
+
+    if not all(k in c_map for k in ["close", "high", "low", "volume"]):
+        df["vwap_daily"]   = np.nan
+        df["dist_vwap_pct"] = np.nan
+        df["above_vwap_4h"] = np.nan
+        return df
+
+    close  = pd.to_numeric(df[c_map["close"]],  errors="coerce")
+    high   = pd.to_numeric(df[c_map["high"]],   errors="coerce")
+    low    = pd.to_numeric(df[c_map["low"]],    errors="coerce")
+    volume = pd.to_numeric(df[c_map["volume"]], errors="coerce").clip(lower=1e-9)
+
+    typical_price = (high + low + close) / 3.0
+
+    # ── VWAP journalier (reset UTC minuit) ───────────────────────────────────
+    if isinstance(df.index, pd.DatetimeIndex):
+        dates = df.index.normalize()       # minuit UTC de chaque bar
+    else:
+        # Fallback : fenêtre glissante 24h
+        vwap = (typical_price * volume).rolling(24, min_periods=1).sum() \
+               / volume.rolling(24, min_periods=1).sum()
+        df["vwap_daily"]    = vwap
+        df["dist_vwap_pct"] = ((close - vwap) / vwap.clip(lower=1e-9)).clip(-0.1, 0.1)
+        above = (close > vwap).astype(float)
+        df["above_vwap_4h"] = above.rolling(4, min_periods=1).mean()
+        for col in ["vwap_daily", "dist_vwap_pct", "above_vwap_4h"]:
+            df[col] = df[col].fillna(0.0)
+        return df
+
+    # Groupby jour : cumsum vectorisé via pandas (très rapide)
+    df["_date"]  = dates
+    cum_tp_vol   = (typical_price * volume).groupby(df["_date"]).cumsum()
+    cum_vol      = volume.groupby(df["_date"]).cumsum().clip(lower=1e-9)
+    vwap         = cum_tp_vol / cum_vol
+    df.drop(columns=["_date"], inplace=True)
+
+    df["vwap_daily"]    = vwap
+    df["dist_vwap_pct"] = ((close - vwap) / vwap.clip(lower=1e-9)).clip(-0.15, 0.15)
+
+    above = (close > vwap).astype(float)
+    df["above_vwap_4h"] = above.rolling(4, min_periods=1).mean()
+
+    for col in ["vwap_daily", "dist_vwap_pct", "above_vwap_4h"]:
+        df[col] = df[col].fillna(0.0)
+
+    return df
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEVIER HEDGE-FUND — Features cross-macro (OI × sentiment × crowd)
+# ─────────────────────────────────────────────────────────────────────────────
+# Ces features exploitent le bundle hedge_fund (OI, L/S, funding, fear_greed)
+# pour construire des signaux de second ordre orthogonaux au price-action pur.
+# Toutes calculées sans lookahead, tolérent l'absence de colonnes (→ 0.0).
+
+def compute_macro_cross_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Features cross-macro disponibles uniquement avec le bundle hedge_fund.
+
+    Nouvelles colonnes :
+      oi_acceleration_z        — acceleration de l'OI (2e derivee z-scored)
+                                  OI qui monte de plus en plus vite = conviction croissante
+      crowd_leverage_index     — |funding_z| × |global_ls_z| : levier crowd composite
+                                  valeur haute = foule extrêmement positionnee des deux cotes
+      macro_confluence_long    — score 0-4 de signaux bullish alignes
+                                  (funding+, OI+, FnG greed, L/S haut)
+      macro_confluence_short   — score 0-4 de signaux bearish alignes
+                                  (funding extreme, OI+price flat, FnG extreme, L/S extreme)
+      oi_funding_divergence    — divergence OI vs funding
+                                  OI monte + funding negatif = accumulation vs crowd short
+                                  Signal contra-trend tres fiable
+      macro_regime_score       — score composite [-2,+2] : positif=bullish, negatif=bearish
+    """
+    df = df.copy()
+
+    def _get(col):
+        if col in df.columns:
+            return pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+        return pd.Series(0.0, index=df.index)
+
+    oi_z24   = _get("oihist_sumOpenInterest_z_24")
+    oi_z72   = _get("oihist_sumOpenInterest_z_72")
+    fund_z24 = _get("funding_rate_z_24")
+    fund_z72 = _get("funding_rate_z_72")
+    fg_z24   = _get("fear_greed_value_z_24")
+    fg_z72   = _get("fear_greed_value_z_72")
+    gls_z24  = _get("global_ls_longShortRatio_z_24")
+    gls_z72  = _get("global_ls_longShortRatio_z_72")
+    tbsr_z24 = _get("taker_ls_buySellRatio_z_24")
+    tls_imb  = _get("taker_ls_imbalance")
+
+    # ── OI acceleration : d/dt de l'OI z-score (momentum du momentum) ───────
+    oi_delta = oi_z24 - oi_z24.shift(1).fillna(0.0)
+    oi_delta_mean = oi_delta.rolling(12, min_periods=3).mean()
+    oi_delta_std  = oi_delta.rolling(12, min_periods=3).std().clip(lower=1e-9)
+    df["oi_acceleration_z"] = ((oi_delta - oi_delta_mean) / oi_delta_std).clip(-3, 3).fillna(0.0)
+
+    # ── Crowd leverage index : les deux cotes extremes en meme temps ────────
+    df["crowd_leverage_index"] = (
+        oi_z24.abs() * gls_z24.abs() * (1 + fund_z24.abs() * 0.5)
+    ).clip(0, 10).fillna(0.0)
+
+    # ── Macro confluence LONG : combien de signaux bullish alignes ───────────
+    bull_funding  = (fund_z24 > 0.5).astype(float)
+    bull_oi       = (oi_z24 > 0.5).astype(float)
+    bull_fng      = (fg_z24  > 0.5).astype(float)
+    bull_gls      = (gls_z24 > 0.5).astype(float)
+    bull_taker    = (tls_imb > 0.3).astype(float)
+    df["macro_confluence_long"] = (bull_funding + bull_oi + bull_fng + bull_gls + bull_taker).fillna(0.0)
+
+    # ── Macro confluence SHORT : combien de signaux bearish alignes ──────────
+    bear_funding_extreme = (fund_z24 > 2.0).astype(float)   # funding excessif = fade
+    bear_oi_dist         = (oi_z24 > 1.0).astype(float) * ((oi_z72 - oi_z24) > 0.5).astype(float)
+    bear_fng_extreme     = (fg_z24 > 2.0).astype(float)     # greed extreme = retournement
+    bear_gls_crowded     = (gls_z24 > 2.0).astype(float)    # tout le monde long = short squeeze risk
+    bear_taker_exhaust   = (tbsr_z24 < -0.5).astype(float)  # takers vendeurs dominent
+    df["macro_confluence_short"] = (
+        bear_funding_extreme + bear_oi_dist + bear_fng_extreme + bear_gls_crowded + bear_taker_exhaust
+    ).fillna(0.0)
+
+    # ── OI vs funding divergence (smart money signal) ───────────────────────
+    # OI monte (smart money accumule) mais funding negatif (crowd short) → bullish
+    # OI monte + funding tres positif (crowd long) → distribution → bearish
+    oi_sign   = np.sign(oi_z24)
+    fund_sign = np.sign(fund_z24)
+    df["oi_funding_divergence"] = (oi_sign * (-fund_sign) * oi_z24.abs()).clip(-3, 3).fillna(0.0)
+
+    # ── Macro regime score composite [-2, +2] ───────────────────────────────
+    # Positif = macro bullish (long confirmé), Negatif = macro bearish (short confirmé)
+    score = (
+        fund_z24 * 0.25           # funding direction
+        + oi_z24 * 0.25           # OI direction
+        + fg_z24 * 0.20           # sentiment direction
+        + tls_imb * 0.15          # taker imbalance
+        + gls_z24 * 0.10          # crowd positioning
+        + tbsr_z24 * 0.05         # taker buy/sell
+    )
+    df["macro_regime_score"] = score.rolling(4, min_periods=1).mean().clip(-2, 2).fillna(0.0)
+
+    return df

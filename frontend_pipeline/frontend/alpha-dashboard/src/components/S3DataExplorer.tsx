@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { designSystem } from '../styles/designSystem';
 import './S3DataExplorer.css';
+import { API_BASE_URL } from '../config/api';
 
 interface S3Overview {
   years: number[];
@@ -48,7 +49,7 @@ const S3DataExplorer: React.FC = () => {
 
   const loadOverview = async () => {
     try {
-      const response = await fetch('http://localhost:8000/s3/overview');
+      const response = await fetch(`${API_BASE_URL}/s3/overview`);
       const data = await response.json();
       setOverview(data);
       if (data.years && data.years.length > 0) {
@@ -62,7 +63,7 @@ const S3DataExplorer: React.FC = () => {
   const loadSymbolData = async (symbol: string, year: number) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8000/s3/data/${symbol}/${year}?limit=5000`);
+      const response = await fetch(`${API_BASE_URL}/s3/data/${symbol}/${year}?limit=5000`);
       const data = await response.json();
       setSymbolData(data.data || []);
       setSymbolStats(data.stats || null);

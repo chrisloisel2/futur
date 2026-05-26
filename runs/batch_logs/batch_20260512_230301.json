@@ -1,0 +1,35 @@
+[
+  {
+    "symbol": "SOLUSDT",
+    "run_id": "train_solusdt_20260512_230228",
+    "success": true,
+    "elapsed": 16.7,
+    "log": "runs/batch_logs/SOLUSDT.log",
+    "long_pf": Infinity,
+    "long_wr": 0.0,
+    "long_ret": 0.0,
+    "short_ok": true
+  },
+  {
+    "symbol": "ETHUSDT",
+    "run_id": "train_ethusdt_20260512_230228",
+    "success": true,
+    "elapsed": 32.4,
+    "log": "runs/batch_logs/ETHUSDT.log",
+    "long_pf": 0.7624,
+    "long_wr": 0.4495,
+    "long_ret": -8.46,
+    "short_ok": true
+  },
+  {
+    "symbol": "BTCUSD",
+    "run_id": "train_btcusd_20260512_230228",
+    "success": true,
+    "elapsed": 33.6,
+    "log": "runs/batch_logs/BTCUSD.log",
+    "long_pf": 0.7299,
+    "long_wr": 0.4529,
+    "long_ret": -7.02,
+    "short_ok": true
+  }
+]

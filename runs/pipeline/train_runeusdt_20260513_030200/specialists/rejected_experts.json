@@ -1,0 +1,13 @@
+{
+  "HIGH_VOL": {
+    "auc": 0.5418,
+    "macro_f1": 0.5212,
+    "acc": 0.9126,
+    "precision_pos": 0.0697,
+    "recall_pos": 0.1204,
+    "n_train": 17168,
+    "n_val": 6144,
+    "label": "y_long",
+    "context": "HIGH_VOL"
+  }
+}

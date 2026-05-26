@@ -1,0 +1,32 @@
+{
+  "elapsed_seconds": 211.7,
+  "n_contexts_trained": 5,
+  "n_accepted": 1,
+  "experts": {
+    "TREND_LONG": {
+      "status": "rejected"
+    },
+    "BREAKOUT": {
+      "status": "rejected"
+    },
+    "TREND_SHORT": {
+      "status": "rejected"
+    },
+    "MEAN_REVERSION": {
+      "status": "rejected"
+    },
+    "HIGH_VOL": {
+      "status": "accepted",
+      "auc": 0.5762,
+      "macro_f1": 0.4299,
+      "acc": 0.6433,
+      "precision_pos": 0.0443,
+      "recall_pos": 0.4768,
+      "n_train": 22295,
+      "n_val": 4581,
+      "label": "y_long",
+      "context": "HIGH_VOL",
+      "ece_after_calibration": 0.0
+    }
+  }
+}

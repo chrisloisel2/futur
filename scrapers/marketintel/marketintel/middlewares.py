@@ -89,7 +89,7 @@ class MongoProxyMiddleware:
 
     Settings Scrapy attendus (tous optionnels, héritent de api_collectors/config.py) :
       PROXY_ENABLED            (bool, défaut True)
-      PROXY_MONGO_URI          mongodb://admin:admin123@100.93.248.105/
+      PROXY_MONGO_URI          mongodb://localhost:27017
       PROXY_MONGO_DB           proxy_db
       PROXY_COLLECTION         proxies
       PROXY_REFRESH_INTERVAL   300

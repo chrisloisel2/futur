@@ -1,0 +1,58 @@
+[
+  {
+    "bar": 4378,
+    "date": "2024-07-01",
+    "year": 2024,
+    "side": "long",
+    "action": "BUY",
+    "p_tradeable": 0.4231,
+    "p_side": 0.5778,
+    "fut_ret": -0.00525,
+    "pnl_net_pct": -0.00424,
+    "pnl_abs": -5.4113,
+    "equity": 9994.59,
+    "notional": 1274.82
+  },
+  {
+    "bar": 4404,
+    "date": "2024-07-02",
+    "year": 2024,
+    "side": "long",
+    "action": "BUY",
+    "p_tradeable": 0.8542,
+    "p_side": 0.6047,
+    "fut_ret": -0.00193,
+    "pnl_net_pct": -0.00872,
+    "pnl_abs": -12.119,
+    "equity": 9982.47,
+    "notional": 1389.17
+  },
+  {
+    "bar": 4406,
+    "date": "2024-07-02",
+    "year": 2024,
+    "side": "long",
+    "action": "BUY",
+    "p_tradeable": 0.6193,
+    "p_side": 0.6334,
+    "fut_ret": 0.0,
+    "pnl_net_pct": 0.01175,
+    "pnl_abs": 14.685,
+    "equity": 9997.15,
+    "notional": 1249.98
+  },
+  {
+    "bar": 6084,
+    "date": "2024-09-10",
+    "year": 2024,
+    "side": "long",
+    "action": "BUY",
+    "p_tradeable": 0.5847,
+    "p_side": 0.6989,
+    "fut_ret": -0.00584,
+    "pnl_net_pct": -0.00538,
+    "pnl_abs": -7.5104,
+    "equity": 9989.64,
+    "notional": 1396.59
+  }
+]

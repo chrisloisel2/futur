@@ -1,0 +1,13 @@
+[
+  {
+    "symbol": "ETHUSDT",
+    "run_id": "train_ethusdt_20260512_163918",
+    "success": true,
+    "elapsed": 20.1,
+    "log": "runs/batch_logs/ETHUSDT.log",
+    "long_pf": 0.9199,
+    "long_wr": 0.5625,
+    "long_ret": -0.79,
+    "short_ok": true
+  }
+]

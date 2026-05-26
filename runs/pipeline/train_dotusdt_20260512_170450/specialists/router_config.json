@@ -1,0 +1,7 @@
+{
+  "default_specialist_weight": 0.35,
+  "max_specialist_weight": 0.55,
+  "min_expert_auc": 0.56,
+  "min_train_samples": 300,
+  "always_fallback": false
+}

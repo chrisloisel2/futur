@@ -1,0 +1,40 @@
+{
+  "run_at": "2026-05-14T14:32:53.514650+00:00",
+  "interval": "1h",
+  "horizon": 5,
+  "label_long": "y_long",
+  "label_short": "y_short",
+  "n_features": {
+    "long": 80,
+    "short": 79,
+    "filter": 20
+  },
+  "splits": {
+    "train": 46982,
+    "val": 8759,
+    "test": 20712
+  },
+  "best_models": {
+    "long": "LogisticRegression",
+    "short": "LogisticRegression"
+  },
+  "val_metrics": {
+    "long": {
+      "model": "LogisticRegression",
+      "side": "long",
+      "macro_f1": 0.5607,
+      "auc": 0.7958,
+      "prec_pos": 0.1051,
+      "rec_pos": 0.2711
+    },
+    "short": {
+      "model": "LogisticRegression",
+      "side": "short",
+      "macro_f1": 0.5228,
+      "auc": 0.7272,
+      "prec_pos": 0.0489,
+      "rec_pos": 0.0833
+    }
+  },
+  "elapsed_s": 216.5
+}

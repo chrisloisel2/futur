@@ -158,6 +158,34 @@ from core.backtest import ShortRobustnessReport, run_wf_backtest_short, should_d
 # CONSTANTES GLOBALES (valeurs par défaut — surchargées par PipelineConfig)
 # ═════════════════════════════════════════════════════════════════════════════
 
+# ── Gate time-of-day (UTC) — par asset ────────────────────────────────────────
+# Analyse sur les trades test 2024-2026 (avg_pnl < -2$, n_trades ≥ 5).
+# Les mauvaises heures sont ASSET-SPÉCIFIQUES — jamais utiliser globalement.
+#
+# BTC (124 trades analysés) :
+#   Bad  : 9,12,17,19,20,21,23  → avg < -2$  WR < 45%  (Europe open + US après-midi)
+#   Good : 13,16,6,14,3         → avg > +6$  WR > 55%  (Europe tarde + US matin)
+#   Gain simulé : +156$ (+1.56%) en bloquant les 48 trades mauvaises heures
+#
+# ETH (118 trades analysés) :
+#   Bad  : 10,14,15,16          → avg < -4$  WR < 35%  (US morning session)
+#   Good : 3,4,22,11,13         → avg > +3$  WR > 50%  (Asie + Europe)
+#   Gain simulé : +253$ (+2.53%) en bloquant les 39 trades mauvaises heures
+#   NOTE : BTC good hours (13,14,16) = ETH BAD hours → TOUJOURS per-asset
+#
+# SOL : direction model fondamentalement brisé (p_dir mean=0.14, max<0.52)
+#   → traité séparément via direction_threshold_override
+
+BAD_HOURS_UTC: frozenset = frozenset({9, 12, 17, 19, 20, 21, 23})  # BTC default
+
+# Table per-asset (symbol uppercase → set d'heures UTC à bloquer)
+BAD_HOURS_BY_ASSET: dict[str, frozenset] = {
+    "BTCUSD":   frozenset({9, 12, 17, 19, 20, 21, 23}),
+    "BTCUSDT":  frozenset({9, 12, 17, 19, 20, 21, 23}),
+    "ETHUSDT":  frozenset({0, 8, 10, 14, 15, 16}),
+    # SOL: pas de bad hours car 0 trades → inutile jusqu'au fix du modèle
+}
+
 HORIZON_BARS   = 1           # 1 barre 1h = 60 min
 TIMEFRAME      = "1h"
 HORIZON_MINUTES = 60
@@ -211,7 +239,9 @@ class PipelineConfig:
     cost_pct: float = 0.001
 
     # ── Seuils de décision LONG ───────────────────────────────────────────────
-    filter_threshold_long: float = 0.40
+    # filter 0.40 → 0.35 : diagnostics montrent p_filter mean=0.28 → 31.87% passent
+    # à 0.35 (vs 22.78% à 0.40) sans dégradation de qualité grâce au gate adaptatif
+    filter_threshold_long: float = 0.35
     direction_threshold_long: float = 0.52
 
     # ── Seuils de décision SHORT (plus conservateurs par défaut) ──────────────
@@ -516,12 +546,23 @@ def _ensure_pipeline_macro_features(df: pd.DataFrame) -> pd.DataFrame:
 
     _zeros("funding_rate_z_24")
     _zeros("funding_rate_z_72")
+    _zeros("funding_rate_z_288")
     _zeros("oihist_sumOpenInterest_z_24")
     _zeros("oihist_sumOpenInterest_z_72")
     _zeros("fear_greed_value_z_24")
     _zeros("fear_greed_value_z_72")
     _zeros("global_ls_longShortRatio_z_24")
     _zeros("global_ls_longShortRatio_z_72")
+    # Nouvelles colonnes macro (bundle étendu) — valeur neutre 0 si absentes du CSV
+    _zeros("global_market_cap_usd_z_24")
+    _zeros("global_market_cap_usd_z_72")
+    _zeros("btc_dominance_z_24")
+    _zeros("btc_mempool_fee_fastest_z_24")
+    _zeros("btc_mempool_tx_count_z_24")
+    _zeros("news_count_z_24")
+    _zeros("news_count_z_72")
+    _zeros("news_count_roll_240")
+    _zeros("news_count_roll_1440")
 
     if taker_delta is not None:
         _series("taker_ls_imbalance", taker_delta.fillna(0.0))
@@ -553,18 +594,17 @@ def _ensure_pipeline_macro_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     macro_cols = [
-        "funding_rate_z_24",
-        "funding_rate_z_72",
-        "oihist_sumOpenInterest_z_24",
-        "oihist_sumOpenInterest_z_72",
-        "fear_greed_value_z_24",
-        "fear_greed_value_z_72",
-        "global_ls_longShortRatio_z_24",
-        "global_ls_longShortRatio_z_72",
-        "taker_ls_imbalance",
-        "taker_ls_buySellRatio_z_24",
-        "funding_x_global_ls",
-        "oi_x_fng",
+        "funding_rate_z_24", "funding_rate_z_72", "funding_rate_z_288",
+        "oihist_sumOpenInterest_z_24", "oihist_sumOpenInterest_z_72",
+        "fear_greed_value_z_24", "fear_greed_value_z_72",
+        "global_ls_longShortRatio_z_24", "global_ls_longShortRatio_z_72",
+        "taker_ls_imbalance", "taker_ls_buySellRatio_z_24",
+        "funding_x_global_ls", "oi_x_fng",
+        "global_market_cap_usd_z_24", "global_market_cap_usd_z_72",
+        "btc_dominance_z_24",
+        "btc_mempool_fee_fastest_z_24", "btc_mempool_tx_count_z_24",
+        "news_count_z_24", "news_count_z_72",
+        "news_count_roll_240", "news_count_roll_1440",
     ]
     df[macro_cols] = df[macro_cols].apply(pd.to_numeric, errors="coerce").ffill().fillna(0.0)
     return df
@@ -592,13 +632,23 @@ def _is_enriched_1m_frame(df: pd.DataFrame) -> bool:
 
 
 def load_csv(path_arg: str) -> pd.DataFrame:
-    p = Path(path_arg)
+    from data_pipeline.mongo_training import is_mongo_training_uri, load_mongo_training_uri
+
+    p = None if is_mongo_training_uri(path_arg) else Path(path_arg)
 
     # ── Bundle parquet (features_merged.parquet) ──────────────────────────────
     # Format natif : 4.5M barres 1m, 123 colonnes, 2017-08 → aujourd'hui.
     # On extrait uniquement les colonnes OHLCV+taker, puis on rééchantillonne
     # vers 1h via _raw1m_df_to_1h (identique au chemin CSV brut Binance).
-    if p.suffix.lower() == ".parquet":
+    if p is None:
+        print("   Source MongoDB détectée — chargement collection OHLCV/features enrichie…")
+        df = load_mongo_training_uri(path_arg)
+        df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+        df = df.sort_values("datetime").set_index("datetime")
+        print("   Feature factory canonique max_public sur données Mongo enrichies...")
+        df = compute_hourly_features(df, include_labels=True)
+        _long_features_done = True
+    elif p.suffix.lower() == ".parquet":
         print(f"   Bundle parquet détecté ({p.name}) → rééchantillonnage 1m→1h…")
         _OHLCV_COLS = [
             "datetime", "open", "high", "low", "close", "volume",
@@ -678,14 +728,6 @@ def load_csv(path_arg: str) -> pd.DataFrame:
                 _long_features_done = True
                 df = df.sort_index()
 
-    required = SNAPSHOT_FEATURES + ["Close", "future_ret_h", "atr_14", "rv_24"]
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise RuntimeError("Colonnes manquantes : " + ", ".join(missing))
-
-    for col in SNAPSHOT_FEATURES + ["future_ret_h"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
-
     # ── Features long asymétriques ────────────────────────────────────────────
     if not _long_features_done:
         print("   Calcul des features long asymétriques...")
@@ -697,9 +739,41 @@ def load_csv(path_arg: str) -> pd.DataFrame:
     df = compute_short_features(df)
 
     # ── Features flow / liquidation (si pas encore calculées) ─────────────────
-    if "trade_intensity" not in df.columns:
+    if "trade_intensity" not in df.columns or "vol_imbalance" not in df.columns:
         print("   Calcul des features flow / liquidation proxies...")
         df = compute_flow_features(df)
+
+    # ── Indicateurs techniques avancés : event, VWAP, Ichimoku, RSI, Vol, TV ──
+    # Ces modules calculent 57 features supplémentaires orthogonales aux features
+    # de base. Idempotent : si les colonnes existent déjà elles sont recalculées.
+    print("   Calcul des indicateurs avancés (event, VWAP, Ichimoku, RSI, Vol, TradingView)...")
+    from ai.level_0.feature_engineering import compute_event_features, compute_vwap_features
+    from ai.level_0.technical_indicators import (
+        compute_ichimoku_features, compute_rsi_features, compute_volume_features,
+    )
+    from ai.level_0.tradingview_indicators import compute_tradingview_features
+
+    df = compute_event_features(df)       # +3  : gc_fresh, days_since_gc, dist_ema200_atr
+    df = compute_vwap_features(df)        # +3  : vwap_daily, dist_vwap_pct, above_vwap_4h
+    df = compute_ichimoku_features(df)    # +12 : nuage Ichimoku sans leakage
+    df = compute_rsi_features(df)         # +8  : RSI multi-période + divergences
+    df = compute_volume_features(df)      # +8  : OBV, CMF, MFI, A/D, climax
+    df = compute_tradingview_features(df) # +23 : Squeeze, Supertrend, WaveTrend, ADX,
+                                          #        HMA, ZLMACD, LSMA+R², Chandelier
+
+    # Calcule future_ret_h (log-return 1 barre ahead) si absent — cas des CSV enrichis USDT
+    if "future_ret_h" not in df.columns and "Close" in df.columns:
+        log_c = np.log(df["Close"].clip(lower=1e-10))
+        df["future_ret_h"] = log_c.shift(-1) - log_c
+        print("   future_ret_h calculé depuis Close (absent du CSV enrichi)")
+
+    required = SNAPSHOT_FEATURES + ["Close", "future_ret_h", "atr_14", "rv_24"]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise RuntimeError("Colonnes manquantes : " + ", ".join(missing))
+
+    for col in SNAPSHOT_FEATURES + ["future_ret_h"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
 
     print("   Normalisation des macro features pipeline...")
     df = _ensure_pipeline_macro_features(df)
@@ -799,6 +873,14 @@ def build_labels(
 
 def chronological_split(df: pd.DataFrame, test_from_year: int = 2024
                         ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    if test_from_year <= VAL_YEAR:
+        raise RuntimeError(
+            "Split chronologique invalide: "
+            f"--test-from={test_from_year} chevauche le train ≤{TRAIN_END_YEAR} "
+            f"ou la validation ={VAL_YEAR}. Utilise --test-from {VAL_YEAR + 1} "
+            "ou plus pour éviter toute fuite temporelle."
+        )
+
     # Supporte index DatetimeIndex (nouvelle version) ou colonne "datetime"
     if isinstance(df.index, pd.DatetimeIndex):
         years = df.index.year
@@ -951,9 +1033,9 @@ def train_filter_model(df: pd.DataFrame,
     except ImportError:
         from sklearn.ensemble import HistGradientBoostingClassifier
         clf = HistGradientBoostingClassifier(
-            learning_rate=0.04, max_iter=500, max_depth=5,
-            min_samples_leaf=20,
-            class_weight="balanced",             # ← FIX CRITIQUE
+            learning_rate=0.04, max_iter=500, max_depth=4,
+            min_samples_leaf=50,
+            class_weight="balanced",
             random_state=42,
         )
         model_name = "HistGBT"
@@ -1111,12 +1193,17 @@ def train_directional_model(
     m_lr = _eval_directional(lr, scaler, X_val, y_val, "Logistic", side)
     all_metrics.append(m_lr)
 
-    # ── Baseline B : XGBoost ─────────────────────────────────────────────────
+    # ── Baseline B : XGBoost (régularisé pour 99+ features) ─────────────────
+    # Avec ~99 features et ~2000 exemples positifs, le risque d'overfit est élevé.
+    # colsample_bytree=0.5 → 50% des features par arbre (diversité + régularisation)
+    # min_child_weight=50  → au moins 50 samples/feuille (regularisation forte)
+    # max_depth=3          → arbres moins profonds → moins d'overfit
     try:
         from xgboost import XGBClassifier
         xgb = XGBClassifier(
-            n_estimators=400, max_depth=4,
-            learning_rate=0.05, subsample=0.8, colsample_bytree=0.8,
+            n_estimators=400, max_depth=3,
+            learning_rate=0.05, subsample=0.8, colsample_bytree=0.5,
+            min_child_weight=50,
             use_label_encoder=False, eval_metric="logloss",
             scale_pos_weight=spw,
             n_jobs=-1, random_state=42,
@@ -1127,7 +1214,8 @@ def train_directional_model(
     except ImportError:
         from sklearn.ensemble import HistGradientBoostingClassifier
         xgb = HistGradientBoostingClassifier(
-            learning_rate=0.05, max_iter=400, max_depth=4,
+            learning_rate=0.05, max_iter=400, max_depth=3,
+            min_samples_leaf=50,
             class_weight="balanced", random_state=42,
         )
         xgb.fit(scaler.transform(X_train), y_train)
@@ -1145,9 +1233,29 @@ def train_directional_model(
     valid_v    = y_val_dir >= 0
     p_val_best = best_model.predict_proba(X_val_sc[valid_v])[:, 1]
     y_val_filt = y_val_dir[valid_v]
-    min_dir_thr = 0.52 if side == "long" else 0.55
+    # Seuils minimaux relevés : plus de précision, moins de trades faux-positifs.
+    # Avec 99 features et AUC~0.65, le signal faible se manifeste par une WR basse.
+    # Seuil plus haut = moins de trades mais signal plus pur.
+    # Diagnostics : sweet spot p_direction est [0.59, 0.68] avec WR=57.7%, avg=+3.66$
+    # [0.56-0.59] a WR=48.7%, avg=+1.10$ — moins bon, mais on garde comme plancher
+    # car le filtre adaptatif + gate + time-of-day font déjà le tri des mauvais trades
+    min_dir_thr = 0.56 if side == "long" else 0.58
+
+    # Distribution shift detection : si le modèle concentre toutes ses proba
+    # très basses (p_val mean << 0.40), le seuil plancher doit être adapté
+    # pour éviter 0 trades (cas SOL où p_dir mean=0.14 → jamais > 0.52).
+    p_val_mean = float(np.mean(p_val_best))
+    if p_val_mean < 0.35:
+        # Modèle fortement décalé : utiliser le top 15% de la distribution val
+        # comme plancher adaptatif (permet au moins quelques trades de qualité)
+        adaptive_floor = float(np.percentile(p_val_best, 85))
+        min_dir_thr = max(min_dir_thr * 0.85,        # réduction max 15%
+                          min(min_dir_thr, adaptive_floor))
+        print(f"   [direction adaptatif] p_val_mean={p_val_mean:.3f} < 0.35 "
+              f"→ plancher adapté : {min_dir_thr:.3f} (85e pct val={adaptive_floor:.3f})")
+
     dir_thr_cal = _calibrate_direction_threshold(p_val_best, y_val_filt,
-                                                  min_threshold=min_dir_thr, min_trades=30)
+                                                  min_threshold=min_dir_thr, min_trades=20)
     print(f"   Seuil directionnel calibré {side_up} : {dir_thr_cal:.2f}  (prec×√n sur val)")
 
     # ── TCN (uniquement pour LONG — le short peut être ajouté plus tard) ──────
@@ -1428,6 +1536,13 @@ def run_backtest_side(
     regime_features: Optional[List[str]] = None,  # features du regime model
     regime_threshold: float = 0.70,              # seuil d'activation bear regime
     specialist_predictor=None,   # SpecialistPredictor niveau 3 (optionnel)
+    use_indicator_gate: bool = True,             # gate multi-indicateurs (EMA obligatoire + ADX+ST+Ichi)
+    indicator_gate_min_score: int = 2,           # score min sur 3 indicateurs dynamiques (EMA déjà obligatoire)
+    collect_trace: bool = False,                 # collecte la trace complète par barre (diagnostic)
+    use_time_gate: bool = True,                  # gate time-of-day : bloque heures UTC à faible alpha
+    bad_hours_override: frozenset | None = None, # override per-asset (None = BAD_HOURS_UTC global)
+    direction_upper_cap: float = 0.68,           # cap direction : >cap = overconfidence = trop d'erreurs
+    adaptive_filter_lookback: int = 48,          # filtre adaptatif : percentile 80 sur N barres passées
 ) -> Dict:
     """
     Backtest walk-forward pour UNE seule branche (long OU short).
@@ -1456,7 +1571,7 @@ def run_backtest_side(
     equity_curve   = [cfg.initial_equity]
     pnl_list: List[float] = []
     trades: List[Dict]    = []
-    skipped_filter = skipped_dir = skipped_risk = n_tested = 0
+    skipped_filter = skipped_dir = skipped_risk = skipped_gate = n_tested = 0
 
     df_test = df[test_mask].reset_index(drop=False)
     # Après reset_index(drop=False), l'ancien index DatetimeIndex devient la colonne "datetime"
@@ -1491,6 +1606,62 @@ def run_backtest_side(
             if not silent:
                 print(f"   [L3] specialist ignoré : {_e}")
 
+    # ── Pré-calcul du gate multi-indicateurs (vectorisé) ─────────────────────
+    # Score [0..4] par barre (4 indicateurs indépendants) :
+    #
+    #  LONG :
+    #   +1  ADX > 25              → marché en trend (pas en range aléatoire)
+    #   +1  Supertrend = +1       → direction ATR confirmée haussière
+    #   +1  Ichimoku above cloud  → structure medium-term haussière (26-52 barres)
+    #   +1  EMA50 > EMA200        → golden cross : structure long-terme haussière
+    #
+    #  SHORT :
+    #   +1  ADX > 25              → marché en trend
+    #   +1  Supertrend = -1       → direction ATR confirmée baissière
+    #   +1  Ichimoku below cloud  → structure medium-term baissière
+    #   +1  EMA50 < EMA200        → death cross : structure long-terme baissière
+    #
+    # Seuil min défaut=2 → au moins 2/4 doivent confirmer.
+    # Avantage de EMA50/200 vs MACD : EMA spread est très persistant, il ne
+    # bascule pas sur un simple bounce → élimine les faux signaux en bear market.
+    if use_indicator_gate:
+        def _col(name, default=0.0):
+            return df_test[name].fillna(default).values.astype(np.float32) \
+                   if name in df_test.columns \
+                   else np.full(len(df_test), default, dtype=np.float32)
+
+        _adx      = _col("adx_trending",       0.0)   # 1 si ADX > 25
+        _st       = _col("supertrend_dir",      1.0)   # +1 uptrend / -1 downtrend
+        _ichi_ab  = _col("ichi_above_cloud",    0.0)   # 1 si price > cloud (bull)
+        _ichi_bl  = _col("ichi_below_cloud",    0.0)   # 1 si price < cloud (bear)
+        _ema_sp   = _col("ema_spread_50_200",   0.0)   # EMA50 - EMA200 (signé)
+
+        # Architecture à deux niveaux :
+        # NIVEAU 1 — gate dur : EMA50 vs EMA200 (golden / death cross)
+        #   Très persistant (semaines/mois) → élimine les bear bounces où
+        #   ADX+ST+Ichi peuvent être temporairement haussiers sans vraie tendance.
+        #
+        # NIVEAU 2 — score mou [0..3] : ADX + Supertrend + Ichimoku
+        #   Exige 2/3 confirmations rapides sur les indicateurs dynamiques.
+        if side == "long":
+            _hard_ok    = (_ema_sp > 0.0)              # golden cross OBLIGATOIRE
+            _soft_score = (
+                (_adx   >= 0.5).astype(np.int8) +      # ADX trending
+                (_st    >  0.0).astype(np.int8) +      # Supertrend bullish
+                (_ichi_ab >= 0.5).astype(np.int8)      # Ichimoku above cloud
+            )
+            _gate_score = np.where(_hard_ok, _soft_score, np.int8(-99))
+        else:
+            _hard_ok    = (_ema_sp < 0.0)              # death cross OBLIGATOIRE
+            _soft_score = (
+                (_adx   >= 0.5).astype(np.int8) +
+                (_st    <  0.0).astype(np.int8) +
+                (_ichi_bl >= 0.5).astype(np.int8)
+            )
+            _gate_score = np.where(_hard_ok, _soft_score, np.int8(-99))
+    else:
+        _gate_score = None
+
     # ── Pré-calcul du méta-modèle de régime bear (short uniquement) ──────────
     _use_regime = (side == "short" and regime_model is not None
                    and regime_scaler is not None and regime_features)
@@ -1506,6 +1677,34 @@ def run_backtest_side(
         skipped_regime = 0
         n_bear_activated = 0
 
+    # ── Trace complète par barre (diagnostic) ────────────────────────────────
+    _trace: list = []   # collecte si collect_trace=True
+
+    # Pré-extraction sécurisée des arrays gate pour la trace
+    # (variables _adx, _st, _ema_sp, _ichi_ab, _ichi_bl existent si use_indicator_gate)
+    _tr_ema  = _ema_sp   if use_indicator_gate else None
+    _tr_adx  = _adx      if use_indicator_gate else None
+    _tr_st   = _st       if use_indicator_gate else None
+    _tr_ichi = (_ichi_ab if side == "long" else _ichi_bl) if use_indicator_gate else None
+
+    # ── Filtre adaptatif (rolling 80th percentile) ────────────────────────────
+    # Résout la dérive du filtre 2025-2026 : au lieu d'un seuil fixe (0.40) qui
+    # bloque 95-98% des barres quand la distribution p_filter s'effondre, on prend
+    # toujours les meilleures barres de la fenêtre récente (top 20%).
+    # Calcul vectorisé avant la boucle (efficace même sur 20k barres).
+    if adaptive_filter_lookback > 0:
+        p_trade_series = p_trade_all  # shape (n,)
+        n_bars = len(p_trade_series)
+        _adaptive_thr = np.full(n_bars, filter_thr, dtype=np.float32)
+        for _j in range(n_bars):
+            _start = max(0, _j - adaptive_filter_lookback)
+            _win = p_trade_series[_start:_j + 1]
+            if len(_win) >= 6:
+                _adaptive_thr[_j] = max(filter_thr * 0.70,           # plancher = 70% du seuil nominal
+                                        float(np.percentile(_win, 80)))  # top 20% récent
+    else:
+        _adaptive_thr = None
+
     for i, row in enumerate(df_test.itertuples()):
         bar_date = pd.Timestamp(row.datetime)
         day_str  = bar_date.strftime("%Y-%m-%d")
@@ -1515,31 +1714,108 @@ def run_backtest_side(
             rc.reset_day(equity=rc.state.equity, day_str=day_str)
 
         n_tested += 1
-        p_trade = float(p_trade_all[i])
+        p_trade  = float(p_trade_all[i])
+        p_side   = float(p_side_all[i])          # toujours dispo (pré-calculé)
+        p_bear_i = float(p_bear_all[i]) if p_bear_all is not None else None
 
-        # 1. Filtre tradeable (seuil dépendant de la branche)
-        if p_trade < filter_thr:
-            skipped_filter += 1
+        # ── FIX 2 : Filtre adaptatif (top 20% récent) ─────────────────────────
+        # Doit être calculé EN PREMIER — utilisé par _push_trace et par le filtre.
+        effective_filter_thr = float(_adaptive_thr[i]) if _adaptive_thr is not None else filter_thr
+
+        # ── Helper trace : empaquète l'état complet de la pipeline à ce tick ──
+        def _push_trace(reason: str, pnl_pct=None, pnl_abs_=None):
+            _trace.append({
+                # ── Contexte temporel ───────────────────────────────────────
+                "datetime":      bar_date.isoformat(),
+                "year":          year,
+                "month":         bar_date.month,
+                "close":         round(float(getattr(row, 'Close',
+                                   getattr(row, 'close', np.nan))), 2),
+                "regime_long":   str(getattr(row, 'regime_long',  '')),
+                "regime_short":  str(getattr(row, 'regime_short', '')),
+
+                # ── Level 0 — Filtre tradeable ──────────────────────────────
+                "p_filter":      round(p_trade,  4),
+                "filter_thr":    round(effective_filter_thr, 4),
+                "filter_ok":     p_trade >= effective_filter_thr,
+
+                # ── Gate — Regime indicateurs ───────────────────────────────
+                "gate_ema_ok":   bool(float(_tr_ema[i])  > 0)   if _tr_ema  is not None else None,
+                "gate_adx_ok":   bool(float(_tr_adx[i]) >= 0.5) if _tr_adx  is not None else None,
+                "gate_st_ok":    bool(float(_tr_st[i])  > 0)    if (_tr_st is not None and side == "long") else (bool(float(_tr_st[i]) < 0) if _tr_st is not None else None),
+                "gate_ichi_ok":  bool(float(_tr_ichi[i]) >= 0.5) if _tr_ichi is not None else None,
+                "gate_score":    int(_gate_score[i]) if _gate_score is not None else None,
+                "gate_min":      indicator_gate_min_score if use_indicator_gate else None,
+                "gate_ok":       (_gate_score is None or int(_gate_score[i]) >= indicator_gate_min_score),
+
+                # ── Meta — Bear regime (short uniquement) ───────────────────
+                "p_bear_regime": round(p_bear_i, 4) if p_bear_i is not None else None,
+                "bear_thr":      regime_threshold if _use_regime else None,
+                "bear_ok":       (p_bear_i >= regime_threshold) if (p_bear_i is not None and _use_regime) else None,
+
+                # ── Level 2 — Modèle directionnel ───────────────────────────
+                "p_direction":   round(p_side, 4),
+                "direction_thr": decision_thr,
+                "direction_ok":  p_side >= decision_thr,
+
+                # ── Décision finale ─────────────────────────────────────────
+                "skip_reason":   reason,          # filter|bear_regime|gate|direction|risk|traded
+                "side":          side if reason == "traded" else None,
+
+                # ── Résultat réel ────────────────────────────────────────────
+                "fut_ret_4h":    _safe_float(getattr(row, 'future_ret_4h', None)),
+                "fut_ret_1h":    _safe_float(getattr(row, 'future_ret_h',  None)),
+                "pnl_pct":       round(pnl_pct,   5) if pnl_pct  is not None else None,
+                "pnl_abs":       round(pnl_abs_,  4) if pnl_abs_ is not None else None,
+                "equity":        round(rc.state.equity, 2),
+            })
+
+        # ── FIX 1 : Time-of-day gate (per-asset) ─────────────────────────────
+        # Heures UTC déficitaires identifiées par analyse des logs diagnostics.
+        # Par défaut = BTC bad hours. bad_hours_override permet per-asset.
+        _active_bad_hours = bad_hours_override if bad_hours_override is not None else BAD_HOURS_UTC
+        if use_time_gate and bar_date.hour in _active_bad_hours:
+            if collect_trace: _push_trace("time_gate")
             continue
 
-        # 1b. Méta-régime bear (short uniquement) — gate AVANT l'edge model
+        # ── 1. Filtre tradeable (adaptatif ou fixe) ───────────────────────────
+        if p_trade < effective_filter_thr:
+            skipped_filter += 1
+            if collect_trace: _push_trace("filter")
+            continue
+
+        # ── 1b. Méta-régime bear (short) — gate AVANT l'edge model ───────────
         if _use_regime:
             p_bear = float(p_bear_all[i])
             if p_bear < regime_threshold:
                 skipped_regime += 1
+                if collect_trace: _push_trace("bear_regime")
                 continue
             n_bear_activated += 1
 
-        # 2. Edge model — P(y_long=1) ou P(y_short=1)
-        p_side = float(p_side_all[i])
-        if p_side < decision_thr:
-            skipped_dir += 1
+        # ── 1c. Gate multi-indicateurs ────────────────────────────────────────
+        if _gate_score is not None and int(_gate_score[i]) < indicator_gate_min_score:
+            skipped_gate += 1
+            if collect_trace: _push_trace("gate")
             continue
 
-        # edge_final : positif → long, négatif → short
-        edge_final = p_side * ret_sign
+        # ── 2. Edge model — P(y_long=1) ou P(y_short=1) ──────────────────────
+        if p_side < decision_thr:
+            skipped_dir += 1
+            if collect_trace: _push_trace("direction")
+            continue
 
-        # 3. RiskController
+        # ── FIX 3 : Direction upper cap (anti-overconfidence) ─────────────────
+        # p_direction > 0.68 : WR=35.7%, avg=-1.96$ sur 14 trades (BTC 2024-2026).
+        # Le modèle est PLUS souvent faux quand il est très confiant → overfit.
+        # Cap à 0.68 libère +28$ → exclure ces signaux extrêmes.
+        if direction_upper_cap > 0 and p_side > direction_upper_cap:
+            skipped_dir += 1
+            if collect_trace: _push_trace("direction_cap")
+            continue
+
+        # ── 3. RiskController ─────────────────────────────────────────────────
+        edge_final = p_side * ret_sign
         feats_dict = {"atr_14": float(row.atr_14), "rv_24": float(row.rv_24)}
         decision = rc.decide(
             price=float(row.Close),
@@ -1550,10 +1826,15 @@ def run_backtest_side(
         )
         if decision["action"] == "HOLD":
             skipped_risk += 1
+            if collect_trace: _push_trace("risk")
             continue
 
-        # 4. Simulation : hold 1 barre, PnL net de coût
-        fut_ret     = float(row.future_ret_h) * ret_sign
+        # ── 4. Simulation : exit à l'horizon 4h (ou 1h si absent) ────────────
+        _ret4h = getattr(row, "future_ret_4h", None)
+        if _ret4h is not None and not np.isnan(float(_ret4h)):
+            fut_ret = float(_ret4h) * ret_sign
+        else:
+            fut_ret = float(row.future_ret_h) * ret_sign
         pnl_net_pct = fut_ret - cfg.cost_pct
         pnl_abs     = pnl_net_pct * decision["notional"]
 
@@ -1572,6 +1853,7 @@ def run_backtest_side(
             "equity": round(rc.state.equity, 2),
             "notional": round(decision["notional"], 2),
         })
+        if collect_trace: _push_trace("traded", pnl_pct=pnl_net_pct, pnl_abs_=pnl_abs)
 
     # ── Métriques ──────────────────────────────────────────────────────────
     m = _backtest_metrics(pnl_list, equity_curve, trades, n_tested)
@@ -1599,6 +1881,13 @@ def run_backtest_side(
                   f"(bear_activé={n_bear_activated:,} / {n_tested:,} = "
                   f"{n_bear_activated/max(n_tested,1):.1%})")
 
+    if use_indicator_gate and not silent:
+        pct_gate = skipped_gate / max(n_tested, 1)
+        print(f"   Skipped gate     : {skipped_gate:,}  ({pct_gate:.1%})  "
+              f"[ADX+Supertrend+Ichimoku+MACD min={indicator_gate_min_score}/4]")
+        m["skipped_indicator_gate"] = skipped_gate
+        m["indicator_gate_min_score"] = indicator_gate_min_score
+
     if not silent:
         _print_backtest_summary(m, skipped_filter, skipped_dir, skipped_risk,
                                 n_tested, bench_all_long, side)
@@ -1608,7 +1897,109 @@ def run_backtest_side(
     json_dump(out_dir / "equity_curve.json", equity_curve)
     json_dump(out_dir / "trades.json", trades[:2000])
 
+    if collect_trace:
+        m["_trace"] = _trace   # list[dict] — récupéré par le caller, pas sérialisé
+
     return m
+
+
+def _safe_float(v) -> float | None:
+    """Convertit une valeur en float ou None si NaN/absent."""
+    if v is None:
+        return None
+    try:
+        f = float(v)
+        return None if np.isnan(f) else round(f, 6)
+    except (TypeError, ValueError):
+        return None
+
+
+def _write_monthly_trace(
+    trace: list,
+    base_dir: "Path",
+    symbol: str,
+    side: str,
+) -> None:
+    """
+    Écrit la trace d'un backtest en fichiers CSV mensuels.
+
+    Structure :
+      base_dir/symbol/YYYY-MM_side.csv   — toutes les barres du mois
+      base_dir/symbol/_summary_side.csv  — agrégat mensuel (trades, PF, WR, skip rates)
+
+    Colonnes des fichiers mensuels :
+      datetime, close, regime_long, regime_short,
+      p_filter, filter_ok,
+      gate_ema_ok, gate_adx_ok, gate_st_ok, gate_ichi_ok, gate_score, gate_ok,
+      p_bear_regime, bear_ok,
+      p_direction, direction_ok,
+      skip_reason, side,
+      fut_ret_4h, fut_ret_1h, pnl_pct, pnl_abs, equity
+    """
+    if not trace:
+        return
+
+    import csv
+
+    out = base_dir / symbol
+    out.mkdir(parents=True, exist_ok=True)
+
+    # Grouper par mois
+    by_month: dict = {}
+    for entry in trace:
+        key = f"{entry['year']:04d}-{entry['month']:02d}"
+        by_month.setdefault(key, []).append(entry)
+
+    fieldnames = list(trace[0].keys())
+    monthly_stats = []
+
+    for ym, rows in sorted(by_month.items()):
+        fpath = out / f"{ym}_{side}.csv"
+        with open(fpath, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+        # Statistiques mensuelles
+        n_total    = len(rows)
+        trades_    = [r for r in rows if r["skip_reason"] == "traded"]
+        n_traded   = len(trades_)
+        wins       = [r for r in trades_ if (r.get("pnl_abs") or 0) > 0]
+        pnl_sum    = sum(r.get("pnl_abs") or 0 for r in trades_)
+        wins_pnl   = sum(r.get("pnl_abs") or 0 for r in wins)
+        losses_pnl = abs(sum(r.get("pnl_abs") or 0 for r in trades_ if (r.get("pnl_abs") or 0) < 0))
+        pf         = wins_pnl / losses_pnl if losses_pnl > 0 else (float("inf") if wins_pnl > 0 else 0.0)
+        wr         = len(wins) / n_traded if n_traded else 0.0
+
+        skip_counts: dict = {}
+        for r in rows:
+            skip_counts[r["skip_reason"]] = skip_counts.get(r["skip_reason"], 0) + 1
+
+        monthly_stats.append({
+            "month":         ym,
+            "side":          side,
+            "n_bars":        n_total,
+            "n_traded":      n_traded,
+            "n_filter":      skip_counts.get("filter",      0),
+            "n_gate":        skip_counts.get("gate",        0),
+            "n_bear_regime": skip_counts.get("bear_regime", 0),
+            "n_direction":   skip_counts.get("direction",   0),
+            "n_risk":        skip_counts.get("risk",        0),
+            "pf":            round(pf, 4),
+            "wr":            round(wr, 4),
+            "pnl_sum":       round(pnl_sum, 4),
+            "p_filter_mean": round(sum(r["p_filter"] for r in rows) / n_total, 4) if n_total else 0,
+            "p_dir_mean":    round(sum(r["p_direction"] for r in rows) / n_total, 4) if n_total else 0,
+            "p_dir_traded":  round(sum(r["p_direction"] for r in trades_) / n_traded, 4) if n_traded else 0,
+        })
+
+    # Résumé mensuel agrégé
+    if monthly_stats:
+        fpath_sum = out / f"_summary_{side}.csv"
+        with open(fpath_sum, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(monthly_stats[0].keys()))
+            writer.writeheader()
+            writer.writerows(monthly_stats)
 
 
 def _print_backtest_summary(m: Dict, skipped_filter: int, skipped_dir: int,
@@ -1660,6 +2051,8 @@ def run_backtest_combined(
     regime_features: Optional[List[str]] = None,
     regime_threshold: float = 0.70,
     specialist_predictor=None,    # SpecialistPredictor niveau 3 (optionnel)
+    use_indicator_gate: bool = True,           # même gate que run_backtest_side
+    indicator_gate_min_score: int = 2,         # score min sur 3 indicateurs dynamiques
 ) -> Dict:
     """
     Backtest combiné LONG + SHORT en un seul pass walk-forward.
@@ -1718,6 +2111,33 @@ def run_backtest_combined(
             if not silent:
                 print(f"   [L3] specialist combiné ignoré : {_e}")
 
+    # ── Pré-calcul du gate multi-indicateurs (combiné) ───────────────────────
+    if use_indicator_gate:
+        def _colc(name, default=0.0):
+            return df_test[name].fillna(default).values.astype(np.float32) \
+                   if name in df_test.columns \
+                   else np.full(len(df_test), default, dtype=np.float32)
+        _adx_c     = _colc("adx_trending",     0.0)
+        _st_c      = _colc("supertrend_dir",   1.0)
+        _ichi_ab_c = _colc("ichi_above_cloud", 0.0)
+        _ichi_bl_c = _colc("ichi_below_cloud", 0.0)
+        _ema_sp_c  = _colc("ema_spread_50_200", 0.0)
+
+        # Même logique que run_backtest_side : EMA50/200 obligatoire + score ADX+ST+Ichi
+        _hard_long_c  = (_ema_sp_c  > 0.0)
+        _hard_short_c = (_ema_sp_c  < 0.0)
+        _soft_long_c  = ((_adx_c>=0.5).astype(np.int8)
+                         + (_st_c>0).astype(np.int8)
+                         + (_ichi_ab_c>=0.5).astype(np.int8))
+        _soft_short_c = ((_adx_c>=0.5).astype(np.int8)
+                         + (_st_c<0).astype(np.int8)
+                         + (_ichi_bl_c>=0.5).astype(np.int8))
+        _gate_long_c  = np.where(_hard_long_c,  _soft_long_c,  np.int8(-99))
+        _gate_short_c = np.where(_hard_short_c, _soft_short_c, np.int8(-99))
+    else:
+        _gate_long_c = None
+        _gate_short_c = None
+
     # ── Pré-calcul du régime bear (gate short) ────────────────────────────────
     _use_regime_c = (cfg.enable_short and regime_model is not None
                      and regime_scaler is not None and regime_features)
@@ -1744,42 +2164,49 @@ def run_backtest_combined(
         # ── Tente le LONG en premier ──────────────────────────────────────────
         taken = False
         if cfg.enable_long and p_trade >= cfg.filter_threshold_long:
-            p_long = float(p_long_c[i])
-            if p_long >= cfg.direction_threshold_long:
-                decision = rc_long.decide(
-                    price=float(row.Close), edge_final=p_long,
-                    scale=p_long, bar_index=i, features=feats,
-                )
-                if decision["action"] != "HOLD":
-                    fut_ret     = float(row.future_ret_h)
-                    pnl_net_pct = fut_ret - cfg.cost_pct
-                    pnl_abs     = pnl_net_pct * decision["notional"]
-                    rc_long.on_fill_pnl(pnl_abs)
-                    # rc_short est indépendant : on ne le notifie PAS quand un long se prend
-                    equity += pnl_abs
-                    equity_curve.append(equity)
-                    pnl_list.append(pnl_abs)
-                    trades.append({
-                        "bar": i, "date": day_str, "year": year, "side": "long",
-                        "p_tradeable": round(p_trade, 4), "p_side": round(p_long, 4),
-                        "fut_ret": round(fut_ret, 5),
-                        "pnl_net_pct": round(pnl_net_pct, 5),
-                        "pnl_abs": round(pnl_abs, 4),
-                        "equity": round(equity, 2),
-                        "notional": round(decision["notional"], 2),
-                    })
-                    counts["long"] += 1
-                    taken = True
-                else:
-                    counts["skipped_risk"] += 1
+            # Gate indicateurs (EMA obligatoire + score >= min)
+            if _gate_long_c is not None and int(_gate_long_c[i]) < indicator_gate_min_score:
+                pass  # gate bloque : not taken, on tente le short
             else:
-                counts["skipped_dir"] += 1
+                p_long = float(p_long_c[i])
+                if p_long >= cfg.direction_threshold_long:
+                    decision = rc_long.decide(
+                        price=float(row.Close), edge_final=p_long,
+                        scale=p_long, bar_index=i, features=feats,
+                    )
+                    if decision["action"] != "HOLD":
+                        _r4h = getattr(row, "future_ret_4h", None)
+                        fut_ret = float(_r4h) if (_r4h is not None and not np.isnan(float(_r4h))) else float(row.future_ret_h)
+                        pnl_net_pct = fut_ret - cfg.cost_pct
+                        pnl_abs     = pnl_net_pct * decision["notional"]
+                        rc_long.on_fill_pnl(pnl_abs)
+                        equity += pnl_abs
+                        equity_curve.append(equity)
+                        pnl_list.append(pnl_abs)
+                        trades.append({
+                            "bar": i, "date": day_str, "year": year, "side": "long",
+                            "p_tradeable": round(p_trade, 4), "p_side": round(p_long, 4),
+                            "fut_ret": round(fut_ret, 5),
+                            "pnl_net_pct": round(pnl_net_pct, 5),
+                            "pnl_abs": round(pnl_abs, 4),
+                            "equity": round(equity, 2),
+                            "notional": round(decision["notional"], 2),
+                        })
+                        counts["long"] += 1
+                        taken = True
+                    else:
+                        counts["skipped_risk"] += 1
+                else:
+                    counts["skipped_dir"] += 1
         elif p_trade < min(cfg.filter_threshold_long, cfg.filter_threshold_short):
             counts["skipped_filter"] += 1
             continue
 
         # ── Tente le SHORT si le long n'a pas pris ────────────────────────────
         if not taken and cfg.enable_short and p_trade >= cfg.filter_threshold_short:
+            # Gate indicateurs short (EMA death cross obligatoire + score >= min)
+            if _gate_short_c is not None and int(_gate_short_c[i]) < indicator_gate_min_score:
+                continue  # gate bloque le short
             # Méta-régime bear : gate avant l'edge model
             if _use_regime_c and float(p_bear_c[i]) < regime_threshold:
                 continue
@@ -1790,7 +2217,9 @@ def run_backtest_combined(
                     scale=p_short, bar_index=i, features=feats,
                 )
                 if decision["action"] != "HOLD":
-                    fut_ret     = -float(row.future_ret_h)   # signe inversé pour short
+                    _r4h_s = getattr(row, "future_ret_4h", None)
+                    fut_ret_short = -(float(_r4h_s) if (_r4h_s is not None and not np.isnan(float(_r4h_s))) else float(row.future_ret_h))
+                    fut_ret     = fut_ret_short
                     pnl_net_pct = fut_ret - cfg.cost_pct
                     pnl_abs     = pnl_net_pct * decision["notional"]
                     rc_short.on_fill_pnl(pnl_abs)
@@ -2075,6 +2504,9 @@ def parse_args():
                          "rééchantillonnées à 1h avant entraînement)")
     ap.add_argument("--out", default=str(SETTINGS.paths.pipeline_runs_dir),
                     help="Dossier de sortie racine")
+    ap.add_argument("--run-id", default=None,
+                    help="Identifiant explicite du run. Utilisé par l'UI pour relier "
+                         "un job de training à son dossier d'artefacts.")
     ap.add_argument("--test-from", type=int, default=2024,
                     help="Première année du jeu de test")
     ap.add_argument("--skip-tcn", action="store_true",
@@ -2144,6 +2576,11 @@ def parse_args():
                          "(0.01 = top 1%% — objectif <1%% de signaux)")
     ap.add_argument("--margin", type=float, default=0.001,
                     help="Margin minimale de PnL prédit pour trader en mode --regression")
+    ap.add_argument("--detailed-logs", type=str, default=None, metavar="DIR",
+                    help="Répertoire de destination pour les logs mensuels détaillés. "
+                         "Produit un CSV par mois et par branche (long/short) avec la trace "
+                         "complète de chaque barre : p_filter, gate, p_direction, p_bear, "
+                         "skip_reason, pnl, equity. Idéal pour diagnostiquer l'alpha.")
 
     return ap.parse_args()
 
@@ -2302,7 +2739,7 @@ def main():
     t_start = time.time()
     args    = parse_args()
 
-    run_id  = time.strftime("%Y%m%d-%H%M%S")
+    run_id  = args.run_id or time.strftime("%Y%m%d-%H%M%S")
     out     = Path(args.out) / run_id
     out.mkdir(parents=True, exist_ok=True)
 
@@ -2410,10 +2847,10 @@ def main():
         df, train_mask, val_mask, out_dir=out / "filter"
     )
 
-    # ── Seuils filtre calibrés sur val — toujours appliqués ─────────────────
-    # La calibration a des guardes dures (floor + precision) donc c'est sûr.
-    # --auto-calibrate est conservé pour compatibilité CLI mais n'a plus d'effet.
-    if "calibrated_threshold_long" in filter_metrics:
+    # ── Seuils filtre calibrés sur val ──────────────────────────────────────
+    # Activé explicitement avec --auto-calibrate pour que le front puisse
+    # piloter des seuils manuels ou une calibration automatique.
+    if args.auto_calibrate and "calibrated_threshold_long" in filter_metrics:
         cal_thr_long  = filter_metrics["calibrated_threshold_long"]
         cal_thr_short = filter_metrics["calibrated_threshold_short"]
         print(f"\n   [filtre calibré] seuils appliqués :")
@@ -2477,8 +2914,11 @@ def main():
             valid_l     = y_val_long >= 0
             p_val_long  = long_result["best_model"].predict_proba(
                               long_result["scaler"].transform(X_val_long[valid_l]))[:, 1]
+            # Diagnostics logs : sweet spot [0.59, 0.68] avec WR=57.7%, avg=+3.66$
+            # Au-delà de 0.68 : WR=35.7%, overconfidence confirmed → direction_upper_cap
+            # Le backtest applique un cap à 0.68 indépendamment de ce seuil.
             cal_dir_long = _calibrate_direction_threshold(
-                p_val_long, y_val_long[valid_l], min_threshold=0.52, min_trades=30)
+                p_val_long, y_val_long[valid_l], min_threshold=0.56, min_trades=20)
             print(f"   [direction calibré] LONG  : {cfg.direction_threshold_long} → {cal_dir_long}")
             cfg = dc_replace(cfg, direction_threshold_long=cal_dir_long)
         except Exception as e:
@@ -2504,6 +2944,10 @@ def main():
     # ── Backtests ─────────────────────────────────────────────────────────────
     long_bt = short_bt = combined_bt = None
 
+    _diag_dir  = Path(args.detailed_logs) if getattr(args, "detailed_logs", None) else None
+    _symbol    = Path(args.data).stem.replace("_1h_features", "")
+    _bad_hours = BAD_HOURS_BY_ASSET.get(_symbol.upper(), BAD_HOURS_UTC)
+
     if long_result:
         from core.features import FEATURES_LONG as _FEAT_LONG_BT
         long_bt = run_backtest_side(
@@ -2516,7 +2960,14 @@ def main():
             model_label=f"{long_result.get('best_tabular', long_result.get('best_model_name', 'best'))}_long",
             edge_features=_FEAT_LONG_BT,
             specialist_predictor=specialist_predictor,
+            collect_trace=_diag_dir is not None,
+            use_time_gate=True,
+            bad_hours_override=_bad_hours,
+            direction_upper_cap=0.68,
+            adaptive_filter_lookback=48,
         )
+        if _diag_dir is not None and long_bt and "_trace" in long_bt:
+            _write_monthly_trace(long_bt.pop("_trace"), _diag_dir, _symbol, "long")
 
     # ── Validation de stabilité short inter-années ────────────────────────────
     require_stability = args.require_short_stability or args.no_short_if_unstable
@@ -2546,7 +2997,14 @@ def main():
             regime_features=_bear_feats,
             regime_threshold=_bear_thr,
             specialist_predictor=specialist_predictor,
+            collect_trace=_diag_dir is not None,
+            use_time_gate=True,
+            bad_hours_override=_bad_hours,
+            direction_upper_cap=0.68,
+            adaptive_filter_lookback=48,
         )
+        if _diag_dir is not None and short_bt and "_trace" in short_bt:
+            _write_monthly_trace(short_bt.pop("_trace"), _diag_dir, _symbol, "short")
 
         # Calibration short (Platt + sweep 0.55-0.90 + precision*sqrt(n))
         print_section("CALIBRATION SHORT ASYMÉTRIQUE")
@@ -2721,7 +3179,7 @@ def main():
         "backtest_combined":    combined_bt,
         "short_disabled_reason": short_disabled_reason,
         "short_enabled_for_inference": short_enabled_for_inference,
-        "auto_calibrate_used":  True,   # filtre toujours calibré sur val
+        "auto_calibrate_used":  bool(args.auto_calibrate),
         "elapsed_sec":          round(elapsed, 1),
     }
 

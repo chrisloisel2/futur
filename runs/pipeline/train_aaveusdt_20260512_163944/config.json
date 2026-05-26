@@ -1,0 +1,30 @@
+{
+  "schema_version": 2,
+  "pipeline": "strategies.pipeline_hourly.profile",
+  "run_id": "train_aaveusdt_20260512_163944",
+  "created_at_utc": "2026-05-12T14:47:11.417872+00:00",
+  "mode": "combined",
+  "data": "data/AAVEUSDT_1h_features.csv",
+  "test_from": 2024,
+  "timeframe": "1h",
+  "horizon_bars": 1,
+  "horizon_minutes": 60,
+  "pipeline_config": {
+    "tradeable_quantile": 0.7,
+    "cost_pct": 0.001,
+    "filter_threshold_long": 0.4,
+    "direction_threshold_long": 0.56,
+    "filter_threshold_short": 0.45,
+    "direction_threshold_short": 0.55,
+    "initial_equity": 10000.0,
+    "risk_per_trade_long": 0.002,
+    "max_consecutive_losses_long": 3,
+    "cooldown_bars_long": 2,
+    "daily_loss_limit_pct": 0.02,
+    "risk_per_trade_short": 0.001,
+    "max_consecutive_losses_short": 2,
+    "cooldown_bars_short": 3,
+    "enable_long": true,
+    "enable_short": true
+  }
+}

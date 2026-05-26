@@ -1,0 +1,56 @@
+{
+  "folds": [
+    {
+      "fold": 1,
+      "test_year": 2022,
+      "n": 1168,
+      "pf": 0.575,
+      "wr": 0.343,
+      "total_return": -0.8386,
+      "max_dd": -0.8469,
+      "n_bear_hours": 3399,
+      "verdict": "FAIL"
+    },
+    {
+      "fold": 2,
+      "test_year": 2023,
+      "n": 280,
+      "pf": 0.367,
+      "wr": 0.296,
+      "total_return": -0.3792,
+      "max_dd": -0.3892,
+      "n_bear_hours": 799,
+      "verdict": "FAIL"
+    },
+    {
+      "fold": 3,
+      "test_year": 2024,
+      "n": 433,
+      "pf": 0.402,
+      "wr": 0.365,
+      "total_return": -0.4679,
+      "max_dd": -0.4766,
+      "n_bear_hours": 1320,
+      "verdict": "FAIL"
+    },
+    {
+      "fold": 4,
+      "test_year": 2025,
+      "n": 481,
+      "pf": 0.48,
+      "wr": 0.364,
+      "total_return": -0.4724,
+      "max_dd": -0.4794,
+      "n_bear_hours": 1310,
+      "verdict": "FAIL"
+    }
+  ],
+  "verdict": "SHORT_REGIME_REJECTED \u2014 revoir param\u00e8tres de r\u00e9gime",
+  "params": {
+    "REGIME_PERSIST_BARS": 48,
+    "N_SHORT_ASSETS": 3,
+    "PROFIT_ATR_MULT": 1.5,
+    "MAX_HOLD_HOURS": 72,
+    "FUNDING_ENTRY_THR": 0.0005
+  }
+}

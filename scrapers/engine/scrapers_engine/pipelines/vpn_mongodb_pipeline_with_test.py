@@ -4,6 +4,7 @@ Stores ONLY working VPNs in MongoDB after testing them
 """
 
 import logging
+import os
 from datetime import datetime
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.errors import DuplicateKeyError
@@ -76,8 +77,9 @@ class VPNMongoDBPipelineWithTesting:
     @classmethod
     def from_crawler(cls, crawler):
         """Initialize from crawler settings"""
+        local_mongo_uri = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
         return cls(
-            mongo_uri=crawler.settings.get('MONGODB_URI', 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//'),
+            mongo_uri=crawler.settings.get('MONGODB_URI', local_mongo_uri),
             mongo_db=crawler.settings.get('MONGODB_DATABASE', 'scrapers_db'),
             collection_name=crawler.settings.get('MONGODB_VPN_COLLECTION', 'vpn_proxies'),
             test_vpn=crawler.settings.getbool('VPN_TEST_BEFORE_STORE', True),

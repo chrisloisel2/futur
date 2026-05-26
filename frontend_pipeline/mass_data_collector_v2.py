@@ -33,8 +33,11 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 
 # Configuration MongoDB
-DEFAULT_URI = os.getenv("MONGO_URI", "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/")
-DEFAULT_DB = os.getenv("MONGO_DB", "trader2")
+DEFAULT_URI = os.getenv(
+    "MONGODB_URI",
+    os.getenv("FUTUR_MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017")),
+)
+DEFAULT_DB = os.getenv("MONGODB_DB", os.getenv("FUTUR_MONGO_DB", os.getenv("MONGO_DB", "trader")))
 COLLECTION = "historical_ohlcv"
 
 @dataclass
@@ -360,9 +363,7 @@ class MongoDBClient:
     def __init__(self, uri=DEFAULT_URI, db_name=DEFAULT_DB):
         self.client = MongoClient(uri)
         self.db = self.client[db_name]
-        self.collection = self.db[COLLECTION]
         self.logger = logging.getLogger(__name__)
-        self._create_indexes()
 
         # Collections séparées pour différents types de données
         self.collections = {
@@ -373,6 +374,8 @@ class MongoDBClient:
             'macro': self.db['macro_data'],
             'derivatives': self.db['derivatives_data']
         }
+        self.collection = self.collections['ohlcv']
+        self._create_indexes()
 
         # Buffer pour ingestion par batch (optimisation)
         self.buffer = {key: [] for key in self.collections.keys()}

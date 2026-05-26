@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 train_pipeline.py — Pipeline ML noyau  (horizon = 60 min, 1 barre 1h)
 ======================================================================
@@ -71,6 +72,7 @@ import json
 import sys
 import time
 import warnings
+import dataclasses
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -98,18 +100,35 @@ from level_7.RiskController import RiskController, RiskConfig, RiskState  # noqa
 from ai.level_2.long          import train_long_model
 from ai.level_2.short         import train_short_model
 from ai.level_2.short_calibrate import calibrate_direction_model as calibrate_short_model
+from ai.level_2.short_multi_horizon import (
+    train_multi_horizon_short, MultiHorizonShortModel,
+    mh_short_proba_with_gate, mh_compute_batch,
+    compute_mh_forward_returns, MH_HORIZONS,
+)
 from ai.level_3 import train_specialists, SpecialistPredictor, SpecialistConfig
 from ai.level_1.rules import (
     diagnose_regime_distribution, compute_regime_stats_by_year,
     REGIME_NO_SHORT,
 )
 from ai.level_1.bear_regime   import train_bear_regime_model
+from ai.level_1.macro_gate    import MacroGate, compute_macro_gate_series
 from core.labels import compute_short_reversal_col, compute_regime_col
-from core.feature_engineering import compute_short_features
+from ai.level_0.constants import (
+    TARGET_COL, HORIZON_BARS, TRADEABLE_QUANTILE_LONG,
+    TARGET_REVERSAL_COL, TARGET_REVERSAL_COL_LONG,
+)
+from ai.level_0.labels import compute_label_columns
+from core.features.engineering import compute_short_features
 from backtest.engine import run_wf_backtest_short
 from backtest.metrics import ShortRobustnessReport, should_deploy_short
 from ai.level_0.live_features import compute_live_features, compute_macro_features, MACRO_BUNDLE_COLS
-from ai.level_0.feature_engineering import compute_long_features, compute_flow_features
+from ai.level_0.feature_engineering import (
+    compute_long_features, compute_flow_features,
+    compute_event_features, compute_vwap_features,
+    compute_macro_cross_features,
+)
+from ai.level_0.short_features import compute_all_short_features
+from data_pipeline.features import compute_hourly_features
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -163,7 +182,7 @@ SNAPSHOT_FEATURES: List[str] = [
     "eff_ratio_12", "eff_ratio_24",
     "zscore_close_24",
     # ── Returns & trend ──────────────────────────────────────────────────────
-    "mom_logret_6", "mom_logret_12", "mom_logret_24", "mom_logret_72",
+    "mom_logret_4", "mom_logret_6", "mom_logret_12", "mom_logret_24", "mom_logret_72",
     "rsi_14", "cci_20",
     "dist_ema_20", "dist_ema_50", "dist_ema_200",
     "ema_spread_20_50", "ema_spread_50_200",
@@ -174,6 +193,25 @@ SNAPSHOT_FEATURES: List[str] = [
     "vol_imbalance",       # buy-sell volume imbalance normalisée
     # ── Temporel ──────────────────────────────────────────────────────────────
     "hour_sin", "hour_cos", "dow_sin", "dow_cos",
+    # ── Macro / Sentiment (hedge_fund bundle) — activation conditionnelle ────
+    # Ces features sont incluses si disponibles (pas d'erreur si absentes)
+    # Elles améliorent significativement la détection des barres tradeables.
+    "funding_rate_z_24",              # positionnement foule
+    "oihist_sumOpenInterest_z_24",    # conviction OI
+    "fear_greed_value_z_24",          # sentiment court terme
+    "global_ls_longShortRatio_z_24",  # ratio long/short institutionnel
+    "taker_ls_imbalance",             # desequilibre taker
+    "oi_x_fng",                       # OI × F&G double confirmation
+    "macro_confluence_long",          # score confluence bull
+    "macro_confluence_short",         # score confluence bear
+    "crowd_leverage_index",           # levier crowd composite
+]
+
+# Liste des features SNAPSHOT qui peuvent etre absentes (pas d'erreur si missing)
+SNAPSHOT_FEATURES_OPTIONAL: List[str] = [
+    "funding_rate_z_24", "oihist_sumOpenInterest_z_24", "fear_greed_value_z_24",
+    "global_ls_longShortRatio_z_24", "taker_ls_imbalance", "oi_x_fng",
+    "macro_confluence_long", "macro_confluence_short", "crowd_leverage_index",
 ]
 
 
@@ -193,7 +231,7 @@ class PipelineConfig:
     """
 
     # ── Labeling ──────────────────────────────────────────────────────────────
-    tradeable_quantile: float = 0.70   # ~30 % des barres
+    tradeable_quantile: float = TRADEABLE_QUANTILE_LONG   # top 10% — horizon 4h
     cost_pct: float = 0.001
 
     # ── Seuils de décision LONG ───────────────────────────────────────────────
@@ -387,28 +425,8 @@ def _raw1m_df_to_1h(raw: pd.DataFrame) -> pd.DataFrame:
     df_1h = df_1h.dropna(subset=["open", "close"])
     print(f"   {len(df_1h):,} barres 1h ({df_1h.index[0].date()} → {df_1h.index[-1].date()})")
 
-    print("   Calcul des SNAPSHOT_FEATURES (compute_live_features)…")
-    df_1h = compute_live_features(df_1h)
-
-    hl  = df_1h["high"] - df_1h["low"]
-    hpc = (df_1h["high"] - df_1h["close"].shift(1)).abs()
-    lpc = (df_1h["low"]  - df_1h["close"].shift(1)).abs()
-    tr  = pd.concat([hl, hpc, lpc], axis=1).max(axis=1)
-    df_1h["atr_14"] = tr.ewm(span=14, adjust=False).mean().ffill().fillna(0.0)
-
-    print("   Calcul des features LONG asymétriques (compute_long_features)…")
-    df_1h = compute_long_features(df_1h)
-
-    print("   Calcul des features flow / liquidation proxies (compute_flow_features)…")
-    df_1h = compute_flow_features(df_1h)
-
-    log_close = np.log(df_1h["close"])
-    df_1h["future_ret_h"] = log_close.shift(-1) - log_close
-
-    df_1h = df_1h.rename(columns={
-        "open": "Open", "high": "High", "low": "Low",
-        "close": "Close", "volume": "Volume",
-    })
+    print("   Calcul feature factory canonique max_public_v1…")
+    df_1h = compute_hourly_features(df_1h, include_labels=True)
     df_1h.index.name = "datetime"
     return df_1h
 
@@ -455,6 +473,68 @@ def _load_raw_1m_klines(path: Path) -> pd.DataFrame:
 
 
 def load_csv(path_arg: str) -> pd.DataFrame:
+    from data_pipeline.mongo_training import is_mongo_training_uri, load_mongo_training_uri
+
+    if is_mongo_training_uri(path_arg):
+        print("   Source MongoDB détectée — chargement collection OHLCV/features enrichie…")
+        df = load_mongo_training_uri(path_arg)
+        df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+        df = df.sort_values("datetime").set_index("datetime")
+        print("   Feature factory canonique max_public sur données Mongo enrichies...")
+        df = compute_hourly_features(df, include_labels=True)
+        _long_features_done = True
+
+        print("   Calcul des features short asymétriques...")
+        df = compute_short_features(df)
+        if "trade_intensity" not in df.columns or "vol_imbalance" not in df.columns:
+            print("   Calcul des features flow / liquidation proxies...")
+            df = compute_flow_features(df)
+        print("   Calcul des features event-driven (golden cross / EMA200 ATR)...")
+        df = compute_event_features(df)
+        print("   Calcul des features VWAP...")
+        df = compute_vwap_features(df)
+        print("   Calcul des features short gamechanger (crowding, breakdown, failed_breakout)...")
+        df = compute_all_short_features(df)
+        df = compute_label_columns(df)
+        # Features requises (core) + features optionnelles (macro bundle)
+        _snap_core = [f for f in SNAPSHOT_FEATURES if f not in SNAPSHOT_FEATURES_OPTIONAL]
+        required = _snap_core + ["Close", TARGET_COL, "atr_14", "rv_24"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise RuntimeError("Colonnes manquantes : " + ", ".join(missing))
+        # Remplir les features optionnelles absentes avec 0 (signal neutre)
+        for f in SNAPSHOT_FEATURES_OPTIONAL:
+            if f not in df.columns:
+                df[f] = 0.0
+
+        for col in SNAPSHOT_FEATURES + [TARGET_COL]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        _label_cols = {TARGET_COL, TARGET_REVERSAL_COL_LONG, TARGET_REVERSAL_COL,
+                       "future_ret_h", "future_ret_h3_min", "future_ret_h3_max"}
+        optional_cols = [c for c in df.columns
+                         if c not in _label_cols
+                         and pd.api.types.is_numeric_dtype(df[c])
+                         and df[c].isna().any()]
+        if optional_cols:
+            df[optional_cols] = df[optional_cols].ffill().fillna(0.0)
+
+        print("   Calcul des régimes short et long...")
+        df = compute_regime_col(df)
+        from core.labels import compute_long_regime_col
+        df = compute_long_regime_col(df)
+
+        _dropna_cols = _snap_core + [TARGET_COL]
+        df.index.name = "datetime"
+        df = df.dropna(subset=_dropna_cols).reset_index(drop=False)
+        if "datetime" not in df.columns:
+            possible = [c for c in ("timestamp", "index", 0) if c in df.columns]
+            if possible:
+                df = df.rename(columns={possible[0]: "datetime"})
+        df = df.set_index("datetime")
+        print(f"   {len(df):,} barres  |  {df.index[0].date()} → {df.index[-1].date()}")
+        return df
+
     p = Path(path_arg)
 
     # ── Bundle parquet (features_merged.parquet) ──────────────────────────────
@@ -463,31 +543,41 @@ def load_csv(path_arg: str) -> pd.DataFrame:
     # vers 1h via _raw1m_df_to_1h (identique au chemin CSV brut Binance).
     if p.suffix.lower() == ".parquet":
         print(f"   Bundle parquet détecté ({p.name}) → rééchantillonnage 1m→1h…")
-        _OHLCV_COLS = [
-            "datetime", "open", "high", "low", "close", "volume",
-            "quote_asset_volume", "number_of_trades",
-            "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume",
-        ]
-        # Charger OHLCV + macro cols disponibles dans le bundle
         import pyarrow.parquet as _pq
         _avail = set(_pq.read_schema(p).names)
-        _macro_present = [c for c in MACRO_BUNDLE_COLS if c in _avail]
-        raw_1m = pd.read_parquet(p, columns=_OHLCV_COLS + _macro_present)
-        raw_1m["datetime"] = pd.to_datetime(raw_1m["datetime"], utc=True, format="ISO8601")
-        raw_1m = raw_1m.set_index("datetime")
+        if "feature_version" in _avail or ("Open" in _avail and ("timestamp" in _avail or "datetime" in _avail)):
+            df = pd.read_parquet(p)
+            ts_col = "timestamp" if "timestamp" in df.columns else "datetime"
+            df[ts_col] = pd.to_datetime(df[ts_col], utc=True)
+            df = df.sort_values(ts_col).set_index(ts_col)
+            print("   Dataset training parquet max_public détecté — finalisation features…")
+            df = compute_hourly_features(df, include_labels=True)
+            _long_features_done = True
+            df = df.sort_index()
+        else:
+            _OHLCV_COLS = [
+                "datetime", "open", "high", "low", "close", "volume",
+                "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume",
+            ]
+            # Charger OHLCV + macro cols disponibles dans le bundle
+            _macro_present = [c for c in MACRO_BUNDLE_COLS if c in _avail]
+            raw_1m = pd.read_parquet(p, columns=_OHLCV_COLS + _macro_present)
+            raw_1m["datetime"] = pd.to_datetime(raw_1m["datetime"], utc=True, format="ISO8601")
+            raw_1m = raw_1m.set_index("datetime")
 
-        # Rééchantillonner OHLCV → 1h
-        df = _raw1m_df_to_1h(raw_1m[_OHLCV_COLS[1:]])  # exclure "datetime" (déjà index)
+            # Rééchantillonner OHLCV → 1h
+            df = _raw1m_df_to_1h(raw_1m[_OHLCV_COLS[1:]])  # exclure "datetime" (déjà index)
 
-        # Rééchantillonner macro → 1h (last value de chaque heure, puis ffill)
-        if _macro_present:
-            macro_1h = raw_1m[_macro_present].resample("1h").last().ffill().fillna(0.0)
-            df = df.join(macro_1h, how="left")
-            df[_macro_present] = df[_macro_present].ffill().fillna(0.0)
+            # Rééchantillonner macro → 1h (last value de chaque heure, puis ffill)
+            if _macro_present:
+                macro_1h = raw_1m[_macro_present].resample("1h").last().ffill().fillna(0.0)
+                df = df.join(macro_1h, how="left")
+                df[_macro_present] = df[_macro_present].ffill().fillna(0.0)
 
-        df = compute_macro_features(df)
-        _long_features_done = True
-        df = df.sort_index()
+            df = compute_macro_features(df)
+            _long_features_done = True
+            df = df.sort_index()
 
     # ── Détection auto du format brut 1m Binance (CSV) ───────────────────────
     else:
@@ -520,19 +610,14 @@ def load_csv(path_arg: str) -> pd.DataFrame:
             df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
             df = df.sort_values("datetime").reset_index(drop=True)
             df = df.set_index("datetime")
-
-    required = SNAPSHOT_FEATURES + ["Close", "future_ret_h", "atr_14", "rv_24"]
-    missing = [c for c in required if c not in df.columns]
-    if missing:
-        raise RuntimeError("Colonnes manquantes : " + ", ".join(missing))
-
-    for col in SNAPSHOT_FEATURES + ["future_ret_h"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+            print("   Feature factory canonique max_public (techniques avancées + contexte si présent)...")
+            df = compute_hourly_features(df, include_labels=True)
+            _long_features_done = True
 
     # ── Features long asymétriques ────────────────────────────────────────────
     if not _long_features_done:
         print("   Calcul des features long asymétriques...")
-        from core.feature_engineering import compute_long_features
+        from core.features.engineering import compute_long_features
         df = compute_long_features(df)
 
     # ── Features short asymétriques ───────────────────────────────────────────
@@ -540,16 +625,55 @@ def load_csv(path_arg: str) -> pd.DataFrame:
     df = compute_short_features(df)
 
     # ── Features flow / liquidation (si pas encore calculées) ─────────────────
-    if "trade_intensity" not in df.columns:
+    if "trade_intensity" not in df.columns or "vol_imbalance" not in df.columns:
         print("   Calcul des features flow / liquidation proxies...")
         df = compute_flow_features(df)
 
-    # ── Colonnes non-retournement (avant le split) ────────────────────────────
-    print("   Calcul future_ret_h3_min (non-retournement long)...")
-    from core.labels import compute_long_reversal_col
-    df = compute_long_reversal_col(df)
-    print("   Calcul future_ret_h3_max (non-retournement short)...")
-    df = compute_short_reversal_col(df)
+    # ── Features event-driven (golden cross, dist EMA200 normée ATR) ──────────
+    print("   Calcul des features event-driven (golden cross / EMA200 ATR)...")
+    df = compute_event_features(df)
+
+    # ── Features VWAP journalier ──────────────────────────────────────────────
+    print("   Calcul des features VWAP journalier...")
+    df = compute_vwap_features(df)
+
+    # ── Features short gamechanger (requiert vwap + macro z-scores déjà calculés) ─
+    print("   Calcul des features short gamechanger (crowding, breakdown, failed_breakout)...")
+    df = compute_all_short_features(df)
+
+    # ── Colonnes label forward (TARGET_COL + reversal) ────────────────────────
+    # compute_label_columns() calcule future_ret_8h + reversal h16_min/max
+    # en une seule passe vectorisée. Doit être appelé sur le df ENTIER.
+    if TARGET_COL not in df.columns:
+        print(f"   Calcul colonnes label (compute_label_columns — horizon {HORIZON_BARS}h)...")
+        df = compute_label_columns(df)
+    else:
+        print(f"   Colonnes label déjà présentes ({TARGET_COL}) — recalcul reversal...")
+        df = compute_label_columns(df)
+
+    # Features requises (core) + features optionnelles (macro bundle)
+    _snap_core = [f for f in SNAPSHOT_FEATURES if f not in SNAPSHOT_FEATURES_OPTIONAL]
+    required = _snap_core + ["Close", TARGET_COL, "atr_14", "rv_24"]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise RuntimeError("Colonnes manquantes : " + ", ".join(missing))
+    # Remplir les features optionnelles absentes avec 0 (signal neutre)
+    for f in SNAPSHOT_FEATURES_OPTIONAL:
+        if f not in df.columns:
+            df[f] = 0.0
+
+    for col in SNAPSHOT_FEATURES + [TARGET_COL]:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # ── Imputation NaN features (macro, flow, régime) ─────────────────────────
+    _label_cols = {TARGET_COL, TARGET_REVERSAL_COL_LONG, TARGET_REVERSAL_COL,
+                   "future_ret_h", "future_ret_h3_min", "future_ret_h3_max"}
+    optional_cols = [c for c in df.columns
+                     if c not in _label_cols
+                     and pd.api.types.is_numeric_dtype(df[c])
+                     and df[c].isna().any()]
+    if optional_cols:
+        df[optional_cols] = df[optional_cols].ffill().fillna(0.0)
 
     # ── Régimes déterministes ─────────────────────────────────────────────────
     print("   Calcul des régimes short et long...")
@@ -557,9 +681,13 @@ def load_csv(path_arg: str) -> pd.DataFrame:
     from core.labels import compute_long_regime_col
     df = compute_long_regime_col(df)
 
-    df = df.dropna(subset=SNAPSHOT_FEATURES + ["future_ret_h"]).reset_index(drop=False)
+    _dropna_cols = _snap_core + [TARGET_COL]
+    df.index.name = "datetime"   # normalise (peut être "timestamp" après _finalize_features)
+    df = df.dropna(subset=_dropna_cols).reset_index(drop=False)
     if "datetime" not in df.columns:
-        df = df.rename(columns={"index": "datetime"})
+        possible = [c for c in ("timestamp", "index", 0) if c in df.columns]
+        if possible:
+            df = df.rename(columns={possible[0]: "datetime"})
     df = df.set_index("datetime")
 
     print(f"   {len(df):,} barres  |  {df.index[0].date()} → {df.index[-1].date()}")
@@ -594,7 +722,7 @@ def build_labels(
     respectif. Ceci force chaque modèle à distinguer sa direction contre le
     bruit ET contre l'autre direction — pas de symétrie implicite.
     """
-    ret = df["future_ret_h"].values.astype(np.float64)
+    ret = df[TARGET_COL].values.astype(np.float64)
 
     # Seuil calibré sur train only (pas de leakage)
     thr = float(np.quantile(np.abs(ret[train_mask]), cfg.tradeable_quantile))
@@ -639,6 +767,14 @@ def build_labels(
 
 def chronological_split(df: pd.DataFrame, test_from_year: int = 2024
                         ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    if test_from_year <= VAL_YEAR:
+        raise RuntimeError(
+            "Split chronologique invalide: "
+            f"--test-from={test_from_year} chevauche le train ≤{TRAIN_END_YEAR} "
+            f"ou la validation ={VAL_YEAR}. Utilise --test-from {VAL_YEAR + 1} "
+            "ou plus pour éviter toute fuite temporelle."
+        )
+
     # Supporte index DatetimeIndex (nouvelle version) ou colonne "datetime"
     if isinstance(df.index, pd.DatetimeIndex):
         years = df.index.year
@@ -1368,8 +1504,8 @@ def run_backtest_side(
             skipped_risk += 1
             continue
 
-        # 4. Simulation : hold 1 barre, PnL net de coût
-        fut_ret     = float(row.future_ret_h) * ret_sign
+        # 4. Simulation : hold HORIZON_BARS barres, PnL net de coût
+        fut_ret     = float(getattr(row, TARGET_COL)) * ret_sign
         pnl_net_pct = fut_ret - cfg.cost_pct
         pnl_abs     = pnl_net_pct * decision["notional"]
 
@@ -1382,7 +1518,7 @@ def run_backtest_side(
             "action": action_name,
             "p_tradeable": round(p_trade, 4),
             "p_side": round(p_side, 4),
-            "fut_ret": round(float(row.future_ret_h), 5),
+            "fut_ret": round(float(getattr(row, TARGET_COL)), 5),
             "pnl_net_pct": round(pnl_net_pct, 5),
             "pnl_abs": round(pnl_abs, 4),
             "equity": round(rc.state.equity, 2),
@@ -1403,7 +1539,7 @@ def run_backtest_side(
         "risk_per_trade": cfg.risk_per_trade_long if side == "long" else cfg.risk_per_trade_short,
     })
 
-    bench_all_long = float(df_test["future_ret_h"].sum())
+    bench_all_long = float(df_test[TARGET_COL].sum())
 
     if _use_regime:
         m["skipped_regime"]    = skipped_regime
@@ -1476,6 +1612,8 @@ def run_backtest_combined(
     regime_features: Optional[List[str]] = None,
     regime_threshold: float = 0.70,
     specialist_predictor=None,    # SpecialistPredictor niveau 3 (optionnel)
+    mh_short_model=None,          # MultiHorizonShortModel (remplace short si fourni)
+    mh_min_agreement: float = 3/7,  # fraction min d horizons en accord
 ) -> Dict:
     """
     Backtest combiné LONG + SHORT en un seul pass walk-forward.
@@ -1513,7 +1651,31 @@ def run_backtest_combined(
     X_short_c  = df_test[_sf].fillna(0.0).values.astype(np.float32)
     p_trade_c  = filter_model.predict_proba(filter_scaler.transform(X_filt_c))[:, 1]
     p_long_c   = long_model.predict_proba(long_scaler.transform(X_long_c))[:, 1]    if cfg.enable_long  else np.zeros(len(df_test))
-    p_short_c  = short_model.predict_proba(short_scaler.transform(X_short_c))[:, 1] if cfg.enable_short else np.zeros(len(df_test))
+
+    # Modele short : multi-horizon si disponible, sinon standard
+    _mh_batch     = None   # resultat mh_compute_batch (ou None)
+    _mh_fwd_rets  = None   # {h: ret_short_h array} pour horizon adaptatif
+    if cfg.enable_short and mh_short_model is not None:
+        _mh_batch = mh_compute_batch(mh_short_model, X_short_c,
+                                     min_agreement=mh_min_agreement)
+        p_short_c = _mh_batch["p_final"].astype(np.float32)
+
+        # Precompute forward returns par horizon pour sortie adaptative
+        close_col = "Close" if "Close" in df_test.columns else "close"
+        if close_col in df_test.columns:
+            _mh_fwd_rets = compute_mh_forward_returns(
+                df_test[close_col].values.astype(np.float64),
+                mh_short_model.horizons,
+            )
+
+        if not silent:
+            n_active_mh = int((p_short_c > 0).sum())
+            print(f"   [MH] Signaux actifs : {n_active_mh}/{len(df_test)} "
+                  f"({n_active_mh/max(len(df_test),1):.1%}) "
+                  f"[agreement >= {mh_min_agreement:.0%}]")
+    else:
+        p_short_c = (short_model.predict_proba(short_scaler.transform(X_short_c))[:, 1]
+                     if cfg.enable_short else np.zeros(len(df_test)))
 
     # ── Level 3 : fusion specialists (optionnel) ──────────────────────────────
     if specialist_predictor is not None:
@@ -1543,6 +1705,12 @@ def run_backtest_combined(
     else:
         p_bear_c = np.ones(len(df_test))  # tout activé (pas de régime)
 
+    # ── Pré-calcul MacroGate vectorisé ────────────────────────────────────────
+    _macro_score_c     = df_test.get("macro_regime_score",     pd.Series(0.0, index=df_test.index)).fillna(0.0).values
+    _macro_conf_long_c = df_test.get("macro_confluence_long",  pd.Series(0.0, index=df_test.index)).fillna(0.0).values
+    _macro_conf_sht_c  = df_test.get("macro_confluence_short", pd.Series(0.0, index=df_test.index)).fillna(0.0).values
+    _macro_oi_accel_c  = df_test.get("oi_acceleration_z",      pd.Series(0.0, index=df_test.index)).fillna(0.0).values
+
     for i, row in enumerate(df_test.itertuples()):
         bar_date = pd.Timestamp(row.datetime)
         day_str  = bar_date.strftime("%Y-%m-%d")
@@ -1557,17 +1725,27 @@ def run_backtest_combined(
         feats  = {"atr_14": float(row.atr_14), "rv_24": float(row.rv_24)}
         p_trade = float(p_trade_c[i])
 
+        # ── MacroGate vectorisé : seuils dynamiques selon régime macro ────────
+        _mg = MacroGate(
+            score            = float(_macro_score_c[i]),
+            confluence_long  = float(_macro_conf_long_c[i]),
+            confluence_short = float(_macro_conf_sht_c[i]),
+            oi_accel         = float(_macro_oi_accel_c[i]),
+        )
+        _thr_long  = _mg.adjust_long_thr(cfg.direction_threshold_long)
+        _thr_short = _mg.adjust_short_thr(cfg.direction_threshold_short)
+
         # ── Tente le LONG en premier ──────────────────────────────────────────
         taken = False
         if cfg.enable_long and p_trade >= cfg.filter_threshold_long:
             p_long = float(p_long_c[i])
-            if p_long >= cfg.direction_threshold_long:
+            if p_long >= _thr_long:
                 decision = rc_long.decide(
                     price=float(row.Close), edge_final=p_long,
                     scale=p_long, bar_index=i, features=feats,
                 )
                 if decision["action"] != "HOLD":
-                    fut_ret     = float(row.future_ret_h)
+                    fut_ret     = float(getattr(row, TARGET_COL))
                     pnl_net_pct = fut_ret - cfg.cost_pct
                     pnl_abs     = pnl_net_pct * decision["notional"]
                     rc_long.on_fill_pnl(pnl_abs)
@@ -1599,14 +1777,32 @@ def run_backtest_combined(
             # Méta-régime bear : gate avant l'edge model
             if _use_regime_c and float(p_bear_c[i]) < regime_threshold:
                 continue
+            # MacroGate hard block : pas de short si macro trop bullish
+            # (bull run ETF-driven : les shorts se retournent trop vite)
+            if _mg.score > 0.60:
+                counts.setdefault("skipped_macro_bull", 0)
+                counts["skipped_macro_bull"] += 1
+                continue
             p_short = float(p_short_c[i])
-            if p_short >= cfg.direction_threshold_short:
+            if p_short >= _thr_short:
                 decision = rc_short.decide(
                     price=float(row.Close), edge_final=-p_short,
                     scale=p_short, bar_index=i, features=feats,
                 )
                 if decision["action"] != "HOLD":
-                    fut_ret     = -float(row.future_ret_h)   # signe inversé pour short
+                    # Horizon adaptatif : si MH model disponible, utiliser best_horizon
+                    # sinon retour standard (4h, signe inverse pour short)
+                    if _mh_batch is not None and _mh_fwd_rets is not None:
+                        best_h = int(_mh_batch["best_horizon"][i])
+                        _fwd   = _mh_fwd_rets.get(best_h)
+                        if _fwd is not None and i < len(_fwd) and np.isfinite(_fwd[i]):
+                            fut_ret = float(_fwd[i])  # deja signe short (positif = baisse)
+                        else:
+                            fut_ret = -float(getattr(row, TARGET_COL))
+                    else:
+                        best_h  = 4
+                        fut_ret = -float(getattr(row, TARGET_COL))
+
                     pnl_net_pct = fut_ret - cfg.cost_pct
                     pnl_abs     = pnl_net_pct * decision["notional"]
                     rc_short.on_fill_pnl(pnl_abs)
@@ -1616,7 +1812,8 @@ def run_backtest_combined(
                     trades.append({
                         "bar": i, "date": day_str, "year": year, "side": "short",
                         "p_tradeable": round(p_trade, 4), "p_side": round(p_short, 4),
-                        "fut_ret": round(float(row.future_ret_h), 5),
+                        "best_horizon": best_h,
+                        "fut_ret": round(float(getattr(row, TARGET_COL)), 5),
                         "pnl_net_pct": round(pnl_net_pct, 5),
                         "pnl_abs": round(pnl_abs, 4),
                         "equity": round(equity, 2),
@@ -1891,6 +2088,8 @@ def parse_args():
                          "rééchantillonnées à 1h avant entraînement)")
     ap.add_argument("--out", default=str(FUTUR / "runs" / "pipeline"),
                     help="Dossier de sortie racine")
+    ap.add_argument("--run-id", default=None,
+                    help="Identifiant de run optionnel (utile pour l'UI)")
     ap.add_argument("--test-from", type=int, default=2024,
                     help="Première année du jeu de test")
     ap.add_argument("--skip-tcn", action="store_true",
@@ -1914,8 +2113,8 @@ def parse_args():
                     help="Désactive la branche SHORT même en mode combined")
 
     # ── Labeling ──────────────────────────────────────────────────────────────
-    ap.add_argument("--tradeable-q", type=float, default=0.70,
-                    help="Quantile pour le seuil de label tradeable (~30%% barres)")
+    ap.add_argument("--tradeable-q", type=float, default=TRADEABLE_QUANTILE_LONG,
+                    help="Quantile pour le seuil de label tradeable (défaut=TRADEABLE_QUANTILE_LONG)")
     ap.add_argument("--cost", type=float, default=COST_PCT,
                     help="Coût round-trip pour le backtest")
 
@@ -1983,8 +2182,8 @@ def train_pnl_regressor(
     """
     Entraîne un XGBRegressor pour prédire le PnL net.
 
-    Cible  : y_long_pnl  = future_ret_h - 2*fee  (si side='long')
-              y_short_pnl = -future_ret_h - 2*fee (si side='short')
+    Cible  : y_long_pnl  = future_ret_4h - 2*fee  (si side='long')
+              y_short_pnl = -future_ret_4h - 2*fee (si side='short')
 
     Règle de trading : si pnl_pred > fee + margin ET pnl_pred ∈ top top_pct% → trade.
     Métriques primaires : profit_factor, Sharpe, avg_pnl, n_trades, trade_rate.
@@ -2049,7 +2248,7 @@ def train_pnl_regressor(
     # ── Backtest test ─────────────────────────────────────────────────────────
     p_test   = reg.predict(X_te_sc)
     ret_sign = +1.0 if side == "long" else -1.0
-    raw_rets = df.loc[test_mask, "future_ret_h"].values.astype(np.float64)
+    raw_rets = df.loc[test_mask, TARGET_COL].values.astype(np.float64)
 
     # Filtre dual : margin + top percentile
     mask_margin = p_test > (fee + margin_cal)
@@ -2118,7 +2317,7 @@ def main():
     t_start = time.time()
     args    = parse_args()
 
-    run_id  = time.strftime("%Y%m%d-%H%M%S")
+    run_id  = args.run_id or time.strftime("%Y%m%d-%H%M%S")
     out     = Path(args.out) / run_id
     out.mkdir(parents=True, exist_ok=True)
 
@@ -2252,6 +2451,8 @@ def main():
             train_tcn=not args.skip_tcn,
         )
 
+    mh_short_model = None  # MultiHorizonShortModel
+
     if cfg.enable_short:
         short_result = train_short_model(
             df=df,
@@ -2259,6 +2460,26 @@ def main():
             val_mask=val_mask,
             out_dir=out / "short",
         )
+
+        # ── MULTI-HORIZON SHORT (parallele au modele standard) ──────────────
+        print_section("STAGE 2b — MODELE SHORT MULTI-HORIZON  (H1-H2-H3-H4-H6-H8-H12)")
+        try:
+            from ai.level_0.features import FEATURES_SHORT as _FEAT_SHORT_MH
+            mh_short_model = train_multi_horizon_short(
+                df=df,
+                train_mask=train_mask,
+                val_mask=val_mask,
+                out_dir=out / "short_mh",
+                horizons=MH_HORIZONS,
+                features=list(_FEAT_SHORT_MH),
+                verbose=True,
+            )
+            print(f"\n   [MH] Meta-AUC = {mh_short_model.meta_auc:.4f}")
+        except Exception as e:
+            import traceback
+            print(f"   ⚠  Multi-horizon short echoue : {e}")
+            traceback.print_exc()
+            mh_short_model = None
 
     # ── Méta-modèle de régime bear (gate short) ───────────────────────────────
     bear_regime_result = None
@@ -2282,7 +2503,7 @@ def main():
     from dataclasses import replace as dc_replace
     if long_result:
         try:
-            from core.preprocessing import get_X as _get_X
+            from core.features.preprocessing import get_X as _get_X
             from core.features import FEATURES_LONG as _FEATS_LONG_DIR
             _feats_long = long_result.get("features") or _FEATS_LONG_DIR
             X_val_long  = _get_X(df, val_mask, _feats_long) if hasattr(_get_X, "__call__") else df.loc[val_mask, _feats_long].fillna(0.0).values.astype(np.float32)
@@ -2345,6 +2566,8 @@ def main():
         _bear_scaler  = bear_regime_result["scaler"]  if bear_regime_result else None
         _bear_feats   = bear_regime_result["features"] if bear_regime_result else None
         _bear_thr     = bear_regime_result["threshold"] if bear_regime_result else 0.70
+        # NOTE: short_bt ici utilise direction_threshold_short AVANT calibration (0.55).
+        # Le combined backtest utilisera le seuil calibré après la calibration ci-dessous.
         short_bt = run_backtest_side(
             df=df, test_mask=test_mask,
             filter_model=filter_clf, filter_scaler=filter_scaler,
@@ -2361,14 +2584,42 @@ def main():
             specialist_predictor=specialist_predictor,
         )
 
-        # Calibration short (Platt + sweep 0.55-0.90 + precision*sqrt(n))
+        # Calibration short — priorité à la dernière année train (bear market)
+        # La val 2023 est une année recovery où les shorts ne fonctionnent pas.
+        # Calibrer sur 2022 (année bear crypto max) donne un seuil bien adapté
+        # aux conditions réelles de marché baissier qui déclencheront le short en prod.
         print_section("CALIBRATION SHORT ASYMÉTRIQUE")
         try:
+            # Masque prioritaire : dernière année du train (la plus bear-like)
+            # Récupérer les années du train — compatible Index et Series
+            if "datetime" in df.columns:
+                _years_all = pd.to_datetime(df["datetime"], utc=True).dt.year.values
+            elif isinstance(df.index, pd.DatetimeIndex):
+                _years_all = df.index.year  # DatetimeIndex: .year direct (pas .dt.year)
+            else:
+                _years_all = pd.Series(df.index).dt.year.values
+
+            import numpy as _np2
+            _train_years = sorted(set(_years_all[train_mask]))
+            _cal_year    = _train_years[-1] if _train_years else 2022  # ex : 2022
+
+            _cal_mask_bear = train_mask & (_years_all == _cal_year)
+            _n_cal_bear    = int(_cal_mask_bear.sum())
+            _n_cal_val     = int(val_mask.sum())
+
+            # Choisir le masque le plus représentatif
+            if _n_cal_bear >= 1000:
+                _cal_mask = _cal_mask_bear
+                print(f"   [Calibration SHORT] Masque = train {_cal_year} ({_n_cal_bear:,} barres)")
+            else:
+                _cal_mask = val_mask
+                print(f"   [Calibration SHORT] Masque = val 2023 ({_n_cal_val:,} barres) — bear train trop petit")
+
             short_calibrator, short_cal_metrics = calibrate_short_model(
                 clf=short_result["best_model"],
                 scaler=short_result["scaler"],
                 df=df,
-                val_mask=val_mask,
+                val_mask=_cal_mask,
                 method="platt",
                 filter_by_regime=True,
                 out_dir=out / "short",
@@ -2376,6 +2627,22 @@ def main():
             short_threshold_calibrated = short_cal_metrics["recommended_threshold"]
             print(f"   Seuil short calibré : {short_threshold_calibrated:.3f}")
             json_dump(out / "short_calibration.json", short_cal_metrics)
+            # Appliquer le seuil calibré au cfg pour le combined + re-backtest short
+            cfg = dataclasses.replace(cfg, direction_threshold_short=short_threshold_calibrated)
+            # Re-backtest short avec seuil calibré (affichage final)
+            short_bt = run_backtest_side(
+                df=df, test_mask=test_mask,
+                filter_model=filter_clf, filter_scaler=filter_scaler,
+                edge_model=short_result["best_model"],
+                edge_scaler=short_result["scaler"],
+                side="short", cfg=cfg,
+                out_dir=out / "backtest_short",
+                model_label=f"{short_result.get('best_tabular', 'best')}_short_calibrated",
+                edge_features=_FEAT_SHORT_BT,
+                regime_model=_bear_model, regime_scaler=_bear_scaler,
+                regime_features=_bear_feats, regime_threshold=_bear_thr,
+                specialist_predictor=specialist_predictor,
+            )
         except Exception as e:
             print(f"   ⚠  Calibration short échouée : {e}")
 
@@ -2445,6 +2712,8 @@ def main():
             regime_features=_bear_feats,
             regime_threshold=_bear_thr,
             specialist_predictor=specialist_predictor,
+            mh_short_model=mh_short_model,   # multi-horizon short
+            mh_min_agreement=3/7,            # 3 horizons sur 7 minimum
         )
 
     # ── Tableau comparatif ────────────────────────────────────────────────────

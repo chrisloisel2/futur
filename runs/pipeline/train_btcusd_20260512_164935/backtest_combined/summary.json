@@ -1,0 +1,43 @@
+{
+  "n_tested": 20601,
+  "n_trades": 151,
+  "profit_factor": 1.0949,
+  "max_drawdown": 0.0092,
+  "sharpe_annualized": 3.2066,
+  "win_rate": 0.4702,
+  "avg_win": 6.0577,
+  "avg_loss": -4.9101,
+  "expectancy_per_trade": 0.2469,
+  "initial_equity": 10000.0,
+  "final_equity": 10037.29,
+  "total_return_pct": 0.37,
+  "by_year": {
+    "2024": {
+      "trades": 73,
+      "pnl_sum": 113.77,
+      "pf": 1.747,
+      "win_rate": 0.493
+    },
+    "2025": {
+      "trades": 53,
+      "pnl_sum": -53.94,
+      "pf": 0.688,
+      "win_rate": 0.453
+    },
+    "2026": {
+      "trades": 25,
+      "pnl_sum": -22.54,
+      "pf": 0.666,
+      "win_rate": 0.44
+    }
+  },
+  "side": "combined",
+  "model": "Combined",
+  "n_long": 64,
+  "n_short": 87,
+  "long_pf": 1.7122,
+  "short_pf": 0.6035,
+  "skipped_filter": 16012,
+  "skipped_direction": 5880,
+  "skipped_risk": 25
+}

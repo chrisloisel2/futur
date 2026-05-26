@@ -65,6 +65,7 @@ from ai.level_0.preprocessing import (
 from ai.level_0.feature_engineering import (
     compute_long_features,
     compute_short_features,
+    compute_macro_cross_features,
 )
 
 from ai.level_0.filter import train_filter_model

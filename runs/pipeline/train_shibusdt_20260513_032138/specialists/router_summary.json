@@ -1,0 +1,10 @@
+{
+  "HIGH_VOL": {
+    "accepted": true,
+    "weight": 0.4259999999999998,
+    "side": "both",
+    "auc": 0.598,
+    "macro_f1": 0.4768,
+    "n_train": 11511
+  }
+}

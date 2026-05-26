@@ -1,0 +1,383 @@
+{
+  "ece_before": 0.16994,
+  "ece_after": 0.01081,
+  "calibration_method": "platt",
+  "recommended_threshold": 0.57,
+  "threshold_stable": true,
+  "threshold_sweep": [
+    {
+      "threshold": 0.52,
+      "n_trades": 130,
+      "pnl": 5.286,
+      "profit_factor": 362.765,
+      "win_rate": 0.985,
+      "expectancy": 0.04066,
+      "score": 167.717733,
+      "precision": 0.985
+    },
+    {
+      "threshold": 0.53,
+      "n_trades": 128,
+      "pnl": 5.209,
+      "profit_factor": 357.5,
+      "win_rate": 0.984,
+      "expectancy": 0.0407,
+      "score": 164.139035,
+      "precision": 0.984
+    },
+    {
+      "threshold": 0.54,
+      "n_trades": 126,
+      "pnl": 5.1811,
+      "profit_factor": 610.349,
+      "win_rate": 0.992,
+      "expectancy": 0.04112,
+      "score": 281.256167,
+      "precision": 0.992
+    },
+    {
+      "threshold": 0.55,
+      "n_trades": 126,
+      "pnl": 5.1811,
+      "profit_factor": 610.349,
+      "win_rate": 0.992,
+      "expectancy": 0.04112,
+      "score": 281.256167,
+      "precision": 0.992
+    },
+    {
+      "threshold": 0.56,
+      "n_trades": 123,
+      "pnl": 5.0837,
+      "profit_factor": 598.893,
+      "win_rate": 0.992,
+      "expectancy": 0.04133,
+      "score": 274.062504,
+      "precision": 0.992
+    },
+    {
+      "threshold": 0.57,
+      "n_trades": 118,
+      "pnl": 4.9555,
+      "profit_factor": 4955497732.334,
+      "win_rate": 1.0,
+      "expectancy": 0.042,
+      "score": 2260651201.60594,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.58,
+      "n_trades": 118,
+      "pnl": 4.9555,
+      "profit_factor": 4955497732.334,
+      "win_rate": 1.0,
+      "expectancy": 0.042,
+      "score": 2260651201.60594,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.59,
+      "n_trades": 115,
+      "pnl": 4.8749,
+      "profit_factor": 4874896037.787,
+      "win_rate": 1.0,
+      "expectancy": 0.04239,
+      "score": 2216061437.25514,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.6,
+      "n_trades": 112,
+      "pnl": 4.8076,
+      "profit_factor": 4807566610.378,
+      "win_rate": 1.0,
+      "expectancy": 0.04292,
+      "score": 2183944557.804119,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.61,
+      "n_trades": 110,
+      "pnl": 4.7348,
+      "profit_factor": 4734821764.828,
+      "win_rate": 1.0,
+      "expectancy": 0.04304,
+      "score": 2137523646.856319,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.62,
+      "n_trades": 106,
+      "pnl": 4.6119,
+      "profit_factor": 4611875314.447,
+      "win_rate": 1.0,
+      "expectancy": 0.04351,
+      "score": 2065866160.704624,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.63,
+      "n_trades": 102,
+      "pnl": 4.4514,
+      "profit_factor": 4451414472.69,
+      "win_rate": 1.0,
+      "expectancy": 0.04364,
+      "score": 1961986347.267098,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.64,
+      "n_trades": 100,
+      "pnl": 4.3854,
+      "profit_factor": 4385417000.626,
+      "win_rate": 1.0,
+      "expectancy": 0.04385,
+      "score": 1923188226.4994,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.65,
+      "n_trades": 97,
+      "pnl": 4.2742,
+      "profit_factor": 4274247133.635,
+      "win_rate": 1.0,
+      "expectancy": 0.04406,
+      "score": 1854955053.953383,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.66,
+      "n_trades": 95,
+      "pnl": 4.198,
+      "profit_factor": 4198003147.709,
+      "win_rate": 1.0,
+      "expectancy": 0.04419,
+      "score": 1808105290.880476,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.67,
+      "n_trades": 90,
+      "pnl": 3.9831,
+      "profit_factor": 3983110833.897,
+      "win_rate": 1.0,
+      "expectancy": 0.04426,
+      "score": 1672335956.975929,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.68,
+      "n_trades": 86,
+      "pnl": 3.8157,
+      "profit_factor": 3815676160.44,
+      "win_rate": 1.0,
+      "expectancy": 0.04437,
+      "score": 1569978812.974143,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.69,
+      "n_trades": 82,
+      "pnl": 3.6651,
+      "profit_factor": 3665129807.1,
+      "win_rate": 1.0,
+      "expectancy": 0.0447,
+      "score": 1483446180.842667,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.7,
+      "n_trades": 79,
+      "pnl": 3.5519,
+      "profit_factor": 3551910897.115,
+      "win_rate": 1.0,
+      "expectancy": 0.04496,
+      "score": 1419418885.900532,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.71,
+      "n_trades": 75,
+      "pnl": 3.3932,
+      "profit_factor": 3393164197.018,
+      "win_rate": 1.0,
+      "expectancy": 0.04524,
+      "score": 1329471770.022093,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.72,
+      "n_trades": 70,
+      "pnl": 3.148,
+      "profit_factor": 3148038815.217,
+      "win_rate": 1.0,
+      "expectancy": 0.04497,
+      "score": 1184489286.528597,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.73,
+      "n_trades": 69,
+      "pnl": 3.1176,
+      "profit_factor": 3117636199.771,
+      "win_rate": 1.0,
+      "expectancy": 0.04518,
+      "score": 1170109015.576966,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.74,
+      "n_trades": 66,
+      "pnl": 3.0187,
+      "profit_factor": 3018734230.443,
+      "win_rate": 1.0,
+      "expectancy": 0.04574,
+      "score": 1121702766.179764,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.75,
+      "n_trades": 63,
+      "pnl": 2.9255,
+      "profit_factor": 2925499823.105,
+      "win_rate": 1.0,
+      "expectancy": 0.04644,
+      "score": 1078275847.553654,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.76,
+      "n_trades": 58,
+      "pnl": 2.7457,
+      "profit_factor": 2745744030.647,
+      "win_rate": 1.0,
+      "expectancy": 0.04734,
+      "score": 989933677.682912,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.77,
+      "n_trades": 54,
+      "pnl": 2.5527,
+      "profit_factor": 2552742023.545,
+      "win_rate": 1.0,
+      "expectancy": 0.04727,
+      "score": 886782217.319475,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.78,
+      "n_trades": 46,
+      "pnl": 2.1823,
+      "profit_factor": 2182309879.918,
+      "win_rate": 1.0,
+      "expectancy": 0.04744,
+      "score": 702188838.003148,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.79,
+      "n_trades": 44,
+      "pnl": 2.0818,
+      "profit_factor": 2081778902.363,
+      "win_rate": 1.0,
+      "expectancy": 0.04731,
+      "score": 653345444.568152,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.8,
+      "n_trades": 41,
+      "pnl": 1.9663,
+      "profit_factor": 1966314988.523,
+      "win_rate": 1.0,
+      "expectancy": 0.04796,
+      "score": 603829394.644762,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.81,
+      "n_trades": 35,
+      "pnl": 1.7204,
+      "profit_factor": 1720377946.303,
+      "win_rate": 1.0,
+      "expectancy": 0.04915,
+      "score": 500280656.264755,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.82,
+      "n_trades": 32,
+      "pnl": 1.6211,
+      "profit_factor": 1621089600.932,
+      "win_rate": 1.0,
+      "expectancy": 0.05066,
+      "score": 464557044.732958,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.83,
+      "n_trades": 30,
+      "pnl": 1.5389,
+      "profit_factor": 1538917629.013,
+      "win_rate": 1.0,
+      "expectancy": 0.0513,
+      "score": 432384504.69074,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.84,
+      "n_trades": 25,
+      "pnl": 1.2662,
+      "profit_factor": 1266201610.431,
+      "win_rate": 1.0,
+      "expectancy": 0.05065,
+      "score": 320653303.39813,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.85,
+      "n_trades": 20,
+      "pnl": 1.0364,
+      "profit_factor": 1036395957.866,
+      "win_rate": 1.0,
+      "expectancy": 0.05182,
+      "score": 240179768.963591,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.86,
+      "n_trades": 17,
+      "pnl": 0.8841,
+      "profit_factor": 884084369.837,
+      "win_rate": 1.0,
+      "expectancy": 0.052,
+      "score": 189567098.948289,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.87,
+      "n_trades": 14,
+      "pnl": 0.7231,
+      "profit_factor": 723077563.884,
+      "win_rate": 1.0,
+      "expectancy": 0.05165,
+      "score": 139735178.457828,
+      "precision": 1.0
+    },
+    {
+      "threshold": 0.88,
+      "n_trades": 8,
+      "pnl": 0.4142,
+      "profit_factor": 414189037.711,
+      "win_rate": 1.0,
+      "expectancy": 0.05177,
+      "score": 60652988.738886,
+      "precision": 1.0
+    }
+  ],
+  "n_val_calibration": 7061,
+  "n_val_short_signals": 160,
+  "cost_short_used": 0.0015,
+  "regime_filtered": true
+}

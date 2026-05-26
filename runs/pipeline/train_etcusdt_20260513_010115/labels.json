@@ -1,0 +1,37 @@
+{
+  "thr_long": 0.016013,
+  "thr_long_raw_quantile": 0.016013,
+  "thr_short_raw": 0.031107,
+  "thr_short_with_cost": 0.032607,
+  "cost_pct_long": 0.001,
+  "cost_pct_short": 0.0015,
+  "tradeable_quantile_long": 0.7,
+  "tradeable_quantile_short": 0.88,
+  "n_total": 69082,
+  "n_tradeable": 12175,
+  "n_long": 2310,
+  "n_short": 968,
+  "n_long_gray": 6624,
+  "n_short_gray": 2000,
+  "n_reversal_rejected": 1408,
+  "n_reversal_long_rejected": 5928,
+  "n_long_net": 8242,
+  "n_short_net": 2794,
+  "frac_long": 0.0334,
+  "frac_short": 0.014,
+  "long_vs_short_ratio": 2.3864,
+  "regime_distribution": {
+    "NEUTRAL": 32849,
+    "SHORTABLE": 24739,
+    "NO_SHORT": 11494
+  },
+  "regime_long_distribution": {
+    "NEUTRAL": 36550,
+    "LONGABLE": 18783,
+    "NO_LONG": 13749
+  },
+  "warning_low_long": false,
+  "warning_low_short": false,
+  "warning_imbalanced": false,
+  "warning_short_too_rare": true
+}

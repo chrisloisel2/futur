@@ -31,6 +31,7 @@ from ai.level_1.rules import (
 )
 
 from ai.level_1.bear_regime import train_bear_regime_model
+from ai.level_1.macro_gate import MacroGate, compute_macro_gate_series
 
 __all__ = [
     # Règles déterministes
@@ -43,4 +44,7 @@ __all__ = [
     "REGIME_NEUTRAL",
     # Méta-modèle ML
     "train_bear_regime_model",
+    # Gate macro dynamique
+    "MacroGate",
+    "compute_macro_gate_series",
 ]

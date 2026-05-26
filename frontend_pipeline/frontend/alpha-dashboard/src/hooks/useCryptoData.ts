@@ -2,8 +2,7 @@
  * Hook React pour consommer l'API crypto data
  */
 import { useState, useEffect, useCallback } from 'react';
-
-const API_BASE_URL = 'http://localhost:8000';
+import { API_BASE_URL, WS_BASE_URL } from '../config/api';
 
 export interface CryptoMetrics {
   current_price: number;
@@ -258,7 +257,7 @@ export function useRealtimeData() {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const websocket = new WebSocket('ws://localhost:8000/ws');
+    const websocket = new WebSocket(`${WS_BASE_URL}/ws`);
 
     websocket.onopen = () => {
       console.log('WebSocket connected');

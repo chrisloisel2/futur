@@ -473,26 +473,32 @@ def load_data(
     label_version: str = "original",
     label_thr: float = 0.0,
 ) -> pd.DataFrame:
-    p = Path(path_arg)
+    from data_pipeline.mongo_training import is_mongo_training_uri, load_mongo_training_uri
 
-    # ── Bundle parquet ────────────────────────────────────────────────────────
-    if p.suffix.lower() == ".parquet":
-        raw = _bundle_parquet_to_1h_local(p)
-    elif p.is_dir():
-        files = sorted(p.glob("*features*.csv"))
-        if not files:
-            files = sorted(p.glob("*.csv"))
-        if not files:
-            raise RuntimeError(f"Aucun CSV dans {p}")
-        print(f"📂 {len(files)} fichier(s) trouvé(s) dans {p}")
-        frames = []
-        for f in files:
-            print(f"   └ {f.name}")
-            frames.append(pd.read_csv(f, low_memory=False))
-        raw = pd.concat(frames, ignore_index=True)
+    if is_mongo_training_uri(path_arg):
+        print("📡 Chargement MongoDB enrichi")
+        raw = load_mongo_training_uri(path_arg)
     else:
-        print(f"📄 Chargement : {p.name}")
-        raw = pd.read_csv(p, low_memory=False)
+        p = Path(path_arg)
+
+        # ── Bundle parquet ────────────────────────────────────────────────────────
+        if p.suffix.lower() == ".parquet":
+            raw = _bundle_parquet_to_1h_local(p)
+        elif p.is_dir():
+            files = sorted(p.glob("*features*.csv"))
+            if not files:
+                files = sorted(p.glob("*.csv"))
+            if not files:
+                raise RuntimeError(f"Aucun CSV dans {p}")
+            print(f"📂 {len(files)} fichier(s) trouvé(s) dans {p}")
+            frames = []
+            for f in files:
+                print(f"   └ {f.name}")
+                frames.append(pd.read_csv(f, low_memory=False))
+            raw = pd.concat(frames, ignore_index=True)
+        else:
+            print(f"📄 Chargement : {p.name}")
+            raw = pd.read_csv(p, low_memory=False)
 
     required = FEATURE_KEYS + [
         "datetime", "label_regime_3", "label_tradeable",

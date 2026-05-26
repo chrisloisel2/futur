@@ -47,7 +47,7 @@ APIs Gratuites Requises:
   • Solana: Optionnel (RPC public disponible)
 
 Base MongoDB:
-  • URI: mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/
+  • URI: mongodb://localhost:27017
   • Database: whale_data
   • Collection: whale_transactions
         """

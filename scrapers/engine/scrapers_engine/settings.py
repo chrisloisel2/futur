@@ -3,6 +3,9 @@ Scrapy settings for scrapers_engine project
 
 Configuration pour un scraping respectueux et efficace.
 """
+import os
+
+LOCAL_MONGODB_URI = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017")))
 
 BOT_NAME = 'scrapers_engine'
 
@@ -112,9 +115,11 @@ STORAGE_PATH = 'data/raw_articles'
 DATABASE_URL = 'sqlite:///data/scraped_articles.db'
 
 # MongoDB Configuration (for VPN storage)
-MONGODB_URI = 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//'
-MONGODB_DATABASE = 'scrapers_db'
-MONGODB_VPN_COLLECTION = 'vpn_proxies'
+MONGODB_URI = os.getenv('SCRAPERS_MONGODB_URI', LOCAL_MONGODB_URI)
+MONGODB_DATABASE = os.getenv('MONGODB_DATABASE', 'scrapers_db')
+MONGODB_VPN_COLLECTION = os.getenv('MONGODB_VPN_COLLECTION', 'vpn_proxies')
+WHALE_MONGODB_URI = os.getenv('WHALE_MONGODB_URI', LOCAL_MONGODB_URI)
+WHALE_MONGODB_DATABASE = os.getenv('WHALE_MONGODB_DATABASE', 'whale_data')
 
 # VPN Testing Configuration (for vpn_mongodb_pipeline_with_test.py)
 VPN_TEST_BEFORE_STORE = True  # Enable/disable VPN testing before storage
@@ -176,8 +181,8 @@ API_KEYS = {
 # ============================================================================
 
 # MongoDB pour transactions whale
-BLOCKCHAIN_MONGODB_URI = 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/'
-BLOCKCHAIN_MONGODB_DATABASE = 'whale_data'
+BLOCKCHAIN_MONGODB_URI = os.getenv('BLOCKCHAIN_MONGODB_URI', LOCAL_MONGODB_URI)
+BLOCKCHAIN_MONGODB_DATABASE = os.getenv('BLOCKCHAIN_MONGODB_DATABASE', 'whale_data')
 
 # Seuil de valeur minimale pour qualifier une transaction de "whale"
 WHALE_MIN_USD_VALUE = 100000  # $100,000 USD

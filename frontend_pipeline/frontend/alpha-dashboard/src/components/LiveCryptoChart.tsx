@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './LiveCryptoChart.css';
+import { API_BASE_URL } from '../config/api';
 
 interface PricePoint {
   time: number;
@@ -81,7 +82,7 @@ const LiveCryptoChart: React.FC = () => {
   const loadDayHistory = async (symbol: string) => {
     try {
       // Charger les données du jour depuis l'API backend
-      const response = await fetch(`http://localhost:8000/market/klines?symbol=${symbol}&interval=1m&limit=1440`);
+      const response = await fetch(`${API_BASE_URL}/market/klines?symbol=${symbol}&interval=1m&limit=1440`);
       const data = await response.json();
 
       if (data && data.length > 0) {
@@ -106,7 +107,7 @@ const LiveCryptoChart: React.FC = () => {
   const fetchPredictions = async (symbol: string) => {
     try {
       // Appeler l'API de prédictions futures
-      const response = await fetch(`http://localhost:8000/pipeline/predictions/future/${symbol}?minutes=60`);
+      const response = await fetch(`${API_BASE_URL}/pipeline/predictions/future/${symbol}?minutes=60`);
       const data = await response.json();
 
       if (data && data.predictions) {

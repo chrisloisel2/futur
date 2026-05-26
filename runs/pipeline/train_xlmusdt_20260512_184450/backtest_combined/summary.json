@@ -1,0 +1,31 @@
+{
+  "n_tested": 20642,
+  "n_trades": 1,
+  "profit_factor": 0.0,
+  "max_drawdown": 0.0028,
+  "sharpe_annualized": 0.0,
+  "win_rate": 0.0,
+  "avg_win": 0.0,
+  "avg_loss": -28.2053,
+  "expectancy_per_trade": -28.2053,
+  "initial_equity": 10000.0,
+  "final_equity": 9971.79,
+  "total_return_pct": -0.28,
+  "by_year": {
+    "2026": {
+      "trades": 1,
+      "pnl_sum": -28.21,
+      "pf": 0.0,
+      "win_rate": 0.0
+    }
+  },
+  "side": "combined",
+  "model": "Combined",
+  "n_long": 1,
+  "n_short": 0,
+  "long_pf": 0.0,
+  "short_pf": Infinity,
+  "skipped_filter": 13664,
+  "skipped_direction": 9183,
+  "skipped_risk": 0
+}

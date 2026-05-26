@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import './DatasetExplorer.css';
+import { API_BASE_URL } from '../config/api';
 
 interface CryptoIntegrity {
   crypto: string;
@@ -100,7 +101,7 @@ const DatasetExplorer: React.FC = () => {
 
   const fetchIntegrityData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/data-integrity/all');
+      const response = await fetch(`${API_BASE_URL}/data-integrity/all`);
       const data = await response.json();
       setIntegrityData(data);
       setLoading(false);
@@ -112,7 +113,7 @@ const DatasetExplorer: React.FC = () => {
 
   const fetchCryptoData = async (crypto: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/dataset/crypto-data/${crypto}?limit=500`);
+      const response = await fetch(`${API_BASE_URL}/dataset/crypto-data/${crypto}?limit=500`);
       const result = await response.json();
       setCryptoData(result.data || []);
     } catch (err) {

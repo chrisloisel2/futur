@@ -1,0 +1,49 @@
+{
+  "n_tested": 20631,
+  "n_trades": 202,
+  "profit_factor": 0.7801,
+  "max_drawdown": 0.0216,
+  "sharpe_annualized": -8.2634,
+  "win_rate": 0.3861,
+  "avg_win": 7.4269,
+  "avg_loss": -5.9884,
+  "expectancy_per_trade": -0.8083,
+  "initial_equity": 10000.0,
+  "final_equity": 9836.73,
+  "total_return_pct": -1.63,
+  "by_year": {
+    "2024": {
+      "trades": 60,
+      "pnl_sum": -18.04,
+      "pf": 0.919,
+      "win_rate": 0.417
+    },
+    "2025": {
+      "trades": 118,
+      "pnl_sum": -96.66,
+      "pf": 0.765,
+      "win_rate": 0.364
+    },
+    "2026": {
+      "trades": 24,
+      "pnl_sum": -48.57,
+      "pf": 0.55,
+      "win_rate": 0.417
+    }
+  },
+  "side": "short",
+  "model": "HistGBT_short",
+  "filter_threshold": 0.45,
+  "direction_threshold": 0.55,
+  "cost_pct": 0.001,
+  "skipped_filter": 14802,
+  "skipped_direction": 919,
+  "skipped_risk": 217,
+  "risk_per_trade": 0.001,
+  "skipped_regime": 3827,
+  "n_bear_activated": 2002,
+  "regime_threshold": 0.7600000000000003,
+  "regime_model_used": true,
+  "skipped_indicator_gate": 664,
+  "indicator_gate_min_score": 2
+}

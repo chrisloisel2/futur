@@ -1,5 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000';
-
+import { API_BASE_URL } from '../config/api';
 export class DataService {
   static async getSummary() {
     const response = await fetch(`${API_BASE_URL}/dataset/summary`);
@@ -247,6 +246,12 @@ export class DataService {
   static async getLevelMetrics(levelId: number) {
     const response = await fetch(`${API_BASE_URL}/ml/level/${levelId}/metrics`);
     if (!response.ok) throw new Error(`Failed to fetch Level ${levelId} metrics`);
+    return response.json();
+  }
+
+  static async getAIStackOverview() {
+    const response = await fetch(`${API_BASE_URL}/ai/stack-overview`);
+    if (!response.ok) throw new Error('Failed to fetch AI stack overview');
     return response.json();
   }
 }

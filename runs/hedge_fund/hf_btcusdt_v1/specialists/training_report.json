@@ -1,0 +1,42 @@
+{
+  "elapsed_seconds": 0.6,
+  "n_contexts_trained": 5,
+  "n_accepted": 2,
+  "experts": {
+    "TREND_LONG": {
+      "status": "accepted",
+      "auc": 0.7421,
+      "macro_f1": 0.5327,
+      "acc": 0.968,
+      "precision_pos": 0.0741,
+      "recall_pos": 0.0909,
+      "n_train": 2391,
+      "n_val": 1405,
+      "label": "y_long",
+      "context": "TREND_LONG",
+      "ece_after_calibration": 0.0
+    },
+    "BREAKOUT": {
+      "status": "rejected"
+    },
+    "TREND_SHORT": {
+      "status": "rejected"
+    },
+    "MEAN_REVERSION": {
+      "status": "rejected"
+    },
+    "HIGH_VOL": {
+      "status": "accepted",
+      "auc": 0.5621,
+      "macro_f1": 0.5137,
+      "acc": 0.9582,
+      "precision_pos": 0.0541,
+      "recall_pos": 0.0444,
+      "n_train": 17238,
+      "n_val": 1864,
+      "label": "y_long",
+      "context": "HIGH_VOL",
+      "ece_after_calibration": 0.0
+    }
+  }
+}

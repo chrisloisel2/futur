@@ -4,6 +4,7 @@ Retrieves and manages VPN proxies from MongoDB for use in scrapers
 """
 
 import logging
+import os
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 import random
@@ -25,11 +26,11 @@ class VPNManager:
 
     def __init__(
         self,
-        mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
+        mongo_uri=None,
         mongo_db='scrapers_db',
         collection_name='vpn_proxies'
     ):
-        self.mongo_uri = mongo_uri
+        self.mongo_uri = mongo_uri or os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
         self.mongo_db = mongo_db
         self.collection_name = collection_name
 
@@ -388,7 +389,7 @@ _vpn_manager = None
 
 
 def get_vpn_manager(
-    mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
+    mongo_uri=None,
     mongo_db='scrapers_db',
     collection_name='vpn_proxies'
 ) -> VPNManager:

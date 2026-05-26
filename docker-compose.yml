@@ -1,0 +1,62 @@
+version: "3.7"
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: futur-mongodb
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  qdrant:
+    image: qdrant/qdrant:v1.17.0
+    container_name: futur-qdrant
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/127.0.0.1/6333'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    image: node:20-bookworm
+    container_name: futur-frontend
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "0.0.0.0:3000:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      BROWSER: none
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      WDS_SOCKET_PORT: "3000"
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+    volumes:
+      - ./frontend_pipeline/frontend/alpha-dashboard:/app
+      - frontend_node_modules:/app/node_modules
+    command: >
+      sh -lc "if [ ! -d node_modules/react-scripts ]; then npm ci; fi;
+      npm start"
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+  qdrant_storage:
+  frontend_node_modules:

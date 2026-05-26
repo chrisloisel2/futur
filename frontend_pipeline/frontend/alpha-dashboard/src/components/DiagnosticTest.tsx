@@ -2,6 +2,7 @@
  * Composant de diagnostic pour tester la connexion API
  */
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface TestResult {
   url: string;
@@ -23,9 +24,9 @@ const DiagnosticTest: React.FC = () => {
 
   const testAPI = async () => {
     const tests: TestResults = {
-      'API Health': { url: 'http://localhost:8000/health', result: null, error: null },
-      'BTC/USDT Data': { url: 'http://localhost:8000/api/historical/BTC/USDT?limit=2', result: null, error: null },
-      'DOGE/USDT Data': { url: 'http://localhost:8000/api/historical/DOGE/USDT?limit=2', result: null, error: null }
+      'API Health': { url: `${API_BASE_URL}/health`, result: null, error: null },
+      'BTC/USDT Data': { url: `${API_BASE_URL}/api/historical/BTC/USDT?limit=2`, result: null, error: null },
+      'DOGE/USDT Data': { url: `${API_BASE_URL}/api/historical/DOGE/USDT?limit=2`, result: null, error: null }
     };
 
     for (const [testName, test] of Object.entries(tests)) {

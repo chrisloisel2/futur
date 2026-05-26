@@ -1,92 +1,143 @@
 """
-ai/level_2/short_specialists.py — FLOTTÉE TRM SHORT (spécialistes par contexte)
+ai/level_2/short_specialists.py — FLOTTÉE TRM SHORT v3 (10 spécialistes OHLCV)
 ================================================================================
 
-TRMShortFleet — architecture symétrique à TRMFleet (tiny_specialists.py) mais
-orientée SHORT et guidée par les contextes sémantiques définis dans
-level_1/short_rules.py plutôt que par des contextes techniques.
+v3 — routage exclusif OHLCV-only (symétrique à TRMFleet v2, tiny_specialists.py)
 
-Contextes (7 spécialistes) :
-    crowded_longs    → foule extrêmement longée : fade de la crowd
-    breakdown        → structure cassée : continuation baissière post-cassure
-    failed_breakout  → faux breakout haussier : retournement rapide
-    liquidity_stress → stress de liquidité : cascades de liquidation longs
-    bear_continuation→ trend baissier établi : continuation momentum
-    macro_riskoff    → régime risk-off global : macro force baissière
-    general_short    → contexte générique (catch-all)
+Problème v2 :
+  - Contextes basés sur features macro (funding, L/S, OI) absentes des CSV
+  - Routage multi-booléen → 5/7 spécialistes disabled (n_train < _MIN_N_TRAIN)
+  - general_short absorbait 95%+ des barres
 
-Routage :
-    p_final = 0.70 × p_ctx + 0.30 × p_general
-    Si 2 contextes actifs :
-      p_final = 0.50 × p_top1 + 0.25 × p_top2 + 0.25 × p_general
+v3 design :
+  1. 10 contextes exclusifs basés UNIQUEMENT sur OHLCV + indicateurs techniques
+  2. Routage déterministe par escalier de priorité (classify_short_context)
+  3. Chaque spécialiste entraîné sur son contexte + general_short sur toutes les barres
+  4. Soft routing : p_final = 0.65 × p_specialist + 0.35 × p_general
+  5. StandardScaler par spécialiste + class_weight pour déséquilibre
 
-Apprentissage récursif (hard examples) :
-    Round 1 : entraînement normal sur les barres du contexte
-    Round 2 : sample_weight ×3 sur les barres difficiles (hard examples)
-    Round 3 : optionnel si val AUC s'améliore > 0.005
+Contextes (10, exclusifs, priorité décroissante) :
+  dc_fresh          → death cross récent (< 7 barres) : naissant bear
+  vol_expand_bear   → volatilité explosant vers le bas
+  dc_mature         → EMA50 < EMA200 établi (> 7 barres)
+  breakdown         → structure cassée (sous VWAP + sous EMA20)
+  failed_breakout   → faux breakout haussier (échec + upper wick)
+  overbought_fade   → extension extrême à la hausse (RSI>65 ou dist_ema>4%)
+  vol_compress_bear → compression volatile + biais baissier
+  bear_momentum     → momentum fortement négatif + stack EMA bearish
+  wick_rejection    → grandes mèches supérieures (rejections)
+  general_short     → catch-all
 
-Calibration :
-    Platt (LogisticRegression C=1.0) si n_val >= 200
-    Isotonic sinon
-    Spécialiste désactivé si n_train < 50 (pas assez de données de contexte)
-
-Note :
-    HistGradientBoostingClassifier ne supporte pas class_weight directement
-    dans la version standard de sklearn — on utilise sample_weight au lieu.
-    Les classes déséquilibrées sont compensées par un sample_weight calculé
-    sur le ratio neg/pos, puis ×3 sur les hard examples au round 2.
+Routage soft :
+  p_final = SPECIALIST_W × p_specialist(ctx) + GENERAL_W × p_general
+  SPECIALIST_W=0.65, GENERAL_W=0.35
 """
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
-from sklearn.isotonic import IsotonicRegression
-from sklearn.linear_model import LogisticRegression as PlattLR
 from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import StandardScaler
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Constantes
+# Contextes et routage OHLCV
 # ─────────────────────────────────────────────────────────────────────────────
 
-CONTEXTS = [
-    "crowded_longs",
+CONTEXT_NAMES = [
+    "dc_fresh",
+    "vol_expand_bear",
+    "dc_mature",
     "breakdown",
     "failed_breakout",
-    "liquidity_stress",
-    "bear_continuation",
-    "macro_riskoff",
+    "overbought_fade",
+    "vol_compress_bear",
+    "bear_momentum",
+    "wick_rejection",
     "general_short",
 ]
 
-# Colonnes ctx_* correspondantes (générées par short_rules.compute_short_permission_context)
-_CTX_COL: Dict[str, str] = {
-    "crowded_longs":    "ctx_crowded_longs",
-    "breakdown":        "ctx_breakdown",
-    "failed_breakout":  "ctx_failed_breakout",
-    "liquidity_stress": "ctx_liquidity_stress",
-    "bear_continuation":"ctx_bear_continuation",
-    "macro_riskoff":    "ctx_macro_riskoff",
-    "general_short":    "ctx_general_short",
+_REASON_MAP: Dict[str, str] = {
+    "dc_fresh":          "Death cross récent — momentum baissier naissant",
+    "vol_expand_bear":   "Expansion de volatilité baissière",
+    "dc_mature":         "Bear établi — EMA50 < EMA200",
+    "breakdown":         "Structure cassée — sous VWAP + sous EMA20",
+    "failed_breakout":   "Faux breakout haussier — rejet + mèche",
+    "overbought_fade":   "Extension extrême à la hausse — fade",
+    "vol_compress_bear": "Compression volatile + biais baissier",
+    "bear_momentum":     "Momentum fortement négatif",
+    "wick_rejection":    "Rejection par grande mèche supérieure",
+    "general_short":     "Contexte générique (catch-all)",
 }
 
-# Poids du routage
-_W_CTX     = 0.70
-_W_GEN     = 0.30
-_W_CTX2    = 0.50    # si 2 contextes actifs : top-1
-_W_CTX2_2  = 0.25    # top-2
-_W_GEN2    = 0.25    # général
 
-_MIN_N_TRAIN    = 50    # seuil minimal pour activer un spécialiste
-_HARD_THRESHOLD_HI = 0.55  # y=0 mais p > 0.55 → hard
-_HARD_THRESHOLD_LO = 0.45  # y=1 mais p < 0.45 → hard
-_HARD_WEIGHT    = 3.0
-_AUC_MIN_IMPROVE = 0.005   # amélioration minimale pour le round 3
+def classify_short_context(df: pd.DataFrame) -> np.ndarray:
+    """
+    Assigne UN contexte par barre — vectorisé, O(n), purement OHLCV.
+
+    Priorité décroissante (dc_fresh la plus haute) :
+      dc_fresh > vol_expand_bear > dc_mature > breakdown > failed_breakout
+      > overbought_fade > vol_compress_bear > bear_momentum > wick_rejection
+      > general_short (défaut)
+    """
+    n = len(df)
+    ctx = np.full(n, "general_short", dtype=object)
+
+    def _col(name: str, default: float = 0.0) -> np.ndarray:
+        if name in df.columns:
+            return df[name].fillna(default).values.astype(np.float64)
+        return np.full(n, default, dtype=np.float64)
+
+    ema_spread  = _col("ema_spread_50_200", 0.0)
+    rv_ratio    = _col("rv_ratio_24_72",    1.0)
+    below_vwap  = _col("below_vwap_4h",     0.0)
+    below_ema20 = _col("below_ema20",        0.0)
+    failed_high = _col("failed_high_12",     0.0)
+    wick_z      = _col("upper_wick_z_24",   0.0)
+    upper_wick  = _col("upper_wick_pct",    0.0)
+    rsi         = _col("rsi_14",            50.0)
+    dist_ema50  = _col("dist_ema_50",        0.0)
+    boll_w      = _col("boll_width_20",     0.02)
+    mom72       = _col("mom_logret_72",      0.0)
+    mom24       = _col("mom_logret_24",      0.0)
+    ema_stack   = _col("ema_stack_bearish",  0.0)
+
+    boll_pos = boll_w[boll_w > 0]
+    boll_med = float(np.nanmedian(boll_pos)) if len(boll_pos) else 0.02
+
+    # dc_fresh : EMA spread vient de passer sous 0 dans les 7 dernières barres
+    if "ema_spread_50_200" in df.columns:
+        spread_7ago = df["ema_spread_50_200"].shift(7).fillna(0.0).values.astype(np.float64)
+        is_dc_fresh = (ema_spread < 0) & (spread_7ago >= 0)
+    else:
+        is_dc_fresh = np.zeros(n, dtype=bool)
+
+    is_vol_expand_bear   = (rv_ratio > 1.4)             & (mom24 < 0.0)
+    is_dc_mature         = (ema_spread < 0)             & (~is_dc_fresh)
+    is_breakdown         = (below_vwap > 0.5)           & (below_ema20 > 0.5)
+    is_failed_breakout   = (failed_high > 0.5)          & (wick_z > 0.5)
+    is_overbought_fade   = (rsi > 65.0)                 | (dist_ema50 > 0.04)
+    is_vol_compress_bear = (boll_w < boll_med * 0.70)   & (ema_spread < 0)
+    is_bear_momentum     = (mom72 < -0.04)              & (ema_stack > 0.5)
+    is_wick_rejection    = (upper_wick > 0.40)          | (wick_z > 1.5)
+
+    # Assignation priorité croissante : dc_fresh en dernier (priorité max)
+    ctx[is_wick_rejection]       = "wick_rejection"
+    ctx[is_bear_momentum]        = "bear_momentum"
+    ctx[is_vol_compress_bear]    = "vol_compress_bear"
+    ctx[is_overbought_fade]      = "overbought_fade"
+    ctx[is_failed_breakout]      = "failed_breakout"
+    ctx[is_breakdown]            = "breakdown"
+    ctx[is_dc_mature]            = "dc_mature"
+    ctx[is_vol_expand_bear]      = "vol_expand_bear"
+    ctx[is_dc_fresh]             = "dc_fresh"
+
+    return ctx
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -96,66 +147,165 @@ _AUC_MIN_IMPROVE = 0.005   # amélioration minimale pour le round 3
 @dataclass
 class ShortSpecialist:
     """
-    Modèle spécialiste short entraîné sur UN contexte de marché.
+    Modèle spécialiste SHORT entraîné sur UN contexte de marché.
 
-    Attributs publics
-    -----------------
-    name        : identifiant du contexte (ex. "crowded_longs")
-    context_col : colonne ctx_* correspondante dans le DataFrame de contexte
-    model       : HistGradientBoostingClassifier entraîné (None si désactivé)
-    calibrator  : calibrateur Platt ou Isotonic (None si non calibré)
-    threshold   : seuil de décision (défaut 0.65)
-    enabled     : False si n_train < _MIN_N_TRAIN
-    val_auc     : AUC sur val (0.0 si non mesuré)
-    n_train     : nombre de barres d'entraînement
+    Utilise TOUTES les features (pas de sélection artificielle) avec la même
+    capacité que le modèle global. La spécialisation vient des DONNÉES, pas
+    des features.
     """
-    name:        str
-    context_col: str
-    model:       Optional[HistGradientBoostingClassifier] = field(default=None, repr=False)
-    calibrator:  Optional[Any]                            = field(default=None, repr=False)
-    threshold:   float = 0.65
-    enabled:     bool  = True
-    val_auc:     float = 0.0
-    n_train:     int   = 0
+    context_name: str
+    features:     List[str]
+    clf_:         Optional[HistGradientBoostingClassifier] = field(default=None, repr=False)
+    scaler_:      Optional[StandardScaler]                = field(default=None, repr=False)
+    val_auc_:     float = 0.0
+    n_train_:     int   = 0
+    n_pos_:       int   = 0
+
+    def fit_raw(
+        self,
+        X:             np.ndarray,
+        y:             np.ndarray,
+        sample_weight: Optional[np.ndarray] = None,
+    ) -> "ShortSpecialist":
+        valid = y >= 0
+        X, y  = X[valid], y[valid]
+        if sample_weight is not None:
+            sample_weight = sample_weight[valid]
+
+        n_pos = int(y.sum())
+        n_neg = len(y) - n_pos
+        self.n_train_ = len(y)
+        self.n_pos_   = n_pos
+
+        if n_pos < 5 or self.n_train_ < 20:
+            return self
+
+        self.scaler_ = StandardScaler()
+        Xsc = self.scaler_.fit_transform(X)
+
+        spw = min(n_neg / max(n_pos, 1), 80.0)
+        self.clf_ = HistGradientBoostingClassifier(
+            max_iter=400,
+            max_depth=4,
+            learning_rate=0.04,
+            l2_regularization=1.0,
+            min_samples_leaf=15,
+            class_weight={0: 1.0, 1: spw},
+            random_state=42,
+        )
+        self.clf_.fit(Xsc, y, sample_weight=sample_weight)
+        return self
+
+    def predict_proba_raw(self, X: np.ndarray) -> np.ndarray:
+        """Retourne P(SHORT=1) pour la matrice X brute."""
+        if self.clf_ is None or self.scaler_ is None:
+            return np.full(len(X), 0.5, dtype=np.float32)
+        Xsc = self.scaler_.transform(X)
+        return self.clf_.predict_proba(Xsc)[:, 1].astype(np.float32)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Flottée principale
+# Calibration des seuils par contexte
+# ─────────────────────────────────────────────────────────────────────────────
+
+def calibrate_short_context_thresholds(
+    fleet:      "TRMShortFleet",
+    df_val:     pd.DataFrame,
+    ret_val:    np.ndarray,
+    cost_short: float = 0.0015,
+    min_thr:    float = 0.55,
+    max_thr:    float = 0.80,
+    min_trades: int   = 5,
+) -> Dict[str, float]:
+    """
+    Calibre UN seuil par contexte en maximisant l'expectancy nette SHORT.
+
+    Arguments
+    ---------
+    fleet      : TRMShortFleet entraîné
+    df_val     : DataFrame val (features + contextes)
+    ret_val    : future_ret aligné sur df_val (positif = hausse = perte pour short)
+    cost_short : coût aller-retour short (ex. 0.0015 = 15 bps)
+    """
+    ctx_arr  = classify_short_context(df_val)
+    X_val    = fleet._get_X(df_val)
+    p_gen    = fleet.specialists["general_short"].predict_proba_raw(X_val)
+
+    thresholds: Dict[str, float] = {}
+
+    for name, spec in fleet.specialists.items():
+        if spec.clf_ is None:
+            thresholds[name] = min_thr
+            continue
+
+        p_spec = spec.predict_proba_raw(X_val)
+        if name == "general_short":
+            p_ens = p_spec
+            sel   = np.ones(len(df_val), dtype=bool)
+        else:
+            p_ens = fleet.SPECIALIST_W * p_spec + fleet.GENERAL_W * p_gen
+            sel   = (ctx_arr == name)
+
+        p_s   = p_ens[sel]
+        ret_s = ret_val[sel] if len(ret_val) == len(df_val) else np.zeros(sel.sum())
+        valid = np.isfinite(ret_s)
+        p_s, ret_s = p_s[valid], ret_s[valid]
+
+        if len(p_s) < min_trades:
+            thresholds[name] = min_thr
+            continue
+
+        best_thr, best_exp = min_thr, -np.inf
+        for thr in np.arange(min_thr, max_thr + 0.001, 0.01):
+            m = p_s >= thr
+            if m.sum() < min_trades:
+                continue
+            exp = float((-ret_s[m] - cost_short).mean())
+            if exp > best_exp:
+                best_exp, best_thr = exp, thr
+
+        thresholds[name] = round(float(best_thr), 2)
+
+    return thresholds
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Flottée TRM SHORT v3
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TRMShortFleet:
     """
-    Flottée de spécialistes SHORT orientée par contexte sémantique.
+    Flottée de 10 spécialistes SHORT — routage exclusif OHLCV v3.
 
-    Usage minimal
-    -------------
-    >>> fleet = TRMShortFleet(features=FEATURES_SHORT)
-    >>> fleet.fit(df_train, y_train, df_val, y_val, context_df_train)
-    >>> result = fleet.predict_short_with_context(df_test, context_df_test)
+    API compatible v2 : context_df ignoré (paramètre conservé pour compatibilité).
 
-    context_df doit contenir les colonnes ctx_* générées par
-    level_1.short_rules.compute_short_permission_context().
+    Utilisation
+    -----------
+    >>> fleet = TRMShortFleet(features=FEATURES_SHORT_GAMECHANGER)
+    >>> fleet.fit(df_train, y_train, df_val, y_val)
+    >>> p = fleet.predict_short_proba(df_test)
     """
 
-    CONTEXTS = CONTEXTS
+    SPECIALIST_W  = 0.65
+    GENERAL_W     = 0.35
+    CONTEXT_NAMES = CONTEXT_NAMES
 
     def __init__(
         self,
-        features: List[str],
-        n_iter: int = 500,
-        learning_rate: float = 0.03,
-        max_leaf_nodes: int = 31,
-        hard_example_rounds: int = 2,
+        features:            List[str],
+        n_iter:              int   = 500,
+        learning_rate:       float = 0.03,
+        max_leaf_nodes:      int   = 31,   # ignoré, max_depth=4 utilisé (compat API v2)
+        hard_example_rounds: int   = 2,
     ) -> None:
         self.features            = features
         self.n_iter              = n_iter
         self.learning_rate       = learning_rate
-        self.max_leaf_nodes      = max_leaf_nodes
         self.hard_example_rounds = hard_example_rounds
 
         self.specialists: Dict[str, ShortSpecialist] = {
-            name: ShortSpecialist(name=name, context_col=_CTX_COL[name])
-            for name in CONTEXTS
+            name: ShortSpecialist(context_name=name, features=features)
+            for name in CONTEXT_NAMES
         }
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -168,116 +318,59 @@ class TRMShortFleet:
         y:          np.ndarray,
         df_val:     pd.DataFrame,
         y_val:      np.ndarray,
-        context_df: pd.DataFrame,
+        context_df: object = None,  # ignoré en v3 — conservé pour compat API
     ) -> None:
         """
-        Entraîne chaque spécialiste sur les barres de son contexte.
+        Entraîne les 10 spécialistes avec apprentissage récursif (hard examples).
 
         Arguments
         ---------
-        df_train   : DataFrame train avec colonnes features
-        y          : labels train (0/1, -1 = ignore)
-        df_val     : DataFrame val avec colonnes features
+        df_train   : DataFrame train (déjà sous-échantillonné si besoin)
+        y          : labels train (0/1, -1=ignore)
+        df_val     : DataFrame val
         y_val      : labels val
-        context_df : DataFrame des ctx_* (même index que df_train)
-                     — généré par compute_short_permission_context()
-
-        Algorithme
-        ----------
-        Round 1 : entraînement normal avec sample_weight basé sur ratio neg/pos
-        Round 2 : hard examples (y=0 & p>0.55 OU y=1 & p<0.45) → weight ×3
-                  ré-entraîner si val AUC ne régresse pas
-        Round 3 (optionnel) : uniquement si val AUC s'améliore > 0.005
+        context_df : ignoré (conservé pour compatibilité API v2)
         """
         t0 = time.time()
 
-        X_train = self._get_X(df_train)
-        y_arr   = np.asarray(y, dtype=np.int32)
-        valid   = y_arr >= 0
-        X_train = X_train[valid]
-        y_arr   = y_arr[valid]
-        # Aligner context_df sur valid
-        ctx_valid = context_df.iloc[np.where(valid)[0]] if isinstance(context_df.index, pd.RangeIndex) \
-                    else context_df.loc[df_train.index[valid]]
+        y_arr     = np.asarray(y,     dtype=np.int32)
+        y_val_arr = np.asarray(y_val, dtype=np.int32)
 
-        X_val_full = self._get_X(df_val)
-        y_val_arr  = np.asarray(y_val, dtype=np.int32)
-        val_valid  = y_val_arr >= 0
-        X_val_c    = X_val_full[val_valid]
-        y_val_c    = y_val_arr[val_valid]
+        ctx_train = classify_short_context(df_train)
+        X_train   = self._get_X(df_train)
+        X_val     = self._get_X(df_val)
 
-        for name, spec in self.specialists.items():
-            ctx_col = spec.context_col
-            is_gen  = (name == "general_short")
+        n_train  = len(X_train)
+        weights  = np.ones(n_train, dtype=np.float64)
 
-            # ── Masque de contexte ────────────────────────────────────────────
-            if is_gen:
-                ctx_mask = np.ones(len(X_train), dtype=bool)
-            elif ctx_col in ctx_valid.columns:
-                ctx_mask = ctx_valid[ctx_col].values.astype(bool)
-            else:
-                ctx_mask = np.ones(len(X_train), dtype=bool)
+        for rnd in range(self.hard_example_rounds):
+            for name, spec in self.specialists.items():
+                if name == "general_short":
+                    ctx_mask = np.ones(n_train, dtype=bool)
+                else:
+                    ctx_mask = (ctx_train == name)
 
-            n_ctx = int(ctx_mask.sum())
-            spec.n_train = n_ctx
+                if ctx_mask.sum() < 20:
+                    continue
 
-            if n_ctx < _MIN_N_TRAIN:
-                spec.enabled = False
-                continue
+                X_ctx = X_train[ctx_mask]
+                y_ctx = y_arr[ctx_mask]
+                w_ctx = weights[ctx_mask]
 
-            X_ctx  = X_train[ctx_mask]
-            y_ctx  = y_arr[ctx_mask]
-            sw_base = self._compute_sample_weight(y_ctx)
+                spec.fit_raw(X_ctx, y_ctx, sample_weight=w_ctx)
 
-            # ── Round 1 ───────────────────────────────────────────────────────
-            clf = self._make_clf()
-            clf.fit(X_ctx, y_ctx, sample_weight=sw_base)
-            auc_r1 = self._val_auc(clf, X_val_c, y_val_c)
+            # Barres difficiles : haute incertitude de l'ensemble
+            if rnd < self.hard_example_rounds - 1:
+                p_ens     = self._predict_ensemble_raw(X_train, ctx_train)
+                uncertain = np.abs(p_ens - 0.5) < 0.12
+                weights   = np.where(uncertain, 3.0, 1.0).astype(np.float64)
 
-            # ── Round 2 : hard examples ───────────────────────────────────────
-            if self.hard_example_rounds >= 2:
-                p_r1    = clf.predict_proba(X_ctx)[:, 1]
-                hard    = (
-                    ((y_ctx == 0) & (p_r1 > _HARD_THRESHOLD_HI))
-                    | ((y_ctx == 1) & (p_r1 < _HARD_THRESHOLD_LO))
-                )
-                sw_r2   = sw_base.copy()
-                sw_r2[hard] *= _HARD_WEIGHT
-
-                clf2 = self._make_clf()
-                clf2.fit(X_ctx, y_ctx, sample_weight=sw_r2)
-                auc_r2 = self._val_auc(clf2, X_val_c, y_val_c)
-
-                if auc_r2 >= auc_r1 - 0.001:   # tolérance de 0.1 point AUC
-                    clf    = clf2
-                    auc_r1 = auc_r2
-
-            # ── Round 3 optionnel : si val AUC améliore > 0.005 ───────────────
-            if self.hard_example_rounds >= 3:
-                p_r2   = clf.predict_proba(X_ctx)[:, 1]
-                hard3  = (
-                    ((y_ctx == 0) & (p_r2 > _HARD_THRESHOLD_HI))
-                    | ((y_ctx == 1) & (p_r2 < _HARD_THRESHOLD_LO))
-                )
-                sw_r3  = sw_base.copy()
-                sw_r3[hard3] *= _HARD_WEIGHT
-
-                clf3   = self._make_clf()
-                clf3.fit(X_ctx, y_ctx, sample_weight=sw_r3)
-                auc_r3 = self._val_auc(clf3, X_val_c, y_val_c)
-
-                if auc_r3 > auc_r1 + _AUC_MIN_IMPROVE:
-                    clf    = clf3
-                    auc_r1 = auc_r3
-
-            spec.model   = clf
-            spec.val_auc = auc_r1
-
-            # ── Calibration ───────────────────────────────────────────────────
-            spec.calibrator = self._calibrate(clf, X_val_c, y_val_c)
+        # AUC val par spécialiste
+        ctx_val = classify_short_context(df_val)
+        self._compute_val_aucs(X_val, y_val_arr, ctx_val)
 
         dt = time.time() - t0
-        self._print_summary(dt)
+        self._print_summary(dt, ctx_train, ctx_val)
 
     # ─────────────────────────────────────────────────────────────────────────
     # Prédiction
@@ -286,314 +379,156 @@ class TRMShortFleet:
     def predict_short_proba(
         self,
         df:         pd.DataFrame,
-        context_df: pd.DataFrame,
+        context_df: object = None,   # ignoré en v3
     ) -> np.ndarray:
-        """
-        Retourne un array de probabilités SHORT de shape (n,).
-
-        Routage par ligne (vectorisé par contexte) :
-            1 contexte actif  : p = 0.70 × p_ctx + 0.30 × p_gen
-            2 contextes actifs: p = 0.50 × p_top1 + 0.25 × p_top2 + 0.25 × p_gen
-            Aucun contexte    : p = p_gen  (ctx_general_short est toujours actif)
-        """
-        n = len(df)
-        X = self._get_X(df)
-
-        p_gen = self._predict_specialist("general_short", X)
-
-        # Probabilités de chaque spécialiste (shape n × n_ctx)
-        ctx_names  = [c for c in CONTEXTS if c != "general_short"]
-        p_matrix   = np.zeros((n, len(ctx_names)), dtype=np.float64)
-        ctx_active = np.zeros((n, len(ctx_names)), dtype=bool)
-
-        for j, name in enumerate(ctx_names):
-            spec    = self.specialists[name]
-            ctx_col = spec.context_col
-            if ctx_col in context_df.columns:
-                ctx_active[:, j] = context_df[ctx_col].values.astype(bool)
-            # Prédiction même si context inactif (routage peut l'ignorer)
-            p_matrix[:, j] = self._predict_specialist(name, X)
-
-        n_active = ctx_active.sum(axis=1)  # nombre de contextes actifs par barre
-
-        p_out = np.empty(n, dtype=np.float64)
-
-        # ── 0 ou 1 contexte actif ─────────────────────────────────────────────
-        mask_0or1 = n_active <= 1
-        if mask_0or1.any():
-            # Récupérer l'indice du contexte actif (−1 si aucun)
-            first_ctx = np.full(n, -1, dtype=np.int32)
-            for j in range(len(ctx_names)):
-                # Premier contexte actif : on écrase seulement si pas encore set
-                is_first = ctx_active[:, j] & (first_ctx == -1)
-                first_ctx[is_first] = j
-
-            p_spec = np.where(
-                first_ctx >= 0,
-                p_matrix[np.arange(n), np.maximum(first_ctx, 0)],
-                p_gen,
-            )
-            # Si premier_ctx >= 0 → blend 70/30 ; sinon → p_gen pur
-            use_ctx = (first_ctx >= 0)
-            p_out[mask_0or1] = np.where(
-                use_ctx[mask_0or1],
-                _W_CTX * p_spec[mask_0or1] + _W_GEN * p_gen[mask_0or1],
-                p_gen[mask_0or1],
-            )
-
-        # ── 2+ contextes actifs ───────────────────────────────────────────────
-        mask_2plus = ~mask_0or1
-        if mask_2plus.any():
-            # Identifier top-1 et top-2 par score de probabilité
-            p_mat_2 = p_matrix[mask_2plus]         # shape (m, n_ctx)
-            active_2 = ctx_active[mask_2plus]       # shape (m, n_ctx)
-
-            # Mettre à −inf les contextes inactifs
-            p_ranked = np.where(active_2, p_mat_2, -np.inf)
-            idx_top1 = np.argmax(p_ranked, axis=1)
-            # Masquer top-1 pour trouver top-2
-            p_ranked2 = p_ranked.copy()
-            p_ranked2[np.arange(len(idx_top1)), idx_top1] = -np.inf
-            idx_top2 = np.argmax(p_ranked2, axis=1)
-
-            m = mask_2plus.sum()
-            p_top1 = p_mat_2[np.arange(m), idx_top1]
-            p_top2 = p_mat_2[np.arange(m), idx_top2]
-            p_g2   = p_gen[mask_2plus]
-
-            p_out[mask_2plus] = (
-                _W_CTX2   * p_top1
-                + _W_CTX2_2 * p_top2
-                + _W_GEN2   * p_g2
-            )
-
-        return p_out
+        """Retourne P(SHORT=1) pour toutes les barres de df — shape (n,)."""
+        ctx_arr = classify_short_context(df)
+        X       = self._get_X(df)
+        return self._predict_ensemble_raw(X, ctx_arr).astype(np.float32)
 
     def predict_short_with_context(
         self,
         df:         pd.DataFrame,
-        context_df: pd.DataFrame,
+        context_df: object = None,   # ignoré en v3
     ) -> pd.DataFrame:
         """
-        Retourne un DataFrame avec les colonnes :
-            p_short   : probabilité short finale (après routage)
-            context   : nom du contexte dominant actif
-            p_context : probabilité brute du spécialiste dominant
-            p_general : probabilité du spécialiste général
-            squeeze_risk : squeeze_risk_score si disponible, sinon 0.0
-            no_short  : gate booléenne (True = signal bloqué par la gate)
-            reason    : explication textuelle du contexte
+        Retourne un DataFrame avec colonnes :
+            p_short, context, p_context, p_general,
+            squeeze_risk, no_short, reason
         """
-        n = len(df)
-        X = self._get_X(df)
+        n       = len(df)
+        ctx_arr = classify_short_context(df)
+        X       = self._get_X(df)
 
-        p_short  = self.predict_short_proba(df, context_df)
-        p_gen    = self._predict_specialist("general_short", X)
+        p_short = self._predict_ensemble_raw(X, ctx_arr).astype(np.float64)
+        p_gen   = self.specialists["general_short"].predict_proba_raw(X).astype(np.float64)
 
-        # Contexte dominant : premier contexte actif dans l'ordre CONTEXTS
-        context_arr  = np.full(n, "general_short", dtype=object)
-        p_ctx_arr    = p_gen.copy()
-        ctx_names    = [c for c in CONTEXTS if c != "general_short"]
+        p_ctx_arr = p_gen.copy()
+        for name, spec in self.specialists.items():
+            if name == "general_short" or spec.clf_ is None:
+                continue
+            ctx_m = (ctx_arr == name)
+            if ctx_m.any():
+                p_ctx_arr[ctx_m] = spec.predict_proba_raw(X[ctx_m]).astype(np.float64)
 
-        for name in reversed(ctx_names):   # reversed → premier contexte a priorité
-            spec    = self.specialists[name]
-            ctx_col = spec.context_col
-            if ctx_col in context_df.columns:
-                active = context_df[ctx_col].values.astype(bool)
-                if active.any():
-                    p_spec = self._predict_specialist(name, X)
-                    context_arr[active] = name
-                    p_ctx_arr[active]   = p_spec[active]
-
-        # squeeze_risk
-        if "squeeze_risk_score" in df.columns:
-            squeeze = df["squeeze_risk_score"].fillna(0.0).values
-        else:
-            squeeze = np.zeros(n, dtype=np.float64)
-
-        # no_short depuis context_df
-        if "no_short" in context_df.columns:
-            no_short = context_df["no_short"].values.astype(bool)
-        else:
-            no_short = np.zeros(n, dtype=bool)
-
-        # Raison textuelle
-        _reason_map = {
-            "crowded_longs":     "Foule extrêmement longée — fade",
-            "breakdown":         "Structure cassée — continuation baissière",
-            "failed_breakout":   "Faux breakout — retournement rapide",
-            "liquidity_stress":  "Stress de liquidité — cascades",
-            "bear_continuation": "Tendance baissière établie",
-            "macro_riskoff":     "Risk-off macro — régime baissier global",
-            "general_short":     "Contexte générique (catch-all)",
-        }
-        reason_arr = np.array(
-            [_reason_map.get(c, "Inconnu") for c in context_arr], dtype=object
+        squeeze = (
+            df["squeeze_risk_score"].fillna(0.0).values
+            if "squeeze_risk_score" in df.columns
+            else np.zeros(n, dtype=np.float64)
         )
+        no_short = np.zeros(n, dtype=bool)
 
         return pd.DataFrame(
             {
                 "p_short":      p_short,
-                "context":      context_arr,
+                "context":      ctx_arr,
                 "p_context":    p_ctx_arr,
                 "p_general":    p_gen,
                 "squeeze_risk": squeeze,
                 "no_short":     no_short,
-                "reason":       reason_arr,
+                "reason":       np.array([_REASON_MAP.get(c, c) for c in ctx_arr]),
             },
             index=df.index,
         )
 
     def get_summary(self) -> Dict[str, Dict]:
-        """
-        Résumé de chaque spécialiste.
-
-        Retourne
-        --------
-        dict {name: {n_train, val_auc, threshold, enabled, calibrated}}
-        """
+        """Résumé de chaque spécialiste : n_train, val_auc, enabled, n_pos."""
         return {
             name: {
-                "n_train":    spec.n_train,
-                "val_auc":    round(spec.val_auc, 4),
-                "threshold":  spec.threshold,
-                "enabled":    spec.enabled,
-                "calibrated": spec.calibrator is not None,
+                "n_train":  spec.n_train_,
+                "n_pos":    spec.n_pos_,
+                "val_auc":  round(spec.val_auc_, 4),
+                "enabled":  spec.clf_ is not None,
             }
             for name, spec in self.specialists.items()
         }
 
     # ─────────────────────────────────────────────────────────────────────────
-    # Helpers privés
+    # Helpers internes
     # ─────────────────────────────────────────────────────────────────────────
 
     def _get_X(self, df: pd.DataFrame) -> np.ndarray:
-        """
-        Extrait la matrice features en respectant l'ordre self.features.
-        Colonnes manquantes → remplies par 0 silencieusement.
-        """
-        n = len(df)
-        cols_present = [f for f in self.features if f in df.columns]
-        cols_missing = [f for f in self.features if f not in df.columns]
-
-        if cols_present:
-            X = df[cols_present].fillna(0.0).values.astype(np.float32)
-        else:
-            X = np.zeros((n, 0), dtype=np.float32)
-
-        if cols_missing:
-            pad = np.zeros((n, len(cols_missing)), dtype=np.float32)
-            X   = np.hstack([X, pad])
-
+        """Extrait la matrice features — colonnes manquantes → 0."""
+        avail   = [f for f in self.features if f in df.columns]
+        missing = len(self.features) - len(avail)
+        X = df[avail].fillna(0.0).values.astype(np.float32) if avail \
+            else np.zeros((len(df), 0), dtype=np.float32)
+        if missing:
+            X = np.hstack([X, np.zeros((len(df), missing), dtype=np.float32)])
         return X
 
-    def _make_clf(self) -> HistGradientBoostingClassifier:
-        """Instancie un HistGBT avec les hyperparamètres de la flottée."""
-        return HistGradientBoostingClassifier(
-            max_iter=self.n_iter,
-            learning_rate=self.learning_rate,
-            max_leaf_nodes=self.max_leaf_nodes,
-            random_state=42,
-            # Pas de class_weight : non supporté par HistGBT → sample_weight
-        )
-
-    @staticmethod
-    def _compute_sample_weight(y: np.ndarray) -> np.ndarray:
-        """
-        Calcule des sample_weights qui compensent le déséquilibre de classes.
-        Ratio = n_neg / n_pos — clampé à 80 pour éviter les explosions.
-        """
-        n_pos = max(int((y == 1).sum()), 1)
-        n_neg = max(int((y == 0).sum()), 1)
-        pos_w = min(n_neg / n_pos, 80.0)
-        sw    = np.where(y == 1, pos_w, 1.0).astype(np.float64)
-        return sw
-
-    def _predict_specialist(self, name: str, X: np.ndarray) -> np.ndarray:
-        """
-        Retourne P(SHORT=1) pour toutes les barres via le spécialiste `name`.
-        Si le spécialiste est désactivé ou non entraîné → retourne 0.5.
-        Calibration appliquée si disponible.
-        """
-        spec = self.specialists[name]
-        n    = len(X)
-
-        if not spec.enabled or spec.model is None:
-            return np.full(n, 0.5, dtype=np.float64)
-
-        p_raw = spec.model.predict_proba(X)[:, 1].astype(np.float64)
-
-        if spec.calibrator is None:
-            return p_raw
-
-        cal = spec.calibrator
-        if isinstance(cal, PlattLR):
-            return cal.predict_proba(p_raw.reshape(-1, 1))[:, 1]
-        if isinstance(cal, IsotonicRegression):
-            return cal.predict(p_raw).astype(np.float64)
-        # Fallback
-        return p_raw
-
-    @staticmethod
-    def _val_auc(clf: HistGradientBoostingClassifier,
-                 X_val: np.ndarray, y_val: np.ndarray) -> float:
-        """AUC sur la validation — retourne 0.0 si non calculable."""
-        if len(X_val) < 10 or y_val.sum() < 2:
-            return 0.0
-        try:
-            p = clf.predict_proba(X_val)[:, 1]
-            return float(roc_auc_score(y_val, p))
-        except Exception:
-            return 0.0
-
-    def _calibrate(
+    def _predict_ensemble_raw(
         self,
-        clf:   HistGradientBoostingClassifier,
-        X_val: np.ndarray,
-        y_val: np.ndarray,
-    ) -> Optional[Any]:
+        X:       np.ndarray,
+        ctx_arr: np.ndarray,
+    ) -> np.ndarray:
         """
-        Calibre les probabilités du modèle sur la val.
-
-        Platt (LogisticRegression C=1.0) si n_val >= 200.
-        IsotonicRegression si 30 <= n_val < 200.
-        None si n_val < 30 (pas assez de données).
+        Soft routing vectorisé sur un tableau X déjà extrait.
+        p_final = 0.65 × p_specialist(ctx) + 0.35 × p_general
         """
-        n_val = len(X_val)
-        if n_val < 30:
-            return None
+        p_gen = self.specialists["general_short"].predict_proba_raw(X).astype(np.float64)
+        p_out = p_gen.copy()
 
-        p_raw = clf.predict_proba(X_val)[:, 1]
+        for name, spec in self.specialists.items():
+            if name == "general_short" or spec.clf_ is None:
+                continue
+            ctx_m = (ctx_arr == name)
+            if not ctx_m.any():
+                continue
+            p_spec = spec.predict_proba_raw(X[ctx_m]).astype(np.float64)
+            p_out[ctx_m] = self.SPECIALIST_W * p_spec + self.GENERAL_W * p_gen[ctx_m]
 
-        if n_val >= 200:
-            cal = PlattLR(C=1.0, random_state=42, max_iter=500)
-            cal.fit(p_raw.reshape(-1, 1), y_val)
-        else:
-            cal = IsotonicRegression(out_of_bounds="clip")
-            cal.fit(p_raw, y_val)
+        return p_out.astype(np.float32)
 
-        return cal
+    def _compute_val_aucs(
+        self,
+        X_val:    np.ndarray,
+        y_val:    np.ndarray,
+        ctx_val:  np.ndarray,
+    ) -> None:
+        valid = y_val >= 0
+        X_v, y_v, ctx_v = X_val[valid], y_val[valid], ctx_val[valid]
 
-    def _print_summary(self, elapsed: float) -> None:
-        """Affiche un résumé de l'entraînement."""
-        enabled = [n for n, s in self.specialists.items() if s.enabled]
-        aucs    = {n: round(s.val_auc, 3)
-                   for n, s in self.specialists.items() if s.enabled}
-        n_trains = {n: s.n_train
-                    for n, s in self.specialists.items() if s.enabled}
+        for name, spec in self.specialists.items():
+            if spec.clf_ is None:
+                continue
+            if name == "general_short":
+                X_s, y_s = X_v, y_v
+            else:
+                m = (ctx_v == name)
+                if m.sum() < 10 or y_v[m].sum() < 2 or (y_v[m] == 0).sum() < 2:
+                    continue
+                X_s, y_s = X_v[m], y_v[m]
+
+            p = spec.predict_proba_raw(X_s)
+            try:
+                spec.val_auc_ = float(roc_auc_score(y_s, p))
+            except Exception:
+                pass
+
+    def _print_summary(
+        self,
+        elapsed:   float,
+        ctx_train: np.ndarray,
+        ctx_val:   np.ndarray,
+    ) -> None:
+        enabled  = [n for n, s in self.specialists.items() if s.clf_ is not None]
+        n_ctx    = {n: int((ctx_train == n).sum()) for n in CONTEXT_NAMES}
+        n_ctx_v  = {n: int((ctx_val   == n).sum()) for n in CONTEXT_NAMES}
+        aucs     = {n: round(s.val_auc_, 3) for n, s in self.specialists.items()
+                    if s.clf_ is not None}
 
         print(
-            f"\n   TRMShortFleet : {len(enabled)}/{len(CONTEXTS)} spécialistes actifs  "
+            f"\n   TRMShortFleet v3 : {len(enabled)}/{len(CONTEXT_NAMES)} spécialistes actifs  "
             f"rounds={self.hard_example_rounds}  t={elapsed:.1f}s"
         )
-        print(
-            "   n_train : "
-            + "  ".join(f"{k[:8]}={v:,}" for k, v in n_trains.items())
-        )
-        print(
-            "   AUC val : "
-            + "  ".join(f"{k[:8]}={v:.3f}" for k, v in aucs.items())
-        )
-        disabled = [n for n, s in self.specialists.items() if not s.enabled]
+        print("   Contextes train : " +
+              "  ".join(f"{k[:7]}={v:,}" for k, v in n_ctx.items()))
+        print("   Contextes val   : " +
+              "  ".join(f"{k[:7]}={v:,}" for k, v in n_ctx_v.items()))
+        print("   AUC val         : " +
+              "  ".join(f"{k[:7]}={v:.3f}" for k, v in aucs.items()))
+
+        disabled = [n for n, s in self.specialists.items() if s.clf_ is None]
         if disabled:
-            print(f"   Désactivés (n_train < {_MIN_N_TRAIN}) : {disabled}")
+            print(f"   Désactivés (n_train<20 ou n_pos<5) : {disabled}")

@@ -1,5 +1,4 @@
-const WS_BASE_URL = 'ws://localhost:8000';
-
+import { WS_BASE_URL } from '../config/api';
 export interface MLArchitectureUpdate {
   level0?: any;
   level1?: any;

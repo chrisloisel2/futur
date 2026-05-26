@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 
 from ai.level_2.short_config import ShortModelConfig
+from ai.level_0.constants import TARGET_COL
 
 
 def check_short_stability(
@@ -65,7 +66,7 @@ def check_short_stability(
 
     proba = clf.predict_proba(scaler.transform(X_val))[:, 1]
     y_val = df_val[label_col].values.astype(np.int32)
-    ret_val = df_val["future_ret_h"].values.astype(np.float64)
+    ret_val = df_val[TARGET_COL].values.astype(np.float64)
 
     if not isinstance(df_val.index, pd.DatetimeIndex):
         try:
@@ -196,7 +197,7 @@ def diagnose_short_failure(
             results[yr] = {"diagnosis": "too_few_samples"}
             continue
 
-        ret_yr   = df_val.loc[yr_mask, "future_ret_h"].values.astype(np.float64)
+        ret_yr   = df_val.loc[yr_mask, TARGET_COL].values.astype(np.float64)
         y_yr     = df_val.loc[yr_mask, label_col].values.astype(np.int32)
         proba_yr = proba[yr_mask]
 

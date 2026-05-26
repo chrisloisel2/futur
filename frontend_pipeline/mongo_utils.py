@@ -19,10 +19,16 @@ from pymongo.operations import ReplaceOne
 # Connection settings (override with env vars if needed)
 MONGODB_URI = os.getenv(
     "MONGODB_URI",
-    "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//",
+    os.getenv("FUTUR_MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017")),
 )
-MONGODB_DB = os.getenv("MONGODB_DB", "trader")
-HISTORICAL_COLLECTION = os.getenv("MONGODB_HIST_COLLECTION", "historical_ohlcv")
+MONGODB_DB = os.getenv("MONGODB_DB", os.getenv("FUTUR_MONGO_DB", "trader"))
+HISTORICAL_COLLECTION = os.getenv(
+    "FUTUR_MONGO_FEATURE_COLLECTION",
+    os.getenv(
+        "MONGODB_FEATURE_COLLECTION",
+        os.getenv("FUTUR_MONGO_OHLCV_COLLECTION", os.getenv("MONGODB_HIST_COLLECTION", "historical_ohlcv_enriched")),
+    ),
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +50,7 @@ def get_historical_collection() -> Collection:
     collection.create_index(
         [("symbol", ASCENDING), ("interval", ASCENDING), ("timestamp", ASCENDING)],
         unique=True,
+        name="uniq_symbol_interval_timestamp",
     )
     return collection
 
@@ -51,6 +58,29 @@ def get_historical_collection() -> Collection:
 def normalize_symbol(symbol: str) -> str:
     """Normalize symbols to a consistent DB-friendly form."""
     return symbol.replace("_", "/").upper()
+
+
+def symbol_query_variants(symbol: str) -> list:
+    compact = str(symbol or "").strip().upper().replace("_", "").replace("-", "").replace("/", "")
+    variants = {normalize_symbol(symbol), compact}
+    for quote in ("USDT", "USDC", "BUSD", "USD", "BTC", "ETH", "EUR"):
+        if compact.endswith(quote) and len(compact) > len(quote):
+            base = compact[: -len(quote)]
+            variants.add(f"{base}/{quote}")
+            if quote == "USD":
+                variants.add(f"{base}USDT")
+                variants.add(f"{base}/USDT")
+            break
+    return sorted(variants)
+
+
+def dedicated_collection_candidates(symbol: str) -> list:
+    suffixes = {
+        str(value).strip().lower().replace("_", "").replace("-", "").replace("/", "")
+        for value in symbol_query_variants(symbol)
+    }
+    suffixes.discard("")
+    return [f"{HISTORICAL_COLLECTION}_{suffix}" for suffix in sorted(suffixes)]
 
 
 def _to_python_datetime(value):
@@ -110,16 +140,19 @@ def fetch_historical_from_mongo(
     symbol: str, limit: Optional[int] = None, interval: str = "1h"
 ) -> Optional[pd.DataFrame]:
     """Fetch OHLCV rows from Mongo; return None if unavailable."""
-    collection = get_historical_collection()
-    norm_symbol = normalize_symbol(symbol)
-    query = {"symbol": norm_symbol, "interval": interval}
+    query = {"symbol": {"$in": symbol_query_variants(symbol)}, "interval": interval}
 
     try:
-        cursor = collection.find(query).sort("timestamp", -1 if limit else 1)
-        if limit:
-            cursor = cursor.limit(int(limit))
-
-        data = list(cursor)
+        data = []
+        db = get_db()
+        for coll_name in dedicated_collection_candidates(symbol) + [HISTORICAL_COLLECTION]:
+            collection = db[coll_name]
+            cursor = collection.find(query).sort("timestamp", -1 if limit else 1)
+            if limit:
+                cursor = cursor.limit(int(limit))
+            data = list(cursor)
+            if data:
+                break
         if not data:
             return None
 

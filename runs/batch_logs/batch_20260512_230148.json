@@ -1,0 +1,23 @@
+[
+  {
+    "symbol": "SOLUSDT",
+    "run_id": "train_solusdt_20260512_230131",
+    "success": false,
+    "elapsed": 11.0,
+    "log": "runs/batch_logs/SOLUSDT.log"
+  },
+  {
+    "symbol": "BTCUSD",
+    "run_id": "train_btcusd_20260512_230131",
+    "success": false,
+    "elapsed": 16.5,
+    "log": "runs/batch_logs/BTCUSD.log"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "run_id": "train_ethusdt_20260512_230131",
+    "success": false,
+    "elapsed": 17.0,
+    "log": "runs/batch_logs/ETHUSDT.log"
+  }
+]

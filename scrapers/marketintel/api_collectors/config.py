@@ -3,13 +3,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+LOCAL_MONGO_URI = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
+
 # ── Mongo données ─────────────────────────────────────────────────────────────
-MONGO_URI        = os.getenv("MONGO_URI",        "mongodb://admin:admin123@192.168.88.17/")
-MONGO_DB         = os.getenv("MONGO_DB",         "market_intel")
+MONGO_URI        = os.getenv("MARKETINTEL_MONGO_URI", os.getenv("MONGO_URI", LOCAL_MONGO_URI))
+MONGO_DB         = os.getenv("MARKETINTEL_MONGO_DB", os.getenv("MONGO_DB", "market_intel"))
 MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "signals")
 
 # ── Mongo proxies ─────────────────────────────────────────────────────────────
-PROXY_MONGO_URI       = os.getenv("PROXY_MONGO_URI",       "mongodb://admin:admin123@100.93.248.105/")
+PROXY_MONGO_URI       = os.getenv("PROXY_MONGO_URI",       LOCAL_MONGO_URI)
 PROXY_MONGO_DB        = os.getenv("PROXY_MONGO_DB",        "proxy_db")
 PROXY_COLLECTION      = os.getenv("PROXY_COLLECTION",      "proxies")
 PROXY_REFRESH_INTERVAL = int(os.getenv("PROXY_REFRESH_INTERVAL", "300"))  # secondes

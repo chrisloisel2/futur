@@ -1,0 +1,37 @@
+{
+  "n_tested": 20642,
+  "n_trades": 5,
+  "profit_factor": Infinity,
+  "max_drawdown": 0.0,
+  "sharpe_annualized": 133.1379,
+  "win_rate": 1.0,
+  "avg_win": 35.079,
+  "avg_loss": 0.0,
+  "expectancy_per_trade": 35.079,
+  "initial_equity": 10000.0,
+  "final_equity": 10175.4,
+  "total_return_pct": 1.75,
+  "by_year": {
+    "2024": {
+      "trades": 2,
+      "pnl_sum": 39.29,
+      "pf": Infinity,
+      "win_rate": 1.0
+    },
+    "2025": {
+      "trades": 3,
+      "pnl_sum": 136.1,
+      "pf": Infinity,
+      "win_rate": 1.0
+    }
+  },
+  "side": "combined",
+  "model": "Combined",
+  "n_long": 5,
+  "n_short": 0,
+  "long_pf": Infinity,
+  "short_pf": Infinity,
+  "skipped_filter": 15163,
+  "skipped_direction": 7057,
+  "skipped_risk": 1
+}

@@ -24,6 +24,7 @@ Ce script :
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import logging
 import sys
 import time
@@ -39,8 +40,39 @@ import requests
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
-from ai.level_0.live_features import compute_live_features
-from ai.level_0.feature_engineering import compute_long_features, compute_short_features
+from mongo_ingestion import (
+    DEFAULT_HISTORICAL_COLLECTION,
+    DEFAULT_MONGO_URI,
+    DEFAULT_TRADER_DB,
+    get_latest_ohlcv_timestamp,
+    normalize_symbol,
+    upsert_ohlcv_dataframe,
+)
+from data_pipeline.features import compute_hourly_features
+
+
+def _load_project_module(module_name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Impossible de charger {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+_live_features = _load_project_module("futur_live_features", ROOT / "ai" / "level_0" / "live_features.py")
+_feature_engineering = _load_project_module(
+    "futur_feature_engineering",
+    ROOT / "ai" / "level_0" / "feature_engineering.py",
+)
+_feature_lists = _load_project_module("futur_feature_lists", ROOT / "ai" / "level_0" / "features.py")
+
+compute_live_features = _live_features.compute_live_features
+compute_long_features = _feature_engineering.compute_long_features
+compute_short_features = _feature_engineering.compute_short_features
+FEATURES_LONG = _feature_lists.FEATURES_LONG
+FEATURES_SHORT = _feature_lists.FEATURES_SHORT
 
 logging.basicConfig(
     level=logging.INFO,
@@ -162,80 +194,7 @@ def _binance_to_training_format(df_raw: pd.DataFrame) -> pd.DataFrame:
     Toutes les features sont calculées ici, avant sauvegarde, pour que le CSV
     soit self-contained — train_pipeline.py n'aura pas à les recalculer.
     """
-    # ── 1. Renommer pour compatibilité compute_live_features ─────────────────
-    df = df_raw.rename(columns={
-        "taker_buy_base": "taker_buy_base_asset_volume",
-        "taker_buy_quote": "taker_buy_quote_asset_volume",
-        "quote_volume":   "quote_asset_volume",
-    })
-
-    # ── 2. SNAPSHOT_FEATURES (base 39) ───────────────────────────────────────
-    # compute_live_features applique ffill().fillna(0) à la fin → aucun NaN
-    df = compute_live_features(df)
-
-    # ── 3. atr_14 absolu (requis par train_pipeline.py en plus de atr_pct_14) ─
-    hl  = df["high"] - df["low"]
-    hpc = (df["high"] - df["close"].shift(1)).abs()
-    lpc = (df["low"]  - df["close"].shift(1)).abs()
-    tr  = pd.concat([hl, hpc, lpc], axis=1).max(axis=1)
-    df["atr_14"] = tr.ewm(span=14, adjust=False).mean().ffill().fillna(0.0)
-    # rv_24 est DÉJÀ calculé par compute_live_features — ne pas re-calculer
-    # (re-calcul sans ffill introduirait des NaN sur les zones de gap Binance)
-
-    # ── 4. FEATURES_LONG extras (10 features) ───────────────────────────────
-    df = compute_long_features(df)
-
-    # ── 5. FEATURES_SHORT extras (11 features) ───────────────────────────────
-    df = compute_short_features(df)
-
-    # ── 6. future_ret_h : log-return 1 barre en avant (label de training) ────
-    log_close = np.log(df["close"])
-    df["future_ret_h"] = log_close.shift(-1) - log_close
-    # NB : la dernière barre aura NaN — intentionnel, dropé au save
-
-    # ── 7. Renommer OHLCV en majuscules (convention du CSV de training) ───────
-    df = df.rename(columns={
-        "open":    "Open",
-        "high":    "High",
-        "low":     "Low",
-        "close":   "Close",
-        "volume":  "Volume",
-        "taker_buy_base_asset_volume": "Taker_Buy_Base",
-        "taker_buy_quote_asset_volume": "Taker_Buy_Quote",
-        "number_of_trades": "Trades",
-        "quote_asset_volume": "Quote_Volume",
-    })
-
-    # ── 8. Sélection et vérification des colonnes ────────────────────────────
-    from ai.level_0.features import FEATURES_LONG, FEATURES_SHORT
-    SNAPSHOT_FEATURES = [
-        "rv_12", "rv_24", "rv_48", "rv_72", "rv_168",
-        "rv_ratio_24_72", "rv_ratio_12_48",
-        "atr_pct_14", "boll_width_20",
-        "mom_logret_6", "mom_logret_12", "mom_logret_24", "mom_logret_72",
-        "mom_sharpe_6", "mom_sharpe_12", "mom_sharpe_24",
-        "rsi_14", "cci_20",
-        "dist_ema_20", "dist_ema_50", "dist_ema_200",
-        "ema_spread_20_50", "ema_spread_50_200",
-        "boll_pos_20", "close_in_bar", "intrabar_range_pct",
-        "eff_ratio_12", "eff_ratio_24",
-        "taker_buy_ratio_base", "delta_taker_pressure",
-        "vol_ratio_24", "trades_ratio_24",
-        "zscore_close_24", "zscore_ret_24", "skew_ret_24",
-        "hour_sin", "hour_cos", "dow_sin", "dow_cos",
-    ]
-    ohlcv = ["Open", "High", "Low", "Close", "Volume",
-             "Taker_Buy_Base", "Taker_Buy_Quote", "Trades", "Quote_Volume"]
-    extras = ["atr_14", "future_ret_h"]
-    all_features = list(dict.fromkeys(SNAPSHOT_FEATURES + FEATURES_LONG + FEATURES_SHORT))
-    keep = ohlcv + all_features + extras
-
-    available = [c for c in keep if c in df.columns]
-    missing   = [c for c in keep if c not in df.columns]
-    if missing:
-        log.warning(f"Colonnes manquantes après feature engineering : {missing}")
-
-    df = df[available].copy()
+    df = compute_hourly_features(df_raw, symbol=SYMBOL, include_labels=True)
     df.index.name = "datetime"
     return df
 
@@ -275,8 +234,10 @@ def merge_with_existing(df_new: pd.DataFrame, csv_path: Path) -> pd.DataFrame:
 
 def save_csv(df: pd.DataFrame, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Supprimer les dernières lignes sans future_ret_h (barre courante, incomplete)
-    if "future_ret_h" in df.columns:
+    # Supprimer les dernières barres sans future_ret_4h (TARGET_COL — 4 barres de NaN en fin)
+    if "future_ret_4h" in df.columns:
+        df = df[df["future_ret_4h"].notna()].copy()
+    elif "future_ret_h" in df.columns:
         df = df[df["future_ret_h"].notna()].copy()
     df.index.name = "datetime"
     df.to_csv(path)
@@ -306,10 +267,27 @@ def main() -> None:
         "--symbol", default=SYMBOL,
         help=f"Symbole Binance (défaut : {SYMBOL})",
     )
+    parser.add_argument(
+        "--no-mongo", action="store_true",
+        help="Ne pas ingérer les données dans MongoDB (CSV seulement)",
+    )
+    parser.add_argument(
+        "--mongo-uri", default=DEFAULT_MONGO_URI,
+        help=f"URI MongoDB (défaut : {DEFAULT_MONGO_URI})",
+    )
+    parser.add_argument(
+        "--mongo-db", default=DEFAULT_TRADER_DB,
+        help=f"Base MongoDB OHLCV (défaut : {DEFAULT_TRADER_DB})",
+    )
+    parser.add_argument(
+        "--mongo-collection", default=DEFAULT_HISTORICAL_COLLECTION,
+        help=f"Collection MongoDB OHLCV (défaut : {DEFAULT_HISTORICAL_COLLECTION})",
+    )
     args = parser.parse_args()
 
     output = Path(args.output)
     since  = args.since
+    mongo_symbol = normalize_symbol(args.symbol)
 
     # Mode incrémental : repartir de la dernière barre connue
     if args.update and output.exists():
@@ -318,6 +296,21 @@ def main() -> None:
         # Repartir 24h avant la dernière barre pour recomputer les features correctement
         since = (last_dt - pd.Timedelta(hours=240)).strftime("%Y-%m-%d %H:%M:%S")
         log.info(f"Mode update — repartir depuis {since} (dernière barre : {last_dt})")
+    elif args.update and not args.no_mongo:
+        try:
+            last_dt = get_latest_ohlcv_timestamp(
+                symbol=mongo_symbol,
+                interval=INTERVAL,
+                mongo_uri=args.mongo_uri,
+                mongo_db=args.mongo_db,
+                collection_name=args.mongo_collection,
+            )
+            if last_dt is not None:
+                last_ts = pd.to_datetime(last_dt, utc=True)
+                since = (last_ts - pd.Timedelta(hours=240)).strftime("%Y-%m-%d %H:%M:%S")
+                log.info(f"Mode update Mongo — repartir depuis {since} (dernière barre : {last_dt})")
+        except Exception as exc:
+            log.warning(f"Impossible de lire le dernier timestamp MongoDB ({exc}); fallback --since={since}")
 
     log.info(f"Téléchargement {args.symbol} 1h depuis {since} …")
     df_raw = fetch_all_klines(
@@ -335,6 +328,35 @@ def main() -> None:
         df_feat = merge_with_existing(df_feat, output)
 
     save_csv(df_feat, output)
+
+    if not args.no_mongo:
+        df_mongo = df_feat
+        if "future_ret_4h" in df_mongo.columns:
+            df_mongo = df_mongo[df_mongo["future_ret_4h"].notna()].copy()
+        elif "future_ret_h" in df_mongo.columns:
+            df_mongo = df_mongo[df_mongo["future_ret_h"].notna()].copy()
+        if df_mongo.empty:
+            log.warning("Aucune ligne complete a ingérer dans MongoDB")
+        else:
+            stats = upsert_ohlcv_dataframe(
+                df_mongo,
+                symbol=mongo_symbol,
+                interval=INTERVAL,
+                source="binance",
+                mongo_uri=args.mongo_uri,
+                mongo_db=args.mongo_db,
+                collection_name=args.mongo_collection,
+            )
+            log.info(
+                "MongoDB upsert : %s.%s %s %s | processed=%s upserted=%s modified=%s",
+                args.mongo_db,
+                args.mongo_collection,
+                mongo_symbol,
+                INTERVAL,
+                stats["processed"],
+                stats["upserted"],
+                stats["modified"],
+            )
     log.info("Terminé.")
 
 

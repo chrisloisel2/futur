@@ -114,6 +114,9 @@ def train_short_model(
         print(f"   ⚠  AUC={best_tab['auc']:.4f} < {cfg.min_auc} — signal short faible")
         print("      → Revoir les features short ou accepter de désactiver le short")
 
+    # ── Feature importance (top-20 gamechanger features) ─────────────────────
+    _print_short_feature_importance(best_tab_model, FEATURES_SHORT)
+
     if cfg.tcn_enabled and best_tab["auc"] >= cfg.min_auc:
         print("   TCN SHORT : non implémenté dans cette version")
         print("   → Activer quand AUC short > 0.65 en baseline tabulaire")
@@ -204,3 +207,40 @@ def _build_xgb_short(cfg: ShortModelConfig, spw: float):
         random_state=cfg.seed,
     )
     return clf, "HistGBT"
+
+
+def _print_short_feature_importance(clf, feature_names: list, top_n: int = 20) -> None:
+    """
+    Affiche les top-N features par importance pour le modele short.
+    Identifie quelles categories de features (gamechanger vs baseline) dominent.
+    """
+    try:
+        if hasattr(clf, "feature_importances_"):
+            importances = clf.feature_importances_
+        elif hasattr(clf, "coef_"):
+            importances = np.abs(clf.coef_[0])
+        else:
+            return
+
+        idx_sorted = np.argsort(importances)[::-1][:top_n]
+        print(f"\n   Feature importance SHORT (top {top_n}) :")
+        for rank, idx in enumerate(idx_sorted, 1):
+            fname = feature_names[idx] if idx < len(feature_names) else f"feat_{idx}"
+            imp   = importances[idx]
+            # Categoriser la feature
+            if any(k in fname for k in ("crowding", "breakdown", "trap", "squeeze",
+                                         "liq_", "taker_sell", "bear_cont", "weak_bounce",
+                                         "failed_", "oi_up_price", "oi_price_div",
+                                         "funding_extreme", "long_short_ext", "fear_greed_ext",
+                                         "funding_accel", "spread_proxy", "open_interest_exp",
+                                         "sell_volume_shock", "range_exp", "vwap_loss",
+                                         "below_ema", "local_low")):
+                cat = "[GC]"  # Gamechanger
+            elif any(k in fname for k in ("oi_x", "funding_x", "macro_conf", "crowd_lev",
+                                           "macro_reg", "oi_accel")):
+                cat = "[XM]"  # Cross-macro
+            else:
+                cat = "[BS]"  # Baseline
+            print(f"     {rank:2d}. {cat} {fname:<45} {imp:.4f}")
+    except Exception as e:
+        print(f"   Feature importance non disponible : {e}")

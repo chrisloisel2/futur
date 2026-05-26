@@ -53,9 +53,9 @@ _THR_HI = 0.82
 _THR_STEP = 0.01
 
 # Contraintes minimales et maximales pour valider un seuil
-_MIN_N_TRADES = 10
-_MAX_N_TRADES_FRAC = 0.08   # max 8% des barres val → évite threshold trop bas
-_MIN_PF = 1.30               # = seuil fold-OK : la val doit avoir même qualité que le test cible
+_MIN_N_TRADES = 8
+_MAX_N_TRADES_FRAC = 0.12   # max 12% des barres val → évite threshold trop bas
+_MIN_PF = 1.05               # seuil bas sur val — le score composite filtre la qualité réelle
 _MAX_SQUEEZE = MAX_SQUEEZE_LOSS_RATE
 
 

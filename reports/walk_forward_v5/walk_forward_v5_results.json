@@ -1,0 +1,132 @@
+{
+  "config": {
+    "label_mode": "Quantile 8h (top 20%)",
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "folds": [
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "n_trm": 100,
+    "cost_long_bps": 10.0
+  },
+  "folds": [
+    {
+      "year": 2022,
+      "skip": false,
+      "status": "CATASTROPHIC",
+      "long": {
+        "n_trades": 698,
+        "pf": 0.626,
+        "wr": 0.466,
+        "expectancy": -0.3023,
+        "max_drawdown": 2.22,
+        "total_pnl": -2.1097
+      },
+      "regime": {
+        "bear_pct": 23.5,
+        "bull_pct": 14.4,
+        "size_mult_mean": 0.918,
+        "dd_reduction_est_pct": 8.2,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "bh_pct": -64.55,
+      "label_col": "y_long",
+      "auc_mean": 0.5089146727486539
+    },
+    {
+      "year": 2023,
+      "skip": false,
+      "status": "OK",
+      "long": {
+        "n_trades": 191,
+        "pf": 1.618,
+        "wr": 0.466,
+        "expectancy": 0.2878,
+        "max_drawdown": 0.34,
+        "total_pnl": 0.5497
+      },
+      "regime": {
+        "bear_pct": 3.3,
+        "bull_pct": 15.4,
+        "size_mult_mean": 0.988,
+        "dd_reduction_est_pct": 1.2,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "bh_pct": 156.03,
+      "label_col": "y_long",
+      "auc_mean": 0.5371474190876512
+    },
+    {
+      "year": 2024,
+      "skip": false,
+      "status": "OK",
+      "long": {
+        "n_trades": 247,
+        "pf": 1.547,
+        "wr": 0.547,
+        "expectancy": 0.2392,
+        "max_drawdown": 0.16,
+        "total_pnl": 0.5909
+      },
+      "regime": {
+        "bear_pct": 8.2,
+        "bull_pct": 23.3,
+        "size_mult_mean": 0.971,
+        "dd_reduction_est_pct": 2.9,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "bh_pct": 120.1,
+      "label_col": "y_long",
+      "auc_mean": 0.5652536456689118
+    },
+    {
+      "year": 2025,
+      "skip": false,
+      "status": "WEAK",
+      "long": {
+        "n_trades": 206,
+        "pf": 0.811,
+        "wr": 0.417,
+        "expectancy": -0.1004,
+        "max_drawdown": 0.25,
+        "total_pnl": -0.2068
+      },
+      "regime": {
+        "bear_pct": 9.4,
+        "bull_pct": 11.3,
+        "size_mult_mean": 0.967,
+        "dd_reduction_est_pct": 3.3,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "bh_pct": -7.16,
+      "label_col": "y_long",
+      "auc_mean": 0.5597677451635175
+    }
+  ],
+  "verdict": {
+    "folds_ok": 2,
+    "folds_total": 4,
+    "cata": 1,
+    "pf_median": 1.179,
+    "n_trades_total": 1342,
+    "deployable": false
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "symbol": "DOTUSDT",
+  "start_date": "2026-05-24T01:08:06.021932+00:00",
+  "total_signals": 3,
+  "total_trades": 0,
+  "total_wins": 0,
+  "total_losses": 0,
+  "gross_win_sum": 0.0,
+  "gross_loss_sum": 0.0,
+  "cumulative_pnl_pct": 0.0,
+  "peak_pnl_pct": 0.0,
+  "max_dd_pct": 0.0,
+  "consecutive_losses": 0,
+  "last_trade_time": null,
+  "weekly_pnl_pct": 0.0,
+  "weekly_start_time": "2026-05-24T01:08:06.022111+00:00",
+  "crash_halt_until": null,
+  "drift_alerts": 0,
+  "accounting_errors": 0
+}

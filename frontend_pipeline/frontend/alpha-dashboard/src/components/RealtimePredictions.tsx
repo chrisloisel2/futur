@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactECharts from 'echarts-for-react';
 import './RealtimePredictions.css';
+import { API_BASE_URL } from '../config/api';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -120,7 +121,7 @@ const RealtimePredictions: React.FC = () => {
 
   const fetchSignal = useCallback(async () => {
     try {
-      const res  = await fetch('http://localhost:8000/pipeline/signal');
+      const res  = await fetch(`${API_BASE_URL}/pipeline/signal`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: PipelineSignal = await res.json();
       setSignal(data);

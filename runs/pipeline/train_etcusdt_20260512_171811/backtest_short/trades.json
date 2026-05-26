@@ -1,0 +1,16 @@
+[
+  {
+    "bar": 17126,
+    "date": "2025-12-14",
+    "year": 2025,
+    "side": "short",
+    "action": "SELL",
+    "p_tradeable": 0.4615,
+    "p_side": 0.5677,
+    "fut_ret": -0.00078,
+    "pnl_net_pct": -0.00022,
+    "pnl_abs": -0.1726,
+    "equity": 9999.83,
+    "notional": 775.04
+  }
+]

@@ -4,6 +4,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import './CryptoCandlestickModal.css';
+import { API_BASE_URL } from '../config/api';
 
 interface RealTimeCandlestickChartProps {
   symbol: string;
@@ -51,7 +52,7 @@ const RealTimeCandlestickChart: React.FC<RealTimeCandlestickChartProps> = ({ sym
         setError(null);
       }
 
-      const url = `http://localhost:8000/api/historical/${symbol}?limit=500`;
+      const url = `${API_BASE_URL}/api/historical/${symbol}?limit=500`;
       const response = await fetch(url);
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

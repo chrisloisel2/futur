@@ -28,7 +28,16 @@ _ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
 sys.path.insert(0, str(_ROOT / "ai" / "TRAIN"))
 
-from mongo_utils import fetch_historical_from_mongo, normalize_symbol, get_db
+from mongo_utils import (
+    HISTORICAL_COLLECTION,
+    MONGODB_DB,
+    MONGODB_URI,
+    fetch_historical_from_mongo,
+    get_db,
+    normalize_symbol,
+    symbol_query_variants,
+)
+from data_pipeline.mongo_training import build_mongo_training_uri, mongo_training_available
 from pymongo.errors import PyMongoError
 
 # Add TRAIN to path for S3 access (déjà ajouté au-dessus)
@@ -92,15 +101,15 @@ async def _fetch_ema_signal(symbol: str = "BTCUSDT") -> dict:
         spread = abs(ema7 - ema25) / ema25
         bullish = ema7 > ema25
 
-        # État courant : LONG si haussier, SHORT si baissier
+        # SHORT désactivé — le fallback EMA retourne seulement LONG ou HOLD
         if bullish:
             action = "LONG"
             reason = f"EMA7({ema7:.0f}) > EMA25({ema25:.0f}) — tendance haussière (spread {spread*100:.2f}%)"
             confidence = min(0.9, 0.55 + spread * 15)
         else:
-            action = "SHORT"
-            reason = f"EMA7({ema7:.0f}) < EMA25({ema25:.0f}) — tendance baissière (spread {spread*100:.2f}%)"
-            confidence = min(0.9, 0.55 + spread * 15)
+            action = "HOLD"
+            reason = f"EMA7({ema7:.0f}) < EMA25({ema25:.0f}) — tendance baissière, pas de signal (SHORT désactivé)"
+            confidence = 0.0
 
         return {"action": action, "price": price, "confidence": confidence, "reason": reason}
     except Exception as exc:
@@ -660,7 +669,7 @@ def resolve_training_data(
     symbol: str,
     raise_on_missing: bool = True,
     data_path: Optional[str] = None,
-) -> Optional[Path]:
+) -> Optional[Any]:
     """Resolve a local dataset with enough history for the canonical pipeline."""
     symbol_key = normalize_symbol(symbol).replace("/", "").upper()
     if data_path:
@@ -685,11 +694,17 @@ def resolve_training_data(
         raw = os.getenv(env_key)
         if not raw:
             continue
+        if raw.startswith("mongo://"):
+            return raw
         candidate = Path(raw).expanduser()
         if not candidate.is_absolute():
             candidate = _ROOT / candidate
         if candidate.exists():
             return candidate
+
+    mongo_uri = build_mongo_training_uri(symbol_key, interval="1h", collection=HISTORICAL_COLLECTION)
+    if mongo_training_available(symbol_key, interval="1h", collection_name=HISTORICAL_COLLECTION):
+        return mongo_uri
 
     for candidate in _training_data_candidates(symbol_key):
         if candidate.exists():
@@ -701,8 +716,9 @@ def resolve_training_data(
             status_code=404,
             detail=(
                 f"Aucun dataset d'entraînement local trouvé pour {symbol_key}. "
-                f"Chemins essayés: {checked}. Ajoute FUTUR_TRAINING_DATA_{symbol_key} "
-                "ou charge un historique complet avant de lancer ce symbole."
+                f"Chemins essayés: {checked}. Collection Mongo attendue: "
+                f"{HISTORICAL_COLLECTION}. Lance scripts/build_enriched_mongo_collection.py "
+                f"ou ajoute FUTUR_TRAINING_DATA_{symbol_key}."
             ),
         )
     return None
@@ -2390,6 +2406,36 @@ async def get_recent_trades(symbol: str = "BTCUSDT", limit: int = 50):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/ohlcv1m")
+async def get_ohlcv1m(symbol: str = "BTCUSDT", limit: int = 500):
+    """Données OHLCV 1m depuis la collection MongoDB ohlcv_1m."""
+    try:
+        db = get_db()
+        col = db["ohlcv_1m"]
+        query = {"symbol": symbol.upper()}
+        docs = list(col.find(query, {"_id": 0}).sort("timestamp", -1).limit(limit))
+        if not docs:
+            raise HTTPException(status_code=404, detail=f"No ohlcv_1m data for {symbol}")
+        docs.sort(key=lambda x: x["timestamp"])
+        result = []
+        for d in docs:
+            ts = d["timestamp"]
+            ts_str = ts.strftime("%Y/%m/%d %H:%M") if isinstance(ts, datetime) else str(ts)
+            result.append({
+                "timestamp": ts_str,
+                "open":   float(d.get("open",   0) or 0),
+                "high":   float(d.get("high",   0) or 0),
+                "low":    float(d.get("low",    0) or 0),
+                "close":  float(d.get("close",  0) or 0),
+                "volume": float(d.get("volume", 0) or 0),
+            })
+        return {"success": True, "symbol": symbol.upper(), "count": len(result), "data": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -2638,23 +2684,77 @@ async def get_training_symbols():
 @app.get("/training/architecture")
 async def get_model_architecture():
     """Architecture réelle du modèle ML."""
-    from pymongo import MongoClient as _MC
     try:
-        db  = _MC("mongodb://localhost:27017", serverSelectionTimeoutMS=2000)["trader"]
-        n_bars   = db["historical_ohlcv"].count_documents({})
+        db = get_db()
+        dedicated = sorted(
+            name for name in db.list_collection_names()
+            if name.startswith(f"{HISTORICAL_COLLECTION}_")
+        )
+        n_bars   = db[HISTORICAL_COLLECTION].count_documents({})
+        if n_bars == 0 and dedicated:
+            n_bars = sum(db[name].count_documents({}) for name in dedicated)
         n_1m     = db["ohlcv_1m"].count_documents({})
-        doc      = db["historical_ohlcv"].find_one() or {}
+        doc      = db[HISTORICAL_COLLECTION].find_one() or {}
+        if not doc and dedicated:
+            doc = db[dedicated[0]].find_one() or {}
         n_feats  = len([k for k in doc.keys() if k not in ("_id","timestamp","symbol","interval","source","ingested_at")])
     except Exception:
         n_bars, n_1m, n_feats = 76341, 0, 88
 
+    # ── TRM fleet : specs statiques + métriques du dernier walk-forward ──────
+    from ai.level_2.tiny_specialists import SPECIALIST_SPECS, CONTEXT_NAMES, TRM_FLEET_SIZE
+    fleet_report_path = _ROOT / "reports" / "walk_forward_4h" / "fleet_report.json"
+    fleet_saved = _read(fleet_report_path) or {}
+    saved_specs = fleet_saved.get("specialists", {})
+
+    trm_fleet: list = []
+    for sp_spec in SPECIALIST_SPECS:
+        saved = saved_specs.get(sp_spec.name, {})
+        trm_fleet.append({
+            "name":          sp_spec.name,
+            "horizon":       sp_spec.horizon.label,
+            "horizon_hours": sp_spec.horizon.hours,
+            "archetype":     sp_spec.movement.key,
+            "archetype_desc": sp_spec.movement.desc,
+            "train_quantile": sp_spec.movement.train_quantile,
+            "status":        "trained" if saved.get("trained") else "pending",
+            "auc":           saved.get("val_auc"),
+            "n_ctx":         saved.get("n_ctx"),
+        })
+    # general specialist
+    saved_gen = saved_specs.get("general", {})
+    trm_fleet.append({
+        "name": "general", "horizon": "all", "horizon_bars": None,
+        "archetype": "general", "archetype_desc": "catch-all",
+        "train_quantile": None,
+        "status": "trained" if saved_gen.get("trained") else "pending",
+        "auc": saved_gen.get("val_auc"),
+        "n_ctx": saved_gen.get("n_ctx"),
+    })
+
+    n_trained   = sum(1 for t in trm_fleet if t["status"] == "trained")
+    n_total     = len(trm_fleet)
+    fleet_run_year = fleet_saved.get("year")
+    run_id = fleet_saved.get("run_id") or fleet_saved.get("job_id") or "current"
+    specialist_names = [t["name"] for t in trm_fleet if t["status"] == "trained"][:6] or \
+                       [t["name"] for t in trm_fleet[:6]]
+
     return {
+        "run_id": run_id,
         "data": {
             "bars_1h":   n_bars,
             "bars_1m":   n_1m,
             "features":  n_feats,
             "period":    "2017-2026",
             "symbols":   TRAINING_SYMBOL_UNIVERSE,
+        },
+        "trm_fleet": trm_fleet,
+        "trm_fleet_meta": {
+            "n_total":    n_total,
+            "n_trained":  n_trained,
+            "n_pending":  n_total - n_trained,
+            "fleet_run_year": fleet_run_year,
+            "fleet_auc_mean": fleet_saved.get("fleet_auc_mean"),
         },
         "levels": [
             {
@@ -2689,14 +2789,18 @@ async def get_model_architecture():
             },
             {
                 "id":   3,
-                "name": "Specialist Router",
-                "type": "XGBoost × 6",
+                "name": "TRM Fleet",
+                "type": f"HistGBT × {n_total}",
                 "inputs": 53,
-                "outputs": 6,
-                "desc": "6 experts spécialisés par régime de marché",
+                "outputs": n_trained or n_total,
+                "desc": f"{n_trained}/{n_total} TRM entraînés · 9 horizons × 8 archétypes + général",
                 "params": {
-                    "specialists": ["TREND_LONG", "TREND_SHORT", "MEAN_REVERSION", "BREAKOUT", "HIGH_VOL", "NEUTRAL"],
-                    "features_long": 53, "features_short": 50, "min_samples": 300
+                    "n_total":      n_total,
+                    "n_trained":    n_trained,
+                    "horizons":     9,
+                    "archetypes":   8,
+                    "routing_top_k": 4,
+                    "min_samples":  160,
                 },
                 "color": "#10b981",
             },
@@ -2859,8 +2963,10 @@ async def start_training(request: TrainingStartRequest):
             env = os.environ.copy()
             env["PYTHONPATH"] = str(_ROOT)
             env["PYTHONUNBUFFERED"] = "1"
-            env["FUTUR_MONGO_URI"] = "mongodb://localhost:27017"
-            env["FUTUR_MONGO_DB"]  = "trader"
+            env["FUTUR_MONGO_URI"] = MONGODB_URI
+            env["FUTUR_MONGO_DB"]  = MONGODB_DB
+            env["FUTUR_MONGO_FEATURE_COLLECTION"] = HISTORICAL_COLLECTION
+            env["MONGODB_FEATURE_COLLECTION"] = HISTORICAL_COLLECTION
 
             cmd = [
                 sys.executable,
@@ -3609,6 +3715,266 @@ async def get_model_architecture():
         }
     }
 
+
+@app.get("/ai/stack-overview")
+async def get_ai_stack_overview():
+    """Vue complète de la stack IA : niveaux, TRM fleet, métriques long/short, backtest."""
+    try:
+        run_dir = _latest_run_dir()
+
+        # ── Config & constants ────────────────────────────────────────────────
+        config_info = {
+            "horizon_bars": 4,
+            "horizon_str": "4h",
+            "bar_frequency": "1h",
+            "cost_pct_base": 0.0010,
+            "cost_pct_stress": 0.0020,
+            "cost_pct_pessimistic": 0.0030,
+            "tradeable_quantile_long": 0.88,
+            "tradeable_quantile_short": 0.88,
+            "long_min_abs_return": 0.010,
+            "short_min_abs_return": 0.012,
+            "train_end_year": 2022,
+            "val_year": 2023,
+            "test_from_year": 2024,
+            "filter_beta_long": 1.5,
+            "filter_beta_short": 1.0,
+            "initial_equity": 10000.0,
+        }
+
+        # ── Architecture levels ───────────────────────────────────────────────
+        levels = [
+            {
+                "id": 0,
+                "name": "Global Gating",
+                "description": "Filtre tradeable — détecte si le marché offre une opportunité",
+                "model": "HistGBT",
+                "status": "active",
+                "color": "#FF6B6B",
+            },
+            {
+                "id": 1,
+                "name": "Context / Régime",
+                "description": "Détection du régime de marché (NEUTRAL / SHORTABLE / NO_SHORT)",
+                "model": "Règles déterministes",
+                "status": "active",
+                "color": "#4ECDC4",
+            },
+            {
+                "id": 2,
+                "name": "Edge Specialists",
+                "description": "Scoring directionnel Long et Short (modèles asymétriques)",
+                "model": "HistGBT Long + Short",
+                "status": "active",
+                "color": "#45B7D1",
+            },
+            {
+                "id": 3,
+                "name": "TRM Fleet",
+                "description": "Spécialistes contextuels — un modèle par régime de marché",
+                "model": "HistGBT par contexte",
+                "status": "active",
+                "color": "#96CEB4",
+            },
+            {
+                "id": 7,
+                "name": "Risk Controller",
+                "description": "Gestion du risque : drawdown, cooldown, position sizing",
+                "model": "Règles paramétrées",
+                "status": "active",
+                "color": "#FFEAA7",
+            },
+        ]
+
+        if not run_dir:
+            return {
+                "success": False,
+                "run_id": None,
+                "config": config_info,
+                "levels": levels,
+                "filter": None,
+                "long": None,
+                "short": None,
+                "trm_fleet": [],
+                "backtest_long": None,
+                "backtest_short": None,
+                "label_stats": None,
+                "regime_report": None,
+                "note": "Aucun run trouvé. Lancer un entraînement.",
+            }
+
+        def _read(path: Path):
+            if path.exists():
+                with open(path) as f:
+                    return json.load(f)
+            return None
+
+        # ── Pipeline summary ──────────────────────────────────────────────────
+        summary = _read(run_dir / "pipeline_summary.json") or {}
+        label_stats = _read(run_dir / "labels.json") or summary.get("label_stats")
+        regime_report = _read(run_dir / "regime_distribution.json") or summary.get("regime_report")
+
+        # ── Filter (Level 0) ──────────────────────────────────────────────────
+        filter_raw = _read(run_dir / "filter" / "metrics.json") or {}
+        filter_metrics = {
+            "model": filter_raw.get("model", "HistGBT"),
+            "val_acc": filter_raw.get("val_acc"),
+            "val_f1": filter_raw.get("val_f1"),
+            "val_auc": filter_raw.get("val_auc"),
+            "recall_tradeable": filter_raw.get("recall_tradeable"),
+            "recall_not_tradeable": filter_raw.get("recall_not_tradeable"),
+            "calibrated_threshold_long": filter_raw.get("calibrated_threshold_long", 0.40),
+            "calibrated_threshold_short": filter_raw.get("calibrated_threshold_short", 0.45),
+        }
+
+        # ── Long model (Level 2) ──────────────────────────────────────────────
+        long_raw = _read(run_dir / "long" / "metrics.json") or {}
+        long_models = long_raw.get("models", [])
+        best_long_model = next(
+            (m for m in long_models if m["model"] == long_raw.get("best_final")),
+            long_models[0] if long_models else {}
+        )
+        long_metrics = {
+            "side": "long",
+            "best_model": long_raw.get("best_final", "HistGBT"),
+            "beats_threshold": long_raw.get("beats_threshold", False),
+            "acc": best_long_model.get("acc"),
+            "macro_f1": best_long_model.get("macro_f1"),
+            "auc": best_long_model.get("auc"),
+            "precision": best_long_model.get("precision_long"),
+            "recall": best_long_model.get("recall_long"),
+            "all_models": long_models,
+            "direction_threshold": summary.get("config", {}).get("direction_threshold_long", 0.53),
+            "filter_threshold": summary.get("config", {}).get("filter_threshold_long", 0.40),
+            "status": "active",
+        }
+
+        # ── Short model (Level 2) ─────────────────────────────────────────────
+        short_raw = _read(run_dir / "short" / "metrics.json")
+        # fallback: find most recent run with short metrics
+        if not short_raw:
+            runs_root = _ROOT / "runs" / "pipeline"
+            for d in sorted(runs_root.iterdir(), reverse=True):
+                candidate = d / "short" / "metrics.json"
+                if candidate.exists():
+                    short_raw = _read(candidate)
+                    break
+        short_raw = short_raw or {}
+        short_models_list = short_raw.get("models", [])
+        best_short_model = next(
+            (m for m in short_models_list if m["model"] == short_raw.get("best_final")),
+            short_models_list[0] if short_models_list else {}
+        )
+        short_cal = None
+        for d in sorted((_ROOT / "runs" / "pipeline").iterdir(), reverse=True):
+            c = d / "short" / "calibration_metrics.json"
+            if c.exists():
+                short_cal = _read(c)
+                break
+        short_metrics = {
+            "side": "short",
+            "best_model": short_raw.get("best_final", "HistGBT"),
+            "acc": best_short_model.get("acc"),
+            "macro_f1": best_short_model.get("macro_f1"),
+            "auc": best_short_model.get("auc"),
+            "precision": best_short_model.get("precision_short"),
+            "recall": best_short_model.get("recall_short"),
+            "all_models": short_models_list,
+            "direction_threshold": summary.get("config", {}).get("direction_threshold_short", 0.55),
+            "filter_threshold": summary.get("config", {}).get("filter_threshold_short", 0.45),
+            "calibration": short_cal,
+            "status": "disabled",
+            "disabled_reason": "PF < 1 sur tous les splits testés — expectancy négative",
+        }
+
+        # ── TRM Fleet (Level 3 specialists) ───────────────────────────────────
+        trm_fleet = []
+        specialists_dir = run_dir / "specialists"
+        router_summary = _read(specialists_dir / "router_summary.json") or {}
+        training_report = _read(specialists_dir / "training_report.json") or {}
+        router_config = _read(specialists_dir / "router_config.json") or {}
+
+        experts_report = training_report.get("experts", {})
+        for ctx_name, ctx_data in router_summary.items():
+            expert_detail = experts_report.get(ctx_name, {})
+            trm_fleet.append({
+                "name": ctx_name,
+                "side": ctx_data.get("side", "long"),
+                "weight": ctx_data.get("weight"),
+                "auc": ctx_data.get("auc"),
+                "macro_f1": ctx_data.get("macro_f1"),
+                "n_train": expert_detail.get("n_train"),
+                "n_val": expert_detail.get("n_val"),
+                "acc": expert_detail.get("acc"),
+                "precision_pos": expert_detail.get("precision_pos"),
+                "recall_pos": expert_detail.get("recall_pos"),
+                "ece": expert_detail.get("ece_after_calibration"),
+                "status": expert_detail.get("status", ctx_data.get("accepted", True) and "accepted" or "rejected"),
+                "label": expert_detail.get("label", "y_long"),
+            })
+        # also capture rejected contexts
+        for ctx_name, ctx_data in experts_report.items():
+            if ctx_data.get("status") == "rejected" and not any(t["name"] == ctx_name for t in trm_fleet):
+                trm_fleet.append({
+                    "name": ctx_name,
+                    "side": "unknown",
+                    "weight": 0,
+                    "auc": None,
+                    "macro_f1": None,
+                    "n_train": None,
+                    "n_val": None,
+                    "acc": None,
+                    "precision_pos": None,
+                    "recall_pos": None,
+                    "ece": None,
+                    "status": "rejected",
+                    "label": None,
+                })
+
+        trm_config = {
+            "default_weight": router_config.get("default_specialist_weight", 0.35),
+            "max_weight": router_config.get("max_specialist_weight", 0.55),
+            "min_auc": router_config.get("min_expert_auc", 0.56),
+            "min_samples": router_config.get("min_train_samples", 300),
+            "n_trained": training_report.get("n_contexts_trained", len(trm_fleet)),
+            "n_accepted": training_report.get("n_accepted", sum(1 for t in trm_fleet if t["status"] == "accepted")),
+        }
+
+        # ── Backtest long ─────────────────────────────────────────────────────
+        bt_long_dir = run_dir / "backtest_long"
+        bt_long = _read(bt_long_dir / "summary.json")
+
+        # ── Backtest short — find most recent ─────────────────────────────────
+        bt_short = None
+        for d in sorted((_ROOT / "runs" / "pipeline").iterdir(), reverse=True):
+            s = d / "backtest_short" / "summary.json"
+            if s.exists():
+                bt_short = _read(s)
+                break
+
+        return {
+            "success": True,
+            "run_id": run_dir.name,
+            "timestamp": datetime.now().isoformat(),
+            "config": config_info,
+            "levels": levels,
+            "filter": filter_metrics,
+            "long": long_metrics,
+            "short": short_metrics,
+            "trm_fleet": trm_fleet,
+            "trm_config": trm_config,
+            "backtest_long": bt_long,
+            "backtest_short": bt_short,
+            "label_stats": label_stats,
+            "regime_report": regime_report,
+            "short_enabled": summary.get("config", {}).get("enable_short", False),
+        }
+
+    except Exception as e:
+        logger.error(f"[stack-overview] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ============================================================================
 # DATA INTEGRITY ENDPOINTS
 # ============================================================================
@@ -3734,7 +4100,8 @@ async def get_mongodb_stats():
         # Collections à surveiller: (collection_name, display, icon, db_name)
         targets = [
             # OHLCV multi-timeframe
-            ("historical_ohlcv",    "OHLCV 1h (2017→)",     "📊", None),
+            (HISTORICAL_COLLECTION, "OHLCV/features enrichi", "📊", None),
+            ("historical_ohlcv",    "OHLCV source legacy",    "📦", None),
             ("ohlcv_1m",            "OHLCV 1m (BTC+ETH+SOL)","⚡", None),
             ("ohlcv_5m",            "OHLCV 5m",             "📈", None),
             ("ohlcv_15m",           "OHLCV 15m",            "📈", None),
@@ -3760,6 +4127,15 @@ async def get_mongodb_stats():
             # Portfolio
             ("portfolio_state",     "Portfolio State",       "💼", None),
         ]
+        try:
+            prefix = f"{HISTORICAL_COLLECTION}_"
+            existing_targets = {name for name, _, _, db_name in targets if db_name is None}
+            for name in sorted(db.list_collection_names()):
+                if name.startswith(prefix) and name not in existing_targets:
+                    symbol = name[len(prefix):].upper()
+                    targets.append((name, f"OHLCV/features enrichi {symbol}", "📊", None))
+        except Exception as exc:
+            logger.warning(f"Unable to list dedicated OHLCV collections: {exc}")
 
         collections_info = []
         for coll_name, display, icon, alt_db in targets:
@@ -4136,6 +4512,216 @@ async def get_long_only_backtest_summary():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# WALK-FORWARD PIPELINE ENDPOINTS  (/wf/*)
+# ============================================================================
+
+from typing import List as _List
+
+class WalkForwardRequest(BaseModel):
+    pipeline: str = "short"          # "long" | "short"
+    # SHORT params
+    max_assets: int = 50
+    folds: _List[int] = [2022, 2023, 2024, 2025, 2026]
+    use_transformer: bool = False
+    use_lgbm: bool = True
+    max_epochs: int = 40
+    # LONG params — no extra required, loads all *USDT*features.csv automatically
+    # Shared
+    data_dir: Optional[str] = None   # None → ROOT/data
+
+_wf_jobs: dict = {}
+_wf_lock = threading.Lock()
+
+
+@app.get("/wf/assets")
+async def wf_list_assets():
+    """Liste tous les actifs disponibles dans data/ (fichiers *_features.csv)."""
+    data_path = _ROOT / "data"
+    assets = []
+    for p in sorted(data_path.glob("*_features.csv")):
+        sym = p.stem.replace("_1h_features", "").replace("_features", "")
+        size_mb = round(p.stat().st_size / 1_048_576, 1)
+        assets.append({"symbol": sym, "file": p.name, "size_mb": size_mb})
+    return {"count": len(assets), "assets": assets}
+
+
+@app.post("/wf/start")
+async def wf_start(request: WalkForwardRequest):
+    """Lance un walk-forward LONG ou SHORT avec les paramètres choisis."""
+    job_id = f"wf_{request.pipeline}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+    log_file = Path(f"/tmp/{job_id}.log")
+    data_dir = Path(request.data_dir) if request.data_dir else _ROOT / "data"
+
+    if request.pipeline == "long":
+        script = _ROOT / "scripts" / "walk_forward_4h.py"
+        btc_alpha = data_dir / "BTCUSD_1h_alpha.csv"
+        if not btc_alpha.exists():
+            btc_alpha = next(data_dir.glob("BTCUSD*alpha*.csv"), None)
+            if btc_alpha is None:
+                raise HTTPException(status_code=400, detail="BTCUSD_1h_alpha.csv introuvable dans data/")
+        cmd = [sys.executable, str(script), "--data", str(btc_alpha)]
+    elif request.pipeline == "short":
+        script = _ROOT / "scripts" / "walk_forward_short_multi_asset.py"
+        cmd = [
+            sys.executable, str(script),
+            "--max-assets", str(request.max_assets),
+            "--folds", *[str(f) for f in request.folds],
+            "--max-epochs", str(request.max_epochs),
+            "--data-dir", str(data_dir),
+        ]
+        if not request.use_transformer:
+            cmd.append("--no-transformer")
+        if not request.use_lgbm:
+            cmd.append("--no-lgbm")
+    else:
+        raise HTTPException(status_code=400, detail=f"Pipeline inconnu: {request.pipeline!r} (long | short)")
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(_ROOT)
+    env["PYTHONUNBUFFERED"] = "1"
+
+    with open(log_file, "w") as lf:
+        proc = subprocess.Popen(
+            cmd, stdout=lf, stderr=subprocess.STDOUT,
+            env=env, cwd=str(_ROOT),
+        )
+
+    job = {
+        "job_id": job_id,
+        "pipeline": request.pipeline,
+        "status": "running",
+        "config": request.dict(),
+        "start_time": datetime.utcnow().isoformat(),
+        "end_time": None,
+        "pid": proc.pid,
+        "log_file": str(log_file),
+        "process": proc,
+        "result": None,
+        "error": None,
+    }
+    with _wf_lock:
+        _wf_jobs[job_id] = job
+
+    def _monitor():
+        proc.wait()
+        with _wf_lock:
+            j = _wf_jobs.get(job_id)
+            if j is None:
+                return
+            j["end_time"] = datetime.utcnow().isoformat()
+            j["status"] = "completed" if proc.returncode == 0 else "failed"
+            j["error"] = None if proc.returncode == 0 else f"exit code {proc.returncode}"
+            # Essayer de lire le JSON de résultats
+            if request.pipeline == "short":
+                rp = _ROOT / "reports" / "short_rebuild" / "walk_forward_short_multi_asset.json"
+            else:
+                rp = _ROOT / "reports" / "walk_forward_4h" / "walk_forward_4h.json"
+            if rp.exists():
+                try:
+                    with open(rp) as f:
+                        j["result"] = json.load(f)
+                except Exception:
+                    pass
+
+    threading.Thread(target=_monitor, daemon=True).start()
+
+    return {"success": True, "job_id": job_id, "pid": proc.pid, "status": "running"}
+
+
+@app.get("/wf/jobs")
+async def wf_list_jobs():
+    """Liste tous les jobs walk-forward (running + terminés)."""
+    with _wf_lock:
+        jobs = [
+            {k: v for k, v in j.items() if k not in ("process",)}
+            for j in _wf_jobs.values()
+        ]
+    return {"jobs": sorted(jobs, key=lambda x: x["start_time"], reverse=True)}
+
+
+@app.get("/wf/logs/{job_id}")
+async def wf_get_logs(job_id: str, lines: int = 300):
+    """Retourne les N dernières lignes de log d'un job walk-forward."""
+    with _wf_lock:
+        job = _wf_jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} introuvable")
+    log_file = Path(job["log_file"])
+    if not log_file.exists():
+        return {"job_id": job_id, "lines": [], "total": 0}
+    with open(log_file, "r", errors="replace") as f:
+        all_lines = f.readlines()
+    tail = all_lines[-lines:]
+    return {
+        "job_id": job_id,
+        "status": job["status"],
+        "lines": [l.rstrip("\n") for l in tail],
+        "total": len(all_lines),
+        "start_time": job["start_time"],
+        "end_time": job.get("end_time"),
+    }
+
+
+@app.post("/wf/stop/{job_id}")
+async def wf_stop_job(job_id: str):
+    """Arrête un job walk-forward en cours."""
+    with _wf_lock:
+        job = _wf_jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} introuvable")
+    proc = job.get("process")
+    if proc and proc.poll() is None:
+        proc.terminate()
+        job["status"] = "stopped"
+        job["end_time"] = datetime.utcnow().isoformat()
+    return {"success": True, "job_id": job_id, "status": job["status"]}
+
+
+@app.get("/wf/results/{job_id}")
+async def wf_get_results(job_id: str):
+    """Retourne le résumé JSON du walk-forward si terminé."""
+    with _wf_lock:
+        job = _wf_jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} introuvable")
+    return {
+        "job_id": job_id,
+        "status": job["status"],
+        "pipeline": job["pipeline"],
+        "result": job.get("result"),
+        "error": job.get("error"),
+        "start_time": job["start_time"],
+        "end_time": job.get("end_time"),
+    }
+
+
+@app.get("/wf/canonical")
+async def wf_canonical():
+    """
+    Retourne les résultats walk-forward validés (rapport scientifique).
+    Source : reports/walk_forward_4h/walk_forward_4h.json
+    Ce résultat est le run scientifiquement validé, pas un job lancé via l'UI.
+    """
+    candidates = [
+        _ROOT / "reports" / "walk_forward_4h" / "walk_forward_4h.json",
+        _ROOT / "reports" / "walk_forward_4h.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            try:
+                data = json.loads(path.read_text())
+                return {
+                    "found": True,
+                    "source": path.name,
+                    "pipeline": "long",
+                    "result": data,
+                }
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Erreur lecture {path.name}: {e}")
+    return {"found": False, "source": None, "pipeline": "long", "result": None}
 
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ def get_settings() -> AppSettings:
     )
     services = ServiceSettings(
         mongo_uri=os.getenv("FUTUR_MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017")),
-        mongo_db=os.getenv("FUTUR_MONGO_DB", os.getenv("MONGO_DB", "market")),
+        mongo_db=os.getenv("FUTUR_MONGO_DB", os.getenv("MONGODB_DB", os.getenv("MONGO_DB", "trader"))),
         s3_bucket=os.getenv("FUTUR_S3_BUCKET", os.getenv("S3_BUCKET", "")),
         s3_prefix=os.getenv("FUTUR_S3_PREFIX", os.getenv("S3_PREFIX", "")),
         binance_klines_url=os.getenv(
@@ -102,18 +102,23 @@ def get_settings() -> AppSettings:
 
 def configure_project_imports(extra_paths: Optional[Iterable[str | Path]] = None) -> Path:
     settings = get_settings()
-    base_paths = [
-        settings.paths.project_root,
-        settings.paths.legacy_dir,
-        settings.paths.legacy_dir / "ai" / "models",
-    ]
+    root_str   = str(settings.paths.project_root)
+    legacy_str = str(settings.paths.legacy_dir)
+    models_str = str(settings.paths.legacy_dir / "ai" / "models")
 
+    extra_list: list[str] = []
     if extra_paths:
-        base_paths.extend(settings.paths.resolve(path) for path in extra_paths)
+        extra_list = [str(settings.paths.resolve(p)) for p in extra_paths]
 
-    for path in base_paths:
-        path_str = str(path)
+    # Legacy paths et extras vont EN FIN de sys.path (fallback seulement).
+    for path_str in [models_str, legacy_str] + extra_list:
         if path_str not in sys.path:
-            sys.path.insert(0, path_str)
+            sys.path.append(path_str)
+
+    # project_root TOUJOURS en première position — quel que soit PYTHONPATH.
+    # Déplace project_root à l'index 0 si déjà présent, sinon insère.
+    if root_str in sys.path:
+        sys.path.remove(root_str)
+    sys.path.insert(0, root_str)
 
     return settings.paths.project_root

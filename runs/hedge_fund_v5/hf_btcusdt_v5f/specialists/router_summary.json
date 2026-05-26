@@ -1,0 +1,18 @@
+{
+  "TREND_LONG": {
+    "accepted": true,
+    "weight": 0.4463999999999998,
+    "side": "long",
+    "auc": 0.6082,
+    "macro_f1": 0.5384,
+    "n_train": 2356
+  },
+  "TREND_SHORT": {
+    "accepted": true,
+    "weight": 0.4101999999999998,
+    "side": "short",
+    "auc": 0.5901,
+    "macro_f1": 0.4944,
+    "n_train": 1785
+  }
+}

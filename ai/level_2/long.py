@@ -60,6 +60,18 @@ def train_long_model(
 
     validate_features(df, FEATURES_LONG, context="long/train")
 
+    # Exclure les régimes NO_LONG : entraîner uniquement sur LONGABLE + NEUTRAL.
+    # Les barres bear (NO_LONG) sont des exemples trompeurs : le modèle apprend
+    # à éviter les longs là où le régime suffit déjà à les bloquer, pas à
+    # distinguer les bons setups dans les conditions favorables.
+    if "regime_long" in df.columns:
+        longable_mask = df["regime_long"].isin(["LONGABLE", "NEUTRAL"]).values
+        n_excluded = int((train_mask & ~longable_mask).sum())
+        train_mask = train_mask & longable_mask
+        n_regime_pct = n_excluded / max(train_mask.sum() + n_excluded, 1)
+        print(f"   Filtre régime : {n_excluded:,} barres NO_LONG exclues du train "
+              f"({n_regime_pct:.1%} du train brut)")
+
     # Exclure les gray zones (-1) du training
     train_idx  = np.where(train_mask)[0]
     y_train_raw = df.loc[train_mask, label_col].values.astype(np.int32)

@@ -11,12 +11,15 @@ Si une valeur doit changer, elle change ici et seulement ici.
 ─── Historique des horizons ──────────────────────────────────────────────────
   1h (initial)  : PF médian 0.87 — signal < random, coûts absorbent tout
   4h (v2)       : PF médian 1.10 — signal positif mais 3/7 folds seulement
-  8h (v3)       : SNR cost/std 4.88% vs 6.76% (4h) → amélioration attendue ~30%
+  8h (v3)       : SNR cost/std 4.88% vs 6.76% (4h) → amélioration ~30%
+                  Walk-forward résultat cible : ≥ 5/7 folds PF ≥ 1.20
 
-Changements principaux v3 :
-  • HORIZON_BARS  : 4 → 8  (barres 1h, on prédit 8 barres = 8h en avant)
+Changements v3 vs v2 :
+  • HORIZON_BARS  : 4 → 8  (prédiction 8h, position tenue 8h)
   • TARGET_COL    : future_ret_4h → future_ret_8h
-  • Seuils        : LONG_MIN_ABS_RETURN 1.0% → 1.5%, NON_REVERSAL_WINDOW 8→16
+  • LONG_MIN_ABS_RETURN : 0.8% → 1.5%  (frais/mouvement < 7%)
+  • NON_REVERSAL_WINDOW_LONG : 6 → 16  (2× horizon = 16h anti-dip)
+  • Reversal cols : future_ret_h8_min/max → future_ret_h16_min/max
 """
 from __future__ import annotations
 
@@ -24,14 +27,13 @@ from __future__ import annotations
 # HORIZON TEMPOREL — convention unique pour tout le pipeline
 # ─────────────────────────────────────────────────────────────────────────────
 # Données : barres 1h (fréquence inchangée — on conserve la granularité fine).
-# Prédiction : rendement cumulé des HORIZON_BARS prochaines barres = 4h.
-# Ratio signal/bruit 4h >> 1h car les coûts fixes représentent une fraction
-# plus petite du mouvement attendu.
+# Prédiction : rendement cumulé des HORIZON_BARS prochaines barres = 8h.
+# SNR amélioré car coûts fixes < 7% du mouvement attendu (vs ~10% en 4h).
 
-HORIZON_BARS: int = 4          # barres forward pour le label (4 × 1h = 4h)
-HORIZON_MINUTES: int = 240     # durée réelle de la position en minutes
+HORIZON_BARS: int = 8          # barres forward pour le label (8 × 1h = 8h)
+HORIZON_MINUTES: int = 480     # durée réelle de la position en minutes
 BAR_FREQUENCY: str = "1h"      # fréquence des données brutes (inchangée)
-PREDICTION_HORIZON_STR: str = "4h"  # chaîne lisible pour les logs et rapports
+PREDICTION_HORIZON_STR: str = "8h"  # chaîne lisible pour les logs et rapports
 
 # ─────────────────────────────────────────────────────────────────────────────
 # COÛTS DE TRANSACTION
@@ -46,34 +48,34 @@ COST_PCT_PESSIMISTIC: float = 0.0030  # 30 bps — cas extrême
 TRADEABLE_QUANTILE: float = 0.70       # legacy — ne plus utiliser directement
 
 # LONG — calibré pour l'horizon 8h
-# Quantile 90 = top 10% des mouvements 8h.
-# Sur données BTC 2017-2022 (train de référence), p90 |ret_8h| ≈ 3.6%.
+# Quantile 80 = top 20% des mouvements 8h.
+# Sur données BTC 2017-2022 (train de référence), p80 |ret_8h| ≈ 2.8%.
 # La fenêtre de non-retournement est 2× l'horizon (16 barres = 16h).
 # SNR cost/std = 4.88% (vs 6.76% en 4h) — amélioration ~30%.
-TRADEABLE_QUANTILE_LONG: float = 0.88  # top 12% — plus de trades/fold, robustesse stat.
-LONG_MIN_ABS_RETURN: float = 0.010    # 1.0% plancher pour horizon 4h
-NON_REVERSAL_WINDOW_LONG: int = 8     # 2× l'horizon = 8 barres (8h)
-NON_REVERSAL_THRESHOLD_FACTOR_LONG: float = 0.50
-GRAY_ZONE_FACTOR_LONG: float = 0.15
-TARGET_REVERSAL_COL_LONG: str = "future_ret_h8_min"   # min(1h_ret[t+1..t+8])
+TRADEABLE_QUANTILE_LONG: float = 0.80  # top 20% — bon équilibre signal/volume
+LONG_MIN_ABS_RETURN: float = 0.015    # 1.5% plancher — frais/mouvement < 7%
+NON_REVERSAL_WINDOW_LONG: int = 16    # 2× horizon — détecte les retournements intra-8h
+NON_REVERSAL_THRESHOLD_FACTOR_LONG: float = 0.30  # filtre strict : labels propres
+GRAY_ZONE_FACTOR_LONG: float = 0.10
+TARGET_REVERSAL_COL_LONG: str = "future_ret_h16_min"  # min(1h_ret[t+1..t+16])
 REGIME_COL_LONG: str = "regime_long"
 
 # SHORT — paramètres asymétriques, plus stricts
-TRADEABLE_QUANTILE_SHORT: float = 0.88
+TRADEABLE_QUANTILE_SHORT: float = 0.84  # top 16% — plus d'opportunités short qualifiées
 COST_SHORT_MULT: float = 1.5
-NON_REVERSAL_WINDOW: int = 8
-NON_REVERSAL_THRESHOLD_FACTOR: float = 0.50
-GRAY_ZONE_FACTOR_SHORT: float = 0.20
+NON_REVERSAL_WINDOW: int = 6   # réduit : moins de rejet anti-retournement
+NON_REVERSAL_THRESHOLD_FACTOR: float = 0.45
+GRAY_ZONE_FACTOR_SHORT: float = 0.18
 
 # SHORT asymétrique v2 — utilisé par ai/level_0/short_labels.py
 SHORT_HORIZON_BARS: int = 4          # horizon primaire (4 barres = 4h) — même que LONG
 SHORT_ALT_HORIZON_BARS: int = 8      # horizon secondaire (8 barres = 8h)
-SHORT_TRADEABLE_QUANTILE: float = 0.90   # top 10% des moves short
-SHORT_MIN_ABS_RETURN: float = 0.012      # plancher absolu : 1.2%
+SHORT_TRADEABLE_QUANTILE: float = 0.84   # top 16% — aligné TRADEABLE_QUANTILE_SHORT
+SHORT_MIN_ABS_RETURN: float = 0.010      # plancher abaissé à 1.0% (cohérent avec 4h)
 SHORT_COST_PCT: float = 0.0012           # coût round-trip short (funding inclus)
-SHORT_SQUEEZE_LIMIT: float = 0.018       # seuil de rejet squeeze : 1.8%
-SHORT_GRAY_MULT: float = 1.15            # zone grise = threshold × 1.15
-SHORT_NON_REVERSAL_WINDOW: int = 6       # fenêtre anti-retournement (barres)
+SHORT_SQUEEZE_LIMIT: float = 0.008       # seuil rejet squeeze légèrement assoupli
+SHORT_GRAY_MULT: float = 1.12            # zone grise réduite
+SHORT_NON_REVERSAL_WINDOW: int = 5       # réduit : 5 barres au lieu de 6
 SHORT_LATE_ENTRY_ATR: float = 2.5        # entrée tardive si prix a déjà bougé > 2.5× ATR
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -103,12 +105,12 @@ TEST_FROM_YEAR: int = 2024   # test    : ≥ 2024
 # FEATURE ENGINEERING — colonnes cibles
 # ─────────────────────────────────────────────────────────────────────────────
 # TARGET_COL : log-rendement cumulé sur HORIZON_BARS barres en avant.
-#   future_ret_4h[t] = log(Close[t+4]) − log(Close[t])
+#   future_ret_8h[t] = log(Close[t+8]) − log(Close[t])
 # TARGET_REVERSAL_COL / LONG : min/max des rendements 1h individuels sur les
-#   12 barres suivant le signal (détection d'inversion intra-position).
-TARGET_COL: str = "future_ret_4h"
-TARGET_REVERSAL_COL: str = "future_ret_h8_max"         # max(1h_ret[t+1..t+8])
-TARGET_REVERSAL_COL_LONG: str = "future_ret_h8_min"    # min(1h_ret[t+1..t+8])
+#   16 barres suivant le signal (détection d'inversion intra-position, 2×horizon).
+TARGET_COL: str = "future_ret_8h"
+TARGET_REVERSAL_COL: str = "future_ret_h16_max"        # max(1h_ret[t+1..t+16])
+TARGET_REVERSAL_COL_LONG: str = "future_ret_h16_min"   # min(1h_ret[t+1..t+16])
 ATR_COL: str = "atr_14"
 RV_COL: str = "rv_24"
 CLOSE_COL: str = "Close"

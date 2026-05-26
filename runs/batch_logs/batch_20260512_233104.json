@@ -1,0 +1,24 @@
+[
+  {
+    "symbol": "ETHUSDT",
+    "run_id": "train_ethusdt_20260512_233032",
+    "success": true,
+    "elapsed": 31.0,
+    "log": "runs/batch_logs/ETHUSDT.log",
+    "long_pf": 0.9426,
+    "long_wr": 0.5044,
+    "long_ret": -0.75,
+    "short_ok": true
+  },
+  {
+    "symbol": "BTCUSD",
+    "run_id": "train_btcusd_20260512_233032",
+    "success": true,
+    "elapsed": 31.9,
+    "log": "runs/batch_logs/BTCUSD.log",
+    "long_pf": 1.2134,
+    "long_wr": 0.4847,
+    "long_ret": 1.66,
+    "short_ok": true
+  }
+]

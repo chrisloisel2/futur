@@ -1,0 +1,29 @@
+{
+  "run_id": "beb7da626e6b",
+  "name": "wf_v5_integrated",
+  "status": "running",
+  "params": {
+    "folds": [
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT"
+    ],
+    "n_trm": 100
+  },
+  "tags": [
+    "walk_forward",
+    "infrastructure",
+    "comparison"
+  ],
+  "metrics": {},
+  "artifacts": [],
+  "start_time": "2026-05-23T15:27:50.802351+00:00",
+  "end_time": null,
+  "duration_s": null
+}

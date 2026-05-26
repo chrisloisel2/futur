@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { designSystem } from '../styles/designSystem';
 import './LiveCryptoMarket.css';
+import { API_BASE_URL } from '../config/api';
 
 interface Prediction {
   timestamp: string;
@@ -63,7 +64,7 @@ const LiveCryptoMarket: React.FC = () => {
   const fetchInitialPredictions = async () => {
     // Récupérer les prédictions initiales pour tous les symboles
     try {
-      const response = await fetch('http://localhost:8000/pipeline/predictions');
+      const response = await fetch(`${API_BASE_URL}/pipeline/predictions`);
       const data = await response.json();
 
       if (data.predictions) {
@@ -199,7 +200,7 @@ const LiveCryptoMarket: React.FC = () => {
   const updatePredictionsIfNeeded = async (symbol: string, currentPrice: number) => {
     // Appeler l'API de prédictions futures pour obtenir de vraies prédictions
     try {
-      const response = await fetch(`http://localhost:8000/pipeline/predictions/future/${symbol}?minutes=5`);
+      const response = await fetch(`${API_BASE_URL}/pipeline/predictions/future/${symbol}?minutes=5`);
       const data = await response.json();
 
       if (data && data.predictions) {

@@ -1,0 +1,20 @@
+{
+  "val": {
+    "n_total": 8759,
+    "pct_no_short": 0.179,
+    "pct_shortable": 0.323,
+    "pct_neutral": 0.498,
+    "short_rate_no_short": 0.019,
+    "short_rate_shortable": 0.0068,
+    "short_rate_neutral": 0.0058
+  },
+  "test": {
+    "n_total": 20631,
+    "pct_no_short": 0.172,
+    "pct_shortable": 0.362,
+    "pct_neutral": 0.466,
+    "short_rate_no_short": 0.0158,
+    "short_rate_shortable": 0.0198,
+    "short_rate_neutral": 0.015
+  }
+}

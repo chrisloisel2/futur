@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import './CandlestickChart.css';
+import { API_BASE_URL } from '../config/api';
 
 interface CandleData {
   time: number;
@@ -97,7 +98,7 @@ const CandlestickChart: React.FC = () => {
 
       console.log('🔄 Chargement depuis API pour', cacheKey);
       const response = await fetch(
-        `http://localhost:8000/market/klines?symbol=${selectedCrypto}&interval=${selectedInterval}&limit=${limit}`
+        `${API_BASE_URL}/market/klines?symbol=${selectedCrypto}&interval=${selectedInterval}&limit=${limit}`
       );
       const data = await response.json();
 
@@ -239,7 +240,7 @@ const CandlestickChart: React.FC = () => {
   const fetchPredictions = useCallback(async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/pipeline/predictions/future/${selectedCrypto}?minutes=60`
+        `${API_BASE_URL}/pipeline/predictions/future/${selectedCrypto}?minutes=60`
       );
       const data = await response.json();
 

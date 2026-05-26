@@ -4,6 +4,7 @@ Support: Bitcoin, Ethereum, Solana
 """
 
 import logging
+import os
 from datetime import datetime
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.errors import DuplicateKeyError, ConnectionFailure
@@ -48,9 +49,10 @@ class BlockchainWhaleMongoDBPipeline:
     @classmethod
     def from_crawler(cls, crawler):
         """Récupère la configuration depuis les settings"""
+        local_mongo_uri = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
         mongo_uri = crawler.settings.get(
             'BLOCKCHAIN_MONGODB_URI',
-            'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/'
+            local_mongo_uri
         )
         mongo_db = crawler.settings.get('BLOCKCHAIN_MONGODB_DATABASE', 'whale_data')
         min_usd_value = crawler.settings.get('WHALE_MIN_USD_VALUE', 100000)

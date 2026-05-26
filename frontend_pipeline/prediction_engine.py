@@ -27,7 +27,7 @@ import pickle
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 import numpy as np
@@ -37,8 +37,27 @@ ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
 from ai.level_0.live_features import compute_live_features
-from ai.level_0.feature_engineering import compute_long_features, compute_short_features
-from ai.level_0.features import FEATURES_LONG, FEATURES_SHORT
+from ai.level_0.feature_engineering import (
+    compute_event_features,
+    compute_flow_features,
+    compute_long_features,
+    compute_short_features,
+    compute_vwap_features,
+)
+from ai.level_0.technical_indicators import (
+    compute_ichimoku_features,
+    compute_rsi_features,
+    compute_volume_features,
+)
+from ai.level_0.tradingview_indicators import compute_tradingview_features
+from ai.level_0.features import (
+    FEATURES_FILTER as FEATURES_FILTER_CORE,
+    FEATURES_LONG,
+    FEATURES_MACRO_LONG,
+    FEATURES_MACRO_SHORT,
+    FEATURES_REGIME,
+    FEATURES_SHORT,
+)
 from ai.level_1.rules import REGIME_NO_SHORT, REGIME_SHORTABLE, REGIME_NEUTRAL
 from ai.level_7.config import make_long_risk_config, make_short_risk_config
 from config.strategy_flags import SHORT_ENABLED
@@ -52,8 +71,34 @@ REGIME_MODEL_DEFAULT_FEATURES = [
     "rv_ratio_24_72",
 ]
 
-# Features réelles du filtre (train_pipeline.py → SNAPSHOT_FEATURES, 39 features)
-FEATURES_FILTER = [
+# Contrats historiques du filtre.
+#
+# Le run legacy actif 20260509-* a été entraîné avec train_pipeline.SNAPSHOT_FEATURES
+# (37 colonnes). Certains runs canoniques récents stockent leur liste dans
+# metadata.json (36 colonnes) et l'ancienne version runtime ci-dessous en avait 39.
+# PredictionEngine choisit donc la liste par rapport au scaler chargé.
+FEATURES_FILTER_SNAPSHOT_37 = [
+    "rv_12", "rv_24", "rv_48", "rv_72", "rv_168",
+    "rv_ratio_24_72", "rv_ratio_12_48",
+    "atr_pct_14", "boll_width_20",
+    "boll_pos_20", "close_in_bar", "intrabar_range_pct",
+    "eff_ratio_12", "eff_ratio_24",
+    "zscore_close_24",
+    "mom_logret_4", "mom_logret_6", "mom_logret_12", "mom_logret_24", "mom_logret_72",
+    "rsi_14", "cci_20",
+    "dist_ema_20", "dist_ema_50", "dist_ema_200",
+    "ema_spread_20_50", "ema_spread_50_200",
+    "taker_buy_ratio_base", "delta_taker_pressure",
+    "vol_ratio_24", "trades_ratio_24",
+    "trade_intensity", "vol_imbalance",
+    "hour_sin", "hour_cos", "dow_sin", "dow_cos",
+]
+
+FEATURES_FILTER_SNAPSHOT_36 = [
+    f for f in FEATURES_FILTER_SNAPSHOT_37 if f != "mom_logret_4"
+]
+
+FEATURES_FILTER_EXTENDED_39 = [
     "rv_12", "rv_24", "rv_48", "rv_72", "rv_168",
     "rv_ratio_24_72", "rv_ratio_12_48",
     "atr_pct_14", "boll_width_20",
@@ -68,7 +113,14 @@ FEATURES_FILTER = [
     "vol_ratio_24", "trades_ratio_24",
     "zscore_close_24", "zscore_ret_24", "skew_ret_24",
     "hour_sin", "hour_cos", "dow_sin", "dow_cos",
-]  # 39 features — correspondant au scaler du modèle entraîné
+]
+
+FEATURES_LONG_NO_MACRO = [
+    f for f in FEATURES_LONG if f not in set(FEATURES_MACRO_LONG)
+]
+FEATURES_SHORT_NO_MACRO = [
+    f for f in FEATURES_SHORT if f not in set(FEATURES_MACRO_SHORT)
+]
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +142,68 @@ def _load_pkl(path: Path) -> Any:
 def _load_json(path: Path) -> dict:
     with open(path) as f:
         return json.load(f)
+
+
+def _features_from_json(path: Path) -> Optional[List[str]]:
+    if not path.exists():
+        return None
+    try:
+        data = _load_json(path)
+    except Exception:
+        return None
+    features = data.get("features")
+    if not isinstance(features, list):
+        return None
+    return [str(f) for f in features]
+
+
+def _expected_n_features(obj: Any) -> Optional[int]:
+    n_features = getattr(obj, "n_features_in_", None)
+    if n_features is not None:
+        try:
+            return int(n_features)
+        except (TypeError, ValueError):
+            pass
+
+    for attr in ("mean_", "scale_"):
+        values = getattr(obj, attr, None)
+        if values is not None:
+            try:
+                return len(values)
+            except TypeError:
+                pass
+    return None
+
+
+def _select_feature_contract(
+    component: str,
+    scaler: Any,
+    candidates: List[Tuple[str, List[str]]],
+    metadata_features: Optional[List[str]] = None,
+) -> Tuple[List[str], str]:
+    expected = _expected_n_features(scaler)
+    ordered: List[Tuple[str, List[str]]] = []
+    if metadata_features:
+        ordered.append(("metadata", metadata_features))
+    ordered.extend(candidates)
+
+    if expected is None:
+        source, features = ordered[0]
+        logger.warning(
+            "%s: impossible de lire n_features_in_; utilisation de %s (%d features)",
+            component, source, len(features),
+        )
+        return list(features), source
+
+    for source, features in ordered:
+        if len(features) == expected:
+            return list(features), source
+
+    counts = ", ".join(f"{source}={len(features)}" for source, features in ordered)
+    raise RuntimeError(
+        f"Contrat features incompatible pour {component}: "
+        f"scaler attend {expected} features; candidats disponibles: {counts}"
+    )
 
 
 def _find_latest_run() -> Optional[Path]:
@@ -141,18 +255,21 @@ class PredictionEngine:
         # Artefacts Level 0 — filtre
         self.clf_filter    = None
         self.scaler_filter = None
+        self.features_filter: List[str] = FEATURES_FILTER_SNAPSHOT_37
         self.thr_long      = 0.40
         self.thr_short     = 0.45
 
         # Artefacts Level 2 — long
         self.clf_long    = None
         self.scaler_long = None
+        self.features_long: List[str] = FEATURES_LONG_NO_MACRO
         self.thr_edge_long = 0.55
 
         # Artefacts Level 2 — short
         self.clf_short    = None
         self.scaler_short = None
         self.cal_short    = None
+        self.features_short: List[str] = FEATURES_SHORT_NO_MACRO
         self.thr_edge_short = 0.65
 
         # Artefacts Level 1 — régime (optionnel)
@@ -187,6 +304,20 @@ class PredictionEngine:
                                   meta.get("recommended_threshold_long", 0.40))
         self.thr_short = meta.get("calibrated_threshold_short",
                                   meta.get("recommended_threshold_short", 0.45))
+        self.features_filter, filter_source = _select_feature_contract(
+            "filter",
+            self.scaler_filter,
+            candidates=[
+                ("snapshot_37", FEATURES_FILTER_SNAPSHOT_37),
+                ("snapshot_36", FEATURES_FILTER_SNAPSHOT_36),
+                ("extended_39", FEATURES_FILTER_EXTENDED_39),
+                ("features_filter_core", FEATURES_FILTER_CORE),
+            ],
+            metadata_features=(
+                _features_from_json(fd / "metadata.json")
+                or _features_from_json(fd / "metrics.json")
+            ),
+        )
 
         # Long (optionnel)
         ld = run_dir / "long"
@@ -196,6 +327,21 @@ class PredictionEngine:
             cal_p = ld / "calibration_metrics.json"
             lmeta = _load_json(cal_p) if cal_p.exists() else {}
             self.thr_edge_long = lmeta.get("recommended_threshold", 0.55)
+            self.features_long, long_source = _select_feature_contract(
+                "long",
+                self.scaler_long,
+                candidates=[
+                    ("features_long_current", FEATURES_LONG),
+                    ("features_long_no_macro", FEATURES_LONG_NO_MACRO),
+                    ("snapshot_37", FEATURES_FILTER_SNAPSHOT_37),
+                ],
+                metadata_features=(
+                    _features_from_json(ld / "metadata.json")
+                    or _features_from_json(ld / "metrics.json")
+                ),
+            )
+        else:
+            long_source = "not_loaded"
 
         # Short (optionnel)
         sd = run_dir / "short"
@@ -207,6 +353,21 @@ class PredictionEngine:
             smeta = _load_json(sd / "calibration_metrics.json") \
                     if (sd / "calibration_metrics.json").exists() else {}
             self.thr_edge_short = smeta.get("recommended_threshold", 0.65)
+            self.features_short, short_source = _select_feature_contract(
+                "short",
+                self.scaler_short,
+                candidates=[
+                    ("features_short_current", FEATURES_SHORT),
+                    ("features_short_no_macro", FEATURES_SHORT_NO_MACRO),
+                    ("snapshot_37", FEATURES_FILTER_SNAPSHOT_37),
+                ],
+                metadata_features=(
+                    _features_from_json(sd / "metadata.json")
+                    or _features_from_json(sd / "metrics.json")
+                ),
+            )
+        else:
+            short_source = "not_loaded"
 
         # Régime (optionnel) — modèle bear entraîné
         rd = run_dir / "regime"
@@ -215,18 +376,36 @@ class PredictionEngine:
             self.scaler_regime = _load_pkl(rd / "bear_regime_scaler.pkl")
             rmeta = _load_json(rd / "bear_regime_metrics.json") \
                     if (rd / "bear_regime_metrics.json").exists() else {}
-            self.regime_features  = rmeta.get("features", REGIME_MODEL_DEFAULT_FEATURES)
+            rmeta_features = rmeta.get("features")
+            if not isinstance(rmeta_features, list):
+                rmeta_features = None
+            self.regime_features, regime_source = _select_feature_contract(
+                "regime",
+                self.scaler_regime,
+                candidates=[
+                    ("features_regime_current", FEATURES_REGIME),
+                    ("regime_default", REGIME_MODEL_DEFAULT_FEATURES),
+                ],
+                metadata_features=(
+                    rmeta_features
+                    or _features_from_json(rd / "metadata.json")
+                ),
+            )
             self.regime_threshold = rmeta.get("activation_threshold", 0.86)
             logger.info(
                 f"Régime bear chargé — {len(self.regime_features)} features "
-                f"thr={self.regime_threshold:.2f} AUC={rmeta.get('val_auc', '?')}"
+                f"source={regime_source} thr={self.regime_threshold:.2f} "
+                f"AUC={rmeta.get('val_auc', '?')}"
             )
 
         self._ready = True
         logger.info(
             f"PredictionEngine prêt — run={run_dir.name} "
             f"long={'OK' if self.clf_long else '—'} "
-            f"short={'OK' if self.clf_short else '—'}"
+            f"short={'OK' if self.clf_short else '—'} "
+            f"features(filter={len(self.features_filter)}:{filter_source}, "
+            f"long={len(self.features_long)}:{long_source}, "
+            f"short={len(self.features_short)}:{short_source})"
         )
 
     # ── Fetch Binance ─────────────────────────────────────────────────────────
@@ -279,15 +458,22 @@ class PredictionEngine:
         # compute_short_features() doit être appelé inconditionnellement car
         # le modèle de régime bear en a besoin (delta_taker_cumul_12, etc.)
         df = compute_live_features(df_raw)
+        df = compute_flow_features(df)
         df = compute_long_features(df)
         df = compute_short_features(df)
+        df = compute_event_features(df)
+        df = compute_vwap_features(df)
+        df = compute_ichimoku_features(df)
+        df = compute_rsi_features(df)
+        df = compute_volume_features(df)
+        df = compute_tradingview_features(df)
 
         last = df.iloc[-1]
         row  = {col: float(last[col]) for col in df.columns
                 if col not in ("open_time", "close_time", "ignore")}
 
         # ── Level 0 : filtre tradeable ────────────────────────────────────────
-        x_f = self._row_to_array(row, FEATURES_FILTER)
+        x_f = self._row_to_array(row, self.features_filter)
         p_filter = float(
             self.clf_filter.predict_proba(
                 self.scaler_filter.transform(x_f)
@@ -328,7 +514,7 @@ class PredictionEngine:
         p_long      = 0.0
         long_signal = False
         if self.clf_long and passes_long:
-            x_l    = self._row_to_array(row, FEATURES_LONG)
+            x_l    = self._row_to_array(row, self.features_long)
             p_long = float(
                 self.clf_long.predict_proba(
                     self.scaler_long.transform(x_l)
@@ -344,7 +530,7 @@ class PredictionEngine:
                 and self.clf_short and passes_short
                 and not long_signal
                 and regime == REGIME_SHORTABLE):
-            x_s         = self._row_to_array(row, FEATURES_SHORT)
+            x_s         = self._row_to_array(row, self.features_short)
             p_short_raw = float(
                 self.clf_short.predict_proba(
                     self.scaler_short.transform(x_s)

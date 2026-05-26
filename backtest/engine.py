@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from core.constants import COST_PCT, COST_SHORT_MULT, INITIAL_EQUITY, REGIME_COL
+from core.features.constants import COST_PCT, COST_SHORT_MULT, INITIAL_EQUITY, REGIME_COL, TARGET_COL
 from .metrics import (
     BacktestResult, compute_backtest_metrics, print_backtest_summary,
     ShortRobustnessReport, should_deploy_short,
@@ -72,7 +72,7 @@ def run_backtest_side(
     --------
     BacktestResult
     """
-    from core.preprocessing import get_X
+    from core.features.preprocessing import get_X
 
     assert side in ("long", "short"), f"side must be 'long' or 'short', got {side!r}"
     ret_sign   = +1.0 if side == "long" else -1.0
@@ -130,7 +130,7 @@ def run_backtest_side(
                 continue
 
         # ── 4. Calculer le return ─────────────────────────────────────────────
-        raw_ret = float(row.get("future_ret_h", 0.0))
+        raw_ret = float(row.get(TARGET_COL, row.get("future_ret_h", 0.0)))
         net_ret = raw_ret * ret_sign - cost_pct
 
         trade_rets.append(net_ret)
@@ -204,7 +204,7 @@ def run_backtest_combined(
     --------
     dict avec clés "long", "short", "combined"
     """
-    from core.preprocessing import get_X
+    from core.features.preprocessing import get_X
 
     ret_sign_map = {"long": +1.0, "short": -1.0}
     df_test = df.loc[test_mask]
@@ -245,7 +245,7 @@ def run_backtest_combined(
         if has_long:
             has_short = False   # long prime sur short au même bar
 
-        raw_ret = float(row.get("future_ret_h", 0.0))
+        raw_ret = float(row.get(TARGET_COL, row.get("future_ret_h", 0.0)))
 
         # ── 5. Trade long ─────────────────────────────────────────────────────
         if has_long:
@@ -615,7 +615,7 @@ def _eval_short_fold(
     Évalue le signal short sur un fold et les deux baselines.
     Vectorisé : toutes les inférences se font en batch pour éviter iterrows lent.
     """
-    from models.regime.classifier import REGIME_NO_SHORT
+    from ai.level_1.rules import REGIME_NO_SHORT
 
     if df_fold.empty:
         return {"model": [], "random": [], "rsi70": [], "n_shortable": 0, "n_total_signal": 0}
@@ -629,7 +629,13 @@ def _eval_short_fold(
     if df_ok.empty:
         return {"model": [], "random": [], "rsi70": [], "n_shortable": 0, "n_total_signal": 0}
 
-    raw_rets = df_ok["future_ret_h"].fillna(0.0).values.astype(np.float64)
+    _ret_col = next(
+        (c for c in (TARGET_COL, "future_ret_short_4h", "future_ret_h") if c in df_ok.columns),
+        None,
+    )
+    if _ret_col is None:
+        return {"model": [], "random": [], "rsi70": [], "n_shortable": 0, "n_total_signal": 0}
+    raw_rets = df_ok[_ret_col].fillna(0.0).values.astype(np.float64)
     net_rets = raw_rets * (-1.0) - cost_short
 
     # ── 2. Filtre tradeable (batch) ───────────────────────────────────────────
@@ -710,7 +716,7 @@ def _find_cost_break_short(
     Retourne ce multiple (2.5 = "résiste à 2.5x le coût de base").
     Vectorisé : inférence batch par fold.
     """
-    from models.regime.classifier import REGIME_NO_SHORT
+    from ai.level_1.rules import REGIME_NO_SHORT
 
     # Précalculer les signaux une fois pour toutes les périodes combinées
     all_dates = df.index if isinstance(df.index, pd.DatetimeIndex) else pd.to_datetime(df.index)
@@ -742,7 +748,13 @@ def _find_cost_break_short(
     except Exception:
         return 1.0
 
-    raw_rets = df_sig["future_ret_h"].fillna(0.0).values.astype(np.float64)
+    _ret_col = next(
+        (c for c in (TARGET_COL, "future_ret_short_4h", "future_ret_h") if c in df_sig.columns),
+        None,
+    )
+    if _ret_col is None:
+        return 1.0
+    raw_rets = df_sig[_ret_col].fillna(0.0).values.astype(np.float64)
     sig_mask = p_cal >= threshold
 
     if sig_mask.sum() == 0:

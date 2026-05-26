@@ -24,24 +24,41 @@ import numpy as np
 import pandas as pd
 
 
-# Colonnes macro présentes dans features_merged.parquet avec couverture historique réelle.
-#
-# Couverture vérifiée (après ffill) :
-#   funding_rate_z_*    : depuis oct 2019  (~24% NaN) → train 2020-2022 ✓ val 2023 ✓ test 2024 ✓
-#   fear_greed_value_z_*: depuis fév 2018  (~5%  NaN) → couverture complète ✓
-#   news_count_roll_*   : depuis août 2017 (0%   NaN) → couverture complète ✓
-#
-# Exclues (données démarrent seulement en mars 2026, inutilisables pour le training) :
+# Colonnes macro issues du bundle — forward-filled au chargement.
+# Couverture de base (features_merged.parquet) :
+#   funding_rate_z_*    : depuis oct 2019
+#   fear_greed_value_z_*: depuis fév 2018
+#   news_count_roll_*   : depuis août 2017
+# Étendu pour le bundle hedge_fund (données OI/L/S depuis 2020) :
 #   oihist_sumOpenInterest_z_*, global_ls_longShortRatio_z_*,
 #   taker_ls_buySellRatio_z_*, taker_ls_imbalance, funding_x_global_ls, oi_x_fng
+# Colonnes sans données disponibles (gardées à 0, signal neutre) :
+#   global_market_cap_usd_z_*, btc_dominance_z_24, btc_mempool_*, news_count_z_*
 MACRO_BUNDLE_COLS: List[str] = [
-    "funding_rate_z_24",      # sentiment positionnement court terme (8h update)
-    "funding_rate_z_72",      # structure moyen terme
-    "funding_rate_z_288",     # tendance structurelle 12j
-    "fear_greed_value_z_24",  # sentiment F&G court terme (daily update)
-    "fear_greed_value_z_72",  # sentiment F&G moyen terme
-    "news_count_roll_240",    # volume news 4h rolling
-    "news_count_roll_1440",   # volume news 24h rolling
+    "funding_rate_z_24",               # sentiment positionnement court terme
+    "funding_rate_z_72",               # structure moyen terme
+    "funding_rate_z_288",              # tendance structurelle 12j
+    "fear_greed_value_z_24",           # sentiment F&G court terme
+    "fear_greed_value_z_72",           # sentiment F&G moyen terme
+    "news_count_roll_240",             # volume news 4h rolling
+    "news_count_roll_1440",            # volume news 24h rolling
+    # OI / Long-Short / Taker — disponibles dans le bundle hedge_fund
+    "oihist_sumOpenInterest_z_24",     # OI z-score 24h
+    "oihist_sumOpenInterest_z_72",     # OI z-score 72h
+    "global_ls_longShortRatio_z_24",   # L/S ratio z-score 24h
+    "global_ls_longShortRatio_z_72",   # L/S ratio z-score 72h
+    "taker_ls_buySellRatio_z_24",      # taker buy/sell z-score 24h
+    "taker_ls_imbalance",              # imbalance nette takers
+    "oi_x_fng",                        # OI z × F&G z (double confirmation)
+    "funding_x_global_ls",             # funding z × L/S z (foule doublement longée)
+    # Colonnes sans données (gardées à 0 = signal neutre)
+    "global_market_cap_usd_z_24",      # market cap crypto global (non dispo)
+    "global_market_cap_usd_z_72",      # idem moyen terme
+    "btc_dominance_z_24",              # dominance BTC (non dispo)
+    "btc_mempool_fee_fastest_z_24",    # mempool (non dispo)
+    "btc_mempool_tx_count_z_24",       # mempool (non dispo)
+    "news_count_z_24",                 # news z-score (non dispo)
+    "news_count_z_72",                 # news z-score moyen terme (non dispo)
 ]
 
 

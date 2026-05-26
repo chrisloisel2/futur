@@ -2,21 +2,23 @@
 
 ## Walk-Forward Multi-Actif
 
-**Date** : 2026-05-11T11:51:28.486544
+**Date** : 2026-05-13T10:34:34.444560
 
-**Verdict** : `SHORT_PAPER_CANDIDATE`
+**Verdict** : `SHORT_REJECTED`
 
-**Actifs** : 50  |  **Folds run** : 3  |  **Folds OK** : 2/5  |  **Catastrophics** : 0
+**Actifs** : 50  |  **Folds run** : 4  |  **Folds OK** : 0/5  |  **Catastrophics** : 4
 
-**PF médian** : 1.3056  |  **PF stress médian (OK)** : 1.7876  |  **Total trades** : 283
+**PF médian** : 0.6731  |  **PF stress médian (OK)** : 0.0000  |  **Total trades** : 239
 
 | Fold | Status | Trades | PF | PF_stress | DD% | Sq% | AUC_val |
 |------|--------|--------|----|-----------|-----|-----|---------|
-| 2022 | OK | 178 | 1.306 | 1.273 | 0.07 | 31.46% | 0.6324 |
+| 2020 | SKIPPED | 0 | 0.000 | 0.000 | 0.00 | 0.00% | 0.0000 |
+| 2021 | CATASTROPHIC | 140 | 0.848 | 0.821 | 0.06 | 50.71% | 0.7282 |
+| 2022 | CATASTROPHIC | 64 | 0.498 | 0.486 | 0.10 | 43.75% | 0.6159 |
 | 2023 | SKIPPED | 0 | 0.000 | 0.000 | 0.00 | 0.00% | 0.0000 |
 | 2024 | SKIPPED | 0 | 0.000 | 0.000 | 0.00 | 0.00% | 0.0000 |
-| 2025 | WEAK | 73 | 1.163 | 1.128 | 0.03 | 26.03% | 0.7440 |
-| 2026 | OK | 32 | 2.389 | 2.303 | 0.01 | 28.12% | 0.7279 |
+| 2025 | CATASTROPHIC | 25 | 0.296 | 0.286 | 0.05 | 56.00% | 0.7191 |
+| 2026 | CATASTROPHIC | 10 | 0.855 | 0.835 | 0.02 | 60.00% | 0.7082 |
 
-**Ensemble** : 0.4× Transformer + 0.35× LightGBM + 0.25× TRMShortFleet
+**Ensemble** : 0.0× Transformer + 0.65× LightGBM + 0.35× TRMShortFleet
 

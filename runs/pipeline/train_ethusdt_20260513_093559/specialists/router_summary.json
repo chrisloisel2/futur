@@ -1,0 +1,10 @@
+{
+  "TREND_LONG": {
+    "accepted": true,
+    "weight": 0.55,
+    "side": "long",
+    "auc": 0.7372,
+    "macro_f1": 0.5353,
+    "n_train": 1264
+  }
+}

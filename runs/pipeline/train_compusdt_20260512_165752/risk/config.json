@@ -1,0 +1,47 @@
+{
+  "schema_version": 2,
+  "timeframe": "1h",
+  "horizon_minutes": 60,
+  "enabled_for_inference": {
+    "long": true,
+    "short": true
+  },
+  "long": {
+    "equity": 10000.0,
+    "risk_per_trade": 0.002,
+    "max_gross_exposure": 1.0,
+    "max_position_notional": 1.0,
+    "use_atr": true,
+    "atr_key": "atr_14",
+    "rv_key": "rv_24",
+    "stop_atr_mult": 2.0,
+    "stop_rv_mult": 3.0,
+    "min_stop_pct": 0.001,
+    "max_stop_pct": 0.03,
+    "rr": 1.5,
+    "min_abs_edge": 0.05,
+    "min_scale": 0.15,
+    "cooldown_bars": 2,
+    "daily_loss_limit_pct": 0.02,
+    "max_consecutive_losses": 3
+  },
+  "short": {
+    "equity": 10000.0,
+    "risk_per_trade": 0.001,
+    "max_gross_exposure": 1.0,
+    "max_position_notional": 1.0,
+    "use_atr": true,
+    "atr_key": "atr_14",
+    "rv_key": "rv_24",
+    "stop_atr_mult": 2.0,
+    "stop_rv_mult": 3.0,
+    "min_stop_pct": 0.001,
+    "max_stop_pct": 0.03,
+    "rr": 1.5,
+    "min_abs_edge": 0.05,
+    "min_scale": 0.15,
+    "cooldown_bars": 3,
+    "daily_loss_limit_pct": 0.02,
+    "max_consecutive_losses": 2
+  }
+}

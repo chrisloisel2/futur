@@ -1,0 +1,13 @@
+[
+  {
+    "symbol": "BTCUSD",
+    "run_id": "train_btcusd_20260512_231424",
+    "success": true,
+    "elapsed": 27.0,
+    "log": "runs/batch_logs/BTCUSD.log",
+    "long_pf": 0.7886,
+    "long_wr": 0.4635,
+    "long_ret": -4.39,
+    "short_ok": true
+  }
+]

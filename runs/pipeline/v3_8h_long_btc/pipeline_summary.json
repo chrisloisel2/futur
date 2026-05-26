@@ -1,0 +1,187 @@
+{
+  "run_id": "v3_8h_long_btc",
+  "mode": "long",
+  "data": "data/enriched/BTCUSDT_1h_enriched.parquet",
+  "test_from": 2024,
+  "config": {
+    "tradeable_quantile": 0.8,
+    "cost_pct": 0.001,
+    "filter_threshold_long": 0.4,
+    "direction_threshold_long": 0.54,
+    "filter_threshold_short": 0.45,
+    "direction_threshold_short": 0.55,
+    "initial_equity": 10000.0,
+    "risk_per_trade_long": 0.002,
+    "max_consecutive_losses_long": 3,
+    "cooldown_bars_long": 2,
+    "daily_loss_limit_pct": 0.02,
+    "risk_per_trade_short": 0.001,
+    "max_consecutive_losses_short": 2,
+    "cooldown_bars_short": 3,
+    "enable_long": true,
+    "enable_short": false
+  },
+  "label_stats": {
+    "thr_long": 0.021566,
+    "thr_long_raw_quantile": 0.021566,
+    "thr_short_raw": 0.025081,
+    "thr_short_with_cost": 0.026581,
+    "cost_pct_long": 0.001,
+    "cost_pct_short": 0.0015,
+    "tradeable_quantile_long": 0.8,
+    "tradeable_quantile_short": 0.84,
+    "n_total": 55251,
+    "n_tradeable": 7268,
+    "n_long": 1027,
+    "n_short": 964,
+    "n_long_gray": 3338,
+    "n_short_gray": 1939,
+    "n_reversal_rejected": 1446,
+    "n_reversal_long_rejected": 3102,
+    "n_long_net": 4034,
+    "n_short_net": 2688,
+    "frac_long": 0.0186,
+    "frac_short": 0.0174,
+    "long_vs_short_ratio": 1.0654,
+    "regime_distribution": {
+      "NEUTRAL": 25661,
+      "SHORTABLE": 16899,
+      "NO_SHORT": 12691
+    },
+    "regime_long_distribution": {
+      "NEUTRAL": 25959,
+      "LONGABLE": 20134,
+      "NO_LONG": 9158
+    },
+    "warning_low_long": false,
+    "warning_low_short": false,
+    "warning_imbalanced": false,
+    "warning_short_too_rare": true
+  },
+  "filter_metrics": {
+    "model": "XGBoost",
+    "val_acc": 0.791324200913242,
+    "val_f1": 0.1683348498635123,
+    "val_auc": 0.6449767331878519,
+    "recall_not_tradeable": 0.8276496565260059,
+    "recall_tradeable": 0.3042763157894737,
+    "confusion_matrix": [
+      [
+        6747,
+        1405
+      ],
+      [
+        423,
+        185
+      ]
+    ],
+    "scale_pos_weight": 4.719,
+    "calibrated_threshold_long": 0.4,
+    "calibrated_threshold_short": 0.45
+  },
+  "regime_report": {
+    "val": {
+      "n_total": 8760,
+      "pct_no_short": 0.237,
+      "pct_shortable": 0.271,
+      "pct_neutral": 0.492,
+      "short_rate_no_short": 0.0132,
+      "short_rate_shortable": 0.0128,
+      "short_rate_neutral": 0.0087
+    },
+    "test": {
+      "n_total": 17536,
+      "pct_no_short": 0.238,
+      "pct_shortable": 0.287,
+      "pct_neutral": 0.474,
+      "short_rate_no_short": 0.0119,
+      "short_rate_shortable": 0.0091,
+      "short_rate_neutral": 0.0151
+    }
+  },
+  "edge_long_metrics": [
+    {
+      "model": "Logistic",
+      "side": "long",
+      "acc": 0.4517,
+      "macro_f1": 0.3295,
+      "auc": 0.5832,
+      "precision_long": 0.0223,
+      "recall_long": 0.7143,
+      "confusion_matrix": [
+        [
+          3725,
+          4608
+        ],
+        [
+          42,
+          105
+        ]
+      ]
+    },
+    {
+      "model": "XGBoost",
+      "side": "long",
+      "acc": 0.9658,
+      "macro_f1": 0.4947,
+      "auc": 0.565,
+      "precision_long": 0.0069,
+      "recall_long": 0.0068,
+      "confusion_matrix": [
+        [
+          8189,
+          144
+        ],
+        [
+          146,
+          1
+        ]
+      ]
+    }
+  ],
+  "edge_short_metrics": null,
+  "short_calibration": null,
+  "short_wf_robustness": null,
+  "backtest_long": {
+    "n_tested": 17536,
+    "n_trades": 164,
+    "profit_factor": 1.1498,
+    "max_drawdown": 0.0351,
+    "sharpe_annualized": 4.6837,
+    "win_rate": 0.5366,
+    "avg_win": 19.2811,
+    "avg_loss": -19.4175,
+    "expectancy_per_trade": 1.3476,
+    "initial_equity": 10000.0,
+    "final_equity": 10221.0,
+    "total_return_pct": 2.21,
+    "by_year": {
+      "2024": {
+        "trades": 101,
+        "pnl_sum": 380.73,
+        "pf": 1.443,
+        "win_rate": 0.574
+      },
+      "2025": {
+        "trades": 63,
+        "pnl_sum": -159.72,
+        "pf": 0.741,
+        "win_rate": 0.476
+      }
+    },
+    "side": "long",
+    "model": "XGBoost_long",
+    "filter_threshold": 0.4,
+    "direction_threshold": 0.54,
+    "cost_pct": 0.001,
+    "skipped_filter": 11900,
+    "skipped_direction": 5414,
+    "skipped_risk": 58,
+    "risk_per_trade": 0.002
+  },
+  "backtest_short": null,
+  "backtest_combined": null,
+  "short_disabled_reason": null,
+  "auto_calibrate_used": true,
+  "elapsed_sec": 172.9
+}

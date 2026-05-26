@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "layout": "pipeline_canonical_v1",
+  "pipeline": "strategies.pipeline_hourly.profile",
+  "run_id": "train_btcusdt_20260512_140852_343060",
+  "created_at_utc": "2026-05-12T14:09:11.711071+00:00",
+  "mode": "combined",
+  "timeframe": "1h",
+  "horizon_minutes": 60,
+  "labels_file": "labels.json",
+  "config_file": "config.json",
+  "components": {
+    "filter": {
+      "dir": "filter",
+      "model": "model.pkl",
+      "scaler": "scaler.pkl",
+      "metadata": "metadata.json",
+      "enabled_for_inference": true
+    },
+    "edge_long": {
+      "dir": "edge_long",
+      "model": "model.pkl",
+      "scaler": "scaler.pkl",
+      "metadata": "metadata.json",
+      "enabled_for_inference": true
+    },
+    "edge_short": {
+      "dir": "edge_short",
+      "model": "model.pkl",
+      "scaler": "scaler.pkl",
+      "metadata": "metadata.json",
+      "calibrator": "calibrator.pkl",
+      "enabled_for_inference": false,
+      "disabled_reason": "short instable sur 3 années: 2024(PF=0.33 WR=26.7%), 2025(PF=0.50 WR=43.8%), 2026(PF=0.56 WR=50.0%)"
+    },
+    "regime": {
+      "dir": "regime",
+      "model": "model.pkl",
+      "scaler": "scaler.pkl",
+      "metadata": "metadata.json",
+      "enabled_for_inference": true
+    },
+    "risk": {
+      "dir": "risk",
+      "config": "config.json"
+    },
+    "backtest_long": {
+      "dir": "backtest_long",
+      "summary": "summary.json",
+      "present": true
+    },
+    "backtest_short": {
+      "dir": "backtest_short",
+      "summary": "summary.json",
+      "present": false
+    },
+    "backtest_combined": {
+      "dir": "backtest_combined",
+      "summary": "summary.json",
+      "present": false
+    }
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "config": {
+    "version": "v5",
+    "n_trm_long": 100,
+    "short_status": "SHORT_REJECTED_2026-05",
+    "hedge_mode": "regime_allocator_v5",
+    "horizons": [
+      "h04",
+      "h08",
+      "h12",
+      "d01",
+      "d03",
+      "w01",
+      "w02",
+      "mo01",
+      "q01",
+      "y01"
+    ],
+    "archetypes": [
+      "momentum_accel",
+      "trend_follow",
+      "breakout_escape",
+      "squeeze_release",
+      "vwap_accum",
+      "pullback_reclaim",
+      "vol_shock",
+      "liquidity_squeeze",
+      "regime_transition",
+      "mean_reversion"
+    ],
+    "label_mode": "quantile_8h",
+    "cost_long_bps": 10.0,
+    "cost_short_bps": 15.0
+  },
+  "folds": [
+    {
+      "year": "2020",
+      "skip": false,
+      "long": {
+        "n_trades": 1,
+        "pf": 69791930.76,
+        "expectancy": 6.9792,
+        "wr": 1.0,
+        "avg_win": 0.06979,
+        "avg_loss": 0.0,
+        "max_drawdown": 0.0,
+        "total_pnl": 0.06979
+      },
+      "regime": {
+        "bear_pct": 4.5,
+        "bull_pct": 0.6,
+        "size_mult_mean": 0.984,
+        "dd_reduction_est_pct": 1.6,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "NO_TRADES",
+      "bh_pct": 303.7,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.7899090939914971,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    },
+    {
+      "year": "2021",
+      "skip": false,
+      "long": {
+        "n_trades": 3,
+        "pf": 71772632.301,
+        "expectancy": 2.3924,
+        "wr": 1.0,
+        "avg_win": 0.02392,
+        "avg_loss": 0.0,
+        "max_drawdown": 0.0,
+        "total_pnl": 0.07177
+      },
+      "regime": {
+        "bear_pct": 10.8,
+        "bull_pct": 2.0,
+        "size_mult_mean": 0.962,
+        "dd_reduction_est_pct": 3.8,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "NO_TRADES",
+      "bh_pct": 59.26,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.7482588904616249,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    },
+    {
+      "year": "2022",
+      "skip": false,
+      "long": {
+        "n_trades": 12,
+        "pf": 670394439.545,
+        "expectancy": 5.5866,
+        "wr": 1.0,
+        "avg_win": 0.05587,
+        "avg_loss": 0.0,
+        "max_drawdown": 0.0,
+        "total_pnl": 0.67039
+      },
+      "regime": {
+        "bear_pct": 9.5,
+        "bull_pct": 1.3,
+        "size_mult_mean": 0.967,
+        "dd_reduction_est_pct": 3.3,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "OK",
+      "bh_pct": -64.55,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.7911667085435368,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    },
+    {
+      "year": "2023",
+      "skip": false,
+      "long": {
+        "n_trades": 3,
+        "pf": 95758410.958,
+        "expectancy": 3.1919,
+        "wr": 1.0,
+        "avg_win": 0.03192,
+        "avg_loss": 0.0,
+        "max_drawdown": 0.0,
+        "total_pnl": 0.09576
+      },
+      "regime": {
+        "bear_pct": 2.6,
+        "bull_pct": 0.1,
+        "size_mult_mean": 0.991,
+        "dd_reduction_est_pct": 0.9,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "NO_TRADES",
+      "bh_pct": 156.03,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.7246555965032557,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    },
+    {
+      "year": "2024",
+      "skip": false,
+      "long": {
+        "n_trades": 98,
+        "pf": 26.952,
+        "expectancy": 1.8242,
+        "wr": 0.908,
+        "avg_win": 0.02086,
+        "avg_loss": -0.00765,
+        "max_drawdown": 0.04,
+        "total_pnl": 1.78775
+      },
+      "regime": {
+        "bear_pct": 3.9,
+        "bull_pct": 1.3,
+        "size_mult_mean": 0.986,
+        "dd_reduction_est_pct": 1.4,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "OK",
+      "bh_pct": 120.1,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.7819810519949658,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    },
+    {
+      "year": "2025",
+      "skip": false,
+      "long": {
+        "n_trades": 95,
+        "pf": 41.541,
+        "expectancy": 2.4659,
+        "wr": 0.926,
+        "avg_win": 0.02728,
+        "avg_loss": -0.00825,
+        "max_drawdown": 0.03,
+        "total_pnl": 2.34257
+      },
+      "regime": {
+        "bear_pct": 3.6,
+        "bull_pct": 0.4,
+        "size_mult_mean": 0.987,
+        "dd_reduction_est_pct": 1.3,
+        "harvest_n": 0,
+        "harvest_pf": 0.0,
+        "harvest_wr": 0.0,
+        "harvest_expectancy": 0.0
+      },
+      "status_long": "OK",
+      "bh_pct": -7.16,
+      "label_col": "y_long",
+      "fleet_long_auc_mean": 0.8364903309547724,
+      "thr_long_sample": {
+        "h04_momentum_accel": 0.55,
+        "h04_trend_follow": 0.55,
+        "h04_breakout_escape": 0.55
+      }
+    }
+  ],
+  "verdict": {
+    "long": {
+      "verdict": "NOT_DEPLOYABLE",
+      "folds_ok": 3,
+      "folds_total": 6,
+      "cata": 0,
+      "pf_median": 41.541,
+      "n_trades": 212,
+      "reasons": [
+        "only_3/6_folds_ok (need 5)"
+      ]
+    },
+    "regime": {
+      "bear_pct_mean": 5.8,
+      "dd_reduction_est_pct": 2.1,
+      "harvest_total_trades": 0,
+      "harvest_pf_mean": 0.0,
+      "note": "SHORT_REJECTED \u2014 hedge uniquement via sizing + funding harvest"
+    }
+  }
+}

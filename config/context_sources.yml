@@ -1,0 +1,84 @@
+version: 1
+updated: "2026-05-08"
+objective: "Multi-context crypto edge map for BTC/ETH/SOL and cross-asset regime modelling."
+
+implemented:
+  - name: binance_funding
+    family: derivatives
+    cadence: 8h
+    storage:
+      mongo: market_intel.signals
+      feature_view: trader.context_features_hourly
+      vector: market_context_v1
+    edge_hypothesis: "Crowded perpetual positioning; extreme or persistent funding is regime context, not a raw entry signal."
+  - name: binance_spot_ohlcv
+    family: price_microstructure
+    cadence: 1h
+    storage:
+      mongo: trader.historical_ohlcv
+      csv: data/BTCUSD_1h_features.csv
+    edge_hypothesis: "Base market state for labels, realized volatility, trend, liquidity and downstream feature joins."
+  - name: coingecko_markets
+    family: cross_sectional_market
+    cadence: live_snapshot
+    storage:
+      mongo: market_intel.signals
+      feature_view: trader.context_features_hourly
+      vector: market_context_v1
+    edge_hypothesis: "Cross-sectional rank/volume/market-cap context helps distinguish BTC-specific moves from broad beta."
+  - name: alternative_me_fear_greed
+    family: sentiment
+    cadence: daily
+    storage:
+      mongo: market_intel.signals
+      vector: market_context_v1
+    edge_hypothesis: "Slow sentiment regime; most useful as gating and sizing context."
+
+next_priority_free_or_low_cost:
+  - name: binance_open_interest_and_taker_ratio
+    family: derivatives
+    cadence: 5m_to_1h
+    target_storage: market_intel.signals
+    edge_hypothesis: "OI expansion with price/volume confirms leverage-driven moves; taker imbalance gives crowd aggression."
+  - name: binance_liquidations_or_aggtrades
+    family: liquidation_microstructure
+    cadence: realtime_to_1m
+    target_storage: trader.liquidation_events
+    edge_hypothesis: "Forced-flow clusters often precede local mean reversion or volatility expansion."
+  - name: mempool_space
+    family: bitcoin_onchain
+    cadence: 5m_to_1h
+    target_storage: market_intel.signals
+    edge_hypothesis: "Fee pressure, mempool congestion and hashrate/security context can flag BTC-specific stress."
+  - name: fred_macro_core
+    family: macro_liquidity
+    cadence: daily_to_monthly
+    target_storage: market_intel.signals
+    edge_hypothesis: "Rates, dollar/liquidity and risk indices drive crypto beta; used as slow regime priors."
+  - name: crypto_news_rss
+    family: narrative
+    cadence: 15m_to_2h
+    target_storage:
+      mongo: market_intel.signals
+      vector: market_context_v1
+    edge_hypothesis: "Narrative shocks are sparse; vector retrieval makes them usable as event context instead of noisy features."
+
+institutional_or_keyed:
+  - name: coindesk_data
+    family: institutional_market_derivatives_onchain
+    rationale: "Standardized coverage across exchanges, pairs, derivatives and on-chain data; suitable if budget allows."
+  - name: coinglass
+    family: derivatives
+    rationale: "Open interest, funding, long/short ratios and liquidations; high-value leverage context."
+  - name: coinmetrics_or_glassnode
+    family: onchain_institutional
+    rationale: "Entity-adjusted flows, realized cap, exchange balances and network valuation metrics."
+  - name: newsapi_or_gdelt
+    family: global_news
+    rationale: "Narrative velocity and macro/geopolitical context; should feed vector store and event features."
+
+quality_rules:
+  - "Every source must preserve source timestamp, ingest timestamp, asset, source, event_type and raw payload."
+  - "All derived features must be point-in-time; forward-fill limits must match source cadence."
+  - "Vector payloads must include asset/source/time filters; no unfiltered semantic retrieval in model pipelines."
+  - "New features need walk-forward ablation before being promoted into training."

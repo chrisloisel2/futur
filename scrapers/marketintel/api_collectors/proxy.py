@@ -1,7 +1,7 @@
 """
 ProxyPool — pool de proxies partagé, chargé depuis MongoDB.
 
-Source : mongodb://admin:admin123@100.93.248.105/ > proxy_db > proxies
+Source par defaut : mongodb://localhost:27017 > proxy_db > proxies
 
 Utilisé par :
   - les middlewares Scrapy (marketintel/middlewares.py)

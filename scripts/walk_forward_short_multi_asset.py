@@ -147,6 +147,13 @@ except ImportError as e:
     _IMPORT_ERRORS.append(f"ai.level_0.features : {e}")
     FEATURES_SHORT: List[str] = []
 
+try:
+    from ai.level_0.augmentation import augment_positives
+    _HAS_AUGMENTATION = True
+except ImportError as e:
+    _IMPORT_ERRORS.append(f"ai.level_0.augmentation : {e}")
+    _HAS_AUGMENTATION = False
+
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score
@@ -171,9 +178,9 @@ GATE_COL = "no_short"
 MACRO_BEAR_COL = "macro_bear_ok"  # True = régime bear → SHORT autorisé
 
 # Poids ensemble
-W_TRANSFORMER = 0.40
-W_LGBM = 0.35
-W_TRM = 0.25
+W_TRANSFORMER = 0.00   # supprimé — ajoute du bruit sans gain AUC par rapport au LONG
+W_LGBM = 0.65
+W_TRM = 0.35
 
 # Actifs liquides à charger en premier (meilleur signal SHORT)
 PRIORITY_ASSETS = ["BTCUSD", "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]
@@ -813,6 +820,7 @@ def _backtest_fold(
         "max_drawdown":  round(max_dd, 4),
         "squeeze_rate":  round(squeeze_rate, 4),
         "gate_blocked_pct": round(float(gate.mean()), 4),
+        "total_return_pct": round(float((equity[-1] - 1.0) * 100), 4) if len(equity) > 0 else 0.0,
     }
 
 
@@ -834,6 +842,7 @@ def _empty_fold_metrics() -> dict:
         "n_trades": 0, "pf": 0.0, "pf_stress": 0.0, "pf_extreme": 0.0,
         "expectancy": 0.0, "wr": 0.0, "avg_win": 0.0, "avg_loss": 0.0,
         "max_drawdown": 0.0, "squeeze_rate": 0.0, "gate_blocked_pct": 0.0,
+        "total_return_pct": 0.0,
     }
 
 
@@ -917,25 +926,41 @@ def run_fold(
     # ── Contextes + gate ───────────────────────────────────────────────────────
     print(f"\n  [gate] Calcul contextes SHORT…")
     df = _compute_context_columns(df, train_mask)
-
-    # Vérifier le context_df pour TRMShortFleet
-    ctx_cols = ["ctx_crowded_longs", "ctx_breakdown", "ctx_failed_breakout",
-                "ctx_liquidity_stress", "ctx_bear_continuation",
-                "ctx_macro_riskoff", "ctx_general_short"]
-    ctx_df_full = df[[c for c in ctx_cols if c in df.columns]].copy()
-    if ctx_df_full.empty:
-        ctx_df_full = pd.DataFrame(
-            {"ctx_general_short": np.ones(len(df), dtype=bool)}, index=df.index
-        )
+    # context_df ignoré en v3 — TRMShortFleet v3 calcule ses propres contextes OHLCV
 
     # ── Sous-échantillonnage mémoire ───────────────────────────────────────────
     _, _, train_mask_sub = _subsample_train(df, asset_ids, train_mask)
+
+    # ── SMOTE augmentation (LightGBM uniquement, comme le LONG) ───────────────
+    # Compenser le faible nombre de positifs sur les folds bear.
+    # TRM Fleet reçoit les données originales (contextes ctx_* cohérents).
+    df_train_aug = df.iloc[np.where(train_mask_sub)[0]].reset_index(drop=True)
+    y_train_aug  = y[train_mask_sub]
+    if _HAS_AUGMENTATION:
+        try:
+            n_pos_sub = int((y_train_aug == 1).sum())
+            if n_pos_sub < 5_000:
+                feats_aug = [f for f in features if f in df_train_aug.columns]
+                df_train_aug = augment_positives(
+                    df_train_aug,
+                    features=feats_aug,
+                    label_col=LABEL_COL,
+                    target_col=RET_COL,
+                    multiplier=3,
+                    k_neighbors=min(5, max(1, n_pos_sub - 1)),
+                    min_pos_for_augment=30,
+                    max_pos_threshold=5_000,
+                )
+                y_train_aug = df_train_aug[LABEL_COL].values.astype(np.int32) \
+                              if LABEL_COL in df_train_aug.columns else y_train_aug
+        except Exception as e:
+            print(f"  WARN SMOTE : {e}")
 
     # ── 5a. Transformer ────────────────────────────────────────────────────────
     p_transformer = np.full(len(df), 0.5, dtype=np.float32)
     metrics_tr = {}
 
-    if use_transformer and _HAS_TRANSFORMER:
+    if use_transformer and _HAS_TRANSFORMER and W_TRANSFORMER > 0:
         print(f"\n  [transformer] Entraînement Transformer SHORT…")
         try:
             cfg_short = TransformerConfig(
@@ -994,7 +1019,7 @@ def run_fold(
                 colsample_bytree=0.80,
             )
             lgbm_model.fit(
-                df[train_mask_sub], y[train_mask_sub],
+                df_train_aug, y_train_aug,
                 df[val_mask], y_val,
                 features=features,
             )
@@ -1021,13 +1046,10 @@ def run_fold(
                 y=y[train_mask_sub],
                 df_val=df[val_mask],
                 y_val=y_val,
-                context_df=ctx_df_full.iloc[np.where(train_mask_sub)[0]],
             )
-            result_fleet = fleet.predict_short_with_context(
-                df, ctx_df_full
-            )
+            result_fleet = fleet.predict_short_with_context(df)
             p_trm_col = result_fleet["p_short"].values if "p_short" in result_fleet.columns \
-                        else fleet.predict_short_proba(df, ctx_df_full)
+                        else fleet.predict_short_proba(df)
             p_trm = p_trm_col.astype(np.float32)
         except Exception as e:
             print(f"  WARN TRMShortFleet : {e}")
@@ -1088,41 +1110,19 @@ def run_fold(
             p_val_full  = p_ensemble[val_mask]
             y_val_full  = y[val_mask]
 
-            # Coverage bear du val standard
-            val_bear_frac = 0.0
-            if MACRO_BEAR_COL in df_val_full.columns:
-                val_bear_frac = float(df_val_full[MACRO_BEAR_COL].mean())
-
-            # Fallback bear-targeted : si val a < 15% bear, chercher la meilleure année bear dans train
-            MIN_VAL_BEAR_FRAC = 0.15
-            if val_bear_frac < MIN_VAL_BEAR_FRAC and MACRO_BEAR_COL in df.columns and "datetime" in df.columns:
-                years_in_train = df.loc[train_mask, "datetime"].dt.year.values if hasattr(df.loc[train_mask, "datetime"], 'dt') \
-                                 else pd.to_datetime(df.loc[train_mask, "datetime"]).dt.year.values
-                best_bear_yr, best_bear_frac = None, 0.0
-                for yr in np.unique(years_in_train):
-                    yr_mask  = train_mask & (pd.to_datetime(df["datetime"]).dt.year.values == yr)
-                    bear_frac = float(df.loc[yr_mask, MACRO_BEAR_COL].mean())
-                    if bear_frac > best_bear_frac:
-                        best_bear_frac = bear_frac
-                        best_bear_yr   = yr
-
-                if best_bear_yr is not None and best_bear_frac >= MIN_VAL_BEAR_FRAC:
-                    bear_yr_mask = train_mask & (pd.to_datetime(df["datetime"]).dt.year.values == best_bear_yr)
-                    print(f"  [calibration] Val bear trop faible ({val_bear_frac*100:.1f}%) → bear-targeted : année {best_bear_yr} ({best_bear_frac*100:.1f}% bear)")
-                    df_val_full = df[bear_yr_mask].reset_index(drop=True)
-                    p_val_full  = p_ensemble[bear_yr_mask]
-                    y_val_full  = y[bear_yr_mask]
-
-            # Filtrer sur les barres bear uniquement
+            # Filtrer sur les barres bear du val uniquement (sans leakage sur train)
+            # Si < 20 barres bear dans le val, calibrer sur tout le val (bull inclus)
             if MACRO_BEAR_COL in df_val_full.columns:
                 bear_val = df_val_full[MACRO_BEAR_COL].values.astype(bool)
                 n_bear   = int(bear_val.sum())
                 pct_bear = n_bear / max(len(bear_val), 1) * 100
                 print(f"  [calibration] Barres val en régime bear : {n_bear:,}/{len(bear_val):,} ({pct_bear:.1f}%)")
-                if n_bear >= 50:
+                if n_bear >= 20:
                     df_val_full = df_val_full[bear_val].reset_index(drop=True)
                     p_val_full  = p_val_full[bear_val]
                     y_val_full  = y_val_full[bear_val]
+                else:
+                    print(f"  [calibration] Pas assez de barres bear → calibration sur tout le val")
 
             thresholds = calibrate_short_thresholds(
                 df_val=df_val_full,
@@ -1142,6 +1142,23 @@ def run_fold(
         # Fallback seuil fixe
         p90 = float(np.percentile(p_ensemble[val_mask], 90))
         thresholds = {"general_short": {"enabled": True, "threshold": p90}}
+
+    # ── Seuil minimum adaptatif (miroir LONG) ─────────────────────────────────
+    # Quand l'AUC val est élevée, on impose un seuil min plus haut = moins de
+    # trades mais de meilleure qualité (identique à calibrate_context_thresholds LONG).
+    _thr_min = (
+        0.52 if ens_auc_val >= 0.70 else
+        0.46 if ens_auc_val >= 0.63 else
+        0.40
+    )
+    n_raised = 0
+    for ctx, entry in thresholds.items():
+        if entry.get("enabled") and entry.get("threshold") is not None:
+            if entry["threshold"] < _thr_min:
+                entry["threshold"] = _thr_min
+                n_raised += 1
+    if n_raised:
+        print(f"  [adaptive_thr] {n_raised} seuil(s) relevé(s) → min={_thr_min:.2f} (AUC_val={ens_auc_val:.3f})")
 
     # Sauvegarder les seuils
     thr_path = REPORT_DIR / f"thresholds_fold_{fold_year}_multi.json"
@@ -1218,11 +1235,12 @@ def run_fold(
         "avg_loss":       bt_metrics["avg_loss"],
         "max_drawdown":   dd,
         "squeeze_rate":   sq,
-        "gate_blocked_pct": bt_metrics["gate_blocked_pct"],
-        "ens_auc_val":    round(ens_auc_val, 4),
-        "tr_best_auc":    metrics_tr.get("best_auc", None),
-        "tr_best_epoch":  metrics_tr.get("best_epoch", None),
-        "duration_s":     round(dt_fold, 1),
+        "gate_blocked_pct":  bt_metrics["gate_blocked_pct"],
+        "total_return_pct":  bt_metrics.get("total_return_pct", 0.0),
+        "ens_auc_val":       round(ens_auc_val, 4),
+        "tr_best_auc":       metrics_tr.get("best_auc", None),
+        "tr_best_epoch":     metrics_tr.get("best_epoch", None),
+        "duration_s":        round(dt_fold, 1),
     }
 
 

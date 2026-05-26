@@ -1,0 +1,21 @@
+{
+  "model": "XGBoost",
+  "val_acc": 0.9199771689497717,
+  "val_f1": 0.18583042973286876,
+  "val_auc": 0.7543004390150793,
+  "recall_not_tradeable": 0.9442603550295858,
+  "recall_tradeable": 0.25806451612903225,
+  "confusion_matrix": [
+    [
+      7979,
+      471
+    ],
+    [
+      230,
+      80
+    ]
+  ],
+  "scale_pos_weight": 7.332,
+  "calibrated_threshold_long": 0.4,
+  "calibrated_threshold_short": 0.45
+}

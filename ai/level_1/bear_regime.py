@@ -62,7 +62,7 @@ def train_bear_regime_model(
     out_dir: Path,
     horizon_bars: int = 72,
     bear_threshold_pct: float = -0.02,
-    activation_threshold: float = 0.70,
+    activation_threshold: float = 0.60,  # 0.60 : balance entre activations et precision
     features: Optional[List[str]] = None,
 ) -> Dict:
     """
@@ -114,9 +114,12 @@ def train_bear_regime_model(
     pct_bear_train = n_bear_train / max(len(y_train), 1)
     pct_bear_val   = n_bear_val   / max(len(y_val),   1)
 
+    oi_feats  = [f for f in _feats if "oi" in f or "sumOI" in f or "oihist" in f]
+    macro_new = [f for f in _feats if f in ("macro_regime_score", "crowd_leverage_index")]
     print(f"\n   [BearRegime] Label bear : train={n_bear_train:,} ({pct_bear_train:.1%})  "
           f"val={n_bear_val:,} ({pct_bear_val:.1%})")
-    print(f"   [BearRegime] Features   : {len(_feats)}")
+    print(f"   [BearRegime] Features   : {len(_feats)}  "
+          f"(OI={len(oi_feats)} macro_cross={len(macro_new)})")
 
     if n_bear_train < 50:
         print("   ⚠  BearRegime: trop peu de labels bear en train — régime désactivé")
@@ -151,7 +154,7 @@ def train_bear_regime_model(
         df=df,
         mask=val_valid,
         p_bear=p_val,
-        min_activated_pct=0.10,
+        min_activated_pct=0.08,   # abaisse 0.10→0.08 : permet d'activer sur des periodes plus courtes
         default_threshold=activation_threshold,
     )
     print(f"   [BearRegime] Seuil calibré : {threshold_cal:.2f}  "

@@ -1,0 +1,28 @@
+[
+  {
+    "bar": 10020,
+    "date": "2025-02-21",
+    "year": 2025,
+    "side": "long",
+    "p_tradeable": 0.4073,
+    "p_side": 0.6401,
+    "fut_ret": -0.01221,
+    "pnl_net_pct": -0.01321,
+    "pnl_abs": -25.2077,
+    "equity": 9974.79,
+    "notional": 1908.6
+  },
+  {
+    "bar": 18531,
+    "date": "2026-02-11",
+    "year": 2026,
+    "side": "short",
+    "p_tradeable": 0.4527,
+    "p_side": 0.5771,
+    "fut_ret": -0.01109,
+    "pnl_net_pct": 0.02645,
+    "pnl_abs": 16.7256,
+    "equity": 9991.52,
+    "notional": 632.33
+  }
+]

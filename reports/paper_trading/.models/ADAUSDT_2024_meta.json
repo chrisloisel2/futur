@@ -1,0 +1,15 @@
+{
+  "symbol": "ADAUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2024,
+  "val_year": 2025,
+  "n_features": 78,
+  "n_train": 43120,
+  "n_val": 8760,
+  "val_n": 14,
+  "val_pf": 1.532,
+  "val_wr": 0.643,
+  "val_wr_pct": "64%",
+  "elapsed_s": 96.0,
+  "trained_at": "2026-05-24T00:49:13.181123+00:00"
+}

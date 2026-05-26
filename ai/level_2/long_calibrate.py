@@ -22,7 +22,7 @@ import numpy as np
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression as PlattLR
 
-from ai.level_0.constants import COST_PCT
+from ai.level_0.constants import COST_PCT, TARGET_COL
 from ai.level_0.features import FEATURES_LONG, FEATURES_SHORT
 from ai.level_0.preprocessing import get_X
 
@@ -61,7 +61,7 @@ def calibrate_direction_model(
 
     X_val   = get_X(df, val_mask, feature_list)
     y_val   = df.loc[val_mask, label_col].values.astype(np.int32)
-    ret_val = df.loc[val_mask, "future_ret_h"].values.astype(np.float64)
+    ret_val = df.loc[val_mask, TARGET_COL].values.astype(np.float64)
 
     # Exclure gray zones
     valid = y_val >= 0
@@ -79,7 +79,14 @@ def calibrate_direction_model(
 
     # ── 2. Calibration du seuil direction (business metric) ──────────────────
     thr_sweep = _threshold_sweep_pnl(proba_cal, ret_val, ret_sign, cost_pct)
-    best_thr   = max(thr_sweep, key=lambda x: x["pnl"])["threshold"]
+    # Critère : maximiser l'expectancy par trade parmi les seuils avec PF ≥ 1.0
+    # et au moins 20 trades. Évite les biais du PnL total (favorise le volume).
+    eligible = [e for e in thr_sweep
+                if e["n_trades"] >= 20 and e["profit_factor"] >= 1.0]
+    if eligible:
+        best_thr = max(eligible, key=lambda x: x["expectancy"])["threshold"]
+    else:
+        best_thr = max(thr_sweep, key=lambda x: x["pnl"])["threshold"]
     best_entry  = next(e for e in thr_sweep if e["threshold"] == best_thr)
 
     stable = _check_thr_stability(thr_sweep, best_thr)
@@ -164,7 +171,7 @@ def _threshold_sweep_pnl(
     Ne jamais utiliser sur le test.
     """
     results = []
-    for thr in np.arange(0.40, 0.85, 0.02):
+    for thr in np.arange(0.40, 0.85, 0.01):
         mask = proba_cal >= thr
         n_tr = int(mask.sum())
         if n_tr < 10:
@@ -189,7 +196,7 @@ def _threshold_sweep_pnl(
 
 
 def _check_thr_stability(sweep: List[Dict], best_thr: float,
-                         delta: float = 0.05, max_drop_pct: float = 0.35) -> bool:
+                         delta: float = 0.05, max_drop_pct: float = 0.15) -> bool:
     """Vérifie que le seuil optimal est robuste à une perturbation de ±delta."""
     def get_pnl(thr):
         e = next((x for x in sweep if abs(x["threshold"] - thr) < 0.015), None)

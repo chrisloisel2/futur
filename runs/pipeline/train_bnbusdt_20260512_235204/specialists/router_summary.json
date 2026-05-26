@@ -1,0 +1,18 @@
+{
+  "TREND_LONG": {
+    "accepted": true,
+    "weight": 0.3707999999999999,
+    "side": "long",
+    "auc": 0.5704,
+    "macro_f1": 0.5177,
+    "n_train": 1167
+  },
+  "HIGH_VOL": {
+    "accepted": true,
+    "weight": 0.36439999999999995,
+    "side": "both",
+    "auc": 0.5672,
+    "macro_f1": 0.473,
+    "n_train": 32648
+  }
+}

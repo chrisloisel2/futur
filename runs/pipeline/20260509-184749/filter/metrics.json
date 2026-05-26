@@ -1,0 +1,21 @@
+{
+  "model": "HistGBT",
+  "val_acc": 0.8050005708414203,
+  "val_f1": 0.23545210384959714,
+  "val_auc": 0.7065189733609594,
+  "recall_not_tradeable": 0.8434393638170974,
+  "recall_tradeable": 0.369901547116737,
+  "confusion_matrix": [
+    [
+      6788,
+      1260
+    ],
+    [
+      448,
+      263
+    ]
+  ],
+  "scale_pos_weight": 3.671,
+  "calibrated_threshold_long": 0.4,
+  "calibrated_threshold_short": 0.45
+}

@@ -5,6 +5,7 @@ Uses proxies stored in MongoDB (populated by free_vpn_scraper spider)
 
 import random
 import logging
+import os
 from typing import List, Optional
 import time
 from scrapy import signals
@@ -35,7 +36,7 @@ class MongoDBProxyRotatorMiddleware:
     def __init__(
         self,
         proxy_enabled=True,
-        mongo_uri='mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//',
+        mongo_uri=None,
         mongo_db='scrapers_db',
         collection_name='vpn_proxies',
         max_proxies=200,
@@ -43,7 +44,7 @@ class MongoDBProxyRotatorMiddleware:
         delete_on_failure=True
     ):
         self.proxy_enabled = proxy_enabled
-        self.mongo_uri = mongo_uri
+        self.mongo_uri = mongo_uri or os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
         self.mongo_db = mongo_db
         self.collection_name = collection_name
         self.max_proxies = max_proxies
@@ -73,7 +74,8 @@ class MongoDBProxyRotatorMiddleware:
             raise NotConfigured('Proxy rotation is disabled')
 
         # MongoDB settings
-        mongo_uri = crawler.settings.get('MONGODB_URI', 'mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//')
+        local_mongo_uri = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
+        mongo_uri = crawler.settings.get('MONGODB_URI', local_mongo_uri)
         mongo_db = crawler.settings.get('MONGODB_DATABASE', 'scrapers_db')
         collection_name = crawler.settings.get('MONGODB_VPN_COLLECTION', 'vpn_proxies')
 

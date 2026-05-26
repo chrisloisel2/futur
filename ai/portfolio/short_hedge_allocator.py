@@ -6,8 +6,8 @@ Décide si et comment utiliser des positions SHORT pour hedger un portefeuille
 principalement LONG.
 
 Logique centrale :
-  1. Sans LONG ouvert  → SHORT standalone autorisé uniquement si signal fort (> 0.70)
-  2. Avec LONG exposé  → SHORT comme hedge si signal court-terme ou squeeze élevé
+  1. Sans LONG ouvert  → SHORT standalone désactivé par défaut (v2 hedge-only)
+  2. Avec LONG exposé  → SHORT comme hedge si stress court-terme confirmé
   3. Bull sain         → bloquer les shorts altcoins
   4. Volatilité extreme → réduire la taille de 50%
   5. Squeeze élevé     → bloquer tout short (trop dangereux)
@@ -51,6 +51,7 @@ class HedgeInput:
     # Risques spécifiques
     squeeze_risk_score: float = 0.0 # [0, 1] — risque de short squeeze
     funding_rate_z: float = 0.0     # z-score du funding rate (+ = longs payent)
+    standalone_short_allowed: bool = False  # v2: hedge-only unless explicitly overridden
 
     def __post_init__(self) -> None:
         # Validation des plages
@@ -106,7 +107,7 @@ def decide_short_hedge(inputs: HedgeInput) -> HedgeDecision:
 
     Évalue les règles dans l'ordre suivant (priorité décroissante) :
       1. Squeeze élevé              → bloquer (trop dangereux)
-      2. Sans LONG ouvert           → standalone seulement si signal fort
+      2. Sans LONG ouvert           → standalone désactivé par défaut
       3. Avec LONG + stress signal  → hedge autorisé
       4. Bull sain + signal faible  → bloquer altcoin shorts
       5. Volatilité extrême         → réduire la taille
@@ -130,8 +131,20 @@ def decide_short_hedge(inputs: HedgeInput) -> HedgeDecision:
             ),
         )
 
-    # ── Règle 1 : Aucun LONG ouvert — mode standalone ─────────────────────────
+    # ── Règle 1 : Aucun LONG ouvert — mode standalone désactivé par défaut ────
     if inp.long_positions_count == 0:
+        if not inp.standalone_short_allowed:
+            return HedgeDecision(
+                allow_short=False,
+                short_size_multiplier=0.0,
+                hedge_mode=False,
+                max_short_exposure=0.0,
+                reason="standalone_disabled_v2",
+                context=(
+                    "SHORT v2 est hedge-only: aucun LONG ouvert, donc aucun short "
+                    "standalone autorisé sans override explicite."
+                ),
+            )
         # SHORT autorisé uniquement si signal BTC fort
         if inp.btc_short_signal > 0.70:
             size = 0.5
@@ -167,7 +180,7 @@ def decide_short_hedge(inputs: HedgeInput) -> HedgeDecision:
     # ── Règle 2 : LONG exposé + stress signal → hedge autorisé ────────────────
     stress_signal = (
         inp.btc_short_signal > 0.60 or
-        inp.squeeze_risk_score > 0.50     # squeeze modéré déclenche le hedge
+        inp.funding_rate_z > 2.0          # crowded longs: hedge useful, not squeeze risk
     )
 
     if inp.long_exposure_total > 0.20 and stress_signal:

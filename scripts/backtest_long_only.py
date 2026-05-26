@@ -65,6 +65,27 @@ RISK_FREE_ANNUAL  = 0.05     # 5% taux sans risque (benchmark)
 
 MONGO_URI = os.getenv("FUTUR_MONGO_URI", "mongodb://localhost:27017")
 DB_NAME   = os.getenv("FUTUR_MONGO_DB",  "trader")
+FEATURE_COLLECTION = os.getenv(
+    "FUTUR_MONGO_FEATURE_COLLECTION",
+    os.getenv(
+        "MONGODB_FEATURE_COLLECTION",
+        os.getenv("FUTUR_MONGO_OHLCV_COLLECTION", os.getenv("MONGODB_HIST_COLLECTION", "historical_ohlcv_enriched")),
+    ),
+)
+
+
+def _symbol_variants(symbol: str) -> List[str]:
+    compact = str(symbol or "").upper().replace("/", "").replace("_", "").replace("-", "")
+    variants = {symbol, compact}
+    for quote in ("USDT", "USDC", "BUSD", "USD", "BTC", "ETH"):
+        if compact.endswith(quote) and len(compact) > len(quote):
+            base = compact[: -len(quote)]
+            variants.add(f"{base}/{quote}")
+            if quote == "USD":
+                variants.add(f"{base}USDT")
+                variants.add(f"{base}/USDT")
+            break
+    return sorted(variants)
 
 
 # ── Market impact ──────────────────────────────────────────────────────────────
@@ -99,17 +120,17 @@ def load_data(run_dir: Optional[Path], since: Optional[str]) -> pd.DataFrame:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     db     = client[DB_NAME]
 
-    query: Dict[str, Any] = {"symbol": "BTCUSDT"}
+    query: Dict[str, Any] = {"symbol": {"$in": _symbol_variants("BTCUSDT")}}
     if since:
         query["open_time"] = {"$gte": pd.Timestamp(since, tz="UTC")}
 
-    cursor = db["historical_ohlcv"].find(query).sort("open_time", ASCENDING)
+    cursor = db[FEATURE_COLLECTION].find(query).sort("open_time", ASCENDING)
     records = list(cursor)
 
     if not records:
         raise RuntimeError(
-            "Aucune donnée dans historical_ohlcv. "
-            "Lancez scripts/fetch_1m_history.py d'abord."
+            f"Aucune donnée dans {FEATURE_COLLECTION}. "
+            "Lancez scripts/build_enriched_mongo_collection.py d'abord."
         )
 
     df = pd.DataFrame(records)

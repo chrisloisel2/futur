@@ -1,5 +1,17 @@
 {
   "bear_continuation": {
+    "enabled": true,
+    "threshold": 0.74,
+    "val_pf": 1.0806,
+    "val_expectancy": 0.000618,
+    "n_val_trades": 90,
+    "squeeze_loss_rate": 0.3444,
+    "max_drawdown": 109.6229,
+    "cost_stress_pf": 1.015,
+    "avg_mae": 0.009721,
+    "score": -10.57257
+  },
+  "breakdown": {
     "enabled": false,
     "threshold": null,
     "val_pf": null,
@@ -12,29 +24,18 @@
     "score": null,
     "reason": "no_threshold_passed_constraints"
   },
-  "breakdown": {
-    "enabled": true,
-    "threshold": 0.15,
-    "val_pf": 2.1791,
-    "val_expectancy": 0.010099,
-    "n_val_trades": 28,
-    "squeeze_loss_rate": 0.25,
-    "max_drawdown": 2986.3173,
-    "cost_stress_pf": 2.0956,
-    "avg_mae": 0.011437,
-    "score": -596.895565
-  },
   "failed_breakout": {
-    "enabled": true,
-    "threshold": 0.12,
-    "val_pf": 1.1022,
-    "val_expectancy": 0.001213,
-    "n_val_trades": 258,
-    "squeeze_loss_rate": 0.3023,
-    "max_drawdown": 655.6627,
-    "cost_stress_pf": 1.0589,
-    "avg_mae": 0.015466,
-    "score": -131.1551
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
   },
   "general_short": {
     "enabled": false,
@@ -50,15 +51,16 @@
     "reason": "no_threshold_passed_constraints"
   },
   "liquidity_stress": {
-    "enabled": true,
-    "threshold": 0.2,
-    "val_pf": 2.443,
-    "val_expectancy": 0.010198,
-    "n_val_trades": 11,
-    "squeeze_loss_rate": 0.1818,
-    "max_drawdown": 80.6091,
-    "cost_stress_pf": 2.3295,
-    "avg_mae": 0.008736,
-    "score": -15.695929
+    "enabled": false,
+    "threshold": null,
+    "val_pf": null,
+    "val_expectancy": null,
+    "n_val_trades": 0,
+    "squeeze_loss_rate": null,
+    "max_drawdown": null,
+    "cost_stress_pf": null,
+    "avg_mae": null,
+    "score": null,
+    "reason": "no_threshold_passed_constraints"
   }
 }

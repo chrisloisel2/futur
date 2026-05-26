@@ -1,0 +1,266 @@
+{
+  "run_id": "hf_linkusdt_v1",
+  "mode": "combined",
+  "data": "data_hedge_fund/LINKUSDT_1m_bundle.parquet",
+  "test_from": 2024,
+  "config": {
+    "tradeable_quantile": 0.88,
+    "cost_pct": 0.001,
+    "filter_threshold_long": 0.4,
+    "direction_threshold_long": 0.52,
+    "filter_threshold_short": 0.45,
+    "direction_threshold_short": 0.55,
+    "initial_equity": 10000.0,
+    "risk_per_trade_long": 0.002,
+    "max_consecutive_losses_long": 3,
+    "cooldown_bars_long": 2,
+    "daily_loss_limit_pct": 0.02,
+    "risk_per_trade_short": 0.001,
+    "max_consecutive_losses_short": 2,
+    "cooldown_bars_short": 3,
+    "enable_long": true,
+    "enable_short": true
+  },
+  "label_stats": {
+    "thr_long": 0.036476,
+    "thr_long_raw_quantile": 0.036476,
+    "thr_short_raw": 0.036476,
+    "thr_short_with_cost": 0.037976,
+    "cost_pct_long": 0.001,
+    "cost_pct_short": 0.0015,
+    "tradeable_quantile_long": 0.88,
+    "tradeable_quantile_short": 0.88,
+    "n_total": 55549,
+    "n_tradeable": 4585,
+    "n_long": 1052,
+    "n_short": 720,
+    "n_long_gray": 1227,
+    "n_short_gray": 1409,
+    "n_reversal_rejected": 915,
+    "n_reversal_long_rejected": 769,
+    "n_long_net": 2138,
+    "n_short_net": 2015,
+    "frac_long": 0.0189,
+    "frac_short": 0.013,
+    "long_vs_short_ratio": 1.4611,
+    "regime_distribution": {
+      "NEUTRAL": 25212,
+      "SHORTABLE": 18916,
+      "NO_SHORT": 11421
+    },
+    "regime_long_distribution": {
+      "NEUTRAL": 27224,
+      "LONGABLE": 18162,
+      "NO_LONG": 10163
+    },
+    "warning_low_long": false,
+    "warning_low_short": false,
+    "warning_imbalanced": false,
+    "warning_short_too_rare": true
+  },
+  "filter_metrics": {
+    "model": "XGBoost",
+    "val_acc": 0.9138127853881278,
+    "val_f1": 0.14301929625425652,
+    "val_auc": 0.7287333943743085,
+    "recall_not_tradeable": 0.9378837978271138,
+    "recall_tradeable": 0.21575342465753425,
+    "confusion_matrix": [
+      [
+        7942,
+        526
+      ],
+      [
+        229,
+        63
+      ]
+    ],
+    "scale_pos_weight": 7.332,
+    "calibrated_threshold_long": 0.4,
+    "calibrated_threshold_short": 0.45
+  },
+  "regime_report": {
+    "val": {
+      "n_total": 8760,
+      "pct_no_short": 0.222,
+      "pct_shortable": 0.326,
+      "pct_neutral": 0.451,
+      "short_rate_no_short": 0.0088,
+      "short_rate_shortable": 0.0056,
+      "short_rate_neutral": 0.0033
+    },
+    "test": {
+      "n_total": 20877,
+      "pct_no_short": 0.187,
+      "pct_shortable": 0.356,
+      "pct_neutral": 0.457,
+      "short_rate_no_short": 0.0112,
+      "short_rate_shortable": 0.0144,
+      "short_rate_neutral": 0.0084
+    }
+  },
+  "edge_long_metrics": [
+    {
+      "model": "Logistic",
+      "side": "long",
+      "acc": 0.9163,
+      "macro_f1": 0.4954,
+      "auc": 0.5759,
+      "precision_long": 0.0195,
+      "recall_long": 0.1494,
+      "confusion_matrix": [
+        [
+          7945,
+          653
+        ],
+        [
+          74,
+          13
+        ]
+      ]
+    },
+    {
+      "model": "XGBoost",
+      "side": "long",
+      "acc": 0.9871,
+      "macro_f1": 0.5055,
+      "auc": 0.5904,
+      "precision_long": 0.037,
+      "recall_long": 0.0115,
+      "confusion_matrix": [
+        [
+          8572,
+          26
+        ],
+        [
+          86,
+          1
+        ]
+      ]
+    }
+  ],
+  "edge_short_metrics": [
+    {
+      "model": "Logistic",
+      "side": "short",
+      "acc": 0.8094,
+      "macro_f1": 0.4526,
+      "auc": 0.5179,
+      "precision_short": 0.0055,
+      "recall_short": 0.1957,
+      "confusion_matrix": [
+        [
+          7023,
+          1619
+        ],
+        [
+          37,
+          9
+        ]
+      ]
+    },
+    {
+      "model": "XGBoost",
+      "side": "short",
+      "acc": 0.9637,
+      "macro_f1": 0.5091,
+      "auc": 0.6724,
+      "precision_short": 0.0214,
+      "recall_short": 0.1304,
+      "confusion_matrix": [
+        [
+          8367,
+          275
+        ],
+        [
+          40,
+          6
+        ]
+      ]
+    }
+  ],
+  "short_calibration": {
+    "threshold_calibrated": 0.65,
+    "method": "platt"
+  },
+  "short_wf_robustness": null,
+  "backtest_long": {
+    "n_tested": 20877,
+    "n_trades": 0,
+    "profit_factor": Infinity,
+    "max_drawdown": 0.0,
+    "sharpe_annualized": 0.0,
+    "win_rate": 0.0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "expectancy_per_trade": 0.0,
+    "initial_equity": 10000.0,
+    "final_equity": 10000.0,
+    "total_return_pct": 0.0,
+    "by_year": {},
+    "side": "long",
+    "model": "XGBoost_long",
+    "filter_threshold": 0.4,
+    "direction_threshold": 0.52,
+    "cost_pct": 0.001,
+    "skipped_filter": 18283,
+    "skipped_direction": 2594,
+    "skipped_risk": 0,
+    "risk_per_trade": 0.002
+  },
+  "backtest_short": {
+    "n_tested": 20877,
+    "n_trades": 0,
+    "profit_factor": Infinity,
+    "max_drawdown": 0.0,
+    "sharpe_annualized": 0.0,
+    "win_rate": 0.0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "expectancy_per_trade": 0.0,
+    "initial_equity": 10000.0,
+    "final_equity": 10000.0,
+    "total_return_pct": 0.0,
+    "by_year": {},
+    "side": "short",
+    "model": "XGBoost_short",
+    "filter_threshold": 0.45,
+    "direction_threshold": 0.55,
+    "cost_pct": 0.001,
+    "skipped_filter": 18932,
+    "skipped_direction": 826,
+    "skipped_risk": 0,
+    "risk_per_trade": 0.001,
+    "skipped_regime": 1119,
+    "n_bear_activated": 826,
+    "regime_threshold": 0.6200000000000002,
+    "regime_model_used": true
+  },
+  "backtest_combined": {
+    "n_tested": 20877,
+    "n_trades": 0,
+    "profit_factor": Infinity,
+    "max_drawdown": 0.0,
+    "sharpe_annualized": 0.0,
+    "win_rate": 0.0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "expectancy_per_trade": 0.0,
+    "initial_equity": 10000.0,
+    "final_equity": 10000.0,
+    "total_return_pct": 0.0,
+    "by_year": {},
+    "side": "combined",
+    "model": "Combined",
+    "n_long": 0,
+    "n_short": 0,
+    "long_pf": Infinity,
+    "short_pf": Infinity,
+    "skipped_filter": 18283,
+    "skipped_direction": 3420,
+    "skipped_risk": 0
+  },
+  "short_disabled_reason": null,
+  "auto_calibrate_used": true,
+  "elapsed_sec": 26.1
+}

@@ -1,0 +1,352 @@
+[
+  {
+    "symbol": "ANKRUSDT",
+    "run_id": "train_ankrusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/ANKRUSDT.log"
+  },
+  {
+    "symbol": "BANDUSDT",
+    "run_id": "train_bandusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/BANDUSDT.log"
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "run_id": "train_avaxusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/AVAXUSDT.log"
+  },
+  {
+    "symbol": "ALGOUSDT",
+    "run_id": "train_algousdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/ALGOUSDT.log"
+  },
+  {
+    "symbol": "AAVEUSDT",
+    "run_id": "train_aaveusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/AAVEUSDT.log"
+  },
+  {
+    "symbol": "ATOMUSDT",
+    "run_id": "train_atomusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/ATOMUSDT.log"
+  },
+  {
+    "symbol": "BATUSDT",
+    "run_id": "train_batusdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/BATUSDT.log"
+  },
+  {
+    "symbol": "ADAUSDT",
+    "run_id": "train_adausdt_20260512_163730",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/ADAUSDT.log"
+  },
+  {
+    "symbol": "COMPUSDT",
+    "run_id": "train_compusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/COMPUSDT.log"
+  },
+  {
+    "symbol": "DOTUSDT",
+    "run_id": "train_dotusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/DOTUSDT.log"
+  },
+  {
+    "symbol": "BTCUSD",
+    "run_id": "train_btcusd_20260512_163731",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/BTCUSD.log"
+  },
+  {
+    "symbol": "BNBUSDT",
+    "run_id": "train_bnbusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/BNBUSDT.log"
+  },
+  {
+    "symbol": "DASHUSDT",
+    "run_id": "train_dashusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/DASHUSDT.log"
+  },
+  {
+    "symbol": "CRVUSDT",
+    "run_id": "train_crvusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/CRVUSDT.log"
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "run_id": "train_dogeusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/DOGEUSDT.log"
+  },
+  {
+    "symbol": "EGLDUSDT",
+    "run_id": "train_egldusdt_20260512_163731",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/EGLDUSDT.log"
+  },
+  {
+    "symbol": "ETCUSDT",
+    "run_id": "train_etcusdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/ETCUSDT.log"
+  },
+  {
+    "symbol": "ETHUSDT",
+    "run_id": "train_ethusdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/ETHUSDT.log"
+  },
+  {
+    "symbol": "FTMUSDT",
+    "run_id": "train_ftmusdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/FTMUSDT.log"
+  },
+  {
+    "symbol": "ENJUSDT",
+    "run_id": "train_enjusdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/ENJUSDT.log"
+  },
+  {
+    "symbol": "GALAUSDT",
+    "run_id": "train_galausdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/GALAUSDT.log"
+  },
+  {
+    "symbol": "FETUSDT",
+    "run_id": "train_fetusdt_20260512_163732",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/FETUSDT.log"
+  },
+  {
+    "symbol": "ICXUSDT",
+    "run_id": "train_icxusdt_20260512_163733",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/ICXUSDT.log"
+  },
+  {
+    "symbol": "IOTAUSDT",
+    "run_id": "train_iotausdt_20260512_163733",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/IOTAUSDT.log"
+  },
+  {
+    "symbol": "LINKUSDT",
+    "run_id": "train_linkusdt_20260512_163733",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/LINKUSDT.log"
+  },
+  {
+    "symbol": "MATICUSDT",
+    "run_id": "train_maticusdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/MATICUSDT.log"
+  },
+  {
+    "symbol": "MANAUSDT",
+    "run_id": "train_manausdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/MANAUSDT.log"
+  },
+  {
+    "symbol": "NEOUSDT",
+    "run_id": "train_neousdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/NEOUSDT.log"
+  },
+  {
+    "symbol": "NEARUSDT",
+    "run_id": "train_nearusdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/NEARUSDT.log"
+  },
+  {
+    "symbol": "LTCUSDT",
+    "run_id": "train_ltcusdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/LTCUSDT.log"
+  },
+  {
+    "symbol": "ONEUSDT",
+    "run_id": "train_oneusdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/ONEUSDT.log"
+  },
+  {
+    "symbol": "MKRUSDT",
+    "run_id": "train_mkrusdt_20260512_163734",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/MKRUSDT.log"
+  },
+  {
+    "symbol": "RUNEUSDT",
+    "run_id": "train_runeusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/RUNEUSDT.log"
+  },
+  {
+    "symbol": "ONTUSDT",
+    "run_id": "train_ontusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/ONTUSDT.log"
+  },
+  {
+    "symbol": "QTUMUSDT",
+    "run_id": "train_qtumusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/QTUMUSDT.log"
+  },
+  {
+    "symbol": "RENUSDT",
+    "run_id": "train_renusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/RENUSDT.log"
+  },
+  {
+    "symbol": "SHIBUSDT",
+    "run_id": "train_shibusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/SHIBUSDT.log"
+  },
+  {
+    "symbol": "SANDUSDT",
+    "run_id": "train_sandusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/SANDUSDT.log"
+  },
+  {
+    "symbol": "SOLUSDT",
+    "run_id": "train_solusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/SOLUSDT.log"
+  },
+  {
+    "symbol": "SNXUSDT",
+    "run_id": "train_snxusdt_20260512_163735",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/SNXUSDT.log"
+  },
+  {
+    "symbol": "THETAUSDT",
+    "run_id": "train_thetausdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/THETAUSDT.log"
+  },
+  {
+    "symbol": "UNIUSDT",
+    "run_id": "train_uniusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.0,
+    "log": "runs/batch_logs/UNIUSDT.log"
+  },
+  {
+    "symbol": "XRPUSDT",
+    "run_id": "train_xrpusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/XRPUSDT.log"
+  },
+  {
+    "symbol": "TRXUSDT",
+    "run_id": "train_trxusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/TRXUSDT.log"
+  },
+  {
+    "symbol": "YFIUSDT",
+    "run_id": "train_yfiusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/YFIUSDT.log"
+  },
+  {
+    "symbol": "XLMUSDT",
+    "run_id": "train_xlmusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/XLMUSDT.log"
+  },
+  {
+    "symbol": "ZECUSDT",
+    "run_id": "train_zecusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.1,
+    "log": "runs/batch_logs/ZECUSDT.log"
+  },
+  {
+    "symbol": "VETUSDT",
+    "run_id": "train_vetusdt_20260512_163736",
+    "success": false,
+    "elapsed": 1.2,
+    "log": "runs/batch_logs/VETUSDT.log"
+  },
+  {
+    "symbol": "ZILUSDT",
+    "run_id": "train_zilusdt_20260512_163737",
+    "success": false,
+    "elapsed": 0.7,
+    "log": "runs/batch_logs/ZILUSDT.log"
+  },
+  {
+    "symbol": "ZRXUSDT",
+    "run_id": "train_zrxusdt_20260512_163737",
+    "success": false,
+    "elapsed": 0.7,
+    "log": "runs/batch_logs/ZRXUSDT.log"
+  }
+]

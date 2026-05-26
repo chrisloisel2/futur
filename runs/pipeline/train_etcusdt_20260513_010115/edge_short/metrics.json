@@ -1,0 +1,45 @@
+{
+  "side": "short",
+  "models": [
+    {
+      "model": "Logistic",
+      "side": "short",
+      "acc": 0.7541,
+      "macro_f1": 0.4425,
+      "auc": 0.5892,
+      "precision_short": 0.0133,
+      "recall_short": 0.3684,
+      "confusion_matrix": [
+        [
+          6511,
+          2084
+        ],
+        [
+          48,
+          28
+        ]
+      ]
+    },
+    {
+      "model": "HistGBT",
+      "side": "short",
+      "acc": 0.9163,
+      "macro_f1": 0.4992,
+      "auc": 0.6721,
+      "precision_short": 0.0235,
+      "recall_short": 0.2105,
+      "confusion_matrix": [
+        [
+          7929,
+          666
+        ],
+        [
+          60,
+          16
+        ]
+      ]
+    }
+  ],
+  "best_tabular": "HistGBT",
+  "best_final": "HistGBT"
+}

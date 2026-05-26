@@ -197,6 +197,21 @@ def load_raw_1m(path: Path) -> pd.DataFrame:
     Charge les CSV bruts Binance Vision 1m ou le bundle parquet features_merged.
     Retourne un DataFrame avec index DatetimeIndex UTC, colonnes lowercase.
     """
+    from data_pipeline.mongo_training import is_mongo_training_uri, load_mongo_training_uri
+
+    if is_mongo_training_uri(str(path)):
+        print("   Source MongoDB enrichie détectée")
+        df = load_mongo_training_uri(str(path))
+        df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+        df = df.sort_values("datetime").set_index("datetime")
+        rename = {"Open": "open", "High": "high", "Low": "low", "Close": "close", "Volume": "volume"}
+        df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
+        for col in ["open", "high", "low", "close", "volume"]:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = df.dropna(subset=["open", "close"])
+        print(f"   {len(df):,} barres Mongo ({df.index[0].date()} → {df.index[-1].date()})")
+        return df
+
     path = Path(path)
 
     # ── Bundle parquet (features_merged.parquet) ──────────────────────────────
@@ -899,7 +914,7 @@ def main():
     print("\n" + "=" * 70)
     print("CHARGEMENT DES DONNÉES BRUTES 1m")
     print("=" * 70)
-    raw = load_raw_1m(Path(args.data))
+    raw = load_raw_1m(args.data)
 
     # ── 2. Feature engineering ────────────────────────────────────────────────
     print("\n" + "=" * 70)

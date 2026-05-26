@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './AIMetrics.css';
+import { API_BASE_URL } from '../config/api';
 
 interface ModelMetrics {
   accuracy: number;
@@ -63,7 +64,7 @@ const AIMetrics: React.FC = () => {
 
   const fetchModelMetrics = async () => {
     try {
-      const response = await fetch('http://localhost:8000/pipeline/status');
+      const response = await fetch(`${API_BASE_URL}/pipeline/status`);
       const data = await response.json();
 
       // Simulated metrics (in production, these would come from the model)
@@ -117,7 +118,7 @@ const AIMetrics: React.FC = () => {
 
   const fetchRecentDecisions = async () => {
     try {
-      const response = await fetch('http://localhost:8000/pipeline/predictions');
+      const response = await fetch(`${API_BASE_URL}/pipeline/predictions`);
       const data = await response.json();
 
       if (data.predictions && data.predictions.length > 0) {

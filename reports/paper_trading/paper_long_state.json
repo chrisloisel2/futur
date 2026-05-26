@@ -1,0 +1,9 @@
+{
+  "consecutive_losses": 0,
+  "last_loss_time": null,
+  "weekly_pnl_pct": 0.0,
+  "weekly_start_time": "2026-05-23T10:24:50.647749+00:00",
+  "crash_halt_until": null,
+  "total_paper_trades": 0,
+  "total_paper_pnl_pct": 0.0
+}

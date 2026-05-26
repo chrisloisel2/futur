@@ -1,0 +1,138 @@
+version: 1
+updated: "2026-05-12"
+policy: "Public/free sources only. No paywall bypass, credentialed institutional feeds, proxy rotation, or rate-limit circumvention."
+
+sources:
+  - name: binance_vision_spot_klines
+    family: price_microstructure
+    endpoint: "https://data.binance.vision/data/spot/monthly/klines/{symbol}/{interval}/{symbol}-{interval}-{yyyy}-{mm}.zip"
+    cadence: monthly_plus_daily
+    market_type: spot
+    priority: 10
+    rate_limit_per_minute: 120
+    ffill_limit: "0s"
+    license: "Binance public data / MIT helper repo"
+    storage:
+      raw: "data/raw/binance_vision_spot_klines/spot/{symbol}/{interval}"
+    schema: [timestamp, open, high, low, close, volume, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume]
+    notes: "Use checksum files when available; spot timestamps can be microseconds from 2025 onward."
+
+  - name: binance_vision_um_futures_klines
+    family: derivatives_price_microstructure
+    endpoint: "https://data.binance.vision/data/futures/um/monthly/klines/{symbol}/{interval}/{symbol}-{interval}-{yyyy}-{mm}.zip"
+    cadence: monthly_plus_daily
+    market_type: futures_um
+    priority: 20
+    rate_limit_per_minute: 120
+    ffill_limit: "0s"
+    storage:
+      raw: "data/raw/binance_vision_um_futures_klines/futures_um/{symbol}/{interval}"
+    schema: [timestamp, open, high, low, close, volume, quote_asset_volume, number_of_trades, taker_buy_base_asset_volume, taker_buy_quote_asset_volume]
+
+  - name: binance_futures_funding
+    family: derivatives
+    endpoint: "https://fapi.binance.com/fapi/v1/fundingRate"
+    cadence: 8h
+    market_type: futures_um
+    priority: 30
+    rate_limit_per_minute: 120
+    ffill_limit: "8h"
+    storage:
+      raw: "data/raw/binance_futures_funding/futures_um/{symbol}/8h"
+    schema: [timestamp, symbol, funding_rate, mark_price]
+
+  - name: binance_futures_positioning
+    family: derivatives
+    endpoint: "https://fapi.binance.com/futures/data/{endpoint}"
+    cadence: 5m_to_1h
+    market_type: futures_um
+    priority: 31
+    rate_limit_per_minute: 120
+    ffill_limit: "2h"
+    storage:
+      raw: "data/raw/binance_futures_positioning/futures_um/{symbol}/1h"
+    schema: [timestamp, symbol, oi, oi_value, ls_ratio_global, ls_ratio_top_binance, taker_buy_sell_ratio]
+
+  - name: bybit_funding
+    family: derivatives
+    endpoint: "https://api.bybit.com/v5/market/funding/history"
+    cadence: 8h
+    market_type: futures_linear
+    priority: 40
+    rate_limit_per_minute: 60
+    ffill_limit: "8h"
+    storage:
+      raw: "data/raw/bybit_funding/futures_linear/{symbol}/8h"
+    schema: [timestamp, symbol, funding_rate]
+
+  - name: okx_top_long_short
+    family: derivatives
+    endpoint: "https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio-contract-top-trader"
+    cadence: 1h
+    market_type: swap
+    priority: 50
+    rate_limit_per_minute: 60
+    ffill_limit: "2h"
+    storage:
+      raw: "data/raw/okx_top_long_short/swap/{symbol}/1h"
+    schema: [timestamp, symbol, ls_ratio_top_okx]
+
+  - name: deribit_options_summary
+    family: options
+    endpoint: "https://www.deribit.com/api/v2/public/get_book_summary_by_currency"
+    cadence: 4h
+    market_type: options
+    priority: 60
+    rate_limit_per_minute: 60
+    ffill_limit: "4h"
+    storage:
+      raw: "data/raw/deribit_options_summary/options/BTC/4h"
+    schema: [timestamp, symbol, atm_iv, put_call_vol_ratio, put_call_oi_ratio, skew_25d_approx]
+
+  - name: alternative_me_fear_greed
+    family: sentiment
+    endpoint: "https://api.alternative.me/fng/"
+    cadence: daily
+    market_type: global
+    priority: 70
+    rate_limit_per_minute: 30
+    ffill_limit: "30h"
+    storage:
+      raw: "data/raw/alternative_me_fear_greed/global/GLOBAL/1d"
+    schema: [timestamp, fng_value, fng_class]
+
+  - name: coingecko_global
+    family: cross_sectional_market
+    endpoint: "https://api.coingecko.com/api/v3/global"
+    cadence: 1h
+    market_type: global
+    priority: 80
+    rate_limit_per_minute: 25
+    ffill_limit: "2h"
+    storage:
+      raw: "data/raw/coingecko_global/global/GLOBAL/1h"
+    schema: [timestamp, total_market_cap_usd, total_volume_24h_usd, btc_dominance, eth_dominance]
+
+  - name: mempool_space_btc
+    family: bitcoin_onchain
+    endpoint: "https://mempool.space/api"
+    cadence: 1h
+    market_type: onchain
+    priority: 90
+    rate_limit_per_minute: 30
+    ffill_limit: "2h"
+    storage:
+      raw: "data/raw/mempool_space_btc/onchain/GLOBAL/1h"
+    schema: [timestamp, mempool_fee_fastest, mempool_tx_count, mempool_vsize, btc_block_height]
+
+  - name: gdelt_crypto_articles
+    family: narrative
+    endpoint: "https://api.gdeltproject.org/api/v2/doc/doc"
+    cadence: 1h
+    market_type: global_news
+    priority: 100
+    rate_limit_per_minute: 15
+    ffill_limit: "6h"
+    storage:
+      raw: "data/raw/gdelt_crypto_articles/global_news/GLOBAL/1h"
+    schema: [timestamp, title, url, source_country, domain, tone]

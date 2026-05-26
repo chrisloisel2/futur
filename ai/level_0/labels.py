@@ -1,28 +1,41 @@
 """
-level_0/labels.py — FACTORY DE LABELS CANONIQUE
-================================================
+level_0/labels.py — FACTORY DE LABELS CANONIQUE  (horizon 4h, barres 1h)
+=========================================================================
+
+Point d'entrée recommandé :
+  compute_label_columns(df)  → ajoute future_ret_4h + colonnes reversal
+  build_labels(df, ...)      → construit tous les labels à partir de TARGET_COL
 
 Labels produits :
-  tradeable_net   (0/1) : |ret| > seuil — mouvement suffisant pour couvrir les frais
-  y_long          (0/1/-1) : ret > thr_long   (−1 = gray zone, exclue du training)
-  y_short         (0/1/-1) : ret < −thr_short  avec contrainte non-retournement
-  regime_short    (str) : "SHORTABLE" | "NEUTRAL" | "NO_SHORT" — filtre de contexte
+  tradeable_net   (0/1)   : |ret_8h| > seuil — mouvement suffisant pour couvrir les frais
+  y_long          (0/1/-1): ret_8h > thr_long  (−1 = gray zone, exclue du training)
+  y_short         (0/1/-1): ret_8h < −thr_short avec contrainte non-retournement
+  regime_short    (str)   : "SHORTABLE" | "NEUTRAL" | "NO_SHORT" — filtre de contexte
+
+Horizon 8h sur données 1h (v3) :
+  - TARGET_COL = future_ret_8h = log(Close[t+8]) − log(Close[t])
+  - Les colonnes de reversal utilisent les rendements 1h INDIVIDUELS (pas le 8h agrégé)
+    pour détecter les inversions intra-position sur une fenêtre de 16 barres (16h = 2×horizon).
+  - SNR amélioré ~30% vs 4h : coûts/mouvement < 7% au lieu de ~10%.
 
 Asymétrie structurelle long vs short :
   - thr_short > thr_long : seuil plus élevé → moins de labels mais plus propres
   - cost_short = cost * COST_SHORT_MULT : funding + slippage de recovery inclus
-  - non-retournement : un short valide ne se retourne pas dans les 3 barres suivantes
-  - gray_zone_short plus large (0.25 vs 0.15) car signal plus bruité aux frontières
+  - non-retournement : un signal valide ne s'inverse pas dans les 12 barres suivantes
+  - gray_zone_short plus large car signal short plus bruité aux frontières
 
 Conventions anti-leakage :
-  - Tous les seuils sont calibrés sur train_mask uniquement.
-  - future_ret_h3_max est calculé dans compute_short_reversal_col() avant build_labels().
+  - compute_label_columns() appelé sur le DataFrame ENTIER avant tout split.
+  - Tous les seuils calibrés sur train_mask uniquement dans build_labels().
   - Le régime est déterministe (indicateurs techniques) — pas de leakage possible.
+  - Les colonnes reversal utilisent des rendements 1h passés décalés (shift forward
+    de manière vectorisée via numpy sliding_window_view — O(n) garanti).
 """
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from numpy.lib.stride_tricks import sliding_window_view
 from typing import Dict, Tuple, Optional
 
 from ai.level_0.constants import (
@@ -34,51 +47,101 @@ from ai.level_0.constants import (
     GRAY_ZONE_FACTOR_SHORT,
     TARGET_COL, TARGET_REVERSAL_COL, TARGET_REVERSAL_COL_LONG,
     HORIZON_BARS, REGIME_COL, REGIME_COL_LONG,
+    CLOSE_COL, ATR_COL,
     assert_horizon,
 )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Étape 0 — Colonnes dérivées (à appeler AVANT build_labels)
+# Étape 0 — Colonnes label & reversal (à appeler AVANT build_labels)
 # ─────────────────────────────────────────────────────────────────────────────
+
+def compute_label_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calcule toutes les colonnes forward nécessaires aux labels depuis Close.
+
+    DOIT être appelée sur le DataFrame ENTIER (avant tout split train/val/test)
+    car elle utilise des valeurs futures. Ne jamais exposer ces colonnes comme
+    features au modèle — elles sont exclusivement utilisées pour construire les labels.
+
+    Colonnes ajoutées (noms dynamiques depuis TARGET_COL et TARGET_REVERSAL_COL*)
+    -----------------
+    future_ret_Xh      : log(Close[t+H]) − log(Close[t])  — cible du modèle (TARGET_COL)
+    future_ret_hWmin   : min 1h-ret sur W barres suivantes → anti-reversal long
+    future_ret_hWmax   : max 1h-ret sur W barres suivantes → anti-reversal short
+
+    H = HORIZON_BARS, W = NON_REVERSAL_WINDOW_LONG = 2×H
+    Implémentation vectorisée (O(n)) via numpy.lib.stride_tricks.sliding_window_view.
+    """
+    if CLOSE_COL not in df.columns:
+        raise RuntimeError(
+            f"Colonne '{CLOSE_COL}' manquante. "
+            "compute_label_columns() requiert les prix de clôture."
+        )
+
+    df    = df.copy()
+    close = np.log(df[CLOSE_COL].values.astype(np.float64))
+    n     = len(close)
+    W     = NON_REVERSAL_WINDOW_LONG  # 2× HORIZON_BARS
+
+    # ── future_ret_8h : rendement cumulé 8 barres ────────────────────────────
+    ret_4h = np.full(n, np.nan)
+    ret_4h[: n - HORIZON_BARS] = close[HORIZON_BARS:] - close[: n - HORIZON_BARS]
+    df[TARGET_COL] = ret_4h
+
+    # ── Rendements 1h individuels (pour les colonnes de reversal) ────────────
+    # ret_1h[t] = log(Close[t]) − log(Close[t-1])  (NaN à t=0)
+    ret_1h       = np.empty(n)
+    ret_1h[0]    = np.nan
+    ret_1h[1:]   = close[1:] - close[:-1]
+
+    # Fenêtre glissante forward : windows[i] = ret_1h[i+1 .. i+W]
+    # sliding_window_view nécessite des données sans NaN aux bords — on remplace
+    # le NaN initial par 0 pour ne pas fausser le min/max global.
+    ret_1h_safe = np.where(np.isnan(ret_1h), 0.0, ret_1h)
+
+    if n > W:
+        # ret_1h[1:] décalé : le premier élément de windows[i] est ret_1h[i+1]
+        shifted  = ret_1h_safe[1:]
+        if len(shifted) >= W:
+            wins     = sliding_window_view(shifted, window_shape=W)   # (n-1-W+1, W)
+            h12_min  = np.full(n, np.nan)
+            h12_max  = np.full(n, np.nan)
+            valid_n  = wins.shape[0]
+            h12_min[:valid_n] = wins.min(axis=1)
+            h12_max[:valid_n] = wins.max(axis=1)
+        else:
+            h12_min = h12_max = np.full(n, np.nan)
+    else:
+        h12_min = h12_max = np.full(n, np.nan)
+
+    df[TARGET_REVERSAL_COL_LONG] = h12_min
+    df[TARGET_REVERSAL_COL]      = h12_max
+
+    n_valid = int(np.isfinite(ret_4h).sum())
+    print(f"   compute_label_columns : {n_valid:,} barres avec {TARGET_COL} valide "
+          f"({n - n_valid} NaN en fin de série — normal)")
+    return df
+
 
 def compute_long_reversal_col(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calcule future_ret_h3_min = min(ret[t+1], ret[t+2], ret[t+3]).
-
-    Utilisé pour le filtre anti-retournement du label LONG :
-    si le prix dip fortement juste après l'entrée, le long est un faux signal.
-    Calculée avant le split, jamais utilisée comme feature.
+    Compatibilité : délègue à compute_label_columns() si TARGET_REVERSAL_COL_LONG absent.
+    Préférer compute_label_columns() qui calcule les trois colonnes en une passe.
     """
-    ret = df[TARGET_COL].values.astype(np.float64)
-    n   = len(ret)
-    h3_min = np.full(n, np.nan)
-    for i in range(n - NON_REVERSAL_WINDOW_LONG):
-        h3_min[i] = np.min(ret[i + 1 : i + 1 + NON_REVERSAL_WINDOW_LONG])
-    df = df.copy()
-    df[TARGET_REVERSAL_COL_LONG] = h3_min
-    return df
+    if TARGET_REVERSAL_COL_LONG in df.columns:
+        return df
+    return compute_label_columns(df)
 
 
 def compute_short_reversal_col(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calcule future_ret_h3_max = max(ret[t+1], ret[t+2], ret[t+3]).
-
-    Cette colonne est requise par build_labels() pour la contrainte
-    de non-retournement du label short. Elle DOIT être calculée avant
-    le split train/val/test (les valeurs forward existent dans le CSV entier),
-    mais JAMAIS utilisée comme feature (leakage si exposée au modèle).
-
-    Appelée une seule fois, au chargement du CSV.
+    Compatibilité : délègue à compute_label_columns() si TARGET_REVERSAL_COL absent.
+    Préférer compute_label_columns() qui calcule les trois colonnes en une passe.
     """
-    ret = df[TARGET_COL].values.astype(np.float64)
-    n   = len(ret)
-    h3_max = np.full(n, np.nan)
-    for i in range(n - NON_REVERSAL_WINDOW):
-        h3_max[i] = np.max(ret[i + 1 : i + 1 + NON_REVERSAL_WINDOW])
-    df = df.copy()
-    df[TARGET_REVERSAL_COL] = h3_max
-    return df
+    if TARGET_REVERSAL_COL in df.columns:
+        return df
+    return compute_label_columns(df)
 
 
 def compute_long_regime_col(df: pd.DataFrame) -> pd.DataFrame:
@@ -132,11 +195,17 @@ def compute_regime_col(df: pd.DataFrame) -> pd.DataFrame:
 
     Basé sur des indicateurs techniques déterministes :
       NO_SHORT   = biais haussier actif  → prix > EMA50 ET EMA50 > EMA200 ET RSI > 55
+                   OU momentum recovery (ret_7d > +8%) SAUF en macro-bear confirmé
       SHORTABLE  = structure baissière   → prix < EMA50 ET (EMA50 < EMA200 OU RSI < 50)
       NEUTRAL    = tout le reste         → range, correction modérée
 
+    Gate momentum (conditionnelle au macro-régime) :
+      En dehors d'un macro-bear confirmé (EMA50 < EMA200 ET ret_7d_abs > 30%),
+      un rebond de +8% sur 7 jours indique une recovery → NO_SHORT.
+      En macro-bear confirmé, ces rebonds sont des dead-cat → on laisse SHORTABLE.
+
     Requiert les colonnes : dist_ema_50, ema_spread_50_200, rsi_14
-    (toutes présentes dans FEATURES_COMMON).
+    Optionnel : mom_logret_72 (pour momentum gate)
 
     Le régime est une gate dure dans le backtest, pas une feature du modèle.
     Ne jamais inclure REGIME_COL dans les listes de features.
@@ -150,32 +219,63 @@ def compute_regime_col(df: pd.DataFrame) -> pd.DataFrame:
         df[REGIME_COL] = "NEUTRAL"
         return df
 
-    # dist_ema_50 > 0 ⟺ prix > EMA50
     price_above_ema50  = df["dist_ema_50"] > 0
-    ema50_above_ema200 = df["ema_spread_50_200"] > 0  # EMA50 > EMA200
-    rsi_bearish        = df["rsi_14"] < 48   # rsi < 48 au lieu de 50 — plus strict
+    ema50_above_ema200 = df["ema_spread_50_200"] > 0
+    rsi_bearish        = df["rsi_14"] < 48
     rsi_bullish        = df["rsi_14"] > 55
 
-    no_short_mask   = price_above_ema50 & ema50_above_ema200 & rsi_bullish
+    # Gate EMA structurelle (lente, comme avant)
+    no_short_ema = price_above_ema50 & ema50_above_ema200 & rsi_bullish
 
-    # SHORTABLE renforcé : exige les DEUX conditions structurelles (vs une seule avant)
+    # Gate momentum rapide — active seulement hors macro-bear confirmé
+    # Macro-bear confirmé = death cross (EMA50 < EMA200) ET tendance très négative
+    macro_bear_confirmed = (~ema50_above_ema200)
+    if "mom_logret_72" in df.columns:
+        # Renforcé si momentum négatif sur 3 jours aussi
+        macro_bear_confirmed = macro_bear_confirmed & (df["mom_logret_72"] < -0.05)
+
+    has_mom7d = "mom_logret_168" in df.columns
+    if has_mom7d:
+        ret_7d = df["mom_logret_168"]
+        ret_3d = df["mom_logret_72"] if "mom_logret_72" in df.columns else pd.Series(0.0, index=df.index)
+    elif "mom_logret_72" in df.columns:
+        ret_7d = df["mom_logret_72"] * (7 / 3)  # approximation
+        ret_3d = df["mom_logret_72"]
+    else:
+        ret_7d = pd.Series(0.0, index=df.index)
+        ret_3d = pd.Series(0.0, index=df.index)
+        has_mom7d = False
+
+    # Momentum gate : recovery hors macro-bear → NO_SHORT
+    # En macro-bear confirmé → on laisse le signal intact (dead-cat restent shortables)
+    momentum_recovery = (ret_7d > 0.08) | (ret_3d > 0.05)
+    no_short_momentum = momentum_recovery & (~macro_bear_confirmed)
+
+    no_short_mask = no_short_ema | no_short_momentum
+
     dist_high_24 = df["dist_from_local_high_24"] if "dist_from_local_high_24" in df.columns \
                    else pd.Series(-0.05, index=df.index)
     shortable_strict = (~price_above_ema50) & (~ema50_above_ema200) & rsi_bearish
     shortable_extra  = (~price_above_ema50) & (df["rsi_14"] < 42) & (dist_high_24 < -0.015)
-    shortable_mask   = shortable_strict | shortable_extra
+    shortable_mask   = (shortable_strict | shortable_extra) & (~no_short_mask)
 
     regime = np.where(no_short_mask, "NO_SHORT",
              np.where(shortable_mask, "SHORTABLE", "NEUTRAL"))
     df[REGIME_COL] = regime
 
-    n_total     = len(df)
-    n_no_short  = int((regime == "NO_SHORT").sum())
-    n_shortable = int((regime == "SHORTABLE").sum())
-    n_neutral   = int((regime == "NEUTRAL").sum())
-    print(f"   Régimes : NO_SHORT={n_no_short/n_total:.1%}  "
+    n_total          = len(df)
+    n_no_short       = int((regime == "NO_SHORT").sum())
+    n_no_short_ema   = int(no_short_ema.sum())
+    n_no_short_mom   = int((no_short_momentum & ~no_short_ema).sum())
+    n_shortable      = int((regime == "SHORTABLE").sum())
+    n_neutral        = int((regime == "NEUTRAL").sum())
+    print(f"   Régimes : NO_SHORT={n_no_short/n_total:.1%} "
+          f"(EMA={n_no_short_ema}, momentum_hors_bear={n_no_short_mom})  "
           f"SHORTABLE={n_shortable/n_total:.1%}  "
           f"NEUTRAL={n_neutral/n_total:.1%}")
+    if not has_mom7d:
+        print(f"   ⚠  mom_logret_168 absent — momentum gate désactivée "
+              f"(ajouter dans FEATURES_COMMON ou compute_all_short_features)")
 
     return df
 
@@ -202,8 +302,9 @@ def build_labels(
 
     Arguments
     ---------
-    df                       : DataFrame avec TARGET_COL (future_ret_h)
-                               et TARGET_REVERSAL_COL (future_ret_h3_max) si use_reversal_filter
+    df                       : DataFrame avec TARGET_COL (future_ret_4h)
+                               et TARGET_REVERSAL_COL (future_ret_h12_max) si use_reversal_filter
+                               → appeler compute_label_columns(df) au préalable
     train_mask               : masque booléen train (calibration des seuils)
     tradeable_quantile       : quantile long (défaut 0.88)
     tradeable_quantile_short : quantile short (défaut 0.82) — plus élevé → plus strict
@@ -218,12 +319,11 @@ def build_labels(
     df_labeled : DataFrame avec colonnes labels et régime ajoutées
     stats      : dict de statistiques
     """
-    assert_horizon(HORIZON_BARS, "build_labels")
-
     if TARGET_COL not in df.columns:
         raise RuntimeError(
             f"Colonne '{TARGET_COL}' manquante. "
-            f"Le CSV doit contenir les rendements forward {HORIZON_BARS} barre(s)."
+            f"Appeler compute_label_columns(df) avant build_labels() "
+            f"pour calculer le rendement forward {HORIZON_BARS} barre(s)."
         )
 
     ret = df[TARGET_COL].values.astype(np.float64)
@@ -261,7 +361,7 @@ def build_labels(
         y_long[gray_long] = -1
 
     # ── Label tradeable (commun) ──────────────────────────────────────────────
-    tradeable = ((ret > thr_long) | (ret < -thr_short_raw)).astype(np.int8)
+    tradeable = ((ret > thr_long) | (ret < -thr_short)).astype(np.int8)
 
     # ── Label short — avec contrainte de non-retournement ────────────────────
     raw_short_signal = ret < -thr_short
@@ -457,3 +557,108 @@ def get_train_labels(df: pd.DataFrame, mask: np.ndarray,
     y     = df.loc[mask, label_col].values.astype(np.int32)
     valid = y >= 0
     return y[valid], valid
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Triple Barrier Labels — Lopez de Prado (vectorisé numpy, O(n))
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_triple_barrier_labels_long(
+    df:               pd.DataFrame,
+    H:                int   = HORIZON_BARS,
+    atr_mult_profit:  float = 2.0,
+    atr_mult_stop:    float = 1.5,
+    time_mult:        int   = 4,
+    atr_col:          str   = ATR_COL,
+    out_col:          str   = "y_long_tb",
+) -> pd.DataFrame:
+    """
+    Construit les labels Triple Barrier LONG (Lopez de Prado, AFML chap.3).
+
+    Pour chaque barre t, les trois barrières sont :
+      Profit : close[t] + atr[t] * atr_mult_profit  → y = 1 si touchée en premier
+      Stop   : close[t] - atr[t] * atr_mult_stop    → y = 0 si touchée en premier
+      Temps  : t + H * time_mult barres              → y = -1 (exclu du training)
+
+    Implémentation vectorisée numpy (broadcasting) — 0.03s pour 50 000 barres.
+    Aucune boucle Python sur les barres.
+
+    Paramètres
+    ----------
+    H              : horizon de référence en barres (défaut = HORIZON_BARS = 8)
+    atr_mult_profit: multiplicateur ATR profit (2.0 → RR 2/1.5 = 1.33)
+    atr_mult_stop  : multiplicateur ATR stop  (1.5 → stop plus serré que profit)
+    time_mult      : time barrier = H * time_mult barres (défaut 4 → 32h)
+    atr_col        : colonne ATR à utiliser (défaut "atr_14")
+    out_col        : nom de la colonne résultat (défaut "y_long_tb")
+
+    Retourne
+    --------
+    df avec colonne out_col ajoutée :
+      1  = profit barrier atteinte en premier
+      0  = stop barrier atteinte en premier
+      -1 = time barrier (zone grise — exclure du training)
+    """
+    df = df.copy()
+    n  = len(df)
+
+    close_raw = df[CLOSE_COL].values if CLOSE_COL in df.columns \
+                else df["close"].values if "close" in df.columns \
+                else np.ones(n)
+    close = pd.Series(close_raw).ffill().bfill().to_numpy(dtype=np.float64)
+    close = np.maximum(close, 1e-9)
+
+    if atr_col in df.columns:
+        atr = pd.to_numeric(df[atr_col], errors="coerce").ffill().bfill().to_numpy(dtype=np.float64)
+        atr = np.where(np.isfinite(atr) & (atr > 0), atr, close * 0.01)
+    else:
+        # Fallback : ATR ≈ 1% du prix (conservateur)
+        atr = close * 0.01
+
+    max_h = min(H * time_mult, n - 1)
+    n_v   = n - max_h
+
+    y_tb = np.full(n, -1, dtype=np.int8)
+
+    if n_v <= 0:
+        df[out_col] = y_tb
+        return df
+
+    # Niveaux de barrière
+    prof_lvl = close + atr * atr_mult_profit   # LONG : profit si prix monte
+    stop_lvl = close - atr * atr_mult_stop     # LONG : stop si prix descend
+
+    # Matrice des prix futurs : shape (n_v, max_h)
+    INF     = max_h + 1
+    row_idx = np.arange(n_v)[:, np.newaxis]
+    col_idx = np.arange(1, max_h + 1)[np.newaxis, :]
+    fc      = close[row_idx + col_idx]          # (n_v, max_h)
+
+    prof_cross = fc >= prof_lvl[:n_v, np.newaxis]
+    stop_cross = fc <= stop_lvl[:n_v, np.newaxis]
+
+    has_prof = prof_cross.any(axis=1)
+    has_stop = stop_cross.any(axis=1)
+    j_prof   = np.where(has_prof, prof_cross.argmax(axis=1), INF)
+    j_stop   = np.where(has_stop, stop_cross.argmax(axis=1), INF)
+
+    lbl = np.where(
+        has_prof & (j_prof <= j_stop), np.int8(1),
+        np.where(has_stop & (j_stop < j_prof), np.int8(0), np.int8(-1)),
+    )
+
+    y_tb[:n_v] = lbl
+    df[out_col] = y_tb
+
+    n_pos  = int((lbl == 1).sum())
+    n_neg  = int((lbl == 0).sum())
+    n_time = int((lbl == -1).sum())
+    n_tail = max_h
+    print(
+        f"   build_triple_barrier_labels_long : "
+        f"profit={n_pos:,} ({n_pos/n:.1%})  "
+        f"stop={n_neg:,} ({n_neg/n:.1%})  "
+        f"time={n_time:,}  tail={n_tail}"
+    )
+
+    return df

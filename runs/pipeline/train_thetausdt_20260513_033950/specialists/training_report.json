@@ -1,0 +1,22 @@
+{
+  "elapsed_seconds": 350.5,
+  "n_contexts_trained": 5,
+  "n_accepted": 0,
+  "experts": {
+    "TREND_LONG": {
+      "status": "rejected"
+    },
+    "BREAKOUT": {
+      "status": "rejected"
+    },
+    "TREND_SHORT": {
+      "status": "rejected"
+    },
+    "MEAN_REVERSION": {
+      "status": "rejected"
+    },
+    "HIGH_VOL": {
+      "status": "rejected"
+    }
+  }
+}

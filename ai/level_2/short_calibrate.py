@@ -24,7 +24,7 @@ import numpy as np
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LogisticRegression as PlattLR
 
-from ai.level_0.constants import COST_PCT, COST_SHORT_MULT, REGIME_COL
+from ai.level_0.constants import COST_PCT, COST_SHORT_MULT, REGIME_COL, TARGET_COL
 from ai.level_0.features import FEATURES_SHORT
 from ai.level_0.preprocessing import get_X
 from ai.level_1.rules import REGIME_NO_SHORT
@@ -67,7 +67,7 @@ def calibrate_direction_model(
 
     X_val   = get_X(df, val_mask, FEATURES_SHORT)
     y_val   = df.loc[val_mask, label_col].values.astype(np.int32)
-    ret_val = df.loc[val_mask, "future_ret_h"].values.astype(np.float64)
+    ret_val = df.loc[val_mask, TARGET_COL].values.astype(np.float64)
 
     valid = y_val >= 0
     X_val, y_val, ret_val = X_val[valid], y_val[valid], ret_val[valid]
@@ -162,8 +162,19 @@ def _threshold_sweep_short(
     ret_sign: float,
     cost_short: float,
 ) -> List[Dict]:
+    """
+    Sweep de seuil avec critère de sélection PnL/PF-centric.
+
+    Score = expectancy × max(pf - 1.0, 0) × sqrt(n_trades)
+      • expectancy : gain moyen par trade net de frais (direction et amplitude)
+      • (pf - 1.0) : edge net (0 = breakeven, pas de bonus)
+      • sqrt(n_trades) : couverture statistique, bonus pour plus de trades
+
+    Cette métrique pénalise fortement les seuils qui produisent PF < 1.0
+    ou WR < 50%, ce qui était la cause du 44% WR observé.
+    """
     results = []
-    for thr in np.arange(0.55, 0.90, 0.01):
+    for thr in np.arange(0.52, 0.90, 0.01):
         mask = proba_cal >= thr
         n_tr = int(mask.sum())
         if n_tr < 8:
@@ -177,7 +188,10 @@ def _threshold_sweep_short(
         gross_l  = float(abs(rets[rets < 0].sum()))
         pf       = gross_w / max(gross_l, 1e-9)
         exp      = float(rets.mean())
-        score = wr * (n_tr ** 0.5)
+
+        # Score PnL-centrique : récompense edge réel, pas le volume pur
+        edge = max(pf - 1.0, 0.0)
+        score = exp * edge * (n_tr ** 0.5)
 
         results.append({
             "threshold":     round(float(thr), 2),
@@ -186,29 +200,64 @@ def _threshold_sweep_short(
             "profit_factor": round(pf, 3),
             "win_rate":      round(wr, 3),
             "expectancy":    round(exp, 5),
-            "score":         round(score, 4),
+            "score":         round(score, 6),
             "precision":     round(wr, 3),
         })
     return results
 
 
 def _select_best_threshold(sweep: List[Dict]) -> float:
+    # Niveau 1 : seuil strict — WR ≥ 52%, PF ≥ 1.10, n ≥ 20
     candidates = [
         e for e in sweep
-        if e["n_trades"] >= 15 and e["win_rate"] >= 0.42 and e["profit_factor"] >= 1.0
+        if e["n_trades"] >= 20
+        and e["win_rate"] >= 0.52
+        and e["profit_factor"] >= 1.10
     ]
 
     if not candidates:
+        # Niveau 2 : WR ≥ 50%, PF ≥ 1.05, n ≥ 12
         candidates = [
             e for e in sweep
-            if e["n_trades"] >= 8 and e["win_rate"] >= 0.40
+            if e["n_trades"] >= 12
+            and e["win_rate"] >= 0.50
+            and e["profit_factor"] >= 1.05
         ]
 
     if not candidates:
-        candidates = [e for e in sweep if e["n_trades"] >= 5]
+        # Niveau 3 : WR ≥ 48%, PF ≥ 1.0, n ≥ 8
+        candidates = [
+            e for e in sweep
+            if e["n_trades"] >= 8
+            and e["win_rate"] >= 0.48
+            and e["profit_factor"] >= 1.0
+        ]
 
     if not candidates:
-        return 0.68
+        # Niveau 4 : WR ≥ 46%, PF ≥ 1.0, n ≥ 8 — seuil minimal acceptable
+        candidates = [
+            e for e in sweep
+            if e["n_trades"] >= 8
+            and e["win_rate"] >= 0.46
+            and e["profit_factor"] >= 1.0
+        ]
+
+    if not candidates:
+        # Niveau 5 : au moins PF ≥ 1.0, n ≥ 5 — désespoir mais mieux que rien
+        candidates = [
+            e for e in sweep
+            if e["n_trades"] >= 5 and e["profit_factor"] >= 1.0
+        ]
+
+    if not candidates:
+        # Niveau 6 : meilleur expectancy positif quel que soit WR
+        pos_exp = [e for e in sweep if e["expectancy"] > 0 and e["n_trades"] >= 3]
+        if pos_exp:
+            return max(pos_exp, key=lambda e: e["expectancy"])["threshold"]
+
+    if not candidates:
+        # Pas de seuil viable meme avec espérance positive : seuil haut pour eviter les pertes
+        return 0.72
 
     return max(candidates, key=lambda e: e["score"])["threshold"]
 
@@ -216,25 +265,26 @@ def _select_best_threshold(sweep: List[Dict]) -> float:
 def _check_thr_stability_short(
     sweep: List[Dict],
     best_thr: float,
-    delta: float = 0.03,
-    max_drop_pct: float = 0.25,
+    delta: float = 0.04,    # fenêtre de stabilite plus large
+    max_drop_pct: float = 0.35,  # tolere plus de variation car PnL-metric est plus volatile
 ) -> bool:
-    def get_score(thr):
+    """
+    Verifie que le seuil optimal n'est pas un pic isole.
+    Utilise maintenant le PF comme critere de stabilite (plus robuste que le score composite).
+    """
+    def get_pf(thr):
         e = next((x for x in sweep if abs(x["threshold"] - thr) < 0.015), None)
-        return e["score"] if e else 0.0
+        return e["profit_factor"] if e else 0.0
 
-    best_score = get_score(best_thr)
-    if best_score <= 0:
+    best_pf = get_pf(best_thr)
+    if best_pf <= 1.0:
         return False
 
-    lo_score = get_score(best_thr - delta)
-    hi_score = get_score(best_thr + delta)
-    min_nbr  = min(lo_score, hi_score)
+    lo_pf = get_pf(best_thr - delta)
+    hi_pf = get_pf(best_thr + delta)
 
-    if best_score < 1e-9:
-        return False
-    drop = (best_score - min_nbr) / best_score
-    return drop <= max_drop_pct
+    # Les deux voisins doivent avoir PF >= 1.0 (pas de breakeven)
+    return lo_pf >= 1.0 and hi_pf >= 1.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────

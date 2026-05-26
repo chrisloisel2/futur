@@ -1,5 +1,7 @@
 import os
 
+LOCAL_MONGO_URI = os.getenv("FUTUR_MONGO_URI", os.getenv("MONGODB_URI", "mongodb://localhost:27017"))
+
 BOT_NAME = "marketintel"
 
 SPIDER_MODULES = ["marketintel.spiders"]
@@ -40,12 +42,12 @@ DOWNLOADER_MIDDLEWARES = {
 }
 
 # ── Mongo données ─────────────────────────────────────────────────────────────
-MONGO_URI      = os.getenv("MONGO_URI",      "mongodb://admin:admin123@192.168.88.17/")
-MONGO_DATABASE = os.getenv("MONGO_DATABASE", "market_intel")
+MONGO_URI      = os.getenv("MARKETINTEL_MONGO_URI", os.getenv("MONGO_URI", LOCAL_MONGO_URI))
+MONGO_DATABASE = os.getenv("MARKETINTEL_MONGO_DB", os.getenv("MONGO_DATABASE", "market_intel"))
 
 # ── Mongo proxies ─────────────────────────────────────────────────────────────
 PROXY_ENABLED          = True
-PROXY_MONGO_URI        = os.getenv("PROXY_MONGO_URI",        "mongodb://admin:admin123@100.93.248.105/")
+PROXY_MONGO_URI        = os.getenv("PROXY_MONGO_URI",        LOCAL_MONGO_URI)
 PROXY_MONGO_DB         = os.getenv("PROXY_MONGO_DB",         "proxy_db")
 PROXY_COLLECTION       = os.getenv("PROXY_COLLECTION",       "proxies")
 PROXY_REFRESH_INTERVAL = int(os.getenv("PROXY_REFRESH_INTERVAL", "300"))

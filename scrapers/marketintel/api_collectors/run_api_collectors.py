@@ -1,4 +1,15 @@
 import logging
+import sys
+from pathlib import Path
+
+PACKAGE_DIR = Path(__file__).resolve().parent
+MARKETINTEL_ROOT = PACKAGE_DIR.parent
+package_dir_str = str(PACKAGE_DIR)
+if package_dir_str in sys.path:
+    sys.path.remove(package_dir_str)
+marketintel_root_str = str(MARKETINTEL_ROOT)
+if marketintel_root_str not in sys.path:
+    sys.path.insert(0, marketintel_root_str)
 
 from api_collectors.mongo import MongoWriter
 from api_collectors.collectors.binance_api import fetch_binance_funding_rates

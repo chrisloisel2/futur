@@ -1,0 +1,44 @@
+[
+  {
+    "bar": 1555,
+    "date": "2024-03-05",
+    "year": 2024,
+    "side": "short",
+    "action": "SELL",
+    "p_tradeable": 0.808,
+    "p_side": 0.7914,
+    "fut_ret": 0.05217,
+    "pnl_net_pct": -0.05317,
+    "pnl_abs": -17.7222,
+    "equity": 9982.28,
+    "notional": 333.33
+  },
+  {
+    "bar": 1880,
+    "date": "2024-03-19",
+    "year": 2024,
+    "side": "short",
+    "action": "SELL",
+    "p_tradeable": 0.7733,
+    "p_side": 0.73,
+    "fut_ret": 0.05611,
+    "pnl_net_pct": -0.05711,
+    "pnl_abs": -19.0029,
+    "equity": 9963.27,
+    "notional": 332.74
+  },
+  {
+    "bar": 15576,
+    "date": "2025-10-11",
+    "year": 2025,
+    "side": "short",
+    "action": "SELL",
+    "p_tradeable": 0.869,
+    "p_side": 0.6253,
+    "fut_ret": 0.06714,
+    "pnl_net_pct": -0.06814,
+    "pnl_abs": -22.6297,
+    "equity": 9940.65,
+    "notional": 332.11
+  }
+]

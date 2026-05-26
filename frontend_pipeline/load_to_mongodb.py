@@ -12,7 +12,7 @@ Collections:
 import os
 import pandas as pd
 import pymongo
-from pymongo import MongoClient, ASCENDING, DESCENDING
+from pymongo import MongoClient, ASCENDING, DESCENDING, UpdateOne
 from pathlib import Path
 from datetime import datetime
 import logging
@@ -27,8 +27,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuration MongoDB
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net//")
-DATABASE_NAME = os.getenv("MONGO_DB", "trader")
+MONGO_URI = os.getenv(
+    "MONGODB_URI",
+    os.getenv("FUTUR_MONGO_URI", os.getenv("MONGO_URI", "mongodb://localhost:27017")),
+)
+DATABASE_NAME = os.getenv("MONGODB_DB", os.getenv("FUTUR_MONGO_DB", os.getenv("MONGO_DB", "trader")))
+HISTORICAL_COLLECTION = os.getenv(
+    "FUTUR_MONGO_FEATURE_COLLECTION",
+    os.getenv(
+        "MONGODB_FEATURE_COLLECTION",
+        os.getenv("FUTUR_MONGO_OHLCV_COLLECTION", os.getenv("MONGODB_HIST_COLLECTION", "historical_ohlcv_enriched")),
+    ),
+)
 
 # Chemins des datasets
 BASE_DIR = Path(__file__).parent
@@ -50,9 +60,14 @@ class MongoDBLoader:
         """Créer les index pour optimiser les requêtes"""
         logger.info("Creating indexes...")
 
-        # Index pour historical_ohlcv
-        self.db.historical_ohlcv.create_index([("symbol", ASCENDING), ("timestamp", DESCENDING)])
-        self.db.historical_ohlcv.create_index([("timestamp", DESCENDING)])
+        # Index pour la collection OHLCV/features canonique
+        hist = self.db[HISTORICAL_COLLECTION]
+        hist.create_index(
+            [("symbol", ASCENDING), ("interval", ASCENDING), ("timestamp", ASCENDING)],
+            unique=True,
+            name="uniq_symbol_interval_timestamp",
+        )
+        hist.create_index([("timestamp", DESCENDING)], name="timestamp_desc")
 
         # Index pour realtime_ticks
         self.db.realtime_ticks.create_index([("symbol", ASCENDING), ("timestamp", DESCENDING)])
@@ -76,7 +91,7 @@ class MongoDBLoader:
         parquet_files = list(HISTORICAL_DIR.glob("*_1h_*.parquet"))
         logger.info(f"Found {len(parquet_files)} historical crypto files")
 
-        collection = self.db.historical_ohlcv
+        collection = self.db[HISTORICAL_COLLECTION]
         total_inserted = 0
 
         for file_path in parquet_files:
@@ -93,17 +108,34 @@ class MongoDBLoader:
 
                 # Ajouter le symbole à chaque ligne
                 df['symbol'] = symbol
+                df['interval'] = "1h"
+                df['timestamp'] = pd.to_datetime(df['timestamp'], utc=True, errors="coerce")
+                df = df[df['timestamp'].notna()].copy()
 
                 # Convertir en dictionnaires
                 records = df.to_dict('records')
 
-                # Insérer par batch
+                # Upsert par batch pour rendre le chargement idempotent
                 for i in range(0, len(records), batch_size):
                     batch = records[i:i + batch_size]
-                    collection.insert_many(batch, ordered=False)
+                    operations = [
+                        UpdateOne(
+                            {
+                                "symbol": row["symbol"],
+                                "interval": row["interval"],
+                                "timestamp": row["timestamp"].to_pydatetime()
+                                if hasattr(row["timestamp"], "to_pydatetime")
+                                else row["timestamp"],
+                            },
+                            {"$set": row},
+                            upsert=True,
+                        )
+                        for row in batch
+                    ]
+                    result = collection.bulk_write(operations, ordered=False)
+                    total_inserted += (result.upserted_count or 0) + (result.modified_count or 0)
 
-                total_inserted += len(records)
-                logger.info(f"✅ {symbol}: {len(records):,} rows inserted")
+                logger.info(f"✅ {symbol}: {len(records):,} rows upserted/prepared")
 
             except Exception as e:
                 logger.error(f"Error loading {file_path.name}: {e}")

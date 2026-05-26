@@ -1,0 +1,43 @@
+{
+  "n_tested": 20877,
+  "n_trades": 17,
+  "profit_factor": 1.2915,
+  "max_drawdown": 0.0063,
+  "sharpe_annualized": 8.3504,
+  "win_rate": 0.4118,
+  "avg_win": 26.6299,
+  "avg_loss": -14.4338,
+  "expectancy_per_trade": 2.4748,
+  "initial_equity": 10000.0,
+  "final_equity": 10042.07,
+  "total_return_pct": 0.42,
+  "by_year": {
+    "2024": {
+      "trades": 4,
+      "pnl_sum": -32.49,
+      "pf": 0.303,
+      "win_rate": 0.25
+    },
+    "2025": {
+      "trades": 5,
+      "pnl_sum": 136.86,
+      "pf": 9.152,
+      "win_rate": 0.8
+    },
+    "2026": {
+      "trades": 8,
+      "pnl_sum": -62.3,
+      "pf": 0.231,
+      "win_rate": 0.25
+    }
+  },
+  "side": "long",
+  "model": "XGBoost_long",
+  "filter_threshold": 0.4,
+  "direction_threshold": 0.54,
+  "cost_pct": 0.001,
+  "skipped_filter": 17046,
+  "skipped_direction": 3811,
+  "skipped_risk": 3,
+  "risk_per_trade": 0.002
+}

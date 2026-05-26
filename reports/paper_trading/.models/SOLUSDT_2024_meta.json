@@ -1,0 +1,15 @@
+{
+  "symbol": "SOLUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2024,
+  "val_year": 2025,
+  "n_features": 78,
+  "n_train": 37530,
+  "n_val": 8760,
+  "val_n": 2,
+  "val_pf": 999.0,
+  "val_wr": 1.0,
+  "val_wr_pct": "100%",
+  "elapsed_s": 90.6,
+  "trained_at": "2026-05-24T00:47:27.320028+00:00"
+}
