@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# bin/dashboard — Démarrer ou ouvrir le dashboard React
+# Usage: bin/dashboard [--build] [--api-only]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD='\033[1m'; GRN='\033[0;32m'; YLW='\033[1;33m'; NC='\033[0m'
+
+DASHBOARD_DIR="$ROOT/frontend_pipeline/frontend/alpha-dashboard"
+API_PORT=8000
+FRONT_PORT=3000
+
+echo -e "\n${BOLD}▶ Alpha Trading Dashboard${NC}\n"
+
+if [[ "${1:-}" == "--api-only" ]]; then
+    echo -e "  Démarrage API uniquement (port $API_PORT)..."
+    python3 -m uvicorn frontend_pipeline.api_server_paper:app --host 0.0.0.0 --port $API_PORT --reload
+    exit 0
+fi
+
+if [[ "${1:-}" == "--build" ]]; then
+    echo -e "  Build production du dashboard..."
+    cd "$DASHBOARD_DIR"
+    npm run build
+    echo -e "\n${GRN}✓ Build terminé${NC}  — dist/ prêt\n"
+    exit 0
+fi
+
+# Démarrer l'API en arrière-plan si elle n'est pas déjà up
+API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:$API_PORT/health 2>/dev/null || echo "000")
+if [ "$API_STATUS" != "200" ]; then
+    echo -e "  Démarrage API (port $API_PORT)..."
+    python3 -m uvicorn frontend_pipeline.api_server_paper:app \
+        --host 0.0.0.0 --port $API_PORT --reload \
+        --log-level warning &
+    API_PID=$!
+    sleep 2
+    echo -e "  ${GRN}API démarrée${NC}  PID=$API_PID"
+else
+    echo -e "  ${GRN}API déjà active${NC}  http://localhost:$API_PORT"
+fi
+
+# Démarrer le frontend React
+echo -e "  Démarrage dashboard React (port $FRONT_PORT)..."
+cd "$DASHBOARD_DIR"
+
+if [ ! -d "node_modules" ]; then
+    echo -e "  ${YLW}Installation dépendances npm...${NC}"
+    npm install --silent
+fi
+
+echo -e "\n  ${GRN}Dashboard : http://localhost:$FRONT_PORT${NC}"
+echo -e "  ${GRN}API       : http://localhost:$API_PORT${NC}\n"
+
+npm start

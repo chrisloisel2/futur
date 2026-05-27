@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# bin/signal — Générer un signal paper trading
+# Usage: bin/signal [--btc-only] [--dry-run] [--retrain] [--symbols BTC ETH]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD='\033[1m'; GRN='\033[0;32m'; YLW='\033[1;33m'; NC='\033[0m'
+
+echo -e "\n${BOLD}▶ Signal paper trading${NC}  $(date '+%Y-%m-%d %H:%M:%S')\n"
+
+# Argument --btc-only => paper_long_signal.py (BTC+ETH seulement, plus rapide)
+if [[ "${1:-}" == "--btc-only" ]]; then
+    shift
+    echo -e "  Mode : ${YLW}BTC+ETH only${NC}  (paper_long_signal.py)"
+    python3 scripts/paper_long_signal.py "$@"
+else
+    echo -e "  Mode : ${GRN}Fleet TOP 10${NC}   (paper_multi_signal.py)"
+    python3 scripts/paper_multi_signal.py "$@"
+fi
+
+echo -e "\n${GRN}✓ Signal terminé${NC}  — Voir état : bin/status\n"

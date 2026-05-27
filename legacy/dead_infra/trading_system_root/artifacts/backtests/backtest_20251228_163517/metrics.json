@@ -1,0 +1,19 @@
+{
+  "trades": 10,
+  "gross_pnl": 388.6788339326158,
+  "net_pnl": -186.14951981601746,
+  "total_costs": 574.8283537486333,
+  "max_drawdown": -1507.9047911317298,
+  "sharpe_ratio": 1.3358418923966249,
+  "sortino_ratio": 2.7801479829445412,
+  "calmar_ratio": 0.0586644025924017,
+  "win_rate": 0.5,
+  "wins": 5,
+  "losses": 5,
+  "avg_win": 620.1329883204797,
+  "avg_loss": -657.3628922836832,
+  "win_loss_ratio": 0.9433647618382192,
+  "profit_factor": 0.9433647618382192,
+  "duration_days": 1.0,
+  "annual_return_pct": 8846.03337379632
+}

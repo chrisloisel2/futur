@@ -27,9 +27,7 @@ from __future__ import annotations
 from typing import List
 import pandas as pd
 
-# Import différé pour éviter les imports circulaires — short_features.py
-# ne dépend pas de features.py, import direct sûr.
-from ai.level_0.short_features import FEATURES_SHORT_GAMECHANGER  # noqa: E402
+# SHORT désactivé (audit 2026-05) — FEATURES_SHORT_GAMECHANGER défini plus bas
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FEATURES MACRO — funding, open interest, long/short ratios, sentiment, news
@@ -377,6 +375,9 @@ FEATURES_SHORT_EXTRA: List[str] = [
 ]
 # Groupe 5 : Positioning / foule extrême (bundle)
 # Groupe 6 : Indicateurs techniques avancés (Ichimoku, RSI étendu, Volumes)
+# SHORT désactivé — liste vide (SHORT_REJECTED audit 2026-05)
+FEATURES_SHORT_GAMECHANGER: List[str] = []
+
 FEATURES_SHORT_EXTRA = list(dict.fromkeys(
     FEATURES_SHORT_EXTRA
     + FEATURES_MACRO_SHORT
@@ -384,9 +385,6 @@ FEATURES_SHORT_EXTRA = list(dict.fromkeys(
     + FEATURES_ICHIMOKU_SHORT
     + FEATURES_RSI_SHORT
     + FEATURES_VOLUME_SHORT
-    # Gamechanger short : 55 features contrariantes de haute valeur
-    # (crowding, breakdown, failed_breakout, liquidity_stress, squeeze_risk)
-    # Calculées par compute_all_short_features() depuis short_features.py.
     + FEATURES_SHORT_GAMECHANGER
 ))
 

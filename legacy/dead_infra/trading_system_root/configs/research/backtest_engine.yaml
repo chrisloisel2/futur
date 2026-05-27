@@ -1,0 +1,54 @@
+mongo:
+  uri: mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/
+  db: market
+  collection: buffer_events
+  lookback_minutes: 60
+s3:
+  clean_prefix: s3://qbia/bourse/data/clean
+  features_prefix: s3://qbia/bourse/data/features
+  labels_prefix: s3://qbia/bourse/data/labels
+  artifacts_prefix: s3://qbia/bourse/artifacts/backtests
+costs:
+  fee_bps: 2.0
+  spread_bps: 0.5
+  slippage_bps: 1.0
+  impact_bps: 0.3
+  adverse_bps: 0.2
+labeling:
+  horizons_s: [60, 300, 900]
+  tp_bps: 50
+  sl_bps: 50
+  label_set: v1
+execution:
+  mode: taker
+  fill_probability: 0.95
+  latency_ms: 50
+  cancel_probability: 0.02
+  partial_fill_probability: 0.1
+  slippage_bps: 1.0
+backtest:
+  mode: taker
+  artifacts_dir: artifacts/backtests
+  s3_prefix: s3://qbia/bourse/artifacts/backtests
+data:
+  orders_path: data/orders/sample_orders.parquet
+  trades_path: artifacts/backtests/latest/trades.parquet
+  equity_path: artifacts/backtests/latest/equity_curve.parquet
+  predictions_path: artifacts/predictions/preds.parquet
+  features_path: data/features/sample_features.parquet
+  labels_path: data/labels/sample_labels.parquet
+artifacts:
+  backtests_dir: artifacts/backtests
+  labels_dir: artifacts/labels
+  calibration_dir: artifacts/calibration
+  s3_prefix: s3://qbia/bourse
+calibration:
+  regime_col: regime
+  pred_col: prob
+  target_col: target
+  output_col: prob_calibrated
+  n_bins: 10
+validation:
+  report_path: artifacts/validation
+  label_set: v1
+  feature_set: default

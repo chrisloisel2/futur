@@ -1,0 +1,8 @@
+clusters:
+  BTCUSDT: btc
+  ETHUSDT: eth
+  SOLUSDT: alt
+caps:
+  btc: 0.6
+  eth: 0.5
+  alt: 0.3

@@ -1,0 +1,19 @@
+{
+  "best_val_loss": 0.22381531000137328,
+  "best_trading_score": 32.83408252331971,
+  "calibration": {
+    "temperature_dir_hit": 2.0332529754135034,
+    "temperature_up": null
+  },
+  "final_real_proxy_val": {
+    "n_trades": 0,
+    "pnl_mean": NaN,
+    "pnl_std": NaN,
+    "sharpe": NaN,
+    "hit_rate": NaN,
+    "max_drawdown": NaN,
+    "pnl_p01": NaN,
+    "pnl_p50": NaN,
+    "pnl_p99": NaN
+  }
+}

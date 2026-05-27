@@ -1,0 +1,10 @@
+maker:
+  post_only: true
+  base_quote_distance_bps: 1.5
+  max_quote_distance_bps: 12.0
+  cancel_repost_seconds: 3
+  min_size_usd: 50
+  max_size_usd: 5000
+  widen_on_reject_bps: 2.0
+  adverse_score_widen_multiplier: 1.5
+  max_open_orders_per_symbol: 2

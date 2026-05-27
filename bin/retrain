@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# bin/retrain — Ré-entraîner le modèle TRM Fleet LONG
+# Usage: bin/retrain [--force] [--symbols BTCUSDT ETHUSDT]
+#
+# --force  : ignore le cache joblib existant
+# Sans arg : entraîne uniquement si le cache a plus de 30 jours
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD='\033[1m'; GRN='\033[0;32m'; YLW='\033[1;33m'; RED='\033[0;31m'; GRY='\033[0;37m'; NC='\033[0m'
+
+echo -e "\n${BOLD}▶ Ré-entraînement TRM Fleet LONG v5${NC}  $(date '+%Y-%m-%d %H:%M:%S')"
+echo -e "  Modèles cachés : reports/paper_trading/.models/\n"
+
+MODEL_DIR="$ROOT/reports/paper_trading/.models"
+mkdir -p "$MODEL_DIR"
+
+# Vérifier l'âge du cache
+if [ "${1:-}" != "--force" ]; then
+    LATEST=$(find "$MODEL_DIR" -name "*.pkl" 2>/dev/null | sort | tail -1)
+    if [ -n "$LATEST" ]; then
+        AGE_DAYS=$(python3 -c "
+import os, time
+mtime = os.path.getmtime('$LATEST')
+print(int((time.time() - mtime) / 86400))
+" 2>/dev/null || echo 999)
+        if [ "$AGE_DAYS" -lt 30 ]; then
+            echo -e "  ${YLW}Cache récent ($AGE_DAYS jours). Utiliser --force pour forcer.${NC}\n"
+            exit 0
+        fi
+        echo -e "  Cache périmé ($AGE_DAYS jours) — ré-entraînement nécessaire\n"
+    else
+        echo -e "  Aucun cache trouvé — premier entraînement\n"
+    fi
+fi
+
+echo -e "  ${GRY}Durée estimée : 20-60 min selon les assets${NC}\n"
+
+python3 scripts/retrain_v4_from_dataout.py "$@"
+
+echo -e "\n${GRN}✓ Entraînement terminé${NC}"
+echo -e "  Modèles : $MODEL_DIR"
+echo -e "  Prochaine étape : bin/signal --retrain (pour forcer rechargement)\n"

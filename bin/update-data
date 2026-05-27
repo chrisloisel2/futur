@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# bin/update-data — Mise à jour des données enrichies live
+# Usage: bin/update-data [--symbols BTCUSDT ETHUSDT ...]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD='\033[1m'; GRN='\033[0;32m'; YLW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
+
+echo -e "\n${BOLD}▶ Mise à jour données enrichies${NC}  $(date '+%Y-%m-%d %H:%M:%S')\n"
+
+# Vérifier que les parquets enrichis existent
+ENRICHED="$ROOT/data/enriched"
+if [ ! -d "$ENRICHED" ] || [ -z "$(ls -A "$ENRICHED" 2>/dev/null)" ]; then
+    echo -e "  ${YLW}Aucun parquet enrichi trouvé — bootstrap initial nécessaire${NC}"
+    echo -e "  Lancer : bin/bootstrap\n"
+    exit 1
+fi
+
+# Afficher les fichiers et leur fraîcheur
+echo -e "  ${BOLD}Parquets enrichis actuels :${NC}"
+for f in "$ENRICHED"/*.parquet; do
+    [ -f "$f" ] || continue
+    fname=$(basename "$f")
+    age=$(python3 -c "
+import os, time
+mtime = os.path.getmtime('$f')
+age_h = (time.time() - mtime) / 3600
+if age_h < 2:
+    print(f'\033[92m{age_h:.1f}h\033[0m')
+elif age_h < 24:
+    print(f'\033[93m{age_h:.1f}h\033[0m')
+else:
+    print(f'\033[91m{age_h:.0f}h\033[0m')
+" 2>/dev/null || echo "?")
+    printf "    %-30s  %s\n" "$fname" "$age"
+done
+
+echo ""
+python3 scripts/live_data_update.py "$@"
+echo -e "\n${GRN}✓ Données à jour${NC}  — Lancer le signal : bin/signal\n"

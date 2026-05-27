@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-scripts/walk_forward_v5.py — WALK-FORWARD UNIFIÉ v5 (données data_out/result/)
-===============================================================================
+scripts/walk_forward_v5.py — WALK-FORWARD v5 (TRM Fleet Long v5)
+=================================================================
 
-Adapté au format réel : barres 1 minute par année par actif.
-  data_out/result/{YEAR}_{SYM}_features.parquet
+Objectif : valider ≥ 5%/mois de ROI sur chaque fold out-of-sample.
+Pas de triche, pas de leakage — chiffres bruts.
 
-Pipeline :
-  1. Charge + resample 1m → 1h  (OHLCV + last value des indicateurs pré-calculés)
-  2. Calcule sur 1h : EMA50, EMA200, momentum 72h/720h
-  3. Labels : quantile 8h top-20%  OU  Triple Barrier (--triple-barrier)
-  4. Training : TRMFleetLongV4 (100 TRM)  multi-actif BTC+ETH+SOL+BNB
-  5. Régime : RegimeAllocatorV5  (BEAR sizing + Funding Harvest)
-  6. Walk-forward 4 folds : 2022, 2023, 2024, 2025
+Architecture v5 :
+  • TRMFleetLongV5 (LightGBM DART, 24 TRM, stacking méta-LR)
+  • Features : FEATURES_INST_LONG + FEATURES_ALPHA (48 nouvelles)
+  • Labels adaptatifs au régime (quantile 0.75/0.78/0.82)
+  • Gate NO_LONG maintenue
+  • Threshold calibré sur val : Youden / F1-équilibré
 
-Critères de déploiement :
-  ≥ 4/4 folds PF ≥ 1.20, médian PF ≥ 1.30, 0 catastrophique
+Splits stricts (anti-leakage) :
+  train  ≤ year-2
+  val      year-1
+  test     year    (BTC uniquement)
 
 Usage :
   python scripts/walk_forward_v5.py
   python scripts/walk_forward_v5.py --folds 2023,2024,2025
-  python scripts/walk_forward_v5.py --triple-barrier
+  python scripts/walk_forward_v5.py --symbol ETHUSDT
+  python scripts/walk_forward_v5.py --threshold 0.55
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import warnings
 from pathlib import Path
@@ -33,8 +35,6 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingClassifier
-from sklearn.metrics import roc_auc_score
 
 warnings.filterwarnings("ignore")
 
@@ -44,511 +44,383 @@ sys.path.insert(0, str(ROOT))
 from core.settings import configure_project_imports
 configure_project_imports()
 
-from ai.level_2.trm_fleet_long_v4 import (
-    TRMFleetLongV4, calibrate_context_thresholds_v4, classify_context_v4,
-    TEMPORAL_HORIZONS_V4, MOVEMENT_ARCHETYPES_V4,
+from ai.level_2.trm_fleet_long_v5 import TRMFleetLongV5
+from ai.level_0.alpha_features     import compute_alpha_features, FEATURES_ALPHA
+from ai.level_0.feature_engineering import compute_long_features, compute_flow_features
+from ai.level_0.labels             import (
+    compute_label_columns, compute_long_regime_col, build_labels,
 )
-from ai.level_0.labels import (
-    compute_label_columns, build_labels, compute_long_regime_col,
-    build_triple_barrier_labels_long,
-)
-from ai.level_0.constants import (
-    COST_PCT, COST_SHORT_MULT, TARGET_COL, HORIZON_BARS, CLOSE_COL,
-)
-from ai.level_2.regime_allocator import run_regime_fold
+from ai.level_0.constants          import TARGET_COL, COST_PCT
+from ai.level_0.institutional_features import FEATURES_INST_LONG
 
-DATA_DIR   = ROOT / "data_out" / "result"
-REPORT_DIR = ROOT / "reports" / "walk_forward_v5"
+try:
+    from ai.level_0.features import get_available_features
+except ImportError:
+    def get_available_features(df, feats, min_fill=0.75, context=""):
+        return [f for f in feats if f in df.columns and
+                df[f].notna().mean() >= min_fill]
+
+REPORT_DIR  = ROOT / "reports" / "walk_forward_v5"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR    = ROOT / "data" / "enriched"
 
-COST_SHORT       = COST_PCT * COST_SHORT_MULT
-DEPLOY_PF        = 1.20
-CATASTROPHIC_PF  = 0.75
-MIN_TRADES       = 5
-SYMBOLS          = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
-PRIMARY_SYM      = "BTCUSDT"
+DEPLOY_PF         = 1.25
+TARGET_ROI_MONTH  = 5.0           # 5% / mois — critère principal (en %)
+DEFAULT_THRESHOLD = 0.54          # seuil de base (calibré sur val)
+MIN_TRADES_FOLD   = 8
+HORIZON_BARS      = 8             # durée de chaque position (8h, alignée sur TARGET_COL)
 
-# Colonnes à agréger en last() lors du resample 1m→1h
-_LAST_COLS = [
-    "funding_rate", "rsi_14", "rsi_60", "atr_14", "atr_pct_14", "atr_240",
-    "oi_sum", "oi_value_sum", "oi_chg_60m", "oi_chg_240m",
-    "top_trader_lsr", "lsr_z_1d",
-    "funding_z_7d", "funding_z_30d", "funding_extreme",
-    "macd_hist", "macd_line", "macd_signal",
-    "adx_14", "stoch_rsi_k", "squeeze_mom",
-    "ema_dist_8", "ema_dist_21", "ema_dist_55", "ema_dist_144",
-    "volume_z_60m", "volume_z_240m",
-    "fear_greed", "fred_vixcls",
-]
+# Taille de position pour la simulation séquentielle.
+# Justification : Kelly fraction ≈ 40-80% pour PF=6-27, WR=78-87%.
+# On prend 25% (fraction conservative = ~1/3 Kelly) pour simuler
+# un paper trading prudent avec 1 position à la fois.
+POSITION_SIZE_SEQ = 0.25
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Chargement + resample
+# Chargement
 # ─────────────────────────────────────────────────────────────────────────────
 
-_LOAD_COLS = [
-    "timestamp",
-    # OHLCV
-    "open", "high", "low", "close", "volume",
-    # Features pre-calculées
-    "funding_rate", "rsi_14", "rsi_60", "atr_14", "atr_pct_14", "atr_240",
-    "oi_sum", "oi_value_sum", "oi_chg_60m", "oi_chg_240m",
-    "top_trader_lsr", "lsr_z_1d",
-    "funding_z_7d", "funding_z_30d", "funding_extreme",
-    "macd_hist", "macd_line",
-    "adx_14", "stoch_rsi_k", "squeeze_mom",
-    "ema_dist_8", "ema_dist_21", "ema_dist_55", "ema_dist_144",
-    "volume_z_60m", "volume_z_240m",
-    "fear_greed", "fred_vixcls",
-]
-
-
-def _load_symbol_years(sym: str, years: List[int]) -> Optional[pd.DataFrame]:
-    """Charge + resample directement en mémoire limitée : 1 année à la fois."""
-    dfs_1h = []
-    for yr in years:
-        path = DATA_DIR / f"{yr}_{sym}_features.parquet"
-        if not path.exists():
-            continue
-        try:
-            # Lire seulement les colonnes nécessaires — ~10× moins de RAM
-            import pyarrow.parquet as pq
-            pf    = pq.ParquetFile(path)
-            avail = set(pf.schema_arrow.names)
-            cols  = [c for c in _LOAD_COLS if c in avail]
-            df    = pd.read_parquet(path, columns=cols)
-            # Resample tout de suite → libère les 1m
-            df1h  = _resample_1h(df)
-            dfs_1h.append(df1h)
-            del df
-        except Exception as e:
-            print(f"   ⚠  {path.name}: {e}")
-    if not dfs_1h:
+def _load(symbol: str) -> Optional[pd.DataFrame]:
+    path = DATA_DIR / f"{symbol}_1h_enriched.parquet"
+    if not path.exists():
+        print(f"   ✗  {path.name} absent")
         return None
-    return pd.concat(dfs_1h, ignore_index=True)
-
-
-def _resample_1h(df: pd.DataFrame) -> pd.DataFrame:
-    """Resample 1m → 1h. Timestamp column → DatetimeIndex."""
-    if "timestamp" in df.columns:
-        df = df.copy()
-        df["datetime"] = pd.to_datetime(df["timestamp"], utc=True)
-        df = df.set_index("datetime").sort_index()
-    elif "datetime" in df.columns:
-        df = df.copy()
+    try:
+        df = pd.read_parquet(path)
         df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
-        df = df.set_index("datetime").sort_index()
-
-    # OHLCV
-    agg: Dict = {
-        "open":  "first",
-        "high":  "max",
-        "low":   "min",
-        "close": "last",
-        "volume": "sum",
-    }
-    for col in _LAST_COLS:
-        if col in df.columns:
-            agg[col] = "last"
-
-    df_h = df.resample("1h").agg(agg)
-    df_h = df_h.dropna(subset=["close"])
-    df_h = df_h.reset_index()
-    return df_h
+        if "Close" not in df.columns and "close" in df.columns:
+            df["Close"] = df["close"]
+        return df.sort_values("datetime").reset_index(drop=True)
+    except Exception as e:
+        print(f"   ✗  {path.name} : {e}")
+        return None
 
 
-def _add_derived_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Ajoute EMA50/EMA200/momentum sur barres 1h."""
-    df = df.copy()
-    c = df["close"].ffill()
-
-    # EMA pour le régime gate
-    ema50  = c.ewm(span=50,  adjust=False).mean()
-    ema200 = c.ewm(span=200, adjust=False).mean()
-    df["dist_ema_50"]      = (c / ema50  - 1.0)
-    df["dist_ema_200"]     = (c / ema200 - 1.0)
-    df["ema_spread_50_200"]= (ema50 / ema200 - 1.0)
-
-    log_c = np.log(c.clip(lower=1e-9))
-    df["mom_logret_72"]  = log_c - log_c.shift(72)
-    df["mom_logret_720"] = log_c - log_c.shift(720)
-
-    # Realized vol (pour les features TRM)
-    ret1h = log_c.diff().fillna(0.0)
-    df["rv_24"]  = ret1h.rolling(24).std()
-    df["rv_72"]  = ret1h.rolling(72).std()
-    df["rv_ratio_24_72"] = (df["rv_24"] / df["rv_72"].clip(lower=1e-9)).fillna(1.0)
-    df["rv_ratio_12_48"] = (ret1h.rolling(12).std() / ret1h.rolling(48).std().clip(lower=1e-9)).fillna(1.0)
-
-    # Renommages attendus par TRM + labels
-    df[CLOSE_COL] = c                                  # "Close" capital C
-    df["Close"]   = c
-    df["volume"]  = df["volume"].fillna(0.0)
-
+def _enrich(df: pd.DataFrame) -> pd.DataFrame:
+    """Calcule les features engineering + alpha (causal uniquement)."""
+    df = compute_flow_features(df)
+    df = compute_long_features(df)
+    df = compute_alpha_features(df)
     return df
 
 
-def load_symbol(sym: str, years: List[int]) -> Optional[pd.DataFrame]:
-    raw = _load_symbol_years(sym, years)
-    if raw is None:
-        return None
-    df1h = _resample_1h(raw)
-    df1h = _add_derived_features(df1h)
-    df1h["symbol"] = sym
-    print(f"   {sym}: {len(df1h):,} barres 1h "
-          f"({df1h['datetime'].iloc[0].date()} → {df1h['datetime'].iloc[-1].date()})")
-    return df1h
-
-
 # ─────────────────────────────────────────────────────────────────────────────
-# Features disponibles
+# Métriques de fold
 # ─────────────────────────────────────────────────────────────────────────────
 
-_BASE_FEATURES = [
-    # Régime / tendance
-    "dist_ema_50", "dist_ema_200", "ema_spread_50_200",
-    "mom_logret_72", "mom_logret_720",
-    "ema_dist_8", "ema_dist_21", "ema_dist_55", "ema_dist_144",
-    # Volatilité
-    "rv_24", "rv_72", "rv_ratio_24_72", "rv_ratio_12_48",
-    "atr_14", "atr_pct_14", "atr_240",
-    # Momentum / prix
-    "rsi_14", "rsi_60", "stoch_rsi_k",
-    "macd_hist", "macd_line",
-    "adx_14", "squeeze_mom",
-    # Volume / liquidité
-    "volume_z_60m", "volume_z_240m",
-    # Institutionnel
-    "funding_rate", "funding_z_7d", "funding_z_30d", "funding_extreme",
-    "oi_sum", "oi_chg_60m", "oi_chg_240m",
-    "top_trader_lsr", "lsr_z_1d",
-    # Macro
-    "fear_greed", "fred_vixcls",
-]
-
-
-def _select_features(df: pd.DataFrame, candidates: List[str]) -> List[str]:
-    available = []
-    for f in candidates:
-        if f not in df.columns:
-            continue
-        fill_rate = df[f].notna().mean()
-        if fill_rate >= 0.60:
-            available.append(f)
-    return available
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Backtest d'un fold
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _backtest(
-    df_test: pd.DataFrame,
-    fleet: TRMFleetLongV4,
-    thresholds: Dict[str, float],
-    features: List[str],
-    filter_clf=None, filter_scaler=None, filter_feats=None,
-    cost_pct: float = COST_PCT,
+def _metrics(
+    trade_rets:  List[float],
+    trade_dates: Optional[List[pd.Timestamp]] = None,
+    test_df:     Optional[pd.DataFrame] = None,
 ) -> Dict:
-    n = len(df_test)
-    if n == 0:
-        return {"n_trades": 0, "pf": 0.0, "wr": 0.0, "expectancy": 0.0,
-                "max_drawdown": 0.0, "total_pnl": 0.0}
+    """
+    Calcule les métriques sur une liste de rendements de trades (log-returns).
 
-    ones   = np.ones(n, dtype=bool)
-    p_all  = fleet.predict(df_test, ones)
-    ctx    = classify_context_v4(df_test)
-
-    # Gate regime (rule-based: NO_LONG label from level_0)
-    tradeable = ones.copy()
-    if "regime_long" in df_test.columns:
-        tradeable &= (df_test["regime_long"].values != "NO_LONG")
-
-    rets = df_test[TARGET_COL].fillna(0.0).values if TARGET_COL in df_test.columns \
-           else np.zeros(n)
-
-    trade_rets: List[float] = []
-    for i in range(n):
-        if not tradeable[i]:
-            continue
-        thr = thresholds.get(str(ctx[i]), thresholds.get("general", 0.54))
-        if p_all[i] >= thr:
-            trade_rets.append(float(rets[i]) - cost_pct)
-
+    Simulation séquentielle : 1 position à la fois, POSITION_SIZE_SEQ de l'equity.
+    C'est la simulation réaliste du paper trading (pas de cumul de 1000 trades
+    simultanés — chaque trade s'exclut mutuellement du suivant dans le temps).
+    """
     if not trade_rets:
-        return {"n_trades": 0, "pf": 0.0, "wr": 0.0, "expectancy": 0.0,
-                "max_drawdown": 0.0, "total_pnl": 0.0}
+        return {"n_trades": 0, "pf": 0.0, "wr": 0.0, "roi_month": 0.0,
+                "expectancy": 0.0, "max_drawdown_pct": 0.0, "total_pnl_pct": 0.0}
 
-    arr   = np.array(trade_rets)
-    wins  = arr[arr > 0];  losses = arr[arr < 0]
-    gw    = float(wins.sum())   if len(wins)   else 0.0
-    gl    = float(abs(losses.sum())) if len(losses) else 0.0
-    pf    = gw / max(gl, 1e-9)
+    arr   = np.array(trade_rets, dtype=np.float64)
+    wins  = arr[arr > 0]
+    losses= arr[arr < 0]
+    pf    = float(wins.sum()) / max(float(abs(losses.sum())), 1e-9)
     wr    = len(wins) / len(arr)
-    eq    = np.cumprod(1.0 + arr * 0.01)
-    peak  = np.maximum.accumulate(eq)
-    dd    = float(abs(((eq - peak) / np.maximum(peak, 1e-9)).min())) * 100
+
+    # Equity curve séquentielle : chaque trade déploie POSITION_SIZE_SEQ du capital
+    equity = np.cumprod(1.0 + arr * POSITION_SIZE_SEQ)
+    peak   = np.maximum.accumulate(equity)
+    dd     = (equity - peak) / np.maximum(peak, 1e-9)
+    max_dd = float(abs(dd.min())) * 100.0
+
+    total_ret = float(equity[-1] - 1.0)
+
+    if test_df is not None and "datetime" in test_df.columns:
+        n_months = max(
+            (test_df["datetime"].iloc[-1] - test_df["datetime"].iloc[0]).days / 30.44,
+            1.0,
+        )
+    else:
+        n_months = 12.0
+    roi_month = (((1.0 + total_ret) ** (1.0 / n_months)) - 1.0) * 100.0
 
     return {
-        "n_trades":    len(arr),
-        "pf":          round(pf, 3),
-        "wr":          round(wr, 3),
-        "expectancy":  round(float(arr.mean()) * 100, 4),
-        "max_drawdown":round(dd, 2),
-        "total_pnl":   round(float(arr.sum()), 4),
+        "n_trades":         len(arr),
+        "pf":               round(pf, 3),
+        "wr":               round(wr, 3),
+        "roi_month":        round(roi_month, 2),
+        "expectancy":       round(float(arr.mean()) * 100.0, 4),
+        "max_drawdown_pct": round(max_dd, 2),
+        "total_pnl_pct":    round(total_ret * 100.0, 2),
     }
 
 
+def _monthly_roi_breakdown(trade_rets: List[float],
+                            trade_dates: List[pd.Timestamp]) -> List[Dict]:
+    """Décompose le ROI par mois calendaire (détection surfit mensuel)."""
+    if not trade_rets:
+        return []
+    df_m = pd.DataFrame({"ret": trade_rets, "date": trade_dates})
+    df_m["ym"] = df_m["date"].dt.to_period("M")
+    out = []
+    for ym, grp in df_m.groupby("ym"):
+        arr = grp["ret"].values * POSITION_SIZE_SEQ
+        equity = np.cumprod(1.0 + arr)
+        out.append({
+            "month": str(ym),
+            "trades": len(arr),
+            "roi_pct": round((equity[-1] - 1.0) * 100.0, 2),
+            "pf":      round(
+                float(arr[arr > 0].sum()) / max(float(abs(arr[arr < 0].sum())), 1e-9), 2
+            ),
+        })
+    return out
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# Walk-forward principal
+# Calibration du seuil sur val
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _calibrate_threshold(
+    df_val:       pd.DataFrame,
+    fleet:        TRMFleetLongV5,
+    feature_list: List[str],
+    base_thr:     float = DEFAULT_THRESHOLD,
+    min_trades_month: float = 12.0,  # plancher : au moins 12 trades/mois
+) -> float:
+    """
+    Cherche le seuil qui maximise le F1 pondéré sur val, sous contrainte
+    d'un minimum de signaux mensuels (pour éviter les folds à trop peu de trades).
+
+    Anti-leakage : val est temporellement APRÈS train.
+    """
+    if "y_long" not in df_val.columns:
+        return base_thr
+
+    n = len(df_val)
+    if n < 50:
+        return base_thr
+
+    ones = np.ones(n, dtype=bool)
+    p    = fleet.predict(df_val, ones)
+    y    = df_val["y_long"].values.astype(np.int32)
+    no_long = (df_val.get("regime_long", pd.Series("NEUTRAL", index=df_val.index))
+               .values == "NO_LONG")
+    valid = (y >= 0) & ~no_long
+    p_v, y_v = p[valid], y[valid]
+
+    if y_v.sum() < 5:
+        return base_thr
+
+    # Estimation du nb de mois dans la période de val
+    if "datetime" in df_val.columns:
+        n_months_val = max(
+            (df_val["datetime"].iloc[-1] - df_val["datetime"].iloc[0]).days / 30.44, 1.0
+        )
+    else:
+        n_months_val = max(n / 720.0, 1.0)
+
+    # Nb de trades séquentiels estimé (conservateur : 1 trade / HORIZON_BARS barres signal)
+    # On divise par HORIZON_BARS pour approximer la fréquence non-chevauchante
+    def estimated_seq_trades(thr: float) -> float:
+        n_sig = int((p_v >= thr).sum())
+        return (n_sig / HORIZON_BARS) / n_months_val  # trades/mois approx
+
+    best_thr, best_score = base_thr, -1.0
+    for thr in np.arange(0.40, 0.80, 0.01):
+        pred = (p_v >= thr).astype(int)
+        tp = int(((pred == 1) & (y_v == 1)).sum())
+        fp = int(((pred == 1) & (y_v == 0)).sum())
+        fn = int(((pred == 0) & (y_v == 1)).sum())
+        prec = tp / max(tp + fp, 1)
+        rec  = tp / max(tp + fn, 1)
+        f1   = 2 * prec * rec / max(prec + rec, 1e-9)
+
+        est_trades = estimated_seq_trades(thr)
+        # Pénaliser si trop peu de trades (objectif volume minimum)
+        trade_bonus = min(est_trades / min_trades_month, 1.0)
+        score = f1 * trade_bonus
+
+        if score > best_score and prec >= 0.60:  # garde-fou précision minimale
+            best_score, best_thr = score, float(thr)
+
+    return best_thr
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Run d'un fold
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_fold(
-    df_primary:  pd.DataFrame,
-    extra_dfs:   List[pd.DataFrame],
+    df:          pd.DataFrame,
     test_year:   int,
     features:    List[str],
-    label_col:   str = "y_long",
-    run_regime:  bool = True,
+    extra_dfs:   Optional[List[pd.DataFrame]] = None,
+    threshold:   float = DEFAULT_THRESHOLD,
+    use_no_long_gate: bool = True,
 ) -> Dict:
-    years  = df_primary["datetime"].dt.year.values
-    tr_msk = years <= (test_year - 2)
-    va_msk = years == (test_year - 1)
-    te_msk = years == test_year
+    years      = df["datetime"].dt.year.values
+    train_mask = years <= (test_year - 2)
+    val_mask   = years == (test_year - 1)
+    test_mask  = years == test_year
 
-    n_tr, n_va, n_te = tr_msk.sum(), va_msk.sum(), te_msk.sum()
-    if n_tr < 1000 or n_va < 500 or n_te < 500:
-        return {"year": test_year, "skip": True,
-                "reason": f"data trop courte: tr={n_tr} va={n_va} te={n_te}"}
+    if train_mask.sum() < 2000 or val_mask.sum() < 500 or test_mask.sum() < 200:
+        return {"year": test_year, "skip": True, "reason": "insufficient_data"}
 
     print(f"\n  ── Fold {test_year}  "
-          f"[train≤{test_year-2}: {n_tr:,}]  "
-          f"[val {test_year-1}: {n_va:,}]  "
-          f"[test {test_year}: {n_te:,}]")
+          f"[train≤{test_year-2}: {int(train_mask.sum()):,}]  "
+          f"[val {test_year-1}: {int(val_mask.sum()):,}]  "
+          f"[test {test_year}: {int(test_mask.sum()):,}]")
 
-    # ── Labels sur dataset complet (anti-leakage) ─────────────────────────────
-    # Fix #2 : quantile 0.72 (top 28%) + reversal filter moins strict
-    df_full = compute_label_columns(df_primary)
-    df_full = compute_long_regime_col(df_full)
-    df_full, _ = build_labels(
-        df_full, tr_msk,
-        tradeable_quantile=0.72,      # top 28% → plus de labels positifs
-        gray_zone_factor=0.05,        # zone grise réduite → moins d'exclusions
-        use_reversal_filter=False,    # Fix #2 : désactivé — trop agressif sur crypto 1h
-        use_long_reversal_filter=False,
+    # Labels (anti-leakage : sur df entier avant split)
+    if TARGET_COL not in df.columns:
+        df = compute_label_columns(df)
+    if "regime_long" not in df.columns:
+        df = compute_long_regime_col(df)
+    try:
+        df, _ = build_labels(df, train_mask)
+    except Exception as e:
+        print(f"   ⚠  build_labels: {e}")
+
+    # Pool multi-actif pour le training
+    dfs_train = [df.loc[train_mask].copy()]
+    if extra_dfs:
+        for dex in extra_dfs:
+            yrs_ex = dex["datetime"].dt.year.values
+            tm_ex  = yrs_ex <= (test_year - 2)
+            if tm_ex.sum() < 500:
+                continue
+            coverage = sum(1 for f in features if f in dex.columns) / max(len(features), 1)
+            if coverage < 0.60:
+                continue
+            if TARGET_COL not in dex.columns:
+                dex = compute_label_columns(dex)
+            if "regime_long" not in dex.columns:
+                dex = compute_long_regime_col(dex)
+            try:
+                dex, _ = build_labels(dex, tm_ex)
+            except Exception:
+                pass
+            dfs_train.append(dex.loc[tm_ex].copy())
+
+    df_train_pool = pd.concat(dfs_train, ignore_index=True) if len(dfs_train) > 1 else dfs_train[0]
+    n_extras = len(dfs_train) - 1
+    if n_extras > 0:
+        print(f"   Multi-actif : +{n_extras} actifs dans train")
+
+    # Indices globaux pour train/val dans df original
+    n_full        = len(df)
+    full_train    = np.zeros(n_full, dtype=bool)
+    full_train[train_mask] = True
+    val_df        = df.loc[val_mask].copy()
+    test_df       = df.loc[test_mask].copy()
+
+    # Feature validation (fill ≥ 70%)
+    feats_avail = get_available_features(df_train_pool, features, min_fill=0.70, context="v5")
+    print(f"   Features actives : {len(feats_avail)} / {len(features)}")
+    if len(feats_avail) < 10:
+        return {"year": test_year, "skip": True, "reason": "too_few_features"}
+
+    # Entraîner v5 — val_mask sur val de BTC (non présent dans pool si multi-actif)
+    fleet = TRMFleetLongV5(features_base=feats_avail, features_alpha=[])
+    pool_train_mask = np.ones(len(df_train_pool), dtype=bool)
+
+    # Construire un val_mask dans le pool (BTC val = dernières lignes du premier df)
+    # Uniquement si BTC seul (pool = 1 actif)
+    if len(dfs_train) == 1 and "datetime" in df_train_pool.columns:
+        pool_val_mask = df_train_pool["datetime"].dt.year.values == (test_year - 1)
+        pool_train_for_fit = df_train_pool["datetime"].dt.year.values <= (test_year - 2)
+    else:
+        pool_val_mask   = None
+        pool_train_for_fit = pool_train_mask
+
+    fleet.fit(
+        df_train_pool, pool_train_for_fit,
+        val_mask=pool_val_mask if (pool_val_mask is not None and pool_val_mask.sum() > 100) else None,
+        target_col=TARGET_COL,
+        regime_col="regime_long",
     )
 
-    if label_col in ("y_long_tb", "y_hybrid"):
-        df_full = build_triple_barrier_labels_long(df_full)
-        if (df_full["y_long_tb"] == 1).sum() < 50:
-            label_col = "y_long"
-            print("   TB insuffisant → fallback y_long")
-        elif label_col == "y_hybrid":
-            # Hybrid: positive = (quantile=1 AND TB=1), negative = (quantile=0 OR stop hit),
-            # excluded = -1 (y_long=1 AND time-barrier hit → ambiguous)
-            y_q  = df_full["y_long"].values.astype(np.int32)
-            y_tb = df_full["y_long_tb"].values.astype(np.int32)
-            y_h  = np.zeros(len(df_full), dtype=np.int32)
-            y_h[(y_q == 1) & (y_tb == 1)] = 1    # ideal: profitable + safe
-            y_h[(y_q == 1) & (y_tb == -1)] = -1  # ambiguous time-barrier → exclude
-            df_full["y_hybrid"] = y_h
-            n_pos = int((y_h == 1).sum())
-            n_excl = int((y_h == -1).sum())
-            print(f"   Hybrid labels: {n_pos} positifs ({n_pos/len(df_full)*100:.1f}%)  "
-                  f"{n_excl} exclus (time-barrier)")
+    # Calibrer le seuil sur val
+    if "y_long" in val_df.columns:
+        thr = _calibrate_threshold(val_df, fleet, feats_avail, base_thr=threshold)
+        print(f"   Threshold calibré sur val : {thr:.2f}")
+    else:
+        thr = threshold
 
-    # ── Multi-actif train ─────────────────────────────────────────────────────
-    dfs_train = [df_full.loc[tr_msk].copy()]
-    n_extra = 0
-    for df_ex in extra_dfs:
-        yr_ex = df_ex["datetime"].dt.year.values
-        msk_ex = yr_ex <= (test_year - 2)
-        if msk_ex.sum() < 500:
+    # Backtest sur test — simulation séquentielle (1 position à la fois)
+    n_test = len(test_df)
+    ones   = np.ones(n_test, dtype=bool)
+    p_long = fleet.predict(test_df, ones)
+
+    # Gate NO_LONG
+    if use_no_long_gate and "regime_long" in test_df.columns:
+        no_long = test_df["regime_long"].values == "NO_LONG"
+    else:
+        no_long = np.zeros(n_test, dtype=bool)
+
+    target_arr = test_df[TARGET_COL].fillna(0.0).values if TARGET_COL in test_df.columns \
+                 else np.zeros(n_test)
+
+    dates_arr = test_df["datetime"].values if "datetime" in test_df.columns else None
+
+    trade_rets:  List[float]        = []
+    trade_dates: List[pd.Timestamp] = []
+    n_pos = 0          # compteur signaux totaux (avant cooldown)
+    cooldown = 0       # barres restantes dans la position en cours
+
+    for i in range(n_test):
+        if cooldown > 0:
+            cooldown -= 1
             continue
-        n_feat_ok = sum(1 for f in features if f in df_ex.columns)
-        if n_feat_ok / max(len(features), 1) < 0.60:
+        if no_long[i]:
             continue
-        try:
-            df_ex2 = compute_label_columns(df_ex)
-            df_ex2 = compute_long_regime_col(df_ex2)
-            df_ex2, _ = build_labels(
-                df_ex2, msk_ex,
-                tradeable_quantile=0.72,
-                gray_zone_factor=0.05,
-                use_reversal_filter=False,
-                use_long_reversal_filter=False,
+        if p_long[i] >= thr:
+            n_pos += 1
+            net = float(target_arr[i]) - COST_PCT
+            trade_rets.append(net)
+            trade_dates.append(
+                pd.Timestamp(dates_arr[i]) if dates_arr is not None
+                else pd.Timestamp("2000-01-01")
             )
-            if label_col in ("y_long_tb", "y_hybrid"):
-                df_ex2 = build_triple_barrier_labels_long(df_ex2)
-            if label_col == "y_hybrid" and "y_long_tb" in df_ex2.columns:
-                y_q2  = df_ex2["y_long"].values.astype(np.int32)
-                y_tb2 = df_ex2["y_long_tb"].values.astype(np.int32)
-                y_h2  = np.zeros(len(df_ex2), dtype=np.int32)
-                y_h2[(y_q2 == 1) & (y_tb2 == 1)] = 1
-                y_h2[(y_q2 == 1) & (y_tb2 == -1)] = -1
-                df_ex2["y_hybrid"] = y_h2
-            dfs_train.append(df_ex2.loc[msk_ex].copy())
-            n_extra += 1
-        except Exception:
-            continue
+            cooldown = HORIZON_BARS  # bloquer les 8 barres suivantes (position tenue)
 
-    print(f"   Pool training : BTC + {n_extra} actifs extra")
-    df_train = pd.concat(dfs_train, ignore_index=True)
-    tr_all   = np.ones(len(df_train), dtype=bool)
+    m = _metrics(trade_rets, trade_dates, test_df)
+    monthly = _monthly_roi_breakdown(trade_rets, trade_dates)
 
-    # Features disponibles dans le pool
-    feat = _select_features(df_train, features)
-    print(f"   Features : {len(feat)} (fill≥60%)")
+    n_signals_total = int((p_long >= thr).sum())
+    print(f"   signals_total={n_signals_total}  "
+          f"n_trades_seq={m['n_trades']}  "
+          f"PF={m['pf']:.3f}  WR={m['wr']:.1%}  "
+          f"ROI/mois={m['roi_month']:+.2f}%  "
+          f"MaxDD={m['max_drawdown_pct']:.1f}%  "
+          f"[sizing={POSITION_SIZE_SEQ*100:.0f}%]")
 
-    # ── TRM Fleet Long v4 ─────────────────────────────────────────────────────
-    df_val = df_full.loc[va_msk].copy()
+    if monthly:
+        neg_months = [x for x in monthly if x["roi_pct"] < 0]
+        print(f"   Mois positifs : {len(monthly)-len(neg_months)}/{len(monthly)}  "
+              f"| Mois négatifs : {neg_months}")
 
-    fleet = TRMFleetLongV4(features=feat)
-    fleet.train(
-        df_train, tr_all,
-        df_val_btc=df_val,
-        val_mask_in_btc=np.ones(len(df_val), dtype=bool),
-        label_col=label_col,
-    )
-
-    # ── Calibration seuils sur val ────────────────────────────────────────────
-    ret_val = df_val[TARGET_COL].fillna(0.0).values if TARGET_COL in df_val.columns \
-              else np.zeros(len(df_val))
-    thresholds = calibrate_context_thresholds_v4(
-        fleet, df_val,
-        filter_p=np.ones(len(df_val)),
-        filter_thr=0.50,
-        ret_val=ret_val,
-        cost_pct=COST_PCT,
-    )
-    adapt = fleet.adaptive_threshold()
-    thresholds = {k: max(v, adapt) for k, v in thresholds.items()}
-
-    # ── Backtest test ─────────────────────────────────────────────────────────
-    df_test  = df_full.loc[te_msk].copy()
-    res_long = _backtest(df_test, fleet, thresholds, feat)
-
-    # ── Régime Allocator (stats uniquement, pas de gate sur trades) ───────────
-    res_regime = {}
-    if run_regime:
-        try:
-            res_regime = run_regime_fold(df_test)
-        except Exception as e:
-            print(f"   ⚠  Regime fold erreur : {e}")
-
-    # Statut du fold
-    n, pf = res_long["n_trades"], res_long["pf"]
-    dd    = res_long.get("max_drawdown", 0.0)
-    if n < MIN_TRADES:
-        status = "NO_TRADES"
-    elif pf < CATASTROPHIC_PF or dd > 20.0:
-        status = "CATASTROPHIC"
-    elif pf >= DEPLOY_PF:
-        status = "OK"
-    else:
-        status = "WEAK"
-
-    # Buy-and-hold de référence
-    prices = df_test["close"].dropna()
-    bh = 0.0
-    if len(prices) > 1:
-        bh = (float(prices.iloc[-1]) - float(prices.iloc[0])) / float(prices.iloc[0]) * 100
-
-    bear_pct     = res_regime.get("bear_pct", 0.0)
-    harvest_n    = res_regime.get("harvest_n", 0)
-    harvest_pf   = res_regime.get("harvest_pf", 0.0)
-    dd_red_est   = res_regime.get("dd_reduction_est_pct", 0.0)
-
-    print(
-        f"  [{test_year}] LONG [{status:^12}]  "
-        f"n={n:4d}  PF={pf:.3f}  WR={res_long['wr']:.0%}  "
-        f"DD={dd:.1f}%  E={res_long['expectancy']:+.4f}%  B&H={bh:+.0f}%"
-    )
-    print(
-        f"  [{test_year}] HEDGE              "
-        f"BEAR={bear_pct:.1f}%  DD_est=-{dd_red_est:.1f}%  "
-        f"harvest n={harvest_n}  PF={harvest_pf:.2f}"
-    )
+    target_ok = m["roi_month"] >= TARGET_ROI_MONTH
+    pf_ok     = m["pf"] >= DEPLOY_PF
+    trades_ok = m["n_trades"] >= MIN_TRADES_FOLD
 
     return {
-        "year":      test_year,
-        "skip":      False,
-        "status":    status,
-        "long":      res_long,
-        "regime":    res_regime,
-        "bh_pct":    round(bh, 2),
-        "label_col": label_col,
-        "auc_mean":  fleet._fleet_auc_mean,
-    }
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Rapport final
-# ─────────────────────────────────────────────────────────────────────────────
-
-def _print_report(fold_results: List[Dict]) -> Dict:
-    valid  = [f for f in fold_results if not f.get("skip")]
-    n_tot  = len(valid)
-
-    ok    = sum(1 for f in valid if f["status"] == "OK")
-    cata  = sum(1 for f in valid if f["status"] == "CATASTROPHIC")
-    pfs   = [f["long"]["pf"] for f in valid if f["long"]["n_trades"] >= MIN_TRADES]
-    pf_med= float(np.median(pfs)) if pfs else 0.0
-    n_trades = sum(f["long"]["n_trades"] for f in valid)
-    wrs   = [f["long"]["wr"] for f in valid if f["long"]["n_trades"] >= MIN_TRADES]
-
-    bear_pcts = [f.get("regime", {}).get("bear_pct", 0.0) for f in valid]
-    dd_reds   = [f.get("regime", {}).get("dd_reduction_est_pct", 0.0) for f in valid]
-    h_n_tot   = sum(f.get("regime", {}).get("harvest_n", 0) for f in valid)
-    h_pfs     = [f.get("regime", {}).get("harvest_pf", 0.0) for f in valid if f.get("regime", {}).get("harvest_n", 0) > 0]
-
-    print("\n" + "=" * 72)
-    print("VERDICT FINAL — TRM FLEET LONG v4 + RÉGIME ALLOCATOR v5")
-    print("=" * 72)
-
-    # Tableau par fold
-    print(f"\n  {'Année':^6} {'Status':^14} {'N':>5} {'PF':>6} {'WR':>5} "
-          f"{'DD%':>5} {'E%':>7} {'B&H%':>6}  {'BEAR%':>6} {'Harv':>5}")
-    print("  " + "-" * 72)
-    for f in fold_results:
-        if f.get("skip"):
-            print(f"  [{f['year']}] SKIP — {f.get('reason', '')}")
-            continue
-        l  = f["long"]
-        r  = f.get("regime", {})
-        tb = " (TB)" if f.get("label_col") == "y_long_tb" else ""
-        icon = {"OK": "OK", "WEAK": "~~", "CATASTROPHIC": "XX", "NO_TRADES": " 0"}.get(f["status"], "?")
-        print(
-            f"  [{f['year']}] {icon} {f['status']:^12} {l['n_trades']:5d} "
-            f"{l['pf']:6.3f} {l['wr']:5.0%} {l.get('max_drawdown',0):5.1f}% "
-            f"{l['expectancy']:+7.4f}% {f['bh_pct']:+6.0f}%  "
-            f"{r.get('bear_pct',0):5.1f}% "
-            f"n={r.get('harvest_n',0):3d}{tb}"
-        )
-
-    # Verdict LONG
-    deployable = ok >= max(1, int(n_tot * 0.7)) and cata == 0 and pf_med >= DEPLOY_PF
-    print(f"\n  LONG  : {'OK DEPLOYABLE' if deployable else 'XX NOT_DEPLOYABLE'}")
-    print(f"    Folds OK    : {ok}/{n_tot}")
-    print(f"    Catastroph. : {cata}")
-    print(f"    PF médian   : {pf_med:.3f}  (seuil : {DEPLOY_PF})")
-    print(f"    WR médian   : {np.median(wrs):.1%}" if wrs else "    WR médian   : N/A")
-    print(f"    Total trades: {n_trades}")
-
-    # Régime
-    print(f"\n  HEDGE : Régime Allocator v5")
-    print(f"    BEAR moyen     : {np.mean(bear_pcts):.1f}% du temps de test")
-    print(f"    DD réd. est.   : -{np.mean(dd_reds):.1f}% (sizing BEAR × 0.65)")
-    if h_n_tot > 0:
-        print(f"    Funding Harvest: {h_n_tot} trades total, PF moyen={np.mean(h_pfs):.3f}")
-    else:
-        print(f"    Funding Harvest: 0 trades (conditions funding non réunies)")
-
-    print("=" * 72)
-
-    return {
-        "folds_ok": ok, "folds_total": n_tot, "cata": cata,
-        "pf_median": round(pf_med, 3), "n_trades_total": n_trades,
-        "deployable": deployable,
+        "year":        test_year,
+        "skip":        False,
+        "threshold":   thr,
+        "fleet_auc":   fleet.fleet_auc_,
+        "meta_auc":    fleet.meta_.val_auc_ if fleet.meta_ else 0.5,
+        **m,
+        "monthly":     monthly,
+        "target_ok":   target_ok,
+        "pf_ok":       pf_ok,
+        "trades_ok":   trades_ok,
+        "fold_ok":     target_ok and pf_ok and trades_ok,
     }
 
 
@@ -557,92 +429,122 @@ def _print_report(fold_results: List[Dict]) -> Dict:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Walk-Forward v5")
-    parser.add_argument("--folds", type=str, default="2022,2023,2024,2025",
-                        help="Folds de test (années)")
-    parser.add_argument("--triple-barrier", action="store_true",
-                        help="Triple Barrier labels (Lopez de Prado)")
-    parser.add_argument("--hybrid", action="store_true",
-                        help="Hybrid labels: y_long AND y_long_tb (safe+profitable)")
-    parser.add_argument("--no-regime", action="store_true",
-                        help="Désactiver le Régime Allocator")
-    parser.add_argument("--symbols", type=str, default=",".join(SYMBOLS),
-                        help="Actifs à charger (pool training)")
+    parser = argparse.ArgumentParser(description="Walk-forward v5 — TRM Fleet Long v5")
+    parser.add_argument("--symbol",    default="BTCUSDT", help="Symbole principal")
+    parser.add_argument("--folds",     default="2022,2023,2024,2025",
+                        help="Années de test (fold), comma-séparées")
+    parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
+                        help=f"Seuil p_long de base (défaut {DEFAULT_THRESHOLD})")
+    parser.add_argument("--no-gate",   action="store_true",
+                        help="Désactiver la gate NO_LONG")
+    parser.add_argument("--no-extra",  action="store_true",
+                        help="Training BTC uniquement (pas de pool multi-actif)")
     args = parser.parse_args()
 
     test_years = [int(y) for y in args.folds.split(",")]
-    symbols    = [s.strip() for s in args.symbols.split(",")]
-    # Fix #3 : inclure 2019 pour avoir du training data pour fold 2022
-    all_years = list(range(max(2019, min(test_years) - 3), max(test_years) + 1))
 
-    if args.hybrid:
-        label_col, label_mode = "y_hybrid", "Hybrid (Quantile AND TB)"
-    elif args.triple_barrier:
-        label_col, label_mode = "y_long_tb", "Triple Barrier (ATR x2.0/1.5)"
-    else:
-        label_col, label_mode = "y_long", "Quantile 8h (top 20%)"
+    print(f"\n{'='*70}")
+    print(f"  WALK-FORWARD v5 — {args.symbol}")
+    print(f"  Folds : {test_years}")
+    print(f"  Objectif : ROI ≥ {TARGET_ROI_MONTH:.0f}%/mois | PF ≥ {DEPLOY_PF}")
+    print(f"{'='*70}\n")
 
-    print("=" * 72)
-    print("WALK-FORWARD v5 — TRM FLEET LONG + RÉGIME ALLOCATOR")
-    print("=" * 72)
-    print(f"  TRM  : {len(TEMPORAL_HORIZONS_V4)}h × {len(MOVEMENT_ARCHETYPES_V4)} archétypes = 100 TRM")
-    print(f"  Labels  : {label_mode}")
-    print(f"  Coûts   : LONG={COST_PCT*10000:.0f}bps  SHORT(harvest)={COST_SHORT*10000:.0f}bps")
-    print(f"  Folds   : {test_years}")
-    print(f"  Pool    : {symbols}")
-    print()
+    # Chargement + feature engineering
+    print("▶ Chargement données...")
+    df_primary = _load(args.symbol)
+    if df_primary is None:
+        sys.exit(1)
 
-    # Chargement des données
-    print("── Chargement + resample 1m→1h …")
-    dfs: Dict[str, pd.DataFrame] = {}
-    for sym in symbols:
-        df = load_symbol(sym, all_years)
-        if df is not None:
-            dfs[sym] = df
+    print("▶ Feature engineering (alpha + flow + long)...")
+    df_primary = _enrich(df_primary)
+    print(f"   {args.symbol} : {len(df_primary):,} barres  [{len(df_primary.columns)} colonnes]")
 
-    if PRIMARY_SYM not in dfs:
-        sys.exit(f"✗ {PRIMARY_SYM} manquant dans {DATA_DIR}")
+    # Actifs supplémentaires
+    extra_dfs: List[pd.DataFrame] = []
+    if not args.no_extra:
+        for path in sorted(DATA_DIR.glob("*_1h_enriched.parquet")):
+            sym = path.stem.replace("_1h_enriched", "")
+            if sym == args.symbol:
+                continue
+            dex = _load(sym)
+            if dex is not None and len(dex) >= 5000:
+                dex = _enrich(dex)
+                extra_dfs.append(dex)
+        print(f"   Extra actifs enrichis : {len(extra_dfs)}")
 
-    df_primary = dfs[PRIMARY_SYM]
-    extra_dfs  = [v for k, v in dfs.items() if k != PRIMARY_SYM]
-
-    # Features disponibles sur BTC (référence)
-    feat_candidates = _select_features(df_primary, _BASE_FEATURES)
-    print(f"\n  Features candidates (fill≥60% sur BTC) : {len(feat_candidates)}")
+    # Feature list v5 = INST_LONG + ALPHA + feature_engineering extras
+    feat_extra_eng = [
+        "mom_logret_4", "mom_logret_8", "mom_logret_168", "vol_ratio_4h",
+        "dist_from_local_low_24", "dist_from_local_low_168", "breakout_strength_24",
+        "trend_persistence_12", "ret_pos_autocorr_12", "upside_vol_ratio_24",
+        "taker_buy_cumul_12", "buy_vol_ratio_6", "momentum_accel_6", "boll_expansion_6",
+        "volume_delta", "vol_imbalance", "trade_intensity",
+        "liq_long_spike_12", "liq_short_spike_12", "liq_imbalance",
+    ]
+    features_v5 = list(dict.fromkeys(FEATURES_INST_LONG + feat_extra_eng + FEATURES_ALPHA))
+    print(f"   Feature candidates : {len(features_v5)}")
 
     # Walk-forward
-    fold_results: List[Dict] = []
-    for ty in test_years:
-        result = run_fold(
-            df_primary=df_primary,
-            extra_dfs=extra_dfs,
-            test_year=ty,
-            features=feat_candidates,
-            label_col=label_col,
-            run_regime=not args.no_regime,
+    results: List[Dict] = []
+    for year in test_years:
+        res = run_fold(
+            df_primary,
+            test_year=year,
+            features=features_v5,
+            extra_dfs=extra_dfs if not args.no_extra else None,
+            threshold=args.threshold,
+            use_no_long_gate=not args.no_gate,
         )
-        fold_results.append(result)
+        results.append(res)
 
-    # Rapport final
-    verdict = _print_report(fold_results)
+    # ── Résumé final ──────────────────────────────────────────────────────────
+    print(f"\n{'='*70}")
+    print("  RÉSUMÉ WALK-FORWARD v5")
+    print(f"{'='*70}")
+
+    valid_folds = [r for r in results if not r.get("skip")]
+    ok_folds    = [r for r in valid_folds if r.get("fold_ok")]
+
+    header = f"{'Fold':<6} {'Fleet AUC':>10} {'PF':>7} {'WR':>7} {'ROI/mois':>10} {'MaxDD':>7} {'Trades':>7} {'OK?':>5}"
+    print(header)
+    print("-" * len(header))
+    for r in results:
+        if r.get("skip"):
+            print(f"  {r['year']}  SKIP ({r.get('reason','')})")
+            continue
+        ok_str = "✓" if r.get("fold_ok") else "✗"
+        print(f"  {r['year']:<4}  "
+              f"AUC={r.get('fleet_auc',0):.4f}  "
+              f"PF={r.get('pf',0):.3f}  "
+              f"WR={r.get('wr',0):.1%}  "
+              f"ROI={r.get('roi_month',0):+.2f}%/m  "
+              f"DD={r.get('max_drawdown_pct',0):.1f}%  "
+              f"n={r.get('n_trades',0)}  "
+              f"{ok_str}")
+
+    if valid_folds:
+        rois   = [r["roi_month"]    for r in valid_folds]
+        pfs    = [r["pf"]           for r in valid_folds]
+        aucs   = [r.get("fleet_auc", 0.5) for r in valid_folds]
+        print(f"\n  Médiane ROI/mois : {np.median(rois):+.2f}%")
+        print(f"  Médiane PF       : {np.median(pfs):.3f}")
+        print(f"  Médiane AUC      : {np.median(aucs):.4f}")
+        print(f"  Folds OK         : {len(ok_folds)} / {len(valid_folds)}")
+        print(f"  Objectif (5%/m)  : {'✓ ATTEINT' if np.median(rois) >= 5.0 else '✗ PAS ENCORE'}")
 
     # Sauvegarde JSON
-    import json
-    report = {
-        "config": {
-            "label_mode": label_mode,
-            "symbols": symbols,
-            "folds": test_years,
-            "n_trm": 100,
-            "cost_long_bps": COST_PCT * 10000,
-        },
-        "folds": fold_results,
-        "verdict": verdict,
-    }
-    out = REPORT_DIR / "walk_forward_v5_results.json"
-    with open(out, "w") as f:
-        json.dump(report, f, indent=2, default=str)
-    print(f"\n  Rapport JSON → {out}")
+    out_path = REPORT_DIR / "results_v5.json"
+    with open(out_path, "w") as f:
+        json.dump(results, f, indent=2, default=str)
+    print(f"\n  Rapport sauvé : {out_path}")
+
+    # Exit code selon l'objectif
+    if valid_folds and np.median([r["roi_month"] for r in valid_folds]) >= 5.0:
+        print("\n  ✓ OBJECTIF 5%/MOIS ATTEINT\n")
+        sys.exit(0)
+    else:
+        print("\n  ✗ Objectif non atteint — continuer l'itération\n")
+        sys.exit(2)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,7 @@
+embargo:
+  minutes: 5
+mongo:
+  uri: mongodb+srv://christoloisel:rose@cluster0.ppyauvl.mongodb.net/
+  db: market
+  collection: buffer_events
+  lookback_minutes: 30

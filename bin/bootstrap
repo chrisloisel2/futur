@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# bin/bootstrap — Construction initiale des parquets enrichis depuis data_out/
+# Usage: bin/bootstrap [--symbols BTCUSDT ETHUSDT ...]
+#
+# À lancer une seule fois (ou après ajout de données historiques brutes).
+# Durée : 30-90 min selon les assets.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BOLD='\033[1m'; GRN='\033[0;32m'; YLW='\033[1;33m'; NC='\033[0m'
+
+echo -e "\n${BOLD}▶ Bootstrap données enrichies${NC}  $(date '+%Y-%m-%d %H:%M:%S')"
+echo -e "  Source : data_out/{year}/{SYM}_features.parquet"
+echo -e "  Sortie : data/enriched/{SYM}_1h_enriched.parquet"
+echo -e "  ${YLW}Durée estimée : 30-90 min${NC}\n"
+
+python3 scripts/bootstrap_enriched.py "$@"
+
+echo -e "\n${GRN}✓ Bootstrap terminé${NC}"
+echo -e "  Parquets : data/enriched/"
+echo -e "  Prochaine étape : bin/health\n"
