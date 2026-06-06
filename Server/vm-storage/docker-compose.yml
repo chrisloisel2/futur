@@ -1,0 +1,87 @@
+services:
+
+  sftp:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sftp
+    restart: always
+    ports:
+      - "2222:22"
+    volumes:
+      - sessions_data:/home/${SFTP_USER}/sessions
+      - ./sftp-keys:/home/${SFTP_USER}/.ssh/keys:ro
+    command: "${SFTP_USER}:${SFTP_PASS}:1000:1000:sessions"
+    healthcheck:
+      test: ["CMD", "pgrep", "sshd"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nfs:
+    image: erichough/nfs-server:2.2.1
+    container_name: nfs-server
+    restart: "no"
+    network_mode: host
+    volumes:
+      - ${SESSIONS_PATH}:/data/sessions:ro
+    environment:
+      NFS_EXPORT_0: '/data/sessions *(ro,sync,no_subtree_check,no_root_squash,insecure,fsid=0)'
+      NFS_DISABLE_VERSION_3: '1'
+    privileged: true
+    healthcheck:
+      test: ["CMD", "sh", "-c", "pgrep rpc.mountd >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  sessions-uploader:
+    build:
+      context: ./sessions-uploader
+      dockerfile: Dockerfile
+    container_name: sessions-uploader
+    restart: always
+    volumes:
+      - sessions_data:/data/sessions
+      - sessions_envoye_data:/data/session_envoye
+    environment:
+      POSTGRES_HOST: ${VM_DATA_IP}
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DELIVERY_CLIENT_ID: ${DELIVERY_CLIENT_ID:-mistral}
+      DELIVERY_CLIENT_NAME: ${DELIVERY_CLIENT_NAME:-Mistral AI}
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.50.0
+    container_name: cadvisor-storage
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+
+volumes:
+  sessions_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SESSIONS_PATH}
+  sessions_envoye_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SESSIONS_ENVOYE_PATH}
+
+networks:
+  default:
+    name: vm-storage-network
