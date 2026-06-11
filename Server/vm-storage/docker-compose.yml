@@ -53,6 +53,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DELIVERY_CLIENT_ID: ${DELIVERY_CLIENT_ID:-mistral}
       DELIVERY_CLIENT_NAME: ${DELIVERY_CLIENT_NAME:-Mistral AI}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_SENDER: ${SMTP_SENDER:-${SMTP_USER}}
+      MAX_ATTACH_MB: ${MAX_ATTACH_MB:-200}
+      KAFKA_BROKER: ${KAFKA_BROKER:-${VM_DATA_IP}:9092}
+      SERVER_ID: ${SERVER_ID:-vm-storage}
+      HEARTBEAT_INTERVAL: ${HEARTBEAT_INTERVAL:-60}
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.50.0

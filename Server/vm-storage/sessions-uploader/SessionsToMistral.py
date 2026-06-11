@@ -1,10 +1,26 @@
+"""
+SessionsToMistral.py — Envoie les sessions complètes/valides vers Mistral.
+
+Parallélisme :
+  - Phase d'analyse (validation d'intégrité de chaque candidat) :
+    ProcessPoolExecutor (ANALYZE_PROCESSES, défaut nb CPUs) découpé en chunks,
+    chaque processus utilisant un ThreadPoolExecutor (ANALYZE_THREADS_PER_PROCESS,
+    défaut 8) pour paralléliser l'I/O (lecture des fichiers de session sur NAS).
+  - Phase d'envoi (zip + upload réseau + DB) :
+    ThreadPoolExecutor (UPLOAD_WORKERS, défaut 3) — l'upload HTTP et la
+    compression libèrent le GIL, donc des threads suffisent.
+"""
+
 import json
 import logging
 import os
 import shutil
 import sys
 import tempfile
+import threading
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from datetime import datetime, timezone
+from multiprocessing import cpu_count
 from pathlib import Path
 
 import psycopg2
@@ -27,6 +43,14 @@ MAX_RUN_BYTES = int(os.environ.get("MAX_RUN_GB", "5")) * 1024 ** 3
 
 # Files that alone do not constitute a meaningful session
 METADATA_ONLY_FILES = {"metadata.json"}
+
+# Parallélisme — analyse (validation/intégrité) : multiprocessing + threads par
+# processus pour l'I/O (lecture des fichiers de session sur NAS)
+ANALYZE_PROCESSES           = int(os.environ.get("ANALYZE_PROCESSES", str(max(1, cpu_count() or 4))))
+ANALYZE_THREADS_PER_PROCESS = int(os.environ.get("ANALYZE_THREADS_PER_PROCESS", "8"))
+
+# Parallélisme — envoi (zip + upload réseau) : threads, l'I/O réseau libère le GIL
+UPLOAD_WORKERS = int(os.environ.get("UPLOAD_WORKERS", "3"))
 
 
 # ---------------------------------------------------------------------------
@@ -209,6 +233,123 @@ def db_mark_delivery_failed(session_id: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Validation d'intégrité — structure complète de la session
+# ---------------------------------------------------------------------------
+
+# Taille minimale d'un MP4 valide (encodage non-corrompu)
+MP4_MIN_BYTES = 100_000  # 100 KB
+
+
+def validate_session(session_dir: Path) -> list[str]:
+    """
+    Vérifie que la session est structurellement complète et sans problème connu.
+    Retourne une liste d'issues (vide = session valide).
+
+    Checks :
+      1. result.json existe et indique SUCCESS
+      2. config.json lisible, caméras sans erreur
+      3. mission.json présent
+      4. analysis.json : sync_check.ok doit être True
+      5. Pour chaque caméra (config) : <name>.mp4 ≥ 100 KB et <name>.jsonl non-vide
+      6. cameras/resampled_30hz.jsonl non-vide
+      7. Pour chaque capteur (config) : sensors/<name>.jsonl non-vide
+    """
+    issues: list[str] = []
+
+    # 1. result.json
+    result_path = session_dir / "result.json"
+    if not result_path.exists():
+        issues.append("result.json manquant")
+    else:
+        try:
+            res = json.loads(result_path.read_text(encoding="utf-8"))
+            result_val = str(res.get("result", "")).upper()
+            if result_val != "SUCCESS":
+                issues.append(f"result.json non-SUCCESS (valeur : '{res.get('result')}')")
+        except Exception as exc:
+            issues.append(f"result.json illisible : {exc}")
+
+    # 2. config.json — lit les caméras et capteurs attendus
+    config_path = session_dir / "config.json"
+    expected_cameras: list[str] = []
+    expected_sensors: list[str] = []
+    if not config_path.exists():
+        issues.append("config.json manquant")
+    else:
+        try:
+            cfg = json.loads(config_path.read_text(encoding="utf-8"))
+            for cam in cfg.get("cameras", []):
+                name = cam.get("name")
+                if not name:
+                    continue
+                expected_cameras.append(name)
+                if cam.get("error"):
+                    issues.append(f"caméra '{name}' : erreur hardware ({cam['error']})")
+            for sen in cfg.get("sensors", []):
+                name = sen.get("name")
+                if name:
+                    expected_sensors.append(name)
+        except Exception as exc:
+            issues.append(f"config.json illisible : {exc}")
+
+    # 3. mission.json
+    if not (session_dir / "mission.json").exists():
+        issues.append("mission.json manquant")
+
+    # 4. analysis.json — sync_check
+    analysis_path = session_dir / "analysis.json"
+    if analysis_path.exists():
+        try:
+            data = json.loads(analysis_path.read_text(encoding="utf-8"))
+            sync = data.get("sync_check", {})
+            if isinstance(sync.get("ok"), bool) and not sync["ok"]:
+                delta = sync.get("delta_sec", "?")
+                issues.append(f"sync_check échoué — delta={delta}s (caméras/capteurs désynchronisés)")
+        except Exception:
+            pass  # read_analysis_errors lèvera l'erreur si le fichier est corrompu
+
+    # 5. Fichiers caméra
+    cam_dir = session_dir / "cameras"
+    for name in expected_cameras:
+        mp4  = cam_dir / f"{name}.mp4"
+        jsonl = cam_dir / f"{name}.jsonl"
+
+        if not mp4.exists():
+            issues.append(f"cameras/{name}.mp4 manquant")
+        else:
+            size = mp4.stat().st_size
+            if size < MP4_MIN_BYTES:
+                issues.append(
+                    f"cameras/{name}.mp4 trop petit ({size} octets < {MP4_MIN_BYTES}) — "
+                    "encodage probablement corrompu"
+                )
+
+        if not jsonl.exists():
+            issues.append(f"cameras/{name}.jsonl manquant")
+        elif jsonl.stat().st_size == 0:
+            issues.append(f"cameras/{name}.jsonl vide — aucune frame enregistrée")
+
+    # resampled_30hz.jsonl — produit par le post-processing
+    resampled = cam_dir / "resampled_30hz.jsonl"
+    if expected_cameras:  # seulement si des caméras sont attendues
+        if not resampled.exists():
+            issues.append("cameras/resampled_30hz.jsonl manquant — post-processing non terminé")
+        elif resampled.stat().st_size == 0:
+            issues.append("cameras/resampled_30hz.jsonl vide — resample échoué")
+
+    # 6. Fichiers capteurs
+    sen_dir = session_dir / "sensors"
+    for name in expected_sensors:
+        jsonl = sen_dir / f"{name}.jsonl"
+        if not jsonl.exists():
+            issues.append(f"sensors/{name}.jsonl manquant")
+        elif jsonl.stat().st_size == 0:
+            issues.append(f"sensors/{name}.jsonl vide — aucune donnée capteur")
+
+    return issues
+
+
+# ---------------------------------------------------------------------------
 # Analysis.json — vérification des erreurs de capture
 # ---------------------------------------------------------------------------
 
@@ -268,6 +409,48 @@ def analyze_session(session_dir: Path) -> tuple[bool, str, int]:
 
 
 # ---------------------------------------------------------------------------
+# Analyse parallèle des candidats (multiprocessing + threads)
+# ---------------------------------------------------------------------------
+
+def _analyze_one(session_dir_str: str) -> tuple:
+    """
+    Classifie une session candidate (lecture seule) :
+      ("invalid",  name, issues)   — structure incomplète/corrompue
+      ("rejected", name, errors)   — erreurs dans analysis.json
+      ("empty",    name, reason)   — pas de données
+      ("valid",    name, size)     — prête à être envoyée
+    """
+    s = Path(session_dir_str)
+
+    issues = validate_session(s)
+    if issues:
+        return (s.name, "invalid", issues)
+
+    errors = read_analysis_errors(s)
+    if errors:
+        return (s.name, "rejected", errors)
+
+    is_empty, reason, size = analyze_session(s)
+    if is_empty:
+        return (s.name, "empty", reason)
+
+    return (s.name, "valid", size)
+
+
+def _analyze_chunk(session_dir_strs: list) -> list:
+    """
+    Worker process : analyse un lot de sessions via un pool de threads
+    (l'I/O — rglob, lecture JSON — domine et libère le GIL).
+    """
+    if len(session_dir_strs) == 1:
+        return [_analyze_one(session_dir_strs[0])]
+
+    workers = min(ANALYZE_THREADS_PER_PROCESS, len(session_dir_strs))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(_analyze_one, session_dir_strs))
+
+
+# ---------------------------------------------------------------------------
 # Dodge file helpers
 # ---------------------------------------------------------------------------
 
@@ -300,14 +483,32 @@ def mark_uploaded(root: Path, dodge: dict, session_name: str, size_bytes: int, d
 # ---------------------------------------------------------------------------
 
 def read_duration(session_dir: Path) -> float:
-    meta = session_dir / "metadata.json"
-    if not meta.exists():
+    """
+    Durée totale d'une session, calculée depuis analysis.json : on prend le
+    max des duration_sec de toutes les caméras (fps_check) et de tous les
+    capteurs (sensor_check), c'est-à-dire le flux le plus long.
+    """
+    analysis_path = session_dir / "analysis.json"
+    if not analysis_path.exists():
         return 0.0
     try:
-        data = json.loads(meta.read_text(encoding="utf-8"))
-        return float(data.get("duration_seconds", 0))
+        data = json.loads(analysis_path.read_text(encoding="utf-8"))
     except Exception:
         return 0.0
+
+    durations = []
+
+    cams = data.get("fps_check", {}).get("cameras", {})
+    for c in (cams or {}).values():
+        if isinstance(c, dict):
+            durations.append(c.get("duration_sec") or 0)
+
+    sensors = data.get("sensor_check", {}).get("sensors", {})
+    for s in (sensors or {}).values():
+        if isinstance(s, dict):
+            durations.append(s.get("duration_sec") or 0)
+
+    return max(durations, default=0.0)
 
 
 def format_duration(total_seconds: float) -> str:
@@ -437,9 +638,17 @@ def main() -> None:
     parser.add_argument("dossier", help="Dossier racine contenant les sessions")
     parser.add_argument("--dry-run", action="store_true",
                         help="Analyse et affiche ce qui serait envoyé, sans rien uploader ni déplacer")
+    parser.add_argument("--max-sessions", type=int, default=0,
+                        help="Nombre maximum de sessions à envoyer par exécution (0 = illimité)")
+    parser.add_argument("--all", action="store_true",
+                        help="Envoie toutes les sessions valides, sans plafond de volume "
+                             "(ignore MAX_RUN_GB). Combinable avec --max-sessions.")
     args = parser.parse_args()
 
     dry_run = args.dry_run
+    max_sessions = args.max_sessions
+    send_all = args.all
+    max_run_bytes = float("inf") if send_all else MAX_RUN_BYTES
     root = Path(args.dossier)
 
     if not root.is_dir():
@@ -468,44 +677,63 @@ def main() -> None:
     print(f"{len(all_sessions)} dossier(s) dont {len(skipped)} déjà envoyé(s). "
           f"Analyse de {len(candidates)} candidat(s)...", flush=True)
 
-    # --- Analyse au fil de l'eau : on s'arrête dès que le quota est atteint ---
+    # --- Analyse parallèle de tous les candidats (multiprocessing + threads) ---
     empty_sessions:    list[tuple[str, str]]       = []
+    invalid_sessions:  list[tuple[str, list[str]]] = []
     rejected_sessions: list[tuple[str, list[str]]] = []
     to_send:           list[tuple[Path, int]]       = []
     capped_count = 0
     cumul_bytes  = 0
 
+    results_by_name: dict = {}
+    candidate_paths = [str(s) for s in candidates]
+    if candidate_paths:
+        chunk_size = max(1, len(candidate_paths) // (ANALYZE_PROCESSES * 4))
+        chunks = [candidate_paths[i:i + chunk_size]
+                  for i in range(0, len(candidate_paths), chunk_size)]
+        with ProcessPoolExecutor(max_workers=min(ANALYZE_PROCESSES, len(chunks))) as pool:
+            for chunk_results in pool.map(_analyze_chunk, chunks, chunksize=1):
+                for name, kind, detail in chunk_results:
+                    results_by_name[name] = (kind, detail)
+
+    # --- Application du quota (max_sessions / MAX_RUN_GB), dans l'ordre d'origine ---
     for s in candidates:
-        if cumul_bytes >= MAX_RUN_BYTES:
+        kind, detail = results_by_name[s.name]
+
+        if kind == "invalid":
+            invalid_sessions.append((s.name, detail))
+            continue
+        if kind == "rejected":
+            rejected_sessions.append((s.name, detail))
+            continue
+        if kind == "empty":
+            empty_sessions.append((s.name, detail))
+            continue
+
+        # kind == "valid" → detail = size
+        size = detail
+        if (max_sessions > 0 and len(to_send) >= max_sessions) or cumul_bytes + size > max_run_bytes:
             capped_count += 1
             continue
 
-        print(f"  Analyse {s.name} ...", end="\r", flush=True)
-
-        # 1. Vérifier analysis.json — ignorer si des erreurs sont présentes
-        errors = read_analysis_errors(s)
-        if errors:
-            rejected_sessions.append((s.name, errors))
-            continue
-
-        # 2. Vérifier que la session n'est pas vide
-        is_empty, reason, size = analyze_session(s)
-        if is_empty:
-            empty_sessions.append((s.name, reason))
-        elif cumul_bytes + size > MAX_RUN_BYTES:
-            capped_count += 1
-        else:
-            to_send.append((s, size))
-            cumul_bytes += size
-
-    print(" " * 60, end="\r", flush=True)
+        to_send.append((s, size))
+        cumul_bytes += size
 
     print(f"{len(all_sessions)} session(s) trouvée(s) au total :", flush=True)
     print(f"  {len(empty_sessions)} vide(s) — ignorées")
+    print(f"  {len(invalid_sessions)} incomplète(s)/corrompue(s) — bloquées")
     print(f"  {len(rejected_sessions)} rejetée(s) — erreurs analysis.json")
     print(f"  {len(skipped)} déjà envoyée(s) — ignorées")
-    print(f"  {capped_count} non analysée(s) — plafond {format_size(MAX_RUN_BYTES)} atteint")
+    plafond_label = "illimité (--all)" if send_all else format_size(MAX_RUN_BYTES)
+    print(f"  {capped_count} non analysée(s) — plafond {plafond_label} atteint")
     print(f"  {len(to_send)} à envoyer ({format_size(cumul_bytes)})")
+
+    if invalid_sessions:
+        print("\nSessions incomplètes / corrompues (bloquées) :")
+        for name, issues in invalid_sessions:
+            print(f"  INVALIDE  {name}")
+            for issue in issues:
+                print(f"            - {issue}")
 
     if rejected_sessions:
         print("\nSessions rejetées (erreurs analysis.json) :")
@@ -539,38 +767,67 @@ def main() -> None:
             else:
                 print(f"           DB → introuvable (upload sans mise à jour DB)")
     else:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            for i, (session_dir, _) in enumerate(to_send, 1):
-                folder_name = session_dir.name
+        dodge_lock  = threading.Lock()
+        print_lock  = threading.Lock()
+
+        def _upload_one(item: tuple) -> str:
+            i, session_dir, _, tmp_dir = item
+            folder_name = session_dir.name
+
+            with print_lock:
                 print(f"[{i}/{len(to_send)}] '{folder_name}'", flush=True)
 
-                # Résoudre le session_id DB (peut différer du nom de dossier NAS)
-                db_session_id = db_resolve_session_id(folder_name)
+            # Revalidation juste avant l'envoi : un fichier a pu disparaître/être
+            # corrompu entre l'analyse initiale et le moment de l'envoi (gros run --all).
+            issues = validate_session(session_dir)
+            if issues:
+                with print_lock:
+                    print(f"  ANNULÉ : fichier(s) manquant(s)/invalide(s) détecté(s) juste avant l'envoi :", flush=True)
+                    for issue in issues:
+                        print(f"    - {issue}", flush=True)
+                return folder_name
+
+            # Résoudre le session_id DB (peut différer du nom de dossier NAS)
+            db_session_id = db_resolve_session_id(folder_name)
+            with print_lock:
                 if db_session_id:
                     print(f"  DB session_id : {db_session_id}", flush=True)
                 else:
                     print(f"  Avertissement : session '{folder_name}' introuvable en DB — upload sans mise à jour DB", flush=True)
 
-                zip_path = zip_session(session_dir, Path(tmp_dir))
-                zip_size = zip_path.stat().st_size
+            zip_path = zip_session(session_dir, Path(tmp_dir))
+            zip_size = zip_path.stat().st_size
+            with print_lock:
                 print(f"  Archive : {zip_path.name}  ({format_size(zip_size)})", flush=True)
 
+            if db_session_id:
+                db_start_delivery(db_session_id, zip_size)
+
+            success = upload_zip_to_mistral(str(zip_path))
+
+            if success:
+                duration = read_duration(session_dir)
                 if db_session_id:
-                    db_start_delivery(db_session_id, zip_size)
-
-                success = upload_zip_to_mistral(str(zip_path))
-
-                if success:
-                    duration = read_duration(session_dir)
-                    if db_session_id:
-                        db_confirm_delivered(db_session_id, zip_size, duration)
+                    db_confirm_delivered(db_session_id, zip_size, duration)
+                with dodge_lock:
                     mark_uploaded(root, dodge, folder_name, zip_size, duration)
-                    move_session_to_sent(session_dir, sent_dir)
-                else:
-                    if db_session_id:
-                        db_mark_delivery_failed(db_session_id)
+                move_session_to_sent(session_dir, sent_dir)
+            else:
+                if db_session_id:
+                    db_mark_delivery_failed(db_session_id)
 
+            zip_path.unlink(missing_ok=True)
+
+            with print_lock:
                 print(flush=True)
+
+            return folder_name
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            items = [(i, session_dir, size, tmp_dir)
+                     for i, (session_dir, size) in enumerate(to_send, 1)]
+            with ThreadPoolExecutor(max_workers=min(UPLOAD_WORKERS, len(items))) as pool:
+                list(pool.map(_upload_one, items))
 
     if dry_run:
         print("\n*** DRY-RUN terminé — rien n'a été modifié ***")
@@ -588,6 +845,8 @@ def main() -> None:
         print(f"  OK     {e['name']}  ({format_size(e['size_bytes'])}, {format_duration(e['duration_seconds'])})")
     for name in failed_this_run:
         print(f"  ECHEC  {name}")
+    for name, issues in invalid_sessions:
+        print(f"  INVALIDE  {name}  ({len(issues)} problème(s) : {issues[0]}{'…' if len(issues) > 1 else ''})")
     for name, errs in rejected_sessions:
         print(f"  REJET  {name}  ({len(errs)} erreur(s) : {errs[0]}{'…' if len(errs) > 1 else ''})")
     for name, reason in empty_sessions:
