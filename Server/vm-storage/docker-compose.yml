@@ -36,34 +36,34 @@ services:
       timeout: 5s
       retries: 3
 
-  sessions-uploader:
-    build:
-      context: ./sessions-uploader
-      dockerfile: Dockerfile
-    container_name: sessions-uploader
-    restart: always
-    volumes:
-      - sessions_data:/data/sessions
-      - sessions_envoye_data:/data/session_envoye
-    environment:
-      POSTGRES_HOST: ${VM_DATA_IP}
-      POSTGRES_PORT: "5432"
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      DELIVERY_CLIENT_ID: ${DELIVERY_CLIENT_ID:-mistral}
-      DELIVERY_CLIENT_NAME: ${DELIVERY_CLIENT_NAME:-Mistral AI}
-      BACKEND_URL: http://${VM_BACKEND_IP}:5000
-      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USER: ${SMTP_USER}
-      SMTP_PASS: ${SMTP_PASS}
-      SMTP_SENDER: ${SMTP_SENDER:-${SMTP_USER}}
-      MAX_ATTACH_MB: ${MAX_ATTACH_MB:-200}
-      KAFKA_BROKER: ${KAFKA_BROKER:-${VM_DATA_IP}:9092}
-      SERVER_ID: ${SERVER_ID:-vm-storage}
-      HEARTBEAT_INTERVAL: ${HEARTBEAT_INTERVAL:-60}
+  # sessions-uploader:
+  #   build:
+  #     context: ./sessions-uploader
+  #     dockerfile: Dockerfile
+  #   container_name: sessions-uploader
+  #   restart: always
+  #   volumes:
+  #     - sessions_data:/data/sessions
+  #     - sessions_envoye_data:/data/session_envoye
+  #   environment:
+  #     POSTGRES_HOST: ${VM_DATA_IP}
+  #     POSTGRES_PORT: "5432"
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     DELIVERY_CLIENT_ID: ${DELIVERY_CLIENT_ID:-mistral}
+  #     DELIVERY_CLIENT_NAME: ${DELIVERY_CLIENT_NAME:-Mistral AI}
+  #     BACKEND_URL: http://${VM_BACKEND_IP}:5000
+  #     INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN}
+  #     SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+  #     SMTP_PORT: ${SMTP_PORT:-587}
+  #     SMTP_USER: ${SMTP_USER}
+  #     SMTP_PASS: ${SMTP_PASS}
+  #     SMTP_SENDER: ${SMTP_SENDER:-${SMTP_USER}}
+  #     MAX_ATTACH_MB: ${MAX_ATTACH_MB:-200}
+  #     KAFKA_BROKER: ${KAFKA_BROKER:-${VM_DATA_IP}:9092}
+  #     SERVER_ID: ${SERVER_ID:-vm-storage}
+  #     HEARTBEAT_INTERVAL: ${HEARTBEAT_INTERVAL:-60}
 
   fs-scanner:
     platform: linux/amd64
