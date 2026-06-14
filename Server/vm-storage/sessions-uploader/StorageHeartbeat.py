@@ -89,6 +89,68 @@ def _captured_hours() -> tuple:
         return 0, 0.0
 
 
+def _quality_stats() -> dict:
+    """
+    Statistiques de qualité des sessions notées par fs_scanner :
+      - distribution des notes A/B/C/D/F (count + %)
+      - % de sessions exploitables (grade A/B/C/D) vs inutilisables (F)
+      - heures totales capturées / heures "propres" (sessions sans erreur)
+    """
+    empty = {
+        "quality_scored_count":  0,
+        "quality_total_count":   0,
+        "quality_avg_score":     None,
+        "quality_pct_usable":    None,
+        "quality_pct_unusable":  None,
+        "quality_grade_pct":     {"A": None, "B": None, "C": None, "D": None, "F": None},
+        "quality_grade_count":   {"A": 0, "B": 0, "C": 0, "D": 0, "F": 0},
+        "total_hours_clean":     0.0,
+    }
+    try:
+        conn = _pg_connect()
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        COUNT(*)                                                   AS total,
+                        COUNT(quality_score)                                       AS scored,
+                        ROUND(AVG(quality_score)::numeric, 1)                      AS avg_score,
+                        COUNT(*) FILTER (WHERE quality_grade = 'A')                AS a,
+                        COUNT(*) FILTER (WHERE quality_grade = 'B')                AS b,
+                        COUNT(*) FILTER (WHERE quality_grade = 'C')                AS c,
+                        COUNT(*) FILTER (WHERE quality_grade = 'D')                AS d,
+                        COUNT(*) FILTER (WHERE quality_grade = 'F')                AS f,
+                        COALESCE(SUM(duration_seconds)
+                            FILTER (WHERE quality_grade IS NOT NULL
+                                      AND quality_grade != 'F'), 0)                AS clean_sec
+                    FROM sessions
+                    WHERE session_folder IS NOT NULL
+                """)
+                total, scored, avg_score, a, b, c, d, f, clean_sec = cur.fetchone()
+        conn.close()
+
+        scored = int(scored or 0)
+        if scored == 0:
+            return empty
+
+        usable = a + b + c + d
+        pct = lambda n: round(n / scored * 100.0, 1)
+
+        return {
+            "quality_scored_count":  scored,
+            "quality_total_count":   int(total or 0),
+            "quality_avg_score":     float(avg_score) if avg_score is not None else None,
+            "quality_pct_usable":    pct(usable),
+            "quality_pct_unusable":  pct(f),
+            "quality_grade_pct":     {"A": pct(a), "B": pct(b), "C": pct(c), "D": pct(d), "F": pct(f)},
+            "quality_grade_count":   {"A": int(a), "B": int(b), "C": int(c), "D": int(d), "F": int(f)},
+            "total_hours_clean":     round(float(clean_sec) / 3600.0, 2),
+        }
+    except Exception as exc:
+        logger.warning("Impossible de lire les stats qualité BDD : %s", exc)
+        return empty
+
+
 def main():
     logger.info("Démarré — broker=%s topic=%s intervalle=%ds dir=%s",
                  KAFKA_BROKER, KAFKA_TOPIC, HEARTBEAT_INTERVAL, SESSIONS_DIR)
@@ -105,6 +167,7 @@ def main():
         disk             = _disk_usage(SESSIONS_DIR)
         sessions_on_disk = _sessions_on_disk(SESSIONS_DIR)
         sessions_in_db, total_hours = _captured_hours()
+        quality          = _quality_stats()
 
         msg = {
             "source":               "server_heartbeat",
@@ -117,6 +180,7 @@ def main():
             "sessions_count_db":    sessions_in_db,
             "total_hours_captured": total_hours,
             **disk,
+            **quality,
         }
 
         try:
@@ -124,9 +188,12 @@ def main():
             producer.flush()
             logger.info(
                 "heartbeat envoyé — disque %.1f%% (%.1f/%.1f Go libres : %.1f Go) "
-                "| %d sessions disque | %d sessions BDD | %.1fh capturées",
+                "| %d sessions disque | %d sessions BDD | %.1fh capturées "
+                "| qualité : %d/%d notées, %s%% exploitables, %s%% inutilisables",
                 disk["disk_used_pct"], disk["disk_used_gb"], disk["disk_total_gb"],
                 disk["disk_free_gb"], sessions_on_disk, sessions_in_db, total_hours,
+                quality["quality_scored_count"], quality["quality_total_count"],
+                quality["quality_pct_usable"], quality["quality_pct_unusable"],
             )
         except Exception as exc:
             logger.warning("Échec envoi Kafka : %s", exc)
