@@ -1,0 +1,450 @@
+CARRY_BASIS_BTCUSDT_2022:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/BTCUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 59e08e7c23e67996a7f38fc98f38356311bc9cf0a1f6f53151a78cff6e907b25
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+CARRY_BASIS_BTCUSDT_2023:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/BTCUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 3979d2f4c8fb5ff65e03cda144a8ae19be32a050ad56d681ff649b80303d51ee
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+CARRY_BASIS_BTCUSDT_2024:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/BTCUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 27528a9c90182dd3cb584d721b9c808f8b4a9bc18e5b1b398873f40c4559d803
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+CARRY_BASIS_BTCUSDT_2025:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/BTCUSDT/v1.0/model_2025.pkl
+  artifact_sha256: c800526759d0a92a0971ad206ab68f2c1b087c05d12567d3e04900946bf211ac
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+CARRY_BASIS_ETHUSDT_2022:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/ETHUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 737ea23d829964525275afdc7e23eb32e52a0fb508056372444bb14ed12725a2
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+CARRY_BASIS_ETHUSDT_2023:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/ETHUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 51dcd3419b72c48e996778028e37ba29ff46315454e01b9d5bd87a30901f982b
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+CARRY_BASIS_ETHUSDT_2024:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/ETHUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 2400a2f27fb000ecef949652b5d676b8fbc97c593ee7adbc98a69fe17f6b050e
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+CARRY_BASIS_ETHUSDT_2025:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/ETHUSDT/v1.0/model_2025.pkl
+  artifact_sha256: b19c241e063a7b23ca744dba164df3760a12e9016a0566457e33eb99ae13336d
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+CARRY_BASIS_SOLUSDT_2022:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/SOLUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 2a7bf099243e51c57eb055ab75e99632a1e5e42ad0ab189f664279de1223238d
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+CARRY_BASIS_SOLUSDT_2023:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/SOLUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 041c7baa5fade9a8508a32c1432e6719b3018f0a8cabe2297aaf231d52c11003
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+CARRY_BASIS_SOLUSDT_2024:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/SOLUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 88c97df7d0d3d9c3e3cfdb9a78722e62d1c08149f2e2b2be725133d41e606d15
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+CARRY_BASIS_SOLUSDT_2025:
+  artifact_path: artifacts/institutional/engines/CARRY_BASIS/SOLUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 9c0b419199ab8c7b7b36f3a8cee5662191151e62a532ce540ac2bc89784fa385
+  artifact_type: dict
+  engine: CARRY_BASIS
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+EXIT_ENGINE_v1:
+  artifact_path: reports/paper_trading/.models/exit_model_v1.pkl
+  artifact_sha256: d2a54220d0845168a27fad8a9547909541db499fb057ba8a97dc5275a646add9
+  artifact_type: ExitFleetV1
+  engine: EXIT_ENGINE
+  executable: true
+  status: SHADOW
+  version: v1
+LIQUIDATION_REBOUND_BTCUSDT_2022:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/BTCUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 332a7b53d7795a451bef37758b12dab907556be3696159faef6ed5e124695ee5
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+LIQUIDATION_REBOUND_BTCUSDT_2023:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/BTCUSDT/v1.0/model_2023.pkl
+  artifact_sha256: d03db7c388f9a6ae3cb7516d951cfc147baf750b81398ee5c3f3496c154678f4
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+LIQUIDATION_REBOUND_BTCUSDT_2024:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/BTCUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 6d58408ecd141883ace7feab35a3260a0a2e357baf52a1ec1dcf122f0b00e5f0
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+LIQUIDATION_REBOUND_BTCUSDT_2025:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/BTCUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 9a498951b67ca67681d7682730a8b198b22df955dfca2d791bea6fa6a48ad796
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+LIQUIDATION_REBOUND_ETHUSDT_2022:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/ETHUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 301db159e87835ff98e4d7b3f20c26fbd57219081412d38809ec44d2accd7c6b
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+LIQUIDATION_REBOUND_ETHUSDT_2023:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/ETHUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 8cb32b9abce3e37240938114dc8266a6603f6912f72580d9f9b395259d3c81c0
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+LIQUIDATION_REBOUND_ETHUSDT_2024:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/ETHUSDT/v1.0/model_2024.pkl
+  artifact_sha256: b1e460ea68329af6e79fe67e50a9aa802f6094d2d63216b70c54e2947569c22b
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+LIQUIDATION_REBOUND_ETHUSDT_2025:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/ETHUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 3fc27e8cc0c417233de9caacbeefdca9b51a3bea816f0f2d6d2fecfd80162b84
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+LIQUIDATION_REBOUND_SOLUSDT_2022:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/SOLUSDT/v1.0/model_2022.pkl
+  artifact_sha256: da323263ba6611782171048c9e290c47a2682fbe25862f43cc4ccb47f619b25b
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+LIQUIDATION_REBOUND_SOLUSDT_2023:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/SOLUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 40c717aef0ce811d1819d78c92c83c4fb3b68763fda45ec9e328a1066509ad7f
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+LIQUIDATION_REBOUND_SOLUSDT_2024:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/SOLUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 15f492fae2d6783f50ae9889a9fbece711f370ac8fbd4196db15b3e307a6ca53
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+LIQUIDATION_REBOUND_SOLUSDT_2025:
+  artifact_path: artifacts/institutional/engines/LIQUIDATION_REBOUND/SOLUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 8ec9195fe3d3a8647769186b32887c811587e95f94fefd384ff8ca1a5f2d35ff
+  artifact_type: dict
+  engine: LIQUIDATION_REBOUND
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+PULLBACK_LONG_BTCUSDT_2022:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/BTCUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 067b8121cff5713de8bac6e2e6813b0d5fe161fb806387942a6e20529abcd21f
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2022
+PULLBACK_LONG_BTCUSDT_2023:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/BTCUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 0902462535924765a093ebd688c347bcd1a42cf50b707813d35d08074638721c
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2023
+PULLBACK_LONG_BTCUSDT_2024:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/BTCUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 261e285bca560e19683f73ffea997894ffa5c2f4fb3dcf29da3a8ef5745d17ad
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2024
+PULLBACK_LONG_BTCUSDT_2025:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/BTCUSDT/v1.0/model_2025.pkl
+  artifact_sha256: ee7207ac80fcfa722cd0eddf60fcf741b2c82891f3d0046dad06a183b0f56c86
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2025
+PULLBACK_LONG_ETHUSDT_2022:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/ETHUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 528bf6f9ffaaf0d3b793814c3630a4261af7c68ec03418382af1bf21e219efaa
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2022
+PULLBACK_LONG_ETHUSDT_2023:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/ETHUSDT/v1.0/model_2023.pkl
+  artifact_sha256: e81ef47812ceba709fef8d70421e2b6cb296eec6d1e933faf9d10fa9e8544261
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2023
+PULLBACK_LONG_ETHUSDT_2024:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/ETHUSDT/v1.0/model_2024.pkl
+  artifact_sha256: 1230d16c485193764be64e539a4cab236047283f046fd290c9f6d980565511d8
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2024
+PULLBACK_LONG_ETHUSDT_2025:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/ETHUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 102612fb397dd79530b6ba5fb1e1e34a11c2a18b12f7c73d46e87635f896246d
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2025
+PULLBACK_LONG_SOLUSDT_2022:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/SOLUSDT/v1.0/model_2022.pkl
+  artifact_sha256: 02a0ec6377f8a6035fdde622f947fdc01ba526520c6992b8412ad12929f9b7c8
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2022
+PULLBACK_LONG_SOLUSDT_2023:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/SOLUSDT/v1.0/model_2023.pkl
+  artifact_sha256: 16bf6b72c4a4bf02b10cf15ca1db56ebe00817453531c13ce877d76d34d701b4
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2023
+PULLBACK_LONG_SOLUSDT_2024:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/SOLUSDT/v1.0/model_2024.pkl
+  artifact_sha256: e08c2475f5579b6f290eb748244ccfc5d309d26017222d5ea9aa479799873239
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2024
+PULLBACK_LONG_SOLUSDT_2025:
+  artifact_path: artifacts/institutional/engines/PULLBACK_LONG/SOLUSDT/v1.0/model_2025.pkl
+  artifact_sha256: 98284289278e009d8417b5af49137103ffde9fc6a1af417d7345c2a1d2a81bec
+  artifact_type: dict
+  engine: PULLBACK_LONG
+  executable: true
+  status: PAPER
+  version: v1.0/2025
+TRM_TREND_INST_BTCUSDT_2022:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2022/model_2022.pkl
+  artifact_sha256: 170b2109b9844461f2c540c771c0f1987f9abe31cc122d5921e59a1db8c38fed
+  artifact_type: LightGBMClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+TRM_TREND_INST_BTCUSDT_2023:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2023/model_2023.pkl
+  artifact_sha256: c44dc96be8b778f9562e43b242d79cfa46e4aa9ae7837b644a8e9a2446323f6f
+  artifact_type: LogisticBaselineClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+TRM_TREND_INST_BTCUSDT_2024:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2024/model_2024.pkl
+  artifact_sha256: 40fd5b4573b3f808ae55dea138fbe7ea149435a1a677f26da7aeebc5f564878c
+  artifact_type: LogisticBaselineClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+TRM_TREND_INST_BTCUSDT_2025:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2025/model_2025.pkl
+  artifact_sha256: 6447bc8d2bf93e11199ac772d317b4024ed9132137df65a5439b8059bc715d17
+  artifact_type: LightGBMClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+TRM_TREND_INST_ETHUSDT_2022:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2022/model_2022.pkl
+  artifact_sha256: 47c7087ad58ae2aa36aa6d1a3446455f69518c86131faa02728610d1a48dacea
+  artifact_type: LogisticBaselineClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2022
+TRM_TREND_INST_ETHUSDT_2023:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2023/model_2023.pkl
+  artifact_sha256: e51094a8fc040657a26bd7737fff7189d248b049366c71e28fa45d4da5ebf847
+  artifact_type: LightGBMClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2023
+TRM_TREND_INST_ETHUSDT_2024:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2024/model_2024.pkl
+  artifact_sha256: 1d82a5f11fa78e559702a9b38ddae66dcec9d090967c1bd0b6bd2180c0a2b3bd
+  artifact_type: LogisticBaselineClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2024
+TRM_TREND_INST_ETHUSDT_2025:
+  artifact_path: artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2025/model_2025.pkl
+  artifact_sha256: 24970426f8a3f40d9a7a6c7d73df67ad1602b8c36d39377f3778a21a5e9704e6
+  artifact_type: LogisticBaselineClassifier
+  engine: TRM_TREND_INST
+  executable: true
+  status: SHADOW
+  version: v1.0/2025
+TRM_TREND_LONG_v4_ADAUSDT:
+  artifact_path: reports/paper_trading/.models/ADAUSDT_2025.pkl
+  artifact_sha256: 8f5d79695763f75e3b1d2d58ba4a7f59f666314bbe507a2f3c00c0aea099580d
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_AVAXUSDT:
+  artifact_path: reports/paper_trading/.models/AVAXUSDT_2025.pkl
+  artifact_sha256: caa19c29554d6b0ed73950a8a6621c0d99d39d78a43a63ee6c9f5994ccc9ccb1
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_BNBUSDT:
+  artifact_path: reports/paper_trading/.models/BNBUSDT_2025.pkl
+  artifact_sha256: d03d2d88421589320bbc3a2c0eee1491ef92b7916a007c2ca84cdf4b95c0b610
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_BTCUSDT:
+  artifact_path: reports/paper_trading/.models/BTCUSDT_2025.pkl
+  artifact_sha256: 1529f32e84eac4bd23b1b3b371f2e4b078ba50799a7931dad0ba4aa91bf12d61
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_DOGEUSDT:
+  artifact_path: reports/paper_trading/.models/DOGEUSDT_2025.pkl
+  artifact_sha256: fdad07318bc7d94cf2f44a3f2c2555b9d987270b7f7b6e004ba21cd1f058fcce
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_DOTUSDT:
+  artifact_path: reports/paper_trading/.models/DOTUSDT_2025.pkl
+  artifact_sha256: 4147c83ae3e659e4cf0988808533f29c25a8c1918e051c8d99d2e4bc7428950e
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_ETHUSDT:
+  artifact_path: reports/paper_trading/.models/ETHUSDT_2025.pkl
+  artifact_sha256: 97730d6d9feb233e02e93718fdd0d7a07fa609f072ac04f84ae304b6f3eed71f
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_LINKUSDT:
+  artifact_path: reports/paper_trading/.models/LINKUSDT_2025.pkl
+  artifact_sha256: 9df0d661f0426c910594f7e2b2c559c08add0f634c395e09a4acd293bcd973b0
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_SOLUSDT:
+  artifact_path: reports/paper_trading/.models/SOLUSDT_2025.pkl
+  artifact_sha256: 885146863558cdeaba075846f3358aa9a444b11038ee4d00bb3a37ea9d5f775a
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v4_XRPUSDT:
+  artifact_path: reports/paper_trading/.models/XRPUSDT_2025.pkl
+  artifact_sha256: 136f94dbc479a74495eed98b1e0e626cc53f1684411014ac24532b09c23ac2c8
+  artifact_type: TRMFleetLongV4
+  engine: TRM_TREND_LONG
+  executable: true
+  status: SHADOW
+  version: v4
+TRM_TREND_LONG_v5:
+  artifact_path: null
+  artifact_sha256: null
+  artifact_type: null
+  engine: TRM_TREND_LONG
+  executable: false
+  note: +5.88%/mois = résultat HISTORIQUE non reproductible tant qu'aucun artefact
+    v5 n'est retrouvé/régénéré. Ne pas citer comme alpha live.
+  status: MISSING_ARTIFACT
+  version: v5

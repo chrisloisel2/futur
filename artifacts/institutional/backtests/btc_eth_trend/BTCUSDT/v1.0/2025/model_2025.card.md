@@ -10,7 +10,7 @@
 ```json
 {
   "task": "multiclass",
-  "n_estimators": 500,
+  "n_estimators": 400,
   "early_stopping_rounds": 50,
   "calibrate": true,
   "objective": "multiclass",

@@ -13,8 +13,14 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+try:
+    from typing import Literal
+except ImportError:  # pragma: no cover - Python <3.8 fallback
+    Literal = None  # type: ignore
 
 import pandas as pd
 
@@ -22,6 +28,7 @@ import pandas as pd
 SIGNAL_FRAME_VERSION = "1.0.0"
 PORTFOLIO_STATE_VERSION = "1.0.0"
 RISK_STATE_VERSION = "1.0.0"
+OPPORTUNITY_VERSION = "1.0.0"
 
 SIGNAL_DIRECTIONS = frozenset(("long", "short", "flat"))
 ENGINE_NAMES = frozenset(("TRM_EVENT_ENGINE", "INSTITUTIONAL_ENGINE", "META_PORTFOLIO"))
@@ -507,3 +514,171 @@ class RobustnessScore:
             "total_score": self.total_score,
             "verdict": self.verdict,
         }
+
+
+# ─── Opportunity ──────────────────────────────────────────────────────────────
+# Contrat UNIQUE produit par TOUS les moteurs alpha (usine à opportunités).
+# Remplace la décision binaire "p_long" par un objet tradable standardisé :
+# rendement attendu, risque attendu, durée, coût, corrélation, zone et raison.
+
+# Échelle de promotion live progressive (jamais paper → full live directement).
+EngineStatusT = ("DISABLED", "SHADOW", "PAPER", "MICRO_LIVE", "HALF_LIVE", "FULL_LIVE")
+ENGINE_STATUSES = frozenset(EngineStatusT)
+
+# Trois zones de décision (remplace p ≥ τ → trade / sinon rien).
+DECISION_ZONES = frozenset(("A_TRADE", "B_SHADOW", "C_REJECT"))
+
+# Directions autorisées : LONG, hedge lié (jamais short nu), ou cash.
+OPPORTUNITY_DIRECTIONS = frozenset(("LONG", "SHORT_HEDGE", "CASH"))
+
+# Fraction de la taille "normale" autorisée selon le statut live.
+STATUS_SIZE_FRACTION: Dict[str, float] = {
+    "DISABLED": 0.0,
+    "SHADOW": 0.0,
+    "PAPER": 0.0,        # paper = pas de capital réel
+    "MICRO_LIVE": 0.05,  # 1-5% de la taille normale
+    "HALF_LIVE": 0.50,
+    "FULL_LIVE": 1.0,
+}
+
+
+class ReasonCode(str, Enum):
+    """Codes de raison de décision — explique CHAQUE trade et CHAQUE non-trade."""
+    REJECT_LOW_PROBA = "REJECT_LOW_PROBA"
+    REJECT_BEAR_NO_LONG = "REJECT_BEAR_NO_LONG"
+    REJECT_SUPPRESSOR = "REJECT_SUPPRESSOR"
+    REJECT_KILLSWITCH = "REJECT_KILLSWITCH"
+    REJECT_EXPOSURE_LIMIT = "REJECT_EXPOSURE_LIMIT"
+    REJECT_COOLDOWN = "REJECT_COOLDOWN"
+    REJECT_CORRELATION = "REJECT_CORRELATION"
+    REJECT_NO_DATA = "REJECT_NO_DATA"
+    ACCEPT_TRADE = "ACCEPT_TRADE"
+    ACCEPT_SHADOW = "ACCEPT_SHADOW"
+
+
+@dataclass
+class Opportunity:
+    """
+    Objet standardisé émis par tout moteur alpha.
+
+    Toute décision (trade, shadow, reject) est représentée par une Opportunity ;
+    le DecisionLedger en écrit une par heure × asset × moteur, même les rejets.
+    """
+    timestamp: pd.Timestamp
+    engine_id: str
+    asset: str
+    direction: str                  # OPPORTUNITY_DIRECTIONS
+    status: str                     # ENGINE_STATUSES
+
+    p_success: float                # proba de succès calibrée ∈ [0, 1]
+    expected_return: float          # E[r] net attendu sur l'horizon (fraction)
+    expected_vol: float             # σ attendue (fraction, > 0)
+    expected_holding_hours: float   # durée attendue de détention (heures)
+    expected_cost: float            # coût aller-retour estimé (fraction)
+
+    score_raw: float                # score brut du modèle (non borné)
+    score_net: float               # score net coûts (utilisé pour le tri)
+    confidence: float               # confiance ∈ [0, 1]
+
+    regime: str                     # régime marché au moment de la décision
+    correlation_bucket: str         # ex. "majors", "alts_l1", "cash"
+
+    max_position_fraction: float    # taille max suggérée (fraction equity)
+    stop_loss: Optional[float]      # distance stop (fraction) ou None
+    take_profit: Optional[float]    # distance TP (fraction) ou None
+
+    decision_zone: str              # DECISION_ZONES
+    reason: str                     # ReasonCode.value
+    version: str = OPPORTUNITY_VERSION
+
+    # ── validation ────────────────────────────────────────────────────────────
+    def validate(self) -> None:
+        if self.direction not in OPPORTUNITY_DIRECTIONS:
+            raise ValueError(f"direction={self.direction!r} must be in {OPPORTUNITY_DIRECTIONS}")
+        if self.status not in ENGINE_STATUSES:
+            raise ValueError(f"status={self.status!r} must be in {ENGINE_STATUSES}")
+        if self.decision_zone not in DECISION_ZONES:
+            raise ValueError(f"decision_zone={self.decision_zone!r} must be in {DECISION_ZONES}")
+        if not (0.0 <= self.p_success <= 1.0):
+            raise ValueError(f"p_success={self.p_success} hors [0,1]")
+        if not (0.0 <= self.confidence <= 1.0):
+            raise ValueError(f"confidence={self.confidence} hors [0,1]")
+        if self.expected_vol <= 0:
+            raise ValueError(f"expected_vol={self.expected_vol} doit être > 0")
+        if not self.asset:
+            raise ValueError("asset vide")
+        if not self.engine_id:
+            raise ValueError("engine_id vide")
+
+    def is_actionable(self) -> bool:
+        """True si zone A (trade réel/paper) ET statut autorisant du capital."""
+        return self.decision_zone == "A_TRADE"
+
+    def is_shadow(self) -> bool:
+        return self.decision_zone == "B_SHADOW"
+
+    def size_fraction(self) -> float:
+        """Taille effective = max_position_fraction × fraction live du statut."""
+        return self.max_position_fraction * STATUS_SIZE_FRACTION.get(self.status, 0.0)
+
+    # ── (dé)sérialisation ───────────────────────────────────────────────────────
+    def to_dict(self) -> Dict[str, Any]:
+        d = asdict(self)
+        d["timestamp"] = pd.Timestamp(self.timestamp).isoformat()
+        return d
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Opportunity":
+        d = d.copy()
+        d["timestamp"] = pd.Timestamp(d["timestamp"])
+        d.pop("version", None)
+        return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})
+
+    # ── pont avec SignalFrame (moteurs institutional existants) ─────────────────
+    @classmethod
+    def from_signal_frame(
+        cls,
+        sf: "SignalFrame",
+        status: str,
+        decision_zone: str,
+        reason: str,
+        correlation_bucket: str,
+        regime: str = "UNKNOWN",
+        expected_cost: float = 0.001,
+        max_position_fraction: float = 0.25,
+        p_success: Optional[float] = None,
+    ) -> "Opportunity":
+        """Dérive une Opportunity d'un SignalFrame produit par un moteur institutional."""
+        dir_map = {"long": "LONG", "short": "SHORT_HEDGE", "flat": "CASH"}
+        p = float(sf.calibrated_score if p_success is None else p_success)
+        return cls(
+            timestamp=sf.timestamp,
+            engine_id=sf.engine_name,
+            asset=sf.asset,
+            direction=dir_map.get(sf.direction, "CASH"),
+            status=status,
+            p_success=p,
+            expected_return=float(sf.expected_return),
+            expected_vol=float(sf.expected_vol),
+            expected_holding_hours=float(sf.max_holding_minutes) / 60.0,
+            expected_cost=float(expected_cost),
+            score_raw=float(sf.raw_score),
+            score_net=float(sf.expected_return - expected_cost),
+            confidence=float(sf.confidence),
+            regime=regime,
+            correlation_bucket=correlation_bucket,
+            max_position_fraction=float(max_position_fraction),
+            stop_loss=float(sf.stop_distance) if sf.stop_distance else None,
+            take_profit=float(sf.take_profit_distance) if sf.take_profit_distance else None,
+            decision_zone=decision_zone,
+            reason=reason,
+        )
+
+
+OPPORTUNITY_COLUMNS = [
+    "timestamp", "engine_id", "asset", "direction", "status",
+    "p_success", "expected_return", "expected_vol", "expected_holding_hours",
+    "expected_cost", "score_raw", "score_net", "confidence", "regime",
+    "correlation_bucket", "max_position_fraction", "stop_loss", "take_profit",
+    "decision_zone", "reason",
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "file": "data/enriched/ADAUSDT_1h_enriched.parquet",
+    "sha256": "1eb1665e7f3d3503780251c7a8f9167b61fce209c8e5ce23545063d7e203eb1c",
+    "issues": [],
+    "ok": true,
+    "rows": 55905,
+    "max_gap_hours": 1.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/AVAXUSDT_1h_enriched.parquet",
+    "sha256": null,
+    "issues": [
+      "MAGIC_BYTES_MISSING (fichier corrompu)"
+    ],
+    "ok": false,
+    "rows": 0
+  },
+  {
+    "file": "data/enriched/BNBUSDT_1h_enriched.parquet",
+    "sha256": null,
+    "issues": [
+      "MAGIC_BYTES_MISSING (fichier corrompu)"
+    ],
+    "ok": false,
+    "rows": 0
+  },
+  {
+    "file": "data/enriched/BTCUSDT_1h_enriched.parquet",
+    "sha256": "1caabc523ccb20dd3339ebe89dee75a4f85f24c373e0e5260a7eb0b0d6c90a22",
+    "issues": [
+      "LARGE_GAP=6018h"
+    ],
+    "ok": false,
+    "rows": 71516,
+    "max_gap_hours": 6018.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/DOGEUSDT_1h_enriched.parquet",
+    "sha256": "38ed62db8d24655da433695bc7eadc1ff5850bf0c2e835d2758fe82448f588f5",
+    "issues": [],
+    "ok": true,
+    "rows": 60897,
+    "max_gap_hours": 9.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/DOTUSDT_1h_enriched.parquet",
+    "sha256": null,
+    "issues": [
+      "MAGIC_BYTES_MISSING (fichier corrompu)"
+    ],
+    "ok": false,
+    "rows": 0
+  },
+  {
+    "file": "data/enriched/ETHUSDT_1h_enriched.parquet",
+    "sha256": "97a3f3ab518bb2a78c21ad82653265a4a6927c1a8f8ce99d692e5e9a4e04a659",
+    "issues": [
+      "LARGE_GAP=7928h"
+    ],
+    "ok": false,
+    "rows": 69652,
+    "max_gap_hours": 7928.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/LINKUSDT_1h_enriched.parquet",
+    "sha256": null,
+    "issues": [
+      "MAGIC_BYTES_MISSING (fichier corrompu)"
+    ],
+    "ok": false,
+    "rows": 0
+  },
+  {
+    "file": "data/enriched/SOLUSDT_1h_enriched.parquet",
+    "sha256": "3ccd5b90e5c10aee06a3e1da3eacd67dacd4fb09e8eef7d0149ba1c8ae6f0e0f",
+    "issues": [
+      "LARGE_GAP=73h"
+    ],
+    "ok": false,
+    "rows": 50315,
+    "max_gap_hours": 73.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/XRPUSDT_1h_enriched.parquet",
+    "sha256": "5e8b7354884a33f9f6940aeef771aea830c9b5859f87c93bc2ab4bfe8e45827c",
+    "issues": [],
+    "ok": true,
+    "rows": 71105,
+    "max_gap_hours": 11.0,
+    "nan_ratio_ohlc": 0.0
+  }
+]

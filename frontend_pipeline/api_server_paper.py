@@ -71,6 +71,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ─── Observabilité portefeuille (usine à opportunités) ─────────────────────────
+# Inclusion gardée : un échec d'import ne doit JAMAIS casser le service paper.
+try:
+    from frontend_pipeline.portfolio_ops_api import router as portfolio_ops_router
+    app.include_router(portfolio_ops_router)
+except Exception as _e:  # pragma: no cover
+    print(f"[api] portfolio_ops_router non chargé: {_e}")
+
 # ─── Run state ────────────────────────────────────────────────────────────────
 
 _run_lock          = threading.Lock()
