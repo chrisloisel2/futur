@@ -145,3 +145,31 @@ CARRY_V2_BTC          : GATE_PASS (delta-neutral, à gater funding-regime)
 HEDGE_GOVERNOR_V1     : PAPER_ONLY (module + tests, intégration backtester à faire)
 LIVE / MICRO_LIVE     : DISABLED
 ```
+
+---
+
+## Doctrine accumulation (2026-06-28, tag v0.24)
+
+**Règle structurelle prouvée** : *un signal utile localement peut être destructeur en exécution
+portefeuille* (exit engine, forced-exit régime, CARRY_GATE_V2 — 3 occurrences). Tout signal doit
+passer 2 niveaux : (1) relation statistique locale, (2) amélioration portefeuille APRÈS fees/churn/
+holding/exits/DD. Signal valide ≠ moteur valide.
+
+```
+V1.1_CARRY50_OLD_GATE      : CONFIRMED_BASELINE (+4.8%/an, DD 1.9%, 3.6y) — figé v0.23, paper-live actif
+CARRY_GATE_V2 (exécution)  : REJECTED_PORTFOLIO (churn/fees) — désactivé par défaut
+CARRY_GATE_V2 (feature)    : KEPT_AS_RESEARCH_FEATURE (contexte/stress, pas de gate exécution)
+CROSS_EXCHANGE_DIRECTIONAL : REJECTED
+CROSS_EXCHANGE_STRESS      : KEPT_AS_RISK_FEATURE
+FUNDING_REFINEMENT         : STOPPED (plafond ~5%/an à DD bas)
+DERIVATIVES_COLLECTOR      : ACTIVE_24/7 (fix reconnect-churn : calme ≠ déconnexion)
+LIQUIDATION_EVENT_PIPELINE : BUILT (catalogue + forward labels) — DATA_NOT_READY (0 events, calme)
+LIQUIDATION_EVENT_ENGINE   : DATA_ACCUMULATION_PHASE (seuils : 100 diag / 300 train / 1000 robuste)
+MICRO_LIVE / TARGET_40_80K : DISABLED / DATA_GATED
+```
+
+**Pipeline accumulation productive (sans overfit)** : `events/live_event_builder.py` +
+`scripts/build_live_liquidation_events.py` + `report_liquidation_event_inventory.py` (verdict
+DATA_NOT_READY / EVENT_DIAGNOSTIC_READY / ENGINE_TRAINING_READY). Inventaire hebdo. **Aucun
+modèle avant ≥100 events.** Le prochain progrès = 1er moteur événementiel qui passe ses gates sur
+de vraies liquidations accumulées. `reports/V1.1_BASELINE.md`.
