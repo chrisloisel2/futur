@@ -47,6 +47,9 @@ class MultiLegConfig:
     carry_fraction: float = 0.20        # par asset carry (notional spot)
     max_open_longs: int = 3
     max_long_entries_per_bar: int = 1   # limite la rotation (anti-churn)
+    # réparations long book (Phase 3)
+    long_min_er_cost_mult: float = 0.0  # rejet si expected_return < mult × coût (0=off, 3=filtre)
+    long_universe: Optional[List[str]] = None  # restreint l'univers long (ex. BTC/ETH/SOL)
     borrow_bps_per_year: float = 1.0
     # toggles d'ablation
     enable_long: bool = True
@@ -401,9 +404,15 @@ class MultiLegBacktester:
                 if n_open_long >= cfg.max_open_longs or entries_this_bar >= cfg.max_long_entries_per_bar:
                     break
                 a = opp.asset
+                if cfg.long_universe is not None and a not in cfg.long_universe:
+                    continue
                 if a in cooldown and t < cooldown[a]:
                     continue
                 if any(p.is_open and p.position_type == "DIRECTIONAL_LONG" and p.asset == a for p in positions):
+                    continue
+                # filtre fees-dominated (Phase 3) : expected_return net ≥ mult × coût aller-retour
+                if cfg.long_min_er_cost_mult > 0 and \
+                        opp.expected_return < cfg.long_min_er_cost_mult * cfg.long_roundtrip:
                     continue
                 # mult par-asset (Phase 47) prioritaire
                 opp_mult = long_mult

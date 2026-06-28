@@ -1,0 +1,92 @@
+{
+  "window": [
+    "2022-01-01",
+    "2026-06-20"
+  ],
+  "runs": {
+    "V1_base": {
+      "metrics": {
+        "total_return": 0.07553013131908748,
+        "pf": 1.0226439632764495,
+        "max_drawdown": -0.020155997734976328,
+        "roi_month_median": 0.00034881863665736645,
+        "roi_month_p10": -0.003847547188703504,
+        "cvar_95": -1.6771482572067592e-05,
+        "n_legs": 841,
+        "sharpe": 0.8809343911426528
+      },
+      "pnl_by_type": {
+        "directional": 608.97,
+        "carry_funding": 1160.7,
+        "hedge": -0.19,
+        "fees": -1012.9,
+        "borrow": -1.28
+      },
+      "annualized": 0.01642281093756992,
+      "carry_share": 0.6558145842044003
+    },
+    "V1_repaired_3xfees_univ": {
+      "metrics": {
+        "total_return": 0.06989899973217772,
+        "pf": 1.0210000679812434,
+        "max_drawdown": -0.024781397930607237,
+        "roi_month_median": 0.00034881866461655697,
+        "roi_month_p10": -0.0037144528169193777,
+        "cvar_95": -1.6312812851659923e-05,
+        "n_legs": 832,
+        "sharpe": 0.8340039522726391
+      },
+      "pnl_by_type": {
+        "directional": 539.95,
+        "carry_funding": 1160.1,
+        "hedge": 2.05,
+        "fees": -1001.83,
+        "borrow": -1.28
+      },
+      "annualized": 0.015229855037731888,
+      "carry_share": 0.6815698255096645
+    },
+    "V1_rep_carry35": {
+      "metrics": {
+        "total_return": 0.11983942522814206,
+        "pf": 1.020860729995498,
+        "max_drawdown": -0.02051038473884574,
+        "roi_month_median": 0.0006614814656531465,
+        "roi_month_p10": -0.003154024543166578,
+        "cvar_95": -1.730740782889048e-05,
+        "n_legs": 820,
+        "sharpe": 1.3771475516606175
+      },
+      "pnl_by_type": {
+        "directional": 545.7,
+        "carry_funding": 2068.67,
+        "hedge": 1.01,
+        "fees": -1414.7,
+        "borrow": -2.29
+      },
+      "annualized": 0.025644399249901584,
+      "carry_share": 0.7909634546413905
+    },
+    "V1_rep_carry50": {
+      "metrics": {
+        "total_return": 0.17162326162526287,
+        "pf": 1.020817670679581,
+        "max_drawdown": -0.019308574212570144,
+        "roi_month_median": 0.0009449504264924524,
+        "roi_month_p10": -0.0028642875333871887,
+        "cvar_95": -1.8272304576886356e-05,
+        "n_legs": 810,
+        "sharpe": 1.8978529201277412
+      },
+      "pnl_by_type": {
+        "directional": 551.72,
+        "carry_funding": 3011.94,
+        "hedge": -1.46,
+        "fees": -1842.63,
+        "borrow": -3.33
+      },
+      "annualized": 0.036069314056341506,
+      "carry_share": 0.8448355174580379
+    }
+  }
+}
