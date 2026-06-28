@@ -1,0 +1,177 @@
+{
+  "score": 90.0,
+  "tier": "STRONG_PAPER",
+  "decision": "PAPER_CONTINUE / MICRO_LIVE_BLOCKED_UNTIL_60_90D_REAL_TRACKING",
+  "window": [
+    "2022-11-03",
+    "2026-06-28"
+  ],
+  "checks": {
+    "reproducibility": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "ledger_hash": "86f7b076d2c7",
+      "detail": "2 runs identiques",
+      "weight": 10
+    },
+    "data_integrity": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "files": 9,
+      "fail": 0,
+      "weight": 15
+    },
+    "leakage_audit": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "regime_causal": true,
+      "weight": 15
+    },
+    "baseline": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "roi": 0.1856,
+      "expected": 0.186,
+      "maxDD": -0.0193,
+      "pf": 1.029,
+      "weight": 10
+    },
+    "regime_splits": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "by_year": {
+        "2022": {
+          "roi": -0.0039,
+          "maxDD": -0.0051
+        },
+        "2023": {
+          "roi": 0.0665,
+          "maxDD": -0.0121
+        },
+        "2024": {
+          "roi": 0.0835,
+          "maxDD": -0.0103
+        },
+        "2025": {
+          "roi": 0.03,
+          "maxDD": -0.0193
+        },
+        "2026": {
+          "roi": -0.0006,
+          "maxDD": -0.0047
+        }
+      },
+      "worst_annual_dd": -0.0193,
+      "weight": 10
+    },
+    "cost_stress": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "runs": {
+        "x1.0": {
+          "roi": 0.1856,
+          "maxDD": -0.0193
+        },
+        "x2.0": {
+          "roi": 0.0643,
+          "maxDD": -0.0256
+        },
+        "x3.0": {
+          "roi": -0.0547,
+          "maxDD": -0.0548
+        }
+      },
+      "fees_x2_roi": 0.0643,
+      "weight": 10
+    },
+    "sleeve_ablation": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "runs": {
+        "CASH": {
+          "roi": 0.0,
+          "maxDD": 0.0
+        },
+        "CARRY_ONLY": {
+          "roi": 0.1692,
+          "maxDD": -0.0051
+        },
+        "LONG_ONLY": {
+          "roi": 0.0145,
+          "maxDD": -0.046
+        },
+        "FULL_V1.1": {
+          "roi": 0.1856,
+          "maxDD": -0.0193
+        }
+      },
+      "carry_is_engine": true,
+      "weight": 10
+    },
+    "paper_replay": {
+      "status": "WARN",
+      "score_frac": 0.5,
+      "forward_days_real": 0,
+      "verdict": "INSUFFICIENT_FORWARD_DATA (d\u00e9terministe = backtest ; besoin 30-60-90j r\u00e9els)",
+      "note": "tracking 0 par construction \u2014 non validable en L4 tant que pas d'ex\u00e9cution r\u00e9elle",
+      "weight": 10
+    },
+    "event_readiness": {
+      "status": "INFO",
+      "score_frac": 0.0,
+      "n_events": 0,
+      "n_significant": 0,
+      "verdict": "DATA_NOT_READY",
+      "weight": 5
+    },
+    "operational_stress": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "checks": {
+        "missing_funding_blocks": true,
+        "corrupt_refused": true
+      },
+      "weight": 5
+    },
+    "sizing_sensitivity": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "runs": {
+        "carry20": {
+          "roi": 0.0793,
+          "maxDD": -0.0202
+        },
+        "carry35": {
+          "roi": 0.1314,
+          "maxDD": -0.0193
+        },
+        "carry50": {
+          "roi": 0.1856,
+          "maxDD": -0.0193
+        },
+        "carry75": {
+          "roi": 0.2807,
+          "maxDD": -0.0194
+        }
+      },
+      "weight": 0
+    },
+    "walk_forward": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "n_folds": 8,
+      "catastrophic_folds": 0,
+      "median_fold_roi": 0.0112,
+      "weight": 0
+    },
+    "monte_carlo": {
+      "status": "PASS",
+      "score_frac": 1.0,
+      "P_roi_neg": 0.0,
+      "P_dd_gt_3pct": 0.0,
+      "method": "monthly_equity_block_bootstrap",
+      "weight": 0
+    }
+  },
+  "offensive_alpha": "DATA_NOT_READY"
+}

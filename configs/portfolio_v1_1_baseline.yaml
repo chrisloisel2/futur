@@ -1,0 +1,22 @@
+# Portfolio V1.1 — baseline officielle FIGÉE (ne pas modifier sans nouveau tag)
+name: portfolio_v1_1_baseline
+capital: 100000
+window:
+  start: "2022-11-03"   # début overlap Bybit (funding cross-exchange dispo)
+  end: null              # null = dernière barre enrichie disponible
+engines_long: [TRM_TREND_INST, PULLBACK_LONG, LIQUIDATION_REBOUND]
+carry_assets: [BTCUSDT, ETHUSDT]
+config:
+  carry_fraction: 0.50
+  enable_long: true
+  enable_asset_regime_gate: true
+  enable_regime_flip_exit: true
+  enable_intra_position_governor: true
+  enable_carry: true
+  carry_gate_v2: false           # déclassé (research feature, pas exécution)
+  enable_hedge: true
+expected:                         # repro baseline (gelée)
+  roi_total: 0.186
+  annualized: 0.048
+  pf: 1.03
+  max_drawdown: -0.019
