@@ -1,0 +1,106 @@
+# V1.1_PARALLEL_50_RESEARCH — paper research only, capital réel = 0.
+# 50 cryptos SURVEILLÉES, top 3-7 tradées. Baseline officielle INCHANGÉE.
+strategy:
+  name: V1.1_PARALLEL_50_RESEARCH
+  base_strategy: V1.1_CARRY50_OLD_GATE
+  mode: paper_research
+  real_capital: 0
+  capital_paper: 100000
+  micro_live: disabled
+  affect_official_baseline: false
+
+execution:
+  send_real_orders: false
+  paper_only: true
+  allow_live_execution: false
+
+universe:                       # 50 surveillés ; quality filter décide qui est tradable
+  - BTCUSDT
+  - ETHUSDT
+  - SOLUSDT
+  - BNBUSDT
+  - XRPUSDT
+  - DOGEUSDT
+  - ADAUSDT
+  - AVAXUSDT
+  - LINKUSDT
+  - LTCUSDT
+  - BCHUSDT
+  - DOTUSDT
+  - NEARUSDT
+  - OPUSDT
+  - ARBUSDT
+  - INJUSDT
+  - ATOMUSDT
+  - APTUSDT
+  - SUIUSDT
+  - FILUSDT
+  - TRXUSDT
+  - ETCUSDT
+  - UNIUSDT
+  - AAVEUSDT
+  - MKRUSDT
+  - RNDRUSDT
+  - FETUSDT
+  - TAOUSDT
+  - SEIUSDT
+  - TIAUSDT
+  - WIFUSDT
+  - PEPEUSDT
+  - ORDIUSDT
+  - STXUSDT
+  - IMXUSDT
+  - GRTUSDT
+  - RUNEUSDT
+  - ARUSDT
+  - JUPUSDT
+  - PYTHUSDT
+  - ENAUSDT
+  - PENDLEUSDT
+  - LDOUSDT
+  - WLDUSDT
+  - ALGOUSDT
+  - ICPUSDT
+  - HBARUSDT
+  - VETUSDT
+  - SANDUSDT
+  - MANAUSDT
+
+carry:
+  enabled: true
+  active_symbols: [BTCUSDT, ETHUSDT]
+  shadow_symbols: [SOLUSDT, BNBUSDT]
+  forbidden_alt_carry: true
+  carry_gate_version: old_sticky_gate
+  carry_gate_v2_execution: false
+
+liquidation_engine:
+  enabled: false
+
+ranker:
+  max_total_positions: 7
+  max_alt_positions: 5
+  max_positions_per_bucket: 2
+  max_meme_positions: 1
+
+risk:
+  max_gross_exposure: 0.75
+  max_net_long_exposure: 0.50
+  max_btc_exposure: 0.20
+  max_eth_exposure: 0.15
+  max_sol_exposure: 0.12
+  max_single_alt_exposure: 0.05
+  max_bucket_exposure: 0.20
+  max_memecoin_exposure: 0.03
+  portfolio_dd_reduce: 0.02
+  portfolio_dd_kill: 0.03
+  max_hourly_new_positions: 2
+  max_daily_new_positions: 10
+
+constraints:
+  no_real_orders: true
+  no_naked_short: true
+  no_unvalidated_data: true
+  no_missing_funding_for_carry: true
+
+ledgers_dir: artifacts/paper_live/v1_1_parallel_50
