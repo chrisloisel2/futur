@@ -1,0 +1,92 @@
+{
+  "window": [
+    "2022-01-01",
+    "2026-06-20"
+  ],
+  "assets": {
+    "BTCUSDT": {
+      "n_periods": 4448,
+      "n_trades": 1,
+      "total_return": 0.28648702897532097,
+      "return_month_median": 0.003710114803381126,
+      "return_month_mean": 0.004704210386127477,
+      "max_dd": -0.0041194170636351035,
+      "pf": 9.073683158062051,
+      "pct_in_market": 1.0,
+      "gate_pass": true,
+      "stress_funding_flip": {
+        "n_periods": 4448,
+        "n_trades": 1,
+        "total_return": -0.12270337585170354,
+        "return_month_median": -0.0035270544781875746,
+        "return_month_mean": -0.002377210398060611,
+        "max_dd": -0.12256128730863858,
+        "pf": 0.30303771168271865,
+        "pct_in_market": 1.0
+      }
+    },
+    "ETHUSDT": {
+      "n_periods": 4866,
+      "n_trades": 1,
+      "total_return": 0.2541940675018546,
+      "return_month_median": 0.0033699749124376233,
+      "return_month_mean": 0.004269302062382686,
+      "max_dd": -0.018813996177220942,
+      "pf": 4.261622593853933,
+      "pct_in_market": 1.0,
+      "gate_pass": false,
+      "stress_funding_flip": {
+        "n_periods": 4866,
+        "n_trades": 1,
+        "total_return": -0.27258440080216084,
+        "return_month_median": -0.006821241531038802,
+        "return_month_mean": -0.005805370001226726,
+        "max_dd": -0.27235086231223654,
+        "pf": 0.13459022986662564,
+        "pct_in_market": 1.0
+      }
+    },
+    "SOLUSDT": {
+      "n_periods": 4851,
+      "n_trades": 1,
+      "total_return": -0.07132258365200328,
+      "return_month_median": 0.001447685267535359,
+      "return_month_mean": -0.0012039719621686766,
+      "max_dd": -0.20350720190275534,
+      "pf": 0.8023600589667347,
+      "pct_in_market": 1.0,
+      "gate_pass": false,
+      "stress_funding_flip": {
+        "n_periods": 4851,
+        "n_trades": 1,
+        "total_return": -0.9515889473496393,
+        "return_month_median": -0.052022921844585346,
+        "return_month_mean": -0.05433541910155037,
+        "max_dd": -0.9515493263898009,
+        "pf": 0.0016294431480550885,
+        "pct_in_market": 1.0
+      }
+    },
+    "BNBUSDT": {
+      "n_periods": 4894,
+      "n_trades": 1,
+      "total_return": -0.2597947486274793,
+      "return_month_median": -0.003279666254392577,
+      "return_month_mean": -0.005141715493292362,
+      "max_dd": -0.2629746981581289,
+      "pf": 0.2598601593449472,
+      "pct_in_market": 1.0,
+      "gate_pass": false,
+      "stress_funding_flip": {
+        "n_periods": 4894,
+        "n_trades": 1,
+        "total_return": -0.7520076979787382,
+        "return_month_median": -0.02335805006144631,
+        "return_month_mean": -0.02507428060314784,
+        "max_dd": -0.7518755954906278,
+        "pf": 0.01193105519296101,
+        "pct_in_market": 1.0
+      }
+    }
+  }
+}

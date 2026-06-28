@@ -104,3 +104,44 @@ Tests `tests/test_atomic_parquet.py` : **8/8** (crash-avant-replace, temp invali
 incapable seul. Carry = seul moteur positif full-cycle. **Hedge + carry obligatoires.**
 ⚠ Governor conservative_v1 = **ratchet monotone** sur multi-année (se fige en cash après 1er DD) →
 le Hedge Governor doit utiliser un DD en fenêtre glissante / ré-armement par régime.
+
+---
+
+## Phase 35-36 — Hedge Governor V1 + Carry V2 (2026-06-28)
+
+**Hedge Governor V1** `src/institutional/risk/hedge_governor.py` (PAPER_ONLY) :
+assurance de portefeuille (≠ short alpha). États NO_HEDGE/REDUCE_LONGS/BTC|ETH_PARTIAL_HEDGE/
+CASH_ONLY/KILL. **DD en fenêtre glissante** (corrige le ratchet monotone). Garde-fous
+SHORT_DIRECTIONAL=False, NAKED_SHORT=False, HEDGE_SHORT=True ; sizing borné
+(min(beta_adj_long×ratio, 30%capital, long_exposure)) ; hedge interdit si long_exposure=0.
+Tests `tests/test_hedge_governor.py` : 9/9. Intégration backtester (jambes SHORT_HEDGE) = à câbler.
+
+**Carry V2 delta-neutral** `scripts/backtest_carry_basis.py` — long spot + short perp, récolte
+funding (aucun short nu, aucun pari de prix). Backtest 2022-2026 :
+
+| Asset | ret total | ret/mo méd | maxDD | PF | gate |
+|---|---:|---:|---:|---:|---|
+| **BTCUSDT** | +28.6% | **+0.37%** | **−0.4%** | 9.07 | **PASS** |
+| ETHUSDT | +25.4% | +0.34% | −1.9% | 4.26 | FAIL (DD) |
+| SOLUSDT | −7.1% | +0.14% | −20% | 0.80 | FAIL |
+| BNBUSDT | −26% | −0.33% | −26% | 0.26 | FAIL |
+
+→ **Premier edge propre de tout l'audit : BTC funding carry PASS** (non-directionnel,
++0.37%/mo, DD 0.4%). ETH proche. **Mais stress funding-flip (−1σ) le casse** (BTC → −0.35%/mo)
+→ carry doit être **gated par le régime de funding**, pas always-on aveugle. Alts non viables.
+
+**Architecture confirmée** : long-only (opportuniste bull) + carry BTC/ETH (base rendement
+non-directionnel, régime-gated) + hedge governor (survie bear) + cash. Pas "plus de longs".
+
+## Statut officiel mis à jour
+
+```
+LIVE_WRITE_PATH       : SAFE (atomic, 10/10 sous service actif)
+DATASTORE             : CLEAN (9/9, DOT dropped)
+TRM_V4                : PAPER_REGIME_DEPENDENT (gagne 2024 bull)
+TRM_V5                : HISTORICAL_ONLY_MISSING_ARTIFACT
+PULLBACK/LIQ/XS       : SHADOW (négatifs hors bull)
+CARRY_V2_BTC          : GATE_PASS (delta-neutral, à gater funding-regime)
+HEDGE_GOVERNOR_V1     : PAPER_ONLY (module + tests, intégration backtester à faire)
+LIVE / MICRO_LIVE     : DISABLED
+```
