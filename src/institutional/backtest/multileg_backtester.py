@@ -52,7 +52,8 @@ class MultiLegConfig:
     enable_long: bool = True
     enable_carry: bool = False
     enable_hedge: bool = False
-    enable_regime_gate: bool = False    # bloque les longs hors BULL/RECOVERY (causal)
+    enable_regime_gate: bool = False    # bloque les longs hors BULL/RECOVERY (macro BTC, causal)
+    enable_asset_regime_gate: bool = False  # gate PAR-ASSET (BTC macro AND régime asset) — Phase 47
     enable_regime_flip_exit: bool = False   # ferme les longs quand régime quitte BULL/RECOVERY
     enable_intra_position_governor: bool = False  # close-only DD governor intra-position
     intra_governor_config: IntraGovernorConfig = field(default_factory=IntraGovernorConfig)
@@ -149,6 +150,11 @@ class MultiLegBacktester:
         if cfg.enable_regime_gate and "BTCUSDT" in prices:
             regime_gate = RegimeGate()
             regime_gate.compute_regime_series(prices["BTCUSDT"])
+        # Asset Regime Gate (Phase 47) : BTC macro AND régime par actif
+        asset_gate = None
+        if cfg.enable_asset_regime_gate:
+            from src.institutional.portfolio.asset_regime_gate import AssetRegimeGate
+            asset_gate = AssetRegimeGate().fit(prices)
 
         cash = cfg.initial_capital
         positions: List[PortfolioPosition] = []
@@ -279,10 +285,16 @@ class MultiLegBacktester:
                 p.is_open = False
 
             # 4c. FORCED EXIT on regime flip (logique alpha) — sortir l'ancien risque d'abord
-            if cfg.enable_regime_flip_exit and regime_gate is not None:
-                cur_reg = regime_gate.decide_at(t).btc_regime
+            if cfg.enable_regime_flip_exit and (asset_gate is not None or regime_gate is not None):
+                cur_reg = regime_gate.decide_at(t).btc_regime if regime_gate is not None else "n/a"
                 for p in positions:
-                    if p.is_open and should_exit_long_on_regime_flip(p.position_type, cur_reg):
+                    if not (p.is_open and p.position_type == "DIRECTIONAL_LONG"):
+                        continue
+                    # asset-level flip (réparation FORCED_EXIT) : BTC OU l'actif hostile
+                    if asset_gate is not None:
+                        if asset_gate.should_exit_long(p.asset, t):
+                            _close_pos(p)
+                    elif should_exit_long_on_regime_flip(p.position_type, cur_reg):
                         _close_pos(p)
 
             # 4d. INTRA-POSITION DD governor (logique survie, close-only)
@@ -369,16 +381,22 @@ class MultiLegBacktester:
                                                       hedge_reason=d.reason)
                         positions.append(hedge_pos)
 
-            # 9-10. LONG entries (regime-gated + anti-churn)
-            long_mult = 1.0
+            # 9-10. LONG entries (regime-gated par-asset + anti-churn)
+            long_mult = 1.0   # macro BTC (si gate macro seul)
             btc_regime = "n/a"
             if regime_gate is not None:
                 gd = regime_gate.decide_at(t)
                 long_mult = gd.size_mult
                 btc_regime = gd.btc_regime
+            if asset_gate is not None:
+                btc_regime = asset_gate._btc.decide_at(t).btc_regime
             n_open_long = len({p.position_id for p in positions if p.is_open and p.position_type == "DIRECTIONAL_LONG"})
             entries_this_bar = 0
-            cand_opps = [] if long_mult <= 0 else sorted(long_opps.get(t, []), key=lambda o: -o.score_net)
+            # si gate macro seul bloque tout → pas de candidats (sauf gate par-asset qui décide par opp)
+            if asset_gate is None and long_mult <= 0:
+                cand_opps = []
+            else:
+                cand_opps = sorted(long_opps.get(t, []), key=lambda o: -o.score_net)
             for opp in cand_opps:
                 if n_open_long >= cfg.max_open_longs or entries_this_bar >= cfg.max_long_entries_per_bar:
                     break
@@ -387,10 +405,16 @@ class MultiLegBacktester:
                     continue
                 if any(p.is_open and p.position_type == "DIRECTIONAL_LONG" and p.asset == a for p in positions):
                     continue
+                # mult par-asset (Phase 47) prioritaire
+                opp_mult = long_mult
+                if asset_gate is not None:
+                    opp_mult = asset_gate.decide_long(a, t).size_mult
+                if opp_mult <= 0:
+                    continue
                 price = px(a, t)
                 if not price:
                     continue
-                notional = cfg.long_fraction * equity * long_mult
+                notional = cfg.long_fraction * equity * opp_mult
                 qty = notional / price
                 pid = self._new_pid("LONG")
                 leg = PositionLeg(self._new_lid(), pid, a, "LONG_SPOT", str(t), price, qty, notional,

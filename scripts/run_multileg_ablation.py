@@ -49,24 +49,26 @@ def main() -> None:
 
     longs = [Cached(build_engine(e)) for e in LONG_ENGINES]
 
-    def cfg(long, gate, flip, intra, carry, hedge):
+    def cfg(long, macro_gate, asset_gate, flip, intra, carry, hedge):
         return MultiLegConfig(
-            enable_long=long, enable_regime_gate=gate,
+            enable_long=long, enable_regime_gate=macro_gate,
+            enable_asset_regime_gate=asset_gate,
             enable_regime_flip_exit=flip, enable_intra_position_governor=intra,
             enable_carry=carry, enable_hedge=hedge)
 
-    # Matrice Phase 45 (DD reduction : regime flip exit + intra-position governor)
+    # Matrice Phase 47 (asset regime gate vs macro gate)
     runs = {
-        "B0_long_gated":       (longs, cfg(True,  True, False, False, False, False)),
-        "B1_flip_exit":        (longs, cfg(True,  True, True,  False, False, False)),
-        "B2_intra_gov":        (longs, cfg(True,  True, False, True,  False, False)),
-        "B3_long_final":       (longs, cfg(True,  True, True,  True,  False, False)),
-        "C3_long_carry":       (longs, cfg(True,  True, True,  True,  True,  False)),
-        "D3_final":            (longs, cfg(True,  True, True,  True,  True,  True)),
-        "E_carry":             ([],    cfg(False, False, False, False, True,  False)),
+        "M_macro_gate":        (longs, cfg(True, True,  False, False, False, False, False)),
+        "A_asset_gate":        (longs, cfg(True, False, True,  False, False, False, False)),
+        "A_asset_flip":        (longs, cfg(True, False, True,  True,  False, False, False)),
+        "A_asset_flip_intra":  (longs, cfg(True, False, True,  True,  True,  False, False)),
+        "A_asset_carry":       (longs, cfg(True, False, True,  True,  True,  True,  False)),
+        "A_asset_full":        (longs, cfg(True, False, True,  True,  True,  True,  True)),
+        "E_carry":             ([],    cfg(False, False, False, False, False, True, False)),
     }
 
     report = {"window": [args.start, args.end], "runs": {}}
+    per_asset_ref = None
     print(f"\n{'Run':<22}{'ROI':>8}{'PF':>7}{'ret/mo':>9}{'maxDD':>8}{'CVaR':>8}  PnL[dir/carry/hedge/fees]")
     print("─" * 96)
     for name, (engs, c) in runs.items():
@@ -78,6 +80,17 @@ def main() -> None:
               f"{m.get('cvar_95',0)*100:>7.2f}%  "
               f"[{p['directional']:.0f}/{p['carry_funding']:.0f}/{p['hedge']:.0f}/{p['fees']:.0f}]")
         report["runs"][name] = {"metrics": m, "pnl_by_type": p}
+        if name == "A_asset_flip_intra" and len(res.leg_ledger):
+            ll = res.leg_ledger
+            longs_ll = ll[ll["leg_type"] == "LONG_SPOT"]
+            per_asset_ref = longs_ll.groupby("asset").agg(
+                n=("net_pnl", "size"), net_pnl=("net_pnl", "sum"),
+                price_pnl=("price_pnl", "sum"), fees=("costs", "sum")).round(1)
+
+    if per_asset_ref is not None:
+        print(f"\n=== PnL LONG par actif (A_asset_flip_intra) — identifier les destructeurs ===")
+        print(per_asset_ref.sort_values("net_pnl").to_string())
+        report["per_asset_long_pnl"] = per_asset_ref.reset_index().to_dict("records")
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(report, indent=2, default=str))
