@@ -45,7 +45,7 @@ def _has_parquet_magic(path: Path) -> bool:
 
 
 def validate_file(path: Path) -> dict:
-    rep = {"file": str(path), "sha256": None, "issues": [], "ok": False, "rows": 0}
+    rep = {"file": str(path), "sha256": None, "issues": [], "warnings": [], "ok": False, "rows": 0}
     if not _has_parquet_magic(path):
         rep["issues"].append("MAGIC_BYTES_MISSING (fichier corrompu)")
         return rep
@@ -85,8 +85,9 @@ def validate_file(path: Path) -> dict:
         if len(gaps):
             max_gap_h = float(gaps.max() / 3600.0)
             rep["max_gap_hours"] = round(max_gap_h, 1)
+            # gap = WARNING (souvent un trou pré-2020 hors fenêtre d'usage), pas fatal
             if max_gap_h > 48:
-                rep["issues"].append(f"LARGE_GAP={max_gap_h:.0f}h")
+                rep["warnings"].append(f"LARGE_GAP={max_gap_h:.0f}h")
     if all(c in df.columns for c in OHLC):
         bad = ((df["high"] < df["low"]) | (df["high"] < df["close"]) |
                (df["low"] > df["close"])).sum()
@@ -111,7 +112,8 @@ def main() -> None:
     ap.add_argument("--out", default="reports/repro_audit/parquet_validation.json")
     args = ap.parse_args()
 
-    files = sorted(Path(args.path).glob(args.pattern))
+    p = Path(args.path)
+    files = [p] if p.is_file() else sorted(p.glob(args.pattern))
     reports = [validate_file(p) for p in files]
     ok = [r for r in reports if r["ok"]]
     bad = [r for r in reports if not r["ok"]]
@@ -120,7 +122,8 @@ def main() -> None:
     print(f"  fichiers : {len(reports)}  |  OK : {len(ok)}  |  ÉCHEC : {len(bad)}")
     for r in reports:
         flag = "OK " if r["ok"] else "FAIL"
-        print(f"  [{flag}] {Path(r['file']).name:<40} rows={r['rows']:>9,}  {('; '.join(r['issues']) or '')}")
+        notes = "; ".join(r["issues"]) or ("warn: " + "; ".join(r.get("warnings", [])) if r.get("warnings") else "")
+        print(f"  [{flag}] {Path(r['file']).name:<40} rows={r['rows']:>9,}  {notes}")
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
