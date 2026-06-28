@@ -49,17 +49,19 @@ def main() -> None:
 
     longs = [Cached(build_engine(e)) for e in LONG_ENGINES]
 
-    def cfg(long, carry, hedge):
-        return MultiLegConfig(enable_long=long, enable_carry=carry, enable_hedge=hedge)
+    def cfg(long, gate, carry, hedge):
+        return MultiLegConfig(enable_long=long, enable_regime_gate=gate,
+                              enable_carry=carry, enable_hedge=hedge)
 
+    # Matrice Phase 40 (regime gate)
     runs = {
-        "A_long":            (longs, cfg(True, False, False)),
-        "B_long_carry":      (longs, cfg(True, True, False)),
-        "C_long_hedge":      (longs, cfg(True, False, True)),
-        "D_long_carry_hedge":(longs, cfg(True, True, True)),
-        "E_carry":           ([],    cfg(False, True, False)),
-        "F_carry_hedge":     ([],    cfg(False, True, True)),
-        "G_hedge_only":      ([],    cfg(False, False, True)),
+        "A_long_raw":          (longs, cfg(True, False, False, False)),
+        "B_long_gated":        (longs, cfg(True, True, False, False)),
+        "C_long_gated_carry":  (longs, cfg(True, True, True, False)),
+        "D_final":             (longs, cfg(True, True, True, True)),
+        "E_carry":             ([],    cfg(False, False, True, False)),
+        "F_carry_hedge":       ([],    cfg(False, False, True, True)),
+        "G_long_gated_hedge":  (longs, cfg(True, True, False, True)),
     }
 
     report = {"window": [args.start, args.end], "runs": {}}

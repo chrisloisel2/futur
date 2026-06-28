@@ -29,6 +29,7 @@ from src.institutional.portfolio.invariants import (
     InvariantLimits, check_portfolio_invariants,
 )
 from src.institutional.risk.hedge_governor import HedgeGovernorV1, HedgeConfig
+from src.institutional.portfolio.regime_gate import RegimeGate, RegimeGateConfig
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class MultiLegConfig:
     enable_long: bool = True
     enable_carry: bool = False
     enable_hedge: bool = False
+    enable_regime_gate: bool = False    # bloque les longs hors BULL/RECOVERY (causal)
     limits: InvariantLimits = field(default_factory=InvariantLimits)
     hedge_config: HedgeConfig = field(default_factory=HedgeConfig)
     funding_gate_config: FundingGateConfig = field(default_factory=FundingGateConfig)
@@ -135,6 +137,12 @@ class MultiLegBacktester:
         grid = sorted(set().union(*[set(s.index) for s in prices.values()]))
         grid = [t for t in grid if pd.Timestamp(start, tz="UTC") <= t <= pd.Timestamp(end, tz="UTC")]
         long_opps = self._long_opps(start, end)
+
+        # RegimeGate causal (série régime BTC calculée sur F_t)
+        regime_gate = None
+        if cfg.enable_regime_gate and "BTCUSDT" in prices:
+            regime_gate = RegimeGate()
+            regime_gate.compute_regime_series(prices["BTCUSDT"])
 
         cash = cfg.initial_capital
         positions: List[PortfolioPosition] = []
@@ -312,10 +320,17 @@ class MultiLegBacktester:
                                                       hedge_reason=d.reason)
                         positions.append(hedge_pos)
 
-            # 9-10. LONG entries (limité par bar = anti-churn)
+            # 9-10. LONG entries (regime-gated + anti-churn)
+            long_mult = 1.0
+            btc_regime = "n/a"
+            if regime_gate is not None:
+                gd = regime_gate.decide_at(t)
+                long_mult = gd.size_mult
+                btc_regime = gd.btc_regime
             n_open_long = len({p.position_id for p in positions if p.is_open and p.position_type == "DIRECTIONAL_LONG"})
             entries_this_bar = 0
-            for opp in sorted(long_opps.get(t, []), key=lambda o: -o.score_net):
+            cand_opps = [] if long_mult <= 0 else sorted(long_opps.get(t, []), key=lambda o: -o.score_net)
+            for opp in cand_opps:
                 if n_open_long >= cfg.max_open_longs or entries_this_bar >= cfg.max_long_entries_per_bar:
                     break
                 a = opp.asset
@@ -326,7 +341,7 @@ class MultiLegBacktester:
                 price = px(a, t)
                 if not price:
                     continue
-                notional = cfg.long_fraction * equity
+                notional = cfg.long_fraction * equity * long_mult
                 qty = notional / price
                 pid = self._new_pid("LONG")
                 leg = PositionLeg(self._new_lid(), pid, a, "LONG_SPOT", str(t), price, qty, notional,
@@ -344,6 +359,7 @@ class MultiLegBacktester:
             port_rows.append({
                 "timestamp": t, "equity": equity, "cash": cash,
                 "drawdown": (equity - peak) / max(peak, 1e-9),
+                "btc_regime": btc_regime,
                 **exposures,
                 "funding_pnl_total": pnl_acc["carry_funding"] + pnl_acc["hedge"],
                 "carry_funding_pnl": pnl_acc["carry_funding"],
