@@ -14,6 +14,7 @@ des deux jambes s'annulent ; le PnL vient du FUNDING (basis omis, documenté).
 from __future__ import annotations
 
 import logging
+from collections import deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -30,6 +31,8 @@ from src.institutional.portfolio.invariants import (
 )
 from src.institutional.risk.hedge_governor import HedgeGovernorV1, HedgeConfig
 from src.institutional.portfolio.regime_gate import RegimeGate, RegimeGateConfig
+from src.institutional.portfolio.regime_exit import should_exit_long_on_regime_flip
+from src.institutional.risk.intra_position_governor import decide_position_risk, IntraGovernorConfig
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +53,9 @@ class MultiLegConfig:
     enable_carry: bool = False
     enable_hedge: bool = False
     enable_regime_gate: bool = False    # bloque les longs hors BULL/RECOVERY (causal)
+    enable_regime_flip_exit: bool = False   # ferme les longs quand régime quitte BULL/RECOVERY
+    enable_intra_position_governor: bool = False  # close-only DD governor intra-position
+    intra_governor_config: IntraGovernorConfig = field(default_factory=IntraGovernorConfig)
     limits: InvariantLimits = field(default_factory=InvariantLimits)
     hedge_config: HedgeConfig = field(default_factory=HedgeConfig)
     funding_gate_config: FundingGateConfig = field(default_factory=FundingGateConfig)
@@ -150,6 +156,7 @@ class MultiLegBacktester:
         carry_open: Dict[str, PortfolioPosition] = {}
         hedge_pos: Optional[PortfolioPosition] = None
         peak = cfg.initial_capital
+        eq_window = deque(maxlen=720)   # ~30j : DD GLISSANT pour le governor (≠ ratchet all-time)
         eq_curve, port_rows, leg_rows = [], [], []
         pnl_acc = {"directional": 0.0, "carry_funding": 0.0, "hedge": 0.0,
                    "fees": 0.0, "borrow": 0.0}
@@ -259,8 +266,50 @@ class MultiLegBacktester:
             equity = cash + unreal
             peak = max(peak, equity)
             eq_curve.append((t, equity))
+            eq_window.append(equity)
+            # DD GLISSANT (gouverneur) — pas le peak all-time (qui ratchet et whipsaw)
+            roll_peak = max(eq_window)
+            portfolio_dd = (equity - roll_peak) / max(roll_peak, 1e-9)
+            long_cost = cfg.taker_fee_bps / 1e4 + cfg.slippage_bps / 1e4
 
-            # 4c. hedge close if no long / governor risk_on handled below
+            def _close_pos(p, reason_cost=long_cost):
+                for l in p.legs:
+                    if l.is_open:
+                        close_leg(l, t, reason_cost)
+                p.is_open = False
+
+            # 4c. FORCED EXIT on regime flip (logique alpha) — sortir l'ancien risque d'abord
+            if cfg.enable_regime_flip_exit and regime_gate is not None:
+                cur_reg = regime_gate.decide_at(t).btc_regime
+                for p in positions:
+                    if p.is_open and should_exit_long_on_regime_flip(p.position_type, cur_reg):
+                        _close_pos(p)
+
+            # 4d. INTRA-POSITION DD governor (logique survie, close-only)
+            if cfg.enable_intra_position_governor:
+                pf_action = decide_position_risk("DIRECTIONAL_LONG", 0.0, portfolio_dd,
+                                                 cfg.intra_governor_config)
+                if pf_action == "KILL":
+                    for p in positions:
+                        if p.is_open:
+                            _close_pos(p)
+                elif pf_action == "CLOSE_ALL_DIRECTIONAL_LONGS":
+                    for p in positions:
+                        if p.is_open and p.position_type == "DIRECTIONAL_LONG":
+                            _close_pos(p)
+                else:
+                    for p in positions:
+                        if not p.is_open or p.position_type != "DIRECTIONAL_LONG":
+                            continue
+                        unreal_p = sum(l.price_pnl() for l in p.legs if l.is_open)
+                        peak_p = max(p.__dict__.get("_peak_unreal", unreal_p), unreal_p)
+                        p.__dict__["_peak_unreal"] = peak_p
+                        dd_eq = max(0.0, peak_p - unreal_p) / max(equity, 1e-9)
+                        if decide_position_risk(p.position_type, dd_eq, portfolio_dd,
+                                                cfg.intra_governor_config) == "CLOSE_POSITION":
+                            _close_pos(p)
+
+            # 4e. hedge close if no long / governor risk_on handled below
             long_exp = sum(l.qty * (l.mark_price or l.entry_price) for l in open_long_legs())
 
             # 6-7. CARRY open (gate)

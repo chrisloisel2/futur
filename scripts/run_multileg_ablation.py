@@ -49,19 +49,21 @@ def main() -> None:
 
     longs = [Cached(build_engine(e)) for e in LONG_ENGINES]
 
-    def cfg(long, gate, carry, hedge):
-        return MultiLegConfig(enable_long=long, enable_regime_gate=gate,
-                              enable_carry=carry, enable_hedge=hedge)
+    def cfg(long, gate, flip, intra, carry, hedge):
+        return MultiLegConfig(
+            enable_long=long, enable_regime_gate=gate,
+            enable_regime_flip_exit=flip, enable_intra_position_governor=intra,
+            enable_carry=carry, enable_hedge=hedge)
 
-    # Matrice Phase 40 (regime gate)
+    # Matrice Phase 45 (DD reduction : regime flip exit + intra-position governor)
     runs = {
-        "A_long_raw":          (longs, cfg(True, False, False, False)),
-        "B_long_gated":        (longs, cfg(True, True, False, False)),
-        "C_long_gated_carry":  (longs, cfg(True, True, True, False)),
-        "D_final":             (longs, cfg(True, True, True, True)),
-        "E_carry":             ([],    cfg(False, False, True, False)),
-        "F_carry_hedge":       ([],    cfg(False, False, True, True)),
-        "G_long_gated_hedge":  (longs, cfg(True, True, False, True)),
+        "B0_long_gated":       (longs, cfg(True,  True, False, False, False, False)),
+        "B1_flip_exit":        (longs, cfg(True,  True, True,  False, False, False)),
+        "B2_intra_gov":        (longs, cfg(True,  True, False, True,  False, False)),
+        "B3_long_final":       (longs, cfg(True,  True, True,  True,  False, False)),
+        "C3_long_carry":       (longs, cfg(True,  True, True,  True,  True,  False)),
+        "D3_final":            (longs, cfg(True,  True, True,  True,  True,  True)),
+        "E_carry":             ([],    cfg(False, False, False, False, True,  False)),
     }
 
     report = {"window": [args.start, args.end], "runs": {}}
