@@ -68,3 +68,4 @@ reports/derivatives_collector.log
 reports/DERIVATIVES_DAILY_*.md
 reports/paper_live/
 reports/paper_v1.log
+data/derivatives_backfill/
