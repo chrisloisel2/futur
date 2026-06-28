@@ -32,11 +32,16 @@ def test_oi_event_detector_no_false_positive_when_calm():
     assert len(ev) == 0
 
 
-def test_writer_append_only_partition(tmp_path, monkeypatch):
+def test_writer_append_only_partition_and_manifest(tmp_path, monkeypatch):
     import src.institutional.data.derivatives_collector.writer as W
-    monkeypatch.setattr(W, "LIVE_ROOT", tmp_path / "exchange=binance")
+    monkeypatch.setattr(W, "RAW_ROOT", tmp_path / "exchange=binance" / "market=usdm")
     p1 = W.write_records("open_interest", "BTCUSDT", [{"timestamp": 1, "open_interest": 1000.0}])
     p2 = W.write_records("open_interest", "BTCUSDT", [{"timestamp": 2, "open_interest": 1001.0}])
     assert p1 != p2 and p1.exists() and p2.exists()           # 2 parts immutables distinctes
-    df = pd.read_parquet(p1)
-    assert df["open_interest"].iloc[0] == 1000.0
+    assert pd.read_parquet(p1)["open_interest"].iloc[0] == 1000.0
+    # manifest présent + hashé
+    import json
+    man = p1.with_name(p1.stem + ".manifest.json")
+    assert man.exists()
+    m = json.loads(man.read_text())
+    assert m["rows"] == 1 and len(m["sha256"]) == 64 and m["validation_status"] == "PASS"

@@ -62,3 +62,7 @@ env/
 .env
 *.log
 .vscode/settings.json
+data/derivatives_raw/
+data/derivatives_live/
+reports/derivatives_collector.log
+reports/DERIVATIVES_DAILY_*.md
