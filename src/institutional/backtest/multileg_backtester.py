@@ -54,6 +54,8 @@ class MultiLegConfig:
     # toggles d'ablation
     enable_long: bool = True
     enable_carry: bool = False
+    carry_gate_v2: bool = False          # gate carry cross-exchange (entry+exit) — churn ⚠
+    carry_gate_v2_size_only: bool = False  # old sticky gate entry/exit + v2 réduit la TAILLE seulement
     enable_hedge: bool = False
     enable_regime_gate: bool = False    # bloque les longs hors BULL/RECOVERY (macro BTC, causal)
     enable_asset_regime_gate: bool = False  # gate PAR-ASSET (BTC macro AND régime asset) — Phase 47
@@ -158,6 +160,16 @@ class MultiLegBacktester:
         if cfg.enable_asset_regime_gate:
             from src.institutional.portfolio.asset_regime_gate import AssetRegimeGate
             asset_gate = AssetRegimeGate().fit(prices)
+        carry_gate = None
+        carry_size_gate = None
+        if cfg.carry_gate_v2 or cfg.carry_gate_v2_size_only:
+            from src.institutional.engines.carry_basis.carry_gate_v2 import CarryGateV2, CarryGateV2Status
+            cg = CarryGateV2(self.carry_assets)
+            self._CG_BLOCK = CarryGateV2Status.BLOCK
+            if cfg.carry_gate_v2_size_only:
+                carry_size_gate = cg     # old gate entry/exit + v2 size mult
+            else:
+                carry_gate = cg          # v2 entry+exit
 
         cash = cfg.initial_capital
         positions: List[PortfolioPosition] = []
@@ -257,13 +269,17 @@ class MultiLegBacktester:
             # 4b. carry exits (funding gate flip)
             for a in list(carry_open.keys()):
                 p = carry_open[a]
-                fwin = funding.get(a)
-                regime = "FUNDING_NEUTRAL"
-                if fwin is not None:
-                    w = fwin[fwin.index <= t]
-                    w = w[w.index.hour.isin((0, 8, 16))].tail(cfg.funding_gate_config.window_periods)
-                    regime = classify_funding_regime(w, cfg.funding_gate_config)
-                if regime != CARRY_OK:
+                if carry_gate is not None:
+                    block = carry_gate.hard_block(a, t)   # sortie only si funding négatif (anti-whipsaw)
+                else:
+                    fwin = funding.get(a)
+                    regime = "FUNDING_NEUTRAL"
+                    if fwin is not None:
+                        w = fwin[fwin.index <= t]
+                        w = w[w.index.hour.isin((0, 8, 16))].tail(cfg.funding_gate_config.window_periods)
+                        regime = classify_funding_regime(w, cfg.funding_gate_config)
+                    block = regime != CARRY_OK
+                if block:
                     for l in p.legs:
                         if l.is_open:
                             close_leg(l, t, cfg.carry_leg_cost)
@@ -332,17 +348,28 @@ class MultiLegBacktester:
                 for a in self.carry_assets:
                     if a in carry_open:
                         continue
-                    fwin = funding.get(a)
-                    if fwin is None:
-                        continue
-                    w = fwin[fwin.index <= t]
-                    w = w[w.index.hour.isin((0, 8, 16))].tail(cfg.funding_gate_config.window_periods)
-                    if classify_funding_regime(w, cfg.funding_gate_config) != CARRY_OK:
-                        continue
+                    carry_mult = 1.0
+                    if carry_gate is not None:
+                        gd = carry_gate.evaluate(a, t)
+                        if gd.status == self._CG_BLOCK:
+                            continue
+                        carry_mult = gd.carry_size_multiplier
+                    else:
+                        fwin = funding.get(a)
+                        if fwin is None:
+                            continue
+                        w = fwin[fwin.index <= t]
+                        w = w[w.index.hour.isin((0, 8, 16))].tail(cfg.funding_gate_config.window_periods)
+                        if classify_funding_regime(w, cfg.funding_gate_config) != CARRY_OK:
+                            continue
+                        # size-only : la dispersion cross-exchange réduit la taille (pas l'entrée)
+                        if carry_size_gate is not None:
+                            d2 = carry_size_gate.evaluate(a, t)
+                            carry_mult = 0.5 if d2.status == self._CG_BLOCK else d2.carry_size_multiplier
                     price = px(a, t)
                     if not price:
                         continue
-                    notional = cfg.carry_fraction * equity
+                    notional = cfg.carry_fraction * equity * carry_mult
                     qty = notional / price
                     pid = self._new_pid("CARRY")
                     legs = [
