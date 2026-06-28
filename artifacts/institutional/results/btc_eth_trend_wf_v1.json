@@ -1,0 +1,40 @@
+{
+  "model": "BTC_ETH_TREND / trend_cont_24h / LightGBM",
+  "label_fix": "vol-adjusted threshold k=1.0 (UP=15%/FLAT=70%/DOWN=15%)",
+  "walk_forward": {
+    "2022": {
+      "val": 0.6633,
+      "test": 0.6214,
+      "pass": true
+    },
+    "2023": {
+      "val": 0.5787,
+      "test": 0.589,
+      "pass": true
+    },
+    "2024": {
+      "val": 0.6914,
+      "test": 0.6373,
+      "pass": true
+    },
+    "2025": {
+      "val": 0.6767,
+      "test": 0.5967,
+      "pass": true
+    }
+  },
+  "summary": {
+    "pass_rate": "4/4",
+    "auc_median_test": 0.609,
+    "verdict": "PAPER"
+  },
+  "top_features": [
+    "rv_720h",
+    "vol_of_vol_7d",
+    "rv_zscore_720h",
+    "rv_zscore_240h",
+    "rv_pct_24h"
+  ],
+  "dataset": "BTCUSDT 2021-2025, 1h, 86 features, 43800 barres",
+  "split": "2026 = paper/shadow uniquement, jamais dans le training"
+}

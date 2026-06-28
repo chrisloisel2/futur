@@ -1,0 +1,20 @@
+{
+  "symbol": "LINKUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2025,
+  "cal_year": 2025,
+  "val_year": 2026,
+  "n_features": 98,
+  "n_train": 47800,
+  "n_cal": 4416,
+  "n_val": 3561,
+  "cal_pf": 0.805,
+  "cal_n": 13,
+  "val_n": 0,
+  "val_pf": 0.0,
+  "val_wr": 0.0,
+  "val_wr_pct": "0%",
+  "threshold_floor": 0.6,
+  "elapsed_s": 143.7,
+  "trained_at": "2026-05-29T10:59:46.864220+00:00"
+}

@@ -1,0 +1,44 @@
+# configs/institutional/models.yaml
+# Paramètres des modèles institutionnels
+
+models:
+  version: "v1.0"
+
+  lightgbm:
+    objective: "multiclass"
+    num_class: 3
+    boosting_type: "dart"
+    num_leaves: 31
+    learning_rate: 0.05
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    min_child_samples: 30
+    lambda_l1: 0.1
+    lambda_l2: 0.1
+    n_estimators: 1000
+    early_stopping_rounds: 50
+    calibrate: true
+    calibration_method: "isotonic"
+
+  logistic_baseline:
+    C: 1.0
+    multi_class: "ovr"
+    max_iter: 1000
+
+  ridge_baseline:
+    alpha: 1.0
+
+  ewma:
+    lambda_decay: 0.94
+    horizon_h: 24
+
+  har_rv:
+    alpha: 0.01
+
+  # Ordre obligatoire : baselines avant tree models
+  # Rejeter si tree ne bat pas baseline sur val OOS
+  baseline_min_improvement: -0.01   # AUC delta acceptable
+
+  target_col: "tb_label"
+  target_col_regression: "fwd_ret_24h"

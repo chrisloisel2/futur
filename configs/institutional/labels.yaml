@@ -1,0 +1,28 @@
+# configs/institutional/labels.yaml
+# Paramètres du Label Store institutionnel
+
+labels:
+  version: "v1.0"
+
+  # Horizons de forward returns (en barres 1h)
+  horizons_h: [4, 12, 24, 72, 168]
+
+  # Coût aller-retour en bps (calibrer selon execution réelle)
+  # BTC/ETH Binance : ~7-12 bps AR
+  cost_bps: 10.0
+
+  # Seuil de classification directionnelle
+  # k × vol_réalisée = seuil min pour UP/DOWN
+  vol_threshold_k: 0.5
+
+  # Triple Barrier
+  triple_barrier:
+    max_bars: 72              # 72h horizon max
+    k_up: 1.0                 # multiplicateur barrière haute
+    k_down: 1.0               # multiplicateur barrière basse
+    vol_window: 24            # fenêtre vol pour les barrières
+    min_vol: 0.001
+    cost_bps: 10.0
+
+  # Embargo (nombre de barres entre train et val/test)
+  embargo_bars: 168           # 7 jours

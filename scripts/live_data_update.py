@@ -45,8 +45,9 @@ configure_project_imports()
 from data_pipeline.enriched_ohlcv_features import compute_enriched_ohlcv_features
 from ai.level_0.labels import compute_label_columns
 
-ENRICHED_DIR = ROOT / "data" / "enriched"
-BINANCE_URL  = "https://api.binance.com/api/v3/klines"
+ENRICHED_DIR    = ROOT / "data" / "enriched"
+BINANCE_URL     = "https://api.binance.com/api/v3/klines"
+BINANCE_FUNDING = "https://fapi.binance.com/fapi/v1/fundingRate"
 
 # Barres de contexte chargées depuis le parquet pour que les features
 # fenêtrées (EMA200, rolling 200j, etc.) soient correctement calculées
@@ -112,6 +113,192 @@ def fetch_binance_1h(symbol: str, since_ms: int) -> pd.DataFrame:
     keep = ["datetime", "open", "high", "low", "close", "Close", "volume",
             "number_of_trades", "taker_buy_base_asset_volume", "quote_volume"]
     return df[[c for c in keep if c in df.columns]]
+
+
+# ─── Fetch funding rate (Binance Futures) ────────────────────────────────────
+
+def fetch_funding_rate(symbol: str, since_ms: int) -> pd.DataFrame:
+    """
+    Charge les funding rates depuis Binance Futures depuis since_ms.
+    Retourne un DataFrame [datetime, funding_rate] à fréquence 8h.
+    Si l'asset n'est pas un perp Binance (erreur API) → retourne DataFrame vide.
+    """
+    all_rows: list = []
+    start = since_ms
+    while True:
+        try:
+            r = requests.get(
+                BINANCE_FUNDING,
+                params={"symbol": symbol, "startTime": int(start), "limit": 1000},
+                timeout=10,
+            )
+            if r.status_code != 200:
+                break
+            rows = r.json()
+            if not rows or isinstance(rows, dict):
+                break
+            all_rows.extend(rows)
+            if len(rows) < 1000:
+                break
+            start = int(rows[-1]["fundingTime"]) + 1
+        except Exception:
+            break
+
+    if not all_rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(all_rows)
+    df["datetime"]     = pd.to_datetime(df["fundingTime"].astype(int), unit="ms", utc=True)
+    df["funding_rate"] = pd.to_numeric(df["fundingRate"], errors="coerce")
+    return df[["datetime", "funding_rate"]].sort_values("datetime").reset_index(drop=True)
+
+
+def _add_funding_features(df: pd.DataFrame, df_funding: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fusionne le funding rate (8h) dans le parquet 1h et calcule les z-scores.
+    df doit avoir un index DatetimeTZAware ou une colonne 'datetime'.
+    """
+    if df_funding.empty:
+        for col in ("funding_rate", "funding_rate_z_24", "funding_rate_z_72"):
+            if col not in df.columns:
+                df[col] = 0.0
+        return df
+
+    # Reindex sur l'index 1h par ffill
+    if "datetime" in df.columns:
+        df_tmp = df.set_index("datetime")
+    else:
+        df_tmp = df.copy()
+
+    fr = df_funding.set_index("datetime")["funding_rate"]
+    fr_aligned = fr.reindex(df_tmp.index, method="ffill").fillna(0.0)
+
+    df_tmp["funding_rate"]    = fr_aligned.values
+    df_tmp["funding_rate_z_24"] = (
+        (fr_aligned - fr_aligned.rolling(24, min_periods=4).mean())
+        / fr_aligned.rolling(24, min_periods=4).std().replace(0, np.nan)
+    ).fillna(0.0)
+    df_tmp["funding_rate_z_72"] = (
+        (fr_aligned - fr_aligned.rolling(72, min_periods=12).mean())
+        / fr_aligned.rolling(72, min_periods=12).std().replace(0, np.nan)
+    ).fillna(0.0)
+
+    if "datetime" in df.columns:
+        df_tmp = df_tmp.reset_index()
+    return df_tmp
+
+
+def _add_taker_flow_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calcule les features order-flow taker absentes du compute_enriched_ohlcv_features.
+    Nécessite 'taker_buy_base_asset_volume' et 'volume' dans df.
+    """
+    if "taker_buy_base_asset_volume" not in df.columns or "volume" not in df.columns:
+        for col in ("taker_buy_ratio_base", "taker_flow_imbalance_20", "taker_flow_momentum_5"):
+            if col not in df.columns:
+                df[col] = 0.0
+        return df
+
+    taker = pd.to_numeric(df["taker_buy_base_asset_volume"], errors="coerce").fillna(0.0)
+    vol   = pd.to_numeric(df["volume"], errors="coerce").fillna(1.0).clip(lower=1e-9)
+
+    ratio = (taker / vol).clip(0.0, 1.0)
+    if "taker_buy_ratio_base" not in df.columns:
+        df["taker_buy_ratio_base"] = ratio.values
+
+    # z-score 20h du taker ratio — excès directionnel
+    if "taker_flow_imbalance_20" not in df.columns:
+        mu  = ratio.rolling(20, min_periods=4).mean()
+        sig = ratio.rolling(20, min_periods=4).std().replace(0, np.nan)
+        df["taker_flow_imbalance_20"] = ((ratio - mu) / sig).fillna(0.0).clip(-4, 4).values
+
+    # Momentum du taker ratio sur 5 barres
+    if "taker_flow_momentum_5" not in df.columns:
+        df["taker_flow_momentum_5"] = ratio.diff(5).fillna(0.0).values
+
+    return df
+
+
+# ─── CVD, OI delta, Basis (microstructure alpha — phase 1 plan) ──────────────
+
+def _z_score(series: pd.Series, window: int) -> pd.Series:
+    """Z-score rolling — helper interne."""
+    mu  = series.rolling(window, min_periods=max(4, window//8)).mean()
+    sig = series.rolling(window, min_periods=max(4, window//8)).std().replace(0, np.nan)
+    return ((series - mu) / sig).fillna(0.0).clip(-4, 4)
+
+
+def _add_cvd_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cumulative Volume Delta depuis taker_buy_base_asset_volume.
+    CVD mesure la pression directionnelle nette des takers.
+    """
+    if "taker_buy_base_asset_volume" not in df.columns or "volume" not in df.columns:
+        for col in ("cvd_4h", "cvd_24h", "cvd_72h", "cvd_4h_z", "cvd_24h_z", "cvd_momentum"):
+            if col not in df.columns:
+                df[col] = 0.0
+        return df
+
+    taker = pd.to_numeric(df["taker_buy_base_asset_volume"], errors="coerce").fillna(0)
+    vol   = pd.to_numeric(df["volume"], errors="coerce").fillna(1e-9).clip(lower=1e-9)
+
+    # Ratio [0,1] plutôt que delta absolu — indépendant de la taille des barres
+    taker_ratio = (taker / vol).clip(0.0, 1.0)
+    # Centrer sur 0.5 → delta en [-0.5, 0.5]
+    delta_norm = taker_ratio - 0.5
+
+    df["cvd_4h"]       = delta_norm.rolling(4,  min_periods=1).sum()
+    df["cvd_24h"]      = delta_norm.rolling(24, min_periods=4).sum()
+    df["cvd_72h"]      = delta_norm.rolling(72, min_periods=12).sum()
+    df["cvd_4h_z"]     = _z_score(df["cvd_4h"],  96)
+    df["cvd_24h_z"]    = _z_score(df["cvd_24h"], 96)
+    df["cvd_momentum"] = df["cvd_24h"].diff(6).fillna(0.0).clip(-2, 2)
+    return df
+
+
+def _add_oi_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Open Interest delta depuis oi_sum (colonne macro déjà présente).
+    Δ OI × direction prix → régime (accumulation / squeeze / liquidation).
+    """
+    if "oi_sum" not in df.columns:
+        for col in ("oi_delta_1h", "oi_delta_8h", "oi_delta_24h", "oi_price_regime"):
+            if col not in df.columns:
+                df[col] = 0.0
+        return df
+
+    oi = pd.to_numeric(df["oi_sum"], errors="coerce").ffill().fillna(0)
+    df["oi_delta_1h"]  = oi.pct_change(1).fillna(0).clip(-0.20, 0.20)
+    df["oi_delta_8h"]  = oi.pct_change(8).fillna(0).clip(-0.30, 0.30)
+    df["oi_delta_24h"] = oi.pct_change(24).fillna(0).clip(-0.50, 0.50)
+
+    # 4 régimes : 0=short_build, 1=short_squeeze, 2=long_cap, 3=long_build
+    close = pd.to_numeric(df["close"], errors="coerce").fillna(method="ffill")
+    ret_8h = close.pct_change(8).fillna(0)
+    df["oi_price_regime"] = (
+        (df["oi_delta_8h"] > 0).astype(int) * 2
+        + (ret_8h > 0).astype(int)
+    )
+    return df
+
+
+def _add_basis_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basis spot/perp proxy via funding_rate.
+    funding_rate élevé → longs crowded → risque de squeeze baissier.
+    """
+    if "funding_rate" not in df.columns:
+        for col in ("basis_annualized", "basis_momentum_8h", "basis_extreme_long", "basis_extreme_short"):
+            if col not in df.columns:
+                df[col] = 0.0
+        return df
+
+    fr = pd.to_numeric(df["funding_rate"], errors="coerce").fillna(0)
+    df["basis_annualized"]   = (fr * 3 * 365 * 100).clip(-200, 200)  # % annualisé
+    df["basis_momentum_8h"]  = fr.diff(1).fillna(0)                   # Δ entre périodes
+    df["basis_extreme_long"] = (fr >  0.001).astype(float)            # > 0.1% → crowded long
+    df["basis_extreme_short"]= (fr < -0.0005).astype(float)           # < -0.05% → crowded short
+    return df
 
 
 # ─── Alias — copie exacte de assemble_enriched_from_dataout.py ───────────────
@@ -190,36 +377,115 @@ def _apply_feature_aliases(df: pd.DataFrame) -> pd.DataFrame:
     if "Close" not in df.columns and "close" in df.columns:
         df["Close"] = df["close"]
 
+    # rv_N aliases for DynamicSizer / MetaSuppressor (absent des parquets enrichis)
+    _rv_map = {
+        "rv_12": "realized_volatility_14",
+        "rv_24": "realized_volatility_20",
+        "rv_48": "realized_volatility_50",
+        "rv_72": "realized_volatility_50",
+        "rv_168": "realized_volatility_100",
+    }
+    for target, source in _rv_map.items():
+        if target not in df.columns and source in df.columns:
+            df[target] = df[source]
+    if "rv_ratio_24_72" not in df.columns and "rv_24" in df.columns and "rv_72" in df.columns:
+        df["rv_ratio_24_72"] = df["rv_24"] / df["rv_72"].replace(0.0, np.nan)
+    if "rv_ratio_12_48" not in df.columns and "rv_12" in df.columns and "rv_48" in df.columns:
+        df["rv_ratio_12_48"] = df["rv_12"] / df["rv_48"].replace(0.0, np.nan)
+
     return df
 
 
-# ─── MTF features (4h et 1d) — identique à l'assemble ───────────────────────
+# ─── MTF features (4h et 1d) — noms identiques aux données d'entraînement ───
+
+def _rsi_ewm(series: pd.Series, n: int) -> pd.Series:
+    delta = series.diff()
+    avg_g = delta.clip(lower=0).ewm(alpha=1.0 / max(n, 1), adjust=False).mean()
+    avg_l = (-delta.clip(upper=0)).ewm(alpha=1.0 / max(n, 1), adjust=False).mean()
+    rs = avg_g / avg_l.replace(0, np.nan)
+    return 100.0 - 100.0 / (1.0 + rs)
+
+
+def _adx_ewm(h: pd.Series, l: pd.Series, c: pd.Series, n: int) -> pd.Series:
+    h_diff = h.diff()
+    l_diff = -l.diff()
+    plus_dm  = np.where((h_diff > l_diff) & (h_diff > 0), h_diff, 0.0)
+    minus_dm = np.where((l_diff > h_diff) & (l_diff > 0), l_diff, 0.0)
+    tr = pd.concat([h - l, (h - c.shift(1)).abs(), (l - c.shift(1)).abs()], axis=1).max(axis=1)
+    a = 1.0 / max(n, 1)
+    atr   = tr.ewm(alpha=a, adjust=False).mean()
+    pdi   = 100.0 * pd.Series(plus_dm,  index=h.index).ewm(alpha=a, adjust=False).mean() / atr.replace(0, np.nan)
+    mdi   = 100.0 * pd.Series(minus_dm, index=h.index).ewm(alpha=a, adjust=False).mean() / atr.replace(0, np.nan)
+    dx    = (pdi - mdi).abs() / (pdi + mdi).replace(0, np.nan) * 100.0
+    return dx.ewm(alpha=a, adjust=False).mean()
+
 
 def _add_mtf_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Resampling 1h → 4h et 1h → 1d pour les features multi-timeframe."""
-    if "datetime" not in df.columns:
+    """
+    Calcule les features MTF 4h et 1d depuis les bars 1h.
+    Noms de colonnes identiques aux données d'entraînement :
+      mtf_4h_adx_20, mtf_4h_adx_10, mtf_4h_ema_distance_20, mtf_4h_rsi_10,
+      mtf_4h_return_5, mtf_4h_donchian_position_20, mtf_4h_realized_vol_10,
+      mtf_1d_return_5, mtf_1d_adx_5, mtf_1d_ema_distance_5, mtf_1d_rsi_5,
+      mtf_1d_donchian_position_5, mtf_1d_realized_vol_5
+    """
+    if "datetime" not in df.columns or "close" not in df.columns:
         return df
 
     df_t = df.set_index("datetime")
-    mtf_specs = {
-        "4h": ("4h", ["rsi_14", "mom_logret_72", "dist_ema_50", "dist_ema_200",
-                       "ema_spread_50_200", "rv_24", "rv_72"]),
-        "1d": ("1d", ["rsi_14", "mom_logret_72", "dist_ema_50", "dist_ema_200",
-                       "ema_spread_50_200", "rv_24"]),
-    }
-    for tf, (rule, cols_to_resample) in mtf_specs.items():
-        available = [c for c in cols_to_resample if c in df_t.columns]
-        if not available:
-            continue
+    orig_idx = df_t.index
+
+    timeframe_specs = [
+        ("4h", "4h", [
+            ("adx_20",               lambda h, l, c: _adx_ewm(h, l, c, 20)),
+            ("adx_10",               lambda h, l, c: _adx_ewm(h, l, c, 10)),
+            ("ema_distance_20",      lambda h, l, c: (c - c.ewm(span=20, adjust=False).mean())
+                                                     / c.ewm(span=20, adjust=False).mean().replace(0, np.nan)),
+            ("rsi_10",               lambda h, l, c: _rsi_ewm(c, 10)),
+            ("return_5",             lambda h, l, c: np.log(c / c.shift(5).replace(0, np.nan))),
+            ("donchian_position_20", lambda h, l, c: (c - l.rolling(20, min_periods=1).min())
+                                                     / (h.rolling(20, min_periods=1).max()
+                                                        - l.rolling(20, min_periods=1).min()).replace(0, np.nan)),
+            ("realized_vol_10",      lambda h, l, c: np.log(c / c.shift(1).replace(0, np.nan)).rolling(10, min_periods=2).std()),
+        ]),
+        ("1d", "1D", [
+            ("return_5",             lambda h, l, c: np.log(c / c.shift(5).replace(0, np.nan))),
+            ("adx_5",                lambda h, l, c: _adx_ewm(h, l, c, 5)),
+            ("ema_distance_5",       lambda h, l, c: (c - c.ewm(span=5, adjust=False).mean())
+                                                     / c.ewm(span=5, adjust=False).mean().replace(0, np.nan)),
+            ("rsi_5",                lambda h, l, c: _rsi_ewm(c, 5)),
+            ("donchian_position_5",  lambda h, l, c: (c - l.rolling(5, min_periods=1).min())
+                                                     / (h.rolling(5, min_periods=1).max()
+                                                        - l.rolling(5, min_periods=1).min()).replace(0, np.nan)),
+            ("realized_vol_5",       lambda h, l, c: np.log(c / c.shift(1).replace(0, np.nan)).rolling(5, min_periods=2).std()),
+        ]),
+    ]
+
+    for tf_name, rule, specs in timeframe_specs:
         try:
-            mtf = df_t[available].resample(rule).last()
-            mtf_1h = mtf.reindex(df_t.index, method="ffill")
-            for col in available:
-                alias = f"{col}_{tf}"
-                if alias not in df.columns:
-                    df[alias] = mtf_1h[col].values
+            ohlcv = df_t[["open", "high", "low", "close"]].copy()
+            htf = ohlcv.resample(rule).agg({"open": "first", "high": "max", "low": "min", "close": "last"})
+            htf = htf.dropna(subset=["close"])
+            if htf.empty:
+                continue
+            hh = htf["high"].astype(float)
+            hl = htf["low"].astype(float)
+            hc = htf["close"].astype(float)
+
+            for feat_name, compute_fn in specs:
+                col = f"mtf_{tf_name}_{feat_name}"
+                try:
+                    vals = compute_fn(hh, hl, hc)
+                    # Shift 1: use only completed candles (no lookahead)
+                    vals = vals.shift(1)
+                    # Forward-fill to 1h resolution
+                    aligned = vals.reindex(orig_idx, method="ffill")
+                    df[col] = aligned.values
+                except Exception:
+                    pass
         except Exception:
             pass
+
     return df
 
 
@@ -286,7 +552,7 @@ def update_enriched(symbol: str, dry_run: bool = False) -> int:
         df_ohlcv,
         interval="1h",
         include_labels=False,
-        include_multi_timeframe=False,
+        include_multi_timeframe=True,   # v2: activé (était False = bug)
         include_sequence_features=False,
     )
     df_enriched = df_enriched.reset_index()
@@ -300,6 +566,39 @@ def update_enriched(symbol: str, dry_run: bool = False) -> int:
 
     df_enriched = _apply_feature_aliases(df_enriched)
     df_enriched = _add_mtf_features(df_enriched)
+
+    # ── v2 : Taker flow z-scores ─────────────────────────────────────────────
+    # Récupérer taker_buy_base_asset_volume depuis df_combined si absent
+    if "taker_buy_base_asset_volume" not in df_enriched.columns and \
+       "taker_buy_base_asset_volume" in df_combined.columns:
+        tb = df_combined.set_index("datetime")["taker_buy_base_asset_volume"]
+        df_enriched = df_enriched.set_index("datetime")
+        df_enriched["taker_buy_base_asset_volume"] = tb.reindex(
+            df_enriched.index, method="nearest"
+        ).values
+        df_enriched = df_enriched.reset_index()
+    df_enriched = _add_taker_flow_features(df_enriched)
+
+    # ── v2 : Funding rate depuis Binance Futures ──────────────────────────────
+    try:
+        df_funding = fetch_funding_rate(symbol, last_ms - 3 * 86_400_000)  # 3j back
+        df_enriched = _add_funding_features(df_enriched, df_funding)
+    except Exception:
+        for col in ("funding_rate", "funding_rate_z_24", "funding_rate_z_72"):
+            if col not in df_enriched.columns:
+                df_enriched[col] = 0.0
+
+    # ── v3 : CVD + OI delta + basis (microstructure alpha) ───────────────────
+    # Passer df_combined pour accès à oi_sum et taker_buy_base si absent
+    if "oi_sum" not in df_enriched.columns and "oi_sum" in df_combined.columns:
+        oi = df_combined.set_index("datetime")["oi_sum"]
+        df_enriched = df_enriched.set_index("datetime")
+        df_enriched["oi_sum"] = oi.reindex(df_enriched.index, method="ffill").values
+        df_enriched = df_enriched.reset_index()
+
+    df_enriched = _add_cvd_features(df_enriched)
+    df_enriched = _add_oi_features(df_enriched)
+    df_enriched = _add_basis_features(df_enriched)
 
     try:
         df_enriched = compute_label_columns(df_enriched)

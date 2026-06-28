@@ -1,0 +1,60 @@
+# configs/institutional/engines/carry.yaml
+# Carry/Funding Engine
+
+engine:
+  name: CARRY
+  description: "Capture de funding et basis — multi-actifs"
+
+assets:
+  - BTCUSDT
+  - ETHUSDT
+  - SOLUSDT
+  - BNBUSDT
+  - AVAXUSDT
+  - DOGEUSDT
+  - LINKUSDT
+
+data:
+  timeframe: "1h"
+  start: "2021-01-01"
+  end:   "2025-12-31"
+  sources:
+    - ohlcv_1h
+    - funding_rate       # signal central
+    - open_interest
+    - basis              # futures_price / spot_price - 1
+    - mark_price
+    - premium_index
+
+features:
+  families:
+    - derivatives        # funding, basis, OI — le coeur du carry engine
+
+labels:
+  family: carry
+  target_primary:   carry_net_24h
+  targets_all:
+    - carry_net_8h
+    - carry_net_24h
+    - carry_net_72h
+  cost_bps:  10.0
+
+# Question du modèle :
+#   Le funding actuel est-il capturable sans se faire détruire par le mouvement de prix ?
+
+walk_forward:
+  mode:        expanding
+  train_start: "2021-01-01"
+  folds:       [2022, 2023, 2024, 2025]
+  val_months:  3
+  embargo_h:   48
+
+model:
+  type:             LightGBM
+  n_estimators:     600
+  early_stopping:   40
+  boosting_type:    gbdt    # GBDT (pas DART) pour carry — plus stable sur features mono-famille
+
+validation:
+  min_pass_rate:  0.75
+  min_auc_test:   0.57

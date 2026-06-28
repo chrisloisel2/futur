@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-05-30T12:36:16.445042+00:00",
+  "asset": "SOLUSDT",
+  "model": "TRM_E_SOL",
+  "signal": "E_cvd_basis_real",
+  "benchmark": {
+    "pf": 1.334,
+    "worst_yr": 1.222,
+    "max_dd": 15.8,
+    "wr": 0.461
+  },
+  "n_closed": 0,
+  "n_open": 0,
+  "n_signals_long": 0,
+  "metrics": {
+    "pf": 0.0,
+    "wr": 0.0,
+    "n": 0,
+    "avg_win": 0.0,
+    "avg_loss": 0.0,
+    "ratio": NaN,
+    "pnl": 0.0,
+    "dd": 0.0
+  },
+  "verdict": "WAIT",
+  "reason": "Aucun trade enregistr\u00e9",
+  "drift": {
+    "status": "INSUFFICIENT_DATA",
+    "n": 0
+  },
+  "rolling_5": {},
+  "e_snapshot_last": {}
+}

@@ -1,0 +1,20 @@
+{
+  "symbol": "DOTUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2025,
+  "cal_year": 2025,
+  "val_year": 2026,
+  "n_features": 97,
+  "n_train": 42629,
+  "n_cal": 4416,
+  "n_val": 3561,
+  "cal_pf": 0.724,
+  "cal_n": 5,
+  "val_n": 0,
+  "val_pf": 0.0,
+  "val_wr": 0.0,
+  "val_wr_pct": "0%",
+  "threshold_floor": 0.63,
+  "elapsed_s": 135.5,
+  "trained_at": "2026-05-29T10:57:09.017338+00:00"
+}

@@ -1,0 +1,41 @@
+{
+  "initial_capital": 10000.0,
+  "final_equity": 9717.44,
+  "pf": 0.1457,
+  "sharpe": -0.7681,
+  "sortino": -0.0792,
+  "cagr": -0.0072,
+  "max_drawdown": -0.0374,
+  "n_trades": 9,
+  "n_wins": 2,
+  "hit_rate": 0.2222,
+  "avg_win": 24.1048,
+  "avg_loss": -47.2535,
+  "win_loss_ratio": 0.5101,
+  "expectancy": -31.3961,
+  "gross_pnl": -260.36,
+  "net_pnl": -282.56,
+  "total_fees": 22.2,
+  "total_slippage": 8.83,
+  "avg_holding_h": 24.0,
+  "turnover": 4.5795,
+  "pnl_by_year": {
+    "2022": -322.74,
+    "2025": 40.18
+  },
+  "pnl_by_fold": {
+    "2022": -322.74,
+    "2025": 40.18
+  },
+  "pnl_by_model": {
+    "artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2022/model_2022.pkl": -322.74,
+    "artifacts/institutional/backtests/btc_eth_trend/BTCUSDT/v1.0/2025/model_2025.pkl": 40.18
+  },
+  "cost_sensitivity": {
+    "pf_x1": 0.1457,
+    "pf_x2": 0.1163,
+    "pf_x3": 0.0905
+  },
+  "portfolio_name": "BTC_ETH_TREND_V1",
+  "engine": "INSTITUTIONAL_BTC_ETH_TREND"
+}

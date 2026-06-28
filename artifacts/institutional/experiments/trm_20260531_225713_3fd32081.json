@@ -1,0 +1,96 @@
+{
+  "experiment_id": "trm_20260531_225713_3fd32081",
+  "timestamp": "2026-05-31T22:57:13.808701+00:00",
+  "engine_name": "TRM_EVENT",
+  "signal_name": "trm_event_event_cont_4h_BNBUSDT",
+  "assets": [
+    "BNBUSDT"
+  ],
+  "features_version": "unknown",
+  "labels_version": "unknown",
+  "model_type": "ModelSelector_WalkForward",
+  "model_params": {},
+  "train_period": {
+    "start": "2021-01-01",
+    "end": "2025-12-31"
+  },
+  "validation_period": {},
+  "test_period": {},
+  "walk_forward_config": {},
+  "cost_config": {
+    "cost_bps": 10.0
+  },
+  "risk_config": {},
+  "metrics": {
+    "test_auc_median": 0.57565,
+    "n_pass": 2
+  },
+  "robustness_tests": {
+    "walk_forward_folds": [
+      {
+        "fold": "2022",
+        "n_train": 6528,
+        "n_val": 2208,
+        "n_test": 8760,
+        "selected_model": "LogisticBaselineClassifier",
+        "val_score": 0.1208,
+        "test_auc": 0.5625,
+        "test_pr_auc_up": 0.0533,
+        "prec_at_5pct": 0.0479,
+        "prevalence_up": 0.0468,
+        "pass": false,
+        "rare_label": true,
+        "primary_metric": "pr_auc_up"
+      },
+      {
+        "fold": "2023",
+        "n_train": 15288,
+        "n_val": 2208,
+        "n_test": 8760,
+        "selected_model": "LightGBMClassifier",
+        "val_score": 0.0561,
+        "test_auc": 0.5633,
+        "test_pr_auc_up": 0.0613,
+        "prec_at_5pct": 0.0799,
+        "prevalence_up": 0.0484,
+        "pass": false,
+        "rare_label": true,
+        "primary_metric": "pr_auc_up"
+      },
+      {
+        "fold": "2024",
+        "n_train": 24048,
+        "n_val": 2208,
+        "n_test": 8784,
+        "selected_model": "LogisticBaselineClassifier",
+        "val_score": 0.0708,
+        "test_auc": 0.5985,
+        "test_pr_auc_up": 0.0884,
+        "prec_at_5pct": 0.1162,
+        "prevalence_up": 0.0551,
+        "pass": true,
+        "rare_label": true,
+        "primary_metric": "pr_auc_up"
+      },
+      {
+        "fold": "2025",
+        "n_train": 32832,
+        "n_val": 2208,
+        "n_test": 8756,
+        "selected_model": "LightGBMClassifier",
+        "val_score": 0.0601,
+        "test_auc": 0.588,
+        "test_pr_auc_up": 0.0897,
+        "prec_at_5pct": 0.1121,
+        "prevalence_up": 0.0537,
+        "pass": true,
+        "rare_label": true,
+        "primary_metric": "pr_auc_up"
+      }
+    ]
+  },
+  "decision": "INCUBATE",
+  "notes": "GBDT + ModelSelector + event_metrics",
+  "artifact_paths": {},
+  "code_hash": ""
+}

@@ -1,0 +1,65 @@
+# configs/institutional/engines/trm_event.yaml
+# TRM Event Engine — alts (SOL, BNB, etc.)
+
+engine:
+  name: TRM_EVENT
+  description: "Détection d'anomalies et événements — altcoins liquides"
+
+assets:
+  - SOLUSDT
+  - BNBUSDT
+  - AVAXUSDT
+  - DOGEUSDT
+  - LINKUSDT
+  - XRPUSDT
+  - ADAUSDT
+
+data:
+  timeframe: "1h"
+  start: "2021-01-01"
+  end:   "2025-12-31"
+  sources:
+    - ohlcv_1h
+    - funding_rate
+    - open_interest
+    - taker_flow
+    - liquidations    # si disponible
+
+features:
+  families:
+    - returns
+    - volatility
+    - derivatives    # funding, OI, CVD (taker flow)
+  btc_regime_as_context: true   # BTC/ETH comme filtre contextuel, pas cible
+
+labels:
+  family: event
+  target_primary:   event_cont_4h
+  targets_all:
+    - event_cont_1h
+    - event_cont_4h
+    - event_cont_8h
+  k:         1.5     # seuils plus hauts — événements génèrent des mouvements forts
+  cost_bps:  15.0    # slippage plus élevé sur alts
+
+walk_forward:
+  mode:        expanding
+  train_start: "2021-01-01"
+  folds:       [2022, 2023, 2024, 2025]
+  val_months:  3
+  embargo_h:   72    # 3 jours suffisent pour événements courts
+  min_train_h: 2160  # 90 jours minimum
+
+model:
+  type:              LightGBM
+  n_estimators:      800
+  early_stopping:    40
+  boosting_type:     dart
+  num_leaves:        25   # moins de feuilles pour alts (moins de données)
+  learning_rate:     0.05
+  min_child_samples: 25
+
+validation:
+  min_pass_rate:  0.75
+  min_auc_test:   0.57
+  max_degradation: 0.10

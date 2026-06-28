@@ -1,0 +1,20 @@
+{
+  "symbol": "ETHUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2025,
+  "cal_year": 2025,
+  "val_year": 2026,
+  "n_features": 71,
+  "n_train": 60955,
+  "n_cal": 4416,
+  "n_val": 3561,
+  "cal_pf": 1.499,
+  "cal_n": 43,
+  "val_n": 4,
+  "val_pf": 0.0,
+  "val_wr": 0.0,
+  "val_wr_pct": "0%",
+  "threshold_floor": 0.58,
+  "elapsed_s": 122.1,
+  "trained_at": "2026-05-29T10:36:44.199503+00:00"
+}

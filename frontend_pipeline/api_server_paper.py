@@ -28,17 +28,19 @@ Usage :
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import subprocess
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import AsyncGenerator, List, Optional
 
 import pandas as pd
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 # ─── Chemins ──────────────────────────────────────────────────────────────────
 
@@ -77,6 +79,190 @@ _run_log: List[str] = []
 _data_update_active = False
 _fleet_run_active  = False
 _fleet_run_log: List[str] = []
+
+# ─── Auto-scheduler ───────────────────────────────────────────────────────────
+
+import time as _time
+
+_sched_enabled:   bool              = True
+_sched_running:   bool              = False
+_sched_last_run:  Optional[datetime] = None
+_sched_next_run:  Optional[datetime] = None
+_sched_log:       List[str]         = []
+_sched_interval_h: int              = 1   # toutes les heures
+
+
+def _sched_do_run() -> None:
+    """Exécute un cycle complet : data update + fleet signals."""
+    global _sched_running, _sched_last_run, _sched_log, _sched_next_run
+
+    _sched_running  = True
+    _sched_last_run = datetime.now(timezone.utc)
+    ts = _sched_last_run.strftime("%H:%M")
+    _sched_log = [f"[{ts}] Cycle auto démarré"]
+
+    try:
+        available = [s for s in TOP_10
+                     if (ENRICHED_DIR / f"{s}_1h_enriched.parquet").exists()]
+
+        if available:
+            _sched_log.append(f"[data] Mise à jour {len(available)} assets…")
+            p = subprocess.run(
+                ["python3", str(ROOT / "scripts" / "live_data_update.py"),
+                 "--symbols"] + available,
+                capture_output=True, text=True, cwd=str(ROOT), timeout=360,
+            )
+            for line in p.stdout.splitlines()[-6:]:
+                _sched_log.append(f"  {line}")
+            if p.returncode != 0:
+                _sched_log.append(f"[WARN data] {p.stderr[-200:]}")
+
+        _sched_log.append("[fleet] Signaux + fermeture positions…")
+        p = subprocess.run(
+            ["python3", str(ROOT / "scripts" / "paper_multi_signal.py")],
+            capture_output=True, text=True, cwd=str(ROOT), timeout=1200,
+        )
+        for line in p.stdout.splitlines()[-15:]:
+            _sched_log.append(f"  {line}")
+        if p.returncode != 0:
+            _sched_log.append(f"[ERROR fleet] {p.stderr[-300:]}")
+        else:
+            _sched_log.append(f"[{datetime.now(timezone.utc).strftime('%H:%M')}] Cycle terminé ✓")
+
+    except Exception as e:
+        _sched_log.append(f"[ERROR] {e}")
+    finally:
+        _sched_running = False
+        # Planifier le prochain run dans le finally pour éviter tout race condition
+        _sched_next_run = datetime.now(timezone.utc) + timedelta(hours=_sched_interval_h)
+
+
+def _scheduler_loop() -> None:
+    """Thread background : lance un cycle immédiatement puis toutes les N heures."""
+    global _sched_next_run, _sched_enabled
+
+    # Courte pause au démarrage pour laisser le serveur s'initialiser
+    _time.sleep(15)
+
+    while True:
+        if _sched_enabled:
+            _sched_do_run()   # _sched_next_run est fixé dans le finally de _sched_do_run
+        else:
+            _sched_next_run = None
+            _time.sleep(30)
+            continue
+
+        # Attente jusqu'au prochain cycle (vérification toutes les 20s)
+        while True:
+            _time.sleep(20)
+            if not _sched_enabled:
+                _sched_next_run = None
+                break
+            if _sched_next_run and datetime.now(timezone.utc) >= _sched_next_run:
+                break
+
+
+# Démarrage automatique du scheduler
+_sched_thread = threading.Thread(target=_scheduler_loop, daemon=True, name="auto-scheduler")
+_sched_thread.start()
+
+
+# ─── Live price background fetcher ───────────────────────────────────────────
+
+_price_lock: threading.Lock = threading.Lock()
+_price_cache: dict = {}
+_price_ts: Optional[datetime] = None
+_price_version: int = 0   # incremented on each successful fetch
+
+
+def _fetch_prices_sync() -> dict:
+    try:
+        sym_param = "[" + ",".join(f'"{s}"' for s in TOP_10) + "]"
+        r = requests.get(
+            "https://api.binance.com/api/v3/ticker/price",
+            params={"symbols": sym_param},
+            timeout=5,
+        )
+        return {item["symbol"]: float(item["price"]) for item in r.json()}
+    except Exception:
+        return {}
+
+
+def _price_fetcher_loop() -> None:
+    global _price_cache, _price_ts, _price_version
+    while True:
+        prices = _fetch_prices_sync()
+        if prices:
+            with _price_lock:
+                _price_cache = prices
+                _price_ts    = datetime.now(timezone.utc)
+                _price_version += 1
+        _time.sleep(8)
+
+
+_price_thread = threading.Thread(target=_price_fetcher_loop, daemon=True, name="price-fetcher")
+_price_thread.start()
+
+
+# ─── SSE event stream ─────────────────────────────────────────────────────────
+
+async def _sse_generator(request: Request) -> AsyncGenerator[str, None]:
+    """Yields SSE events: prices every ~8s, scheduler status on change, heartbeat."""
+    last_price_version = -1
+    last_sched_running = None
+    last_sched_log_len = 0
+    tick = 0
+
+    while True:
+        if await request.is_disconnected():
+            break
+
+        tick += 1
+
+        # ── Price event when new data available ────────────────────────────────
+        with _price_lock:
+            ver   = _price_version
+            prices = dict(_price_cache)
+            ts    = _price_ts
+
+        if ver != last_price_version and prices:
+            last_price_version = ver
+            payload = {
+                "type":      "prices",
+                "prices":    prices,
+                "timestamp": ts.isoformat() if ts else datetime.now(timezone.utc).isoformat(),
+            }
+            yield f"data: {json.dumps(payload)}\n\n"
+
+        # ── Scheduler status on change ─────────────────────────────────────────
+        sched_running = _sched_running
+        sched_log_len = len(_sched_log)
+        if sched_running != last_sched_running or (sched_running and sched_log_len != last_sched_log_len):
+            last_sched_running  = sched_running
+            last_sched_log_len  = sched_log_len
+            payload = {
+                "type":    "scheduler",
+                "running": sched_running,
+                "log":     list(_sched_log[-12:]),
+                "next_run": _sched_next_run.isoformat() if _sched_next_run else None,
+            }
+            yield f"data: {json.dumps(payload)}\n\n"
+
+        # ── Heartbeat every 30 ticks (~30s) ───────────────────────────────────
+        if tick % 30 == 0:
+            yield f"data: {json.dumps({'type': 'heartbeat', 'ts': datetime.now(timezone.utc).isoformat()})}\n\n"
+
+        await asyncio.sleep(1)
+
+
+@app.get("/api/stream")
+async def sse_stream(request: Request):
+    """SSE endpoint: pushes live prices, scheduler status, heartbeat."""
+    return StreamingResponse(
+        _sse_generator(request),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 # ─── Helpers single-asset (BTC) ───────────────────────────────────────────────
@@ -567,6 +753,241 @@ def fleet_run(update_data: bool = True):
 
     threading.Thread(target=_run, daemon=True).start()
     return {"status": "started"}
+
+
+# ─── Scheduler endpoints ──────────────────────────────────────────────────────
+
+@app.get("/api/scheduler/status")
+def scheduler_status():
+    return {
+        "enabled":        _sched_enabled,
+        "running":        _sched_running,
+        "last_run":       _sched_last_run.isoformat() if _sched_last_run else None,
+        "next_run":       _sched_next_run.isoformat() if _sched_next_run else None,
+        "interval_hours": _sched_interval_h,
+        "log":            _sched_log[-12:],
+    }
+
+
+@app.post("/api/scheduler/toggle")
+def scheduler_toggle():
+    global _sched_enabled, _sched_next_run
+    _sched_enabled = not _sched_enabled
+    if not _sched_enabled:
+        _sched_next_run = None
+    return {"enabled": _sched_enabled}
+
+
+@app.post("/api/scheduler/run-now")
+def scheduler_run_now():
+    """Force un cycle immédiat en dehors du planning."""
+    global _fleet_run_active, _fleet_run_log
+    if _sched_running or _fleet_run_active:
+        return {"status": "already_running"}
+
+    def _force():
+        global _fleet_run_active, _fleet_run_log, _sched_next_run
+        _fleet_run_active = True
+        _sched_do_run()
+        _fleet_run_log = _sched_log.copy()
+        _sched_next_run = datetime.now(timezone.utc) + timedelta(hours=_sched_interval_h)
+        _fleet_run_active = False
+
+    threading.Thread(target=_force, daemon=True).start()
+    return {"status": "started"}
+
+
+# ─── Live prices ──────────────────────────────────────────────────────────────
+
+def _binance_symbols_param(symbols: list) -> str:
+    """Build Binance-compatible symbols JSON string (no spaces, double quotes)."""
+    return "[" + ",".join(f'"{s}"' for s in symbols) + "]"
+
+
+@app.get("/api/live-prices")
+def live_prices_api():
+    """Batch price fetch from Binance for all TOP_10 symbols."""
+    try:
+        r = requests.get(
+            "https://api.binance.com/api/v3/ticker/price",
+            params={"symbols": _binance_symbols_param(TOP_10)},
+            timeout=5,
+        )
+        data = r.json()
+        prices = {item["symbol"]: float(item["price"]) for item in data}
+        return {"prices": prices, "timestamp": datetime.now(timezone.utc).isoformat()}
+    except Exception as e:
+        return {"prices": {}, "error": str(e), "timestamp": datetime.now(timezone.utc).isoformat()}
+
+
+@app.get("/api/portfolio/live")
+def portfolio_live():
+    """Full portfolio state: per-agent paper trades + live Binance prices."""
+    INITIAL_CAPITAL = 10_000.0  # USD per agent
+
+    # Fetch live prices (batch)
+    live_prices: dict = {}
+    try:
+        r = requests.get(
+            "https://api.binance.com/api/v3/ticker/price",
+            params={"symbols": _binance_symbols_param(TOP_10)},
+            timeout=5,
+        )
+        for item in r.json():
+            live_prices[item["symbol"]] = float(item["price"])
+    except Exception:
+        pass
+
+    # Fetch 24h tickers (batch)
+    ticker_24h: dict = {}
+    try:
+        r = requests.get(
+            "https://api.binance.com/api/v3/ticker/24hr",
+            params={"symbols": _binance_symbols_param(TOP_10)},
+            timeout=6,
+        )
+        for item in r.json():
+            ticker_24h[item["symbol"]] = item
+    except Exception:
+        pass
+
+    agents = []
+    total_realized_usd   = 0.0
+    total_unrealized_usd = 0.0
+
+    for sym in TOP_10:
+        state_f   = _asset_dir(sym) / "state.json"
+        trade_f   = _asset_dir(sym) / "trades.csv"
+        sig_f     = _asset_dir(sym) / "signals.csv"
+        available = (ENRICHED_DIR / f"{sym}_1h_enriched.parquet").exists()
+
+        state: dict = {}
+        if state_f.exists():
+            try:
+                state = json.loads(state_f.read_text())
+            except Exception:
+                pass
+
+        # Trades
+        open_positions: list  = []
+        closed_trades_count   = 0
+        if trade_f.exists():
+            try:
+                df_t = pd.read_csv(trade_f).fillna("")
+                for _, row in df_t.iterrows():
+                    d = dict(row)
+                    if str(d.get("outcome", "")).upper() == "OPEN":
+                        open_positions.append(d)
+                    else:
+                        closed_trades_count += 1
+            except Exception:
+                pass
+
+        # Latest signal
+        latest_sig: dict = {}
+        if sig_f.exists():
+            try:
+                df_s = pd.read_csv(sig_f).tail(1)
+                if not df_s.empty:
+                    latest_sig = df_s.fillna("").to_dict("records")[0]
+            except Exception:
+                pass
+
+        lp   = live_prices.get(sym)
+        t24  = ticker_24h.get(sym, {})
+
+        # Unrealized P&L on open positions
+        open_pos_data: list = []
+        unrealized_usd = 0.0
+        for pos in open_positions:
+            ep_raw = pos.get("close_entry")
+            sm_raw = pos.get("size_multiplier", 1.0)
+            try:
+                ep = float(ep_raw) if ep_raw not in ("", None) else None
+                sm = float(sm_raw) if sm_raw not in ("", None) else 1.0
+            except (TypeError, ValueError):
+                ep, sm = None, 1.0
+            if ep and ep > 0 and lp:
+                pos_usd   = INITIAL_CAPITAL * 0.25 * sm
+                qty       = pos_usd / ep
+                curr_val  = qty * lp
+                upnl_usd  = curr_val - pos_usd
+                upnl_pct  = (lp / ep - 1.0) * 100.0
+                unrealized_usd += upnl_usd
+                open_pos_data.append({
+                    "entry_time":           pos.get("entry_time"),
+                    "entry_price":          round(ep, 6),
+                    "current_price":        round(lp, 6),
+                    "position_usd":         round(pos_usd, 2),
+                    "quantity":             round(qty, 8),
+                    "current_value_usd":    round(curr_val, 2),
+                    "unrealized_pnl_usd":   round(upnl_usd, 2),
+                    "unrealized_pnl_pct":   round(upnl_pct, 3),
+                    "context":              pos.get("context", ""),
+                    "p_long":               pos.get("p_long"),
+                    "size_multiplier":      round(sm, 4),
+                })
+
+        cum_pnl_pct    = float(state.get("cumulative_pnl_pct", 0.0))
+        realized_usd   = INITIAL_CAPITAL * cum_pnl_pct / 100.0
+        agent_value    = INITIAL_CAPITAL + realized_usd + unrealized_usd
+
+        total_realized_usd   += realized_usd
+        total_unrealized_usd += unrealized_usd
+
+        # Model meta
+        meta = _load_model_meta(sym)
+
+        agents.append({
+            "symbol":                sym,
+            "available":             available,
+            "live_price":            lp,
+            "price_change_24h_pct":  float(t24.get("priceChangePercent", 0)) if t24 else None,
+            "volume_24h_usdt":       float(t24.get("quoteVolume", 0))         if t24 else None,
+            "high_24h":              float(t24.get("highPrice", 0))            if t24 else None,
+            "low_24h":               float(t24.get("lowPrice", 0))             if t24 else None,
+            "action":                latest_sig.get("action", "NO_DATA"),
+            "p_long":                latest_sig.get("p_long"),
+            "threshold":             latest_sig.get("threshold"),
+            "sup_level":             latest_sig.get("sup_level"),
+            "signal_timestamp":      latest_sig.get("timestamp"),
+            "btc_regime":            latest_sig.get("btc_regime", "UNKNOWN"),
+            "total_trades":          state.get("total_trades", 0),
+            "total_wins":            state.get("total_wins", 0),
+            "cumulative_pnl_pct":    cum_pnl_pct,
+            "realized_pnl_usd":      round(realized_usd, 2),
+            "unrealized_pnl_usd":    round(unrealized_usd, 2),
+            "agent_value_usd":       round(agent_value, 2),
+            "open_positions":        open_pos_data,
+            "closed_trades_count":   closed_trades_count,
+            "max_dd_pct":            float(state.get("max_dd_pct", 0.0)),
+            "consecutive_losses":    state.get("consecutive_losses", 0),
+            "weekly_pnl_pct":        float(state.get("weekly_pnl_pct", 0.0)),
+            "crash_halt_until":      state.get("crash_halt_until"),
+            "start_date":            state.get("start_date"),
+            # Model quality
+            "model_trained":         (MODELS_DIR / f"{sym}_{datetime.now(timezone.utc).year - 2}.pkl").exists(),
+            "val_pf":                meta.get("val_pf"),
+            "val_wr":                meta.get("val_wr"),
+            "val_n":                 meta.get("val_n"),
+            "n_features":            meta.get("n_features"),
+        })
+
+    initial_total    = len(TOP_10) * INITIAL_CAPITAL
+    total_pnl_usd    = total_realized_usd + total_unrealized_usd
+    total_value      = initial_total + total_pnl_usd
+
+    return {
+        "timestamp":                  datetime.now(timezone.utc).isoformat(),
+        "initial_capital_usd":        initial_total,
+        "total_value_usd":            round(total_value, 2),
+        "total_realized_pnl_usd":     round(total_realized_usd, 2),
+        "total_unrealized_pnl_usd":   round(total_unrealized_usd, 2),
+        "total_pnl_usd":              round(total_pnl_usd, 2),
+        "total_pnl_pct":              round(total_pnl_usd / initial_total * 100, 3),
+        "btc_price":                  live_prices.get("BTCUSDT"),
+        "agents":                     agents,
+    }
 
 
 # ─── Entry point ──────────────────────────────────────────────────────────────

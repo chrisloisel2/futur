@@ -2,19 +2,21 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { SignalView, TradesView, ModelView } from './components/PaperDashboard';
 import { FleetView } from './components/FleetView';
+import { LiveDashboard } from './components/LiveDashboard';
 import { API_BASE_URL } from './config/api';
 
-type View = 'fleet' | 'signal' | 'trades' | 'model';
+type View = 'live' | 'fleet' | 'signal' | 'trades' | 'model';
 
 const NAV: { id: View; label: string; icon: string }[] = [
-  { id: 'fleet',  label: 'Fleet TOP 10',  icon: '◈' },
-  { id: 'signal', label: 'Signal BTC',    icon: '▲' },
-  { id: 'trades', label: 'Trades',        icon: '◆' },
-  { id: 'model',  label: 'Modèle',        icon: '⊞' },
+  { id: 'live',   label: 'Portfolio Live', icon: '⚡' },
+  { id: 'fleet',  label: 'Fleet TOP 10',   icon: '◈' },
+  { id: 'signal', label: 'Signal BTC',     icon: '▲' },
+  { id: 'trades', label: 'Trades',         icon: '◆' },
+  { id: 'model',  label: 'Modèle',         icon: '⊞' },
 ];
 
 function App() {
-  const [view, setView] = useState<View>('fleet');
+  const [view, setView] = useState<View>('live');
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
   const [clock, setClock] = useState('');
 
@@ -42,6 +44,7 @@ function App() {
 
   const renderView = () => {
     switch (view) {
+      case 'live':   return <LiveDashboard />;
       case 'fleet':  return <FleetView />;
       case 'signal': return <SignalView />;
       case 'trades': return <TradesView />;
@@ -98,7 +101,7 @@ function App() {
             <h1 className="page-title">{NAV.find(n => n.id === view)?.label}</h1>
           </div>
           <div className="header-right">
-            <span className="paper-mode-tag">PAPER</span>
+            <span className="paper-mode-tag">PAPER · LIVE DATA</span>
             <span className="header-clock">{clock}</span>
           </div>
         </div>

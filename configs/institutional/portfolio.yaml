@@ -1,0 +1,27 @@
+# configs/institutional/portfolio.yaml
+# Portfolio construction institutionnel
+
+portfolio:
+  # Méthode de sizing
+  method: "vol_targeting"    # inverse_vol | vol_targeting | kelly | risk_budget
+
+  # Volatilité cible du portefeuille (annualisée)
+  target_vol: 0.15           # 15%
+
+  # Limites de position
+  max_position_pct: 0.25     # 25% equity max par position
+  kelly_fraction: 0.25       # Kelly × 1/4 (conservateur)
+  risk_budget_pct: 0.02      # 2% equity max en risque par trade
+
+  # Meta portfolio (TRM + Institutional)
+  meta:
+    trm_max_pct: 0.50
+    institutional_max_pct: 0.50
+    max_asset_pct: 0.40
+    cash_is_position: true         # le cash est une position valide
+
+  # Contraintes de corrélation
+  max_correlated_exposure: 0.70    # max 70% en actifs corrélés > 0.8
+
+  # Turnover
+  max_daily_turnover_pct: 0.50     # max 50% du portefeuille par jour

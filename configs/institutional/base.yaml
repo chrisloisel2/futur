@@ -1,0 +1,13 @@
+# configs/institutional/base.yaml
+# Configuration de base du INSTITUTIONAL_ENGINE
+# Toutes les configs spécialisées héritent de celle-ci.
+
+institutional_engine:
+  version: "v1.0"
+  name: "INSTITUTIONAL_ENGINE"
+  assets:
+    priority_1: ["BTCUSDT", "ETHUSDT"]
+    priority_2: ["SOLUSDT", "BNBUSDT"]
+    priority_3: ["AVAXUSDT", "LINKUSDT", "DOGEUSDT", "XRPUSDT", "ADAUSDT"]
+  timeframe: "1H"
+  base_currency: "USDT"

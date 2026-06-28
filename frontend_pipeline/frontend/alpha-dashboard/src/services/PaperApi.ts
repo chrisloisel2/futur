@@ -69,6 +69,68 @@ export interface RunStatus {
   log: string[];
 }
 
+// ── Portfolio Live types ──────────────────────────────────────────────────────
+
+export interface OpenPosition {
+  entry_time: string | null;
+  entry_price: number;
+  current_price: number;
+  position_usd: number;
+  quantity: number;
+  current_value_usd: number;
+  unrealized_pnl_usd: number;
+  unrealized_pnl_pct: number;
+  context: string;
+  p_long: number | null;
+  size_multiplier: number;
+}
+
+export interface AgentLive {
+  symbol: string;
+  available: boolean;
+  live_price: number | null;
+  price_change_24h_pct: number | null;
+  volume_24h_usdt: number | null;
+  high_24h: number | null;
+  low_24h: number | null;
+  action: string;
+  p_long: number | null;
+  threshold: number | null;
+  sup_level: string | null;
+  signal_timestamp: string | null;
+  btc_regime: string;
+  total_trades: number;
+  total_wins: number;
+  cumulative_pnl_pct: number;
+  realized_pnl_usd: number;
+  unrealized_pnl_usd: number;
+  agent_value_usd: number;
+  open_positions: OpenPosition[];
+  closed_trades_count: number;
+  max_dd_pct: number;
+  consecutive_losses: number;
+  weekly_pnl_pct: number;
+  crash_halt_until: string | null;
+  start_date: string | null;
+  model_trained: boolean;
+  val_pf: number | null;
+  val_wr: number | null;
+  val_n: number | null;
+  n_features: number | null;
+}
+
+export interface PortfolioLive {
+  timestamp: string;
+  initial_capital_usd: number;
+  total_value_usd: number;
+  total_realized_pnl_usd: number;
+  total_unrealized_pnl_usd: number;
+  total_pnl_usd: number;
+  total_pnl_pct: number;
+  btc_price: number | null;
+  agents: AgentLive[];
+}
+
 // ── Fleet types ───────────────────────────────────────────────────────────────
 
 export type AssetAction = 'LONG' | 'WATCH' | 'NO_SIGNAL' | 'PENDING' | 'NO_DATA' | 'BLOCKED' | 'ERROR';
@@ -159,6 +221,19 @@ export const PaperApi = {
   runStatus:     () => get<RunStatus>('/api/signal/run-status'),
   triggerRun:    () => post<{ status: string }>('/api/signal/run'),
   triggerUpdate: () => post<{ status: string }>('/api/data/update'),
+
+  // Portfolio live (prix Binance temps réel + état agents)
+  portfolioLive:      () => get<PortfolioLive>('/api/portfolio/live'),
+  livePrices:         () => get<{ prices: Record<string, number>; timestamp: string }>('/api/live-prices'),
+
+  // Auto-scheduler
+  schedulerStatus:    () => get<{
+    enabled: boolean; running: boolean;
+    last_run: string | null; next_run: string | null;
+    interval_hours: number; log: string[];
+  }>('/api/scheduler/status'),
+  schedulerToggle:    () => post<{ enabled: boolean }>('/api/scheduler/toggle'),
+  schedulerRunNow:    () => post<{ status: string }>('/api/scheduler/run-now'),
 
   // Fleet multi-asset
   fleet:              () => get<FleetSummary>('/api/fleet'),

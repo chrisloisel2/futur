@@ -1,0 +1,48 @@
+{
+  "version": "test_v1",
+  "asset": "BTCUSDT",
+  "config": {
+    "horizons_h": [
+      4,
+      12,
+      24,
+      72,
+      168
+    ],
+    "cost_bps": 10.0,
+    "vol_threshold_k": 0.5,
+    "triple_barrier": {
+      "max_bars": 72,
+      "k_up": 1.0,
+      "k_down": 1.0,
+      "vol_window": 24,
+      "cost_bps": 10.0
+    }
+  },
+  "config_hash": "f33bd4628aff",
+  "n_rows": 8737,
+  "label_columns": [
+    "fwd_ret_4h",
+    "fwd_ret_12h",
+    "fwd_ret_24h",
+    "fwd_ret_72h",
+    "fwd_ret_168h",
+    "dir_label_4h",
+    "dir_label_12h",
+    "dir_label_24h",
+    "dir_label_72h",
+    "dir_label_168h",
+    "tb_label",
+    "tb_ret",
+    "label_version"
+  ],
+  "start": "2022-01-01 00:00:00+00:00",
+  "end": "2022-12-31 00:00:00+00:00",
+  "class_distribution": {
+    "tb_label": {
+      "0": 8716,
+      "-1": 16,
+      "1": 5
+    }
+  }
+}
