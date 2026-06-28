@@ -79,3 +79,28 @@ sculpter le governor sur une seule période · ignorer les parquets corrompus.
 3. **Liquidation event-first** : nécessite un vrai feed liquidations/OI (absent d'enriched).
 4. **Carry** : backtest portage (funding reçu/payé, basis, coût hedge, gap) — pas directionnel.
 5. Étendre la fenêtre d'éval (inclure des régimes haussiers) avant tout verdict définitif sur un moteur.
+
+---
+
+## Phase 30-34 — Live writer safe + full-cycle regime (2026-06-28, branche fix/datastore-recovery)
+
+**Atomic write (Phase 30-32) :** `src/institutional/data/atomic_parquet.py` (lock flock +
+temp + os.replace + fsync + validation ; quarantaine si existant corrompu, jamais d'écrasement).
+Câblé dans `live_data_update.py` (remplace le `to_parquet` direct, cause de corruption).
+Tests `tests/test_atomic_parquet.py` : **8/8** (crash-avant-replace, temp invalide, corrupt-jamais-écrasé,
+4 writers concurrents, vide refusé). Store **10/10 PASS sous service ACTIF** → `LIVE_WRITE_PATH: SAFE`.
+
+**Full-cycle regime report (Phase 34)** `reports/portfolio_full_cycle_after_datastore_recovery.json` :
+
+| Année | Régime | ROI | PF | Verdict |
+|---|---|---:|---:|---|
+| 2022 | bear | −20.8% | 0.80 | LOSS |
+| 2023 | recovery | +0.7% | 1.01 | FLAT |
+| 2024 | bull | **+6.3%** | 1.08 | **WIN** |
+| 2025 | mixed | −13.9% | 0.83 | LOSS |
+| 2026 | hostile | −5.6% | 0.84 | LOSS |
+
+→ **Long-only RÉGIME-DÉPENDANT** (gagne en bull, saigne en bear/mixed/hostile). Pas mort, mais
+incapable seul. Carry = seul moteur positif full-cycle. **Hedge + carry obligatoires.**
+⚠ Governor conservative_v1 = **ratchet monotone** sur multi-année (se fige en cash après 1er DD) →
+le Hedge Governor doit utiliser un DD en fenêtre glissante / ré-armement par régime.

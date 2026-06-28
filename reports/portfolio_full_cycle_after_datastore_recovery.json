@@ -1,0 +1,65 @@
+{
+  "engines": [
+    "TRM_TREND_INST",
+    "PULLBACK_LONG",
+    "LIQUIDATION_REBOUND",
+    "CARRY_BASIS",
+    "CROSS_SECTIONAL_LONG"
+  ],
+  "governor": "none",
+  "full_cycle_roi": -0.30862328230283065,
+  "by_year": {
+    "2022": {
+      "regime": "bear / high-vol",
+      "roi": -0.2078,
+      "pf": 0.805,
+      "n_trades": 1286,
+      "trades_month": 107.2,
+      "max_dd": -0.2155,
+      "verdict": "LOSS"
+    },
+    "2023": {
+      "regime": "recovery / risk-on",
+      "roi": 0.0074,
+      "pf": 1.011,
+      "n_trades": 902,
+      "trades_month": 75.2,
+      "max_dd": -0.1239,
+      "verdict": "FLAT"
+    },
+    "2024": {
+      "regime": "bull / risk-on",
+      "roi": 0.0632,
+      "pf": 1.077,
+      "n_trades": 1015,
+      "trades_month": 84.6,
+      "max_dd": -0.0599,
+      "verdict": "WIN"
+    },
+    "2025": {
+      "regime": "mixed",
+      "roi": -0.1386,
+      "pf": 0.829,
+      "n_trades": 963,
+      "trades_month": 80.2,
+      "max_dd": -0.155,
+      "verdict": "LOSS"
+    },
+    "2026": {
+      "regime": "hostile long-only (YTD)",
+      "roi": -0.0561,
+      "pf": 0.837,
+      "n_trades": 441,
+      "trades_month": 36.8,
+      "max_dd": -0.0906,
+      "verdict": "LOSS"
+    }
+  },
+  "per_engine_pnl": {
+    "CROSS_SECTIONAL_LONG": -2703.79,
+    "LIQUIDATION_REBOUND": -368.93,
+    "PULLBACK_LONG": -87.36,
+    "CARRY_BASIS": 99.27,
+    "TRM_TREND_INST": -25.43
+  }
+}

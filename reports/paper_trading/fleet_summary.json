@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-06-28T10:09:08.600335+00:00",
+  "timestamp": "2026-06-28T10:16:22.468705+00:00",
   "btc_regime": "BEAR",
   "btc_price": 60258.84,
   "btc_vs_ema200": -2.22,
   "assets": [
     {
       "symbol": "BTCUSDT",
-      "timestamp": "2026-06-28T10:09:31.138457+00:00",
+      "timestamp": "2026-06-28T10:16:43.603736+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.3976,
       "threshold": 0.63,
@@ -42,7 +42,7 @@
     },
     {
       "symbol": "ETHUSDT",
-      "timestamp": "2026-06-28T10:09:31.714625+00:00",
+      "timestamp": "2026-06-28T10:16:44.190747+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.3687,
       "threshold": 0.58,
@@ -78,7 +78,7 @@
     },
     {
       "symbol": "BNBUSDT",
-      "timestamp": "2026-06-28T10:09:08.600335+00:00",
+      "timestamp": "2026-06-28T10:16:22.468705+00:00",
       "action": "ERROR",
       "p_long": null,
       "threshold": null,
@@ -100,7 +100,7 @@
     },
     {
       "symbol": "SOLUSDT",
-      "timestamp": "2026-06-28T10:09:32.278833+00:00",
+      "timestamp": "2026-06-28T10:16:44.756258+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.296,
       "threshold": 0.63,
@@ -136,7 +136,7 @@
     },
     {
       "symbol": "XRPUSDT",
-      "timestamp": "2026-06-28T10:09:32.649916+00:00",
+      "timestamp": "2026-06-28T10:16:45.120176+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.327,
       "threshold": 0.63,
@@ -172,7 +172,7 @@
     },
     {
       "symbol": "DOGEUSDT",
-      "timestamp": "2026-06-28T10:09:33.031370+00:00",
+      "timestamp": "2026-06-28T10:16:45.488398+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.2819,
       "threshold": 0.62,
@@ -208,7 +208,7 @@
     },
     {
       "symbol": "ADAUSDT",
-      "timestamp": "2026-06-28T10:09:33.379800+00:00",
+      "timestamp": "2026-06-28T10:16:45.848858+00:00",
       "action": "NO_SIGNAL",
       "p_long": 0.4028,
       "threshold": 0.6,
@@ -244,7 +244,7 @@
     },
     {
       "symbol": "AVAXUSDT",
-      "timestamp": "2026-06-28T10:09:08.600335+00:00",
+      "timestamp": "2026-06-28T10:16:22.468705+00:00",
       "action": "ERROR",
       "p_long": null,
       "threshold": null,
@@ -266,7 +266,7 @@
     },
     {
       "symbol": "LINKUSDT",
-      "timestamp": "2026-06-28T10:09:08.600335+00:00",
+      "timestamp": "2026-06-28T10:16:22.468705+00:00",
       "action": "ERROR",
       "p_long": null,
       "threshold": null,
@@ -290,6 +290,6 @@
   "n_assets": 9,
   "n_long_signals": 0,
   "n_watch": 0,
-  "elapsed_s": 25.4,
+  "elapsed_s": 24.0,
   "model_type": "per_asset_dedicated"
 }

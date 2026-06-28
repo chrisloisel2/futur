@@ -622,14 +622,15 @@ def update_enriched(symbol: str, dry_run: bool = False) -> int:
 
     df_only_new = df_only_new[[c for c in existing_cols if c in df_only_new.columns]]
 
-    # ── 7. Append au parquet ──────────────────────────────────────────────────
-    df_full = pd.read_parquet(path)
-    df_full["datetime"] = pd.to_datetime(df_full["datetime"], utc=True)
-    df_full = pd.concat([df_full, df_only_new], ignore_index=True)
-    df_full = df_full.drop_duplicates("datetime").sort_values("datetime").reset_index(drop=True)
-    df_full.to_parquet(path, index=False)
+    # ── 7. Append ATOMIQUE au parquet (lock + temp + os.replace + fsync) ───────
+    # Remplace l'ancien `to_parquet(path)` direct, cause de corruption en
+    # concurrence avec le scheduler. cf. src/institutional/data/atomic_parquet.py
+    from src.institutional.data.atomic_parquet import append_enriched_atomic
+    df_only_new["datetime"] = pd.to_datetime(df_only_new["datetime"], utc=True)
+    n_total = append_enriched_atomic(
+        path, df_only_new, timestamp_col="datetime", dedupe_cols=("datetime",))
 
-    print(f"  {symbol}: +{len(df_only_new)} barres → {path.name} ({len(df_full):,} total)")
+    print(f"  {symbol}: +{len(df_only_new)} barres → {path.name} ({n_total:,} total)")
     return len(df_only_new)
 
 
