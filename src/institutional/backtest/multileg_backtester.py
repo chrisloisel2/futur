@@ -33,6 +33,7 @@ from src.institutional.risk.hedge_governor import HedgeGovernorV1, HedgeConfig
 from src.institutional.portfolio.regime_gate import RegimeGate, RegimeGateConfig
 from src.institutional.portfolio.regime_exit import should_exit_long_on_regime_flip
 from src.institutional.risk.intra_position_governor import decide_position_risk, IntraGovernorConfig
+from src.institutional.risk.correlation_buckets import bucket_of as _bucket_of, is_meme as _is_meme
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,11 @@ class MultiLegConfig:
     long_min_er_cost_mult: float = 0.0  # rejet si expected_return < mult × coût (0=off, 3=filtre)
     long_universe: Optional[List[str]] = None  # restreint l'univers long (ex. BTC/ETH/SOL)
     borrow_bps_per_year: float = 1.0
+    # ranker d'opportunités (univers élargi : sélectionner les MEILLEURS, pas tout exécuter)
+    enable_ranker: bool = False          # caps corrélation/meme/alt sur la sélection long
+    ranker_max_per_bucket: int = 2       # max positions par bucket de corrélation
+    ranker_max_meme: int = 1             # max positions meme
+    ranker_max_alt: int = 5              # max positions alt (hors BTC/ETH)
     # toggles d'ablation
     enable_long: bool = True
     enable_carry: bool = False
@@ -422,6 +428,17 @@ class MultiLegBacktester:
                 btc_regime = asset_gate._btc.decide_at(t).btc_regime
             n_open_long = len({p.position_id for p in positions if p.is_open and p.position_type == "DIRECTIONAL_LONG"})
             entries_this_bar = 0
+            # ranker : compteurs bucket/meme/alt sur les longs DÉJÀ ouverts (sélection diversifiée)
+            bucket_ct: Dict[str, int] = {}
+            meme_ct = alt_ct = 0
+            if cfg.enable_ranker:
+                for p in positions:
+                    if p.is_open and p.position_type == "DIRECTIONAL_LONG":
+                        bucket_ct[_bucket_of(p.asset)] = bucket_ct.get(_bucket_of(p.asset), 0) + 1
+                        if _is_meme(p.asset):
+                            meme_ct += 1
+                        if p.asset not in ("BTCUSDT", "ETHUSDT"):
+                            alt_ct += 1
             # si gate macro seul bloque tout → pas de candidats (sauf gate par-asset qui décide par opp)
             if asset_gate is None and long_mult <= 0:
                 cand_opps = []
@@ -437,6 +454,15 @@ class MultiLegBacktester:
                     continue
                 if any(p.is_open and p.position_type == "DIRECTIONAL_LONG" and p.asset == a for p in positions):
                     continue
+                # ranker : caps corrélation / meme / alt (diversification, pas tout exécuter)
+                if cfg.enable_ranker:
+                    is_major = a in ("BTCUSDT", "ETHUSDT")
+                    if bucket_ct.get(_bucket_of(a), 0) >= cfg.ranker_max_per_bucket:
+                        continue
+                    if _is_meme(a) and meme_ct >= cfg.ranker_max_meme:
+                        continue
+                    if (not is_major) and alt_ct >= cfg.ranker_max_alt:
+                        continue
                 # filtre fees-dominated (Phase 3) : expected_return net ≥ mult × coût aller-retour
                 if cfg.long_min_er_cost_mult > 0 and \
                         opp.expected_return < cfg.long_min_er_cost_mult * cfg.long_roundtrip:
@@ -460,6 +486,12 @@ class MultiLegBacktester:
                 cash -= leg.fees_entry; pnl_acc["fees"] -= leg.fees_entry
                 positions.append(PortfolioPosition(pid, "DIRECTIONAL_LONG", opp.engine_id, a, str(t), [leg]))
                 n_open_long += 1; entries_this_bar += 1
+                if cfg.enable_ranker:   # MAJ compteurs ranker pour la suite de la barre
+                    bucket_ct[_bucket_of(a)] = bucket_ct.get(_bucket_of(a), 0) + 1
+                    if _is_meme(a):
+                        meme_ct += 1
+                    if a not in ("BTCUSDT", "ETHUSDT"):
+                        alt_ct += 1
 
             # invariants (crash si short nu)
             exposures = check_portfolio_invariants(positions, equity, cfg.limits)

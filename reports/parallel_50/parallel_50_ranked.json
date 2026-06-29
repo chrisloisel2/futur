@@ -1,0 +1,56 @@
+{
+  "RANKED3": {
+    "label": "RANKED3",
+    "equity_end": 65818.0303046982,
+    "gain_usd": -34181.9696953018,
+    "roi_total": -0.34181969695301795,
+    "pf": 0.9312222857730943,
+    "max_drawdown": -0.3867648177308975,
+    "n_legs": 6404,
+    "roi_month_median": -0.0034364859304564233,
+    "pnl_by_type": {
+      "directional": 16086.37,
+      "carry_funding": 8469.66,
+      "hedge": -668.14,
+      "fees": -58059.12,
+      "borrow": -10.73
+    },
+    "runtime_s": 280.6
+  },
+  "RANKED7": {
+    "label": "RANKED7",
+    "equity_end": 110584.5269424803,
+    "gain_usd": 10584.526942480297,
+    "roi_total": 0.10584526942480288,
+    "pf": 1.0147434961739663,
+    "max_drawdown": -0.053104441177729764,
+    "n_legs": 4991,
+    "roi_month_median": 0.00017960407639661113,
+    "pnl_by_type": {
+      "directional": 16705.78,
+      "carry_funding": 25218.09,
+      "hedge": -577.59,
+      "fees": -30734.99,
+      "borrow": -26.76
+    },
+    "runtime_s": 288.1
+  },
+  "RANKED3_FEE": {
+    "label": "RANKED3_FEE",
+    "equity_end": 65818.0303046982,
+    "gain_usd": -34181.9696953018,
+    "roi_total": -0.34181969695301795,
+    "pf": 0.9312222857730943,
+    "max_drawdown": -0.3867648177308975,
+    "n_legs": 6404,
+    "roi_month_median": -0.0034364859304564233,
+    "pnl_by_type": {
+      "directional": 16086.37,
+      "carry_funding": 8469.66,
+      "hedge": -668.14,
+      "fees": -58059.12,
+      "borrow": -10.73
+    },
+    "runtime_s": 270.2
+  }
+}
