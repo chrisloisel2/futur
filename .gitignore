@@ -74,3 +74,4 @@ reports/parallel_50/enriched_backfill.log
 reports/parallel_50/parallel_50_backtest.log
 reports/parallel_50/pullback_train.log
 reports/parallel_50/parallel_50_ranked.log
+reports/parallel_50/parallel_50_edge.log

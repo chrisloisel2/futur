@@ -57,6 +57,10 @@ class MultiLegConfig:
     ranker_max_per_bucket: int = 2       # max positions par bucket de corrélation
     ranker_max_meme: int = 1             # max positions meme
     ranker_max_alt: int = 5              # max positions alt (hors BTC/ETH)
+    # gate edge réalisé par-actif (causal) : ne trader un alt que s'il a prouvé un edge net>0 avant
+    enable_asset_edge_gate: bool = False
+    asset_edge_min_net: float = 0.0      # PnL net moyen/signal requis sur les folds précédents
+    asset_edge_min_signals: int = 20     # échantillon prior minimal (sinon non tradable)
     # toggles d'ablation
     enable_long: bool = True
     enable_carry: bool = False
@@ -166,6 +170,14 @@ class MultiLegBacktester:
         if cfg.enable_asset_regime_gate:
             from src.institutional.portfolio.asset_regime_gate import AssetRegimeGate
             asset_gate = AssetRegimeGate().fit(prices)
+        # Asset Edge Gate (causal) : ne trader un alt que s'il a prouvé un edge net>0 avant
+        edge_gate = None
+        if cfg.enable_asset_edge_gate:
+            from src.institutional.portfolio.asset_edge_gate import AssetEdgeGate
+            flat = [o for opps in long_opps.values() for o in opps]
+            edge_gate = AssetEdgeGate(min_net=cfg.asset_edge_min_net,
+                                      min_signals=cfg.asset_edge_min_signals).fit(
+                flat, prices, cfg.long_roundtrip)
         carry_gate = None
         carry_size_gate = None
         if cfg.carry_gate_v2 or cfg.carry_gate_v2_size_only:
@@ -453,6 +465,9 @@ class MultiLegBacktester:
                 if a in cooldown and t < cooldown[a]:
                     continue
                 if any(p.is_open and p.position_type == "DIRECTIONAL_LONG" and p.asset == a for p in positions):
+                    continue
+                # asset edge gate (causal) : alt non tradable tant qu'il n'a pas prouvé un edge net>0
+                if edge_gate is not None and not edge_gate.allows(a, t):
                     continue
                 # ranker : caps corrélation / meme / alt (diversification, pas tout exécuter)
                 if cfg.enable_ranker:
