@@ -71,3 +71,5 @@ reports/paper_v1.log
 data/derivatives_backfill/
 data/events/
 reports/parallel_50/enriched_backfill.log
+reports/parallel_50/parallel_50_backtest.log
+reports/parallel_50/pullback_train.log
