@@ -1,0 +1,13 @@
+{
+  "overlap_hours": 23.5,
+  "overlap_window": [
+    "2026-07-04 13:42:42.809000+00:00",
+    "2026-07-05 13:13:21.603000+00:00"
+  ],
+  "real_clusters": 1103,
+  "real_significant": 41,
+  "proxy_events": 16,
+  "recall_significant": 0.049,
+  "precision_proxy": 0.062,
+  "verdict": "INDICATIVE_ONLY_OVERLAP_LT_7D"
+}

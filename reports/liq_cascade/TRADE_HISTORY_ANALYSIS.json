@@ -1,0 +1,479 @@
+{
+  "stack_overall": {
+    "n": 11333,
+    "win_rate": 0.532,
+    "gross_win": 187.5507,
+    "gross_loss": -146.8111,
+    "net": 40.7396,
+    "pf": 1.277,
+    "expectancy_bps": 35.95,
+    "avg_win_bps": 311.2,
+    "avg_loss_bps": -276.7
+  },
+  "tail_concentration": {
+    "total_net_pct_sized10": 407.4,
+    "ladder": [
+      {
+        "worst_pct": 0.5,
+        "n_trades": 56,
+        "cost": -12.9798,
+        "pct_of_gross_win_erased": 6.9,
+        "net_with": 40.7396,
+        "net_without": 53.7195,
+        "uplift_x": 1.32
+      },
+      {
+        "worst_pct": 1.0,
+        "n_trades": 113,
+        "cost": -21.8304,
+        "pct_of_gross_win_erased": 11.6,
+        "net_with": 40.7396,
+        "net_without": 62.57,
+        "uplift_x": 1.54
+      },
+      {
+        "worst_pct": 2.0,
+        "n_trades": 226,
+        "cost": -34.1641,
+        "pct_of_gross_win_erased": 18.2,
+        "net_with": 40.7396,
+        "net_without": 74.9037,
+        "uplift_x": 1.84
+      },
+      {
+        "worst_pct": 5.0,
+        "n_trades": 566,
+        "cost": -59.3824,
+        "pct_of_gross_win_erased": 31.7,
+        "net_with": 40.7396,
+        "net_without": 100.1221,
+        "uplift_x": 2.46
+      },
+      {
+        "worst_pct": 10.0,
+        "n_trades": 1133,
+        "cost": -86.227,
+        "pct_of_gross_win_erased": 46.0,
+        "net_with": 40.7396,
+        "net_without": 126.9666,
+        "uplift_x": 3.12
+      }
+    ],
+    "worst_trades": [
+      {
+        "date": "2025-10-10",
+        "symbol": "TIAUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -3510.0,
+        "score": 0.549
+      },
+      {
+        "date": "2022-11-08",
+        "symbol": "SOLUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -3069.0,
+        "score": 0.564
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ICPUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2899.0,
+        "score": 0.521
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "VETUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2896.0,
+        "score": 0.579
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ICPUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2800.0,
+        "score": 0.579
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "TIAUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2782.0,
+        "score": 0.581
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ATOMUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2780.0,
+        "score": 0.526
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ARUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2730.0,
+        "score": 0.532
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "SANDUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2696.0,
+        "score": 0.523
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "MANAUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2644.0,
+        "score": 0.522
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ORDIUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2626.0,
+        "score": 0.586
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ARUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2612.0,
+        "score": 0.51
+      },
+      {
+        "date": "2025-10-10",
+        "symbol": "ARBUSDT",
+        "engine": "PREMIUM_DISLOCATION",
+        "net_bps": -2612.0,
+        "score": 0.538
+      },
+      {
+        "date": "2025-02-02",
+        "symbol": "WIFUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2558.0,
+        "score": 0.58
+      },
+      {
+        "date": "2022-05-11",
+        "symbol": "SANDUSDT",
+        "engine": "LIQ_CASCADE",
+        "net_bps": -2535.0,
+        "score": 0.567
+      }
+    ]
+  },
+  "by_engine": [
+    {
+      "engine": "CROWDING_REVERSAL",
+      "n": 290,
+      "net_bps_sum": 115231.0,
+      "expectancy_bps": 397.3,
+      "pf": 3.73,
+      "win_rate": 0.65
+    },
+    {
+      "engine": "PREMIUM_DISLOCATION",
+      "n": 3885,
+      "net_bps_sum": 140380.0,
+      "expectancy_bps": 36.1,
+      "pf": 1.26,
+      "win_rate": 0.52
+    },
+    {
+      "engine": "LIQ_CASCADE",
+      "n": 7158,
+      "net_bps_sum": 151785.0,
+      "expectancy_bps": 21.2,
+      "pf": 1.17,
+      "win_rate": 0.53
+    }
+  ],
+  "by_symbol_worst": [
+    {
+      "symbol": "RUNEUSDT",
+      "n": 325,
+      "net_bps_sum": -14579.0,
+      "expectancy_bps": -44.9,
+      "pf": 0.72,
+      "win_rate": 0.47
+    },
+    {
+      "symbol": "LDOUSDT",
+      "n": 218,
+      "net_bps_sum": -8943.0,
+      "expectancy_bps": -41.0,
+      "pf": 0.77,
+      "win_rate": 0.48
+    },
+    {
+      "symbol": "ARBUSDT",
+      "n": 196,
+      "net_bps_sum": -7575.0,
+      "expectancy_bps": -38.6,
+      "pf": 0.81,
+      "win_rate": 0.51
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "n": 268,
+      "net_bps_sum": -6123.0,
+      "expectancy_bps": -22.8,
+      "pf": 0.86,
+      "win_rate": 0.49
+    },
+    {
+      "symbol": "TRXUSDT",
+      "n": 139,
+      "net_bps_sum": -3814.0,
+      "expectancy_bps": -27.4,
+      "pf": 0.74,
+      "win_rate": 0.47
+    },
+    {
+      "symbol": "OPUSDT",
+      "n": 259,
+      "net_bps_sum": -3065.0,
+      "expectancy_bps": -11.8,
+      "pf": 0.92,
+      "win_rate": 0.49
+    },
+    {
+      "symbol": "ATOMUSDT",
+      "n": 219,
+      "net_bps_sum": -2055.0,
+      "expectancy_bps": -9.4,
+      "pf": 0.94,
+      "win_rate": 0.48
+    },
+    {
+      "symbol": "BTCUSDT",
+      "n": 205,
+      "net_bps_sum": -1823.0,
+      "expectancy_bps": -8.9,
+      "pf": 0.89,
+      "win_rate": 0.48
+    },
+    {
+      "symbol": "SANDUSDT",
+      "n": 315,
+      "net_bps_sum": -1105.0,
+      "expectancy_bps": -3.5,
+      "pf": 0.98,
+      "win_rate": 0.54
+    },
+    {
+      "symbol": "LTCUSDT",
+      "n": 207,
+      "net_bps_sum": 875.0,
+      "expectancy_bps": 4.2,
+      "pf": 1.04,
+      "win_rate": 0.54
+    },
+    {
+      "symbol": "INJUSDT",
+      "n": 235,
+      "net_bps_sum": 2181.0,
+      "expectancy_bps": 9.3,
+      "pf": 1.06,
+      "win_rate": 0.51
+    },
+    {
+      "symbol": "ETHUSDT",
+      "n": 260,
+      "net_bps_sum": 2361.0,
+      "expectancy_bps": 9.1,
+      "pf": 1.09,
+      "win_rate": 0.5
+    }
+  ],
+  "by_symbol_best": [
+    {
+      "symbol": "ORDIUSDT",
+      "n": 259,
+      "net_bps_sum": 25298.0,
+      "expectancy_bps": 97.7,
+      "pf": 1.77,
+      "win_rate": 0.53
+    },
+    {
+      "symbol": "FETUSDT",
+      "n": 203,
+      "net_bps_sum": 24749.0,
+      "expectancy_bps": 121.9,
+      "pf": 2.14,
+      "win_rate": 0.6
+    },
+    {
+      "symbol": "PYTHUSDT",
+      "n": 165,
+      "net_bps_sum": 22484.0,
+      "expectancy_bps": 136.3,
+      "pf": 1.88,
+      "win_rate": 0.52
+    },
+    {
+      "symbol": "ARUSDT",
+      "n": 321,
+      "net_bps_sum": 19706.0,
+      "expectancy_bps": 61.4,
+      "pf": 1.44,
+      "win_rate": 0.53
+    },
+    {
+      "symbol": "TIAUSDT",
+      "n": 208,
+      "net_bps_sum": 19032.0,
+      "expectancy_bps": 91.5,
+      "pf": 1.59,
+      "win_rate": 0.53
+    },
+    {
+      "symbol": "SUIUSDT",
+      "n": 203,
+      "net_bps_sum": 18592.0,
+      "expectancy_bps": 91.6,
+      "pf": 1.84,
+      "win_rate": 0.56
+    },
+    {
+      "symbol": "STXUSDT",
+      "n": 188,
+      "net_bps_sum": 18415.0,
+      "expectancy_bps": 98.0,
+      "pf": 1.88,
+      "win_rate": 0.51
+    },
+    {
+      "symbol": "GRTUSDT",
+      "n": 281,
+      "net_bps_sum": 18168.0,
+      "expectancy_bps": 64.7,
+      "pf": 1.56,
+      "win_rate": 0.51
+    },
+    {
+      "symbol": "IMXUSDT",
+      "n": 300,
+      "net_bps_sum": 17276.0,
+      "expectancy_bps": 57.6,
+      "pf": 1.59,
+      "win_rate": 0.56
+    },
+    {
+      "symbol": "ENAUSDT",
+      "n": 160,
+      "net_bps_sum": 16358.0,
+      "expectancy_bps": 102.2,
+      "pf": 1.91,
+      "win_rate": 0.61
+    },
+    {
+      "symbol": "FILUSDT",
+      "n": 351,
+      "net_bps_sum": 15844.0,
+      "expectancy_bps": 45.1,
+      "pf": 1.32,
+      "win_rate": 0.52
+    },
+    {
+      "symbol": "HBARUSDT",
+      "n": 198,
+      "net_bps_sum": 15552.0,
+      "expectancy_bps": 78.5,
+      "pf": 1.78,
+      "win_rate": 0.58
+    }
+  ],
+  "by_year": [
+    {
+      "year": "2022",
+      "n": 2852,
+      "net_bps_sum": -35223.0,
+      "expectancy_bps": -12.4,
+      "pf": 0.91,
+      "win_rate": 0.52
+    },
+    {
+      "year": "2023",
+      "n": 569,
+      "net_bps_sum": 36004.0,
+      "expectancy_bps": 63.3,
+      "pf": 2.01,
+      "win_rate": 0.61
+    },
+    {
+      "year": "2026",
+      "n": 1838,
+      "net_bps_sum": 41271.0,
+      "expectancy_bps": 22.5,
+      "pf": 1.23,
+      "win_rate": 0.51
+    },
+    {
+      "year": "2025",
+      "n": 2207,
+      "net_bps_sum": 119825.0,
+      "expectancy_bps": 54.3,
+      "pf": 1.33,
+      "win_rate": 0.51
+    },
+    {
+      "year": "2024",
+      "n": 3867,
+      "net_bps_sum": 245519.0,
+      "expectancy_bps": 63.5,
+      "pf": 1.51,
+      "win_rate": 0.55
+    }
+  ],
+  "rejected_overall": {
+    "n": 2162,
+    "win_rate": 0.467,
+    "gross_win": 23.0901,
+    "gross_loss": -22.9557,
+    "net": 0.1344,
+    "pf": 1.006,
+    "expectancy_bps": 0.62,
+    "avg_win_bps": 228.6,
+    "avg_loss_bps": -199.3
+  },
+  "by_score_band": [
+    {
+      "score_band": "Q2",
+      "n": 2833,
+      "net_bps_sum": 14127.0,
+      "expectancy_bps": 5.0,
+      "pf": 1.04,
+      "win_rate": 0.52
+    },
+    {
+      "score_band": "Q1_bas",
+      "n": 2834,
+      "net_bps_sum": 107468.0,
+      "expectancy_bps": 37.9,
+      "pf": 1.39,
+      "win_rate": 0.55
+    },
+    {
+      "score_band": "Q3",
+      "n": 2833,
+      "net_bps_sum": 116714.0,
+      "expectancy_bps": 41.2,
+      "pf": 1.3,
+      "win_rate": 0.52
+    },
+    {
+      "score_band": "Q4_haut",
+      "n": 2833,
+      "net_bps_sum": 169088.0,
+      "expectancy_bps": 59.7,
+      "pf": 1.36,
+      "win_rate": 0.53
+    }
+  ]
+}

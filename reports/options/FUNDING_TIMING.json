@@ -1,0 +1,32 @@
+{
+  "BTCUSDT": {
+    "n_windows": 6014,
+    "years": 5.49,
+    "pct_windows_positive": 0.855,
+    "persistence_pos": 0.915,
+    "persistence_neg": 0.499,
+    "alwayson_ann": 0.1097,
+    "timed_gross_ann": 0.1113,
+    "participation": 0.855,
+    "toggles_per_year": 159.7,
+    "timed_net_ann_taker": -0.1122,
+    "delta_vs_alwayson_taker": -0.2219,
+    "timed_net_ann_maker": 0.0474,
+    "delta_vs_alwayson_maker": -0.0622
+  },
+  "ETHUSDT": {
+    "n_windows": 6014,
+    "years": 5.49,
+    "pct_windows_positive": 0.839,
+    "persistence_pos": 0.908,
+    "persistence_neg": 0.522,
+    "alwayson_ann": 0.1178,
+    "timed_gross_ann": 0.1228,
+    "participation": 0.839,
+    "toggles_per_year": 169.0,
+    "timed_net_ann_taker": -0.1137,
+    "delta_vs_alwayson_taker": -0.2316,
+    "timed_net_ann_maker": 0.0552,
+    "delta_vs_alwayson_maker": -0.0626
+  }
+}

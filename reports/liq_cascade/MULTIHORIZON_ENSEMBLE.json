@@ -1,0 +1,45 @@
+{
+  "corr": {
+    "p_fwd_1h": {
+      "p_fwd_1h": 1.0,
+      "p_fwd_4h": 0.582,
+      "p_fwd_8h": 0.466
+    },
+    "p_fwd_4h": {
+      "p_fwd_1h": 0.582,
+      "p_fwd_4h": 1.0,
+      "p_fwd_8h": 0.765
+    },
+    "p_fwd_8h": {
+      "p_fwd_1h": 0.466,
+      "p_fwd_4h": 0.765,
+      "p_fwd_8h": 1.0
+    }
+  },
+  "results": {
+    "A_single_4h": {
+      "n": 6284,
+      "pf": 1.203,
+      "mean_bps": 23.2,
+      "wr": 0.527
+    },
+    "B_ensemble_mean": {
+      "n": 6283,
+      "pf": 1.273,
+      "mean_bps": 31.1,
+      "wr": 0.532
+    },
+    "C_consensus": {
+      "n": 2540,
+      "pf": 1.443,
+      "mean_bps": 55.7,
+      "wr": 0.551
+    },
+    "D_term_hold": {
+      "n": 6284,
+      "pf": 1.373,
+      "mean_bps": 47.4,
+      "wr": 0.534
+    }
+  }
+}

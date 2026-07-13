@@ -1,0 +1,80 @@
+{
+  "LIQ_CASCADE": {
+    "path": "artifacts/event_engines/MH_LIQ_CASCADE.pkl",
+    "sha256": "555ebdd4febc84bf3be4dc9836fb5b10418645d50e1188601e131616d044125f",
+    "horizons": [
+      "fwd_1h",
+      "fwd_4h",
+      "fwd_8h"
+    ],
+    "hp": {
+      "fwd_1h": {
+        "num_leaves": 8,
+        "val_auc": 0.5141
+      },
+      "fwd_4h": {
+        "num_leaves": 8,
+        "val_auc": 0.511
+      },
+      "fwd_8h": {
+        "num_leaves": 31,
+        "val_auc": 0.4843
+      }
+    },
+    "trained_until": "2026-07-04 15:25:00+00:00",
+    "n_train": 38138,
+    "trained_at": "2026-07-13T07:13:20.140827+00:00"
+  },
+  "PREMIUM_DISLOCATION": {
+    "path": "artifacts/event_engines/MH_PREMIUM_DISLOCATION.pkl",
+    "sha256": "c272b5c940545a9cf1c9c13bb5367c10aae805a55847507856c6024c59f5cea8",
+    "horizons": [
+      "fwd_1h",
+      "fwd_4h",
+      "fwd_8h"
+    ],
+    "hp": {
+      "fwd_1h": {
+        "num_leaves": 8,
+        "val_auc": 0.542
+      },
+      "fwd_4h": {
+        "num_leaves": 15,
+        "val_auc": 0.5238
+      },
+      "fwd_8h": {
+        "num_leaves": 8,
+        "val_auc": 0.5201
+      }
+    },
+    "trained_until": "2026-06-30 19:00:00+00:00",
+    "n_train": 27437,
+    "trained_at": "2026-07-13T07:13:31.377655+00:00"
+  },
+  "CROWDING_REVERSAL": {
+    "path": "artifacts/event_engines/MH_CROWDING_REVERSAL.pkl",
+    "sha256": "0036feee0d599596268a13d6ebf4a41326693c7fe84dc714621b30c25d76fc02",
+    "horizons": [
+      "fwd_4h",
+      "fwd_8h",
+      "fwd_24h"
+    ],
+    "hp": {
+      "fwd_4h": {
+        "num_leaves": 8,
+        "val_auc": 0.5962
+      },
+      "fwd_8h": {
+        "num_leaves": 24,
+        "val_auc": 0.5982
+      },
+      "fwd_24h": {
+        "num_leaves": 8,
+        "val_auc": 0.5412
+      }
+    },
+    "trained_until": "2026-07-09 02:05:00+00:00",
+    "n_train": 2241,
+    "trained_at": "2026-07-13T07:13:40.674803+00:00"
+  }
+}

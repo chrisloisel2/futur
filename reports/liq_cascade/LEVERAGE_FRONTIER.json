@@ -1,0 +1,45 @@
+{
+  "rows": [
+    {
+      "leverage": 1,
+      "roi_ann": 0.0391,
+      "vol": 0.0127,
+      "maxdd": -0.0117,
+      "sharpe": 3.01,
+      "worst_month": -0.0079
+    },
+    {
+      "leverage": 2,
+      "roi_ann": -0.0035,
+      "vol": 0.0255,
+      "maxdd": -0.0792,
+      "sharpe": -0.13,
+      "worst_month": -0.0224
+    },
+    {
+      "leverage": 3,
+      "roi_ann": -0.0446,
+      "vol": 0.0382,
+      "maxdd": -0.1944,
+      "sharpe": -1.17,
+      "worst_month": -0.0369
+    },
+    {
+      "leverage": 4,
+      "roi_ann": -0.0841,
+      "vol": 0.051,
+      "maxdd": -0.335,
+      "sharpe": -1.7,
+      "worst_month": -0.0514
+    },
+    {
+      "leverage": 5,
+      "roi_ann": -0.1221,
+      "vol": 0.0637,
+      "maxdd": -0.4515,
+      "sharpe": -2.01,
+      "worst_month": -0.0659
+    }
+  ],
+  "funding_negative_pct": 0.21845386533665836
+}

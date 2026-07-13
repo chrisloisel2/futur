@@ -20,10 +20,11 @@ def _setup(tmp, monkeypatch):
         "symbol": ["BTCUSDT", "BTCUSDT"], "side": ["SELL", "BUY"],
         "price": [60000.0, 60010.0], "qty": [10.0, 1.0], "usd": [600000.0, 60000.0],
     })
-    p = tmp / "symbol=BTCUSDT" / "date=2024-06-01" / "part-1.parquet"
+    p = (tmp / "exchange=binance" / "market=usdm" / "stream=force_order"
+         / "symbol=BTCUSDT" / "date=2024-06-01" / "part-1.parquet")
     p.parent.mkdir(parents=True, exist_ok=True)
     recs.to_parquet(p, index=False)
-    monkeypatch.setattr(EB, "RAW_FORCE_ORDER", tmp)
+    monkeypatch.setattr(EB, "RAW_ROOT", tmp)
     # prix : hausse après l'event → rebond du long flush
     idx = pd.date_range("2024-06-01", periods=48, freq="1h", tz="UTC")
     px = pd.Series(60000 * np.cumprod(1 + np.full(48, 0.001)), index=idx)
@@ -51,5 +52,5 @@ def test_forward_labels_after_event(tmp_path, monkeypatch):
 
 
 def test_empty_when_no_liquidations(tmp_path, monkeypatch):
-    monkeypatch.setattr(EB, "RAW_FORCE_ORDER", tmp_path / "empty")
+    monkeypatch.setattr(EB, "RAW_ROOT", tmp_path / "empty")
     assert EB.build_events().empty

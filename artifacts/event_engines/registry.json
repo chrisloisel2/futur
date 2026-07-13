@@ -1,0 +1,23 @@
+{
+  "LIQ_CASCADE": {
+    "path": "artifacts/event_engines/LIQ_CASCADE_2026-07-10.pkl",
+    "sha256": "d3b858761bfb62d0b21f1857dcb4d8576ae8f55f36d5f2863aebda197a78402f",
+    "trained_until": "2026-07-08 20:10:00+00:00",
+    "n_train": 38235,
+    "trained_at": "2026-07-10T10:35:27.173238+00:00"
+  },
+  "CROWDING_REVERSAL": {
+    "path": "artifacts/event_engines/CROWDING_REVERSAL_2026-07-10.pkl",
+    "sha256": "a176723647cfdb1abd40040534198bae28c1128a7bf3d7d3cf48ef3f7915f808",
+    "trained_until": "2026-07-07 22:30:00+00:00",
+    "n_train": 2238,
+    "trained_at": "2026-07-10T10:35:36.876387+00:00"
+  },
+  "PREMIUM_DISLOCATION": {
+    "path": "artifacts/event_engines/PREMIUM_DISLOCATION_2026-07-10.pkl",
+    "sha256": "36c8708c14156be180ed5a1fafb58c61795b62eb901d8a06695b44b74be4edfb",
+    "trained_until": "2026-06-30 19:00:00+00:00",
+    "n_train": 27427,
+    "trained_at": "2026-07-10T10:35:54.171935+00:00"
+  }
+}

@@ -1,23 +1,23 @@
 {
-  "score": 90.0,
+  "score": 95.0,
   "tier": "STRONG_PAPER",
   "decision": "PAPER_CONTINUE / MICRO_LIVE_BLOCKED_UNTIL_60_90D_REAL_TRACKING",
   "window": [
     "2022-11-03",
-    "2026-06-28"
+    "2026-07-05"
   ],
   "checks": {
     "reproducibility": {
       "status": "PASS",
       "score_frac": 1.0,
-      "ledger_hash": "86f7b076d2c7",
+      "ledger_hash": "e501c363a71e",
       "detail": "2 runs identiques",
       "weight": 10
     },
     "data_integrity": {
       "status": "PASS",
       "score_frac": 1.0,
-      "files": 9,
+      "files": 50,
       "fail": 0,
       "weight": 15
     },
@@ -30,10 +30,10 @@
     "baseline": {
       "status": "PASS",
       "score_frac": 1.0,
-      "roi": 0.1856,
-      "expected": 0.186,
-      "maxDD": -0.0193,
-      "pf": 1.029,
+      "roi": 0.3374,
+      "expected": 0.336,
+      "maxDD": -0.0228,
+      "pf": 1.032,
       "weight": 10
     },
     "regime_splits": {
@@ -41,27 +41,27 @@
       "score_frac": 1.0,
       "by_year": {
         "2022": {
-          "roi": -0.0039,
-          "maxDD": -0.0051
+          "roi": -0.0059,
+          "maxDD": -0.0076
         },
         "2023": {
-          "roi": 0.0665,
-          "maxDD": -0.0121
+          "roi": 0.061,
+          "maxDD": -0.0111
         },
         "2024": {
-          "roi": 0.0835,
-          "maxDD": -0.0103
-        },
-        "2025": {
-          "roi": 0.03,
+          "roi": 0.1896,
           "maxDD": -0.0193
         },
+        "2025": {
+          "roi": 0.0472,
+          "maxDD": -0.0228
+        },
         "2026": {
-          "roi": -0.0006,
-          "maxDD": -0.0047
+          "roi": 0.017,
+          "maxDD": -0.0179
         }
       },
-      "worst_annual_dd": -0.0193,
+      "worst_annual_dd": -0.0228,
       "weight": 10
     },
     "cost_stress": {
@@ -69,19 +69,19 @@
       "score_frac": 1.0,
       "runs": {
         "x1.0": {
-          "roi": 0.1856,
-          "maxDD": -0.0193
+          "roi": 0.3374,
+          "maxDD": -0.0228
         },
         "x2.0": {
-          "roi": 0.0643,
-          "maxDD": -0.0256
+          "roi": 0.1465,
+          "maxDD": -0.0329
         },
         "x3.0": {
-          "roi": -0.0547,
-          "maxDD": -0.0548
+          "roi": -0.0046,
+          "maxDD": -0.0562
         }
       },
-      "fees_x2_roi": 0.0643,
+      "fees_x2_roi": 0.1465,
       "weight": 10
     },
     "sleeve_ablation": {
@@ -93,16 +93,16 @@
           "maxDD": 0.0
         },
         "CARRY_ONLY": {
-          "roi": 0.1692,
-          "maxDD": -0.0051
+          "roi": 0.2644,
+          "maxDD": -0.0076
         },
         "LONG_ONLY": {
-          "roi": 0.0145,
-          "maxDD": -0.046
+          "roi": 0.0638,
+          "maxDD": -0.0554
         },
         "FULL_V1.1": {
-          "roi": 0.1856,
-          "maxDD": -0.0193
+          "roi": 0.3374,
+          "maxDD": -0.0228
         }
       },
       "carry_is_engine": true,
@@ -118,10 +118,10 @@
     },
     "event_readiness": {
       "status": "INFO",
-      "score_frac": 0.0,
-      "n_events": 0,
-      "n_significant": 0,
-      "verdict": "DATA_NOT_READY",
+      "score_frac": 1.0,
+      "n_events": 1166,
+      "n_significant": 41,
+      "verdict": "ML_READY",
       "weight": 5
     },
     "operational_stress": {
@@ -138,20 +138,20 @@
       "score_frac": 1.0,
       "runs": {
         "carry20": {
-          "roi": 0.0793,
-          "maxDD": -0.0202
+          "roi": 0.1235,
+          "maxDD": -0.0383
         },
         "carry35": {
-          "roi": 0.1314,
-          "maxDD": -0.0193
+          "roi": 0.178,
+          "maxDD": -0.0282
         },
         "carry50": {
-          "roi": 0.1856,
-          "maxDD": -0.0193
+          "roi": 0.2358,
+          "maxDD": -0.0243
         },
         "carry75": {
-          "roi": 0.2807,
-          "maxDD": -0.0194
+          "roi": 0.3374,
+          "maxDD": -0.0228
         }
       },
       "weight": 0
@@ -161,17 +161,16 @@
       "score_frac": 1.0,
       "n_folds": 8,
       "catastrophic_folds": 0,
-      "median_fold_roi": 0.0112,
+      "median_fold_roi": 0.0192,
       "weight": 0
     },
     "monte_carlo": {
       "status": "PASS",
       "score_frac": 1.0,
       "P_roi_neg": 0.0,
-      "P_dd_gt_3pct": 0.0,
+      "P_dd_gt_3pct": 0.002,
       "method": "monthly_equity_block_bootstrap",
       "weight": 0
     }
-  },
-  "offensive_alpha": "DATA_NOT_READY"
+  }
 }

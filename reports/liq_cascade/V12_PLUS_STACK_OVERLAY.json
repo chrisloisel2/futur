@@ -1,0 +1,53 @@
+{
+  "window": [
+    "2023-01-01",
+    "2026-03-31"
+  ],
+  "daily_corr": {
+    "V1.2 (socle)": {
+      "V1.2 (socle)": 1.0,
+      "STACK 3 moteurs (2%/trade)": 0.09,
+      "BASIS_TERM (quarterly, 50%)": -0.102
+    },
+    "STACK 3 moteurs (2%/trade)": {
+      "V1.2 (socle)": 0.09,
+      "STACK 3 moteurs (2%/trade)": 1.0,
+      "BASIS_TERM (quarterly, 50%)": -0.034
+    },
+    "BASIS_TERM (quarterly, 50%)": {
+      "V1.2 (socle)": -0.102,
+      "STACK 3 moteurs (2%/trade)": -0.034,
+      "BASIS_TERM (quarterly, 50%)": 1.0
+    }
+  },
+  "stats": [
+    {
+      "label": "V1.2 (socle)",
+      "roi_total": 0.3242,
+      "roi_ann": 0.0904,
+      "maxdd": -0.0211,
+      "sharpe": 2.67
+    },
+    {
+      "label": "STACK 3 moteurs (2%/trade)",
+      "roi_total": 0.11,
+      "roi_ann": 0.0327,
+      "maxdd": -0.0342,
+      "sharpe": 0.98
+    },
+    {
+      "label": "BASIS_TERM (quarterly, 50%)",
+      "roi_total": 0.2891,
+      "roi_ann": 0.0814,
+      "maxdd": -0.0295,
+      "sharpe": 2.16
+    },
+    {
+      "label": "COMBIN\u00c9 (3 jambes)",
+      "roi_total": 0.8947,
+      "roi_ann": 0.2177,
+      "maxdd": -0.0319,
+      "sharpe": 3.41
+    }
+  ]
+}

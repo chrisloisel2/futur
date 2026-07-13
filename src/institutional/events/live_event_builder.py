@@ -20,19 +20,27 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[3]
-RAW_FORCE_ORDER = ROOT / "data" / "derivatives_raw" / "exchange=binance" / "market=usdm" / "stream=force_order"
+RAW_ROOT = ROOT / "data" / "derivatives_raw"
 CLUSTER_MIN = 5            # regroupe les liquidations par fenêtre de 5 min
 SIGNIFICANT_USD = 250_000  # event "significatif" si notional ≥ ce seuil
 
 
 def load_force_orders() -> pd.DataFrame:
-    parts = sorted(RAW_FORCE_ORDER.glob("symbol=*/date=*/part-*.parquet"))
+    """Charge les liquidations de TOUS les exchanges (binance/usdm + bybit/linear).
+
+    Le side est déjà normalisé convention Binance par le collecteur
+    (SELL = long liquidé, BUY = short liquidé), quel que soit l'exchange.
+    """
     frames = []
-    for p in parts:
-        try:
-            frames.append(pd.read_parquet(p))
-        except Exception:
-            continue
+    for ex_dir in sorted(RAW_ROOT.glob("exchange=*")):
+        exchange = ex_dir.name.split("=", 1)[1]
+        for p in sorted(ex_dir.glob("market=*/stream=force_order/symbol=*/date=*/part-*.parquet")):
+            try:
+                df = pd.read_parquet(p)
+                df["exchange"] = exchange
+                frames.append(df)
+            except Exception:
+                continue
     if not frames:
         return pd.DataFrame()
     df = pd.concat(frames, ignore_index=True)

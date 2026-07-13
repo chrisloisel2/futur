@@ -1,0 +1,120 @@
+{
+  "LIQ_CASCADE": {
+    "BASELINE": {
+      "n": 6284,
+      "pf": 1.227,
+      "mean_bps": 24.9,
+      "net_units": 156288.0
+    },
+    "TERM_HOLD": {
+      "n": 6283,
+      "pf": 1.359,
+      "mean_bps": 44.0,
+      "net_units": 276358.0
+    },
+    "CONSENSUS": {
+      "n": 2218,
+      "pf": 1.443,
+      "mean_bps": 56.6,
+      "net_units": 125479.0
+    },
+    "COMBINED": {
+      "n": 2218,
+      "pf": 1.646,
+      "mean_bps": 95.3,
+      "net_units": 211338.0
+    },
+    "COMBINED_costx2": {
+      "n": 2218,
+      "pf": 1.529,
+      "mean_bps": 81.3,
+      "net_units": 180286.0
+    },
+    "COMBINED_by_year": {
+      "2023": 2.18,
+      "2024": 1.55,
+      "2025": 1.92,
+      "2026": 1.31
+    },
+    "trade_h": "fwd_4h",
+    "exit_h": "fwd_8h"
+  },
+  "PREMIUM_DISLOCATION": {
+    "BASELINE": {
+      "n": 4263,
+      "pf": 1.456,
+      "mean_bps": 54.1,
+      "net_units": 230698.0
+    },
+    "TERM_HOLD": {
+      "n": 4263,
+      "pf": 1.493,
+      "mean_bps": 68.1,
+      "net_units": 290400.0
+    },
+    "CONSENSUS": {
+      "n": 1486,
+      "pf": 2.732,
+      "mean_bps": 189.4,
+      "net_units": 281394.0
+    },
+    "COMBINED": {
+      "n": 1486,
+      "pf": 2.761,
+      "mean_bps": 228.7,
+      "net_units": 339831.0
+    },
+    "COMBINED_costx2": {
+      "n": 1486,
+      "pf": 2.586,
+      "mean_bps": 214.7,
+      "net_units": 319027.0
+    },
+    "COMBINED_by_year": {
+      "2023": 1.89,
+      "2024": 2.72,
+      "2025": 3.96,
+      "2026": 1.22
+    },
+    "trade_h": "fwd_4h",
+    "exit_h": "fwd_8h"
+  },
+  "CROWDING_REVERSAL": {
+    "BASELINE": {
+      "n": 298,
+      "pf": 5.332,
+      "mean_bps": 367.3,
+      "net_units": 109446.0
+    },
+    "TERM_HOLD": {
+      "n": 298,
+      "pf": 4.413,
+      "mean_bps": 400.3,
+      "net_units": 119282.0
+    },
+    "CONSENSUS": {
+      "n": 172,
+      "pf": 7.978,
+      "mean_bps": 541.5,
+      "net_units": 93133.0
+    },
+    "COMBINED": {
+      "n": 172,
+      "pf": 5.65,
+      "mean_bps": 577.5,
+      "net_units": 99324.0
+    },
+    "COMBINED_costx2": {
+      "n": 172,
+      "pf": 5.404,
+      "mean_bps": 563.5,
+      "net_units": 96916.0
+    },
+    "COMBINED_by_year": {
+      "2024": 3.71,
+      "2025": 13.73
+    },
+    "trade_h": "fwd_8h",
+    "exit_h": "fwd_24h"
+  }
+}

@@ -48,11 +48,26 @@ class Suite:
         self.end = self.spec["window"]["end"] or str(
             load_enriched("BTCUSDT", required_cols=["close"])["datetime"].max().date())
         self.start = self.spec["window"]["start"]
-        self.longs = [Cached(build_engine(e)) for e in self.spec["engines_long"]]
+        self.longs = [Cached(self._build_engine_spec(e)) for e in self.spec["engines_long"]]
         self.carry_assets = self.spec["carry_assets"]
         self.years = max((pd.Timestamp(self.end) - pd.Timestamp(self.start)).days / 365.25, 0.1)
         self.results = {}
         self._run_cache = {}
+
+    def _build_engine_spec(self, e):
+        """Entrée engines_long : str (registre) OU dict {id, kwargs, assets_from_universe}.
+        assets_from_universe=true → assets = univers quality-filtré du yaml `universe_from`
+        (nécessaire pour PULLBACK_LONG sur l'univers 50 de V1.2)."""
+        if isinstance(e, str):
+            return build_engine(e)
+        kw = dict(e.get("kwargs", {}))
+        if e.get("assets_from_universe"):
+            from src.institutional.universe.asset_quality_filter import (
+                assess_universe, AssetQualityStatus as Q)
+            U = yaml.safe_load((ROOT / self.spec["universe_from"]).read_text())["universe"]
+            qual = assess_universe(U)
+            kw["assets"] = [s for s in U if qual[s].status != Q.BLOCK]
+        return build_engine(e["id"], **kw)
 
     def _cfg(self, **ov) -> MultiLegConfig:
         d = dict(self.spec["config"]); d["initial_capital"] = self.spec["capital"]; d.update(ov)

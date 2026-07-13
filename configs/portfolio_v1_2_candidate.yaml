@@ -1,0 +1,38 @@
+# Portfolio V1.2 CANDIDATE — RANKED7_EDGE + long×1.5 + carry75 (2026-07-03)
+# Validation : reports/parallel_50/PARALLEL_50_V12_VALIDATION.md
+# Statut : PAPER_CANDIDATE — ne remplace PAS la baseline V1.1 (figée).
+name: portfolio_v1_2_candidate
+capital: 100000
+window:
+  start: "2022-11-03"
+  end: null              # null = dernière barre enrichie disponible
+engines_long:
+  - TRM_TREND_INST
+  - id: PULLBACK_LONG
+    assets_from_universe: true    # univers 50 quality-filtré (V1.2)
+  - LIQUIDATION_REBOUND
+universe_from: configs/portfolio_v1_1_parallel_50.yaml
+carry_assets: [BTCUSDT, ETHUSDT]
+config:
+  carry_fraction: 0.75           # frontière mesurée (linéaire, DD insensible)
+  long_fraction: 0.0645          # ×1.5 (frontière : ×2 échoue ROI et DD)
+  max_open_longs: 7
+  enable_long: true
+  enable_asset_regime_gate: true
+  enable_regime_flip_exit: true
+  enable_intra_position_governor: true
+  enable_carry: true
+  carry_gate_v2: false
+  enable_hedge: true
+  enable_ranker: true
+  ranker_max_per_bucket: 2
+  ranker_max_meme: 1
+  ranker_max_alt: 5
+  enable_asset_edge_gate: true   # gate causal edge réalisé (non tuné)
+  asset_edge_min_net: 0.0
+  asset_edge_min_signals: 20
+expected:                        # mesuré 2022-11-03 → 2026-06-28
+  roi_total: 0.336
+  annualized: 0.086
+  pf: 1.03
+  max_drawdown: -0.023
