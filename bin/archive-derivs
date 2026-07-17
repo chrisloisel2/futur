@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# bin/archive-derivs — Archivage positioning dérivés Binance (rétention API ~30 j)
+# Usage: bin/archive-derivs [args passés à scripts/archive_derivatives.py]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+    PYTHON_BIN="$ROOT/.venv/bin/python"
+elif [[ -x "/opt/homebrew/Caskroom/miniconda/base/bin/python" ]]; then
+    PYTHON_BIN="/opt/homebrew/Caskroom/miniconda/base/bin/python"
+else
+    PYTHON_BIN="python3"
+fi
+
+mkdir -p "$ROOT/data/logs"
+exec "$PYTHON_BIN" -u scripts/archive_derivatives.py "$@" 2>&1 | tee -a "$ROOT/data/logs/archive_derivatives.log"
