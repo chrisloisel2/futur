@@ -16,7 +16,7 @@ import re
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "derivatives_backfill" / "binance_vision_quarterly"
 S3 = "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision"
 BASE = "https://data.binance.vision/data/futures/um/monthly/klines"
+BASE_DAILY = "https://data.binance.vision/data/futures/um/daily/klines"
 COLS = ["open_time", "open", "high", "low", "close", "volume", "close_time",
         "qvol", "count", "tbv", "tbqv", "ignore"]
 
@@ -50,8 +51,7 @@ def months_of(contract: str):
     return exp, out
 
 
-def fetch(contract: str, ym: str):
-    url = f"{BASE}/{contract}/1d/{contract}-1d-{ym}.zip"
+def _fetch_zip(url: str):
     try:
         with urllib.request.urlopen(url, timeout=30) as r:
             raw = r.read()
@@ -60,10 +60,18 @@ def fetch(contract: str, ym: str):
             if isinstance(df["open_time"].iloc[0], str) and not str(
                     df["open_time"].iloc[0]).isdigit():
                 df = df.iloc[1:]
-        df = df[["open_time", "close"]].apply(pd.to_numeric, errors="coerce").dropna()
-        return df
+        return df[["open_time", "close"]].apply(
+            pd.to_numeric, errors="coerce").dropna()
     except Exception:
         return None
+
+
+def fetch(contract: str, ym: str):
+    return _fetch_zip(f"{BASE}/{contract}/1d/{contract}-1d-{ym}.zip")
+
+
+def fetch_daily(contract: str, ymd: str):
+    return _fetch_zip(f"{BASE_DAILY}/{contract}/1d/{contract}-1d-{ymd}.zip")
 
 
 def main():
@@ -71,24 +79,53 @@ def main():
     contracts = list_contracts()
     print(f"{len(contracts)} contrats trimestriels trouvés")
     reg = {}
+    today = date.today()
     for c in contracts:
         exp, months = months_of(c)
         pq = OUT / f"{c}_1d.parquet"
         reg[c] = {"expiry": str(exp), "symbol": c.split("_")[0]}
+        # INCRÉMENTAL : top-up des contrats vivants (l'ancien `continue`
+        # inconditionnel gelait la donnée — et donc la jambe BASIS — dès le
+        # premier téléchargement).
+        old, have_until = None, None
         if pq.exists():
-            continue
-        frames = []
+            old = pd.read_parquet(pq)
+            if len(old):
+                have_until = pd.to_datetime(old["date"]).max().date()
+            if have_until is not None and have_until >= min(exp, today - timedelta(days=1)):
+                continue    # contrat livré (ou déjà à J-1) : rien à faire
+        want_months = months if have_until is None else [
+            m for m in months if m >= f"{have_until.year}-{have_until.month:02d}"]
+        frames = [] if old is None else [old[["open_time", "close"]]]
         with ThreadPoolExecutor(max_workers=8) as ex:
-            for fut in as_completed({ex.submit(fetch, c, m): m for m in months}):
+            for fut in as_completed({ex.submit(fetch, c, m): m for m in want_months}):
                 df = fut.result()
                 if df is not None:
                     frames.append(df)
+        # zips DAILY pour les jours récents (les zips monthly paraissent avec
+        # ~2 semaines de retard) : depuis le max déjà couvert jusqu'à J-1.
+        cover = (pd.concat(frames)["open_time"].pipe(
+            lambda s: pd.to_datetime(pd.to_numeric(s, errors="coerce").max(),
+                                     unit="ms").date()) if frames else None)
+        d0 = cover or (have_until or exp)
+        days = pd.date_range(str(d0), str(min(exp, today)), freq="D")[1:]
+        if len(days):
+            with ThreadPoolExecutor(max_workers=8) as ex:
+                for fut in as_completed({ex.submit(fetch_daily, c,
+                                                   d.strftime("%Y-%m-%d")): d
+                                         for d in days}):
+                    df = fut.result()
+                    if df is not None:
+                        frames.append(df)
         if frames:
             allf = (pd.concat(frames).drop_duplicates("open_time")
                     .sort_values("open_time").reset_index(drop=True))
             allf["date"] = pd.to_datetime(allf["open_time"], unit="ms", utc=True)
-            allf.to_parquet(pq, index=False)
-            print(f"  {c}: {len(allf)} jours", flush=True)
+            if old is None or len(allf) > len(old):
+                allf.to_parquet(pq, index=False)
+                print(f"  {c}: {len(allf)} jours "
+                      f"(+{len(allf) - (len(old) if old is not None else 0)})",
+                      flush=True)
     (OUT / "contracts.json").write_text(json.dumps(reg, indent=2))
     print(f"→ {OUT}")
 

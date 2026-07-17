@@ -2,7 +2,16 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Poste de contrôle : portefeuille paper live, cryptos temps réel, prévisions, world monitor, edge lab.">
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FUTUR">
 <title>FUTUR // COMMAND CENTER</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 <style>
@@ -77,18 +86,56 @@
   .lab-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
   #crossChart{height:290px} #corrHeat{height:230px} #yearly{height:230px}
   .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+  html{-webkit-text-size-adjust:100%}
+  body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
+  .topbar{padding-top:calc(12px + env(safe-area-inset-top))}
+  #installBtn{display:none;font-size:11px;padding:5px 10px;border-color:rgba(8,145,178,.5)}
+  /* ── MOBILE (PWA) : nav en barre d'onglets basse, tout scrollable ── */
+  @media(max-width:720px){
+    /* pas de dézoom : on clippe l'axe X et on empêche le min-content des
+       tableaux nowrap de gonfler les colonnes de grille */
+    html,body{overflow-x:clip}
+    .grid>*{min-width:0}
+    /* backdrop-filter créerait un containing block → le nav fixed se collerait au topbar */
+    .topbar{padding:calc(8px + env(safe-area-inset-top)) 12px 8px;gap:8px;
+      backdrop-filter:none;background:rgba(11,16,32,.97)}
+    h1{font-size:12px;letter-spacing:.14em}
+    .ticker{font-size:10.5px;gap:10px;order:3;width:100%;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none}
+    .ticker::-webkit-scrollbar{display:none}
+    #svc{font-size:9.5px;gap:7px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+    #svc::-webkit-scrollbar{display:none}
+    nav{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:30;display:flex;gap:2px;
+      background:rgba(11,16,32,.94);backdrop-filter:blur(14px);
+      border-top:1px solid var(--line);
+      padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
+    .tab{flex:1;text-align:center;padding:6px 1px;font-size:8.5px;letter-spacing:0;border-radius:10px}
+    .tab::before{content:attr(data-ico);display:block;font-size:17px;line-height:1.2;margin-bottom:1px}
+    .tab.active{box-shadow:none}
+    main{padding:14px 12px calc(86px + env(safe-area-inset-bottom))}
+    #pfValue{font-size:31px!important}
+    .tile .v{font-size:20px}
+    .tiles{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+    .cgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .panel{padding:13px 13px;border-radius:12px}
+    table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+    #eq{height:290px} #cChart{height:270px} #crossChart{height:240px}
+    #corrHeat{height:210px} #yearly{height:200px}
+    select,input,button{min-height:40px}
+    #pfInit button{display:block;width:100%;margin:8px 0 0!important}
+  }
 </style>
 </head>
 <body data-palette="#0891b2,#8b5cf6,#d97706,#059669">
 <div class="topbar">
   <h1>FUTUR <b>//</b> COMMAND CENTER</h1>
   <div class="ticker" id="ticker"></div>
+  <button id="installBtn">📲 installer</button>
   <nav id="nav">
-    <div class="tab active" data-v="portfolio">PORTEFEUILLE</div>
-    <div class="tab" data-v="cryptos">CRYPTOS</div>
-    <div class="tab" data-v="forecasts">PRÉVISIONS</div>
-    <div class="tab" data-v="world">WORLD</div>
-    <div class="tab" data-v="lab">LAB</div>
+    <div class="tab active" data-v="portfolio" data-ico="▤">PORTEFEUILLE</div>
+    <div class="tab" data-v="cryptos" data-ico="◈">CRYPTOS</div>
+    <div class="tab" data-v="forecasts" data-ico="✦">PRÉVISIONS</div>
+    <div class="tab" data-v="world" data-ico="◉">WORLD</div>
+    <div class="tab" data-v="lab" data-ico="⚗">LAB</div>
   </nav>
   <div id="svc"></div>
 </div>
@@ -99,7 +146,7 @@
   <section class="panel blk" id="liveHero" style="margin-top:0;border-color:rgba(8,145,178,.4);box-shadow:0 0 40px rgba(8,145,178,.08)">
     <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.2em;color:var(--ink2);text-transform:uppercase">Portefeuille paper live <span class="badge" id="pfLiveDot">● live</span></div>
+        <div style="font-size:11px;letter-spacing:.2em;color:var(--ink2);text-transform:uppercase">Portefeuille paper live <span class="badge" id="pfLiveDot">● live</span> <button id="pfBell" onclick="toggleNotif()" title="Alertes gros gains / grosses pertes (±500 €)" style="border:none;background:transparent;cursor:pointer;font-size:14px;padding:0 4px">🔕</button></div>
         <div id="pfValue" style="font-size:44px;font-weight:800;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums">—</div>
         <div id="pfPnl" style="font-size:15px;margin-top:2px"></div>
         <div id="pfMeta" style="font-size:11px;color:var(--ink3);margin-top:6px"></div>
@@ -170,9 +217,9 @@
       <div><label class="f">direction</label><div class="dirbtns" id="dDir">
         <button data-d="up">▲ hausse</button><button data-d="neutral">■ neutre</button><button data-d="down">▼ baisse</button>
       </div></div>
-      <div><label class="f">cible (prix)</label><input id="dTarget" type="number" step="any"></div>
-      <div><label class="f">horizon (jours)</label><input id="dHorizon" type="number"></div>
-      <div><label class="f">conviction 1-5</label><input id="dConv" type="number" min="1" max="5" value="3"></div>
+      <div><label class="f">cible (prix)</label><input id="dTarget" type="number" step="any" inputmode="decimal"></div>
+      <div><label class="f">horizon (jours)</label><input id="dHorizon" type="number" inputmode="numeric"></div>
+      <div><label class="f">conviction 1-5</label><input id="dConv" type="number" min="1" max="5" value="3" inputmode="numeric"></div>
       <div style="grid-column:1/-1"><label class="f">note</label><input id="dNote" placeholder="thèse, niveau clé, catalyseur…"></div>
       <div><button id="dSave" style="border-color:var(--c4);background:rgba(5,150,105,.15)">💾 enregistrer</button></div>
       <div><button id="dDel" style="border-color:rgba(220,38,38,.5)">supprimer</button></div>
@@ -236,6 +283,8 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
   t.classList.add("active"); document.getElementById("v-"+t.dataset.v).classList.add("active");
   if(t.dataset.v==="cryptos")loadCryptos(); if(t.dataset.v==="forecasts")loadForecasts();
+  setTimeout(()=>document.querySelectorAll(".view.active div[_echarts_instance_]").forEach(el=>{
+    const c=echarts.getInstanceByDom(el);if(c)c.resize();}),60);
 });
 
 // ── PORTFOLIO ──
@@ -502,8 +551,10 @@ async function portfolioLive(){
         `sleeves : carry <span class="${sl.carry>=0?'pos':'neg'}">${sl.carry>=0?"+":""}${sl.carry.toFixed(2)}€</span> · `+
         `basis <span class="${sl.basis>=0?'pos':'neg'}">${sl.basis>=0?"+":""}${sl.basis.toFixed(2)}€</span> · `+
         `longs <span class="${sl.longs>=0?'pos':'neg'}">${sl.longs>=0?"+":""}${sl.longs.toFixed(2)}€</span>`+
-        (sl.borrow!=null?` · borrow <span class="neg">${sl.borrow.toFixed(2)}€</span>`:"")+
-        (d.gross_leverage?` · <b>${d.gross_leverage}× spot</b>`:"");
+        (sl.fees!=null?` · frais <span class="neg">${sl.fees.toFixed(2)}€</span>`:"")+
+        (sl.borrow!=null&&sl.borrow!==0?` · borrow <span class="neg">${sl.borrow.toFixed(2)}€</span>`:"")+
+        (d.gross_leverage!=null?` · <b>${d.gross_leverage}× spot</b>`:"")+
+        (d.breakdown_eur?`<br><span style="color:var(--ink3);font-size:11px">comptabilité v2 (réalisée) : funding encaissé ${d.breakdown_eur["funding_encaissé"].toFixed(2)}€ · longs réalisés ${d.breakdown_eur["longs_réalisé"].toFixed(2)}€ · latent ${d.breakdown_eur["longs_latent"].toFixed(2)}€${d.rebalanced_at?` · rebalancé ${new Date(d.rebalanced_at).toLocaleString("fr-FR")}`:""}</span>`:"");
       document.querySelector("#pfPos thead").innerHTML=`<tr><th>actif</th><th>sleeve</th><th>notional</th><th>prix live</th><th>P&L</th><th>détail</th></tr>`;
       document.querySelector("#pfPos tbody").innerHTML=d.positions.map(p=>{
         const u=p.pnl_eur>=0,sc=p.sleeve.includes("carry")?"var(--c1)":p.sleeve.includes("basis")?"var(--c3)":"var(--c4)";
@@ -582,7 +633,72 @@ async function eventBook(){
   setTimeout(eventBook,30000);
 }
 
+// ── notifications portefeuille : toasts in-app + Notification navigateur ────
+// Les événements (gain/perte ±500 €, flips de gate, rolls, rebalances) sont
+// émis CÔTÉ SERVEUR par le moteur paper (timer 15 min, tourne PWA fermée) ;
+// ici on les affiche dès que l'app est ouverte.
+function notifOn(){return localStorage.getItem("pfNotif")==="1"&&("Notification" in window)&&Notification.permission==="granted";}
+function paintBell(){const b=document.getElementById("pfBell");if(b)b.textContent=notifOn()?"🔔":"🔕";}
+async function toggleNotif(){
+  if(!("Notification" in window)){alert("Notifications non supportées par ce navigateur");return;}
+  if(notifOn()){localStorage.setItem("pfNotif","0");}
+  else{
+    const p=await Notification.requestPermission();
+    if(p==="granted")localStorage.setItem("pfNotif","1");
+    else alert("Permission refusée — active les notifications pour ce site dans le navigateur.");
+  }
+  paintBell();
+}
+function toast(ev){
+  let host=document.getElementById("toasts");
+  if(!host){host=document.createElement("div");host.id="toasts";
+    host.style.cssText="position:fixed;right:14px;bottom:70px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:320px";
+    document.body.appendChild(host);}
+  const c=ev.level==="gain"?"#059669":ev.level==="perte"?"#dc2626":"#0891b2";
+  const el=document.createElement("div");
+  el.style.cssText=`background:#121a33;border:1px solid ${c};border-left:4px solid ${c};border-radius:8px;padding:10px 12px;box-shadow:0 8px 30px rgba(0,0,0,.4);font-size:12px;color:#e6edf7`;
+  el.innerHTML=`<b>${ev.title}</b><br><span style="color:#93a1bd">${ev.body||""}</span>`;
+  host.appendChild(el);
+  setTimeout(()=>{el.style.transition="opacity .5s";el.style.opacity="0";setTimeout(()=>el.remove(),500);},9000);
+}
+async function pfEvents(){
+  try{
+    const d=await j("/api/portfolio/events?limit=20");
+    const evs=(d.events||[]).slice().reverse();          // du plus ancien au plus récent
+    const seen=localStorage.getItem("pfEvtSeen")||"";
+    const fresh=evs.filter(e=>e.ts>seen);
+    if(seen){                                            // 1er passage : on marque sans spammer
+      for(const ev of fresh.slice(-4)){
+        toast(ev);
+        if(notifOn()&&ev.level!=="info"){
+          const reg=await navigator.serviceWorker.getRegistration().catch(()=>null);
+          if(reg)reg.showNotification(ev.title,{body:ev.body||"",icon:"/icons/icon-192.png",badge:"/icons/icon-192.png",tag:"pf-"+ev.ts});
+          else new Notification(ev.title,{body:ev.body||""});
+        }
+      }
+    }
+    if(evs.length)localStorage.setItem("pfEvtSeen",evs[evs.length-1].ts);
+  }catch(e){}
+  setTimeout(pfEvents,20000);
+}
+paintBell();pfEvents();
 boot();live();lab();worldmon();portfolioLive();eventBook();
+
+// ── PWA : service worker + prompt d'installation ──
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+}
+let deferredInstall=null;
+const installBtn=document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();deferredInstall=e;installBtn.style.display="inline-block";
+});
+installBtn.onclick=async()=>{
+  if(!deferredInstall)return;
+  deferredInstall.prompt();await deferredInstall.userChoice;
+  deferredInstall=null;installBtn.style.display="none";
+};
+window.addEventListener("appinstalled",()=>{installBtn.style.display="none";});
 </script>
 </body>
 </html>

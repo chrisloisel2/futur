@@ -1,4 +1,4 @@
-# Overlay mesuré — 3 jambes
+# Overlay mesuré — 3 jambes (tapes legacy)
 
 Fenêtre 2023-01-01 → 2026-03-31
 
@@ -18,6 +18,10 @@ Fenêtre 2023-01-01 → 2026-03-31
 | STACK 3 moteurs (2%/trade)  |      0.11   |    0.0327 | -0.0342 |     0.98 |
 | BASIS_TERM (quarterly, 50%) |      0.2891 |    0.0814 | -0.0295 |     2.16 |
 | COMBINÉ (3 jambes)          |      0.8947 |    0.2177 | -0.0319 |     3.41 |
+
+## Stack — ROI par année
+
+2022 -3.98% · 2023 +2.29% · 2024 +6.52% · 2025 +2.70% · 2026 -1.13%
 
 
 ## Réserves

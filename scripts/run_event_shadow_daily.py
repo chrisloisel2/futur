@@ -51,7 +51,16 @@ STATE = SHADOW_DIR / "state.json"
 COST_RT = 0.0014
 TOP_FRAC = 0.20
 WAVE_GAP = pd.Timedelta(minutes=30)
-TOP_K = 3
+TOP_K = 3                       # (déprécié — remplacé par seuil de confiance)
+CONF_THRESHOLD = 0.70           # limite par CERTITUDE, pas par nombre : ne garder
+                                # que les décisions dont le consensus moyen ≥ 0.70.
+                                # Mesuré : bat le cap top-3 (ROI ×2, DD plus bas,
+                                # PF 5+ vs 1,44) car la confiance écarte les krachs.
+PROBE_THRESHOLD = 0.50          # tier PROBE : décisions 0.50-0.70 enregistrées
+                                # POUR LES LABELS UNIQUEMENT (accumulation
+                                # statistique — 2 labels/semaine au seuil 0.70
+                                # ne trancheront jamais un verdict à J+30).
+                                # Le book officiel et son P&L restent ≥ 0.70.
 
 SPECS = {
     "cascade": {"name": "LIQ_CASCADE", "horizon": "fwd_4h",
@@ -185,8 +194,12 @@ def main():
         cand["wave"] = w
         cand = (cand.sort_values(["wave", "rank_pct"], ascending=[True, False])
                     .drop_duplicates(subset=["wave", "symbol"], keep="first"))
-        cand["k"] = cand.groupby("wave").cumcount()
-        dec = cand[cand["k"] < TOP_K].drop(columns=["k"]).copy()
+        # limite par CERTITUDE : toutes les décisions ≥ seuil de confiance,
+        # sans plafond de nombre (la capacité s'étend dans les grosses vagues).
+        # Tier 'book' (≥0.70) = P&L officiel ; tier 'probe' (0.50-0.70) =
+        # labels seulement, pour accumuler l'échantillon du verdict J+30.
+        dec = cand[cand["score"] >= PROBE_THRESHOLD].copy()
+        dec["tier"] = np.where(dec["score"] >= CONF_THRESHOLD, "book", "probe")
         dec["decided_at"] = datetime.now(timezone.utc).isoformat()
         dec["net_labeled"] = np.nan
         if LEDGER.exists():
@@ -219,11 +232,16 @@ def main():
         days = (pd.Timestamp.now(tz="UTC")
                 - pd.Timestamp(state["shadow_started"])).days
         if len(lab):
-            net = lab["net_labeled"].values
-            pf = net[net > 0].sum() / max(abs(net[net < 0].sum()), 1e-9)
-            print(f"SHADOW: jour {days} | décisions {len(led)} "
-                  f"(labellisées {len(lab)}) | PF {pf:.2f} "
-                  f"mean {net.mean()*1e4:+.1f}bps | verdict à J30 : "
+            tiers = lab.get("tier", pd.Series("book", index=lab.index)).fillna("book")
+            for tier in ("book", "probe"):
+                sub = lab[tiers == tier]
+                if not len(sub):
+                    continue
+                net = sub["net_labeled"].values
+                pf = net[net > 0].sum() / max(abs(net[net < 0].sum()), 1e-9)
+                print(f"SHADOW[{tier}]: jour {days} | labellisées {len(sub)} | "
+                      f"PF {pf:.2f} mean {net.mean()*1e4:+.1f}bps", flush=True)
+            print(f"SHADOW: décisions {len(led)} | verdict à J30 : "
                   f"{'ATTEINT — évaluer promotion' if days >= 30 else f'{30-days} j restants'}",
                   flush=True)
         else:

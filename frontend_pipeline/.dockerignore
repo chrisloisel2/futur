@@ -1,0 +1,4 @@
+# aucun COPY dans le Dockerfile : on n'envoie rien de lourd au daemon
+frontend/
+__pycache__/
+*.pyc

@@ -14,6 +14,7 @@ en Mongo — aucun ordre, rien d'envoyé à l'extérieur). Caches TTL.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import time
 import urllib.request
@@ -25,7 +26,7 @@ import numpy as np
 import pandas as pd
 import yaml
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +35,9 @@ STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="FUTUR Command Center")
 _cache: Dict[str, tuple] = {}
+
+# localhost par défaut (run natif) ; surchargé en Docker (mongodb://mongodb:27017)
+MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 
 
 def _universe() -> List[str]:
@@ -45,7 +49,7 @@ def _forecast_db():
     """Collection Mongo des prévisions utilisateur (None si Mongo indispo)."""
     try:
         import pymongo
-        c = pymongo.MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=1500)
+        c = pymongo.MongoClient(MONGO_URL, serverSelectionTimeoutMS=1500)
         c.admin.command("ping")
         return c["futur_ui"].forecasts
     except Exception:
@@ -217,6 +221,9 @@ def api_live():
         led = LC / "shadow" / "decisions.parquet"
         if led.exists():
             df = pd.read_parquet(led)
+            t = df.get("tier")
+            df = df[(pd.Series("book", index=df.index) if t is None
+                     else t.fillna("book")) == "book"]   # probes hors P&L
             lab = df[np.isfinite(df.get("net_labeled", np.nan))]
             sh = {"decisions": int(len(df)), "labeled": int(len(lab))}
             if len(lab):
@@ -576,7 +583,7 @@ def _paper():
     from src.institutional.live.paper_portfolio import PaperPortfolio
     try:
         import pymongo
-        c = pymongo.MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=1500)
+        c = pymongo.MongoClient(MONGO_URL, serverSelectionTimeoutMS=1500)
         c.admin.command("ping")
         return PaperPortfolio(c["futur_ui"])
     except Exception:
@@ -618,6 +625,20 @@ def api_portfolio_history():
     return _clean({"history": _paper().history()})
 
 
+@app.get("/api/portfolio/events")
+def api_portfolio_events(limit: int = 30):
+    """Événements de notification (gros gains/pertes, flips, rolls, rebalances)
+    émis par le moteur paper — consommés par le PWA (toast + Notification)."""
+    pp = _paper()
+    if pp.events is None:
+        return {"events": [], "backend": "unavailable"}
+    out = []
+    for d in pp.events.find().sort("ts", -1).limit(max(1, min(limit, 100))):
+        d.pop("_id", None)
+        out.append(d)
+    return _clean({"events": out})
+
+
 # ── EVENT STRATEGY — paper trading LIVE (multi-horizon consensus, shadow) ────
 
 @app.get("/api/event_book")
@@ -630,7 +651,15 @@ def api_event_book():
         df = pd.read_parquet(led)
         df["event_time"] = pd.to_datetime(df["event_time"], utc=True)
         df = df.sort_values("event_time")
-        SIZE = 0.02                       # 2% par décision (comme la wave sim)
+        SIZE = 0.05                       # 5% par décision (choix user, paper only —
+                                          # ~Kelly/4 ; +18.9%/an mais maxDD -8.4% en backtest)
+        # tier 'probe' (0.50-0.70) = accumulation de labels UNIQUEMENT ; le
+        # book officiel (P&L, courbe, verdict) ne compte que le tier 'book'.
+        tiers = df.get("tier")
+        tiers = (pd.Series("book", index=df.index) if tiers is None
+                 else tiers.fillna("book"))
+        probes = df[tiers == "probe"]
+        df = df[tiers == "book"]
         labeled = df[np.isfinite(df.get("net_labeled", np.nan))]
         pending = df[~np.isfinite(df.get("net_labeled", np.nan))]
         # courbe d'équité paper (base 100) sur les trades clôturés
@@ -665,13 +694,16 @@ def api_event_book():
         fwd_days = 0
         if started:
             fwd_days = max(0, (pd.Timestamp.now(tz="UTC") - pd.Timestamp(started)).days)
+        n_probe_lab = int(np.isfinite(probes.get(
+            "net_labeled", pd.Series(dtype=float))).sum()) if len(probes) else 0
         return _clean({
             "exists": True, "sizing_pct": SIZE * 100,
             "n_total": int(len(df)), "n_closed": int(len(labeled)),
             "n_pending": int(len(pending)),
+            "n_probe": int(len(probes)), "n_probe_labeled": n_probe_lab,
             "stats": stats, "curve": curve, "recent": rows, "by_engine": by_eng,
             "forward_days": fwd_days, "gate_days": 30,
-            "note": "Paper live — décisions consensus multi-horizon gelées, P&L au label forward. Aucun argent.",
+            "note": "Paper live — consensus multi-horizon, sizing 5%, gating par CONFIANCE (score≥0.70, pas de cap de nombre : la capacité s'étend dans les grosses vagues). Tier PROBE (0.50-0.70) enregistré pour les labels seulement — n'entre ni dans le P&L ni dans le verdict. Aucun argent réel.",
         })
     return cached("event_book", 20, load)
 
@@ -679,3 +711,28 @@ def api_event_book():
 @app.get("/", response_class=HTMLResponse)
 def index():
     return (STATIC / "command_center.html").read_text()
+
+
+# ── PWA : manifest, service worker, icônes ───────────────────────────────────
+
+@app.get("/manifest.webmanifest", include_in_schema=False)
+def manifest():
+    return FileResponse(STATIC / "manifest.webmanifest",
+                        media_type="application/manifest+json")
+
+
+@app.get("/sw.js", include_in_schema=False)
+def service_worker():
+    # no-cache : le navigateur revalide le SW à chaque visite (déploiements)
+    return FileResponse(STATIC / "sw.js", media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/icons/{name}", include_in_schema=False)
+def icon(name: str):
+    icons_dir = (STATIC / "icons").resolve()
+    p = (icons_dir / name).resolve()
+    if p.parent != icons_dir or not p.is_file():
+        raise HTTPException(404)
+    return FileResponse(p, media_type="image/png",
+                        headers={"Cache-Control": "public, max-age=86400"})
