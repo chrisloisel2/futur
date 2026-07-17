@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer 6h archiveur positioning (couverture 41,6 h par appel, marge 7x)
+
+[Timer]
+OnCalendar=*-*-* 00/6:20:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

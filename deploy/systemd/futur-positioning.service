@@ -1,0 +1,10 @@
+[Unit]
+Description=Futur positioning archiver (Binance fapi top/global/taker ratios, retention API 30 j)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/archive_binance_positioning.py
+StandardOutput=append:/home/qbee/futur/reports/positioning_archiver.log
+StandardError=append:/home/qbee/futur/reports/positioning_archiver.log
+TimeoutStartSec=900
