@@ -1,0 +1,3127 @@
+0GUSDT:
+  first_kline: '2025-09-17 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000000BOBUSDT:
+  first_kline: '2025-06-05 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000000MOGUSDT:
+  first_kline: '2024-11-07 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000BONKUSDT:
+  first_kline: '2023-11-22 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000CATUSDT:
+  first_kline: '2024-10-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000CHEEMSUSDT:
+  first_kline: '2024-11-25 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000FLOKIUSDT:
+  first_kline: '2023-05-06 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000PEPEUSDT:
+  first_kline: '2023-05-05 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000RATSUSDT:
+  first_kline: '2023-12-15 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000SATSUSDT:
+  first_kline: '2023-12-12 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000WHYUSDT:
+  first_kline: '2024-11-25 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1000XUSDT:
+  first_kline: '2024-11-13 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+1MBABYDOGEUSDT:
+  first_kline: '2024-09-16 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+2ZUSDT:
+  first_kline: '2025-10-02 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+42USDT:
+  first_kline: '2025-10-27 11:00:00+00:00'
+  funding: 570
+  k1: 720
+  k5: 864
+  status: PASS
+4USDT:
+  first_kline: '2025-10-08 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+A2ZUSDT:
+  first_kline: '2025-07-30 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ACEUSDT:
+  first_kline: '2023-12-18 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ACHUSDT:
+  first_kline: '2023-02-22 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ACTUSDT:
+  first_kline: '2024-11-11 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ACUUSDT:
+  first_kline: '2026-01-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ACXUSDT:
+  first_kline: '2024-12-06 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AERGOUSDT:
+  first_kline: '2025-04-16 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AEROUSDT:
+  first_kline: '2024-12-04 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AEVOUSDT:
+  first_kline: '2024-03-13 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AGIXUSDT:
+  first_kline: '2023-02-16 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AGLDUSDT:
+  first_kline: '2023-07-29 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AGTUSDT:
+  first_kline: '2025-05-20 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AI16ZUSDT:
+  first_kline: '2025-01-02 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIAUSDT:
+  first_kline: '2026-01-20 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIGENSYNUSDT:
+  first_kline: '2026-04-29 15:00:00+00:00'
+  funding: 474
+  k1: 720
+  k5: 864
+  status: PASS
+AINUSDT:
+  first_kline: '2025-07-10 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIOTUSDT:
+  first_kline: '2025-04-30 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIOUSDT:
+  first_kline: '2025-08-13 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIUSDT:
+  first_kline: '2024-01-08 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AIXBTUSDT:
+  first_kline: '2024-12-20 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AKEUSDT:
+  first_kline: '2025-09-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AKTUSDT:
+  first_kline: '2024-11-18 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALCHUSDT:
+  first_kline: '2025-01-07 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALLOUSDT:
+  first_kline: '2025-11-11 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALLUSDT:
+  first_kline: '2025-08-06 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALPACAUSDT:
+  first_kline: '2024-08-22 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALPINEUSDT:
+  first_kline: '2025-05-06 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ALTUSDT:
+  first_kline: '2024-01-25 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AMBUSDT:
+  first_kline: '2023-03-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ANIMEUSDT:
+  first_kline: '2025-01-23 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+APRUSDT:
+  first_kline: '2025-10-23 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARBUSDT:
+  first_kline: '2023-03-23 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARCUSDT:
+  first_kline: '2025-01-17 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARIAUSDT:
+  first_kline: '2025-09-03 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARKMUSDT:
+  first_kline: '2023-07-28 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARKUSDT:
+  first_kline: '2023-09-19 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ARXUSDT:
+  first_kline: '2026-06-23 05:00:00+00:00'
+  funding: 147
+  k1: 591
+  k5: 864
+  status: PASS
+ASRUSDT:
+  first_kline: '2025-05-06 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ASTERUSDT:
+  first_kline: '2025-09-19 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ASTRUSDT:
+  first_kline: '2023-02-14 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ATHUSDT:
+  first_kline: '2025-04-02 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ATUSDT:
+  first_kline: '2025-10-29 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AUCTIONUSDT:
+  first_kline: '2023-12-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AUSDT:
+  first_kline: '2025-05-28 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AVAAIUSDT:
+  first_kline: '2025-01-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AVAUSDT:
+  first_kline: '2024-12-13 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AVNTUSDT:
+  first_kline: '2025-09-09 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AWEUSDT:
+  first_kline: '2025-05-21 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AXLUSDT:
+  first_kline: '2024-03-01 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+AZTECUSDT:
+  first_kline: '2026-02-11 05:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+B2USDT:
+  first_kline: '2025-05-06 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+B3USDT:
+  first_kline: '2025-02-13 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BABYUSDT:
+  first_kline: '2025-04-05 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BADGERUSDT:
+  first_kline: '2023-11-09 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BANANAS31USDT:
+  first_kline: '2025-03-22 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BANANAUSDT:
+  first_kline: '2024-08-15 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BANKUSDT:
+  first_kline: '2025-04-18 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BANUSDT:
+  first_kline: '2024-11-18 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BARDUSDT:
+  first_kline: '2025-09-18 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BASEDUSDT:
+  first_kline: '2026-03-30 10:00:00+00:00'
+  funding: 655
+  k1: 720
+  k5: 864
+  status: PASS
+BASUSDT:
+  first_kline: '2025-08-26 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BBUSDT:
+  first_kline: '2024-05-13 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BEAMXUSDT:
+  first_kline: '2023-11-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BEATUSDT:
+  first_kline: '2025-11-12 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BERAUSDT:
+  first_kline: '2025-02-06 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BICOUSDT:
+  first_kline: '2023-09-28 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BIDUSDT:
+  first_kline: '2025-03-20 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BIGTIMEUSDT:
+  first_kline: '2023-10-12 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BILLUSDT:
+  first_kline: '2026-05-07 09:00:00+00:00'
+  funding: 427
+  k1: 720
+  k5: 864
+  status: PASS
+BIOUSDT:
+  first_kline: '2025-01-03 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BIRBUSDT:
+  first_kline: '2026-01-29 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BLESSUSDT:
+  first_kline: '2025-09-23 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BLUAIUSDT:
+  first_kline: '2025-10-21 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BLURUSDT:
+  first_kline: '2023-04-28 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BMTUSDT:
+  first_kline: '2025-03-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BNTUSDT:
+  first_kline: '2023-08-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BNXUSDT:
+  first_kline: '2023-02-22 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BOBUSDT:
+  first_kline: '2025-11-21 11:00:00+00:00'
+  funding: 948
+  k1: 720
+  k5: 864
+  status: PASS
+BOMEUSDT:
+  first_kline: '2024-03-16 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BONDUSDT:
+  first_kline: '2023-10-15 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BRETTUSDT:
+  first_kline: '2024-08-20 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BREVUSDT:
+  first_kline: '2025-12-30 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BROCCOLI714USDT:
+  first_kline: '2025-03-21 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BROCCOLIF3BUSDT:
+  first_kline: '2025-03-21 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BRUSDT:
+  first_kline: '2025-03-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BSBUSDT:
+  first_kline: '2026-03-25 12:00:00+00:00'
+  funding: 685
+  k1: 720
+  k5: 864
+  status: PASS
+BSVUSDT:
+  first_kline: '2023-10-20 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BSWUSDT:
+  first_kline: '2024-09-05 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BTRUSDT:
+  first_kline: '2025-08-27 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BTWUSDT:
+  first_kline: '2026-06-04 15:00:00+00:00'
+  funding: 258
+  k1: 720
+  k5: 864
+  status: PASS
+BULLAUSDT:
+  first_kline: '2025-07-04 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+BUSDT:
+  first_kline: '2025-05-22 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CAKEUSDT:
+  first_kline: '2023-11-02 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CAPUSDT:
+  first_kline: '2026-06-27 12:00:00+00:00'
+  funding: 122
+  k1: 488
+  k5: 864
+  status: PASS
+CARVUSDT:
+  first_kline: '2025-08-07 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CATIUSDT:
+  first_kline: '2024-09-20 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CCUSDT:
+  first_kline: '2025-10-31 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CETUSUSDT:
+  first_kline: '2024-11-06 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CFGUSDT:
+  first_kline: '2026-03-16 13:00:00+00:00'
+  funding: 738
+  k1: 720
+  k5: 864
+  status: PASS
+CFXUSDT:
+  first_kline: '2023-02-20 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CGPTUSDT:
+  first_kline: '2024-12-20 20:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CHESSUSDT:
+  first_kline: '2024-08-29 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CHILLGUYUSDT:
+  first_kline: '2024-11-27 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CHIPUSDT:
+  first_kline: '2026-04-16 08:00:00+00:00'
+  funding: 554
+  k1: 720
+  k5: 864
+  status: PASS
+CKBUSDT:
+  first_kline: '2023-02-28 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CLANKERUSDT:
+  first_kline: '2025-11-12 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CLOUSDT:
+  first_kline: '2025-10-14 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COAIUSDT:
+  first_kline: '2025-09-25 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COCOSUSDT:
+  first_kline: '2023-02-21 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COLLECTUSDT:
+  first_kline: '2025-12-31 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COMBOUSDT:
+  first_kline: '2023-06-02 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COMMONUSDT:
+  first_kline: '2025-10-27 13:00:00+00:00'
+  funding: 569
+  k1: 720
+  k5: 864
+  status: PASS
+COOKIEUSDT:
+  first_kline: '2025-01-07 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COSUSDT:
+  first_kline: '2024-09-30 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+COWUSDT:
+  first_kline: '2024-11-06 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CROSSUSDT:
+  first_kline: '2025-07-10 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CTKUSDT:
+  first_kline: '2025-04-30 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CTRUSDT:
+  first_kline: '2026-05-28 10:00:00+00:00'
+  funding: 301
+  k1: 720
+  k5: 864
+  status: PASS
+CUDISUSDT:
+  first_kline: '2025-08-20 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CUSDT:
+  first_kline: '2025-07-15 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CVCUSDT:
+  first_kline: '2025-05-16 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CVXUSDT:
+  first_kline: '2025-07-23 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CYBERUSDT:
+  first_kline: '2023-08-21 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+CYSUSDT:
+  first_kline: '2025-12-12 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DAMUSDT:
+  first_kline: '2025-08-18 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DATAIPUSDT:
+  first_kline: '2026-07-03 07:00:00+00:00'
+  funding: 87
+  k1: 349
+  k5: 864
+  status: PASS
+DEEPUSDT:
+  first_kline: '2025-04-22 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DEGENUSDT:
+  first_kline: '2024-11-15 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DEGOUSDT:
+  first_kline: '2024-12-13 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DEXEUSDT:
+  first_kline: '2024-12-24 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DFUSDT:
+  first_kline: '2024-12-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DIAUSDT:
+  first_kline: '2024-10-02 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DMCUSDT:
+  first_kline: '2025-06-24 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DODOXUSDT:
+  first_kline: '2023-08-08 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DOGSUSDT:
+  first_kline: '2024-08-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DOLOUSDT:
+  first_kline: '2025-05-01 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DOODUSDT:
+  first_kline: '2025-05-09 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DRIFTUSDT:
+  first_kline: '2024-11-08 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DUSDT:
+  first_kline: '2025-01-09 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+DYMUSDT:
+  first_kline: '2024-02-07 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EDENUSDT:
+  first_kline: '2025-09-30 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EDGEUSDT:
+  first_kline: '2026-03-19 14:00:00+00:00'
+  funding: 720
+  k1: 720
+  k5: 864
+  status: PASS
+EDUUSDT:
+  first_kline: '2023-04-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EIGENUSDT:
+  first_kline: '2024-10-01 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ELSAUSDT:
+  first_kline: '2026-01-22 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ENAUSDT:
+  first_kline: '2024-04-02 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ENSOUSDT:
+  first_kline: '2025-10-14 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EPICUSDT:
+  first_kline: '2025-03-13 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EPTUSDT:
+  first_kline: '2025-04-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ERAUSDT:
+  first_kline: '2025-07-17 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ESPORTSUSDT:
+  first_kline: '2025-07-29 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ESPUSDT:
+  first_kline: '2026-02-10 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ETHFIUSDT:
+  first_kline: '2024-03-18 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ETHWUSDT:
+  first_kline: '2023-11-28 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EULUSDT:
+  first_kline: '2025-10-13 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+EVAAUSDT:
+  first_kline: '2025-10-03 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FARTCOINUSDT:
+  first_kline: '2024-12-20 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FETUSDT:
+  first_kline: '2023-01-17 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FFUSDT:
+  first_kline: '2025-09-29 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FHEUSDT:
+  first_kline: '2025-04-12 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FIDAUSDT:
+  first_kline: '2024-09-19 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FIGHTUSDT:
+  first_kline: '2026-01-23 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FIOUSDT:
+  first_kline: '2024-09-20 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FISUSDT:
+  first_kline: '2025-04-25 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FLOCKUSDT:
+  first_kline: '2025-09-09 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FLUIDUSDT:
+  first_kline: '2025-09-24 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FLUXUSDT:
+  first_kline: '2024-09-03 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FOGOUSDT:
+  first_kline: '2026-01-10 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FOLKSUSDT:
+  first_kline: '2025-11-06 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FORMUSDT:
+  first_kline: '2025-03-19 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FORTHUSDT:
+  first_kline: '2025-04-08 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FRAXUSDT:
+  first_kline: '2026-01-15 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FRONTUSDT:
+  first_kline: '2023-09-22 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FUNUSDT:
+  first_kline: '2025-03-31 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FUSDT:
+  first_kline: '2025-06-18 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+FXSUSDT:
+  first_kline: '2023-01-20 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GAIBUSDT:
+  error: 'HTTP Error 400: Bad Request'
+  status: MISSING_DATA
+GASUSDT:
+  first_kline: '2023-10-25 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GENIUSUSDT:
+  first_kline: '2026-04-16 04:00:00+00:00'
+  funding: 555
+  k1: 720
+  k5: 864
+  status: PASS
+GHSTUSDT:
+  first_kline: '2024-09-23 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GIGGLEUSDT:
+  first_kline: '2025-10-09 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GLMRUSDT:
+  first_kline: '2023-09-26 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GLMUSDT:
+  first_kline: '2024-02-22 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GMXUSDT:
+  first_kline: '2023-02-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GOATUSDT:
+  first_kline: '2024-10-24 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GPSUSDT:
+  first_kline: '2025-02-17 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GRAMUSDT:
+  first_kline: '2026-07-02 08:00:00+00:00'
+  funding: 93
+  k1: 372
+  k5: 864
+  status: PASS
+GRASSUSDT:
+  first_kline: '2024-11-08 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GRIFFAINUSDT:
+  first_kline: '2025-01-02 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GUAUSDT:
+  first_kline: '2025-12-21 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GUNUSDT:
+  first_kline: '2025-03-31 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GUSDT:
+  first_kline: '2024-08-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+GWEIUSDT:
+  first_kline: '2026-01-29 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HAEDALUSDT:
+  first_kline: '2025-05-01 04:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HANAUSDT:
+  first_kline: '2025-09-26 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HEIUSDT:
+  first_kline: '2025-02-13 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HEMIUSDT:
+  first_kline: '2025-08-29 05:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HFTUSDT:
+  first_kline: '2023-04-06 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HIFIUSDT:
+  first_kline: '2023-09-16 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HIGHUSDT:
+  first_kline: '2023-02-07 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HIPPOUSDT:
+  first_kline: '2024-11-13 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HIVEUSDT:
+  first_kline: '2024-12-23 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HMSTRUSDT:
+  first_kline: '2024-09-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HOLOUSDT:
+  first_kline: '2025-09-11 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HOMEUSDT:
+  first_kline: '2025-06-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HOOKUSDT:
+  first_kline: '2023-01-23 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HUMAUSDT:
+  first_kline: '2025-05-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HUSDT:
+  first_kline: '2025-06-25 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HYPERUSDT:
+  first_kline: '2025-04-22 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+HYPEUSDT:
+  first_kline: '2025-05-30 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ICNTUSDT:
+  first_kline: '2025-07-03 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IDEXUSDT:
+  first_kline: '2023-05-03 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IDOLUSDT:
+  first_kline: '2025-07-04 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IDUSDT:
+  first_kline: '2023-03-23 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ILVUSDT:
+  first_kline: '2023-11-10 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+INITUSDT:
+  first_kline: '2025-04-16 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+INUSDT:
+  first_kline: '2025-08-07 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+INXUSDT:
+  first_kline: '2026-01-30 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IOUSDT:
+  first_kline: '2024-06-11 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IPUSDT:
+  first_kline: '2025-02-13 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+IRUSDT:
+  first_kline: '2025-12-21 11:00:00+00:00'
+  funding: 774
+  k1: 720
+  k5: 864
+  status: PASS
+IRYSUSDT:
+  first_kline: '2025-11-26 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JCTUSDT:
+  first_kline: '2025-11-10 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JELLYJELLYUSDT:
+  first_kline: '2025-03-26 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JOEUSDT:
+  first_kline: '2023-03-29 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JSTUSDT:
+  first_kline: '2025-04-28 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JTOUSDT:
+  first_kline: '2023-12-08 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+JUPUSDT:
+  first_kline: '2024-01-31 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KAIAUSDT:
+  first_kline: '2024-12-04 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KAITOUSDT:
+  first_kline: '2025-02-20 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KASUSDT:
+  first_kline: '2023-11-17 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KATUSDT:
+  first_kline: '2026-03-02 05:00:00+00:00'
+  funding: 824
+  k1: 720
+  k5: 864
+  status: PASS
+KDAUSDT:
+  first_kline: '2024-09-18 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KERNELUSDT:
+  first_kline: '2025-04-14 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KEYUSDT:
+  first_kline: '2023-05-24 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KGENUSDT:
+  first_kline: '2025-10-07 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KITEUSDT:
+  first_kline: '2025-10-29 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KMNOUSDT:
+  first_kline: '2024-12-20 19:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+KOMAUSDT:
+  first_kline: '2024-12-10 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LABUSDT:
+  first_kline: '2025-10-17 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LAUSDT:
+  first_kline: '2025-06-05 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LAYERUSDT:
+  first_kline: '2025-02-11 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LEVERUSDT:
+  first_kline: '2023-03-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LIGHTUSDT:
+  first_kline: '2025-09-27 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LINEAUSDT:
+  first_kline: '2025-09-01 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LISTAUSDT:
+  first_kline: '2024-06-20 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LITUSDT:
+  first_kline: '2025-12-23 18:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LOKAUSDT:
+  first_kline: '2024-09-24 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LOOMUSDT:
+  first_kline: '2023-10-11 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LQTYUSDT:
+  first_kline: '2023-03-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LSKUSDT:
+  first_kline: '2024-01-25 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LUMIAUSDT:
+  first_kline: '2024-12-18 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+LYNUSDT:
+  first_kline: '2025-10-06 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MAGICUSDT:
+  first_kline: '2023-01-25 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MAGMAUSDT:
+  first_kline: '2025-12-31 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MANTAUSDT:
+  first_kline: '2024-01-18 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MANTRAUSDT:
+  first_kline: '2026-03-04 08:00:00+00:00'
+  funding: 812
+  k1: 720
+  k5: 864
+  status: PASS
+MAVIAUSDT:
+  first_kline: '2025-03-26 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MAVUSDT:
+  first_kline: '2023-06-29 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MBLUSDT:
+  first_kline: '2023-11-14 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MBOXUSDT:
+  first_kline: '2024-08-28 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MDTUSDT:
+  first_kline: '2023-06-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MEGAUSDT:
+  first_kline: '2026-01-30 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MELANIAUSDT:
+  first_kline: '2025-01-20 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MEMEFIUSDT:
+  first_kline: '2025-04-25 08:00:00+00:00'
+  funding: 649
+  k1: 720
+  k5: 864
+  status: PASS
+MEMEUSDT:
+  first_kline: '2023-11-03 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MERLUSDT:
+  first_kline: '2025-05-29 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+METISUSDT:
+  first_kline: '2024-03-12 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+METUSDT:
+  first_kline: '2025-10-11 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MEUSDT:
+  first_kline: '2024-12-10 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MEWUSDT:
+  first_kline: '2024-06-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MILKUSDT:
+  first_kline: '2025-05-06 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MINAUSDT:
+  first_kline: '2023-02-07 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MIRAUSDT:
+  first_kline: '2025-09-26 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MITOUSDT:
+  first_kline: '2025-08-28 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MLNUSDT:
+  first_kline: '2025-03-31 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MMTUSDT:
+  first_kline: '2025-11-04 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MOCAUSDT:
+  first_kline: '2024-12-16 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MONUSDT:
+  first_kline: '2025-10-10 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MOODENGUSDT:
+  first_kline: '2024-10-25 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MORPHOUSDT:
+  first_kline: '2024-11-27 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MOVEUSDT:
+  first_kline: '2024-12-09 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MOVRUSDT:
+  first_kline: '2023-12-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MUBARAKUSDT:
+  first_kline: '2025-03-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MUSDT:
+  first_kline: '2025-07-07 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MYROUSDT:
+  first_kline: '2024-03-05 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+MYXUSDT:
+  first_kline: '2025-06-18 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NAORISUSDT:
+  first_kline: '2025-07-31 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NEIROETHUSDT:
+  first_kline: '2024-09-06 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NEIROUSDT:
+  first_kline: '2024-09-16 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NEWTUSDT:
+  first_kline: '2025-06-19 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NFPUSDT:
+  first_kline: '2023-12-27 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NIGHTUSDT:
+  first_kline: '2025-12-10 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NILUSDT:
+  first_kline: '2025-03-24 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NMRUSDT:
+  first_kline: '2023-06-22 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NOMUSDT:
+  first_kline: '2025-10-01 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NOTUSDT:
+  first_kline: '2024-05-16 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NTRNUSDT:
+  first_kline: '2023-11-14 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NULSUSDT:
+  first_kline: '2024-08-26 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+NXPCUSDT:
+  first_kline: '2025-05-15 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OBOLUSDT:
+  first_kline: '2025-05-07 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OGUSDT:
+  first_kline: '2025-05-12 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OLUSDT:
+  first_kline: '2025-06-25 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OMNIUSDT:
+  first_kline: '2024-04-17 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OMUSDT:
+  first_kline: '2024-02-13 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ONDOUSDT:
+  first_kline: '2024-01-20 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ONGUSDT:
+  first_kline: '2023-11-27 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ONUSDT:
+  first_kline: '2025-10-24 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OPENUSDT:
+  first_kline: '2025-09-08 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OPGUSDT:
+  first_kline: '2026-04-22 16:00:00+00:00'
+  funding: 516
+  k1: 720
+  k5: 864
+  status: PASS
+OPNUSDT:
+  first_kline: '2026-02-21 15:00:00+00:00'
+  funding: 876
+  k1: 720
+  k5: 864
+  status: PASS
+ORBSUSDT:
+  first_kline: '2023-10-17 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ORCAUSDT:
+  first_kline: '2024-12-06 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ORDERUSDT:
+  first_kline: '2025-09-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ORDIUSDT:
+  first_kline: '2023-11-07 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+OUSDT:
+  first_kline: '2026-06-24 12:00:00+00:00'
+  funding: 140
+  k1: 560
+  k5: 864
+  status: PASS
+OXTUSDT:
+  first_kline: '2023-08-11 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PARTIUSDT:
+  first_kline: '2025-03-25 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PAXGUSDT:
+  first_kline: '2025-03-27 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PENDLEUSDT:
+  first_kline: '2023-07-28 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PENGUUSDT:
+  first_kline: '2024-12-17 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PERPUSDT:
+  first_kline: '2023-03-06 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PHAROSUSDT:
+  first_kline: '2026-05-14 06:00:00+00:00'
+  funding: 386
+  k1: 720
+  k5: 864
+  status: PASS
+PHAUSDT:
+  first_kline: '2024-12-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PHBUSDT:
+  first_kline: '2023-02-16 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PIEVERSEUSDT:
+  first_kline: '2025-11-14 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PIPPINUSDT:
+  first_kline: '2025-01-24 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PIXELUSDT:
+  first_kline: '2024-02-19 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PLAYUSDT:
+  first_kline: '2025-07-31 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PLUMEUSDT:
+  first_kline: '2025-03-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PNUTUSDT:
+  first_kline: '2024-11-11 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+POLUSDT:
+  first_kline: '2024-09-13 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+POLYXUSDT:
+  first_kline: '2023-10-25 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PONKEUSDT:
+  first_kline: '2024-11-04 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+POPCATUSDT:
+  first_kline: '2024-08-22 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PORT3USDT:
+  first_kline: '2025-06-04 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PORTALUSDT:
+  first_kline: '2024-02-29 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+POWERUSDT:
+  first_kline: '2025-12-06 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+POWRUSDT:
+  first_kline: '2023-10-27 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PRLUSDT:
+  first_kline: '2026-04-01 11:00:00+00:00'
+  funding: 678
+  k1: 720
+  k5: 864
+  status: PASS
+PROMPTUSDT:
+  first_kline: '2025-04-11 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PROMUSDT:
+  first_kline: '2025-01-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PROVEUSDT:
+  first_kline: '2025-08-05 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PTBUSDT:
+  first_kline: '2025-09-03 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PUFFERUSDT:
+  first_kline: '2025-06-04 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PUMPBTCUSDT:
+  first_kline: '2025-06-13 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PUMPUSDT:
+  first_kline: '2025-07-10 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PUNDIXUSDT:
+  first_kline: '2025-04-30 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+PYTHUSDT:
+  first_kline: '2023-11-22 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+QUICKUSDT:
+  first_kline: '2024-09-06 05:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+QUSDT:
+  first_kline: '2025-09-02 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RADUSDT:
+  first_kline: '2023-05-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RAREUSDT:
+  first_kline: '2024-08-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RAVEUSDT:
+  first_kline: '2025-12-14 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RAYSOLUSDT:
+  first_kline: '2024-12-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RDNTUSDT:
+  first_kline: '2023-04-05 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RECALLUSDT:
+  first_kline: '2025-10-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+REDUSDT:
+  first_kline: '2025-03-06 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+REIUSDT:
+  first_kline: '2024-09-27 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RENDERUSDT:
+  first_kline: '2024-07-26 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RESOLVUSDT:
+  first_kline: '2025-06-10 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+REUSDT:
+  first_kline: '2026-06-18 14:00:00+00:00'
+  funding: 174
+  k1: 702
+  k5: 864
+  status: PASS
+REZUSDT:
+  first_kline: '2024-04-30 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RIFUSDT:
+  first_kline: '2023-10-21 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RIVERUSDT:
+  first_kline: '2025-10-17 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RLSUSDT:
+  first_kline: '2025-12-02 10:00:00+00:00'
+  funding: 762
+  k1: 720
+  k5: 864
+  status: PASS
+RNDRUSDT:
+  first_kline: '2023-02-03 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ROBOUSDT:
+  first_kline: '2026-02-27 09:00:00+00:00'
+  funding: 841
+  k1: 720
+  k5: 864
+  status: PASS
+RONINUSDT:
+  first_kline: '2024-02-06 05:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RPLUSDT:
+  first_kline: '2024-09-09 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+RVVUSDT:
+  first_kline: '2025-10-18 14:00:00+00:00'
+  funding: 692
+  k1: 720
+  k5: 864
+  status: PASS
+SAFEUSDT:
+  first_kline: '2024-10-25 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SAGAUSDT:
+  first_kline: '2024-04-09 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SAHARAUSDT:
+  first_kline: '2025-06-26 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SANTOSUSDT:
+  first_kline: '2024-10-28 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SAPIENUSDT:
+  first_kline: '2025-08-20 18:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SCRTUSDT:
+  first_kline: '2024-11-21 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SCRUSDT:
+  first_kline: '2024-10-22 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SEIUSDT:
+  first_kline: '2023-08-17 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SENTUSDT:
+  first_kline: '2025-11-14 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SHELLUSDT:
+  first_kline: '2025-02-17 18:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SIGNUSDT:
+  first_kline: '2025-04-28 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SIRENUSDT:
+  first_kline: '2025-03-22 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SKATEUSDT:
+  first_kline: '2025-06-09 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SKRUSDT:
+  first_kline: '2026-01-22 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SKYAIUSDT:
+  first_kline: '2025-05-13 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SKYUSDT:
+  first_kline: '2025-09-09 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SLERFUSDT:
+  first_kline: '2024-11-21 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SLPUSDT:
+  first_kline: '2025-07-23 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SLXUSDT:
+  first_kline: '2026-06-01 08:00:00+00:00'
+  funding: 469
+  k1: 720
+  k5: 864
+  status: PASS
+SNTUSDT:
+  first_kline: '2023-11-02 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SOLVUSDT:
+  first_kline: '2025-01-17 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SOMIUSDT:
+  first_kline: '2025-08-25 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SONICUSDT:
+  first_kline: '2025-01-08 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SOONUSDT:
+  first_kline: '2025-05-23 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SOPHUSDT:
+  first_kline: '2025-05-28 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SPACEUSDT:
+  first_kline: '2026-01-23 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SPKUSDT:
+  first_kline: '2025-06-17 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SPORTFUNUSDT:
+  first_kline: '2026-01-16 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SPXUSDT:
+  first_kline: '2024-12-10 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SQDUSDT:
+  first_kline: '2025-06-11 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SSVUSDT:
+  first_kline: '2023-02-24 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STABLEUSDT:
+  first_kline: '2025-11-06 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STARUSDT:
+  first_kline: '2026-05-14 06:00:00+00:00'
+  funding: 386
+  k1: 720
+  k5: 864
+  status: PASS
+STBLUSDT:
+  first_kline: '2025-09-17 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STEEMUSDT:
+  first_kline: '2023-11-08 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STOUSDT:
+  first_kline: '2025-04-12 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STPTUSDT:
+  first_kline: '2023-10-18 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STRAXUSDT:
+  first_kline: '2023-10-11 03:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STRKUSDT:
+  first_kline: '2024-02-20 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+STXUSDT:
+  first_kline: '2023-02-21 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SUIUSDT:
+  first_kline: '2023-05-03 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SUNUSDT:
+  first_kline: '2024-08-22 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SUPERUSDT:
+  first_kline: '2023-11-26 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SUSDT:
+  first_kline: '2025-01-16 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SWARMSUSDT:
+  first_kline: '2025-01-07 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SWELLUSDT:
+  first_kline: '2024-11-08 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SXTUSDT:
+  first_kline: '2025-05-02 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SYNUSDT:
+  first_kline: '2024-08-16 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SYRUPUSDT:
+  first_kline: '2025-05-07 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+SYSUSDT:
+  first_kline: '2024-08-19 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TACUSDT:
+  first_kline: '2025-07-15 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TAGUSDT:
+  first_kline: '2025-07-25 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TAIKOUSDT:
+  first_kline: '2025-06-11 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TAKEUSDT:
+  first_kline: '2025-09-03 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TANSSIUSDT:
+  first_kline: '2025-07-09 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TAOUSDT:
+  first_kline: '2024-04-11 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TAUSDT:
+  first_kline: '2025-07-21 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+THEUSDT:
+  first_kline: '2024-11-27 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TIAUSDT:
+  first_kline: '2023-10-31 18:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TLMUSDT:
+  first_kline: '2023-03-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TNSRUSDT:
+  first_kline: '2024-04-08 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TOKENUSDT:
+  first_kline: '2023-11-03 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TONUSDT:
+  first_kline: '2024-03-01 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TOSHIUSDT:
+  first_kline: '2025-09-17 06:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TOWNSUSDT:
+  first_kline: '2025-08-05 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRADOORUSDT:
+  first_kline: '2025-09-19 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TREEUSDT:
+  first_kline: '2025-07-29 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRIAUSDT:
+  first_kline: '2026-02-06 13:00:00+00:00'
+  funding: 966
+  k1: 720
+  k5: 864
+  status: PASS
+TROYUSDT:
+  first_kline: '2024-10-31 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRUMPUSDT:
+  first_kline: '2025-01-18 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRUSTUSDT:
+  first_kline: '2025-11-05 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRUTHUSDT:
+  first_kline: '2025-10-01 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TRUUSDT:
+  first_kline: '2023-03-07 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TSTUSDT:
+  first_kline: '2025-02-09 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TURBOUSDT:
+  first_kline: '2024-05-30 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TURTLEUSDT:
+  first_kline: '2025-10-22 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TUSDT:
+  first_kline: '2023-02-01 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TUTUSDT:
+  first_kline: '2025-03-20 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+TWTUSDT:
+  first_kline: '2023-11-03 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+UAIUSDT:
+  first_kline: '2025-11-06 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+UBUSDT:
+  first_kline: '2025-09-12 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+UMAUSDT:
+  first_kline: '2023-05-10 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+USDCUSDT:
+  first_kline: '2023-03-12 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+USELESSUSDT:
+  first_kline: '2025-08-15 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+USTCUSDT:
+  first_kline: '2023-11-27 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+USUALUSDT:
+  first_kline: '2024-12-18 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+USUSDT:
+  first_kline: '2025-12-12 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+UXLINKUSDT:
+  first_kline: '2024-09-15 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VANAUSDT:
+  first_kline: '2024-12-16 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VANRYUSDT:
+  first_kline: '2024-03-13 18:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VELODROMEUSDT:
+  first_kline: '2024-12-13 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VELVETUSDT:
+  first_kline: '2025-07-15 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VFYUSDT:
+  first_kline: '2025-09-30 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VICUSDT:
+  first_kline: '2025-03-12 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VIDTUSDT:
+  first_kline: '2024-08-23 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VINEUSDT:
+  first_kline: '2025-01-24 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VIRTUALUSDT:
+  first_kline: '2024-12-10 13:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VOXELUSDT:
+  first_kline: '2024-08-20 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VTHOUSDT:
+  first_kline: '2025-01-22 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+VVVUSDT:
+  first_kline: '2025-01-29 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WALUSDT:
+  first_kline: '2025-03-27 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WAXPUSDT:
+  first_kline: '2023-10-18 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WCTUSDT:
+  first_kline: '2025-04-15 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WETUSDT:
+  first_kline: '2025-12-10 07:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WIFUSDT:
+  first_kline: '2024-01-18 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WLDUSDT:
+  first_kline: '2023-07-24 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WLFIUSDT:
+  first_kline: '2025-08-23 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+WUSDT:
+  first_kline: '2024-04-03 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XAIUSDT:
+  first_kline: '2024-01-09 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XANUSDT:
+  first_kline: '2025-09-29 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XAUTUSDT:
+  first_kline: '2026-03-26 14:00:00+00:00'
+  funding: 678
+  k1: 720
+  k5: 864
+  status: PASS
+XCNUSDT:
+  first_kline: '2025-04-11 16:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XNYUSDT:
+  first_kline: '2025-08-13 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XPINUSDT:
+  first_kline: '2025-09-12 08:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XPLUSDT:
+  first_kline: '2025-08-22 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XVGUSDT:
+  first_kline: '2023-07-05 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+XVSUSDT:
+  first_kline: '2023-04-13 02:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+YALAUSDT:
+  first_kline: '2025-08-07 17:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+YBUSDT:
+  first_kline: '2025-10-10 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+YGGUSDT:
+  first_kline: '2023-08-05 04:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZAMAUSDT:
+  first_kline: '2026-01-09 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZBTUSDT:
+  first_kline: '2025-10-17 12:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZEREBROUSDT:
+  first_kline: '2025-01-02 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZESTUSDT:
+  first_kline: '2026-06-04 14:00:00+00:00'
+  funding: 258
+  k1: 720
+  k5: 864
+  status: PASS
+ZETAUSDT:
+  first_kline: '2024-02-02 09:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZKCUSDT:
+  first_kline: '2025-09-15 14:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZKJUSDT:
+  first_kline: '2025-05-13 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZKPUSDT:
+  first_kline: '2025-12-21 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZKUSDT:
+  first_kline: '2024-06-17 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZORAUSDT:
+  first_kline: '2025-07-25 11:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZRCUSDT:
+  first_kline: '2025-07-29 10:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+ZROUSDT:
+  first_kline: '2024-06-20 15:00:00+00:00'
+  funding: 1000
+  k1: 720
+  k5: 864
+  status: PASS
+_meta:
+  missing_delisted: 2
+  n_targets: 522
+  start: '2023-01-01'
+币安人生USDT:
+  error: '''ascii'' codec can''t encode characters in position 27-30: ordinal not
+    in range(128)'
+  status: MISSING_DATA
+我踏马来了USDT:
+  error: '''ascii'' codec can''t encode characters in position 27-31: ordinal not
+    in range(128)'
+  status: MISSING_DATA
+龙虾USDT:
+  error: '''ascii'' codec can''t encode characters in position 27-28: ordinal not
+    in range(128)'
+  status: MISSING_DATA
