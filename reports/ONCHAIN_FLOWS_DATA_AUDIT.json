@@ -1,0 +1,18 @@
+{
+  "test": "ONCHAIN_FLOWS_DATA_AUDIT",
+  "date": "2026-07-17",
+  "verdict": "NOT_TESTABLE_DATA_MISSING",
+  "audit": {
+    "whale_data.whale_transactions": "EMPTY (0 docs)",
+    "trader.whale_transactions": "EMPTY (0 docs)",
+    "cex_flow_parquet": "aucun dans data/",
+    "scrapers": "fetch_whale_onchain.pyc present mais jamais execute en production"
+  },
+  "backfill_gratuit_possible": false,
+  "raison": "Flux exchange historiques = payant (CryptoQuant/Glassnode/CoinMetrics pro) ; Etherscan ne permet pas de reconstruire les flux USDT vers hot wallets a cette echelle (pagination 10k)",
+  "options": [
+    "A: collecteur live (Whale Alert free tier + etiquetage adresses CEX via Etherscan) -> reevaluation a 60-90 j comme top_traders",
+    "B: DROP de la piste"
+  ],
+  "reference": "arXiv:2411.06327 : USDT->CEX predit + BTC/ETH 1-6h ; ETH->CEX predit - ; BTC->CEX = vol seulement"
+}
