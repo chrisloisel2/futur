@@ -61,6 +61,9 @@ class MultiLegConfig:
     enable_asset_edge_gate: bool = False
     asset_edge_min_net: float = 0.0      # PnL net moyen/signal requis sur les folds précédents
     asset_edge_min_signals: int = 20     # échantillon prior minimal (sinon non tradable)
+    # gate âge de listing : aucun long < N jours après onboardDate (event study 518 listings)
+    enable_listing_age_gate: bool = False
+    listing_min_age_days: int = 30
     # toggles d'ablation
     enable_long: bool = True
     enable_carry: bool = False
@@ -178,6 +181,11 @@ class MultiLegBacktester:
             edge_gate = AssetEdgeGate(min_net=cfg.asset_edge_min_net,
                                       min_signals=cfg.asset_edge_min_signals).fit(
                 flat, prices, cfg.long_roundtrip)
+        # Listing Age Gate : aucun long sur un perp < N jours (drift négatif prouvé J+0→J+30)
+        listing_gate = None
+        if cfg.enable_listing_age_gate:
+            from src.institutional.portfolio.listing_age_gate import ListingAgeGate
+            listing_gate = ListingAgeGate(min_age_days=cfg.listing_min_age_days)
         carry_gate = None
         carry_size_gate = None
         if cfg.carry_gate_v2 or cfg.carry_gate_v2_size_only:
@@ -465,6 +473,9 @@ class MultiLegBacktester:
                 if a in cooldown and t < cooldown[a]:
                     continue
                 if any(p.is_open and p.position_type == "DIRECTIONAL_LONG" and p.asset == a for p in positions):
+                    continue
+                # listing age gate : jamais long un perp trop jeune (onboardDate, point-in-time)
+                if listing_gate is not None and not listing_gate.allows(a, t):
                     continue
                 # asset edge gate (causal) : alt non tradable tant qu'il n'a pas prouvé un edge net>0
                 if edge_gate is not None and not edge_gate.allows(a, t):
