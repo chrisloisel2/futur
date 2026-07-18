@@ -56,11 +56,16 @@ de suppositions).
   vraisemblablement du funding/momentum déguisé, pas un edge autonome. NO_EDGE à 1h ;
   le moteur fin exige tick multi-venue (S3 requester-pays ou collecteur live).
 
-### Options positioning — data OK, signal à tester
+### Options positioning — NO_EDGE directionnel v0 (`reports/OPTIONS_POSITIONING_SIGNAL_SCAN.md`)
 
-Backfill trades BTC 2023→2026 en cours ; features journalières validées (skew tradé,
-P/C ratio, flows signés, concentration strikes, blocs). Prochain test : d_skew / d_pc /
-top_strike_share → retours forward BTC, corrélation PnL vs stack existant.
+Backfill complet : **16,1 M de trades BTC 2023-01→2026-07** (43 mois, 575 Mo), features
+journalières sur 1294 jours (skew tradé, P/C, flows signés, concentration strikes, blocs).
+Scan causal (z-roll 90 j, délais 0/+24 h, fwd 1/3/7 j) : **0/54 tests sous p<0.002** ;
+le meilleur (skew level, +24 h, 7 j : IC 0.083, p 3.3e-3) = attendu par hasard sur 54 tests.
+Volet filtre : |stress| > 2σ → vol 7 j 47 % vs 42 % et retours PLUS hauts — pas de filtre
+de risque utile. **Verdict honnête : NO_EDGE avec les agrégats journaliers v0 sur BTC.**
+Pistes restantes (= variantes, pas de nouveaux edges) : skew par ténor/delta, 4h intraday,
+ETH, conditionnement expiries — à ne tenter que si une thèse précise le justifie.
 
 ## Décisions / gaps honnêtes
 

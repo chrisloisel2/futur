@@ -68,20 +68,22 @@ def main() -> None:
     if not files:
         print("Aucun trade backfillé — lancer backfill_deribit_option_trades.py d'abord.")
         return
-    parts = []
+    # incrémental par fichier mensuel (les jours ne chevauchent jamais deux mois)
+    parts, n_trades = [], 0
     for f in files:
         df = pd.read_parquet(f)
         df = df[df["iv"].notna() & (df["index_price"] > 0)]
         df["day"] = df["ts"].dt.floor("D")
-        parts.append(df)
-    allt = pd.concat(parts, ignore_index=True)
-    feats = allt.groupby("day").apply(day_features).reset_index()
+        n_trades += len(df)
+        parts.append(df.groupby("day").apply(day_features))
+    feats = pd.concat(parts).sort_index()
+    feats = feats[~feats.index.duplicated(keep="last")].reset_index()
     # deltas causaux (jour vs jour-1) — le signal est dans la VARIATION du positionnement
     for c in ["atm_iv_traded", "skew_25ish", "pc_volume_ratio", "top_strike_share"]:
         feats[f"d_{c}"] = feats[c].diff()
     atomic_write_parquet(feats, OUT / f"{args.currency}_daily.parquet")
     print(f"{len(feats)} jours ({feats['day'].min().date()} → {feats['day'].max().date()}) "
-          f"depuis {allt['trade_id'].nunique():,} trades → "
+          f"depuis {n_trades:,} trades → "
           f"{(OUT / (args.currency + '_daily.parquet')).relative_to(ROOT)}")
     print(feats.tail(5)[["day", "atm_iv_traded", "skew_25ish", "pc_volume_ratio",
                          "top_strike_share", "n_trades"]].to_string(index=False))
