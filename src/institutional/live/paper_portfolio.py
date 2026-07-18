@@ -24,11 +24,17 @@ Honnêteté (v2 — comptabilité RÉALISÉE, plus aucun P&L recalculé rétroac
 from __future__ import annotations
 
 import json
+import threading
 import urllib.request
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
+
+# Sérialise lecture→décision→écriture du mark : le poll PWA (2,5 s) et le
+# timer 15 min frappent le même process — sans ce lock, deux marks concurrents
+# peuvent rejouer le même rebalance ou s'écraser (observé 2026-07-18 10:15:50/52).
+_MARK_LOCK = threading.Lock()
 
 CAPITAL_EUR = 200_000.0
 BORROW_ANN = 0.08          # coût d'emprunt sur le spot levé au-delà du cash
@@ -434,6 +440,17 @@ class PaperPortfolio:
         return doc
 
     # ── rebalance adaptatif toutes les 8 h ───────────────────────────────────
+    def _claim_rebalance(self, now_ms: int) -> bool:
+        """Garde ATOMIQUE de la fenêtre de rebalance : un seul appelant
+        (thread ou processus) peut avancer next_rebalance_ms ; les autres
+        voient le filtre échouer et sautent le rebalance."""
+        if self.col is None:
+            return True
+        prev = self.col.find_one_and_update(
+            {"_id": "main", "next_rebalance_ms": {"$lte": now_ms}},
+            {"$set": {"next_rebalance_ms": now_ms + REBALANCE_S * 1000}})
+        return prev is not None
+
     def _rebalance_adaptive(self, doc: Dict, led: Dict, px: Dict[str, float],
                             eq_usdt: float, regime: str, now_ms: int) -> None:
         carry_w, basis_w, longs_w, note, qmeta = self._adaptive_targets(regime, px)
@@ -633,17 +650,24 @@ class PaperPortfolio:
                    + led["longs_realized"] + led["fees"] + longs_unreal)
         if (doc.get("preset") == "adaptive"
                 and now_ms >= int(doc.get("next_rebalance_ms", 0))):
-            self._rebalance_adaptive(doc, led, px, eq_usdt, regime, now_ms)
-            doc["next_rebalance_ms"] = now_ms + REBALANCE_S * 1000
-            self._notify("info", "⚖ Rebalance adaptatif (8h)",
-                         " · ".join(f"{k}: {v}" for k, v in
-                                    (doc.get("alloc_note") or {}).items())[:400])
-            longs_unreal = sum(
-                l["notional"] * (px[l["symbol"]] / l["entry"] - 1)
-                for l in doc["longs"] if l.get("active") and px.get(l["symbol"]))
-            eq_usdt = (doc["capital_eur"] * fx + led["carry_accrued"]
-                       + led["basis_accrued"] + led["borrow_accrued"]
-                       + led["longs_realized"] + led["fees"] + longs_unreal)
+            if self._claim_rebalance(now_ms):
+                self._rebalance_adaptive(doc, led, px, eq_usdt, regime, now_ms)
+                doc["next_rebalance_ms"] = now_ms + REBALANCE_S * 1000
+                self._notify("info", "⚖ Rebalance adaptatif (8h)",
+                             " · ".join(f"{k}: {v}" for k, v in
+                                        (doc.get("alloc_note") or {}).items())[:400])
+                longs_unreal = sum(
+                    l["notional"] * (px[l["symbol"]] / l["entry"] - 1)
+                    for l in doc["longs"] if l.get("active") and px.get(l["symbol"]))
+                eq_usdt = (doc["capital_eur"] * fx + led["carry_accrued"]
+                           + led["basis_accrued"] + led["borrow_accrued"]
+                           + led["longs_realized"] + led["fees"] + longs_unreal)
+            else:
+                # fenêtre déjà prise ailleurs : ne pas la réarmer via notre
+                # replace_one plein-doc plus bas
+                cur = self.get() or {}
+                doc["next_rebalance_ms"] = int(cur.get(
+                    "next_rebalance_ms", now_ms + REBALANCE_S * 1000))
 
         led["last_mark"] = now.isoformat()
         pnl_usdt = eq_usdt - doc["capital_eur"] * fx
@@ -715,6 +739,13 @@ class PaperPortfolio:
 
     # ── marquage au marché (live) ────────────────────────────────────────────
     def mark_to_market(self) -> Dict:
+        """Lecture→décision→écriture sous _MARK_LOCK : deux appels concurrents
+        (poll 2,5 s + timer) sont sérialisés, le second voit l'état écrit par
+        le premier."""
+        with _MARK_LOCK:
+            return self._mark_unlocked()
+
+    def _mark_unlocked(self) -> Dict:
         doc = self.get()
         if doc is None:
             return {"exists": False}
