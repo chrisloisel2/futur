@@ -67,6 +67,23 @@ de risque utile. **Verdict honnête : NO_EDGE avec les agrégats journaliers v0 
 Pistes restantes (= variantes, pas de nouveaux edges) : skew par ténor/delta, 4h intraday,
 ETH, conditionnement expiries — à ne tenter que si une thèse précise le justifie.
 
+## Décisions utilisateur 2026-07-18 — état d'exécution
+
+1. **Listing** : J+22→J+30 mesuré (n=512, médiane nette −285 bps, 4 cohortes négatives)
+   → filtre 30 j prouvé de bout en bout, `ListingAgeGate` branché dans le multileg
+   backtester (`enable_listing_age_gate`, défaut OFF — l'activer dans les configs
+   candidates exige un run frontière mesuré). Commit 731ba53.
+2. **Options** : protocole 4h pré-enregistré (1d06580) exécuté UNE fois → 0/24 cellules,
+   **NO_EDGE_DEFINITIF** (684f497). Classement final, aucune variante future.
+3. **CEX-DEX** : achat tick plafonné accepté ; `fetch_hyperliquid_tick_archive.py` prêt
+   (estimation + plafond dur + reprise). **Bloqué : credentials AWS locaux invalides**
+   (`aws sts get-caller-identity` → InvalidClientTokenId). Le 1h est définitivement rejeté.
+4. **Unlocks** : pas d'achat DefiLlama pour l'instant — piste gelée.
+5. **Priorité alpha suivante** : ⚠ l'accélération fees/revenus est DÉJÀ NO_EDGE
+   (eef8646, 19 protocoles, 228 semaines, 4 variantes) — ne pas re-tester. Reste
+   réellement ouvert : composantes non testées (TVL qualité, users, dev, dilution)
+   et **stablecoin liquidity/régime** (data gratuite confirmée, jamais testé).
+
 ## Décisions / gaps honnêtes
 
 - **Unlocks** : la seule source structurée gratuite connue (DefiLlama) est paywallée.
