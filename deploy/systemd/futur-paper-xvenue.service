@@ -1,0 +1,10 @@
+[Unit]
+Description=Paper-live FUNDING_XVENUE v0 (sleeve separe, regle gelee du protocole, stores publics Binance+HL)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_paper_xvenue_v0.py
+StandardOutput=append:/home/qbee/futur/reports/paper_xvenue.log
+StandardError=append:/home/qbee/futur/reports/paper_xvenue.log
+TimeoutStartSec=600

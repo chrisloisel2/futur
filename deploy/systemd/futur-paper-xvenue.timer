@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer horaire paper FUNDING_XVENUE (decision aux settlements 8h, store rafraichi chaque heure)
+
+[Timer]
+OnCalendar=*-*-* *:07:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer quotidien paper MH (07:40 UTC, apres le shadow quotidien)
+
+[Timer]
+OnCalendar=*-*-* 07:40:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

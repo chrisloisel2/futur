@@ -1,0 +1,10 @@
+[Unit]
+Description=Paper-live stack MH (sleeve separe en lecture seule sur le ledger shadow, qui reste le deverrouilleur J+30)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_paper_mh_events.py
+StandardOutput=append:/home/qbee/futur/reports/paper_mh.log
+StandardError=append:/home/qbee/futur/reports/paper_mh.log
+TimeoutStartSec=600
