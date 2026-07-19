@@ -1,8 +1,8 @@
 [Unit]
-Description=Timer quotidien paper MH (07:40 UTC, apres le shadow quotidien)
+Description=Timer quotidien paper MH (09:40 heure machine, 70 min apres le shadow de 08:30)
 
 [Timer]
-OnCalendar=*-*-* 07:40:00
+OnCalendar=*-*-* 09:40:00
 Persistent=true
 
 [Install]
