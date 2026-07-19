@@ -16,6 +16,14 @@ Honnêteté (v2 — comptabilité RÉALISÉE, plus aucun P&L recalculé rétroac
   • preset adaptive : RE-ALLOCATION toutes les 8 h (pas du funding) selon les
     yields LIVE vs borrow ; resize seulement si dérive > 2 % d'equity
     (anti-churn — leçon exit-engine/CARRY_GATE_V2 : le churn est un impôt) ;
+  • règle NET (2026-07-19, pré-enregistrée) : une jambe ne S'OUVRE que si son
+    yield NET — brut moins coûts d'aller-retour amortis sur la détention visée
+    (30 j) moins borrow sur la part levée — dépasse la marge de sécurité ;
+    une jambe DÉJÀ ouverte est GARDÉE tant que son brut reste > 0 (hystérésis)
+    et ne peut être coupée/réduite avant 72 h (min-hold, sauf yield toxique).
+    Le doc trace en continu le CONTREFACTUEL de l'ancienne règle (churn_guard :
+    frais, accruals et borrow qu'elle aurait générés) — c'est la mesure LIVE
+    de la différence entre les deux règles ;
   • historique d'équité COMPRESSÉ (30 s récent / 1 h ≤ 30 j / 1 j au-delà),
     jamais tronqué aveuglément.
 
@@ -42,6 +50,16 @@ MAKER_FEE = 0.0002         # par jambe, post-only (jambes Δ-neutres)
 TAKER_FEE = 0.0005         # jambe directionnelle (flips de gate)
 YIELD_FLOOR = 0.01         # sleeve mort sous 1 %/an
 DRIFT_MIN = 0.02           # anti-churn : resize si |Δ| > 2 % de l'equity
+# ── règle NET 2026-07-19 (anti-churn structurel, pré-enregistrée) ────────────
+MIN_HOLD_S = 72 * 3600     # coupe/réduction interdite avant 72 h : garder le
+                           # borrow 72 h coûte au plus ~6,6 bps là où l'aller-
+                           # retour coupe+réouverture coûte 8 bps
+HOLD_AMORT_D = 30          # amortissement des coûts d'A/R du score net sur la
+                           # détention minimale VISÉE (30 j), pas sur 72 h
+COST_RT = 4 * MAKER_FEE    # aller-retour Δ-neutre complet (2 jambes × 2)
+NET_MARGIN = 0.01          # marge de sécurité du score net (1 %/an)
+HARD_EXIT_ANN = -BORROW_ANN  # sous ce yield le min-hold saute (sleeve toxique)
+GUARD_EVENTS_CAP = 120     # rétention du journal contrefactuel churn_guard
 REBALANCE_S = 8 * 3600     # au pas du funding (00/08/16 UTC)
 MA_TTL_S = 6 * 3600        # rafraîchissement du seuil trend MA20
 FUNDING_8H_MS = 8 * 3600 * 1000
@@ -283,10 +301,58 @@ class PaperPortfolio:
         return {s: inv.get(s, 0) / tot for s in symbols}
 
     # ── allocation adaptative (partagée init + rebalance 8 h) ────────────────
-    def _adaptive_targets(self, regime: str, px: Dict[str, float]):
-        """Poids cibles par yield LIVE décroissant : budget spot ≤ 1×E sans
-        borrow, levier accordé SEULEMENT si yield > borrow + 2 %, plancher
-        1 %/an. Longs par régime (BULL 40 % / RECOVERY 25 % / sinon 0)."""
+    def _alloc_from_yields(self, yields: Dict, budget_free: float,
+                           held: Dict, legacy: bool = False):
+        """Répartit le budget Δ-neutre par yield décroissant.
+        legacy=False — règle NET 2026-07-19 : OUVRIR exige yield net (brut −
+        coûts A/R amortis sur HOLD_AMORT_D) > NET_MARGIN, levier d'ouverture
+        si net > borrow + marge ; GARDER (sleeve dans `held`) exige seulement
+        brut > 0, levier gardé si brut > borrow (hystérésis : couper coûte
+        l'aller-retour, on ne l'exige donc pas pour rester).
+        legacy=True — ancienne règle (plancher brut 1 %, levier si brut >
+        borrow + 2 %), conservée UNIQUEMENT pour le contrefactuel churn_guard."""
+        cost_ann = COST_RT * 365 / HOLD_AMORT_D
+        carry_w, basis_w, note = {}, {}, {}
+        for (kind, s), y in sorted(yields.items(), key=lambda kv: -kv[1]):
+            cap_w = SLEEVE_CAPS[(kind, s)]
+            key = f"{kind}_{s}"
+            if legacy:
+                if y <= YIELD_FLOOR:
+                    note[key] = f"{y*100:+.1f}%/an < plancher 1% → 0"
+                    continue
+                lever_need = BORROW_ANN + 0.02
+            elif (kind, s) in held:
+                if y <= 0.0:
+                    note[key] = f"{y*100:+.1f}%/an brut ≤ 0 → coupe (hystérésis)"
+                    continue
+                lever_need = BORROW_ANN
+            else:
+                if y - cost_ann <= NET_MARGIN:
+                    note[key] = (f"{y*100:+.1f}%/an brut, net "
+                                 f"{(y - cost_ann)*100:+.1f}% ≤ marge "
+                                 f"{NET_MARGIN*100:.0f}% → reste dormant")
+                    continue
+                lever_need = BORROW_ANN + cost_ann + NET_MARGIN
+            unlev = min(cap_w, budget_free)
+            lever = cap_w - unlev
+            lever_ok = y > lever_need
+            w = unlev + (lever if lever_ok else 0.0)
+            budget_free -= unlev
+            if w > 0:
+                (carry_w if kind == "carry" else basis_w)[s] = round(w, 4)
+            note[key] = (
+                f"{y*100:+.1f}%/an → {w:.2f}E"
+                + ("" if (lever <= 0 or lever_ok)
+                   else f" (levier {lever:.2f}E refusé : yield < "
+                        f"{lever_need*100:.1f}%)"))
+        return carry_w, basis_w, note
+
+    def _adaptive_targets(self, regime: str, px: Dict[str, float],
+                          held: Optional[Dict] = None):
+        """Poids cibles : budget spot ≤ 1×E sans borrow, gates de la règle NET
+        (voir _alloc_from_yields). Longs par régime (BULL 40 % / RECOVERY 25 %
+        / sinon 0). `held` = sleeves carry/basis actuellement ouverts
+        {(kind, sym): opened_ms} — active l'hystérésis garder/ouvrir."""
         yields, qmeta = {}, {}
         for s in ("BTCUSDT", "ETHUSDT"):
             f = live_funding(s)
@@ -300,24 +366,9 @@ class PaperPortfolio:
         longs_w = {s: round(long_total * w, 4)
                    for s, w in self._inverse_vol_weights(LONG_BASKET).items()}
         budget_free = max(1.0 - long_total, 0.0)
-        carry_w, basis_w, note = {}, {}, {}
-        for (kind, s), y in sorted(yields.items(), key=lambda kv: -kv[1]):
-            cap_w = SLEEVE_CAPS[(kind, s)]
-            if y <= YIELD_FLOOR:
-                note[f"{kind}_{s}"] = f"{y*100:+.1f}%/an < plancher 1% → 0"
-                continue
-            unlev = min(cap_w, budget_free)
-            lever = cap_w - unlev
-            lever_ok = y > BORROW_ANN + 0.02
-            w = unlev + (lever if lever_ok else 0.0)
-            budget_free -= unlev
-            if w > 0:
-                (carry_w if kind == "carry" else basis_w)[s] = round(w, 4)
-            note[f"{kind}_{s}"] = (
-                f"{y*100:+.1f}%/an → {w:.2f}E"
-                + ("" if (lever <= 0 or lever_ok)
-                   else f" (levier {lever:.2f}E refusé : yield < borrow+2%)"))
-        return carry_w, basis_w, longs_w, note, qmeta
+        carry_w, basis_w, note = self._alloc_from_yields(
+            yields, budget_free, held or {})
+        return carry_w, basis_w, longs_w, note, qmeta, yields
 
     # ── STRATÉGIE VALIDÉE : carry Δ-neutre + basis Δ-neutre + longs gatés ─────
     def initialize_strategy(self, aggressive: bool = False,
@@ -338,7 +389,7 @@ class PaperPortfolio:
         regime0 = btc_regime()
         px = live_prices(list(set(["BTCUSDT", "ETHUSDT"] + LONG_BASKET)))
         if preset == "adaptive":
-            CARRY, BASIS, LONGS, alloc_note, qmeta = self._adaptive_targets(regime0, px)
+            CARRY, BASIS, LONGS, alloc_note, qmeta, _ = self._adaptive_targets(regime0, px)
         elif preset == "max":
             CARRY = {"BTCUSDT": 0.40, "ETHUSDT": 0.35}   # ~1.5× equity spot (Δ-neutre)
             BASIS = {"BTCUSDT": 0.28, "ETHUSDT": 0.22}   # ~1.0× equity (Δ-neutre)
@@ -363,7 +414,8 @@ class PaperPortfolio:
             f = live_funding(s)
             if px.get(s) and f is not None and w > 0:
                 carry.append({"symbol": s, "notional": cap * w, "spot_entry": px[s],
-                              "funding_rate": f, "funding_paid_until": now_ms})
+                              "funding_rate": f, "funding_paid_until": now_ms,
+                              "opened_ms": now_ms})
                 led["fees"] -= cap * w * MAKER_FEE * 2
         for s, w in BASIS.items():
             m = qmeta.get(s)
@@ -374,7 +426,8 @@ class PaperPortfolio:
             if px.get(s) and q and days and w > 0:
                 basis.append({"symbol": s, "notional": cap * w, "spot_entry": px[s],
                               "q_entry": q, "days_to_expiry": days, "q_symbol": qsym,
-                              "basis_entry": q / px[s] - 1, "accrued_frac": 0.0})
+                              "basis_entry": q / px[s] - 1, "accrued_frac": 0.0,
+                              "opened_ms": now_ms})
                 led["fees"] -= cap * w * MAKER_FEE * 2
         for s, w in LONGS.items():
             if px.get(s) and w > 0:
@@ -451,10 +504,126 @@ class PaperPortfolio:
             {"$set": {"next_rebalance_ms": now_ms + REBALANCE_S * 1000}})
         return prev is not None
 
+    def _min_hold_veto(self, kind: str, sym: str, pos: Dict,
+                       yields: Dict, now_ms: int) -> bool:
+        """True si le min-hold interdit de couper/réduire ce sleeve : ouvert
+        depuis < 72 h et yield pas toxique (> -borrow). Économie : garder le
+        gross 72 h coûte au plus ~6,6 bps de borrow là où couper puis rouvrir
+        coûte 8 bps d'aller-retour."""
+        age_ms = now_ms - int(pos.get("opened_ms", 0))
+        if age_ms >= MIN_HOLD_S * 1000:
+            return False
+        y = yields.get((kind, sym))
+        return y is None or y > HARD_EXIT_ANN
+
+    def _guard_accrue(self, doc: Dict, yields: Dict, eq_usdt: float,
+                      cap_usdt: float, regime: str, now_ms: int) -> Dict:
+        """CONTREFACTUEL de l'ancienne règle (churn_guard) — la mesure live de
+        « la différence ». Un état shadow suit les notionals que l'ancienne
+        règle détiendrait ; on cumule séparément ses frais, le différentiel
+        d'accrual (approximé aux yields courants de la fenêtre) et le
+        différentiel de borrow. Rien ici ne touche le ledger réel."""
+        now_iso = datetime.fromtimestamp(now_ms / 1000, tz=timezone.utc).isoformat()
+        # le shadow démarre SUR les positions réelles : la différence ne
+        # s'accumule qu'à partir de la première divergence de décision
+        shadow0 = {f"carry_{c['symbol']}": c["notional"]
+                   for c in doc.get("carry", []) if c["notional"] > 0}
+        shadow0.update({f"basis_{b['symbol']}": b["notional"]
+                        for b in doc.get("basis", [])
+                        if b["notional"] > 0 and not b.get("delivered")})
+        guard = doc.setdefault("churn_guard", {
+            "since": now_iso, "rule": "net_v1_2026-07-19",
+            "fees_new_usdt": 0.0, "fees_legacy_usdt": 0.0,
+            "rev_diff_usdt": 0.0, "borrow_diff_usdt": 0.0,
+            "shadow": shadow0, "shadow_ms": now_ms, "blocks": 0, "events": []})
+        shadow = guard["shadow"]
+        dt_s = max((now_ms - int(guard["shadow_ms"])) / 1000.0, 0.0)
+        real = {f"carry_{c['symbol']}": c["notional"] for c in doc.get("carry", [])}
+        real.update({f"basis_{b['symbol']}": b["notional"]
+                     for b in doc.get("basis", []) if not b.get("delivered")})
+        if dt_s > 0:
+            for (kind, s), y in yields.items():
+                key = f"{kind}_{s}"
+                guard["rev_diff_usdt"] += ((real.get(key, 0.0) - shadow.get(key, 0.0))
+                                           * y * dt_s / (365 * 86400))
+            longs_g = sum(l["notional"] for l in doc.get("longs", [])
+                          if l.get("active"))
+            exc_real = max(sum(real.values()) + longs_g - cap_usdt, 0.0)
+            exc_shadow = max(sum(shadow.values()) + longs_g - cap_usdt, 0.0)
+            guard["borrow_diff_usdt"] += ((exc_real - exc_shadow)
+                                          * BORROW_ANN * dt_s / (365 * 86400))
+        # décisions que l'ancienne règle prendrait CETTE fenêtre (memoryless)
+        budget_free = max(1.0 - {"BULL": 0.40, "RECOVERY": 0.25}.get(regime, 0.0), 0.0)
+        lc, lb, _ = self._alloc_from_yields(yields, budget_free, {}, legacy=True)
+        legacy_tgt = {f"carry_{s}": eq_usdt * w for s, w in lc.items()}
+        legacy_tgt.update({f"basis_{s}": eq_usdt * w for s, w in lb.items()})
+        for key in set(shadow) | set(legacy_tgt):
+            tgt = legacy_tgt.get(key, 0.0)
+            prev = shadow.get(key, 0.0)
+            if abs(tgt - prev) > DRIFT_MIN * eq_usdt:
+                guard["fees_legacy_usdt"] += abs(tgt - prev) * MAKER_FEE * 2
+                if tgt > 0:
+                    shadow[key] = tgt
+                else:
+                    shadow.pop(key, None)
+        guard["shadow_ms"] = now_ms
+        return guard
+
+    def _guard_block(self, guard: Dict, kind: str, sym: str, kept: float,
+                     tgt: float, y: Optional[float], now_ms: int, fx: float) -> None:
+        """Journalise une coupe/réduction DIFFÉRÉE par le min-hold (les frais
+        ne sont pas « gagnés » tant que la coupe peut encore arriver après
+        72 h — la vraie économie se lit dans fees_legacy vs fees_new)."""
+        guard["blocks"] += 1
+        fee = abs(kept - tgt) * MAKER_FEE * 2
+        guard["events"].append({
+            "ts": datetime.fromtimestamp(now_ms / 1000, tz=timezone.utc).isoformat(),
+            "sleeve": f"{kind}_{sym}", "kept_usdt": round(kept, 2),
+            "target_usdt": round(tgt, 2),
+            "y_ann": None if y is None else round(y, 4),
+            "fee_deferred_usdt": round(fee, 2)})
+        guard["events"] = guard["events"][-GUARD_EVENTS_CAP:]
+        self._notify("info", f"🛡 Min-hold : coupe {kind} "
+                     f"{sym.replace('USDT', '')} différée",
+                     f"Cible {tgt / fx:,.0f} €, position {kept / fx:,.0f} € "
+                     f"conservée (< 72 h) — frais différés ~{fee / fx:,.0f} €")
+
+    def _guard_summary(self, doc: Dict, fx: float) -> Optional[Dict]:
+        """Résumé € du contrefactuel pour l'API/PWA. edge > 0 = la règle NET
+        fait mieux que l'ancienne (frais évités + accrual gardé − borrow subi)."""
+        g = doc.get("churn_guard")
+        if not g:
+            return None
+        edge = (g["fees_legacy_usdt"] - g["fees_new_usdt"]
+                + g["rev_diff_usdt"] - g["borrow_diff_usdt"])
+        return {"since": g["since"], "rule": g["rule"], "blocks": g["blocks"],
+                "fees_new_eur": round(g["fees_new_usdt"] / fx, 2),
+                "fees_legacy_eur": round(g["fees_legacy_usdt"] / fx, 2),
+                "rev_diff_eur": round(g["rev_diff_usdt"] / fx, 2),
+                "borrow_diff_eur": round(g["borrow_diff_usdt"] / fx, 2),
+                "edge_vs_legacy_eur": round(edge / fx, 2),
+                "note": "contrefactuel de l'ancienne règle (plancher brut 1%) ; "
+                        "accruals approximés aux yields courants de chaque fenêtre"}
+
     def _rebalance_adaptive(self, doc: Dict, led: Dict, px: Dict[str, float],
-                            eq_usdt: float, regime: str, now_ms: int) -> None:
-        carry_w, basis_w, longs_w, note, qmeta = self._adaptive_targets(regime, px)
-        # CARRY : resize/create/close par yield live (frais maker 2 jambes sur |Δ|)
+                            eq_usdt: float, regime: str, now_ms: int,
+                            fx: float) -> None:
+        created_ms = _iso_ms(doc["created_at"])
+        held = {}
+        for c in doc.get("carry", []):
+            if c["notional"] > 0:
+                c.setdefault("opened_ms", created_ms)
+                held[("carry", c["symbol"])] = int(c["opened_ms"])
+        for b in doc.get("basis", []):
+            if b["notional"] > 0 and not b.get("delivered"):
+                b.setdefault("opened_ms", created_ms)
+                held[("basis", b["symbol"])] = int(b["opened_ms"])
+        carry_w, basis_w, longs_w, note, qmeta, yields = self._adaptive_targets(
+            regime, px, held=held)
+        guard = self._guard_accrue(doc, yields, eq_usdt,
+                                   doc["capital_eur"] * fx, regime, now_ms)
+        fees_new = 0.0
+        # CARRY : resize/create/close par score net (frais maker 2 jambes sur |Δ|)
         old = {c["symbol"]: c for c in doc.get("carry", [])}
         new_carry = []
         for s, w in carry_w.items():
@@ -465,14 +634,31 @@ class PaperPortfolio:
                 if not px.get(s) or f is None:
                     continue
                 c = {"symbol": s, "notional": 0.0, "spot_entry": px[s],
-                     "funding_rate": f, "funding_paid_until": now_ms}
+                     "funding_rate": f, "funding_paid_until": now_ms,
+                     "opened_ms": now_ms}
             if abs(tgt - c["notional"]) > DRIFT_MIN * eq_usdt:
-                led["fees"] -= abs(tgt - c["notional"]) * MAKER_FEE * 2
-                c["notional"] = tgt
+                if (tgt < c["notional"]
+                        and self._min_hold_veto("carry", s, c, yields, now_ms)):
+                    self._guard_block(guard, "carry", s, c["notional"], tgt,
+                                      yields.get(("carry", s)), now_ms, fx)
+                else:
+                    fee = abs(tgt - c["notional"]) * MAKER_FEE * 2
+                    led["fees"] -= fee
+                    fees_new += fee
+                    if c["notional"] <= 0 < tgt:
+                        c["opened_ms"] = now_ms
+                    c["notional"] = tgt
             new_carry.append(c)
-        for s, c in old.items():             # sleeve coupé (yield < plancher)
+        for s, c in old.items():             # cible 0 → coupe totale
             if c["notional"] > 0:
-                led["fees"] -= c["notional"] * MAKER_FEE * 2
+                if self._min_hold_veto("carry", s, c, yields, now_ms):
+                    self._guard_block(guard, "carry", s, c["notional"], 0.0,
+                                      yields.get(("carry", s)), now_ms, fx)
+                    new_carry.append(c)      # conservé malgré la cible 0
+                else:
+                    fee = c["notional"] * MAKER_FEE * 2
+                    led["fees"] -= fee
+                    fees_new += fee
         doc["carry"] = new_carry
         # BASIS : resize/create/close (le P&L de convergence est déjà accrué)
         old = {b["symbol"]: b for b in doc.get("basis", [])}
@@ -487,15 +673,32 @@ class PaperPortfolio:
                 b = {"symbol": s, "notional": 0.0, "spot_entry": px[s],
                      "q_entry": m["q"], "days_to_expiry": m["days"],
                      "q_symbol": m["qsym"], "basis_entry": m["q"] / px[s] - 1,
-                     "accrued_frac": 0.0}
+                     "accrued_frac": 0.0, "opened_ms": now_ms}
             if abs(tgt - b["notional"]) > DRIFT_MIN * eq_usdt:
-                led["fees"] -= abs(tgt - b["notional"]) * MAKER_FEE * 2
-                b["notional"] = tgt
+                if (tgt < b["notional"]
+                        and self._min_hold_veto("basis", s, b, yields, now_ms)):
+                    self._guard_block(guard, "basis", s, b["notional"], tgt,
+                                      yields.get(("basis", s)), now_ms, fx)
+                else:
+                    fee = abs(tgt - b["notional"]) * MAKER_FEE * 2
+                    led["fees"] -= fee
+                    fees_new += fee
+                    if b["notional"] <= 0 < tgt:
+                        b["opened_ms"] = now_ms
+                    b["notional"] = tgt
             new_basis.append(b)
         for s, b in old.items():
             if b["notional"] > 0 and not b.get("delivered"):
-                led["fees"] -= b["notional"] * MAKER_FEE * 2
+                if self._min_hold_veto("basis", s, b, yields, now_ms):
+                    self._guard_block(guard, "basis", s, b["notional"], 0.0,
+                                      yields.get(("basis", s)), now_ms, fx)
+                    new_basis.append(b)
+                else:
+                    fee = b["notional"] * MAKER_FEE * 2
+                    led["fees"] -= fee
+                    fees_new += fee
         doc["basis"] = new_basis
+        guard["fees_new_usdt"] += fees_new
         # LONGS : nouvelles cibles inverse-vol × régime ; resize d'une position
         # ACTIVE = réalisation partielle au prix courant (entry rebasé)
         by_sym = {l["symbol"]: l for l in doc.get("longs", [])}
@@ -651,7 +854,7 @@ class PaperPortfolio:
         if (doc.get("preset") == "adaptive"
                 and now_ms >= int(doc.get("next_rebalance_ms", 0))):
             if self._claim_rebalance(now_ms):
-                self._rebalance_adaptive(doc, led, px, eq_usdt, regime, now_ms)
+                self._rebalance_adaptive(doc, led, px, eq_usdt, regime, now_ms, fx)
                 doc["next_rebalance_ms"] = now_ms + REBALANCE_S * 1000
                 self._notify("info", "⚖ Rebalance adaptatif (8h)",
                              " · ".join(f"{k}: {v}" for k, v in
@@ -727,11 +930,13 @@ class PaperPortfolio:
             "policy": {
                 "max": "FULL-STACK +21.8% backtest → ~18-19%/an honnête après borrow · ~5× gross",
                 "aggressive": "AGRESSIVE 40% directionnel + cœur Δ-neutre · ~+10%/an cible, DD ~-13%",
-                "adaptive": "ADAPTATIF — re-alloué toutes les 8h par yield LIVE vs borrow · "
+                "adaptive": "ADAPTATIF — re-alloué toutes les 8h par SCORE NET (yield − coûts A/R "
+                            "amortis − borrow) · hystérésis garder si brut > 0 · min-hold 72h · "
                             "comptabilité v2 : funding réel encaissé, P&L réalisé aux flips, "
-                            "frais déclarés, anti-churn 2%",
+                            "frais déclarés, anti-churn 2% · contrefactuel churn_guard",
             }.get(doc.get("preset"), "stratégie validée V1.2 (carry+basis Δ-neutre + longs gatés)"),
             "alloc_note": doc.get("alloc_note"),
+            "churn_guard": self._guard_summary(doc, fx),
             "gross_leverage": round(gross_spot / (doc["capital_eur"] * fx), 2),
             "accounting": "v2_realized",
             "ts": now.isoformat(),
