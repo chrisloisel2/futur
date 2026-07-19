@@ -80,8 +80,10 @@ def allocate(book: pd.DataFrame, capital: float) -> pd.DataFrame:
             taken.append(False)
         close_at.append(end)
     book = book.copy()
-    book["taken"] = taken
-    book["close_at"] = close_at
+    # dtype bool explicite : une colonne vide object serait lue comme sélection
+    # de labels (pas comme masque) par les vieux pandas
+    book["taken"] = pd.Series(taken, index=book.index, dtype=bool)
+    book["close_at"] = pd.Series(close_at, index=book.index)
     book["notional"] = np.where(book["taken"], notional, 0.0)
     lab = pd.to_numeric(book["net_labeled"], errors="coerce")
     book["pnl"] = np.where(book["taken"] & np.isfinite(lab),
@@ -127,10 +129,11 @@ def run_once(args) -> dict:
           if len(net) else None)
 
     book.to_parquet(OUT / "ledger.parquet", index=False)
+    taken_df = book[book["taken"]] if len(book) else book
     per_engine = {
         eng: {"n": int(len(g)), "labeled": int(np.isfinite(g["pnl"]).sum()),
               "pnl": round(float(g["pnl"].sum(skipna=True)), 2)}
-        for eng, g in book[book["taken"]].groupby("engine")}
+        for eng, g in (taken_df.groupby("engine") if len(taken_df) else ())}
     state.update({
         "status": "active",
         "equity": round(args.capital + pnl_total, 2),

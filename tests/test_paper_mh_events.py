@@ -82,6 +82,25 @@ def test_conservation_and_pending(tmp_path, monkeypatch):
     assert np.isnan(out[out["symbol"] == "SOLUSDT"]["pnl"].iloc[0])
 
 
+def test_old_format_ledger_all_filtered(tmp_path, monkeypatch):
+    """Régression 2026-07-19 : ledger réel pré-MH (sans colonne tier, horizon
+    fwd_4h) → book vide ; le masque taken doit rester bool, pas object."""
+    led = pd.DataFrame([_row("2026-07-11T01:00", horizon="fwd_4h"),
+                        _row("2026-07-12T02:00", horizon="fwd_4h")]
+                       ).drop(columns=["tier"])
+    ledger = tmp_path / "decisions.parquet"
+    led.to_parquet(ledger, index=False)
+    monkeypatch.setattr(rmh, "SHADOW_LEDGER", ledger)
+    monkeypatch.setattr(rmh, "SHADOW_STATE", tmp_path / "absent.json")
+    monkeypatch.setattr(rmh, "OUT", tmp_path / "out")
+    args = argparse.Namespace(capital=10000.0, paper_start="2026-07-19")
+    state = rmh.run_once(args)
+    assert state["status"] == "active"
+    assert state["n_decisions"] == 0 and state["n_taken"] == 0
+    assert state["equity"] == 10000.0
+    assert state["per_engine"] == {}
+
+
 def test_no_ledger_graceful(tmp_path, monkeypatch):
     monkeypatch.setattr(rmh, "SHADOW_LEDGER", tmp_path / "absent.parquet")
     monkeypatch.setattr(rmh, "SHADOW_STATE", tmp_path / "absent.json")
