@@ -26,6 +26,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 import src.institutional.live.paper_portfolio as pp_mod
@@ -278,6 +280,48 @@ def test_reversal_same_direction_or_toxic_not_vetoed():
     y_tox = {("carry", "BTCUSDT"): -0.12}
     assert not pp._reversal_veto("carry", "BTCUSDT", pos, y_tox, now_ms, -1)
     assert not pp._reversal_veto("carry", "BTCUSDT", {}, y_ok, now_ms, -1)
+
+
+def test_alpha20_emitter_records_fees_and_decision(monkeypatch, tmp_path):
+    """Chaque rebalance exécuté émet ses frais + un événement decision (cumuls
+    Mongo) dans le ledger alpha20 — la source de vérité du gate forward."""
+    from src.alpha20.accounting import event_ledger
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    _patch(monkeypatch, y_ann=0.06)              # net > marge → ouvre les sleeves
+    pp = _pp(_doc(datetime.now(timezone.utc)))
+    pp.mark_to_market()
+    df = event_ledger.read()
+    assert len(df) and event_ledger.verify_chain()
+    fees = df[df["kind"] == "fee"]
+    dec = df[(df["kind"] == "decision") & (df["ref"] == "rebalance")]
+    assert len(fees) >= 1 and len(dec) == 1
+    doc = pp.col.doc
+    assert dec.iloc[0]["meta"]["mongo_fees_cum"] == round(
+        float(doc["ledger"]["fees"]), 6)
+    # la somme des frais émis = frais Mongo (même rebalance, même vérité)
+    assert abs(float(fees["amount_usdt"].sum())
+               - float(doc["ledger"]["fees"])) < 1e-6
+
+
+def test_alpha20_emitter_records_real_funding(monkeypatch, tmp_path):
+    from src.alpha20.accounting import event_ledger
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    _patch(monkeypatch, y_ann=0.005)
+    now = datetime.now(timezone.utc)
+    now_ms = int(now.timestamp() * 1000)
+    settle_ms = now_ms - 3600 * 1000
+    monkeypatch.setattr(pp_mod, "funding_events",
+                        lambda s, a, b: [(settle_ms, 5e-5)])
+    held = _carry(0.40 * EQ0, now, funding_paid_until=now_ms - 9 * 3600 * 1000,
+                  opened_ms=now_ms)
+    doc = _doc(now, carry=[held])
+    doc["next_rebalance_ms"] = now_ms + 10_000_000   # pas de rebalance : mark pur
+    pp = _pp(doc)
+    pp.mark_to_market()
+    df = event_ledger.read(kinds=["funding"])
+    assert len(df) == 1
+    assert df["amount_usdt"].iloc[0] == pytest.approx(0.40 * EQ0 * 5e-5)
+    assert df["sleeve"].iloc[0] == "carry_BTCUSDT"
 
 
 def test_resize_stamps_direction(monkeypatch):

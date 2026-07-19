@@ -69,14 +69,51 @@ def ingest_facts(audit: Dict, audit_ref: str) -> int:
     return len(event_ledger.append(events))
 
 
+def forward_gate() -> Dict:
+    """Gate FORWARD (la seule vérité après le 2026-07-19) : entre le premier et
+    le dernier événement `decision/rebalance` émis À LA SOURCE par le paper,
+    le Δ des cumuls Mongo doit égaler la somme des événements du ledger à
+    ≤ 0,01 USDT — plus aucune trajectoire reconstruite a posteriori."""
+    dec = event_ledger.read(kinds=["decision"])
+    dec = dec[dec["ref"] == "rebalance"] if len(dec) else dec
+    if len(dec) < 2:
+        return {"status": "pending",
+                "note": f"{len(dec)} rebalance(s) émis — gate évaluable à 2",
+                "passed": None}
+    first, last = dec.iloc[0], dec.iloc[-1]
+    mongo_fees = last["meta"]["mongo_fees_cum"] - first["meta"]["mongo_fees_cum"]
+    mongo_carry = last["meta"]["mongo_carry_cum"] - first["meta"]["mongo_carry_cum"]
+    t0, t1 = first["ts"], last["ts"]
+    fees = event_ledger.read(kinds=["fee"])
+    fees = fees[(fees["ts"] > t0) & (fees["ts"] <= t1)] if len(fees) else fees
+    fund = event_ledger.read(kinds=["funding"])
+    fund = fund[(fund["ts"] > t0) & (fund["ts"] <= t1)] if len(fund) else fund
+    gap_fees = abs(float(fees["amount_usdt"].sum() if len(fees) else 0.0)
+                   - float(mongo_fees))
+    gap_carry = abs(float(fund["amount_usdt"].sum() if len(fund) else 0.0)
+                    - float(mongo_carry))
+    return {"status": "evaluated", "window": [str(t0), str(t1)],
+            "n_rebalances": int(len(dec)),
+            "gap_fees_usdt": round(gap_fees, 4),
+            "gap_carry_usdt": round(gap_carry, 4),
+            "gate_usdt": GATE_USDT,
+            "passed": bool(gap_fees <= GATE_USDT and gap_carry <= GATE_USDT)}
+
+
 def reconcile(run_fresh: bool = True) -> Dict:
     if run_fresh:
         path = run_audit()
     else:
         path = sorted((ROOT / "reports" / "paper_audit").glob("AUDIT_*.json"))[-1]
     audit = json.loads(path.read_text())
-    result = evaluate(audit)
+    historical = evaluate(audit)
+    historical["note"] = ("trail partiellement reconstruit (limites connues "
+                          "au-delà du 2026-07-18) — la vérité est le gate forward")
     n = ingest_facts(audit, audit_ref=path.name)
+    fwd = forward_gate()
+    result = {"historical": historical, "forward": fwd,
+              "passed": fwd["passed"] if fwd["passed"] is not None
+              else historical["passed"]}
     event_ledger.append([LedgerEvent(
         ts=str(audit.get("run")), kind="reconciliation", sleeve="portfolio",
         venue="offchain", amount_usdt=0.0, ref=path.name, meta=result)])

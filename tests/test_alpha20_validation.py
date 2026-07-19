@@ -109,3 +109,34 @@ def test_reconciliation_gate(monkeypatch, tmp_path):
     df = event_ledger.read()
     assert set(df["kind"]) == {"funding", "fee"}
     assert df[df["kind"] == "fee"]["amount_usdt"].iloc[0] == -32.05
+
+
+def _dec(ts, fees_cum, carry_cum):
+    from src.alpha20.contracts import LedgerEvent
+    return LedgerEvent(ts=ts, kind="decision", sleeve="portfolio",
+                       venue="binance_usdm", amount_usdt=0.0, ref="rebalance",
+                       meta={"mongo_fees_cum": fees_cum,
+                             "mongo_carry_cum": carry_cum, "exec_usdt": {}})
+
+
+def test_forward_gate(monkeypatch, tmp_path):
+    from src.alpha20.accounting import event_ledger
+    from src.alpha20.contracts import LedgerEvent
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    assert lr.forward_gate()["passed"] is None            # rien → pending
+    event_ledger.append([_dec("2026-07-20T02:30:00Z", -100.0, 10.0)])
+    assert lr.forward_gate()["status"] == "pending"       # 1 seul rebalance
+    event_ledger.append([
+        LedgerEvent(ts="2026-07-20T08:00:00Z", kind="funding",
+                    sleeve="carry_BTCUSDT", venue="binance_usdm",
+                    amount_usdt=2.5, ref="settlement"),
+        LedgerEvent(ts="2026-07-20T10:30:00Z", kind="fee", sleeve="carry_BTCUSDT",
+                    venue="binance_usdm", amount_usdt=-18.32, ref="rebalance"),
+        _dec("2026-07-20T10:30:00Z", -118.32, 12.5),
+    ])
+    g = lr.forward_gate()
+    assert g["passed"] and g["gap_fees_usdt"] == 0.0 and g["gap_carry_usdt"] == 0.0
+    # divergence Mongo vs ledger → gate rouge
+    event_ledger.append([_dec("2026-07-20T18:30:00Z", -140.0, 12.5)])
+    g = lr.forward_gate()
+    assert not g["passed"] and g["gap_fees_usdt"] > 0.01

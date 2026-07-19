@@ -46,6 +46,16 @@ def test_tamper_breaks_chain(ledger, tmp_path):
     assert not ledger.verify_chain()
 
 
+def test_out_of_order_ts_keeps_chain(ledger):
+    """Régression 2026-07-19 : un fait passé audité (ts antérieur) appendu
+    après des événements récents ne doit PAS casser la chaîne."""
+    ledger.append([_ev("2026-07-19T10:00:00Z", "fee", -1.0)])
+    ledger.append([_ev("2026-07-17T08:00:00Z", "funding", 2.0)])   # ts passé
+    ledger.append([_ev("2026-07-19T11:00:00Z", "fee", -3.0)])
+    assert ledger.verify_chain()
+    assert len(ledger.read()) == 3
+
+
 def test_bad_kind_rejected(ledger):
     with pytest.raises(ValueError):
         ledger.append([_ev("2026-07-19T08:00:00Z", "bonus", 1.0)])

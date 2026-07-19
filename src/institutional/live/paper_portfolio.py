@@ -98,6 +98,24 @@ def _fapi(path: str):
     return json.loads(urllib.request.urlopen(req, timeout=12).read())
 
 
+def _alpha20_emit(rows: list) -> None:
+    """Émission SOFT vers le ledger append-only alpha20 — la vérité comptable
+    est enregistrée au moment de l'EXÉCUTION (fin des trails reconstruits a
+    posteriori, leçon de l'audit du 2026-07-19). Jamais bloquant : le paper
+    survit à toute erreur côté alpha20."""
+    try:
+        import sys
+        from pathlib import Path as _P
+        root = str(_P(__file__).resolve().parents[3])
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from src.alpha20.accounting.event_ledger import append as _append
+        from src.alpha20.contracts import LedgerEvent as _LE
+        _append([_LE(**r) for r in rows])
+    except Exception:
+        pass
+
+
 def live_funding(symbol: str) -> Optional[float]:
     try:
         return float(_fapi(f"/fapi/v1/premiumIndex?symbol={symbol}")["lastFundingRate"])
@@ -637,6 +655,13 @@ class PaperPortfolio:
             "y_ann": None if y is None else round(y, 4),
             "fee_deferred_usdt": round(fee, 2)})
         guard["events"] = guard["events"][-GUARD_EVENTS_CAP:]
+        _alpha20_emit([{
+            "ts": datetime.fromtimestamp(now_ms / 1000, tz=timezone.utc).isoformat(),
+            "kind": "decision", "sleeve": f"{kind}_{sym}",
+            "venue": "binance_usdm", "amount_usdt": 0.0, "ref": "deferral",
+            "meta": {"reason": reason, "kept_usdt": round(kept, 2),
+                     "target_usdt": round(tgt, 2),
+                     "fee_deferred_usdt": round(fee, 2)}}])
         action = "hausse" if tgt > kept else "coupe"
         self._notify("info", f"🛡 {reason.capitalize()} : {action} {kind} "
                      f"{sym.replace('USDT', '')} différée",
@@ -680,6 +705,15 @@ class PaperPortfolio:
                                    doc["capital_eur"] * fx, regime, now_ms)
         guard["rule"] = GUARD_RULE
         fees_new = 0.0
+        now_iso = datetime.fromtimestamp(now_ms / 1000, tz=timezone.utc).isoformat()
+        emit = []
+
+        def _fee_row(sleeve: str, fee: float, before: float, after: float):
+            emit.append({"ts": now_iso, "kind": "fee", "sleeve": sleeve,
+                         "venue": "binance_usdm", "amount_usdt": -fee,
+                         "ref": "rebalance",
+                         "meta": {"from_usdt": round(before, 2),
+                                  "to_usdt": round(after, 2)}})
         # CARRY : resize/create/close par score net (frais maker 2 jambes sur |Δ|)
         old = {c["symbol"]: c for c in doc.get("carry", [])}
         new_carry = []
@@ -705,6 +739,7 @@ class PaperPortfolio:
                     fee = abs(tgt - c["notional"]) * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
+                    _fee_row(f"carry_{s}", fee, c["notional"], tgt)
                     if c["notional"] <= 0 < tgt:
                         c["opened_ms"] = now_ms
                     c["last_resize_ms"], c["last_resize_dir"] = now_ms, sense
@@ -722,6 +757,7 @@ class PaperPortfolio:
                     fee = c["notional"] * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
+                    _fee_row(f"carry_{s}", fee, c["notional"], 0.0)
         doc["carry"] = new_carry
         # BASIS : resize/create/close (le P&L de convergence est déjà accrué)
         old = {b["symbol"]: b for b in doc.get("basis", [])}
@@ -749,6 +785,7 @@ class PaperPortfolio:
                     fee = abs(tgt - b["notional"]) * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
+                    _fee_row(f"basis_{s}", fee, b["notional"], tgt)
                     if b["notional"] <= 0 < tgt:
                         b["opened_ms"] = now_ms
                     b["last_resize_ms"], b["last_resize_dir"] = now_ms, sense
@@ -766,6 +803,7 @@ class PaperPortfolio:
                     fee = b["notional"] * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
+                    _fee_row(f"basis_{s}", fee, b["notional"], 0.0)
         doc["basis"] = new_basis
         guard["fees_new_usdt"] += fees_new
         # LONGS : nouvelles cibles inverse-vol × régime ; resize d'une position
@@ -787,12 +825,30 @@ class PaperPortfolio:
             cur = px.get(l["symbol"])
             if l.get("active") and cur:
                 led["longs_realized"] += l["notional"] * (cur / l["entry"] - 1)
-                led["fees"] -= abs(tgt - l["notional"]) * TAKER_FEE
+                fee = abs(tgt - l["notional"]) * TAKER_FEE
+                led["fees"] -= fee
+                _fee_row(f"long_{s}", fee, l["notional"], tgt)
                 l["entry"] = cur
             l["notional"] = tgt
         doc["alloc_note"] = note
         doc["rebalanced_at"] = datetime.fromtimestamp(
             now_ms / 1000, tz=timezone.utc).isoformat()
+        # événement de DÉCISION : état exécuté + cumuls Mongo (gate forward de
+        # live_reconciliation : Δ cumuls Mongo ≡ Σ événements du ledger)
+        emit.append({
+            "ts": now_iso, "kind": "decision", "sleeve": "portfolio",
+            "venue": "binance_usdm", "amount_usdt": 0.0, "ref": "rebalance",
+            "meta": {
+                "exec_usdt": dict(
+                    {f"carry_{c['symbol']}": round(c["notional"], 2)
+                     for c in doc["carry"] if c["notional"] > 0},
+                    **{f"basis_{b['symbol']}": round(b["notional"], 2)
+                       for b in doc["basis"]
+                       if b["notional"] > 0 and not b.get("delivered")}),
+                "mongo_fees_cum": round(float(led["fees"]), 6),
+                "mongo_carry_cum": round(float(led["carry_accrued"]), 6),
+                "regime": regime, "equity_usdt": round(eq_usdt, 2)}})
+        _alpha20_emit(emit)
 
     # ── marquage stratégie (v2 : accruals incrémentaux + réalisations) ───────
     def _mark_strategy(self, doc: Dict) -> Dict:
@@ -823,6 +879,14 @@ class PaperPortfolio:
                     led["carry_accrued"] += sum(c["notional"] * r for _, r in evs)
                     c["funding_paid_until"] = evs[-1][0]
                     c["funding_rate"] = evs[-1][1]
+                    _alpha20_emit([{
+                        "ts": datetime.fromtimestamp(
+                            t / 1000, tz=timezone.utc).isoformat(),
+                        "kind": "funding", "sleeve": f"carry_{c['symbol']}",
+                        "venue": "binance_usdm",
+                        "amount_usdt": c["notional"] * r, "ref": "settlement",
+                        "meta": {"rate": r, "notional_usdt": c["notional"]}}
+                        for t, r in evs])
             pos_out.append({"symbol": c["symbol"], "sleeve": "carry Δ-neutre",
                             "notional_eur": c["notional"] / fx,
                             "price": px.get(c["symbol"]),
@@ -842,6 +906,11 @@ class PaperPortfolio:
             if frac1 >= 1.0:
                 # livraison (2 bps) puis ROLL sur le trimestriel suivant si yield OK
                 led["fees"] -= b["notional"] * 0.0002
+                _alpha20_emit([{
+                    "ts": now.isoformat(), "kind": "fee",
+                    "sleeve": f"basis_{b['symbol']}", "venue": "binance_usdm",
+                    "amount_usdt": -b["notional"] * 0.0002, "ref": "delivery",
+                    "meta": {"notional_usdt": round(b["notional"], 2)}}])
                 q, days, qsym = next_quarterly(b["symbol"])
                 spot = px.get(b["symbol"])
                 ann = (q / spot - 1) * 365 / days if (q and days and spot) else None
@@ -850,6 +919,11 @@ class PaperPortfolio:
                               "days_to_expiry": days, "q_symbol": qsym,
                               "basis_entry": q / spot - 1, "accrued_frac": 0.0})
                     led["fees"] -= b["notional"] * MAKER_FEE * 2
+                    _alpha20_emit([{
+                        "ts": now.isoformat(), "kind": "fee",
+                        "sleeve": f"basis_{b['symbol']}", "venue": "binance_usdm",
+                        "amount_usdt": -b["notional"] * MAKER_FEE * 2,
+                        "ref": "roll", "meta": {"to": qsym}}])
                     self._notify("info", f"🔁 Basis {b['symbol'].replace('USDT', '')} "
                                  f"livré et rollé sur {qsym}",
                                  f"Nouveau basis {ann * 100:+.1f}%/an, "
