@@ -1,6 +1,6 @@
 {
   "engine": "CROWDING_REVERSAL",
-  "events_total": 2241,
+  "events_total": 2242,
   "config": {
     "cost_rt": 0.0014,
     "selection": "top20%_val",
@@ -122,11 +122,11 @@
       },
       "portfolio_sim": {
         "n": 28,
-        "pf": 8.251,
+        "pf": 9.246,
         "wr": 0.643,
-        "mean_net_bps": 832.2,
-        "roi_sized": 0.2577,
-        "roi_portfolio_style": 0.2577,
+        "mean_net_bps": 946.4,
+        "roi_sized": 0.2979,
+        "roi_portfolio_style": 0.2979,
         "n_taken": 28
       },
       "threshold_ladder": {
@@ -199,7 +199,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2025,
-      "n_test": 214,
+      "n_test": 215,
       "ml_gated": {
         "n": 43,
         "pf": 0.654,
@@ -246,7 +246,7 @@
           "roi_sized": 0.0257
         }
       },
-      "ml_auc_test": 0.5465,
+      "ml_auc_test": 0.5445,
       "top_features": [
         [
           "btc_vol_24h",
@@ -397,11 +397,11 @@
       },
       "portfolio_sim": {
         "n": 30,
-        "pf": 8.999,
+        "pf": 10.016,
         "wr": 0.667,
-        "mean_net_bps": 838.5,
-        "roi_sized": 0.281,
-        "roi_portfolio_style": 0.281,
+        "mean_net_bps": 945.1,
+        "roi_sized": 0.322,
+        "roi_portfolio_style": 0.322,
         "n_taken": 30
       },
       "threshold_ladder": {
@@ -474,7 +474,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2025,
-      "n_test": 214,
+      "n_test": 215,
       "ml_gated": {
         "n": 40,
         "pf": 0.584,
@@ -521,7 +521,7 @@
           "roi_sized": 0.0174
         }
       },
-      "ml_auc_test": 0.5406,
+      "ml_auc_test": 0.5392,
       "top_features": [
         [
           "btc_vol_24h",

@@ -6,23 +6,23 @@
     "rank": "score pct dans (engine, ann\u00e9e)",
     "note": "2022 exclu du bilan (folds sans train)"
   },
-  "n_waves": 3845,
+  "n_waves": 3849,
   "sims": [
     {
       "sizing": 0.02,
-      "n_trades": 5490,
-      "skipped_open": 419,
+      "n_trades": 5497,
+      "skipped_open": 418,
       "skipped_gross": 0,
       "by_year": {
         "2022": {
-          "n": 1550,
+          "n": 1551,
           "pf": 0.9,
-          "roi": -0.0397,
-          "maxdd": -0.0611,
+          "roi": -0.0403,
+          "maxdd": -0.061,
           "wr": 0.495,
           "mix": {
             "LIQ_CASCADE": 1146,
-            "PREMIUM_DISLOCATION": 404
+            "PREMIUM_DISLOCATION": 405
           }
         },
         "2023": {
@@ -61,13 +61,13 @@
           }
         },
         "2026": {
-          "n": 1012,
+          "n": 1018,
           "pf": 0.94,
-          "roi": -0.0113,
+          "roi": -0.0115,
           "maxdd": -0.0239,
-          "wr": 0.463,
+          "wr": 0.464,
           "mix": {
-            "LIQ_CASCADE": 575,
+            "LIQ_CASCADE": 581,
             "PREMIUM_DISLOCATION": 413,
             "CROWDING_REVERSAL": 24
           }
@@ -75,28 +75,28 @@
       },
       "final": {
         "window": "2023-01 \u2192 2026-07",
-        "n": 3940,
-        "roi_total": 0.1064,
-        "roi_ann": 0.0292,
+        "n": 3946,
+        "roi_total": 0.1062,
+        "roi_ann": 0.029,
         "maxdd": -0.0355,
         "pf": 1.126
       }
     },
     {
       "sizing": 0.05,
-      "n_trades": 5484,
-      "skipped_open": 419,
+      "n_trades": 5491,
+      "skipped_open": 418,
       "skipped_gross": 6,
       "by_year": {
         "2022": {
-          "n": 1550,
+          "n": 1551,
           "pf": 0.9,
-          "roi": -0.0977,
-          "maxdd": -0.1465,
+          "roi": -0.099,
+          "maxdd": -0.1466,
           "wr": 0.495,
           "mix": {
             "LIQ_CASCADE": 1146,
-            "PREMIUM_DISLOCATION": 404
+            "PREMIUM_DISLOCATION": 405
           }
         },
         "2023": {
@@ -135,13 +135,13 @@
           }
         },
         "2026": {
-          "n": 1012,
+          "n": 1018,
           "pf": 0.94,
-          "roi": -0.0285,
+          "roi": -0.029,
           "maxdd": -0.0587,
-          "wr": 0.463,
+          "wr": 0.464,
           "mix": {
-            "LIQ_CASCADE": 575,
+            "LIQ_CASCADE": 581,
             "PREMIUM_DISLOCATION": 413,
             "CROWDING_REVERSAL": 24
           }
@@ -149,28 +149,28 @@
       },
       "final": {
         "window": "2023-01 \u2192 2026-07",
-        "n": 3934,
-        "roi_total": 0.2732,
-        "roi_ann": 0.0712,
+        "n": 3940,
+        "roi_total": 0.2726,
+        "roi_ann": 0.0706,
         "maxdd": -0.0867,
         "pf": 1.122
       }
     },
     {
       "sizing": 0.1,
-      "n_trades": 5332,
-      "skipped_open": 401,
+      "n_trades": 5339,
+      "skipped_open": 400,
       "skipped_gross": 176,
       "by_year": {
         "2022": {
-          "n": 1510,
+          "n": 1511,
           "pf": 0.89,
-          "roi": -0.19,
-          "maxdd": -0.2739,
+          "roi": -0.1935,
+          "maxdd": -0.2751,
           "wr": 0.491,
           "mix": {
             "LIQ_CASCADE": 1117,
-            "PREMIUM_DISLOCATION": 393
+            "PREMIUM_DISLOCATION": 394
           }
         },
         "2023": {
@@ -187,12 +187,12 @@
         "2024": {
           "n": 1536,
           "pf": 1.14,
-          "roi": 0.25,
+          "roi": 0.2498,
           "maxdd": -0.121,
           "wr": 0.512,
           "mix": {
-            "LIQ_CASCADE": 862,
-            "PREMIUM_DISLOCATION": 624,
+            "LIQ_CASCADE": 861,
+            "PREMIUM_DISLOCATION": 625,
             "CROWDING_REVERSAL": 50
           }
         },
@@ -209,13 +209,13 @@
           }
         },
         "2026": {
-          "n": 974,
+          "n": 980,
           "pf": 0.96,
           "roi": -0.0415,
-          "maxdd": -0.1048,
+          "maxdd": -0.1042,
           "wr": 0.458,
           "mix": {
-            "LIQ_CASCADE": 554,
+            "LIQ_CASCADE": 560,
             "PREMIUM_DISLOCATION": 396,
             "CROWDING_REVERSAL": 24
           }
@@ -223,10 +223,10 @@
       },
       "final": {
         "window": "2023-01 \u2192 2026-07",
-        "n": 3822,
+        "n": 3828,
         "roi_total": 0.4355,
-        "roi_ann": 0.1084,
-        "maxdd": -0.1856,
+        "roi_ann": 0.1078,
+        "maxdd": -0.1872,
         "pf": 1.098
       }
     }
