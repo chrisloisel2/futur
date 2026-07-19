@@ -1,0 +1,157 @@
+{
+  "test": "FUNDING_XVENUE_V0",
+  "date": "2026-07-18",
+  "protocol": "reports/FUNDING_XVENUE_PROTOCOL.md",
+  "params": {
+    "window": [
+      "2024-01-01",
+      "2026-06-28"
+    ],
+    "lookback": 21,
+    "theta_in_ann": 4.0,
+    "theta_out_ann": 1.0,
+    "neighborhood": {
+      "lookbacks": [
+        9,
+        21,
+        42
+      ],
+      "theta_ins": [
+        2.0,
+        4.0,
+        6.0
+      ]
+    },
+    "fee_binance_bp": 5.0,
+    "fee_hl_bp": 5.0,
+    "fee_bybit_bp": 5.5,
+    "slippage_bp": 2.0,
+    "basis_rt_bp": 3.0,
+    "drag_bp_month": 1.0,
+    "liq_adverse_move": 0.35,
+    "max_rt_per_year": 26.0,
+    "floor_trailing_ann_x1": 3.0,
+    "trailing_year": [
+      "2025-07-01",
+      "2026-06-28"
+    ],
+    "stress_mult": 0.75,
+    "concentration_max": 0.5
+  },
+  "rt_cost_bp_x1": {
+    "binance_hl": 31.0,
+    "binance_bybit": 32.0
+  },
+  "n_settlements": 2727,
+  "per_coin": {
+    "BTC": {
+      "net_ann_x1": 3.363,
+      "net_ann_x2": 0.028,
+      "gross_ann": 6.697,
+      "rt_per_year": 10.4,
+      "time_in_pos": 0.816,
+      "worst_weekly_move": 0.2343,
+      "liquidated": false
+    },
+    "ETH": {
+      "net_ann_x1": 0.954,
+      "net_ann_x2": -3.366,
+      "gross_ann": 5.273,
+      "rt_per_year": 13.7,
+      "time_in_pos": 0.726,
+      "worst_weekly_move": 0.3212,
+      "liquidated": false
+    },
+    "SOL": {
+      "net_ann_x1": 3.376,
+      "net_ann_x2": -0.696,
+      "gross_ann": 7.448,
+      "rt_per_year": 12.8,
+      "time_in_pos": 0.736,
+      "worst_weekly_move": 0.433,
+      "liquidated": true
+    }
+  },
+  "aggregate": {
+    "net_ann_x1": 2.564,
+    "net_ann_x2": -1.344,
+    "subperiods_x2": {
+      "2024": 2.984,
+      "2025": -1.946,
+      "2026": -8.967
+    },
+    "trailing_year": {
+      "x1": -0.323,
+      "x2": -4.153
+    },
+    "concentration_30d": 0.368,
+    "stress_x075_x1": 1.405
+  },
+  "neighborhood": {
+    "lb9_th2.0": {
+      "x1": -3.783,
+      "x2": -14.7
+    },
+    "lb9_th4.0": {
+      "x1": -2.095,
+      "x2": -11.133
+    },
+    "lb9_th6.0": {
+      "x1": -0.395,
+      "x2": -7.362
+    },
+    "lb21_th2.0": {
+      "x1": 1.97,
+      "x2": -2.908
+    },
+    "lb21_th4.0": {
+      "x1": 2.564,
+      "x2": -1.344
+    },
+    "lb21_th6.0": {
+      "x1": 3.024,
+      "x2": -0.126
+    },
+    "lb42_th2.0": {
+      "x1": 4.209,
+      "x2": 1.967
+    },
+    "lb42_th4.0": {
+      "x1": 4.274,
+      "x2": 2.377
+    },
+    "lb42_th6.0": {
+      "x1": 4.388,
+      "x2": 3.005
+    }
+  },
+  "criteria": {
+    "P1_full_x2_2of3": false,
+    "P2_subperiods_x2": false,
+    "P3_trailing": false,
+    "P4_no_liquidation": false,
+    "P5_churn": true,
+    "P6_concentration": true,
+    "P7_stress": true,
+    "P8_neighborhood": false
+  },
+  "verdict": "NO_EDGE",
+  "secondary_bybit_x2": {
+    "BTC": {
+      "net_ann_x2": -5.617,
+      "n": 2729
+    },
+    "ETH": {
+      "net_ann_x2": -3.671,
+      "n": 2729
+    },
+    "SOL": {
+      "net_ann_x2": -7.77,
+      "n": 2729
+    }
+  },
+  "secondary_corr_daily": {
+    "v12_equity_daily": 0.08,
+    "basis_term_equity_daily": 0.026
+  }
+}
