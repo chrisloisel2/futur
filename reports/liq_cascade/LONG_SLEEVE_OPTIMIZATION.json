@@ -1,0 +1,41 @@
+{
+  "A_regime_only": {
+    "roi_ann": 0.2621,
+    "vol": 0.4433,
+    "maxdd": -0.4628,
+    "sharpe": 0.74,
+    "roi_total": 1.868
+  },
+  "B_plus_trend": {
+    "roi_ann": 0.1899,
+    "vol": 0.319,
+    "maxdd": -0.3357,
+    "sharpe": 0.7,
+    "roi_total": 1.1965
+  },
+  "C_plus_ivol": {
+    "roi_ann": 0.1628,
+    "vol": 0.289,
+    "maxdd": -0.3086,
+    "sharpe": 0.66,
+    "roi_total": 0.9787
+  },
+  "D_plus_voltarget": {
+    "roi_ann": 0.1011,
+    "vol": 0.2064,
+    "maxdd": -0.2749,
+    "sharpe": 0.57,
+    "roi_total": 0.5462
+  },
+  "current_ivol_weights": {
+    "BTCUSDT": 0.444,
+    "ETHUSDT": 0.301,
+    "SOLUSDT": 0.254
+  },
+  "trend_now": {
+    "BTCUSDT": true,
+    "ETHUSDT": true,
+    "SOLUSDT": true
+  },
+  "regime_now": false
+}

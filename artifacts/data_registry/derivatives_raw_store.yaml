@@ -1,0 +1,14 @@
+open_interest:
+  rows: 4
+  symbols:
+  - BNBUSDT
+  - BTCUSDT
+  - ETHUSDT
+  - SOLUSDT
+ratios:
+  rows: 4
+  symbols:
+  - BNBUSDT
+  - BTCUSDT
+  - ETHUSDT
+  - SOLUSDT

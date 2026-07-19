@@ -1,0 +1,101 @@
+{
+  "btc_20260530_224114_54d66b53": {
+    "timestamp": "2026-05-30 22:41:14.995718+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_BTCUSDT",
+    "assets": [
+      "BTCUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260530_224114_54d66b53.json",
+    "metrics_summary": {}
+  },
+  "btc_20260531_004625_cea5d597": {
+    "timestamp": "2026-05-31 00:46:25.521256+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_BTCUSDT",
+    "assets": [
+      "BTCUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260531_004625_cea5d597.json",
+    "metrics_summary": {}
+  },
+  "btc_20260531_004700_4fe659d0": {
+    "timestamp": "2026-05-31 00:47:00.284979+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_ETHUSDT",
+    "assets": [
+      "ETHUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260531_004700_4fe659d0.json",
+    "metrics_summary": {}
+  },
+  "trm_20260531_004916_8f19d81c": {
+    "timestamp": "2026-05-31 00:49:16.995611+00:00",
+    "engine_name": "TRM_EVENT",
+    "signal_name": "trm_event_event_cont_4h_BNBUSDT",
+    "assets": [
+      "BNBUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/trm_20260531_004916_8f19d81c.json",
+    "metrics_summary": {}
+  },
+  "btc_20260531_225631_e32ea64e": {
+    "timestamp": "2026-05-31 22:56:31.193479+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_BTCUSDT",
+    "assets": [
+      "BTCUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260531_225631_e32ea64e.json",
+    "metrics_summary": {}
+  },
+  "btc_20260531_225640_e4e1bf10": {
+    "timestamp": "2026-05-31 22:56:40.727861+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_ETHUSDT",
+    "assets": [
+      "ETHUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260531_225640_e4e1bf10.json",
+    "metrics_summary": {}
+  },
+  "trm_20260531_225713_3fd32081": {
+    "timestamp": "2026-05-31 22:57:13.808701+00:00",
+    "engine_name": "TRM_EVENT",
+    "signal_name": "trm_event_event_cont_4h_BNBUSDT",
+    "assets": [
+      "BNBUSDT"
+    ],
+    "decision": "INCUBATE",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/trm_20260531_225713_3fd32081.json",
+    "metrics_summary": {}
+  },
+  "btc_20260628_002552_44d0debc": {
+    "timestamp": "2026-06-28 00:25:52.633316+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_BTCUSDT",
+    "assets": [
+      "BTCUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260628_002552_44d0debc.json",
+    "metrics_summary": {}
+  },
+  "btc_20260628_002600_e4589771": {
+    "timestamp": "2026-06-28 00:26:00.150915+00:00",
+    "engine_name": "BTC_ETH_TREND",
+    "signal_name": "btc_eth_trend_trend_cont_24h_ETHUSDT",
+    "assets": [
+      "ETHUSDT"
+    ],
+    "decision": "PAPER",
+    "path": "/home/qbee/futur/artifacts/institutional/experiments/btc_20260628_002600_e4589771.json",
+    "metrics_summary": {}
+  }
+}

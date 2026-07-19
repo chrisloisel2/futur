@@ -1,0 +1,73 @@
+{
+  "test": "OPTIONS_POSITIONING_V1",
+  "date": "2026-07-17",
+  "sample": [
+    "2023-03-01",
+    "2026-06-28"
+  ],
+  "n_days": 1216,
+  "verdict": "NO_EDGE",
+  "primary": {
+    "beta": 0.000137,
+    "nw_t_full": 0.28,
+    "nw_t_half1": 0.23,
+    "nw_t_half2": 0.2,
+    "beta_half1": 0.000156,
+    "beta_half2": 0.000144,
+    "P1_nw_t_ge_2": false,
+    "P2_alpha_x2_pos": false,
+    "P3_sign_stable": true,
+    "P4_delay_survives": false
+  },
+  "strategy": {
+    "exposure": 0.513,
+    "sharpe_x1": -0.16,
+    "ann_ret_x1": -0.0527,
+    "sharpe_x2": -0.91,
+    "ann_ret_x2": -0.2936,
+    "max_dd_x2": -0.7582,
+    "timing_alpha_x1": -0.253,
+    "timing_alpha_x2": -0.4939,
+    "timing_alpha_x2_delay1": -0.4731,
+    "timing_alpha_x2_drop10": -0.5043,
+    "nw_t_drop10": 0.23,
+    "dsr_6_trials": 0.055,
+    "corr_vs_buyhold": 0.683
+  },
+  "secondaries_exploratory": {
+    "S1_skew_low_fade": {
+      "nw_t": -0.95,
+      "spearman_ic": -0.0081,
+      "n": 1216
+    },
+    "S2_d_skew": {
+      "nw_t": 0.36,
+      "spearman_ic": 0.0078,
+      "n": 1216
+    },
+    "S3_pc_ratio_z": {
+      "nw_t": 0.12,
+      "spearman_ic": 0.0039,
+      "n": 1216
+    },
+    "S4_pinning_cash": {
+      "nw_t": 0.0,
+      "spearman_ic": 0.0019,
+      "n": 1216
+    },
+    "S5_flow_x_block": {
+      "nw_t": 0.27,
+      "spearman_ic": 0.0152,
+      "n": 1216
+    },
+    "S6_primary_3d": {
+      "nw_t": -0.9,
+      "n": 1214
+    }
+  },
+  "notes": [
+    "ETH non test\u00e9 (pas de trades backfill\u00e9s).",
+    "Klines 1d s'arr\u00eatent 2026-06-30 \u2014 17 derniers jours de features non utilis\u00e9s.",
+    "Co\u00fbts : 15 bps/turnover (30 A/R), stress x2 = 30 bps."
+  ]
+}

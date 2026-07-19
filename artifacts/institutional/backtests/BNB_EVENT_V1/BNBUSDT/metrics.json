@@ -1,0 +1,32 @@
+{
+  "initial_capital": 10000.0,
+  "final_equity": 10000.0,
+  "pf": 0.0,
+  "sharpe": 0.0,
+  "sortino": 0.0,
+  "cagr": 0.0,
+  "max_drawdown": 0.0,
+  "n_trades": 0,
+  "n_wins": 0,
+  "hit_rate": 0.0,
+  "avg_win": 0.0,
+  "avg_loss": 0.0,
+  "win_loss_ratio": 0.0,
+  "expectancy": 0.0,
+  "gross_pnl": 0,
+  "net_pnl": 0,
+  "total_fees": 0,
+  "total_slippage": 0,
+  "avg_holding_h": 0.0,
+  "turnover": 0.0,
+  "pnl_by_year": {},
+  "pnl_by_fold": {},
+  "pnl_by_model": {},
+  "cost_sensitivity": {
+    "pf_x1": 0.0,
+    "pf_x2": 0.0,
+    "pf_x3": 0.0
+  },
+  "portfolio_name": "BNB_EVENT_V1",
+  "engine": "INSTITUTIONAL_TRM_EVENT"
+}

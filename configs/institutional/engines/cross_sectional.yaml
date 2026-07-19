@@ -1,0 +1,55 @@
+# configs/institutional/engines/cross_sectional.yaml
+# Cross-Sectional Momentum Engine
+
+engine:
+  name: CROSS_SECTIONAL
+  description: "Ranking cross-sectionnel — actifs liquides avec futures propres"
+
+# IMPORTANT : inclure seulement les actifs avec :
+#   - historique futures ≥ 2 ans
+#   - liquidité suffisante (volume journalier > 50M USD)
+#   - funding/OI disponibles sur toute la période
+#   - pas trop de trous de données (< 5%)
+assets:
+  - BTCUSDT
+  - ETHUSDT
+  - SOLUSDT
+  - BNBUSDT
+  - AVAXUSDT
+  - LINKUSDT
+  - XRPUSDT
+  - ADAUSDT
+
+data:
+  timeframe: "1h"
+  start: "2021-01-01"   # Ne pas remonter avant 2021 pour garantir
+  end:   "2025-12-31"   # la disponibilité des données futures de tous les actifs
+  sources:
+    - ohlcv_1h
+    - funding_rate
+    - open_interest
+
+features:
+  # Pour le cross-sectional, les features sont des RANGS, pas des valeurs absolues
+  families:
+    - returns            # pour calculer les rangs momentum
+    - volatility         # pour les rangs vol
+    - derivatives        # pour les rangs funding/OI
+  cross_sectional: true  # activer les rangs inter-actifs
+
+labels:
+  family: cross_sectional
+  # Rank des rendements futurs dans l'univers
+  horizons_h: [24, 72]
+  cost_bps:   12.0        # frais légèrement plus élevés (turnover plus fréquent)
+
+# NOTE : le modèle cross-sectionnel prédit un RANG, pas une direction.
+# Le label est le percentile de rendement futur dans l'univers.
+# Top quantile = long, bottom quantile = short (ou flat si pas de short autorisé).
+
+walk_forward:
+  mode:        expanding
+  train_start: "2021-01-01"
+  folds:       [2022, 2023, 2024, 2025]
+  embargo_h:   48
+  min_assets_required: 5   # Minimum 5 actifs en même temps pour les rangs

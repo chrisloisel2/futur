@@ -1,0 +1,64 @@
+{
+  "portfolio": "BTC_ETH_TREND_V1",
+  "asset": "ETHUSDT",
+  "threshold": 0.6,
+  "generated_at": "2026-05-31 23:51:18.785914+00:00",
+  "folds": [
+    {
+      "fold_year": 2022,
+      "model_path": "artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2022/model_2022.pkl",
+      "model_type": "LightGBMClassifier",
+      "test_start": "2022-01-01",
+      "test_end": "2022-12-31",
+      "train_period": "2021-01-01 \u2192 2021-09-30",
+      "validation_period": "2021-10-01 \u2192 2021-12-31",
+      "model_version": "v1.0",
+      "n_bars": 8748,
+      "n_signals": 125,
+      "n_trades": 21,
+      "pnl_net": -141.28
+    },
+    {
+      "fold_year": 2023,
+      "model_path": "artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2023/model_2023.pkl",
+      "model_type": "LightGBMClassifier",
+      "test_start": "2023-01-01",
+      "test_end": "2023-12-31",
+      "train_period": "2021-01-01 \u2192 2022-09-30",
+      "validation_period": "2022-10-01 \u2192 2022-12-31",
+      "model_version": "v1.0",
+      "n_bars": 8734,
+      "n_signals": 0,
+      "n_trades": 0,
+      "pnl_net": 0
+    },
+    {
+      "fold_year": 2024,
+      "model_path": "artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2024/model_2024.pkl",
+      "model_type": "LightGBMClassifier",
+      "test_start": "2024-01-01",
+      "test_end": "2024-12-31",
+      "train_period": "2021-01-01 \u2192 2023-09-30",
+      "validation_period": "2023-10-01 \u2192 2023-12-31",
+      "model_version": "v1.0",
+      "n_bars": 8758,
+      "n_signals": 0,
+      "n_trades": 0,
+      "pnl_net": 0
+    },
+    {
+      "fold_year": 2025,
+      "model_path": "artifacts/institutional/backtests/btc_eth_trend/ETHUSDT/v1.0/2025/model_2025.pkl",
+      "model_type": "LightGBMClassifier",
+      "test_start": "2025-01-01",
+      "test_end": "2025-12-31",
+      "train_period": "2021-01-01 \u2192 2024-09-30",
+      "validation_period": "2024-10-01 \u2192 2024-12-31",
+      "model_version": "v1.0",
+      "n_bars": 8734,
+      "n_signals": 0,
+      "n_trades": 0,
+      "pnl_net": 0
+    }
+  ]
+}

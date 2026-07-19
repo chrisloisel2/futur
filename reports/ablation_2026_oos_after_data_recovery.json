@@ -1,0 +1,168 @@
+{
+  "window": [
+    "2026-01-01",
+    "2026-06-20"
+  ],
+  "runs": {
+    "A_trm_legacy": {
+      "final_equity": 10003.1,
+      "roi": 0.0003,
+      "n_trades": 1,
+      "pf": Infinity,
+      "sharpe": -4.44,
+      "max_dd": -0.0052,
+      "cvar95": -0.0,
+      "roi_month_med": 0.0,
+      "trades_month": 0.2,
+      "per_engine_pnl": {
+        "TRM_TREND_LONG": 3.09
+      },
+      "gate": "FAIL"
+    },
+    "B_trm_alloc": {
+      "final_equity": 9988.9,
+      "roi": -0.0011,
+      "n_trades": 1,
+      "pf": 0.0,
+      "sharpe": -41.38,
+      "max_dd": -0.0011,
+      "cvar95": -0.0,
+      "roi_month_med": 0.0,
+      "trades_month": 0.2,
+      "per_engine_pnl": {
+        "TRM_TREND_LONG": -11.06
+      },
+      "gate": "FAIL"
+    },
+    "C_trm_alloc_exit": {
+      "final_equity": 9989.9,
+      "roi": -0.001,
+      "n_trades": 1,
+      "pf": 0.0,
+      "sharpe": -41.57,
+      "max_dd": -0.001,
+      "cvar95": -0.0,
+      "roi_month_med": 0.0,
+      "trades_month": 0.2,
+      "per_engine_pnl": {
+        "TRM_TREND_LONG": -10.11
+      },
+      "gate": "FAIL"
+    },
+    "D_trm_full": {
+      "final_equity": 9989.9,
+      "roi": -0.001,
+      "n_trades": 1,
+      "pf": 0.0,
+      "sharpe": -41.57,
+      "max_dd": -0.001,
+      "cvar95": -0.0,
+      "roi_month_med": 0.0,
+      "trades_month": 0.2,
+      "per_engine_pnl": {
+        "TRM_TREND_LONG": -10.11
+      },
+      "gate": "FAIL"
+    },
+    "E_pullback_raw": {
+      "final_equity": 9927.0,
+      "roi": -0.0073,
+      "n_trades": 44,
+      "pf": 0.936,
+      "sharpe": -0.89,
+      "max_dd": -0.0475,
+      "cvar95": -5e-05,
+      "roi_month_med": -0.0026,
+      "trades_month": 7.8,
+      "per_engine_pnl": {
+        "PULLBACK_LONG": -73.0
+      },
+      "gate": "FAIL"
+    },
+    "F_pullback_full": {
+      "final_equity": 10023.2,
+      "roi": 0.0023,
+      "n_trades": 6,
+      "pf": 1.583,
+      "sharpe": -5.14,
+      "max_dd": -0.0041,
+      "cvar95": -0.0,
+      "roi_month_med": 0.0,
+      "trades_month": 1.1,
+      "per_engine_pnl": {
+        "PULLBACK_LONG": 23.17
+      },
+      "gate": "FAIL"
+    },
+    "G_all_raw": {
+      "final_equity": 6498.5,
+      "roi": -0.3502,
+      "n_trades": 717,
+      "pf": 0.698,
+      "sharpe": -3.33,
+      "max_dd": -0.4036,
+      "cvar95": -0.00784,
+      "roi_month_med": -0.056,
+      "trades_month": 126.5,
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -2091.7,
+        "CARRY_BASIS": -1118.25,
+        "LIQUIDATION_REBOUND": -539.33,
+        "PULLBACK_LONG": 245.32,
+        "TRM_TREND_LONG": 2.45
+      },
+      "gate": "FAIL"
+    },
+    "H_all_alloc": {
+      "final_equity": 9418.3,
+      "roi": -0.0582,
+      "n_trades": 441,
+      "pf": 0.832,
+      "sharpe": -2.0,
+      "max_dd": -0.0906,
+      "cvar95": -0.00215,
+      "roi_month_med": -0.0005,
+      "trades_month": 77.8,
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -421.2,
+        "LIQUIDATION_REBOUND": -134.28,
+        "PULLBACK_LONG": -10.06,
+        "CARRY_BASIS": -16.13
+      },
+      "gate": "FAIL"
+    },
+    "I_all_alloc_exit": {
+      "final_equity": 8234.2,
+      "roi": -0.1766,
+      "n_trades": 1232,
+      "pf": 0.688,
+      "sharpe": -5.32,
+      "max_dd": -0.1848,
+      "cvar95": -0.0023,
+      "roi_month_med": -0.029,
+      "trades_month": 217.4,
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -1676.33,
+        "LIQUIDATION_REBOUND": -82.3,
+        "PULLBACK_LONG": -7.2
+      },
+      "gate": "FAIL"
+    },
+    "J_all_full": {
+      "final_equity": 9789.2,
+      "roi": -0.0211,
+      "n_trades": 172,
+      "pf": 0.73,
+      "sharpe": -3.02,
+      "max_dd": -0.0298,
+      "cvar95": -0.0007,
+      "roi_month_med": 0.0,
+      "trades_month": 30.3,
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -205.79,
+        "LIQUIDATION_REBOUND": -5.02
+      },
+      "gate": "FAIL"
+    }
+  }
+}

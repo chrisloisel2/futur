@@ -1,8 +1,0 @@
-cross_source:
-  spot_ref: binance
-  futures_ref: bybit
-  index_ref: okx
-  max_premium_bps: 50.0
-  max_basis_bps: 75.0
-  max_diff_abs: 5.0
-  fallback: allow_missing

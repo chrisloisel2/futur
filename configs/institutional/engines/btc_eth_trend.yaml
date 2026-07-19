@@ -1,0 +1,63 @@
+# configs/institutional/engines/btc_eth_trend.yaml
+# BTC/ETH Trend Following Engine
+
+engine:
+  name: BTC_ETH_TREND
+  description: "Trend following institutionnel BTC/ETH — horizons 24h-7d"
+
+assets:
+  - BTCUSDT
+  - ETHUSDT
+
+data:
+  timeframe: "1h"
+  start: "2021-01-01"
+  end:   "2025-12-31"   # 2026 = paper/shadow uniquement
+  sources:
+    - ohlcv_1h
+    - funding_rate
+    - open_interest
+    - basis
+
+features:
+  families:
+    - returns       # log_ret multi-horizons, z-scores
+    - volatility    # EWMA, RV, Parkinson, HAR
+    - trend         # EMA, Donchian, momentum, RSI (feature seulement)
+    - derivatives   # funding, OI, basis
+
+labels:
+  family: trend
+  target_primary:   trend_cont_24h   # horizon principal
+  targets_all:
+    - trend_cont_24h
+    - trend_cont_72h
+    - trend_cont_168h
+  k:         1.0     # vol_horizon multiplier
+  cost_bps:  10.0    # frais AR Binance Futures
+  # Distribution attendue (BTC) : ~20% UP / 60% FLAT / 20% DOWN
+
+walk_forward:
+  mode:        expanding
+  train_start: "2021-01-01"
+  folds:       [2022, 2023, 2024, 2025]
+  val_months:  3
+  embargo_h:   168   # 7 jours
+  min_train_h: 4380  # 6 mois minimum
+
+model:
+  type:                 LightGBM
+  n_estimators:         1000
+  early_stopping:       50
+  boosting_type:        dart
+  num_leaves:           31
+  learning_rate:        0.05
+  feature_fraction:     0.8
+  bagging_fraction:     0.8
+  min_child_samples:    30
+
+validation:
+  min_pass_rate:    0.75   # ≥ 3/4 folds OK
+  min_auc_test:     0.57
+  max_degradation:  0.10   # val - test ≤ 10%
+  require_cost_x2:  true

@@ -1,0 +1,234 @@
+{
+  "design": {
+    "wave_gap_min": 30,
+    "top_k": 3,
+    "gross_cap": 0.6,
+    "rank": "score pct dans (engine, ann\u00e9e)",
+    "note": "2022 exclu du bilan (folds sans train)"
+  },
+  "n_waves": 3849,
+  "sims": [
+    {
+      "sizing": 0.02,
+      "n_trades": 5497,
+      "skipped_open": 418,
+      "skipped_gross": 0,
+      "by_year": {
+        "2022": {
+          "n": 1551,
+          "pf": 0.9,
+          "roi": -0.0403,
+          "maxdd": -0.061,
+          "wr": 0.495,
+          "mix": {
+            "LIQ_CASCADE": 1146,
+            "PREMIUM_DISLOCATION": 405
+          }
+        },
+        "2023": {
+          "n": 317,
+          "pf": 1.51,
+          "roi": 0.0229,
+          "maxdd": -0.0062,
+          "wr": 0.587,
+          "mix": {
+            "LIQ_CASCADE": 283,
+            "PREMIUM_DISLOCATION": 34
+          }
+        },
+        "2024": {
+          "n": 1571,
+          "pf": 1.19,
+          "roi": 0.0652,
+          "maxdd": -0.0215,
+          "wr": 0.517,
+          "mix": {
+            "LIQ_CASCADE": 882,
+            "PREMIUM_DISLOCATION": 638,
+            "CROWDING_REVERSAL": 51
+          }
+        },
+        "2025": {
+          "n": 1040,
+          "pf": 1.11,
+          "roi": 0.027,
+          "maxdd": -0.0327,
+          "wr": 0.488,
+          "mix": {
+            "LIQ_CASCADE": 523,
+            "PREMIUM_DISLOCATION": 490,
+            "CROWDING_REVERSAL": 27
+          }
+        },
+        "2026": {
+          "n": 1018,
+          "pf": 0.94,
+          "roi": -0.0115,
+          "maxdd": -0.0239,
+          "wr": 0.464,
+          "mix": {
+            "LIQ_CASCADE": 581,
+            "PREMIUM_DISLOCATION": 413,
+            "CROWDING_REVERSAL": 24
+          }
+        }
+      },
+      "final": {
+        "window": "2023-01 \u2192 2026-07",
+        "n": 3946,
+        "roi_total": 0.1062,
+        "roi_ann": 0.029,
+        "maxdd": -0.0355,
+        "pf": 1.126
+      }
+    },
+    {
+      "sizing": 0.05,
+      "n_trades": 5491,
+      "skipped_open": 418,
+      "skipped_gross": 6,
+      "by_year": {
+        "2022": {
+          "n": 1551,
+          "pf": 0.9,
+          "roi": -0.099,
+          "maxdd": -0.1466,
+          "wr": 0.495,
+          "mix": {
+            "LIQ_CASCADE": 1146,
+            "PREMIUM_DISLOCATION": 405
+          }
+        },
+        "2023": {
+          "n": 317,
+          "pf": 1.51,
+          "roi": 0.058,
+          "maxdd": -0.0153,
+          "wr": 0.587,
+          "mix": {
+            "LIQ_CASCADE": 283,
+            "PREMIUM_DISLOCATION": 34
+          }
+        },
+        "2024": {
+          "n": 1571,
+          "pf": 1.19,
+          "roi": 0.1695,
+          "maxdd": -0.053,
+          "wr": 0.517,
+          "mix": {
+            "LIQ_CASCADE": 882,
+            "PREMIUM_DISLOCATION": 638,
+            "CROWDING_REVERSAL": 51
+          }
+        },
+        "2025": {
+          "n": 1034,
+          "pf": 1.1,
+          "roi": 0.0592,
+          "maxdd": -0.0799,
+          "wr": 0.486,
+          "mix": {
+            "LIQ_CASCADE": 521,
+            "PREMIUM_DISLOCATION": 490,
+            "CROWDING_REVERSAL": 23
+          }
+        },
+        "2026": {
+          "n": 1018,
+          "pf": 0.94,
+          "roi": -0.029,
+          "maxdd": -0.0587,
+          "wr": 0.464,
+          "mix": {
+            "LIQ_CASCADE": 581,
+            "PREMIUM_DISLOCATION": 413,
+            "CROWDING_REVERSAL": 24
+          }
+        }
+      },
+      "final": {
+        "window": "2023-01 \u2192 2026-07",
+        "n": 3940,
+        "roi_total": 0.2726,
+        "roi_ann": 0.0706,
+        "maxdd": -0.0867,
+        "pf": 1.122
+      }
+    },
+    {
+      "sizing": 0.1,
+      "n_trades": 5339,
+      "skipped_open": 400,
+      "skipped_gross": 176,
+      "by_year": {
+        "2022": {
+          "n": 1511,
+          "pf": 0.89,
+          "roi": -0.1935,
+          "maxdd": -0.2751,
+          "wr": 0.491,
+          "mix": {
+            "LIQ_CASCADE": 1117,
+            "PREMIUM_DISLOCATION": 394
+          }
+        },
+        "2023": {
+          "n": 312,
+          "pf": 1.52,
+          "roi": 0.1189,
+          "maxdd": -0.0266,
+          "wr": 0.59,
+          "mix": {
+            "LIQ_CASCADE": 279,
+            "PREMIUM_DISLOCATION": 33
+          }
+        },
+        "2024": {
+          "n": 1536,
+          "pf": 1.14,
+          "roi": 0.2498,
+          "maxdd": -0.121,
+          "wr": 0.512,
+          "mix": {
+            "LIQ_CASCADE": 861,
+            "PREMIUM_DISLOCATION": 625,
+            "CROWDING_REVERSAL": 50
+          }
+        },
+        "2025": {
+          "n": 1000,
+          "pf": 1.07,
+          "roi": 0.0709,
+          "maxdd": -0.1713,
+          "wr": 0.481,
+          "mix": {
+            "LIQ_CASCADE": 505,
+            "PREMIUM_DISLOCATION": 479,
+            "CROWDING_REVERSAL": 16
+          }
+        },
+        "2026": {
+          "n": 980,
+          "pf": 0.96,
+          "roi": -0.0415,
+          "maxdd": -0.1042,
+          "wr": 0.458,
+          "mix": {
+            "LIQ_CASCADE": 560,
+            "PREMIUM_DISLOCATION": 396,
+            "CROWDING_REVERSAL": 24
+          }
+        }
+      },
+      "final": {
+        "window": "2023-01 \u2192 2026-07",
+        "n": 3828,
+        "roi_total": 0.4355,
+        "roi_ann": 0.1078,
+        "maxdd": -0.1872,
+        "pf": 1.098
+      }
+    }
+  ]
+}

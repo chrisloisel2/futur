@@ -1,0 +1,20 @@
+BTCUSDT:
+  asset: BTCUSDT
+  has_liquidations: false
+  oi_coverage:
+  - '2021-01-01 00:00:00+00:00'
+  - '2025-12-31 23:00:00+00:00'
+  path: data/derivatives/BTCUSDT_1h.parquet
+  rows: 71521
+  status: PARTIAL_BTC_ONLY
+  taker_coverage:
+  - '2020-09-01 00:00:00+00:00'
+  - '2022-12-31 23:00:00+00:00'
+ETHUSDT:
+  asset: ETHUSDT
+  reason: pas d'OI/taker/liquidations historiques pour cet actif
+  status: NO_DERIVATIVES_DATA
+SOLUSDT:
+  asset: SOLUSDT
+  reason: pas d'OI/taker/liquidations historiques pour cet actif
+  status: NO_DERIVATIVES_DATA

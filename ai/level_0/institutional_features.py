@@ -134,6 +134,30 @@ FEATURES_INST_LONG_EXTRA: List[str] = [
     "mfi_20",                   # Money Flow Index
     "dollar_volume_ratio_20",   # dollar volume relatif
 
+    # Order flow — taker pressure (v2: ajout P0.3)
+    "taker_buy_ratio_base",     # taker buy / volume total (momentum agressif)
+    "taker_buy_ratio_quote",    # version quote — confirme le pressure
+    "taker_flow_imbalance_20",  # z-score 20h : excès taker buy → signal directionnel
+    "taker_flow_momentum_5",    # variation rapide du taker ratio (5 barres)
+
+    # Funding rate — signal de déséquilibre perp/spot (v2: ajout P0.3)
+    "funding_rate",             # funding courant (signe = biais directionnel marché)
+    "funding_rate_z_24",        # z-score 24h : extrêmes → risque de retournement
+    "funding_rate_z_72",        # z-score 72h : biais structurel plus long
+
+    # CVD — pression directionnelle nette des takers (v3: ajout plan phase 1)
+    "cvd_4h_z",                 # z-score CVD 4h vs historique 96h
+    "cvd_24h_z",                # z-score CVD 24h
+    "cvd_momentum",             # accélération CVD (diff 6 barres)
+
+    # OI delta — RETIRÉS : oi_sum absent du parquet → 100% zéros (audit hostile)
+    # "oi_delta_8h", "oi_delta_24h", "oi_price_regime" → exclus
+
+    # Basis — E_cvd_basis_real : seul basis_annualized retenu (audit hostile)
+    "basis_annualized",         # funding × 3 × 365 (% annualisé, corr=0.73 funding_rate)
+    # "basis_momentum_8h" : 90.8% zéros → exclu
+    # "basis_extreme_long": 98.5% zéros → exclu
+
     # Régime de tendance
     "hurst_proxy_50",           # tendance persistante vs mean-reverting
     "hurst_proxy_100",

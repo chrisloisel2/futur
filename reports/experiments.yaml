@@ -1,0 +1,199 @@
+- assets: BTC+ETH+BNB+SOL
+  decision: incubate
+  experiment_id: EXP-20260529_2324-d90d54
+  features_version: OHLCV+techniques (base)
+  model: TRMFleetV4_BL
+  n_trades: 317
+  notes: ''
+  pf_oos: 0.638
+  r2_oos: 0.022
+  reason: PF<1 mais V3 améliore (+7.4pts). Alpha insuffisant avec features OHLCV.
+  split: train<H1-2025 cal=H2-2025
+  timestamp: '2026-05-29T23:24:36.159733+00:00'
+  wr_oos: null
+  years: 2022-2025
+- assets: BTC+ETH+BNB+SOL
+  decision: incubate
+  experiment_id: EXP-20260529_2324-227bd8
+  features_version: OHLCV+regime_oversample+ReturnPredictor_gate
+  model: TRMFleetV4_V3
+  n_trades: 554
+  notes: ''
+  pf_oos: 0.841
+  r2_oos: 0.031
+  reason: 'V3>BL +7.4pts mais PF<1. STOP: R²<0.05 sur micro features Ridge.'
+  split: train<H1-2025 cal=H2-2025 NO_LONG_mult=2
+  timestamp: '2026-05-29T23:24:36.160609+00:00'
+  wr_oos: null
+  years: 2022-2025
+- assets: BTC+ETH+SOL+BNB
+  decision: reject
+  experiment_id: EXP-20260529_2324-c7ef6a
+  features_version: OHLCV+CVD+OI_delta+basis (Ridge OOS test)
+  model: ReturnPredictor_Ridge
+  n_trades: 0
+  notes: ''
+  pf_oos: 0.0
+  r2_oos: -0.024
+  reason: R² OOS négatif (-0.024). Features micro n'apportent pas d'alpha linéaire.
+  split: train<=2022 OOS>=2023
+  timestamp: '2026-05-29T23:24:36.163020+00:00'
+  wr_oos: null
+  years: 2023-2025
+- assets: BTC+ETH+SOL
+  decision: incubate
+  experiment_id: EXP-20260529_2325-03adc3
+  features_version: OHLCV+CVD+OI+basis+taker (52 feats)
+  model: LightGBM_simple_v1
+  n_trades: 3921
+  notes: Re-tester avec threshold BTC=0.62, ETH=0.55 (asset-specific). BTC overtrading
+    corrige le verdict.
+  pf_oos: 0.89
+  r2_oos: -0.024
+  reason: 'PF global=0.890 drag BTC (1277t/2024 surtrading). ETH-2025=1.35(410t) SOL-2023=1.42(142t):
+    signal réel.'
+  split: train<test_year-1 cal=H2 prev_year thr=auto
+  timestamp: '2026-05-29T23:25:55.954472+00:00'
+  wr_oos: 0.455
+  years: 2022-2025
+- assets: BTC+ETH+SOL
+  decision: incubate
+  experiment_id: EXP-20260529_2328-e0d101
+  features_version: OHLCV+CVD+OI+basis+taker (52 feats), thr asset-specific
+  model: LightGBM_asset_specific_threshold
+  n_trades: 3012
+  notes: 'Ridge rate alpha non-lin. Focus SOL+ETH. Prochaine: retrain TRM avec micro
+    features sur SOL+ETH uniquement.'
+  pf_oos: 0.995
+  r2_oos: -0.024
+  reason: SOL PF=1.405(2023)+1.351(2024)+1.018(2025). ETH PF=1.132(2025,671t). BTC
+    drag=PF<1. Alpha non-lineaire confirme.
+  split: train<test_year-1 cal=H2 prev_year BTC=0.62 ETH=0.54 SOL=0.55
+  timestamp: '2026-05-29T23:28:18.498104+00:00'
+  wr_oos: 0.463
+  years: 2022-2025
+- assets: SOL (primary), ETH (negative)
+  decision: incubate
+  experiment_id: EXP-20260530_0721-a15280
+  features_version: OHLCV+CVD+OI+basis (H_all, 52 features)
+  model: LightGBM_H_all
+  n_trades: 430
+  notes: 'Interaction nécessaire : OHLCV+CVD+OI+basis. OI seul=0 effet. Micro_only
+    détruit le signal.'
+  pf_oos: 1.265
+  r2_oos: null
+  reason: SOL H_all GO tous critères (4yr_pos, worst=1.055, stress=1.158). Shuffle
+    + BNB/XRP pending. ETH H_all REJECT.
+  split: train<test_year-1 cal=H2 prev_year SOL_thr=0.55
+  timestamp: '2026-05-30T07:21:31.205629+00:00'
+  wr_oos: 0.477
+  years: 2022-2025
+- assets: SOL (primary) + BNB+XRP (controls)
+  decision: promote
+  experiment_id: EXP-20260530_0724-ce8161
+  features_version: OHLCV+CVD+OI+basis (H_all, 52 features)
+  model: LightGBM_H_all_falsified
+  n_trades: 430
+  notes: 'Prochaine: retrain TRM SOL avec H_all features. BNB A_base PF=1.409 shuffle=+0.522
+    → A investiguer separement.'
+  pf_oos: 1.265
+  r2_oos: null
+  reason: Tous critères GO. Shuffle_delta=+0.276 (signal réel). BNB gap=+0.284 XRP
+    gap=+0.264 (controles stables). 4/4 annees positives worst_yr=1.055.
+  split: train<test_year-1 cal=H2 prev_year SOL_thr=0.55
+  timestamp: '2026-05-30T07:24:46.369721+00:00'
+  wr_oos: 0.477
+  years: 2022-2025
+- assets: BNB
+  decision: incubate
+  experiment_id: EXP-20260530_0724-8d589f
+  features_version: OHLCV+taker+funding (A_base, 43 features)
+  model: LightGBM_A_base_BNB
+  n_trades: 211
+  notes: Investiguer séparément. Ne pas ajouter micro features BNB.
+  pf_oos: 1.409
+  r2_oos: null
+  reason: 'PF=1.409 shuffle_delta=+0.522 signal réel. Seul manque: worst_yr=0.929<0.95.
+    Micro features H_all détruisent BNB.'
+  split: train<test_year-1 cal=H2 prev_year BNB_thr=0.63
+  timestamp: '2026-05-30T07:24:46.380195+00:00'
+  wr_oos: 0.578
+  years: 2022-2025
+- assets: SOL
+  decision: promote
+  experiment_id: EXP-20260530_0739-7a664f
+  features_version: OHLCV+CVD+basis_annualized (E_cvd_basis_real, 46 features)
+  model: LightGBM_E_cvd_basis_real
+  n_trades: 425
+  notes: OI absent parquet (backfill requis). Basis_annualized corr=0.728 funding_rate
+    (clip diverge). Shuffle pending.
+  pf_oos: 1.334
+  r2_oos: null
+  reason: PF=1.334 > H_all=1.265. 4/4yr_pos. CVD(+0.094)+basis_annualized(+0.258)+interaction=+0.413.
+    Superadditif.
+  split: train<test_year-1 cal=H2 prev SOL_thr=0.55
+  timestamp: '2026-05-30T07:39:53.870032+00:00'
+  wr_oos: 0.461
+  years: 2022-2025
+- assets: SOL
+  decision: retire
+  experiment_id: EXP-20260530_0739-d05dc1
+  features_version: H_all avec OI zeros (invalide)
+  model: LightGBM_H_all_OI_zeros
+  n_trades: 430
+  notes: ''
+  pf_oos: 1.265
+  r2_oos: null
+  reason: OI 100% zeros (oi_sum absent parquet). Remplacé par E_cvd_basis_real PF=1.334.
+  split: train<test_year-1 cal=H2 prev SOL_thr=0.55
+  timestamp: '2026-05-30T07:39:53.883926+00:00'
+  wr_oos: 0.477
+  years: 2022-2025
+- assets: SOL
+  decision: promote
+  experiment_id: EXP-20260530_1202-f27066
+  features_version: E_cvd_basis_real — audit hostile 6 phases
+  model: LightGBM_E_hostile_audit
+  n_trades: 425
+  notes: '2022 n=14 statistiquement fragile. Prochaine: backfill parquets SOL, retrain
+    TRM avec E features.'
+  pf_oos: 1.334
+  r2_oos: null
+  reason: 4/4 phases hostile passées. shuffle=0.926<1.05. worst_yr=1.222. 5/5 thr>1.15.
+    cost×2 PF=1.218. cvd_24h_z indispensable (ΔPF=-0.392).
+  split: train<test_year-1 cal=H2 prev SOL_thr=0.55
+  timestamp: '2026-05-30T12:02:04.500605+00:00'
+  wr_oos: 0.461
+  years: 2022-2025
+- assets: SOL
+  decision: promote
+  experiment_id: EXP-20260530_1229-3a3be5
+  features_version: E_cvd_basis_real (backfillé parquet SOL)
+  model: TRM_E_SOL_v1 (102 features, thr=0.63)
+  n_trades: 425
+  notes: TRM_E PF sur historique INVALIDE (data leakage). LGB_E est le proxy valide.
+    Surveiller live PF vs LGB_E=1.334.
+  pf_oos: 1.334
+  r2_oos: null
+  reason: LGB_E PF=1.334 hostile 4/4. TRM_E prod retrained avec E features (102 feat,
+    thr=0.63). Gain vs old_V3=+0.493. DD=15.8% borderline.
+  split: train<H1-2025 cal=H2-2025 tst=2026
+  timestamp: '2026-05-30T12:29:58.554920+00:00'
+  wr_oos: 0.461
+  years: 2026 (production)
+- assets: BNB
+  decision: incubate
+  experiment_id: EXP-20260530_1255-5a8d16
+  features_version: A_base (43 features, no micro), thr=0.59
+  model: LightGBM_A_base_BNB_thr059
+  n_trades: 365
+  notes: thr=0.59 optimal. thr=0.60 donne worst=0.962 (>0.95) mais PF=1.324. Surveiller
+    paper 20 trades. PROMOTE si WF 0.95 réalisé en paper.
+  pf_oos: 1.382
+  r2_oos: null
+  reason: worst_yr=0.949 (0.001 sous seuil 0.95). PF=1.382, shuffle=0.867 (delta=+0.515),
+    cost×2=1.198. 7/8 critères PROMOTE. Fragile uniquement en crash bear 2022.
+  split: walk-forward 2022-2025
+  timestamp: '2026-05-30T12:55:30.226913+00:00'
+  wr_oos: 0.556
+  years: 2022-2025

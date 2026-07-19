@@ -62,3 +62,16 @@ env/
 .env
 *.log
 .vscode/settings.json
+data/derivatives_raw/
+data/derivatives_live/
+reports/derivatives_collector.log
+reports/DERIVATIVES_DAILY_*.md
+reports/paper_live/
+reports/paper_v1.log
+data/derivatives_backfill/
+data/events/
+reports/parallel_50/enriched_backfill.log
+reports/parallel_50/parallel_50_backtest.log
+reports/parallel_50/pullback_train.log
+reports/parallel_50/parallel_50_ranked.log
+reports/parallel_50/parallel_50_edge.log

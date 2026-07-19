@@ -1,0 +1,31 @@
+========================================================================
+  MONITORING TRM_E_SOL — SOLUSDT                         2026-05-30T12:36 UTC
+========================================================================
+
+  VERDICT   : WAIT
+  Raison    : Aucun trade enregistré
+
+  ── MÉTRIQUES GLOBALES ──────────────────────────────────────────────
+  n_trades  : 0 fermés  0 ouverts  0 signaux LONG
+  PF        : 0.000  (benchmark LGB_E = 1.334)
+  WR        : 0.0%  (benchmark 46.1%)
+  avg_win   : +0.000%    avg_loss : -0.000%
+  win/loss  : —
+  net PnL   : +0.00%  max DD : 0.0%  (benchmark 15.8%)
+
+  ── ROLLING 5 DERNIERS TRADES ───────────────────────────────────────
+  Insuffisant (0 < 5 requis)
+
+  ── DÉRIVE FEATURES E ───────────────────────────────────────────────
+
+  ── SNAPSHOT FEATURES E (dernier signal LONG) ───────────────────────
+  (aucun signal LONG encore)
+
+  ── RÈGLES ACTIVES ──────────────────────────────────────────────────
+  CONTINUE_PAPER     si PF ≥ 1.2 sur 30 trades
+  INCUBATE           si PF [1.0-1.2[ sur 30 trades
+  REVERT_LGB_E       si PF < 1.0 sur 30 trades
+  PAUSE_SIGNAL       si PF < 0.8 sur 20 trades
+  INVESTIGATE_EXITS  si avg_loss > avg_win × 1.5
+
+========================================================================

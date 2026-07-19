@@ -1,0 +1,879 @@
+{
+  "engine": "LIQ_CASCADE_V2",
+  "events_total": 38141,
+  "config": {
+    "cost_rt": 0.0014,
+    "p_threshold": 0.55,
+    "horizon": "fwd_4h",
+    "sizing": 0.1,
+    "n_bag": 5,
+    "max_concurrent": 3,
+    "features": [
+      "oi_drop_30m",
+      "oi_drop_z",
+      "oi_drop_1h",
+      "px_ret_30m",
+      "px_ret_1h",
+      "px_accel",
+      "taker_z",
+      "toptrader_z",
+      "ls_ratio_z",
+      "vol_24h",
+      "dist_low_24h",
+      "dist_low_7d",
+      "oi_vs_7d",
+      "ret_24h",
+      "hour_utc",
+      "n_events_mktwide_30m",
+      "is_long_cascade",
+      "funding_last",
+      "funding_z30",
+      "oi_ret_2h",
+      "oi_ret_24h",
+      "oi_pctile_30d",
+      "taker_delta_1h",
+      "toptrader_delta_1h",
+      "btc_ret_30m",
+      "btc_vol_24h",
+      "mins_since_prev_event",
+      "n_events_sym_24h",
+      "dow"
+    ]
+  },
+  "folds": [
+    {
+      "year": 2022,
+      "skip": false,
+      "n_train": 597,
+      "n_test": 6125,
+      "ml_gated": {
+        "n": 1239,
+        "pf": 0.795,
+        "wr": 0.492,
+        "mean_net_bps": -33.6,
+        "roi_sized": -0.3476
+      },
+      "ml_frac_traded": 0.202,
+      "portfolio_sim": {
+        "n": 730,
+        "pf": 0.779,
+        "wr": 0.493,
+        "mean_net_bps": -32.3,
+        "roi_sized": -0.2143,
+        "roi_portfolio_style": -0.2143,
+        "n_taken": 730,
+        "n_skipped_concurrency": 509
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 2242,
+          "pf": 0.752,
+          "wr": 0.473,
+          "mean_net_bps": -36.3,
+          "roi_sized": -0.5639
+        },
+        "0.6": {
+          "n": 998,
+          "pf": 0.775,
+          "wr": 0.501,
+          "mean_net_bps": -38.4,
+          "roi_sized": -0.3252
+        },
+        "0.65": {
+          "n": 0,
+          "pf": 0.0,
+          "wr": 0.0,
+          "mean_net_bps": 0.0,
+          "roi_sized": 0.0
+        }
+      },
+      "ml_auc_test": 0.5107,
+      "top_features": [
+        [
+          "mins_since_prev_event",
+          2.0
+        ],
+        [
+          "vol_24h",
+          1.0
+        ],
+        [
+          "hour_utc",
+          0.0
+        ],
+        [
+          "px_accel",
+          0.0
+        ],
+        [
+          "btc_vol_24h",
+          0.0
+        ],
+        [
+          "oi_drop_30m",
+          0.0
+        ],
+        [
+          "taker_z",
+          0.0
+        ],
+        [
+          "n_events_sym_24h",
+          0.0
+        ]
+      ]
+    },
+    {
+      "year": 2023,
+      "skip": false,
+      "n_train": 6722,
+      "n_test": 7868,
+      "ml_gated": {
+        "n": 3,
+        "pf": 1.046,
+        "wr": 0.667,
+        "mean_net_bps": 2.6,
+        "roi_sized": 0.0001
+      },
+      "ml_frac_traded": 0.0,
+      "portfolio_sim": {
+        "n": 3,
+        "pf": 1.046,
+        "wr": 0.667,
+        "mean_net_bps": 2.6,
+        "roi_sized": 0.0001,
+        "roi_portfolio_style": 0.0001,
+        "n_taken": 3,
+        "n_skipped_concurrency": 0
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 516,
+          "pf": 2.345,
+          "wr": 0.624,
+          "mean_net_bps": 73.6,
+          "roi_sized": 0.4598
+        },
+        "0.6": {
+          "n": 3,
+          "pf": 1.046,
+          "wr": 0.667,
+          "mean_net_bps": 2.6,
+          "roi_sized": 0.0001
+        },
+        "0.65": {
+          "n": 3,
+          "pf": 1.046,
+          "wr": 0.667,
+          "mean_net_bps": 2.6,
+          "roi_sized": 0.0001
+        }
+      },
+      "ml_auc_test": 0.5063,
+      "top_features": [
+        [
+          "ret_24h",
+          21.0
+        ],
+        [
+          "btc_vol_24h",
+          18.0
+        ],
+        [
+          "hour_utc",
+          5.0
+        ],
+        [
+          "dist_low_24h",
+          5.0
+        ],
+        [
+          "mins_since_prev_event",
+          4.0
+        ],
+        [
+          "dow",
+          3.0
+        ],
+        [
+          "btc_ret_30m",
+          3.0
+        ],
+        [
+          "dist_low_7d",
+          3.0
+        ]
+      ]
+    },
+    {
+      "year": 2024,
+      "skip": false,
+      "n_train": 14590,
+      "n_test": 9875,
+      "ml_gated": {
+        "n": 3295,
+        "pf": 1.393,
+        "wr": 0.556,
+        "mean_net_bps": 44.1,
+        "roi_sized": 3.1729
+      },
+      "ml_frac_traded": 0.334,
+      "portfolio_sim": {
+        "n": 1136,
+        "pf": 1.031,
+        "wr": 0.513,
+        "mean_net_bps": 3.4,
+        "roi_sized": 0.0331,
+        "roi_portfolio_style": 0.0331,
+        "n_taken": 1136,
+        "n_skipped_concurrency": 2159
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 6014,
+          "pf": 1.227,
+          "wr": 0.529,
+          "mean_net_bps": 23.5,
+          "roi_sized": 2.979
+        },
+        "0.6": {
+          "n": 975,
+          "pf": 1.973,
+          "wr": 0.636,
+          "mean_net_bps": 120.1,
+          "roi_sized": 2.1863
+        },
+        "0.65": {
+          "n": 975,
+          "pf": 1.973,
+          "wr": 0.636,
+          "mean_net_bps": 120.1,
+          "roi_sized": 2.1863
+        }
+      },
+      "ml_auc_test": 0.5518,
+      "top_features": [
+        [
+          "ret_24h",
+          30.0
+        ],
+        [
+          "btc_vol_24h",
+          26.0
+        ],
+        [
+          "toptrader_z",
+          23.0
+        ],
+        [
+          "hour_utc",
+          15.0
+        ],
+        [
+          "btc_ret_30m",
+          9.0
+        ],
+        [
+          "toptrader_delta_1h",
+          8.0
+        ],
+        [
+          "taker_z",
+          6.0
+        ],
+        [
+          "ls_ratio_z",
+          6.0
+        ]
+      ]
+    },
+    {
+      "year": 2025,
+      "skip": false,
+      "n_train": 24465,
+      "n_test": 8767,
+      "ml_gated": {
+        "n": 1157,
+        "pf": 1.111,
+        "wr": 0.513,
+        "mean_net_bps": 17.4,
+        "roi_sized": 0.1935
+      },
+      "ml_frac_traded": 0.132,
+      "portfolio_sim": {
+        "n": 496,
+        "pf": 0.841,
+        "wr": 0.474,
+        "mean_net_bps": -20.3,
+        "roi_sized": -0.0986,
+        "roi_portfolio_style": -0.0986,
+        "n_taken": 496,
+        "n_skipped_concurrency": 662
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 2094,
+          "pf": 1.067,
+          "wr": 0.51,
+          "mean_net_bps": 8.8,
+          "roi_sized": 0.1664
+        },
+        "0.6": {
+          "n": 14,
+          "pf": 1.238,
+          "wr": 0.286,
+          "mean_net_bps": 280.8,
+          "roi_sized": 0.0313
+        },
+        "0.65": {
+          "n": 0,
+          "pf": 0.0,
+          "wr": 0.0,
+          "mean_net_bps": 0.0,
+          "roi_sized": 0.0
+        }
+      },
+      "ml_auc_test": 0.5169,
+      "top_features": [
+        [
+          "ret_24h",
+          42.0
+        ],
+        [
+          "hour_utc",
+          26.0
+        ],
+        [
+          "btc_vol_24h",
+          18.0
+        ],
+        [
+          "px_ret_30m",
+          17.0
+        ],
+        [
+          "px_ret_1h",
+          16.0
+        ],
+        [
+          "toptrader_z",
+          16.0
+        ],
+        [
+          "oi_drop_1h",
+          12.0
+        ],
+        [
+          "toptrader_delta_1h",
+          8.0
+        ]
+      ]
+    },
+    {
+      "year": 2026,
+      "skip": false,
+      "n_train": 33232,
+      "n_test": 4906,
+      "ml_gated": {
+        "n": 101,
+        "pf": 3.633,
+        "wr": 0.693,
+        "mean_net_bps": 246.5,
+        "roi_sized": 0.2803
+      },
+      "ml_frac_traded": 0.021,
+      "portfolio_sim": {
+        "n": 44,
+        "pf": 2.588,
+        "wr": 0.636,
+        "mean_net_bps": 189.8,
+        "roi_sized": 0.0861,
+        "roi_portfolio_style": 0.0861,
+        "n_taken": 44,
+        "n_skipped_concurrency": 57
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 704,
+          "pf": 1.496,
+          "wr": 0.54,
+          "mean_net_bps": 42.9,
+          "roi_sized": 0.3462
+        },
+        "0.6": {
+          "n": 37,
+          "pf": 9.396,
+          "wr": 0.784,
+          "mean_net_bps": 542.6,
+          "roi_sized": 0.2206
+        },
+        "0.65": {
+          "n": 34,
+          "pf": 9.197,
+          "wr": 0.794,
+          "mean_net_bps": 551.5,
+          "roi_sized": 0.2046
+        }
+      },
+      "ml_auc_test": 0.5322,
+      "top_features": [
+        [
+          "ret_24h",
+          91.0
+        ],
+        [
+          "hour_utc",
+          42.0
+        ],
+        [
+          "vol_24h",
+          38.0
+        ],
+        [
+          "btc_vol_24h",
+          31.0
+        ],
+        [
+          "toptrader_z",
+          26.0
+        ],
+        [
+          "px_ret_1h",
+          22.0
+        ],
+        [
+          "toptrader_delta_1h",
+          18.0
+        ],
+        [
+          "px_ret_30m",
+          15.0
+        ]
+      ]
+    }
+  ],
+  "folds_stress": [
+    {
+      "year": 2022,
+      "skip": false,
+      "n_train": 597,
+      "n_test": 6125,
+      "ml_gated": {
+        "n": 780,
+        "pf": 0.679,
+        "wr": 0.473,
+        "mean_net_bps": -63.4,
+        "roi_sized": -0.3956
+      },
+      "ml_frac_traded": 0.127,
+      "portfolio_sim": {
+        "n": 465,
+        "pf": 0.707,
+        "wr": 0.48,
+        "mean_net_bps": -50.6,
+        "roi_sized": -0.2128,
+        "roi_portfolio_style": -0.2128,
+        "n_taken": 465,
+        "n_skipped_concurrency": 315
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 783,
+          "pf": 0.683,
+          "wr": 0.474,
+          "mean_net_bps": -62.4,
+          "roi_sized": -0.3922
+        },
+        "0.6": {
+          "n": 776,
+          "pf": 0.68,
+          "wr": 0.473,
+          "mean_net_bps": -63.4,
+          "roi_sized": -0.3942
+        },
+        "0.65": {
+          "n": 0,
+          "pf": 0.0,
+          "wr": 0.0,
+          "mean_net_bps": 0.0,
+          "roi_sized": 0.0
+        }
+      },
+      "ml_auc_test": 0.5238,
+      "top_features": [
+        [
+          "mins_since_prev_event",
+          4.0
+        ],
+        [
+          "vol_24h",
+          2.0
+        ],
+        [
+          "hour_utc",
+          1.0
+        ],
+        [
+          "px_accel",
+          1.0
+        ],
+        [
+          "oi_drop_30m",
+          1.0
+        ],
+        [
+          "btc_vol_24h",
+          0.0
+        ],
+        [
+          "taker_z",
+          0.0
+        ],
+        [
+          "dist_low_7d",
+          0.0
+        ]
+      ]
+    },
+    {
+      "year": 2023,
+      "skip": false,
+      "n_train": 6722,
+      "n_test": 7868,
+      "ml_gated": {
+        "n": 29,
+        "pf": 14.525,
+        "wr": 0.828,
+        "mean_net_bps": 244.7,
+        "roi_sized": 0.0733
+      },
+      "ml_frac_traded": 0.004,
+      "portfolio_sim": {
+        "n": 7,
+        "pf": Infinity,
+        "wr": 1.0,
+        "mean_net_bps": 369.7,
+        "roi_sized": 0.0261,
+        "roi_portfolio_style": 0.0261,
+        "n_taken": 7,
+        "n_skipped_concurrency": 22
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 87,
+          "pf": 3.981,
+          "wr": 0.759,
+          "mean_net_bps": 132.5,
+          "roi_sized": 0.1218
+        },
+        "0.6": {
+          "n": 8,
+          "pf": 0.497,
+          "wr": 0.375,
+          "mean_net_bps": -33.0,
+          "roi_sized": -0.0026
+        },
+        "0.65": {
+          "n": 3,
+          "pf": 0.813,
+          "wr": 0.667,
+          "mean_net_bps": -11.4,
+          "roi_sized": -0.0003
+        }
+      },
+      "ml_auc_test": 0.5107,
+      "top_features": [
+        [
+          "ret_24h",
+          27.0
+        ],
+        [
+          "btc_vol_24h",
+          25.0
+        ],
+        [
+          "dist_low_24h",
+          6.0
+        ],
+        [
+          "mins_since_prev_event",
+          5.0
+        ],
+        [
+          "hour_utc",
+          5.0
+        ],
+        [
+          "btc_ret_30m",
+          4.0
+        ],
+        [
+          "px_ret_1h",
+          4.0
+        ],
+        [
+          "dow",
+          3.0
+        ]
+      ]
+    },
+    {
+      "year": 2024,
+      "skip": false,
+      "n_train": 14590,
+      "n_test": 9875,
+      "ml_gated": {
+        "n": 1303,
+        "pf": 1.642,
+        "wr": 0.6,
+        "mean_net_bps": 84.9,
+        "roi_sized": 1.9779
+      },
+      "ml_frac_traded": 0.132,
+      "portfolio_sim": {
+        "n": 360,
+        "pf": 0.9,
+        "wr": 0.503,
+        "mean_net_bps": -15.2,
+        "roi_sized": -0.0562,
+        "roi_portfolio_style": -0.0562,
+        "n_taken": 360,
+        "n_skipped_concurrency": 943
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 2552,
+          "pf": 1.317,
+          "wr": 0.547,
+          "mean_net_bps": 40.8,
+          "roi_sized": 1.7669
+        },
+        "0.6": {
+          "n": 1302,
+          "pf": 1.641,
+          "wr": 0.6,
+          "mean_net_bps": 84.8,
+          "roi_sized": 1.9709
+        },
+        "0.65": {
+          "n": 1109,
+          "pf": 1.742,
+          "wr": 0.61,
+          "mean_net_bps": 97.1,
+          "roi_sized": 1.8959
+        }
+      },
+      "ml_auc_test": 0.5582,
+      "top_features": [
+        [
+          "ret_24h",
+          36.0
+        ],
+        [
+          "btc_vol_24h",
+          29.0
+        ],
+        [
+          "toptrader_z",
+          20.0
+        ],
+        [
+          "hour_utc",
+          14.0
+        ],
+        [
+          "toptrader_delta_1h",
+          7.0
+        ],
+        [
+          "btc_ret_30m",
+          7.0
+        ],
+        [
+          "ls_ratio_z",
+          6.0
+        ],
+        [
+          "taker_z",
+          6.0
+        ]
+      ]
+    },
+    {
+      "year": 2025,
+      "skip": false,
+      "n_train": 24465,
+      "n_test": 8767,
+      "ml_gated": {
+        "n": 1062,
+        "pf": 1.017,
+        "wr": 0.486,
+        "mean_net_bps": 3.0,
+        "roi_sized": 0.0072
+      },
+      "ml_frac_traded": 0.121,
+      "portfolio_sim": {
+        "n": 446,
+        "pf": 0.722,
+        "wr": 0.448,
+        "mean_net_bps": -40.7,
+        "roi_sized": -0.1686,
+        "roi_portfolio_style": -0.1686,
+        "n_taken": 446,
+        "n_skipped_concurrency": 617
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 1726,
+          "pf": 1.032,
+          "wr": 0.501,
+          "mean_net_bps": 4.7,
+          "roi_sized": 0.0538
+        },
+        "0.6": {
+          "n": 16,
+          "pf": 1.058,
+          "wr": 0.25,
+          "mean_net_bps": 69.6,
+          "roi_sized": 0.0024
+        },
+        "0.65": {
+          "n": 16,
+          "pf": 1.058,
+          "wr": 0.25,
+          "mean_net_bps": 69.6,
+          "roi_sized": 0.0024
+        }
+      },
+      "ml_auc_test": 0.5242,
+      "top_features": [
+        [
+          "ret_24h",
+          64.0
+        ],
+        [
+          "hour_utc",
+          29.0
+        ],
+        [
+          "px_ret_1h",
+          23.0
+        ],
+        [
+          "px_ret_30m",
+          21.0
+        ],
+        [
+          "btc_vol_24h",
+          19.0
+        ],
+        [
+          "toptrader_z",
+          19.0
+        ],
+        [
+          "oi_drop_1h",
+          16.0
+        ],
+        [
+          "vol_24h",
+          10.0
+        ]
+      ]
+    },
+    {
+      "year": 2026,
+      "skip": false,
+      "n_train": 33232,
+      "n_test": 4906,
+      "ml_gated": {
+        "n": 80,
+        "pf": 4.645,
+        "wr": 0.725,
+        "mean_net_bps": 294.0,
+        "roi_sized": 0.2631
+      },
+      "ml_frac_traded": 0.016,
+      "portfolio_sim": {
+        "n": 34,
+        "pf": 3.006,
+        "wr": 0.676,
+        "mean_net_bps": 233.2,
+        "roi_sized": 0.0816,
+        "roi_portfolio_style": 0.0816,
+        "n_taken": 34,
+        "n_skipped_concurrency": 46
+      },
+      "threshold_ladder": {
+        "0.5": {
+          "n": 80,
+          "pf": 4.645,
+          "wr": 0.725,
+          "mean_net_bps": 294.0,
+          "roi_sized": 0.2631
+        },
+        "0.6": {
+          "n": 79,
+          "pf": 4.784,
+          "wr": 0.734,
+          "mean_net_bps": 300.1,
+          "roi_sized": 0.2655
+        },
+        "0.65": {
+          "n": 49,
+          "pf": 4.72,
+          "wr": 0.735,
+          "mean_net_bps": 356.1,
+          "roi_sized": 0.1893
+        }
+      },
+      "ml_auc_test": 0.548,
+      "top_features": [
+        [
+          "ret_24h",
+          106.0
+        ],
+        [
+          "vol_24h",
+          54.0
+        ],
+        [
+          "hour_utc",
+          39.0
+        ],
+        [
+          "btc_vol_24h",
+          29.0
+        ],
+        [
+          "toptrader_z",
+          27.0
+        ],
+        [
+          "px_ret_1h",
+          23.0
+        ],
+        [
+          "toptrader_delta_1h",
+          15.0
+        ],
+        [
+          "btc_ret_30m",
+          14.0
+        ]
+      ]
+    }
+  ],
+  "verdict": "NO_EDGE",
+  "verdict_rule": {
+    "min_train_events": 2000,
+    "excluded_folds": [
+      2022
+    ],
+    "pf_ok_folds": [
+      2024,
+      2026
+    ],
+    "destructive_folds": []
+  }
+}

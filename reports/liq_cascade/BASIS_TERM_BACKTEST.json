@@ -1,0 +1,880 @@
+{
+  "config": {
+    "costs": 0.0023,
+    "primary_entry": 0.05,
+    "window_days": [
+      10,
+      120
+    ]
+  },
+  "runs": {
+    "entry3_size25": {
+      "stats": {
+        "n_trades": 44,
+        "roi_total": 0.2307,
+        "roi_ann": 0.0375,
+        "maxdd": -0.0246,
+        "by_year": {
+          "2021": 0.0623,
+          "2022": 0.0195,
+          "2023": 0.0176,
+          "2024": 0.0782,
+          "2025": 0.0313,
+          "2026": 0.0042
+        },
+        "avg_capture_bps": 190.2
+      },
+      "trades": null
+    },
+    "entry3_size50": {
+      "stats": {
+        "n_trades": 44,
+        "roi_total": 0.5097,
+        "roi_ann": 0.0758,
+        "maxdd": -0.049,
+        "by_year": {
+          "2021": 0.1269,
+          "2022": 0.0393,
+          "2023": 0.0356,
+          "2024": 0.1616,
+          "2025": 0.0635,
+          "2026": 0.0076
+        },
+        "avg_capture_bps": 190.2
+      },
+      "trades": null
+    },
+    "entry5_size25": {
+      "stats": {
+        "n_trades": 38,
+        "roi_total": 0.232,
+        "roi_ann": 0.0413,
+        "maxdd": -0.0217,
+        "by_year": {
+          "2021": 0.0652,
+          "2022": 0.0181,
+          "2023": 0.0188,
+          "2024": 0.0782,
+          "2025": 0.0322,
+          "2026": 0.0019
+        },
+        "avg_capture_bps": 221.0
+      },
+      "trades": [
+        {
+          "contract": "BTCUSDT_210326",
+          "symbol": "BTCUSDT",
+          "entry": "2021-02-03",
+          "expiry": "2021-03-26",
+          "basis_entry": 0.02687,
+          "ann_at_entry": 0.1923,
+          "days_held": 51,
+          "capture_net": 0.02457
+        },
+        {
+          "contract": "BTCUSDT_210625",
+          "symbol": "BTCUSDT",
+          "entry": "2021-03-27",
+          "expiry": "2021-06-25",
+          "basis_entry": 0.06277,
+          "ann_at_entry": 0.2546,
+          "days_held": 90,
+          "capture_net": 0.06047
+        },
+        {
+          "contract": "BTCUSDT_210924",
+          "symbol": "BTCUSDT",
+          "entry": "2021-06-28",
+          "expiry": "2021-09-24",
+          "basis_entry": 0.01318,
+          "ann_at_entry": 0.0547,
+          "days_held": 88,
+          "capture_net": 0.01088
+        },
+        {
+          "contract": "BTCUSDT_211231",
+          "symbol": "BTCUSDT",
+          "entry": "2021-09-25",
+          "expiry": "2021-12-31",
+          "basis_entry": 0.01772,
+          "ann_at_entry": 0.0667,
+          "days_held": 97,
+          "capture_net": 0.01542
+        },
+        {
+          "contract": "BTCUSDT_220325",
+          "symbol": "BTCUSDT",
+          "entry": "2022-01-01",
+          "expiry": "2022-03-25",
+          "basis_entry": 0.02292,
+          "ann_at_entry": 0.1008,
+          "days_held": 83,
+          "capture_net": 0.02062
+        },
+        {
+          "contract": "BTCUSDT_220624",
+          "symbol": "BTCUSDT",
+          "entry": "2022-03-26",
+          "expiry": "2022-06-24",
+          "basis_entry": 0.01295,
+          "ann_at_entry": 0.0525,
+          "days_held": 90,
+          "capture_net": 0.01065
+        },
+        {
+          "contract": "BTCUSDT_220930",
+          "symbol": "BTCUSDT",
+          "entry": "2022-07-29",
+          "expiry": "2022-09-30",
+          "basis_entry": 0.00893,
+          "ann_at_entry": 0.0517,
+          "days_held": 63,
+          "capture_net": 0.00663
+        },
+        {
+          "contract": "BTCUSDT_230331",
+          "symbol": "BTCUSDT",
+          "entry": "2023-01-24",
+          "expiry": "2023-03-31",
+          "basis_entry": 0.01011,
+          "ann_at_entry": 0.0559,
+          "days_held": 66,
+          "capture_net": 0.00781
+        },
+        {
+          "contract": "BTCUSDT_230630",
+          "symbol": "BTCUSDT",
+          "entry": "2023-04-01",
+          "expiry": "2023-06-30",
+          "basis_entry": 0.0133,
+          "ann_at_entry": 0.0539,
+          "days_held": 90,
+          "capture_net": 0.011
+        },
+        {
+          "contract": "BTCUSDT_230929",
+          "symbol": "BTCUSDT",
+          "entry": "2023-07-01",
+          "expiry": "2023-09-29",
+          "basis_entry": 0.0183,
+          "ann_at_entry": 0.0742,
+          "days_held": 90,
+          "capture_net": 0.016
+        },
+        {
+          "contract": "BTCUSDT_231229",
+          "symbol": "BTCUSDT",
+          "entry": "2023-10-01",
+          "expiry": "2023-12-29",
+          "basis_entry": 0.01284,
+          "ann_at_entry": 0.0527,
+          "days_held": 89,
+          "capture_net": 0.01054
+        },
+        {
+          "contract": "BTCUSDT_240329",
+          "symbol": "BTCUSDT",
+          "entry": "2023-12-30",
+          "expiry": "2024-03-29",
+          "basis_entry": 0.04693,
+          "ann_at_entry": 0.1903,
+          "days_held": 90,
+          "capture_net": 0.04463
+        },
+        {
+          "contract": "BTCUSDT_240628",
+          "symbol": "BTCUSDT",
+          "entry": "2024-03-30",
+          "expiry": "2024-06-28",
+          "basis_entry": 0.06468,
+          "ann_at_entry": 0.2623,
+          "days_held": 90,
+          "capture_net": 0.06238
+        },
+        {
+          "contract": "BTCUSDT_240927",
+          "symbol": "BTCUSDT",
+          "entry": "2024-06-29",
+          "expiry": "2024-09-27",
+          "basis_entry": 0.02825,
+          "ann_at_entry": 0.1146,
+          "days_held": 90,
+          "capture_net": 0.02595
+        },
+        {
+          "contract": "BTCUSDT_241227",
+          "symbol": "BTCUSDT",
+          "entry": "2024-09-28",
+          "expiry": "2024-12-27",
+          "basis_entry": 0.02026,
+          "ann_at_entry": 0.0822,
+          "days_held": 90,
+          "capture_net": 0.01796
+        },
+        {
+          "contract": "BTCUSDT_250328",
+          "symbol": "BTCUSDT",
+          "entry": "2024-12-28",
+          "expiry": "2025-03-28",
+          "basis_entry": 0.03195,
+          "ann_at_entry": 0.1296,
+          "days_held": 90,
+          "capture_net": 0.02965
+        },
+        {
+          "contract": "BTCUSDT_250627",
+          "symbol": "BTCUSDT",
+          "entry": "2025-04-01",
+          "expiry": "2025-06-27",
+          "basis_entry": 0.01216,
+          "ann_at_entry": 0.051,
+          "days_held": 87,
+          "capture_net": 0.00986
+        },
+        {
+          "contract": "BTCUSDT_250926",
+          "symbol": "BTCUSDT",
+          "entry": "2025-07-09",
+          "expiry": "2025-09-26",
+          "basis_entry": 0.01276,
+          "ann_at_entry": 0.059,
+          "days_held": 79,
+          "capture_net": 0.01046
+        },
+        {
+          "contract": "BTCUSDT_251226",
+          "symbol": "BTCUSDT",
+          "entry": "2025-09-27",
+          "expiry": "2025-12-26",
+          "basis_entry": 0.01663,
+          "ann_at_entry": 0.0674,
+          "days_held": 90,
+          "capture_net": 0.01433
+        },
+        {
+          "contract": "BTCUSDT_260327",
+          "symbol": "BTCUSDT",
+          "entry": "2025-12-27",
+          "expiry": "2026-03-27",
+          "basis_entry": 0.01295,
+          "ann_at_entry": 0.0525,
+          "days_held": 90,
+          "capture_net": 0.01065
+        },
+        {
+          "contract": "ETHUSDT_210326",
+          "symbol": "ETHUSDT",
+          "entry": "2021-02-04",
+          "expiry": "2021-03-26",
+          "basis_entry": 0.04375,
+          "ann_at_entry": 0.3194,
+          "days_held": 50,
+          "capture_net": 0.04145
+        },
+        {
+          "contract": "ETHUSDT_210625",
+          "symbol": "ETHUSDT",
+          "entry": "2021-03-27",
+          "expiry": "2021-06-25",
+          "basis_entry": 0.0723,
+          "ann_at_entry": 0.2932,
+          "days_held": 90,
+          "capture_net": 0.07
+        },
+        {
+          "contract": "ETHUSDT_210924",
+          "symbol": "ETHUSDT",
+          "entry": "2021-06-30",
+          "expiry": "2021-09-24",
+          "basis_entry": 0.0184,
+          "ann_at_entry": 0.0781,
+          "days_held": 86,
+          "capture_net": 0.0161
+        },
+        {
+          "contract": "ETHUSDT_211231",
+          "symbol": "ETHUSDT",
+          "entry": "2021-09-25",
+          "expiry": "2021-12-31",
+          "basis_entry": 0.01885,
+          "ann_at_entry": 0.0709,
+          "days_held": 97,
+          "capture_net": 0.01655
+        },
+        {
+          "contract": "ETHUSDT_220325",
+          "symbol": "ETHUSDT",
+          "entry": "2022-01-01",
+          "expiry": "2022-03-25",
+          "basis_entry": 0.02406,
+          "ann_at_entry": 0.1058,
+          "days_held": 83,
+          "capture_net": 0.02176
+        },
+        {
+          "contract": "ETHUSDT_220624",
+          "symbol": "ETHUSDT",
+          "entry": "2022-03-26",
+          "expiry": "2022-06-24",
+          "basis_entry": 0.01465,
+          "ann_at_entry": 0.0594,
+          "days_held": 90,
+          "capture_net": 0.01235
+        },
+        {
+          "contract": "ETHUSDT_230331",
+          "symbol": "ETHUSDT",
+          "entry": "2023-01-27",
+          "expiry": "2023-03-31",
+          "basis_entry": 0.00864,
+          "ann_at_entry": 0.0501,
+          "days_held": 63,
+          "capture_net": 0.00634
+        },
+        {
+          "contract": "ETHUSDT_230630",
+          "symbol": "ETHUSDT",
+          "entry": "2023-04-01",
+          "expiry": "2023-06-30",
+          "basis_entry": 0.01384,
+          "ann_at_entry": 0.0561,
+          "days_held": 90,
+          "capture_net": 0.01154
+        },
+        {
+          "contract": "ETHUSDT_230929",
+          "symbol": "ETHUSDT",
+          "entry": "2023-07-01",
+          "expiry": "2023-09-29",
+          "basis_entry": 0.01262,
+          "ann_at_entry": 0.0512,
+          "days_held": 90,
+          "capture_net": 0.01032
+        },
+        {
+          "contract": "ETHUSDT_231229",
+          "symbol": "ETHUSDT",
+          "entry": "2023-10-27",
+          "expiry": "2023-12-29",
+          "basis_entry": 0.00891,
+          "ann_at_entry": 0.0516,
+          "days_held": 63,
+          "capture_net": 0.00661
+        },
+        {
+          "contract": "ETHUSDT_240329",
+          "symbol": "ETHUSDT",
+          "entry": "2023-12-30",
+          "expiry": "2024-03-29",
+          "basis_entry": 0.04276,
+          "ann_at_entry": 0.1734,
+          "days_held": 90,
+          "capture_net": 0.04046
+        },
+        {
+          "contract": "ETHUSDT_240628",
+          "symbol": "ETHUSDT",
+          "entry": "2024-03-30",
+          "expiry": "2024-06-28",
+          "basis_entry": 0.0655,
+          "ann_at_entry": 0.2656,
+          "days_held": 90,
+          "capture_net": 0.0632
+        },
+        {
+          "contract": "ETHUSDT_240927",
+          "symbol": "ETHUSDT",
+          "entry": "2024-06-29",
+          "expiry": "2024-09-27",
+          "basis_entry": 0.0303,
+          "ann_at_entry": 0.1229,
+          "days_held": 90,
+          "capture_net": 0.028
+        },
+        {
+          "contract": "ETHUSDT_241227",
+          "symbol": "ETHUSDT",
+          "entry": "2024-09-28",
+          "expiry": "2024-12-27",
+          "basis_entry": 0.0178,
+          "ann_at_entry": 0.0722,
+          "days_held": 90,
+          "capture_net": 0.0155
+        },
+        {
+          "contract": "ETHUSDT_250328",
+          "symbol": "ETHUSDT",
+          "entry": "2024-12-28",
+          "expiry": "2025-03-28",
+          "basis_entry": 0.03103,
+          "ann_at_entry": 0.1258,
+          "days_held": 90,
+          "capture_net": 0.02873
+        },
+        {
+          "contract": "ETHUSDT_250627",
+          "symbol": "ETHUSDT",
+          "entry": "2025-04-29",
+          "expiry": "2025-06-27",
+          "basis_entry": 0.00878,
+          "ann_at_entry": 0.0543,
+          "days_held": 59,
+          "capture_net": 0.00648
+        },
+        {
+          "contract": "ETHUSDT_250926",
+          "symbol": "ETHUSDT",
+          "entry": "2025-07-09",
+          "expiry": "2025-09-26",
+          "basis_entry": 0.01232,
+          "ann_at_entry": 0.0569,
+          "days_held": 79,
+          "capture_net": 0.01002
+        },
+        {
+          "contract": "ETHUSDT_251226",
+          "symbol": "ETHUSDT",
+          "entry": "2025-09-27",
+          "expiry": "2025-12-26",
+          "basis_entry": 0.01609,
+          "ann_at_entry": 0.0653,
+          "days_held": 90,
+          "capture_net": 0.01379
+        }
+      ]
+    },
+    "entry5_size50": {
+      "stats": {
+        "n_trades": 38,
+        "roi_total": 0.5139,
+        "roi_ann": 0.0839,
+        "maxdd": -0.0432,
+        "by_year": {
+          "2021": 0.133,
+          "2022": 0.0366,
+          "2023": 0.0379,
+          "2024": 0.1616,
+          "2025": 0.0654,
+          "2026": 0.0036
+        },
+        "avg_capture_bps": 221.0
+      },
+      "trades": [
+        {
+          "contract": "BTCUSDT_210326",
+          "symbol": "BTCUSDT",
+          "entry": "2021-02-03",
+          "expiry": "2021-03-26",
+          "basis_entry": 0.02687,
+          "ann_at_entry": 0.1923,
+          "days_held": 51,
+          "capture_net": 0.02457
+        },
+        {
+          "contract": "BTCUSDT_210625",
+          "symbol": "BTCUSDT",
+          "entry": "2021-03-27",
+          "expiry": "2021-06-25",
+          "basis_entry": 0.06277,
+          "ann_at_entry": 0.2546,
+          "days_held": 90,
+          "capture_net": 0.06047
+        },
+        {
+          "contract": "BTCUSDT_210924",
+          "symbol": "BTCUSDT",
+          "entry": "2021-06-28",
+          "expiry": "2021-09-24",
+          "basis_entry": 0.01318,
+          "ann_at_entry": 0.0547,
+          "days_held": 88,
+          "capture_net": 0.01088
+        },
+        {
+          "contract": "BTCUSDT_211231",
+          "symbol": "BTCUSDT",
+          "entry": "2021-09-25",
+          "expiry": "2021-12-31",
+          "basis_entry": 0.01772,
+          "ann_at_entry": 0.0667,
+          "days_held": 97,
+          "capture_net": 0.01542
+        },
+        {
+          "contract": "BTCUSDT_220325",
+          "symbol": "BTCUSDT",
+          "entry": "2022-01-01",
+          "expiry": "2022-03-25",
+          "basis_entry": 0.02292,
+          "ann_at_entry": 0.1008,
+          "days_held": 83,
+          "capture_net": 0.02062
+        },
+        {
+          "contract": "BTCUSDT_220624",
+          "symbol": "BTCUSDT",
+          "entry": "2022-03-26",
+          "expiry": "2022-06-24",
+          "basis_entry": 0.01295,
+          "ann_at_entry": 0.0525,
+          "days_held": 90,
+          "capture_net": 0.01065
+        },
+        {
+          "contract": "BTCUSDT_220930",
+          "symbol": "BTCUSDT",
+          "entry": "2022-07-29",
+          "expiry": "2022-09-30",
+          "basis_entry": 0.00893,
+          "ann_at_entry": 0.0517,
+          "days_held": 63,
+          "capture_net": 0.00663
+        },
+        {
+          "contract": "BTCUSDT_230331",
+          "symbol": "BTCUSDT",
+          "entry": "2023-01-24",
+          "expiry": "2023-03-31",
+          "basis_entry": 0.01011,
+          "ann_at_entry": 0.0559,
+          "days_held": 66,
+          "capture_net": 0.00781
+        },
+        {
+          "contract": "BTCUSDT_230630",
+          "symbol": "BTCUSDT",
+          "entry": "2023-04-01",
+          "expiry": "2023-06-30",
+          "basis_entry": 0.0133,
+          "ann_at_entry": 0.0539,
+          "days_held": 90,
+          "capture_net": 0.011
+        },
+        {
+          "contract": "BTCUSDT_230929",
+          "symbol": "BTCUSDT",
+          "entry": "2023-07-01",
+          "expiry": "2023-09-29",
+          "basis_entry": 0.0183,
+          "ann_at_entry": 0.0742,
+          "days_held": 90,
+          "capture_net": 0.016
+        },
+        {
+          "contract": "BTCUSDT_231229",
+          "symbol": "BTCUSDT",
+          "entry": "2023-10-01",
+          "expiry": "2023-12-29",
+          "basis_entry": 0.01284,
+          "ann_at_entry": 0.0527,
+          "days_held": 89,
+          "capture_net": 0.01054
+        },
+        {
+          "contract": "BTCUSDT_240329",
+          "symbol": "BTCUSDT",
+          "entry": "2023-12-30",
+          "expiry": "2024-03-29",
+          "basis_entry": 0.04693,
+          "ann_at_entry": 0.1903,
+          "days_held": 90,
+          "capture_net": 0.04463
+        },
+        {
+          "contract": "BTCUSDT_240628",
+          "symbol": "BTCUSDT",
+          "entry": "2024-03-30",
+          "expiry": "2024-06-28",
+          "basis_entry": 0.06468,
+          "ann_at_entry": 0.2623,
+          "days_held": 90,
+          "capture_net": 0.06238
+        },
+        {
+          "contract": "BTCUSDT_240927",
+          "symbol": "BTCUSDT",
+          "entry": "2024-06-29",
+          "expiry": "2024-09-27",
+          "basis_entry": 0.02825,
+          "ann_at_entry": 0.1146,
+          "days_held": 90,
+          "capture_net": 0.02595
+        },
+        {
+          "contract": "BTCUSDT_241227",
+          "symbol": "BTCUSDT",
+          "entry": "2024-09-28",
+          "expiry": "2024-12-27",
+          "basis_entry": 0.02026,
+          "ann_at_entry": 0.0822,
+          "days_held": 90,
+          "capture_net": 0.01796
+        },
+        {
+          "contract": "BTCUSDT_250328",
+          "symbol": "BTCUSDT",
+          "entry": "2024-12-28",
+          "expiry": "2025-03-28",
+          "basis_entry": 0.03195,
+          "ann_at_entry": 0.1296,
+          "days_held": 90,
+          "capture_net": 0.02965
+        },
+        {
+          "contract": "BTCUSDT_250627",
+          "symbol": "BTCUSDT",
+          "entry": "2025-04-01",
+          "expiry": "2025-06-27",
+          "basis_entry": 0.01216,
+          "ann_at_entry": 0.051,
+          "days_held": 87,
+          "capture_net": 0.00986
+        },
+        {
+          "contract": "BTCUSDT_250926",
+          "symbol": "BTCUSDT",
+          "entry": "2025-07-09",
+          "expiry": "2025-09-26",
+          "basis_entry": 0.01276,
+          "ann_at_entry": 0.059,
+          "days_held": 79,
+          "capture_net": 0.01046
+        },
+        {
+          "contract": "BTCUSDT_251226",
+          "symbol": "BTCUSDT",
+          "entry": "2025-09-27",
+          "expiry": "2025-12-26",
+          "basis_entry": 0.01663,
+          "ann_at_entry": 0.0674,
+          "days_held": 90,
+          "capture_net": 0.01433
+        },
+        {
+          "contract": "BTCUSDT_260327",
+          "symbol": "BTCUSDT",
+          "entry": "2025-12-27",
+          "expiry": "2026-03-27",
+          "basis_entry": 0.01295,
+          "ann_at_entry": 0.0525,
+          "days_held": 90,
+          "capture_net": 0.01065
+        },
+        {
+          "contract": "ETHUSDT_210326",
+          "symbol": "ETHUSDT",
+          "entry": "2021-02-04",
+          "expiry": "2021-03-26",
+          "basis_entry": 0.04375,
+          "ann_at_entry": 0.3194,
+          "days_held": 50,
+          "capture_net": 0.04145
+        },
+        {
+          "contract": "ETHUSDT_210625",
+          "symbol": "ETHUSDT",
+          "entry": "2021-03-27",
+          "expiry": "2021-06-25",
+          "basis_entry": 0.0723,
+          "ann_at_entry": 0.2932,
+          "days_held": 90,
+          "capture_net": 0.07
+        },
+        {
+          "contract": "ETHUSDT_210924",
+          "symbol": "ETHUSDT",
+          "entry": "2021-06-30",
+          "expiry": "2021-09-24",
+          "basis_entry": 0.0184,
+          "ann_at_entry": 0.0781,
+          "days_held": 86,
+          "capture_net": 0.0161
+        },
+        {
+          "contract": "ETHUSDT_211231",
+          "symbol": "ETHUSDT",
+          "entry": "2021-09-25",
+          "expiry": "2021-12-31",
+          "basis_entry": 0.01885,
+          "ann_at_entry": 0.0709,
+          "days_held": 97,
+          "capture_net": 0.01655
+        },
+        {
+          "contract": "ETHUSDT_220325",
+          "symbol": "ETHUSDT",
+          "entry": "2022-01-01",
+          "expiry": "2022-03-25",
+          "basis_entry": 0.02406,
+          "ann_at_entry": 0.1058,
+          "days_held": 83,
+          "capture_net": 0.02176
+        },
+        {
+          "contract": "ETHUSDT_220624",
+          "symbol": "ETHUSDT",
+          "entry": "2022-03-26",
+          "expiry": "2022-06-24",
+          "basis_entry": 0.01465,
+          "ann_at_entry": 0.0594,
+          "days_held": 90,
+          "capture_net": 0.01235
+        },
+        {
+          "contract": "ETHUSDT_230331",
+          "symbol": "ETHUSDT",
+          "entry": "2023-01-27",
+          "expiry": "2023-03-31",
+          "basis_entry": 0.00864,
+          "ann_at_entry": 0.0501,
+          "days_held": 63,
+          "capture_net": 0.00634
+        },
+        {
+          "contract": "ETHUSDT_230630",
+          "symbol": "ETHUSDT",
+          "entry": "2023-04-01",
+          "expiry": "2023-06-30",
+          "basis_entry": 0.01384,
+          "ann_at_entry": 0.0561,
+          "days_held": 90,
+          "capture_net": 0.01154
+        },
+        {
+          "contract": "ETHUSDT_230929",
+          "symbol": "ETHUSDT",
+          "entry": "2023-07-01",
+          "expiry": "2023-09-29",
+          "basis_entry": 0.01262,
+          "ann_at_entry": 0.0512,
+          "days_held": 90,
+          "capture_net": 0.01032
+        },
+        {
+          "contract": "ETHUSDT_231229",
+          "symbol": "ETHUSDT",
+          "entry": "2023-10-27",
+          "expiry": "2023-12-29",
+          "basis_entry": 0.00891,
+          "ann_at_entry": 0.0516,
+          "days_held": 63,
+          "capture_net": 0.00661
+        },
+        {
+          "contract": "ETHUSDT_240329",
+          "symbol": "ETHUSDT",
+          "entry": "2023-12-30",
+          "expiry": "2024-03-29",
+          "basis_entry": 0.04276,
+          "ann_at_entry": 0.1734,
+          "days_held": 90,
+          "capture_net": 0.04046
+        },
+        {
+          "contract": "ETHUSDT_240628",
+          "symbol": "ETHUSDT",
+          "entry": "2024-03-30",
+          "expiry": "2024-06-28",
+          "basis_entry": 0.0655,
+          "ann_at_entry": 0.2656,
+          "days_held": 90,
+          "capture_net": 0.0632
+        },
+        {
+          "contract": "ETHUSDT_240927",
+          "symbol": "ETHUSDT",
+          "entry": "2024-06-29",
+          "expiry": "2024-09-27",
+          "basis_entry": 0.0303,
+          "ann_at_entry": 0.1229,
+          "days_held": 90,
+          "capture_net": 0.028
+        },
+        {
+          "contract": "ETHUSDT_241227",
+          "symbol": "ETHUSDT",
+          "entry": "2024-09-28",
+          "expiry": "2024-12-27",
+          "basis_entry": 0.0178,
+          "ann_at_entry": 0.0722,
+          "days_held": 90,
+          "capture_net": 0.0155
+        },
+        {
+          "contract": "ETHUSDT_250328",
+          "symbol": "ETHUSDT",
+          "entry": "2024-12-28",
+          "expiry": "2025-03-28",
+          "basis_entry": 0.03103,
+          "ann_at_entry": 0.1258,
+          "days_held": 90,
+          "capture_net": 0.02873
+        },
+        {
+          "contract": "ETHUSDT_250627",
+          "symbol": "ETHUSDT",
+          "entry": "2025-04-29",
+          "expiry": "2025-06-27",
+          "basis_entry": 0.00878,
+          "ann_at_entry": 0.0543,
+          "days_held": 59,
+          "capture_net": 0.00648
+        },
+        {
+          "contract": "ETHUSDT_250926",
+          "symbol": "ETHUSDT",
+          "entry": "2025-07-09",
+          "expiry": "2025-09-26",
+          "basis_entry": 0.01232,
+          "ann_at_entry": 0.0569,
+          "days_held": 79,
+          "capture_net": 0.01002
+        },
+        {
+          "contract": "ETHUSDT_251226",
+          "symbol": "ETHUSDT",
+          "entry": "2025-09-27",
+          "expiry": "2025-12-26",
+          "basis_entry": 0.01609,
+          "ann_at_entry": 0.0653,
+          "days_held": 90,
+          "capture_net": 0.01379
+        }
+      ]
+    },
+    "entry8_size25": {
+      "stats": {
+        "n_trades": 28,
+        "roi_total": 0.2033,
+        "roi_ann": 0.0385,
+        "maxdd": -0.0217,
+        "by_year": {
+          "2021": 0.0658,
+          "2022": 0.0106,
+          "2023": 0.0109,
+          "2024": 0.0778,
+          "2025": 0.0253
+        },
+        "avg_capture_bps": 266.1
+      },
+      "trades": null
+    },
+    "entry8_size50": {
+      "stats": {
+        "n_trades": 28,
+        "roi_total": 0.4447,
+        "roi_ann": 0.0779,
+        "maxdd": -0.0432,
+        "by_year": {
+          "2021": 0.1344,
+          "2022": 0.0214,
+          "2023": 0.0218,
+          "2024": 0.1608,
+          "2025": 0.0512
+        },
+        "avg_capture_bps": 266.1
+      },
+      "trades": null
+    }
+  }
+}

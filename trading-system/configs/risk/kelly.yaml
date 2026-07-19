@@ -1,6 +1,0 @@
-enabled: true
-kelly_cap: 0.5
-shrinkage: 0.5
-min_edge: 0.0
-min_samples: 10
-fallback_multiplier: 0.1

@@ -1,0 +1,71 @@
+{
+  "test": "FUNDAMENTALS_V1",
+  "date": "2026-07-18",
+  "universe_resolved": [
+    "AAVE",
+    "UNI",
+    "LDO",
+    "MKR",
+    "CRV",
+    "COMP",
+    "SNX",
+    "SUSHI",
+    "GMX",
+    "DYDX",
+    "PENDLE",
+    "CAKE",
+    "JUP",
+    "RAY",
+    "STG",
+    "WOO",
+    "DODO",
+    "BAL",
+    "KNC"
+  ],
+  "n_protocols": 19,
+  "n_weeks": 228,
+  "sample": [
+    "2022-02-14",
+    "2026-06-22"
+  ],
+  "verdict": "NO_EDGE",
+  "primary": {
+    "mean_weekly_spread": -0.0011,
+    "nw_t_spread": -0.4,
+    "mean_ic": -0.0218,
+    "nw_t_ic": -1.16,
+    "half1_spread": -0.00445,
+    "half2_spread": 0.00226,
+    "mean_turnover": 0.17,
+    "net_x1_weekly": -0.0016,
+    "net_x2_weekly": -0.00211,
+    "P1": false,
+    "P2": false,
+    "P3": false,
+    "P4": false
+  },
+  "secondaries_exploratory": {
+    "S1_revenue_accel": {
+      "mean_spread": -0.00244,
+      "nw_t": -0.88,
+      "n_weeks": 220,
+      "n_prot": 19
+    },
+    "S2_fees_momentum": {
+      "mean_spread": -0.00102,
+      "nw_t": -0.37
+    },
+    "S3_bottom_tercile": {
+      "mean_spread": -0.00107,
+      "nw_t": -0.48
+    },
+    "S4_2weeks": {
+      "mean_spread": -0.00391,
+      "nw_t": -0.77
+    }
+  },
+  "notes": [
+    "Biais de survivance residuel (DefiLlama actuel) : SIGNAL_VALIDATED devrait etre reconfirme point-in-time avant cablage.",
+    "Spread vs moyenne d'univers = orthogonal au marche par construction."
+  ]
+}

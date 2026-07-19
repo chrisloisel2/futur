@@ -1,0 +1,141 @@
+{
+  "window": [
+    "2022-01-01",
+    "2026-06-20"
+  ],
+  "runs": {
+    "B0_long_gated": {
+      "metrics": {
+        "total_return": -0.04625206474784538,
+        "pf": 0.9259691394303529,
+        "max_drawdown": -0.07217088055656003,
+        "roi_month_median": -0.0007353047682392422,
+        "roi_month_p10": -0.010132360534894191,
+        "cvar_95": -0.0006571803355215237,
+        "n_legs": 1383,
+        "sharpe": -0.380456807806704
+      },
+      "pnl_by_type": {
+        "directional": 729.98,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -1192.5,
+        "borrow": 0.0
+      }
+    },
+    "B1_flip_exit": {
+      "metrics": {
+        "total_return": -0.060358687801063016,
+        "pf": 0.9028083295039736,
+        "max_drawdown": -0.08382829481860675,
+        "roi_month_median": -0.001546069615547263,
+        "roi_month_p10": -0.00990326031849933,
+        "cvar_95": -0.0006483396742535539,
+        "n_legs": 1417,
+        "sharpe": -0.5089075139725142
+      },
+      "pnl_by_type": {
+        "directional": 599.12,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -1202.7,
+        "borrow": 0.0
+      }
+    },
+    "B2_intra_gov": {
+      "metrics": {
+        "total_return": -0.051866291388157904,
+        "pf": 0.9173473844807609,
+        "max_drawdown": -0.0760183586106849,
+        "roi_month_median": -0.0007353047682395752,
+        "roi_month_p10": -0.010132360534894524,
+        "cvar_95": -0.0006530207017763873,
+        "n_legs": 1452,
+        "sharpe": -0.43087285862668673
+      },
+      "pnl_by_type": {
+        "directional": 717.85,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -1236.51,
+        "borrow": 0.0
+      }
+    },
+    "B3_long_final": {
+      "metrics": {
+        "total_return": -0.08006274935413438,
+        "pf": 0.87365741953173,
+        "max_drawdown": -0.10116184058841438,
+        "roi_month_median": -0.001546069615547263,
+        "roi_month_p10": -0.009903260318499307,
+        "cvar_95": -0.0006432864197445038,
+        "n_legs": 1691,
+        "sharpe": -0.6902570000720486
+      },
+      "pnl_by_type": {
+        "directional": 564.85,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -1365.48,
+        "borrow": 0.0
+      }
+    },
+    "C3_long_carry": {
+      "metrics": {
+        "total_return": -0.023916555107311277,
+        "pf": 0.9930425623239971,
+        "max_drawdown": -0.10320848323655454,
+        "roi_month_median": -0.0005910851700493547,
+        "roi_month_p10": -0.008408211558926015,
+        "cvar_95": -0.0006412458373259118,
+        "n_legs": 2126,
+        "sharpe": -0.19058172040444693
+      },
+      "pnl_by_type": {
+        "directional": 594.39,
+        "carry_funding": 1061.22,
+        "hedge": 0.0,
+        "fees": -1893.6,
+        "borrow": -1.17
+      }
+    },
+    "D3_final": {
+      "metrics": {
+        "total_return": -0.03635341187200958,
+        "pf": 0.9895272948686761,
+        "max_drawdown": -0.10435477248233417,
+        "roi_month_median": -0.00059108517005102,
+        "roi_month_p10": -0.009158707192013638,
+        "cvar_95": -0.0006332691889940612,
+        "n_legs": 2277,
+        "sharpe": -0.30391010661410034
+      },
+      "pnl_by_type": {
+        "directional": 572.8,
+        "carry_funding": 1053.59,
+        "hedge": -67.09,
+        "fees": -1921.67,
+        "borrow": -1.16
+      }
+    },
+    "E_carry": {
+      "metrics": {
+        "total_return": 0.06280436292045644,
+        "pf": 1.020342297656774,
+        "max_drawdown": -0.004780971329356169,
+        "roi_month_median": 0.0007771830310181471,
+        "roi_month_p10": -0.0004602042586131949,
+        "cvar_95": -1.3805919099826592e-06,
+        "n_legs": 426,
+        "sharpe": 7.83551126992312
+      },
+      "pnl_by_type": {
+        "directional": 0.0,
+        "carry_funding": 1151.78,
+        "hedge": 0.0,
+        "fees": -522.46,
+        "borrow": -1.28
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# configs/institutional/features.yaml
+# Paramètres du Feature Store institutionnel
+
+features:
+  version: "v1.0"
+  timeframe: "1H"
+
+  return_horizons_h: [1, 4, 8, 12, 24, 48, 72, 168]
+
+  vol_windows_h: [15, 24, 60, 120, 240, 720]
+
+  ema_spans: [8, 21, 55, 144]
+
+  momentum_horizons_h: [4, 8, 12, 24, 48, 72, 168]
+
+  donchian_windows: [20, 55]
+
+  zscore_windows: [60, 240]
+
+  data:
+    max_stale_funding_h: 10.0    # funding 8h → stale après 10h
+    max_stale_metrics_h: 2.0     # OI/LSR 5m → stale après 2h
+    max_missing_rate: 0.05
+    max_gap_minutes: 120
+
+  # Familles activées
+  include_returns: true
+  include_volatility: true
+  include_trend: true
+  include_funding: true
+  include_oi: true
+  include_basis: true
+  include_cross_sectional: false   # nécessite universe panel

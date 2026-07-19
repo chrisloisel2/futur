@@ -1,0 +1,20 @@
+{
+  "symbol": "BNBUSDT",
+  "extra_sym": "BTCUSDT",
+  "train_end": 2025,
+  "cal_year": 2025,
+  "val_year": 2026,
+  "n_features": 98,
+  "n_train": 47224,
+  "n_cal": 4416,
+  "n_val": 3561,
+  "cal_pf": 0.0,
+  "cal_n": 1,
+  "val_n": 0,
+  "val_pf": 0.0,
+  "val_wr": 0.0,
+  "val_wr_pct": "0%",
+  "threshold_floor": 0.63,
+  "elapsed_s": 135.9,
+  "trained_at": "2026-05-29T10:39:15.256548+00:00"
+}

@@ -1,0 +1,251 @@
+{
+  "PULLBACK_LONG": {
+    "engine": "PULLBACK_LONG",
+    "assets": {
+      "BTCUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5014,
+          "n_train": 8736,
+          "prevalence": 0.2926
+        },
+        {
+          "year": 2023,
+          "auc": 0.5903,
+          "n_train": 17496,
+          "prevalence": 0.2404
+        },
+        {
+          "year": 2024,
+          "auc": 0.5712,
+          "n_train": 26256,
+          "prevalence": 0.3297
+        },
+        {
+          "year": 2025,
+          "auc": 0.5848,
+          "n_train": 35040,
+          "prevalence": 0.2898
+        }
+      ],
+      "ETHUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5321,
+          "n_train": 8736,
+          "prevalence": 0.36
+        },
+        {
+          "year": 2023,
+          "auc": 0.5734,
+          "n_train": 17496,
+          "prevalence": 0.2684
+        },
+        {
+          "year": 2024,
+          "auc": 0.564,
+          "n_train": 26256,
+          "prevalence": 0.3566
+        },
+        {
+          "year": 2025,
+          "auc": 0.5614,
+          "n_train": 35040,
+          "prevalence": 0.3768
+        }
+      ],
+      "SOLUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5074,
+          "n_train": 8736,
+          "prevalence": 0.388
+        },
+        {
+          "year": 2023,
+          "auc": 0.5407,
+          "n_train": 17376,
+          "prevalence": 0.3938
+        },
+        {
+          "year": 2024,
+          "auc": 0.5386,
+          "n_train": 26136,
+          "prevalence": 0.4098
+        },
+        {
+          "year": 2025,
+          "auc": 0.5496,
+          "n_train": 34920,
+          "prevalence": 0.3941
+        }
+      ]
+    }
+  },
+  "LIQUIDATION_REBOUND": {
+    "engine": "LIQUIDATION_REBOUND",
+    "assets": {
+      "BTCUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5103,
+          "n_train": 8736,
+          "prevalence": 0.4402
+        },
+        {
+          "year": 2023,
+          "auc": 0.5549,
+          "n_train": 17496,
+          "prevalence": 0.4277
+        },
+        {
+          "year": 2024,
+          "auc": 0.5412,
+          "n_train": 26256,
+          "prevalence": 0.4762
+        },
+        {
+          "year": 2025,
+          "auc": 0.5328,
+          "n_train": 35040,
+          "prevalence": 0.4477
+        }
+      ],
+      "ETHUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5107,
+          "n_train": 8736,
+          "prevalence": 0.4608
+        },
+        {
+          "year": 2023,
+          "auc": 0.5507,
+          "n_train": 17496,
+          "prevalence": 0.436
+        },
+        {
+          "year": 2024,
+          "auc": 0.5302,
+          "n_train": 26256,
+          "prevalence": 0.4718
+        },
+        {
+          "year": 2025,
+          "auc": 0.5384,
+          "n_train": 35040,
+          "prevalence": 0.4785
+        }
+      ],
+      "SOLUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5036,
+          "n_train": 8736,
+          "prevalence": 0.4549
+        },
+        {
+          "year": 2023,
+          "auc": 0.4951,
+          "n_train": 17376,
+          "prevalence": 0.482
+        },
+        {
+          "year": 2024,
+          "auc": 0.5029,
+          "n_train": 26136,
+          "prevalence": 0.4886
+        },
+        {
+          "year": 2025,
+          "auc": 0.5221,
+          "n_train": 34920,
+          "prevalence": 0.4719
+        }
+      ]
+    }
+  },
+  "CARRY_BASIS": {
+    "engine": "CARRY_BASIS",
+    "assets": {
+      "BTCUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5416,
+          "n_train": 8736,
+          "prevalence": 0.4425
+        },
+        {
+          "year": 2023,
+          "auc": 0.5743,
+          "n_train": 17496,
+          "prevalence": 0.4869
+        },
+        {
+          "year": 2024,
+          "auc": 0.5128,
+          "n_train": 26256,
+          "prevalence": 0.5154
+        },
+        {
+          "year": 2025,
+          "auc": 0.4992,
+          "n_train": 35040,
+          "prevalence": 0.4862
+        }
+      ],
+      "ETHUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5153,
+          "n_train": 8736,
+          "prevalence": 0.4669
+        },
+        {
+          "year": 2023,
+          "auc": 0.5282,
+          "n_train": 17496,
+          "prevalence": 0.4783
+        },
+        {
+          "year": 2024,
+          "auc": 0.5358,
+          "n_train": 26256,
+          "prevalence": 0.5097
+        },
+        {
+          "year": 2025,
+          "auc": 0.5417,
+          "n_train": 35040,
+          "prevalence": 0.4919
+        }
+      ],
+      "SOLUSDT": [
+        {
+          "year": 2022,
+          "auc": 0.5457,
+          "n_train": 8736,
+          "prevalence": 0.439
+        },
+        {
+          "year": 2023,
+          "auc": 0.4989,
+          "n_train": 17376,
+          "prevalence": 0.4982
+        },
+        {
+          "year": 2024,
+          "auc": 0.4985,
+          "n_train": 26136,
+          "prevalence": 0.4981
+        },
+        {
+          "year": 2025,
+          "auc": 0.513,
+          "n_train": 34920,
+          "prevalence": 0.4783
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "engines": [
+    "TRM_TREND_LONG",
+    "PULLBACK_LONG",
+    "LIQUIDATION_REBOUND",
+    "CARRY_BASIS",
+    "CROSS_SECTIONAL_LONG"
+  ],
+  "start": "2026-01-01",
+  "end": "2026-06-20",
+  "runs": {
+    "legacy_single_global": {
+      "final_equity": 9296.074158824833,
+      "metrics": {
+        "pf": 0.7475,
+        "sharpe": -2.1269,
+        "sortino": -2.5344,
+        "calmar": -1.4869,
+        "cagr": -0.145,
+        "max_drawdown": -0.0975,
+        "max_dd_duration_bars": 3937,
+        "hit_rate": 0.4731,
+        "avg_win": 47.354047,
+        "avg_loss": -56.887835,
+        "win_loss_ratio": 0.8324,
+        "expectancy": -7.569095,
+        "n_trades": 93,
+        "n_wins": 44,
+        "n_losses": 49,
+        "avg_holding_bars": 20.1,
+        "exposure_pct": 0.0,
+        "skewness": -0.6884,
+        "kurtosis": 17.9027,
+        "worst_year": 0.0,
+        "worst_month": -0.0356,
+        "best_year": 0.0,
+        "best_month": 0.0123,
+        "pf_cost_x2": 0.0,
+        "pf_cost_x3": 0.0,
+        "sharpe_cost_x2": 0.0,
+        "roi_month_median": -0.016382285317529166,
+        "roi_month_p10": -0.029672575155134284,
+        "cvar_95": -0.002574871585029446,
+        "trades_per_month": 16.40774320019603
+      },
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -703.93
+      },
+      "gate": {
+        "verdict": "FAIL",
+        "checks": {
+          "roi_month_median>=3%": false,
+          "roi_month_p10>0": false,
+          "pf_net>=1.30": false,
+          "max_dd<=3%": false,
+          "cvar95<=1.5%": true,
+          "trades/month>=30": false,
+          "no_engine>60%pnl": false
+        },
+        "fails": [
+          "roi_month_median>=3%",
+          "roi_month_p10>0",
+          "pf_net>=1.30",
+          "max_dd<=3%",
+          "trades/month>=30",
+          "no_engine>60%pnl"
+        ],
+        "max_engine_pnl_share": 1.0
+      }
+    },
+    "portfolio_multi_local": {
+      "final_equity": 7370.988478513297,
+      "metrics": {
+        "pf": 0.769,
+        "sharpe": -2.4634,
+        "sortino": -2.4433,
+        "calmar": -1.4004,
+        "cagr": -0.4804,
+        "max_drawdown": -0.3431,
+        "max_dd_duration_bars": 3752,
+        "hit_rate": 0.4769,
+        "avg_win": 29.277081,
+        "avg_loss": -34.703838,
+        "win_loss_ratio": 0.8436,
+        "expectancy": -4.193001,
+        "n_trades": 627,
+        "n_wins": 299,
+        "n_losses": 328,
+        "avg_holding_bars": 15.9,
+        "exposure_pct": 0.0,
+        "skewness": -0.143,
+        "kurtosis": 14.7051,
+        "worst_year": 0.0,
+        "worst_month": -0.1374,
+        "best_year": 0.0,
+        "best_month": 0.0131,
+        "pf_cost_x2": 0.0,
+        "pf_cost_x3": 0.0,
+        "sharpe_cost_x2": 0.0,
+        "roi_month_median": -0.016815746915622154,
+        "roi_month_p10": -0.1272674063160329,
+        "cvar_95": -0.007346553509994558,
+        "trades_per_month": 110.61994609164421
+      },
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -1077.1,
+        "CARRY_BASIS": -1485.62,
+        "LIQUIDATION_REBOUND": -444.92,
+        "PULLBACK_LONG": 376.03,
+        "TRM_TREND_LONG": 2.6
+      },
+      "gate": {
+        "verdict": "FAIL",
+        "checks": {
+          "roi_month_median>=3%": false,
+          "roi_month_p10>0": false,
+          "pf_net>=1.30": false,
+          "max_dd<=3%": false,
+          "cvar95<=1.5%": true,
+          "trades/month>=30": true,
+          "no_engine>60%pnl": true
+        },
+        "fails": [
+          "roi_month_median>=3%",
+          "roi_month_p10>0",
+          "pf_net>=1.30",
+          "max_dd<=3%"
+        ],
+        "max_engine_pnl_share": 0.565
+      }
+    },
+    "full_stack": {
+      "final_equity": 9757.482545648581,
+      "metrics": {
+        "pf": 0.6493,
+        "sharpe": -3.4731,
+        "sortino": -4.3989,
+        "calmar": -1.4765,
+        "cagr": -0.0513,
+        "max_drawdown": -0.0348,
+        "max_dd_duration_bars": 4008,
+        "hit_rate": 0.415,
+        "avg_win": 7.360613,
+        "avg_loss": -8.040871,
+        "win_loss_ratio": 0.9154,
+        "expectancy": -1.649779,
+        "n_trades": 147,
+        "n_wins": 61,
+        "n_losses": 86,
+        "avg_holding_bars": 6.8,
+        "exposure_pct": 0.0,
+        "skewness": -3.5143,
+        "kurtosis": 183.7201,
+        "worst_year": 0.0,
+        "worst_month": 0.0,
+        "best_year": 0.0,
+        "best_month": 0.0,
+        "pf_cost_x2": 0.0,
+        "pf_cost_x3": 0.0,
+        "sharpe_cost_x2": 0.0,
+        "roi_month_median": 0.0,
+        "roi_month_p10": 0.0,
+        "cvar_95": -0.0006210119025555344,
+        "trades_per_month": 25.93481989708405
+      },
+      "per_engine_pnl": {
+        "CROSS_SECTIONAL_LONG": -231.16,
+        "LIQUIDATION_REBOUND": -8.4,
+        "CARRY_BASIS": -2.96
+      },
+      "gate": {
+        "verdict": "FAIL",
+        "checks": {
+          "roi_month_median>=3%": false,
+          "roi_month_p10>0": false,
+          "pf_net>=1.30": false,
+          "max_dd<=3%": false,
+          "cvar95<=1.5%": true,
+          "trades/month>=30": false,
+          "no_engine>60%pnl": false
+        },
+        "fails": [
+          "roi_month_median>=3%",
+          "roi_month_p10>0",
+          "pf_net>=1.30",
+          "max_dd<=3%",
+          "trades/month>=30",
+          "no_engine>60%pnl"
+        ],
+        "max_engine_pnl_share": 0.953
+      }
+    }
+  },
+  "constraint_cost": {
+    "trades_delta": 534,
+    "roi_month_median_delta": -0.0004334615980929879,
+    "pf_delta": 0.021499999999999964
+  }
+}

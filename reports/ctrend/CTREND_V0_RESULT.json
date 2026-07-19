@@ -1,0 +1,70 @@
+{
+  "strategy": "CTREND_V0",
+  "protocol": {
+    "universe": "UNIVERSE_50 (courant, BIAIS DE SURVIVANCE ASSUMÉ)",
+    "lookbacks_days": [
+      1,
+      3,
+      7,
+      14,
+      30
+    ],
+    "top_k": 5,
+    "rebalance_days": 7,
+    "gate": "BTC>MA20",
+    "cost_rt_bps": 30.0,
+    "execution": "barre suivante",
+    "no_forward_fill": true,
+    "start": "2020-01-01",
+    "preregistered": true,
+    "n_runs": 1
+  },
+  "cost_x1": {
+    "cagr": 1.1042,
+    "cmgr": 0.064,
+    "monthly_mean": 0.102,
+    "monthly_median": 0.0267,
+    "monthly_positive_share": 0.5195,
+    "sharpe_daily_ann": 1.39,
+    "max_dd": -0.6693,
+    "per_year": {
+      "2021": 4.8482,
+      "2022": -0.4582,
+      "2023": 4.5601,
+      "2024": 2.861,
+      "2025": -0.3226,
+      "2026": -0.2171
+    },
+    "top3_months_share_of_pnl": 0.478,
+    "top10_days_share_of_pnl": 0.395,
+    "n_months": 77
+  },
+  "cost_x2": {
+    "cagr": 0.985,
+    "cmgr": 0.0588,
+    "monthly_mean": 0.0964,
+    "monthly_median": 0.0193,
+    "monthly_positive_share": 0.5195,
+    "sharpe_daily_ann": 1.3,
+    "max_dd": -0.6964,
+    "per_year": {
+      "2021": 4.5051,
+      "2022": -0.4805,
+      "2023": 4.151,
+      "2024": 2.605,
+      "2025": -0.3583,
+      "2026": -0.2394
+    },
+    "top3_months_share_of_pnl": 0.514,
+    "top10_days_share_of_pnl": 0.428,
+    "n_months": 77
+  },
+  "environment": {
+    "cutoff_data": "2026-06-30",
+    "generated_at": "2026-07-17T19:42:02.230782+00:00",
+    "data_hash_sha256_16": "47ad97819cfcf9c3",
+    "n_symbols_loaded": 49,
+    "python": "3.8.10",
+    "command": ".venv/bin/python scripts/backtest_ctrend_v0.py"
+  }
+}

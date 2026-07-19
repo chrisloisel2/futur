@@ -1,0 +1,36 @@
+{
+  "RANKED7_EDGE": {
+    "label": "RANKED7_EDGE",
+    "equity_end": 121700.33611229881,
+    "gain_usd": 21700.336112298814,
+    "roi_total": 0.21700336112298824,
+    "pf": 1.0328068062412394,
+    "max_drawdown": -0.015041561992068042,
+    "n_legs": 1702,
+    "pnl_by_type": {
+      "directional": 11689.43,
+      "carry_funding": 27605.71,
+      "hedge": -137.59,
+      "fees": -17427.9,
+      "borrow": -29.31
+    },
+    "runtime_s": 214.3
+  },
+  "RANKED7_EDGE_STRICT": {
+    "label": "RANKED7_EDGE_STRICT",
+    "equity_end": 123103.54012524043,
+    "gain_usd": 23103.540125240426,
+    "roi_total": 0.2310354012524043,
+    "pf": 1.0355604223779502,
+    "max_drawdown": -0.01220219284055157,
+    "n_legs": 1386,
+    "pnl_by_type": {
+      "directional": 11560.53,
+      "carry_funding": 27586.85,
+      "hedge": -32.46,
+      "fees": -15982.04,
+      "borrow": -29.35
+    },
+    "runtime_s": 209.9
+  }
+}

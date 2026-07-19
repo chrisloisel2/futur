@@ -3,368 +3,368 @@
     "year": 2022,
     "skip": false,
     "threshold": 0.54,
-    "fleet_auc": 0.8436332952011012,
-    "meta_auc": 0.8436332952011012,
-    "n_trades": 356,
-    "pf": 3.076,
-    "wr": 0.699,
-    "roi_month": 6.37,
-    "expectancy": 0.8365,
-    "max_drawdown_pct": 3.77,
-    "total_pnl_pct": 109.23,
+    "fleet_auc": 0.6630211801750474,
+    "meta_auc": 0.6630211801750474,
+    "n_trades": 738,
+    "pf": 0.717,
+    "wr": 0.45,
+    "roi_month": -3.55,
+    "expectancy": -0.2291,
+    "max_drawdown_pct": 35.41,
+    "total_pnl_pct": -35.08,
     "monthly": [
       {
         "month": "2022-01",
-        "trades": 36,
-        "roi_pct": 4.64,
-        "pf": 2.19
+        "trades": 81,
+        "roi_pct": -4.97,
+        "pf": 0.68
       },
       {
         "month": "2022-02",
-        "trades": 32,
-        "roi_pct": 11.19,
-        "pf": 5.36
+        "trades": 66,
+        "roi_pct": 1.26,
+        "pf": 1.11
       },
       {
         "month": "2022-03",
-        "trades": 38,
-        "roi_pct": 9.16,
-        "pf": 5.87
+        "trades": 70,
+        "roi_pct": -1.44,
+        "pf": 0.87
       },
       {
         "month": "2022-04",
-        "trades": 21,
-        "roi_pct": 5.07,
-        "pf": 4.99
+        "trades": 55,
+        "roi_pct": -5.43,
+        "pf": 0.49
       },
       {
         "month": "2022-05",
-        "trades": 47,
-        "roi_pct": 8.4,
-        "pf": 2.39
+        "trades": 75,
+        "roi_pct": -2.32,
+        "pf": 0.86
       },
       {
         "month": "2022-06",
-        "trades": 33,
-        "roi_pct": 4.93,
-        "pf": 1.51
+        "trades": 70,
+        "roi_pct": -14.77,
+        "pf": 0.4
       },
       {
         "month": "2022-07",
-        "trades": 40,
-        "roi_pct": 11.92,
-        "pf": 5.01
+        "trades": 74,
+        "roi_pct": -0.07,
+        "pf": 1.0
       },
       {
         "month": "2022-08",
-        "trades": 16,
-        "roi_pct": 5.91,
-        "pf": 73.96
+        "trades": 71,
+        "roi_pct": -4.99,
+        "pf": 0.61
       },
       {
         "month": "2022-09",
-        "trades": 33,
-        "roi_pct": 7.16,
-        "pf": 3.75
+        "trades": 66,
+        "roi_pct": -1.3,
+        "pf": 0.89
       },
       {
         "month": "2022-10",
-        "trades": 20,
-        "roi_pct": 4.2,
-        "pf": 11.97
+        "trades": 44,
+        "roi_pct": 0.42,
+        "pf": 1.11
       },
       {
         "month": "2022-11",
-        "trades": 31,
-        "roi_pct": 2.42,
-        "pf": 1.49
+        "trades": 54,
+        "roi_pct": -4.74,
+        "pf": 0.57
       },
       {
         "month": "2022-12",
-        "trades": 9,
-        "roi_pct": 1.69,
-        "pf": 9.49
+        "trades": 12,
+        "roi_pct": -3.01,
+        "pf": 0.0
       }
     ],
-    "target_ok": true,
-    "pf_ok": true,
+    "target_ok": false,
+    "pf_ok": false,
     "trades_ok": true,
-    "fold_ok": true
+    "fold_ok": false
   },
   {
     "year": 2023,
     "skip": false,
     "threshold": 0.54,
-    "fleet_auc": 0.8146521928213444,
-    "meta_auc": 0.8146521928213444,
-    "n_trades": 216,
-    "pf": 10.221,
-    "wr": 0.769,
-    "roi_month": 5.39,
-    "expectancy": 1.1691,
-    "max_drawdown_pct": 0.49,
-    "total_pnl_pct": 87.43,
+    "fleet_auc": 0.6338190318962229,
+    "meta_auc": 0.6338190318962229,
+    "n_trades": 56,
+    "pf": 3.755,
+    "wr": 0.679,
+    "roi_month": 0.84,
+    "expectancy": 0.721,
+    "max_drawdown_pct": 1.2,
+    "total_pnl_pct": 10.54,
     "monthly": [
       {
         "month": "2023-01",
-        "trades": 27,
-        "roi_pct": 9.33,
-        "pf": 22.16
+        "trades": 5,
+        "roi_pct": 0.98,
+        "pf": 9.43
       },
       {
         "month": "2023-02",
-        "trades": 17,
-        "roi_pct": 4.33,
-        "pf": 9.46
+        "trades": 4,
+        "roi_pct": -0.45,
+        "pf": 0.02
       },
       {
         "month": "2023-03",
-        "trades": 34,
-        "roi_pct": 11.45,
-        "pf": 6.03
+        "trades": 11,
+        "roi_pct": 5.17,
+        "pf": 10.42
       },
       {
         "month": "2023-04",
-        "trades": 15,
-        "roi_pct": 3.92,
-        "pf": 7.89
+        "trades": 8,
+        "roi_pct": -0.21,
+        "pf": 0.85
       },
       {
         "month": "2023-05",
-        "trades": 17,
-        "roi_pct": 3.87,
-        "pf": 7.84
+        "trades": 6,
+        "roi_pct": -0.08,
+        "pf": 0.88
       },
       {
         "month": "2023-06",
-        "trades": 17,
-        "roi_pct": 5.79,
-        "pf": 11.27
+        "trades": 2,
+        "roi_pct": 1.79,
+        "pf": 17855055.61
       },
       {
         "month": "2023-07",
-        "trades": 6,
-        "roi_pct": 0.84,
-        "pf": 44.74
+        "trades": 1,
+        "roi_pct": 0.29,
+        "pf": 2918095.83
       },
       {
         "month": "2023-08",
-        "trades": 10,
-        "roi_pct": 2.31,
-        "pf": 4.09
+        "trades": 1,
+        "roi_pct": -0.19,
+        "pf": 0.0
       },
       {
         "month": "2023-09",
-        "trades": 9,
-        "roi_pct": 2.54,
-        "pf": 42.98
+        "trades": 1,
+        "roi_pct": 0.02,
+        "pf": 186304.52
       },
       {
         "month": "2023-10",
-        "trades": 20,
-        "roi_pct": 7.55,
-        "pf": 20.16
+        "trades": 8,
+        "roi_pct": 0.77,
+        "pf": 3.18
       },
       {
         "month": "2023-11",
-        "trades": 17,
-        "roi_pct": 5.21,
-        "pf": 14.79
+        "trades": 3,
+        "roi_pct": 0.49,
+        "pf": 4904928.75
       },
       {
         "month": "2023-12",
-        "trades": 27,
-        "roi_pct": 7.86,
-        "pf": 16.01
+        "trades": 6,
+        "roi_pct": 1.62,
+        "pf": 16126720.22
       }
     ],
-    "target_ok": true,
+    "target_ok": false,
     "pf_ok": true,
     "trades_ok": true,
-    "fold_ok": true
+    "fold_ok": false
   },
   {
     "year": 2024,
     "skip": false,
     "threshold": 0.54,
-    "fleet_auc": 0.830736302903301,
-    "meta_auc": 0.830736302903301,
-    "n_trades": 402,
-    "pf": 6.222,
-    "wr": 0.796,
-    "roi_month": 7.95,
-    "expectancy": 0.917,
-    "max_drawdown_pct": 2.98,
-    "total_pnl_pct": 150.34,
+    "fleet_auc": 0.62293200257912,
+    "meta_auc": 0.62293200257912,
+    "n_trades": 220,
+    "pf": 0.891,
+    "wr": 0.541,
+    "roi_month": -0.41,
+    "expectancy": -0.0835,
+    "max_drawdown_pct": 11.46,
+    "total_pnl_pct": -4.78,
     "monthly": [
       {
         "month": "2024-01",
-        "trades": 33,
-        "roi_pct": 11.16,
-        "pf": 26.55
+        "trades": 20,
+        "roi_pct": -0.73,
+        "pf": 0.82
       },
       {
         "month": "2024-02",
-        "trades": 31,
-        "roi_pct": 9.45,
-        "pf": 15.91
+        "trades": 6,
+        "roi_pct": 0.02,
+        "pf": 1.03
       },
       {
         "month": "2024-03",
-        "trades": 49,
-        "roi_pct": 12.31,
-        "pf": 5.95
+        "trades": 42,
+        "roi_pct": -4.02,
+        "pf": 0.66
       },
       {
         "month": "2024-04",
-        "trades": 31,
-        "roi_pct": 7.57,
-        "pf": 4.65
+        "trades": 23,
+        "roi_pct": -0.43,
+        "pf": 0.91
       },
       {
         "month": "2024-05",
-        "trades": 20,
-        "roi_pct": 6.46,
-        "pf": 16.71
+        "trades": 9,
+        "roi_pct": -0.92,
+        "pf": 0.67
       },
       {
         "month": "2024-06",
-        "trades": 20,
-        "roi_pct": 3.41,
-        "pf": 16.59
+        "trades": 3,
+        "roi_pct": -0.0,
+        "pf": 1.0
       },
       {
         "month": "2024-07",
-        "trades": 33,
-        "roi_pct": 6.55,
-        "pf": 3.65
+        "trades": 21,
+        "roi_pct": -1.05,
+        "pf": 0.78
       },
       {
         "month": "2024-08",
-        "trades": 38,
-        "roi_pct": 7.33,
-        "pf": 2.62
+        "trades": 34,
+        "roi_pct": 0.77,
+        "pf": 1.13
       },
       {
         "month": "2024-09",
-        "trades": 35,
-        "roi_pct": 7.72,
-        "pf": 7.69
+        "trades": 11,
+        "roi_pct": 1.55,
+        "pf": 2.35
       },
       {
         "month": "2024-10",
-        "trades": 25,
-        "roi_pct": 5.58,
-        "pf": 14.04
+        "trades": 6,
+        "roi_pct": 0.23,
+        "pf": 2.76
       },
       {
         "month": "2024-11",
-        "trades": 45,
-        "roi_pct": 11.63,
-        "pf": 8.86
+        "trades": 22,
+        "roi_pct": -0.39,
+        "pf": 0.86
       },
       {
         "month": "2024-12",
-        "trades": 42,
-        "roi_pct": 6.57,
-        "pf": 4.38
+        "trades": 23,
+        "roi_pct": 0.19,
+        "pf": 1.06
       }
     ],
-    "target_ok": true,
-    "pf_ok": true,
+    "target_ok": false,
+    "pf_ok": false,
     "trades_ok": true,
-    "fold_ok": true
+    "fold_ok": false
   },
   {
     "year": 2025,
     "skip": false,
     "threshold": 0.54,
-    "fleet_auc": 0.8533109821434214,
-    "meta_auc": 0.8533109821434214,
-    "n_trades": 398,
-    "pf": 4.144,
-    "wr": 0.751,
-    "roi_month": 5.22,
-    "expectancy": 0.6136,
-    "max_drawdown_pct": 1.93,
-    "total_pnl_pct": 83.66,
+    "fleet_auc": 0.6439915830979508,
+    "meta_auc": 0.6439915830979508,
+    "n_trades": 368,
+    "pf": 0.726,
+    "wr": 0.457,
+    "roi_month": -1.39,
+    "expectancy": -0.1789,
+    "max_drawdown_pct": 16.95,
+    "total_pnl_pct": -15.41,
     "monthly": [
       {
         "month": "2025-01",
-        "trades": 43,
-        "roi_pct": 6.34,
-        "pf": 3.66
+        "trades": 47,
+        "roi_pct": -1.09,
+        "pf": 0.84
       },
       {
         "month": "2025-02",
-        "trades": 32,
-        "roi_pct": 2.57,
-        "pf": 1.6
+        "trades": 39,
+        "roi_pct": -4.13,
+        "pf": 0.58
       },
       {
         "month": "2025-03",
-        "trades": 41,
-        "roi_pct": 7.72,
-        "pf": 4.02
+        "trades": 46,
+        "roi_pct": -0.16,
+        "pf": 0.99
       },
       {
         "month": "2025-04",
         "trades": 43,
-        "roi_pct": 7.94,
-        "pf": 5.18
+        "roi_pct": 1.8,
+        "pf": 1.38
       },
       {
         "month": "2025-05",
-        "trades": 31,
-        "roi_pct": 5.42,
-        "pf": 10.15
+        "trades": 24,
+        "roi_pct": -0.14,
+        "pf": 0.93
       },
       {
         "month": "2025-06",
-        "trades": 24,
-        "roi_pct": 3.38,
-        "pf": 4.91
+        "trades": 11,
+        "roi_pct": -0.14,
+        "pf": 0.87
       },
       {
         "month": "2025-07",
-        "trades": 23,
-        "roi_pct": 4.27,
-        "pf": 10.59
+        "trades": 14,
+        "roi_pct": -0.11,
+        "pf": 0.92
       },
       {
         "month": "2025-08",
-        "trades": 30,
-        "roi_pct": 4.99,
-        "pf": 13.61
+        "trades": 15,
+        "roi_pct": -0.55,
+        "pf": 0.67
       },
       {
         "month": "2025-09",
-        "trades": 21,
-        "roi_pct": 4.06,
-        "pf": 57.47
+        "trades": 8,
+        "roi_pct": -0.29,
+        "pf": 0.46
       },
       {
         "month": "2025-10",
-        "trades": 40,
-        "roi_pct": 4.74,
-        "pf": 2.84
+        "trades": 39,
+        "roi_pct": -4.27,
+        "pf": 0.39
       },
       {
         "month": "2025-11",
-        "trades": 40,
-        "roi_pct": 4.27,
-        "pf": 2.35
+        "trades": 46,
+        "roi_pct": -5.16,
+        "pf": 0.51
       },
       {
         "month": "2025-12",
-        "trades": 30,
-        "roi_pct": 6.81,
-        "pf": 13.39
+        "trades": 36,
+        "roi_pct": -2.13,
+        "pf": 0.63
       }
     ],
-    "target_ok": true,
-    "pf_ok": true,
+    "target_ok": false,
+    "pf_ok": false,
     "trades_ok": true,
-    "fold_ok": true
+    "fold_ok": false
   }
 ]

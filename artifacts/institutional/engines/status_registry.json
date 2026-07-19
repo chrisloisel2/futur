@@ -1,0 +1,104 @@
+{
+  "CARRY_BASIS": {
+    "status": "SHADOW",
+    "evidence": {
+      "engine_id": "CARRY_BASIS",
+      "n_trades": 12406,
+      "ess": 1346.4,
+      "pf": 1.1,
+      "p_pf_gt_130": 0.0,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "SHADOW",
+      "reasons": [
+        "preuves insuffisantes pour promouvoir \u2014 statu quo"
+      ]
+    }
+  },
+  "CROSS_SECTIONAL_LONG": {
+    "status": "SHADOW",
+    "evidence": {
+      "engine_id": "CROSS_SECTIONAL_LONG",
+      "n_trades": 43194,
+      "ess": 8114.9,
+      "pf": 0.993,
+      "p_pf_gt_130": 0.0,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "SHADOW",
+      "reasons": [
+        "preuves insuffisantes pour promouvoir \u2014 statu quo"
+      ]
+    }
+  },
+  "LIQUIDATION_REBOUND": {
+    "status": "SHADOW",
+    "evidence": {
+      "engine_id": "LIQUIDATION_REBOUND",
+      "n_trades": 1974,
+      "ess": 563.4,
+      "pf": 1.005,
+      "p_pf_gt_130": 0.001,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "SHADOW",
+      "reasons": [
+        "preuves insuffisantes pour promouvoir \u2014 statu quo"
+      ]
+    }
+  },
+  "PULLBACK_LONG": {
+    "status": "PAPER",
+    "evidence": {
+      "engine_id": "PULLBACK_LONG",
+      "n_trades": 779,
+      "ess": 139.4,
+      "pf": 1.494,
+      "p_pf_gt_130": 0.909,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "PAPER",
+      "reasons": [
+        "shadow sain (PF>1.10, n\u226530) \u2192 PAPER"
+      ]
+    }
+  },
+  "TRM_TREND_INST": {
+    "status": "SHADOW",
+    "evidence": {
+      "engine_id": "TRM_TREND_INST",
+      "n_trades": 209,
+      "ess": 16.3,
+      "pf": 0.586,
+      "p_pf_gt_130": 0.0,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "SHADOW",
+      "reasons": [
+        "preuves insuffisantes pour promouvoir \u2014 statu quo"
+      ]
+    }
+  },
+  "TRM_TREND_LONG": {
+    "status": "SHADOW",
+    "evidence": {
+      "engine_id": "TRM_TREND_LONG",
+      "n_trades": 5,
+      "ess": 5.0,
+      "pf": 0.015,
+      "p_pf_gt_130": 0.0,
+      "p_dd_lt_3": 0.0,
+      "drift": 0.0,
+      "current_status": "SHADOW",
+      "recommended_status": "SHADOW",
+      "reasons": [
+        "preuves insuffisantes pour promouvoir \u2014 statu quo"
+      ]
+    }
+  }
+}

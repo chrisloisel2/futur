@@ -195,6 +195,22 @@ def _apply_feature_aliases(df: pd.DataFrame) -> pd.DataFrame:
     if "Close" not in df.columns and "close" in df.columns:
         df["Close"] = df["close"]
 
+    # rv_N aliases for DynamicSizer / MetaSuppressor
+    _rv_map = {
+        "rv_12": "realized_volatility_14",
+        "rv_24": "realized_volatility_20",
+        "rv_48": "realized_volatility_50",
+        "rv_72": "realized_volatility_50",
+        "rv_168": "realized_volatility_100",
+    }
+    for target, source in _rv_map.items():
+        if target not in df.columns and source in df.columns:
+            df[target] = df[source]
+    if "rv_ratio_24_72" not in df.columns and "rv_24" in df.columns and "rv_72" in df.columns:
+        df["rv_ratio_24_72"] = df["rv_24"] / df["rv_72"].replace(0.0, np.nan)
+    if "rv_ratio_12_48" not in df.columns and "rv_12" in df.columns and "rv_48" in df.columns:
+        df["rv_ratio_12_48"] = df["rv_12"] / df["rv_48"].replace(0.0, np.nan)
+
     return df
 
 

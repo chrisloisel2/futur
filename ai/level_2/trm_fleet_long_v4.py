@@ -97,7 +97,7 @@ SPECIALIST_SPECS_V4: Tuple[SpecialistSpec, ...] = tuple(
 )
 
 TRM_FLEET_SIZE_V4 = len(SPECIALIST_SPECS_V4) + 1   # 100 + 1 general = 101
-PRIMARY_CONTEXT_SCORE_FLOOR = 0.55
+PRIMARY_CONTEXT_SCORE_FLOOR = 0.40  # v2: 0.55→0.40 — active le routing specialist
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -520,19 +520,24 @@ def calibrate_context_thresholds_v4(
     df_val:     pd.DataFrame,
     filter_p:   np.ndarray,
     filter_thr: float,
-    ret_val:    np.ndarray,
+    ret_val:    Optional[np.ndarray] = None,
+    ret_cal:    Optional[np.ndarray] = None,
     cost_pct:   float = 0.001,
     min_thr:    float = 0.54,
-    max_thr:    float = 0.66,
-    min_trades: int   = 15,   # relevé de 5→15 : volume minimal pour calibration stable
+    max_thr:    float = 0.68,
+    min_trades: int   = 15,
 ) -> Dict[str, float]:
     """
-    Calibre un seuil PnL par contexte primaire sur la validation.
+    Calibre un seuil PnL par contexte sur le jeu de CALIBRATION (pas de val).
+
+    ret_cal  : retours futurs sur le jeu de calibration (2024).
+    ret_val  : alias déprécié pour compatibilité — préférer ret_cal.
 
     Critère : PnL total net × WR_bonus (pénalise WR < 50%)
-    Ce critère équilibre volume et qualité — évite de trouver 1 trade parfait
-    avec un seuil très haut au détriment de 30 trades profitables avec un seuil raisonnable.
     """
+    # Compatibilité : accepter ret_val comme alias de ret_cal
+    returns = ret_cal if ret_cal is not None else ret_val
+
     n       = len(df_val)
     ones    = np.ones(n, dtype=bool)
     ctx_arr = classify_context_v4(df_val)
@@ -550,7 +555,7 @@ def calibrate_context_thresholds_v4(
         sel     = filt_ok & ctx_ok
 
         p_sub   = p_fleet[sel]
-        ret_sub = ret_val[sel]
+        ret_sub = returns[sel]
         valid_s = np.isfinite(ret_sub)
         p_sub, ret_sub = p_sub[valid_s], ret_sub[valid_s]
 
@@ -773,7 +778,13 @@ class TRMFleetLongV4:
                              key=lambda x: x[1], reverse=True)[:10]
         auc_top     = sorted(((k, v) for k, v in aucs.items() if v > 0),
                              key=lambda x: x[1], reverse=True)[:10]
-        thr_adaptive = 0.54 if self._fleet_auc_mean < 0.58 else 0.55
+        # Threshold adaptatif — 5 paliers selon AUC moyen de la fleet
+        auc = self._fleet_auc_mean
+        if   auc < 0.54: thr_adaptive = 0.52
+        elif auc < 0.57: thr_adaptive = 0.54
+        elif auc < 0.60: thr_adaptive = 0.55
+        elif auc < 0.63: thr_adaptive = 0.56
+        else:            thr_adaptive = 0.57
 
         print(f"   TRMFleetLong v4 : {len(trained)}/{len(self.specialists)} TRM entraînés  "
               f"top_k={self.routing_top_k}  rounds={self.n_recursive_rounds}  t={dt:.1f}s")
@@ -877,8 +888,13 @@ class TRMFleetLongV4:
         return p_out.astype(np.float32)
 
     def adaptive_threshold(self) -> float:
-        """Seuil minimal adaptatif basé sur l'AUC moyenne de la fleet."""
-        return 0.54 if self._fleet_auc_mean < 0.58 else 0.55
+        """Seuil minimal adaptatif — 5 paliers selon AUC moyenne de la fleet."""
+        auc = self._fleet_auc_mean
+        if   auc < 0.54: return 0.52
+        elif auc < 0.57: return 0.54
+        elif auc < 0.60: return 0.55
+        elif auc < 0.63: return 0.56
+        else:            return 0.57
 
     def val_auc_summary(self) -> Dict[str, float]:
         return {n: round(s.val_auc_, 3) for n, s in self.specialists.items()}

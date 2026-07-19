@@ -1,0 +1,80 @@
+{
+  "experiment_id": "btc_20260531_004625_cea5d597",
+  "timestamp": "2026-05-31T00:46:25.521256+00:00",
+  "engine_name": "BTC_ETH_TREND",
+  "signal_name": "btc_eth_trend_trend_cont_24h_BTCUSDT",
+  "assets": [
+    "BTCUSDT"
+  ],
+  "features_version": "unknown",
+  "labels_version": "unknown",
+  "model_type": "LightGBM_WalkForward",
+  "model_params": {},
+  "train_period": {
+    "start": "2021-01-01",
+    "end": "2025-12-31"
+  },
+  "validation_period": {},
+  "test_period": {},
+  "walk_forward_config": {},
+  "cost_config": {
+    "cost_bps": 10.0
+  },
+  "risk_config": {},
+  "metrics": {
+    "auc_test_median": 0.6092,
+    "n_pass": "4"
+  },
+  "robustness_tests": {
+    "walk_forward_folds": [
+      {
+        "fold": "2022",
+        "n_train": 6540,
+        "n_val": 2208,
+        "n_test": 8760,
+        "baseline_auc_val": 0.622,
+        "lgbm_auc_val": 0.6736,
+        "lgbm_auc_test": 0.6159,
+        "degradation": 0.0577,
+        "pass": "True"
+      },
+      {
+        "fold": "2023",
+        "n_train": 15300,
+        "n_val": 2208,
+        "n_test": 8760,
+        "baseline_auc_val": 0.6045,
+        "lgbm_auc_val": 0.6004,
+        "lgbm_auc_test": 0.5826,
+        "degradation": 0.0178,
+        "pass": "True"
+      },
+      {
+        "fold": "2024",
+        "n_train": 24060,
+        "n_val": 2208,
+        "n_test": 8784,
+        "baseline_auc_val": 0.7211,
+        "lgbm_auc_val": 0.6816,
+        "lgbm_auc_test": 0.6284,
+        "degradation": 0.0532,
+        "pass": "True"
+      },
+      {
+        "fold": "2025",
+        "n_train": 32844,
+        "n_val": 2208,
+        "n_test": 8736,
+        "baseline_auc_val": 0.6699,
+        "lgbm_auc_val": 0.677,
+        "lgbm_auc_test": 0.6025,
+        "degradation": 0.0746,
+        "pass": "True"
+      }
+    ]
+  },
+  "decision": "PAPER",
+  "notes": "",
+  "artifact_paths": {},
+  "code_hash": ""
+}

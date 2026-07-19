@@ -1,5 +1,5 @@
 """
-risk/dynamic_sizing.py — Dynamic Position Sizing
+risk/dynamic_sizing.py — Dynamic Position Sizing v2
 
 Extension du RiskController avec:
   1. Volatility targeting — ajuste la taille pour cibler une vol annuelle fixe
@@ -164,3 +164,98 @@ class DynamicSizer:
         """vol_24h (fraction sur 24h) → vol annuelle approximative."""
         bars_per_day = 24
         return vol_24h * math.sqrt(365 * bars_per_day / self._bars_yr * self._bars_yr)
+
+
+# ─── Portfolio-level correlation cap (v2) ────────────────────────────────────
+
+# Corrélations historiques crypto approximatives (bull market)
+_DEFAULT_CRYPTO_CORR: dict = {
+    ("BTCUSDT", "ETHUSDT"):  0.88,
+    ("BTCUSDT", "BNBUSDT"):  0.82,
+    ("BTCUSDT", "SOLUSDT"):  0.80,
+    ("BTCUSDT", "XRPUSDT"):  0.75,
+    ("BTCUSDT", "ADAUSDT"):  0.78,
+    ("BTCUSDT", "AVAXUSDT"): 0.79,
+    ("BTCUSDT", "DOGEUSDT"): 0.72,
+    ("BTCUSDT", "DOTUSDT"):  0.80,
+    ("BTCUSDT", "LINKUSDT"): 0.78,
+    ("ETHUSDT", "BNBUSDT"):  0.85,
+    ("ETHUSDT", "SOLUSDT"):  0.82,
+    ("ETHUSDT", "ADAUSDT"):  0.83,
+    ("ETHUSDT", "AVAXUSDT"): 0.84,
+}
+
+
+def _get_corr(a: str, b: str) -> float:
+    """Retourne la corrélation estimée entre deux assets."""
+    key = tuple(sorted([a, b]))
+    return _DEFAULT_CRYPTO_CORR.get(key, 0.75)   # 0.75 par défaut
+
+
+def apply_portfolio_correlation_cap(
+    open_positions:   dict,          # {symbol: {"size": float, "rv_24": float}}
+    new_symbol:       str,
+    new_size:         float,
+    max_portfolio_vol: float = 0.20, # 20% vol annuelle portfolio cible
+    target_vol:       float = 0.15,
+) -> float:
+    """
+    Réduit new_size si l'ajout de cette position fait dépasser la vol portfolio cible.
+
+    open_positions : dict des positions déjà ouvertes (excl. la nouvelle)
+    new_symbol     : symbol qu'on veut ouvrir
+    new_size       : taille souhaitée (fraction du capital, ex : 0.25)
+    max_portfolio_vol : seuil de vol annuelle portfolio (défaut 20%)
+
+    Retourne la taille ajustée (≤ new_size).
+    """
+    if not open_positions:
+        return new_size  # première position : pas de corrélation
+
+    # Construire la matrice de covariance approximative
+    all_syms = list(open_positions.keys()) + [new_symbol]
+    n = len(all_syms)
+    sizes = [open_positions[s]["size"] for s in all_syms[:-1]] + [new_size]
+    vols  = [open_positions[s].get("rv_24", 0.02) for s in all_syms[:-1]] + [0.02]
+
+    # rv_24 = realized_volatility_20 = std(log_ret, 20) × √20
+    # → vol_hourly = rv_24 / √20
+    # → vol_annual = vol_hourly × √8760 = rv_24 × √(8760/20)
+    _ANN = math.sqrt(8760 / 20)   # ≈ 20.93
+    vols_annual = [v * _ANN for v in vols]
+
+    # Matrice de covariance (diagonale = var, off-diag = corr × σi × σj)
+    cov = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                cov[i][j] = vols_annual[i] ** 2
+            else:
+                rho = _get_corr(all_syms[i], all_syms[j])
+                cov[i][j] = rho * vols_annual[i] * vols_annual[j]
+
+    # Vol portfolio = sqrt(w' Σ w)
+    w = sizes[:]
+    port_var = sum(w[i] * w[j] * cov[i][j] for i in range(n) for j in range(n))
+    port_vol = math.sqrt(max(port_var, 0.0))
+
+    if port_vol <= max_portfolio_vol:
+        return new_size  # pas de problème
+
+    # Résoudre pour la taille max de la nouvelle position
+    # Vol portfolio = f(new_size) — on fait une recherche binaire
+    lo, hi = 0.0, new_size
+    for _ in range(20):
+        mid = (lo + hi) / 2
+        w[-1] = mid
+        pv = sum(w[i] * w[j] * cov[i][j] for i in range(n) for j in range(n))
+        if math.sqrt(max(pv, 0.0)) <= max_portfolio_vol:
+            lo = mid
+        else:
+            hi = mid
+
+    adjusted = round(lo, 4)
+    if adjusted < new_size * 0.05:
+        adjusted = 0.0  # trop corrélé → ne pas ouvrir
+
+    return adjusted

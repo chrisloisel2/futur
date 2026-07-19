@@ -1,0 +1,44 @@
+{
+  "BASELINE_9": {
+    "label": "BASELINE_9",
+    "n_pullback_assets": 4,
+    "equity_start": 100000.0,
+    "equity_end": 118185.8104178268,
+    "gain_usd": 18185.810417826797,
+    "roi_total": 0.18185810417826787,
+    "annualized": null,
+    "pf": 1.0286426053847635,
+    "max_drawdown": -0.01738631045523714,
+    "roi_month_median": 0.0020913121375600863,
+    "n_trades": null,
+    "pnl_by_type": {
+      "directional": 6098.4,
+      "carry_funding": 27751.4,
+      "hedge": 84.74,
+      "fees": -15719.44,
+      "borrow": -29.3
+    },
+    "runtime_s": 102.7
+  },
+  "PARALLEL_50": {
+    "label": "PARALLEL_50",
+    "n_pullback_assets": 50,
+    "equity_start": 100000.0,
+    "equity_end": 60417.70418596739,
+    "gain_usd": -39582.29581403261,
+    "roi_total": -0.3958229581403261,
+    "annualized": null,
+    "pf": 0.9159002731980728,
+    "max_drawdown": -0.4369035209684697,
+    "roi_month_median": -0.004951218689465575,
+    "n_trades": null,
+    "pnl_by_type": {
+      "directional": 8848.45,
+      "carry_funding": 7692.71,
+      "hedge": 700.96,
+      "fees": -56814.25,
+      "borrow": -10.16
+    },
+    "runtime_s": 267.6
+  }
+}

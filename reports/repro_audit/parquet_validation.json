@@ -1,0 +1,98 @@
+[
+  {
+    "file": "data/enriched/ADAUSDT_1h_enriched.parquet",
+    "sha256": "65560582185f37a5edaeff5de6cb7cda785977eb4861b0391654204701497815",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 56162,
+    "max_gap_hours": 1.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/AVAXUSDT_1h_enriched.parquet",
+    "sha256": "7a0a2599de647e4f3cfe7f6cb79fc66031495c406ba0dfbc0639cc6ec522ef28",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 50499,
+    "max_gap_hours": 1.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/BNBUSDT_1h_enriched.parquet",
+    "sha256": "f8e198d2bfb9228d61030e327143d6a1e5c03d6e52a12e745923980b9e01fe18",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 55922,
+    "max_gap_hours": 1.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/BTCUSDT_1h_enriched.parquet",
+    "sha256": "fe1813a99abad235897ca241c21329e4c1b704456fe86e1a20433ee7629e0dc0",
+    "issues": [],
+    "warnings": [
+      "LARGE_GAP=6018h"
+    ],
+    "ok": true,
+    "rows": 71517,
+    "max_gap_hours": 6018.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/DOGEUSDT_1h_enriched.parquet",
+    "sha256": "5cb57842c10452aee65cbfc86784f30a0baafc69d63e3a5c35119cf90e64badc",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 61154,
+    "max_gap_hours": 9.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/ETHUSDT_1h_enriched.parquet",
+    "sha256": "e39177821e17bdbbf085b926646de332b2f1353c085727a070d959079dbdc0d4",
+    "issues": [],
+    "warnings": [
+      "LARGE_GAP=7928h"
+    ],
+    "ok": true,
+    "rows": 69653,
+    "max_gap_hours": 7928.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/LINKUSDT_1h_enriched.parquet",
+    "sha256": "ce33b03c4c48ed7341b8299cd372c17d908d25d15af685770a459348c8bc6850",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 56498,
+    "max_gap_hours": 1.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/SOLUSDT_1h_enriched.parquet",
+    "sha256": "d42d3d3c56416909ecb3b6741e5c4b8534dfc2b4b085d0dca75a43f12fd57adf",
+    "issues": [],
+    "warnings": [
+      "LARGE_GAP=73h"
+    ],
+    "ok": true,
+    "rows": 50572,
+    "max_gap_hours": 73.0,
+    "nan_ratio_ohlc": 0.0
+  },
+  {
+    "file": "data/enriched/XRPUSDT_1h_enriched.parquet",
+    "sha256": "f47746e3dd7d6094774290aa5145015f0a449c20f1632ce4592fb2f3e1884c20",
+    "issues": [],
+    "warnings": [],
+    "ok": true,
+    "rows": 71362,
+    "max_gap_hours": 11.0,
+    "nan_ratio_ohlc": 0.0
+  }
+]

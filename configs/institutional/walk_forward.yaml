@@ -1,0 +1,36 @@
+# configs/institutional/walk_forward.yaml
+# Configuration walk-forward institutionnel
+
+walk_forward:
+  # Début de l'historique d'entraînement
+  train_start: "2021-01-01"
+
+  # Folds de test (années de validation out-of-sample)
+  test_periods: ["2022", "2023", "2024", "2025"]
+
+  # Mode : expanding (train s'agrandit) ou rolling (fenêtre fixe)
+  mode: "expanding"
+
+  # Fenêtre rolling si mode=rolling (mois)
+  rolling_train_months: 18
+
+  # Validation = derniers N mois du train
+  validation_months: 3
+
+  # Embargo entre train et test (barres 1h)
+  # 7 jours pour éviter la fuite via labels overlapping
+  embargo_bars: 168
+
+  # Train minimum (barres 1h)
+  # 90 jours × 24h/j = 2160 barres minimum
+  min_train_bars: 2160
+
+  # Seuils de validation
+  min_pass_rate: 0.75           # 3/4 folds OK minimum
+  min_pf_test: 1.10             # PF min sur chaque fold
+  min_auc_test: 0.55            # AUC min sur chaque fold
+
+  # Anti-overfit gates (automatiques)
+  require_shuffle_test: true
+  require_cost_x2: true
+  require_year_ablation: true

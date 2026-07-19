@@ -1,0 +1,112 @@
+{
+  "test": "TOP_TRADERS_V1",
+  "date": "2026-07-18",
+  "n_symbols": 49,
+  "sample": [
+    "2021-01-15 23:00:00+00:00",
+    "2026-07-15 23:00:00+00:00"
+  ],
+  "n_panel": 1415299,
+  "verdict": "NO_EDGE",
+  "primary": {
+    "beta": 0.000525,
+    "nw_t": 11.14,
+    "half1": {
+      "beta": 0.000967,
+      "nw_t": 14.75
+    },
+    "half2": {
+      "beta": -5e-05,
+      "nw_t": -0.75
+    },
+    "n_symbols_positive": 31,
+    "extreme_bucket": {
+      "n": 184796,
+      "delta_fwd24": 0.00221,
+      "delta_fwd24_drop10": 0.00368
+    },
+    "P1": true,
+    "P2": false,
+    "P3": false,
+    "P4": true
+  },
+  "per_symbol_top10_abs_t": {
+    "ALGOUSDT": {
+      "beta": 0.002528,
+      "nw_t": 3.65,
+      "n": 31292
+    },
+    "FETUSDT": {
+      "beta": 0.0026,
+      "nw_t": 3.07,
+      "n": 29821
+    },
+    "VETUSDT": {
+      "beta": 0.002246,
+      "nw_t": 3.01,
+      "n": 31269
+    },
+    "BTCUSDT": {
+      "beta": 0.000925,
+      "nw_t": 2.93,
+      "n": 39727
+    },
+    "XRPUSDT": {
+      "beta": 0.001676,
+      "nw_t": 2.91,
+      "n": 31722
+    },
+    "ADAUSDT": {
+      "beta": 0.001826,
+      "nw_t": 2.84,
+      "n": 31723
+    },
+    "DOGEUSDT": {
+      "beta": 0.001499,
+      "nw_t": 2.78,
+      "n": 31722
+    },
+    "MANAUSDT": {
+      "beta": 0.001865,
+      "nw_t": 2.76,
+      "n": 31293
+    },
+    "SOLUSDT": {
+      "beta": 0.001155,
+      "nw_t": 2.32,
+      "n": 31723
+    },
+    "ICPUSDT": {
+      "beta": -0.001306,
+      "nw_t": -2.24,
+      "n": 30577
+    }
+  },
+  "secondaries_exploratory": {
+    "S1_conviction": {
+      "nw_t": 10.06,
+      "n": 1415203
+    },
+    "S2_distribution": {
+      "n": 314999,
+      "fwd24_mean": -0.00065,
+      "fwd24_all": 0.00084
+    },
+    "S3_contrarian_both_extreme": {
+      "n": 13178,
+      "fwd24_mean": 0.00122
+    },
+    "S4_div_x_taker": {
+      "nw_t": -1.64,
+      "n": 1415299
+    },
+    "S5_fwd4h": {
+      "nw_t": 9.73,
+      "n": 1415299
+    }
+  },
+  "notes": [
+    "Ratios top-traders Vision metrics 5m depuis 2021-12 \u2014 la retention API 30j ne s'applique qu'au live.",
+    "Panel inter-actifs correle (memes crashs) \u2014 NW lag 24 attenue mais ne supprime pas."
+  ]
+}

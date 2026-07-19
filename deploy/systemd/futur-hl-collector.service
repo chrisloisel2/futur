@@ -1,0 +1,17 @@
+[Unit]
+Description=Futur Hyperliquid metaorders collector (WS trades + l2/ctxs + twapHistory, local, sans AWS)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/hl_metaorders_collector.py
+Restart=always
+RestartSec=10
+KillSignal=SIGTERM
+TimeoutStopSec=60
+StandardOutput=append:/home/qbee/futur/reports/hl_collector.log
+StandardError=append:/home/qbee/futur/reports/hl_collector.log
+
+[Install]
+WantedBy=default.target

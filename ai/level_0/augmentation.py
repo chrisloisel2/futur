@@ -200,3 +200,159 @@ def augment_positives(
           f"({n_new} synthétiques  ×{multiplier:.1f})")
 
     return df_out
+
+
+# ─── Regime-aware oversampling (v3) ──────────────────────────────────────────
+
+def regime_aware_augment(
+    df: pd.DataFrame,
+    features: List[str],
+    label_col: str = "y_long",
+    target_col: Optional[str] = None,
+    regime_col: str = "regime_long",
+    global_target_pos: int = 3000,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """
+    Oversampling par régime de marché — v3.
+
+    Principe :
+      Les signaux long en phase BEAR (NO_LONG) et NEUTRAL sont rares mais
+      précieux pour la généralisation. On les oversample plus agressivement
+      que les signaux en phase LONGABLE (bull) pour rééquilibrer.
+
+      Multipliers par régime :
+        LONGABLE  : ×2  — déjà bien représenté
+        NEUTRAL   : ×4  — sous-représenté
+        NO_LONG   : ×6  — très rare, très utile pour la robustesse
+
+      Résultat : le modèle voit autant d'exemples bear que bull →
+      meilleures prédictions lors des transitions de régime.
+
+    Paramètres
+    ----------
+    df               : DataFrame d'entraînement complet
+    features         : liste des features d'entrée
+    label_col        : colonne de label binaire (y_long)
+    target_col       : colonne de rendement forward (pour interpolation)
+    regime_col       : colonne de régime ('LONGABLE', 'NEUTRAL', 'NO_LONG')
+    global_target_pos: nombre total de positifs cible après augmentation
+    seed             : graine aléatoire
+    """
+    if target_col is None:
+        target_col = _DEFAULT_TARGET_COL
+
+    if label_col not in df.columns:
+        return df.copy()
+
+    # Multipliers par régime — calibrés pour équilibrer la distribution
+    REGIME_MULT: dict = {
+        "LONGABLE":  2,
+        "NEUTRAL":   3,   # réduit de 4 → 3
+        "NO_LONG":   2,   # réduit de 6 → 2 (sur-trading 2025 corrigé)
+        "EXPANSION": 2,
+        "RECOVERY":  2,
+    }
+    DEFAULT_MULT = 2
+
+    y = df[label_col].values.astype(np.int32)
+    n_pos_total = int((y == 1).sum())
+
+    if n_pos_total < 30:
+        return df.copy()
+
+    avail = [f for f in features if f in df.columns]
+    rng   = np.random.default_rng(seed)
+
+    parts = [df.copy()]
+    regime_stats: list = []
+
+    # Identifier les régimes disponibles
+    if regime_col in df.columns:
+        regimes = df[regime_col].fillna("NEUTRAL").unique().tolist()
+    else:
+        # Fallback sans colonne de régime : SMOTE global standard
+        regimes = ["_ALL_"]
+
+    for regime in regimes:
+        if regime == "_ALL_":
+            mask = pd.Series([True] * len(df), index=df.index)
+        else:
+            mask = df[regime_col].fillna("NEUTRAL") == regime
+
+        df_r   = df[mask]
+        y_r    = y[mask.values]
+        n_pos_r = int((y_r == 1).sum())
+
+        if n_pos_r < 10:
+            continue
+
+        # Multiplicateur pour ce régime
+        mult = REGIME_MULT.get(regime, DEFAULT_MULT)
+
+        # Ne pas dépasser le budget global
+        n_already = sum(len(p) for p in parts)
+        budget_left = max(0, global_target_pos - n_pos_total)
+        n_synth = min(n_pos_r * (mult - 1), budget_left)
+        if n_synth <= 0:
+            continue
+
+        df_pos_r = df_r[y_r == 1]
+        X_pos    = df_pos_r[avail].fillna(0.0).values.astype(np.float32)
+        X_pos    = np.nan_to_num(X_pos, nan=0.0, posinf=0.0, neginf=0.0)
+
+        feat_std = X_pos.std(axis=0)
+        feat_std = np.where(feat_std < 1e-9, 1.0, feat_std)
+        X_norm   = X_pos / feat_std
+
+        k = min(5, n_pos_r - 1)
+        if k < 1:
+            continue
+
+        X_synth = _smote_for_positives(
+            X_norm, y_r[y_r == 1],
+            k=k, n_synthetic=int(n_synth),
+            noise_pct=0.04, rng=rng,
+        )
+        X_synth = X_synth * feat_std
+
+        ret_pos = (df_pos_r[target_col].values
+                   if target_col in df_pos_r.columns
+                   else np.zeros(n_pos_r))
+
+        synth_rows = []
+        for i, x_syn in enumerate(X_synth):
+            dists   = np.linalg.norm(X_pos - x_syn, axis=1)
+            nearest = int(np.argmin(dists))
+            ret_syn = float(ret_pos[nearest]) + rng.normal(0, 0.002)
+            row = {f: float(x_syn[j]) for j, f in enumerate(avail)}
+            row[label_col]       = 1
+            row[target_col]      = ret_syn
+            row["is_synthetic"]  = 1
+            if regime_col in df.columns:
+                row[regime_col]  = regime
+            synth_rows.append(row)
+
+        if synth_rows:
+            df_synth_r = pd.DataFrame(synth_rows)
+            for col in df.columns:
+                if col not in df_synth_r.columns:
+                    df_synth_r[col] = 0.0
+            parts.append(df_synth_r[df.columns.tolist()])
+
+        regime_stats.append(
+            f"{regime}:{n_pos_r}→{n_pos_r + len(synth_rows)} (×{mult})"
+        )
+
+    if len(parts) > 1:
+        df_out = pd.concat(parts, ignore_index=True)
+        df_out["is_synthetic"] = df_out.get(
+            "is_synthetic", pd.Series(0, index=df_out.index)
+        ).fillna(0).astype(int)
+        n_new_total = len(df_out) - len(df)
+        print(f"   Regime-aware SMOTE : {n_pos_total}→{n_pos_total+n_new_total} positifs")
+        if regime_stats:
+            print(f"   Régimes : {' | '.join(regime_stats)}")
+        return df_out
+
+    return df.copy()

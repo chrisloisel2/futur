@@ -1,0 +1,281 @@
+{
+  "strategy": "CTREND_V1",
+  "preregistered": true,
+  "protocol": {
+    "lookbacks": [
+      1,
+      3,
+      7,
+      14,
+      30
+    ],
+    "top_k": 5,
+    "exit_rank": 10,
+    "rebalance_days": 7,
+    "gate_ma": 20,
+    "universe_size": 50,
+    "min_median_qv": 5000000.0,
+    "cost_rt": 0.003,
+    "cost_mult": 1.0,
+    "delay_extra": 0,
+    "vol_target": 0.0,
+    "vol_lookback": 60,
+    "asset_cap": 0.25,
+    "start": "2020-06-01",
+    "delist_grace_days": 2,
+    "stable_fiat_excluded": [
+      "AEURUSDT",
+      "BUSDUSDT",
+      "DAIUSDT",
+      "EURUSDT",
+      "FDUSDUSDT",
+      "GBPUSDT",
+      "TUSDUSDT",
+      "USD1USDT",
+      "USDCUSDT",
+      "USDEUSDT",
+      "USDFUSDT",
+      "USDPUSDT",
+      "XUSDUSDT"
+    ]
+  },
+  "runs": {
+    "primary_x1": {
+      "cagr": -0.0205,
+      "cmgr": -0.0017,
+      "monthly_mean": 0.0302,
+      "monthly_median": -0.034,
+      "monthly_positive_share": 0.4167,
+      "sharpe": 0.39,
+      "max_dd": -0.9447,
+      "per_year": {
+        "2020": 1.6513,
+        "2021": 3.7221,
+        "2022": -0.8444,
+        "2023": 0.6648,
+        "2024": -0.3639,
+        "2025": -0.5794,
+        "2026": 0.0164
+      },
+      "top3_months_share_of_pnl": -12.559,
+      "top10_days_share_of_pnl": -16.135,
+      "n_months": 72,
+      "turnover_ann": 40.0
+    },
+    "primary_x2": {
+      "cagr": -0.0776,
+      "cmgr": -0.0067,
+      "monthly_mean": 0.0249,
+      "monthly_median": -0.038,
+      "monthly_positive_share": 0.4167,
+      "sharpe": 0.32,
+      "max_dd": -0.9564,
+      "per_year": {
+        "2020": 1.5471,
+        "2021": 3.4514,
+        "2022": -0.852,
+        "2023": 0.5722,
+        "2024": -0.4094,
+        "2025": -0.6014,
+        "2026": -0.0145
+      },
+      "top3_months_share_of_pnl": -3.187,
+      "top10_days_share_of_pnl": -4.13,
+      "n_months": 72,
+      "turnover_ann": 40.0
+    },
+    "delay_plus1_x1": {
+      "cagr": -0.0568,
+      "cmgr": -0.0049,
+      "monthly_mean": 0.0253,
+      "monthly_median": -0.0054,
+      "monthly_positive_share": 0.4306,
+      "sharpe": 0.34,
+      "max_dd": -0.889,
+      "per_year": {
+        "2020": 1.4187,
+        "2021": 1.4022,
+        "2022": -0.7624,
+        "2023": 1.0455,
+        "2024": -0.2681,
+        "2025": -0.5844,
+        "2026": -0.1838
+      },
+      "top3_months_share_of_pnl": -4.588,
+      "top10_days_share_of_pnl": -5.674,
+      "n_months": 72,
+      "turnover_ann": 39.9
+    },
+    "voltarget20_x1": {
+      "cagr": 0.0335,
+      "cmgr": 0.0027,
+      "monthly_mean": 0.0128,
+      "monthly_median": -0.0184,
+      "monthly_positive_share": 0.4306,
+      "sharpe": 0.29,
+      "max_dd": -0.7611,
+      "per_year": {
+        "2020": 0.6327,
+        "2021": 1.4774,
+        "2022": -0.6763,
+        "2023": 0.4181,
+        "2024": -0.0305,
+        "2025": -0.3385,
+        "2026": 0.026
+      },
+      "top3_months_share_of_pnl": 4.73,
+      "top10_days_share_of_pnl": 5.869,
+      "n_months": 72,
+      "turnover_ann": 22.1
+    },
+    "voltarget20_x2": {
+      "cagr": -0.0004,
+      "cmgr": -0.0,
+      "monthly_mean": 0.01,
+      "monthly_median": -0.0199,
+      "monthly_positive_share": 0.4306,
+      "sharpe": 0.22,
+      "max_dd": -0.7906,
+      "per_year": {
+        "2020": 0.5884,
+        "2021": 1.4067,
+        "2022": -0.6863,
+        "2023": 0.3712,
+        "2024": -0.0658,
+        "2025": -0.3571,
+        "2026": 0.01
+      },
+      "top3_months_share_of_pnl": -366.245,
+      "top10_days_share_of_pnl": -457.781,
+      "n_months": 72,
+      "turnover_ann": 22.2
+    }
+  },
+  "sensitivity": {
+    "lb_3_7_14": {
+      "cagr": -0.1716,
+      "max_dd": -0.9587,
+      "sharpe": 0.22
+    },
+    "lb_7_14_30": {
+      "cagr": -0.1551,
+      "max_dd": -0.9767,
+      "sharpe": 0.22
+    },
+    "lb_plus90": {
+      "cagr": -0.2866,
+      "max_dd": -0.9785,
+      "sharpe": 0.02
+    },
+    "topk_3": {
+      "cagr": 0.022,
+      "max_dd": -0.858,
+      "sharpe": 0.42
+    },
+    "topk_7": {
+      "cagr": -0.078,
+      "max_dd": -0.9484,
+      "sharpe": 0.27
+    },
+    "reb_3j": {
+      "cagr": -0.0075,
+      "max_dd": -0.9234,
+      "sharpe": 0.41
+    },
+    "reb_14j": {
+      "cagr": -0.0304,
+      "max_dd": -0.8912,
+      "sharpe": 0.37
+    },
+    "no_gate": {
+      "cagr": 0.0336,
+      "max_dd": -0.975,
+      "sharpe": 0.59
+    },
+    "no_hysteresis": {
+      "cagr": -0.0445,
+      "max_dd": -0.9554,
+      "sharpe": 0.37
+    },
+    "univ_30": {
+      "cagr": -0.0931,
+      "max_dd": -0.9708,
+      "sharpe": 0.25
+    },
+    "univ_80": {
+      "cagr": -0.0918,
+      "max_dd": -0.9746,
+      "sharpe": 0.33
+    },
+    "minqv_2M": {
+      "cagr": -0.0182,
+      "max_dd": -0.9447,
+      "sharpe": 0.39
+    }
+  },
+  "dsr": {
+    "sr_daily": 0.0205,
+    "sr0_daily": 0.0285,
+    "n_trials": 14,
+    "T": 2220,
+    "skew": 0.53,
+    "kurt": 10.65,
+    "dsr": 0.353
+  },
+  "pbo": {
+    "pbo": 0.615,
+    "n_combos": 252,
+    "n_variants": 13,
+    "lambda_median": -0.693
+  },
+  "vs_existing_legs": {
+    "window": [
+      "2023-01-12",
+      "2026-03-31"
+    ],
+    "daily_corr": {
+      "V1.2": {
+        "V1.2": 1.0,
+        "BASIS_TERM": -0.102,
+        "STACK_MH": 0.108,
+        "CTREND_V1": 0.172
+      },
+      "BASIS_TERM": {
+        "V1.2": -0.102,
+        "BASIS_TERM": 1.0,
+        "STACK_MH": -0.026,
+        "CTREND_V1": -0.114
+      },
+      "STACK_MH": {
+        "V1.2": 0.108,
+        "BASIS_TERM": -0.026,
+        "STACK_MH": 1.0,
+        "CTREND_V1": 0.056
+      },
+      "CTREND_V1": {
+        "V1.2": 0.172,
+        "BASIS_TERM": -0.114,
+        "STACK_MH": 0.056,
+        "CTREND_V1": 1.0
+      }
+    },
+    "combo_3legs": {
+      "roi_ann": 0.2533,
+      "maxdd": -0.031,
+      "sharpe": 3.62
+    },
+    "combo_3legs_plus_ctrend": {
+      "roi_ann": 0.2291,
+      "maxdd": -0.4507,
+      "sharpe": 0.68
+    }
+  },
+  "environment": {
+    "cutoff_data": "2026-06-30",
+    "generated_at": "2026-07-17T20:08:42.586954+00:00",
+    "data_hash_names_sizes_sha256_16": "72d814f83b2bd8cf",
+    "n_symbols_panel": 786,
+    "python": "3.8.10",
+    "command": ".venv/bin/python scripts/backtest_ctrend_v1.py"
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "window": [
+    "2022-01-01",
+    "2026-06-20"
+  ],
+  "runs": {
+    "M_macro_gate": {
+      "metrics": {
+        "total_return": -0.04625206474784538,
+        "pf": 0.9259691394303529,
+        "max_drawdown": -0.07217088055656003,
+        "roi_month_median": -0.0007353047682392422,
+        "roi_month_p10": -0.010132360534894191,
+        "cvar_95": -0.0006571803355215237,
+        "n_legs": 1383,
+        "sharpe": -0.380456807806704
+      },
+      "pnl_by_type": {
+        "directional": 729.98,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -1192.5,
+        "borrow": 0.0
+      }
+    },
+    "A_asset_gate": {
+      "metrics": {
+        "total_return": 0.015884690538632062,
+        "pf": 1.0700289083398278,
+        "max_drawdown": -0.04601900659945755,
+        "roi_month_median": 0.0,
+        "roi_month_p10": -0.004111445047232198,
+        "cvar_95": -1.4260781966382451e-05,
+        "n_legs": 384,
+        "sharpe": 0.19808422422442523
+      },
+      "pnl_by_type": {
+        "directional": 624.33,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -465.48,
+        "borrow": 0.0
+      }
+    },
+    "A_asset_flip": {
+      "metrics": {
+        "total_return": 0.012972377569892446,
+        "pf": 1.0567039878433795,
+        "max_drawdown": -0.04601900659945821,
+        "roi_month_median": 0.0,
+        "roi_month_p10": -0.004111445047231932,
+        "cvar_95": -1.4283295094035115e-05,
+        "n_legs": 387,
+        "sharpe": 0.16354835297428222
+      },
+      "pnl_by_type": {
+        "directional": 598.11,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -468.39,
+        "borrow": 0.0
+      }
+    },
+    "A_asset_flip_intra": {
+      "metrics": {
+        "total_return": 0.012972377569892446,
+        "pf": 1.0567039878433795,
+        "max_drawdown": -0.04601900659945821,
+        "roi_month_median": 0.0,
+        "roi_month_p10": -0.004111445047231932,
+        "cvar_95": -1.4283295094035115e-05,
+        "n_legs": 387,
+        "sharpe": 0.16354835297428222
+      },
+      "pnl_by_type": {
+        "directional": 598.11,
+        "carry_funding": 0.0,
+        "hedge": 0.0,
+        "fees": -468.39,
+        "borrow": 0.0
+      }
+    },
+    "A_asset_carry": {
+      "metrics": {
+        "total_return": 0.07649208213980518,
+        "pf": 1.0229433336435556,
+        "max_drawdown": -0.01986859977348744,
+        "roi_month_median": 0.00034883585129796835,
+        "roi_month_p10": -0.003847547188703504,
+        "cvar_95": -1.685942246627707e-05,
+        "n_legs": 813,
+        "sharpe": 0.8883789630311627
+      },
+      "pnl_by_type": {
+        "directional": 609.09,
+        "carry_funding": 1161.01,
+        "hedge": 0.0,
+        "fees": -1003.9,
+        "borrow": -1.28
+      }
+    },
+    "A_asset_full": {
+      "metrics": {
+        "total_return": 0.07553013131908748,
+        "pf": 1.0226439632764495,
+        "max_drawdown": -0.020155997734976328,
+        "roi_month_median": 0.00034881863665736645,
+        "roi_month_p10": -0.003847547188703504,
+        "cvar_95": -1.6771482572067592e-05,
+        "n_legs": 841,
+        "sharpe": 0.8809343911426528
+      },
+      "pnl_by_type": {
+        "directional": 608.97,
+        "carry_funding": 1160.7,
+        "hedge": -0.19,
+        "fees": -1012.9,
+        "borrow": -1.28
+      }
+    },
+    "E_carry": {
+      "metrics": {
+        "total_return": 0.06280436292045644,
+        "pf": 1.020342297656774,
+        "max_drawdown": -0.004780971329356169,
+        "roi_month_median": 0.0007771830310181471,
+        "roi_month_p10": -0.0004602042586131949,
+        "cvar_95": -1.3805919099826592e-06,
+        "n_legs": 426,
+        "sharpe": 7.83551126992312
+      },
+      "pnl_by_type": {
+        "directional": 0.0,
+        "carry_funding": 1151.78,
+        "hedge": 0.0,
+        "fees": -522.46,
+        "borrow": -1.28
+      }
+    }
+  },
+  "per_asset_long_pnl": [
+    {
+      "asset": "BTCUSDT",
+      "n": 93,
+      "net_pnl": 74.9,
+      "price_pnl": 206.0,
+      "fees": 131.0
+    },
+    {
+      "asset": "ETHUSDT",
+      "n": 163,
+      "net_pnl": 24.1,
+      "price_pnl": 223.1,
+      "fees": 199.0
+    },
+    {
+      "asset": "SOLUSDT",
+      "n": 131,
+      "net_pnl": 30.7,
+      "price_pnl": 169.0,
+      "fees": 138.3
+    }
+  ]
+}

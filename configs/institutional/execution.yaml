@@ -1,0 +1,25 @@
+# configs/institutional/execution.yaml
+# Paramètres du simulateur d'exécution
+
+execution:
+  # Frais (Binance Futures VIP 0)
+  taker_fee_bps: 5.0           # 0.05%
+  maker_fee_bps: 2.0           # 0.02%
+  assume_taker: true           # conservateur : toujours taker
+
+  # Slippage
+  fixed_slippage_bps: 2.0      # slippage minimal
+  vol_slippage_mult: 0.5       # slippage × (mult × vol_courante × 10000)
+
+  # Spread
+  spread_mult: 1.0
+
+  # Latence
+  latency_seconds: 0.5
+
+  # Taille
+  max_participation_rate: 0.10  # max 10% du volume de la barre
+  min_order_notional: 10.0      # ordre min 10 USD
+
+  # Coût AR total estimé : ≈ 7-15 bps selon vol
+  # À comparer avec le threshold du label store (cost_bps: 10.0)
