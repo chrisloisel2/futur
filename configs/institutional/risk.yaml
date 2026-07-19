@@ -2,13 +2,16 @@
 # Risk Engine institutionnel
 
 risk:
+  # SEUILS UNIFIÉS 2026-07-19 sur le profil ALPHA20_LOW_RISK
+  # (configs/alpha20.yaml) — l'ancien couple 10 %/15 % coexistait avec le
+  # governor conservateur à 2,5-3 % ; un seul kill switch désormais : -2,5 %.
   # Limites de perte
-  max_day_loss_pct: 0.03        # -3%/jour → halt
-  max_week_loss_pct: 0.07       # -7%/semaine → halt
+  max_day_loss_pct: 0.005       # -0,5%/jour → halt
+  max_week_loss_pct: 0.01       # -1%/semaine → halt
 
   # Drawdown
-  max_drawdown_pct: 0.10        # -10% → réduction de taille
-  kill_drawdown_pct: 0.15       # -15% → kill switch
+  max_drawdown_pct: 0.01        # -1% → réduction de taille
+  kill_drawdown_pct: 0.025      # -2,5% → kill switch ABSOLU
 
   # Exposition
   max_gross_exposure_pct: 1.00  # 100% equity max

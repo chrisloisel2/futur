@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import json
 import threading
+import time
 import urllib.request
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
@@ -124,26 +125,56 @@ def funding_events(symbol: str, start_ms: int, end_ms: int) -> List[Tuple[int, f
     return out
 
 
+_QUARTERLIES_CACHE = {"ts": 0.0, "by_pair": {}}
+_QUARTERLIES_TTL_S = 6 * 3600
+
+
+def _discover_quarterlies():
+    """Contrats livrables ACTIFS via exchangeInfo (cache 6 h) — remplace la
+    liste d'échéances figée (2026-07-19). {pair: [(delivery_ms, symbol), …]}."""
+    now = time.time()
+    if now - _QUARTERLIES_CACHE["ts"] < _QUARTERLIES_TTL_S:
+        return _QUARTERLIES_CACHE["by_pair"]
+    by_pair: Dict[str, list] = {}
+    for s in _fapi("/fapi/v1/exchangeInfo").get("symbols", []):
+        if (s.get("contractType") in ("CURRENT_QUARTER", "NEXT_QUARTER")
+                and s.get("status") == "TRADING"
+                and int(s.get("deliveryDate", 0)) > now * 1000):
+            by_pair.setdefault(s["pair"], []).append(
+                (int(s["deliveryDate"]), s["symbol"]))
+    for v in by_pair.values():
+        v.sort()
+    _QUARTERLIES_CACHE.update(ts=now, by_pair=by_pair)
+    return by_pair
+
+
 def next_quarterly(symbol: str):
-    """(prix_trimestriel_live, jours_échéance, symbole) du contrat le plus proche >0."""
-    from datetime import date
-    today = date.today()
-    for exp in _QUARTERLY_EXPIRIES:
-        y, m, d = exp
-        e = date(y, m, d)
-        if e <= today:
-            continue
-        sym = f"{symbol}_{y % 100:02d}{m:02d}{d:02d}"
+    """(prix_trimestriel_live, jours_échéance, symbole) du contrat le plus
+    proche — découverte dynamique, fallback liste statique si l'API échoue."""
+    now_ms = time.time() * 1000
+    try:
+        contracts = _discover_quarterlies().get(symbol, [])
+    except Exception:
+        contracts = []
+    if not contracts:                       # fallback : anciennes échéances figées
+        from datetime import date
+        today = date.today()
+        contracts = [
+            (int(datetime(y, m, d, tzinfo=timezone.utc).timestamp() * 1000),
+             f"{symbol}_{y % 100:02d}{m:02d}{d:02d}")
+            for y, m, d in _QUARTERLY_EXPIRIES_FALLBACK
+            if date(y, m, d) > today]
+    for delivery_ms, sym in contracts:
         try:
             px = float(_fapi(f"/fapi/v1/ticker/price?symbol={sym}")["price"])
-            return px, (e - today).days, sym
+            return px, int((delivery_ms - now_ms) / 86_400_000), sym
         except Exception:
             continue
     return None, None, None
 
 
-_QUARTERLY_EXPIRIES = [
-    (2026, 3, 27), (2026, 6, 26), (2026, 9, 25), (2026, 12, 25),
+_QUARTERLY_EXPIRIES_FALLBACK = [
+    (2026, 9, 25), (2026, 12, 25),
     (2027, 3, 26), (2027, 6, 25), (2027, 9, 24), (2027, 12, 31),
 ]
 

@@ -27,12 +27,12 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RiskConfig:
     # Limites journalières
-    max_day_loss_pct: float = 0.03        # -3% equity/jour → halt
+    max_day_loss_pct: float = 0.005       # -0,5% equity/jour → halt (ALPHA20_LOW_RISK)
     # Limites hebdomadaires
-    max_week_loss_pct: float = 0.07       # -7% equity/semaine → halt
+    max_week_loss_pct: float = 0.01       # -1% equity/semaine → halt (ALPHA20_LOW_RISK)
     # Drawdown
-    max_drawdown_pct: float = 0.10        # -10% depuis peak → réduction
-    kill_drawdown_pct: float = 0.15       # -15% depuis peak → kill switch
+    max_drawdown_pct: float = 0.01        # -1% depuis peak → réduction (ALPHA20_LOW_RISK)
+    kill_drawdown_pct: float = 0.025      # -2,5% depuis peak → kill ABSOLU unifié 2026-07-19
 
     # Exposition
     max_gross_exposure_pct: float = 1.00  # 100% equity max

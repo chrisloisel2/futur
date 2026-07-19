@@ -1,0 +1,132 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ALPHA_20 — vérité économique figée (étape 1 du plan, 2026-07-19)
+# Couche indépendante au-dessus de src/institutional : ce fichier est la seule
+# source de vérité du capital, des coûts, du risque et des règles de promotion.
+# La cible 20 %/mois net est une MÉTRIQUE DE CONTRÔLE, jamais une récompense
+# d'optimisation ni une contrainte de sizing.
+# ─────────────────────────────────────────────────────────────────────────────
+
+capital:
+  initial_eur: 200000.0
+  currency: EUR
+  nav_source: alpha20_event_ledger        # NAV début de mois = ledger, pas Mongo
+
+target:
+  net_monthly_eur: 40000.0                # après coûts ET après provision fiscale
+  control_metric_only: true               # jamais utilisée pour forcer le sizing
+
+tax:
+  # PROFIL PROVISOIRE — scénario, pas un avis fiscal. Régimes possibles :
+  # 150 VH bis (PFU 30 % à la cession en monnaie fiat), BNC si activité
+  # habituelle/professionnelle, IFT pour les dérivés. Formulaire 2086 / BOFiP.
+  active_scenario: pfu_30
+  scenarios:
+    pfu_30:   {rate: 0.30, base: net_positive_monthly, note: "flat tax 150 VH bis"}
+    bnc_45:   {rate: 0.45, base: net_positive_monthly, note: "borne haute BNC + prélèvements"}
+    none:     {rate: 0.00, base: net_positive_monthly, note: "sanity / structures exonérées"}
+  required_pretax_monthly_eur: 57143.0     # 40000 / (1 - 0.30)
+  required_pretax_monthly_pct: 0.2857
+
+costs:
+  # AUCUN coût codé en dur dans alpha20 : tout passe par des snapshots datés
+  # (data/alpha20/cost_snapshots/). Les valeurs ci-dessous sont les DÉFAUTS
+  # "assumed" utilisés tant qu'aucun snapshot réel (commissionRate signé,
+  # borrow réel) n'existe — chaque usage est étiqueté source=assumed.
+  snapshot_dir: data/alpha20/cost_snapshots
+  assumed_defaults:
+    binance_usdm: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
+    binance_quarterly: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
+    hyperliquid: {maker_bp: 1.0, taker_bp: 3.5, as_of: "2026-07-19", source: assumed}
+    borrow_ann: {rate: 0.08, as_of: "2026-07-19", source: assumed}
+    slippage_bp_default: 2.0
+    gas_infra_eur_monthly: 120.0          # serveurs + data ; à remplacer par factures
+
+risk:
+  profile: ALPHA20_LOW_RISK
+  ALPHA20_LOW_RISK:
+    dd_reduce: 0.010          # réduction globale
+    dd_cash: 0.020            # passage cash
+    dd_kill: 0.025            # kill absolu — SEUIL UNIFIÉ (remplace 15 % risk.yaml / 3 % governor)
+    daily_loss: 0.005
+    weekly_loss: 0.010
+    es99_1d: 0.005
+    net_delta_cap: 0.05       # |delta net| ≤ 5 % NAV
+    margin_used_cap: 0.20
+    venue_unsecured_cap: 0.15
+    naked_leg_max_s: 30
+  stress_scenarios:           # obligatoires avant toute promotion
+    - funding_flip
+    - borrow_x4
+    - spread_x5
+    - gap_20pct
+    - vol_x3
+    - stablecoin_down_10pct
+    - venue_down_24h
+    - leg_liquidated
+    - stale_data
+    - partial_fills
+
+gates:
+  # gates uniques, PRÉ-ENREGISTRÉS avant tout calcul (étape 10)
+  dsr_min: 0.95
+  pbo_max: 0.10
+  costs_x2_positive: true
+  extra_delay_positive: true
+  top10_events_removed_positive: true
+  point_in_time_universe: true
+  same_sign_both_halves: true
+  no_destructive_recent_year: true
+  max_corr_with_kept_sleeves: 0.25
+  marginal_contribution_positive: true
+  min_capacity_eur: 200000.0
+  sleeve_minimal: {pf_min: 1.30}          # étape 6
+
+promotion:
+  ladder:                                  # étape 11
+    - {stage: research}
+    - {stage: hostile_backtest}
+    - {stage: shadow, min_days: 30}
+    - {stage: paper_executable, min_days: 60}
+    - {stage: paper_full, min_days: 90}
+    - {stage: micro_live, nav_frac: 0.0025}
+    - {stage: live_1pct, nav_frac: 0.01}
+    - {stage: live_2p5pct, nav_frac: 0.025}
+    - {stage: live_5pct, nav_frac: 0.05}   # plafond par nouveau sleeve
+  per_step_requirements:
+    min_closed_trades: 100                 # ou 3 cycles complets si lent
+    min_full_cycles_slow: 3
+    tracking_error_max: 0.20
+    risk_violations_max: 0
+    net_return_positive: true
+
+resize_rule:                               # étape 7 — baseline à battre = 077171a
+  min_gain_over_rt_cost: 3.0               # gain net anticipé > 3 × coût A/R complet
+
+# ── Registre des expériences DÉJÀ CLASSÉES — ne jamais recycler sans thèse
+#    nouvelle pré-enregistrée (verdicts commités, voir reports/) ─────────────
+experiment_registry:
+  closed_no_edge:
+    - {name: ctrend_v0_v1, verdict: REJECTED, ref: "859ebad", note: "biais de survivance"}
+    - {name: liquidation_exhaustion, verdict: NO_EDGE, ref: "9088b2c"}
+    - {name: top_traders_divergence, verdict: NO_EDGE, ref: "7ef8d83"}
+    - {name: options_flow_daily, verdict: NO_EDGE, ref: "fdfa862"}
+    - {name: options_positioning_4h, verdict: NO_EDGE_DEFINITIF, ref: "684f497"}
+    - {name: funding_extreme_level, verdict: NO_EDGE, ref: "a589e54"}
+    - {name: protocol_fundamentals, verdict: NO_EDGE, ref: "eef8646"}
+    - {name: stablecoin_regime_overlay, verdict: NO_EDGE, ref: "019f86d", note: "volet stat PASS, overlay FAIL"}
+    - {name: funding_xvenue_v0, verdict: NO_EDGE, ref: "1717fd8",
+       note: "JAMAIS recycler sous un autre nom (ordre explicite)"}
+    - {name: naive_50_universe, verdict: NO_EDGE, ref: "0c6fd80", note: "churn-fees -39.6%"}
+  not_testable:
+    - {name: onchain_flows, verdict: NOT_TESTABLE, ref: "53d6f70"}
+  validated_foundations:
+    - {name: carry_basis_v12, status: socle, note: "V1.1 +4.8%/an DD1.9% ; aucun levier avant net live + churn guard"}
+    - {name: basis_term, status: a_qualifier, note: "carnets réels, rolls, règlement, contrat dynamique requis"}
+    - {name: mh_events, status: shadow_gele, note: "verdict 2026-08-09 ; sizing 20%/décision = expérience paper"}
+    - {name: hl_metaorders, status: collecte, note: "évaluation ≥ 2026-08-17 si ≥30 j ET ≥300 événements éligibles"}
+  pending_new_axes:                        # étape 9 uniquement
+    - btc_variance_premium_defined_risk
+    - calendar_basis_relative_value
+    - l2_execution_overlay
+    - paired_relative_value
+    - liquidation_replay_tick

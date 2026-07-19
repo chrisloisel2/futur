@@ -35,9 +35,9 @@ STATE_MULT: Dict[str, float] = {
 
 @dataclass
 class GovernorConfig:
-    reduce_drawdown: float = 0.02      # -2% depuis peak → risk_reduced
-    cash_drawdown: float = 0.025       # -2.5% → cash (plus de nouveaux longs)
-    kill_drawdown: float = 0.03        # -3% depuis peak → kill (gate DD≤3%)
+    reduce_drawdown: float = 0.01      # -1% depuis peak → risk_reduced (ALPHA20_LOW_RISK)
+    cash_drawdown: float = 0.02        # -2% → cash (plus de nouveaux longs)
+    kill_drawdown: float = 0.025       # -2,5% depuis peak → kill ABSOLU unifié 2026-07-19
     bear_regimes: tuple = ("NO_LONG", "HARD_BEAR", "PANIC", "DELEVERAGING")
     drift_kill: float = 1.0            # drift normalisé ≥ 1 → kill
     corr_spike: float = 0.9            # corrélation moyenne ≥ 0.9 → risk_reduced
