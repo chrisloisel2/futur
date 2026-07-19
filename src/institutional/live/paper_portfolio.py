@@ -24,6 +24,12 @@ Honnêteté (v2 — comptabilité RÉALISÉE, plus aucun P&L recalculé rétroac
     Le doc trace en continu le CONTREFACTUEL de l'ancienne règle (churn_guard :
     frais, accruals et borrow qu'elle aurait générés) — c'est la mesure LIVE
     de la différence entre les deux règles ;
+  • v1.1 (2026-07-19, décision humaine, incrément anti-oscillation) : un
+    resize ne peut pas INVERSER la direction du resize précédent d'un sleeve
+    avant 72 h (même échappatoire yield toxique) — le min-hold ne protégeait
+    que les sleeves jeunes, les cibles oscillaient sur du bruit de yield 8 h
+    et payaient les frais dans les deux sens ; les seuils jugés de la v1
+    (marge, bande 2 %, min-hold) sont inchangés ;
   • historique d'équité COMPRESSÉ (30 s récent / 1 h ≤ 30 j / 1 j au-delà),
     jamais tronqué aveuglément.
 
@@ -59,6 +65,7 @@ HOLD_AMORT_D = 30          # amortissement des coûts d'A/R du score net sur la
 COST_RT = 4 * MAKER_FEE    # aller-retour Δ-neutre complet (2 jambes × 2)
 NET_MARGIN = 0.01          # marge de sécurité du score net (1 %/an)
 HARD_EXIT_ANN = -BORROW_ANN  # sous ce yield le min-hold saute (sleeve toxique)
+GUARD_RULE = "net_v1.1_2026-07-19"  # v1.1 = v1 + veto de réversion 72 h
 GUARD_EVENTS_CAP = 120     # rétention du journal contrefactuel churn_guard
 REBALANCE_S = 8 * 3600     # au pas du funding (00/08/16 UTC)
 MA_TTL_S = 6 * 3600        # rafraîchissement du seuil trend MA20
@@ -516,6 +523,21 @@ class PaperPortfolio:
         y = yields.get((kind, sym))
         return y is None or y > HARD_EXIT_ANN
 
+    def _reversal_veto(self, kind: str, sym: str, pos: Dict, yields: Dict,
+                       now_ms: int, direction: int) -> bool:
+        """v1.1 : True si ce resize INVERSERAIT la direction du resize
+        précédent moins de 72 h après lui. Le min-hold ne protège que les
+        sleeves jeunes ; sans ceci, les cibles oscillent sur du bruit de
+        yield 8 h et paient les frais dans les deux sens. Même échappatoire
+        que le min-hold : yield toxique (< -borrow) → le veto saute."""
+        last_dir = int(pos.get("last_resize_dir", 0))
+        if not last_dir or direction == last_dir:
+            return False
+        if now_ms - int(pos.get("last_resize_ms", 0)) >= MIN_HOLD_S * 1000:
+            return False
+        y = yields.get((kind, sym))
+        return y is None or y > HARD_EXIT_ANN
+
     def _guard_accrue(self, doc: Dict, yields: Dict, eq_usdt: float,
                       cap_usdt: float, regime: str, now_ms: int) -> Dict:
         """CONTREFACTUEL de l'ancienne règle (churn_guard) — la mesure live de
@@ -532,7 +554,7 @@ class PaperPortfolio:
                         for b in doc.get("basis", [])
                         if b["notional"] > 0 and not b.get("delivered")})
         guard = doc.setdefault("churn_guard", {
-            "since": now_iso, "rule": "net_v1_2026-07-19",
+            "since": now_iso, "rule": GUARD_RULE,
             "fees_new_usdt": 0.0, "fees_legacy_usdt": 0.0,
             "rev_diff_usdt": 0.0, "borrow_diff_usdt": 0.0,
             "shadow": shadow0, "shadow_ms": now_ms, "blocks": 0, "events": []})
@@ -570,23 +592,26 @@ class PaperPortfolio:
         return guard
 
     def _guard_block(self, guard: Dict, kind: str, sym: str, kept: float,
-                     tgt: float, y: Optional[float], now_ms: int, fx: float) -> None:
-        """Journalise une coupe/réduction DIFFÉRÉE par le min-hold (les frais
-        ne sont pas « gagnés » tant que la coupe peut encore arriver après
-        72 h — la vraie économie se lit dans fees_legacy vs fees_new)."""
+                     tgt: float, y: Optional[float], now_ms: int, fx: float,
+                     reason: str = "min-hold") -> None:
+        """Journalise un resize DIFFÉRÉ (min-hold ou réversion 72 h — les frais
+        ne sont pas « gagnés » tant que le resize peut encore arriver après
+        72 h ; la vraie économie se lit dans fees_legacy vs fees_new)."""
         guard["blocks"] += 1
         fee = abs(kept - tgt) * MAKER_FEE * 2
         guard["events"].append({
             "ts": datetime.fromtimestamp(now_ms / 1000, tz=timezone.utc).isoformat(),
             "sleeve": f"{kind}_{sym}", "kept_usdt": round(kept, 2),
-            "target_usdt": round(tgt, 2),
+            "target_usdt": round(tgt, 2), "reason": reason,
             "y_ann": None if y is None else round(y, 4),
             "fee_deferred_usdt": round(fee, 2)})
         guard["events"] = guard["events"][-GUARD_EVENTS_CAP:]
-        self._notify("info", f"🛡 Min-hold : coupe {kind} "
+        action = "hausse" if tgt > kept else "coupe"
+        self._notify("info", f"🛡 {reason.capitalize()} : {action} {kind} "
                      f"{sym.replace('USDT', '')} différée",
                      f"Cible {tgt / fx:,.0f} €, position {kept / fx:,.0f} € "
-                     f"conservée (< 72 h) — frais différés ~{fee / fx:,.0f} €")
+                     f"conservée ({reason} < 72 h) — frais différés "
+                     f"~{fee / fx:,.0f} €")
 
     def _guard_summary(self, doc: Dict, fx: float) -> Optional[Dict]:
         """Résumé € du contrefactuel pour l'API/PWA. edge > 0 = la règle NET
@@ -622,6 +647,7 @@ class PaperPortfolio:
             regime, px, held=held)
         guard = self._guard_accrue(doc, yields, eq_usdt,
                                    doc["capital_eur"] * fx, regime, now_ms)
+        guard["rule"] = GUARD_RULE
         fees_new = 0.0
         # CARRY : resize/create/close par score net (frais maker 2 jambes sur |Δ|)
         old = {c["symbol"]: c for c in doc.get("carry", [])}
@@ -637,23 +663,29 @@ class PaperPortfolio:
                      "funding_rate": f, "funding_paid_until": now_ms,
                      "opened_ms": now_ms}
             if abs(tgt - c["notional"]) > DRIFT_MIN * eq_usdt:
-                if (tgt < c["notional"]
-                        and self._min_hold_veto("carry", s, c, yields, now_ms)):
+                sense = 1 if tgt > c["notional"] else -1
+                mh = (sense < 0
+                      and self._min_hold_veto("carry", s, c, yields, now_ms))
+                if mh or self._reversal_veto("carry", s, c, yields, now_ms, sense):
                     self._guard_block(guard, "carry", s, c["notional"], tgt,
-                                      yields.get(("carry", s)), now_ms, fx)
+                                      yields.get(("carry", s)), now_ms, fx,
+                                      reason="min-hold" if mh else "réversion")
                 else:
                     fee = abs(tgt - c["notional"]) * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
                     if c["notional"] <= 0 < tgt:
                         c["opened_ms"] = now_ms
+                    c["last_resize_ms"], c["last_resize_dir"] = now_ms, sense
                     c["notional"] = tgt
             new_carry.append(c)
         for s, c in old.items():             # cible 0 → coupe totale
             if c["notional"] > 0:
-                if self._min_hold_veto("carry", s, c, yields, now_ms):
+                mh = self._min_hold_veto("carry", s, c, yields, now_ms)
+                if mh or self._reversal_veto("carry", s, c, yields, now_ms, -1):
                     self._guard_block(guard, "carry", s, c["notional"], 0.0,
-                                      yields.get(("carry", s)), now_ms, fx)
+                                      yields.get(("carry", s)), now_ms, fx,
+                                      reason="min-hold" if mh else "réversion")
                     new_carry.append(c)      # conservé malgré la cible 0
                 else:
                     fee = c["notional"] * MAKER_FEE * 2
@@ -675,23 +707,29 @@ class PaperPortfolio:
                      "q_symbol": m["qsym"], "basis_entry": m["q"] / px[s] - 1,
                      "accrued_frac": 0.0, "opened_ms": now_ms}
             if abs(tgt - b["notional"]) > DRIFT_MIN * eq_usdt:
-                if (tgt < b["notional"]
-                        and self._min_hold_veto("basis", s, b, yields, now_ms)):
+                sense = 1 if tgt > b["notional"] else -1
+                mh = (sense < 0
+                      and self._min_hold_veto("basis", s, b, yields, now_ms))
+                if mh or self._reversal_veto("basis", s, b, yields, now_ms, sense):
                     self._guard_block(guard, "basis", s, b["notional"], tgt,
-                                      yields.get(("basis", s)), now_ms, fx)
+                                      yields.get(("basis", s)), now_ms, fx,
+                                      reason="min-hold" if mh else "réversion")
                 else:
                     fee = abs(tgt - b["notional"]) * MAKER_FEE * 2
                     led["fees"] -= fee
                     fees_new += fee
                     if b["notional"] <= 0 < tgt:
                         b["opened_ms"] = now_ms
+                    b["last_resize_ms"], b["last_resize_dir"] = now_ms, sense
                     b["notional"] = tgt
             new_basis.append(b)
         for s, b in old.items():
             if b["notional"] > 0 and not b.get("delivered"):
-                if self._min_hold_veto("basis", s, b, yields, now_ms):
+                mh = self._min_hold_veto("basis", s, b, yields, now_ms)
+                if mh or self._reversal_veto("basis", s, b, yields, now_ms, -1):
                     self._guard_block(guard, "basis", s, b["notional"], 0.0,
-                                      yields.get(("basis", s)), now_ms, fx)
+                                      yields.get(("basis", s)), now_ms, fx,
+                                      reason="min-hold" if mh else "réversion")
                     new_basis.append(b)
                 else:
                     fee = b["notional"] * MAKER_FEE * 2

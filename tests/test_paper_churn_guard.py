@@ -13,7 +13,11 @@ Règle NET 2026-07-19 du paper adaptatif (anti-churn structurel) :
      (backdaté sur created_at) — et le mark expose le résumé churn_guard ;
   4. min-hold expiré → la coupe passe et facture une seule fois ;
   5. yield toxique (< -borrow) → le min-hold saute, coupe immédiate ;
-  6. _guard_accrue : différentiels d'accrual et de borrow du contrefactuel.
+  6. _guard_accrue : différentiels d'accrual et de borrow du contrefactuel ;
+  7. v1.1 veto de réversion : un resize opposé au précédent < 72 h est différé
+     même sur un sleeve âgé (le min-hold ne protège que les jeunes) ;
+  8. réversion expirée (> 72 h) ou même direction ou yield toxique → passe ;
+  9. tout resize exécuté tamponne last_resize_{ms,dir}.
 
 Aucun réseau. Mêmes fakes que test_paper_mark_concurrency.
 """
@@ -222,3 +226,69 @@ def test_guard_accrue_rev_and_borrow_diff(monkeypatch):
                          200_000.0 * FX, "BEAR", now_ms)
     expected_borrow = 0.20 * EQ0 * BORROW_ANN * dt_s / (365 * 86400)
     assert abs(g["borrow_diff_usdt"] - expected_borrow) < 1e-9
+
+
+def test_reversal_veto_blocks_opposite_resize_within_72h(monkeypatch):
+    # sleeve ÂGÉ (min-hold expiré) mais AUGMENTÉ il y a 8 h : la coupe (cible 0
+    # via hystérésis, y < 0) est DIFFÉRÉE par le veto de réversion, sans frais
+    _patch(monkeypatch, y_ann=-0.011)
+    now = datetime.now(timezone.utc)
+    now_ms = int(now.timestamp() * 1000)
+    c = _carry(0.40 * EQ0, now,
+               opened_ms=now_ms - (MIN_HOLD_S + 7200) * 1000)
+    c["last_resize_ms"] = now_ms - 8 * 3600 * 1000
+    c["last_resize_dir"] = 1
+    pp = _pp(_doc(now, carry=[c]))
+    pp.mark_to_market()
+    doc = pp.col.doc
+    assert len(doc["carry"]) == 1                    # conservé malgré cible 0
+    assert doc["ledger"]["fees"] == 0.0
+    g = doc["churn_guard"]
+    assert g["blocks"] == 1
+    assert g["events"][0]["reason"] == "réversion"
+    assert g["rule"] == "net_v1.1_2026-07-19"
+
+
+def test_reversal_expired_allows_resize(monkeypatch):
+    # même config mais dernier resize > 72 h → la coupe passe et facture
+    _patch(monkeypatch, y_ann=-0.011)
+    now = datetime.now(timezone.utc)
+    now_ms = int(now.timestamp() * 1000)
+    c = _carry(0.40 * EQ0, now,
+               opened_ms=now_ms - (MIN_HOLD_S + 7200) * 1000)
+    c["last_resize_ms"] = now_ms - (MIN_HOLD_S + 3600) * 1000
+    c["last_resize_dir"] = 1
+    pp = _pp(_doc(now, carry=[c]))
+    pp.mark_to_market()
+    doc = pp.col.doc
+    assert doc["carry"] == []
+    assert abs(doc["ledger"]["fees"] + 0.40 * EQ0 * MAKER_FEE * 2) < 1e-6
+    assert doc["churn_guard"]["blocks"] == 0
+
+
+def test_reversal_same_direction_or_toxic_not_vetoed():
+    # unitaires : même direction jamais vetoée ; yield toxique fait sauter le veto
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    pp = _pp(_doc(datetime.now(timezone.utc)))
+    pos = {"last_resize_ms": now_ms - 1000, "last_resize_dir": -1}
+    y_ok = {("carry", "BTCUSDT"): 0.02}
+    assert not pp._reversal_veto("carry", "BTCUSDT", pos, y_ok, now_ms, -1)
+    pos["last_resize_dir"] = 1
+    assert pp._reversal_veto("carry", "BTCUSDT", pos, y_ok, now_ms, -1)
+    y_tox = {("carry", "BTCUSDT"): -0.12}
+    assert not pp._reversal_veto("carry", "BTCUSDT", pos, y_tox, now_ms, -1)
+    assert not pp._reversal_veto("carry", "BTCUSDT", {}, y_ok, now_ms, -1)
+
+
+def test_resize_stamps_direction(monkeypatch):
+    # ouverture initiale (net > marge) : le resize exécuté tamponne la direction
+    _patch(monkeypatch, y_ann=0.06)
+    now = datetime.now(timezone.utc)
+    pp = _pp(_doc(now))
+    pp.mark_to_market()
+    doc = pp.col.doc
+    assert doc["carry"]
+    for c in doc["carry"]:
+        if c["notional"] > 0:
+            assert c["last_resize_dir"] == 1
+            assert c["last_resize_ms"] > 0
