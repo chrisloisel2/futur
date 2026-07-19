@@ -39,15 +39,15 @@ def guard_new_experiment(name: str, new_thesis: str = "") -> Dict:
     """À appeler AVANT tout nouveau protocole. Lève si l'idée est déjà classée
     et qu'aucune thèse nouvelle n'est fournie ; funding_xvenue est verrouillé
     définitivement quelle que soit la thèse."""
+    if "xvenue" in name.lower():
+        raise RecycledExperimentError(
+            f"{name} : funding_xvenue est classé NO_EDGE définitif (1717fd8) — "
+            "ne jamais recycler, même sous un autre nom")
     hit = lookup(name)
     if hit is None:
         return {"name": name, "status": "new"}
     if hit["section"] == "validated_foundations":
         return dict(hit, status="foundation")
-    if name == "funding_xvenue_v0" or "xvenue" in name:
-        raise RecycledExperimentError(
-            f"{name} : classé NO_EDGE définitif — ne jamais recycler, "
-            f"même sous un autre nom (verdict {hit.get('ref')})")
     if not new_thesis.strip():
         raise RecycledExperimentError(
             f"{name} : déjà classé {hit.get('verdict')} ({hit.get('ref')}) — "
