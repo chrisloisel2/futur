@@ -101,7 +101,7 @@ def test_mongo_unavailable_does_not_break_the_cycle(no_network, monkeypatch):
     """Le tournoi n'écrit délibérément PAS dans Mongo (voir reconciliation.py)
     — preuve positive : MongoClient bloqué, un cycle complet aboutit quand
     même."""
-    import pymongo
+    pymongo = pytest.importorskip("pymongo", reason="pymongo absent de cet environnement")
     def _boom(*a, **kw):
         raise AssertionError("le tournoi ne doit JAMAIS instancier MongoClient")
     monkeypatch.setattr(pymongo, "MongoClient", _boom)

@@ -1,0 +1,33 @@
+# configs/alpha20_governance_log.yaml — journal APPEND-ONLY des changements de
+# gouvernance du tournoi (éligibilité/sélection), distinct des changements de
+# stratégie (signal/sizing/coûts, couverts par config_hash par runner) et du
+# protocole de sélection figé (configs/alpha20_selection_protocol.yaml).
+#
+# Règle : une entrée n'est JAMAIS modifiée ni supprimée après coup — seulement
+# ajoutée. Un changement de gouvernance ne réécrit JAMAIS d'événement
+# historique du ledger ; il documente la frontière temporelle à partir de
+# laquelle une nouvelle règle d'éligibilité s'applique.
+#
+# Pourquoi ce fichier existe : `configs/alpha20_runners.yaml.git_commit` est
+# stampé par scripts/build_alpha20_registry.py qui lit le HEAD *parent* au
+# moment du stampage, PUIS le fichier stampé est inclus dans le commit
+# suivant (pattern déjà présent avant ce fichier : ex. git_commit=1e3af95
+# stampé à l'intérieur du commit 890aa17 qui vient après 1e3af95). Ce champ
+# ne prouve donc PAS que le registre correspond au code effectivement
+# déployé — seul `deployment_git_sha` ci-dessous fait foi pour une entrée
+# donnée. Pas de renommage du champ existant (schéma déjà testé/consommé
+# ailleurs) : un manifeste externe suffit pour ce déploiement.
+
+changes:
+  - effective_at: "2026-07-20T22:29:49Z"    # horodatage commit du changement (9c410e1, converti UTC)
+    deployment_git_sha: "9c410e1"
+    registry_generator_head: "2fe693b"       # champ git_commit du registre à cette date — HEAD PARENT au stampage, PAS deployment_git_sha (voir note ci-dessus)
+    registry_built_at: "2026-07-20T22:28:41.084614+00:00"
+    registry_content_sha256: "35ca8fd9c7685aa3d2462e999967df31964a0313afd654d8d5c1ae7dd86968e0"
+    selection_protocol_hash: "53a265970fffd082dbfc5ade"
+    change: "OBSERVE_ONLY rendu inéligible à la sélection : nouvelle règle de priorité 0 dans selection_status() (src/alpha20/tournament/selection/phases.py) — status registre != ACTIVE -> status OBSERVE_ONLY, inconditionnel, avant tout calcul de performance. Auparavant OBSERVE_ONLY n'excluait de rien (accepté par le schéma YAML, sans effet réel sur eligible_ids)."
+    affected_runners: [carry_solusdt, carry_bnbusdt]
+    affected_runner_status_change: "ACTIVE -> OBSERVE_ONLY"
+    affected_runner_config_hash_unchanged: true   # e0cc3cdbf3b236b648cf5563 (sol) / 18a5748907bd401ab24eac13 (bnb) — identique avant/après
+    historical_events_rewritten: false
+    related_experiment_registry_entries: [carry_solusdt, carry_bnbusdt]   # configs/alpha20.yaml -> experiment_registry.closed_no_edge

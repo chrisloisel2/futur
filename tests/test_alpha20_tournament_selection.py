@@ -107,6 +107,18 @@ def test_observe_only_excluded_from_run_selection_alongside_eligible_active():
         "ELIGIBLE", "SELECTED_PROVISIONAL")
 
 
+def test_unknown_status_fails_closed_not_eligible():
+    """La garde est `spec.status != "ACTIVE"`, pas `== "OBSERVE_ONLY"` : un
+    statut futur inconnu ou désactivé doit rester exclu par défaut, jamais
+    devenir éligible faute de correspondance explicite."""
+    spec = _spec("mystery", status="SOMETHING_UNDEFINED")
+    _seed_history("mystery", n_days=45, daily_mu=0.0025, daily_sigma=0.002, seed=7,
+                  n_decisions=350)
+    st = phases.selection_status(spec)
+    assert st["status"] != "ELIGIBLE"
+    assert st["status"] == "OBSERVE_ONLY"
+
+
 def test_fragile_when_bootstrap_lcb_non_positive():
     """NAV construite à la main (pas de marche aléatoire) : petites hausses
     régulières entrecoupées de chutes ponctuelles assez espacées pour que le

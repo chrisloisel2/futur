@@ -82,6 +82,19 @@ def test_registry_locks_xvenue_forever():
     assert ok["status"] == "reopened_with_thesis"
     assert er.guard_new_experiment("btc_variance_premium")["status"] == "new"
     assert er.guard_new_experiment("carry_basis_v12")["status"] == "foundation"
+    # carry_solusdt/carry_bnbusdt (9c410e1) : bloqués sans thèse, mais PAS
+    # verrouillés à vie comme xvenue — une vraie réouverture documentée reste
+    # possible via le mécanisme normal, pas une interdiction permanente.
+    with pytest.raises(er.RecycledExperimentError):
+        er.guard_new_experiment("carry_solusdt")
+    with pytest.raises(er.RecycledExperimentError):
+        er.guard_new_experiment("carry_bnbusdt")
+    reopened_sol = er.guard_new_experiment(
+        "carry_solusdt", "changement matériel d'exécution : basis réel câblé")
+    assert reopened_sol["status"] == "reopened_with_thesis"
+    reopened_bnb = er.guard_new_experiment(
+        "carry_bnbusdt", "changement matériel d'exécution : basis réel câblé")
+    assert reopened_bnb["status"] == "reopened_with_thesis"
 
 
 def test_reconciliation_gate(monkeypatch, tmp_path):
