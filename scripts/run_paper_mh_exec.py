@@ -19,8 +19,18 @@ avec les conditions d'exécution :
     assumed tant que commissionRate signé indisponible) : taker ×2 +
     slippage ×2 + demi-spread ×2.
 
-Sorties : reports/paper_live/mh_events/exec_ledger.parquet + exec_state.json,
-avec TRACKING ERROR vs les labels shadow (même décision, deux valorisations).
+DÉCOMPOSITION OBLIGATOIRE (ordre R0 2026-07-20) — trois erreurs SÉPARÉES,
+sinon la close horaire hostile serait faussement attribuée à l'exécution ou
+au modèle :
+  • sampling_error_1h    = net_grid − net_label   (même coût forfaitaire que
+    le shadow, seule la grille 1 h + le délai d'arrivée changent) ;
+  • execution_shortfall  = net_exec − net_grid    (écart de coûts réels :
+    registry + spread — s'enrichira de l'impact mesuré par la TCA) ;
+  • model_tracking_error = niveau SLEEVE : PF réalisé des labels vs PF
+    pré-enregistré de la stack (référence configs/alpha20.yaml) — l'écart
+    modèle se juge sur les labels, jamais sur les frictions d'exécution.
+
+Sorties : reports/paper_live/mh_events/exec_ledger.parquet + exec_state.json.
 Le sizing 20 %/décision reste une expérience paper — jamais un sizing live.
 """
 from __future__ import annotations
@@ -48,6 +58,7 @@ _spec.loader.exec_module(rmh)
 ENRICHED = ROOT / "data" / "enriched"
 OUT = ROOT / "reports" / "paper_live" / "mh_events"
 HALF_SPREAD_BP = 1.0            # majors : à remplacer par le spread L2 mesuré
+LABEL_COST_RT_BP = 14.0         # = COST_RT du shadow (run_event_shadow_daily)
 
 
 def _closes(symbol: str) -> pd.Series:
@@ -60,7 +71,7 @@ def _closes(symbol: str) -> pd.Series:
 
 
 def replay_decision(row, closes: pd.Series, cost_bp: float):
-    """(net_exec, entry_ts, exit_ts) ou None si données manquantes."""
+    """(net_exec, entry_ts, exit_ts, gross) ou None si données manquantes."""
     t = row["event_time"]
     hours = rmh.TRADE_HOURS.get(row["engine"], 4)
     after = closes[closes.index > t]
@@ -72,7 +83,7 @@ def replay_decision(row, closes: pd.Series, cost_bp: float):
         return None
     exit_ts, exit_px = exit_after.index[0], float(exit_after.iloc[0])
     gross = exit_px / entry_px - 1.0
-    return gross - cost_bp / 1e4, entry_ts, exit_ts
+    return gross - cost_bp / 1e4, entry_ts, exit_ts, gross
 
 
 def run_once(args) -> dict:
@@ -100,13 +111,18 @@ def run_once(args) -> dict:
     for _, r in book[book["taken"]].iterrows():
         closes = _closes(r["symbol"])
         rep = replay_decision(r, closes, cost_bp)
+        gross = rep[3] if rep else np.nan
+        net_exec = rep[0] if rep else np.nan
+        net_grid = gross - LABEL_COST_RT_BP / 1e4 if rep else np.nan
+        net_label = float(r["net_labeled"]) if np.isfinite(
+            pd.to_numeric(r["net_labeled"], errors="coerce")) else np.nan
         rows.append({
             "event_time": r["event_time"], "symbol": r["symbol"],
             "engine": r["engine"], "score": r["score"],
-            "notional": r["notional"],
-            "net_label": float(r["net_labeled"]) if np.isfinite(
-                pd.to_numeric(r["net_labeled"], errors="coerce")) else np.nan,
-            "net_exec": rep[0] if rep else np.nan,
+            "notional": r["notional"], "net_label": net_label,
+            "net_grid": net_grid, "net_exec": net_exec,
+            "sampling_error_1h": net_grid - net_label,
+            "execution_shortfall": net_exec - net_grid,
             "entry_ts": rep[1] if rep else None,
             "exit_ts": rep[2] if rep else None,
         })
@@ -116,11 +132,14 @@ def run_once(args) -> dict:
         led.to_parquet(OUT / "exec_ledger.parquet", index=False)
 
     both = led.dropna(subset=["net_label", "net_exec"]) if len(led) else led
-    te = None
-    if len(both) >= 2:
-        diff = both["net_exec"] - both["net_label"]
-        denom = float(both["net_label"].abs().mean())
-        te = float(diff.abs().mean() / denom) if denom > 0 else None
+    # model_tracking_error : les LABELS réalisés vs la référence pré-enregistrée
+    # de la stack — jamais mélangé aux frictions d'exécution
+    from src.alpha20 import load_config
+    ref_pf = float(load_config().get("references", {}).get(
+        "mh_stack_pf_preregistered", 1.435))
+    lab = led["net_label"].dropna() if len(led) else pd.Series(dtype=float)
+    pf_real = (float(lab[lab > 0].sum() / max(abs(lab[lab < 0].sum()), 1e-9))
+               if len(lab) >= 10 else None)     # < 10 labels : pas jugeable
     pnl = float(led["pnl_exec"].sum(skipna=True)) if len(led) else 0.0
     state.update({
         "status": "active",
@@ -129,14 +148,28 @@ def run_once(args) -> dict:
         "n_decisions": int(len(led)),
         "n_replayed": int(led["net_exec"].notna().sum()) if len(led) else 0,
         "n_labeled_both": int(len(both)),
-        "tracking_error_vs_labels": round(te, 3) if te is not None else None,
+        "errors": {
+            "sampling_error_1h_bps_mean": round(float(
+                both["sampling_error_1h"].mean() * 1e4), 1) if len(both) else None,
+            "execution_shortfall_bps_mean": round(float(
+                led["execution_shortfall"].mean() * 1e4), 1)
+                if len(led) and led["execution_shortfall"].notna().any() else None,
+            "model_tracking": {"reference_pf": ref_pf, "realized_pf_labels": pf_real,
+                               "n_labels": int(len(lab)),
+                               "gap": round(pf_real - ref_pf, 3)
+                               if pf_real is not None else None},
+        },
         "mean_exec_bps": round(float(led["net_exec"].mean() * 1e4), 1)
                           if len(led) and led["net_exec"].notna().any() else None,
     })
     (OUT / "exec_state.json").write_text(json.dumps(state, indent=2, default=str))
+    e = state["errors"]
     print(f"[paper MH exec] equity {state['equity_exec']:.0f}  "
           f"décisions {state['n_decisions']} (rejouées {state['n_replayed']})  "
-          f"TE vs labels: {state['tracking_error_vs_labels']}", flush=True)
+          f"sampling {e['sampling_error_1h_bps_mean']} bps | "
+          f"shortfall {e['execution_shortfall_bps_mean']} bps | "
+          f"PF labels {e['model_tracking']['realized_pf_labels']}"
+          f"/{e['model_tracking']['reference_pf']}", flush=True)
     return state
 
 

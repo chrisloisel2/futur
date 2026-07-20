@@ -51,9 +51,16 @@ def evaluate(audit: Dict) -> Dict:
 
 
 def ingest_facts(audit: Dict, audit_ref: str) -> int:
-    """Faits audités → ledger (idempotent par event_id déterministe)."""
+    """Faits audités → ledger (idempotent par event_id déterministe).
+    Les faits datés de l'ÈRE SOURCE (≥ premier rebalance émis par le paper)
+    sont refusés : ils existent déjà, les ré-ingérer doublerait la NAV."""
+    dec = event_ledger.read(kinds=["decision"])
+    dec = dec[dec["ref"] == "rebalance"] if len(dec) else dec
+    source_era_start = str(dec["ts"].iloc[0]) if len(dec) else "9999"
     events = []
     for row in audit.get("carry_detail", []):
+        if str(row["funding_time"]) >= source_era_start:
+            continue
         events.append(LedgerEvent(
             ts=str(row["funding_time"]), kind="funding",
             sleeve=f"carry_{row['symbol']}", venue="binance_usdm",
@@ -62,6 +69,8 @@ def ingest_facts(audit: Dict, audit_ref: str) -> int:
                                  "notional_usdt": row["notional_usdt"]}))
     for row in audit.get("fees_lines", []):
         ts = str(row["line"]).split(" ")[0]
+        if ts >= source_era_start:
+            continue
         events.append(LedgerEvent(
             ts=ts, kind="fee", sleeve="portfolio", venue="binance_usdm",
             amount_usdt=-abs(float(row["fee_usdt"])),
@@ -70,34 +79,55 @@ def ingest_facts(audit: Dict, audit_ref: str) -> int:
 
 
 def forward_gate() -> Dict:
-    """Gate FORWARD (la seule vérité après le 2026-07-19) : entre le premier et
-    le dernier événement `decision/rebalance` émis À LA SOURCE par le paper,
+    """Gate FORWARD (la seule vérité après le 2026-07-19), PAR INTERVALLE :
+    entre chaque paire de `decision/rebalance` consécutifs émis à la source,
     le Δ des cumuls Mongo doit égaler la somme des événements du ledger à
-    ≤ 0,01 USDT — plus aucune trajectoire reconstruite a posteriori."""
+    ≤ 0,01 USDT. Exige aussi chaîne de hash valide et un événement par fait.
+    `consecutive_ok` (depuis la fin) pilote le tag alpha20-r0-ledger-trusted
+    (règle mécanique : ≥ 3)."""
+    integ = event_ledger.integrity()
     dec = event_ledger.read(kinds=["decision"])
-    dec = dec[dec["ref"] == "rebalance"] if len(dec) else dec
+    dec = dec[dec["ref"] == "rebalance"].reset_index(drop=True) if len(dec) else dec
     if len(dec) < 2:
-        return {"status": "pending",
-                "note": f"{len(dec)} rebalance(s) émis — gate évaluable à 2",
-                "passed": None}
-    first, last = dec.iloc[0], dec.iloc[-1]
-    mongo_fees = last["meta"]["mongo_fees_cum"] - first["meta"]["mongo_fees_cum"]
-    mongo_carry = last["meta"]["mongo_carry_cum"] - first["meta"]["mongo_carry_cum"]
-    t0, t1 = first["ts"], last["ts"]
+        return {"status": "pending", "passed": None, "consecutive_ok": 0,
+                "integrity": integ,
+                "note": f"{len(dec)} rebalance(s) émis — gate évaluable à 2"}
+    # seuls les événements émis À LA SOURCE comptent — les faits ré-ingérés
+    # d'un audit (ref AUDIT_*) doubleraient les fenêtres qu'ils recouvrent
     fees = event_ledger.read(kinds=["fee"])
-    fees = fees[(fees["ts"] > t0) & (fees["ts"] <= t1)] if len(fees) else fees
+    fees = fees[~fees["ref"].astype(str).str.startswith("AUDIT_")] \
+        if len(fees) else fees
     fund = event_ledger.read(kinds=["funding"])
-    fund = fund[(fund["ts"] > t0) & (fund["ts"] <= t1)] if len(fund) else fund
-    gap_fees = abs(float(fees["amount_usdt"].sum() if len(fees) else 0.0)
-                   - float(mongo_fees))
-    gap_carry = abs(float(fund["amount_usdt"].sum() if len(fund) else 0.0)
-                    - float(mongo_carry))
-    return {"status": "evaluated", "window": [str(t0), str(t1)],
-            "n_rebalances": int(len(dec)),
-            "gap_fees_usdt": round(gap_fees, 4),
-            "gap_carry_usdt": round(gap_carry, 4),
-            "gate_usdt": GATE_USDT,
-            "passed": bool(gap_fees <= GATE_USDT and gap_carry <= GATE_USDT)}
+    fund = fund[fund["ref"] == "settlement"] if len(fund) else fund
+    intervals = []
+    for i in range(1, len(dec)):
+        a, b = dec.iloc[i - 1], dec.iloc[i]
+        t0, t1 = a["ts"], b["ts"]
+        d_fees = b["meta"]["mongo_fees_cum"] - a["meta"]["mongo_fees_cum"]
+        d_carry = b["meta"]["mongo_carry_cum"] - a["meta"]["mongo_carry_cum"]
+        lf = fees[(fees["ts"] > t0) & (fees["ts"] <= t1)] if len(fees) else fees
+        lu = fund[(fund["ts"] > t0) & (fund["ts"] <= t1)] if len(fund) else fund
+        gap_f = abs(float(lf["amount_usdt"].sum() if len(lf) else 0.0)
+                    - float(d_fees))
+        gap_c = abs(float(lu["amount_usdt"].sum() if len(lu) else 0.0)
+                    - float(d_carry))
+        intervals.append({"from": str(t0), "to": str(t1),
+                          "gap_fees_usdt": round(gap_f, 4),
+                          "gap_carry_usdt": round(gap_c, 4),
+                          "passed": bool(gap_f <= GATE_USDT
+                                         and gap_c <= GATE_USDT)})
+    consecutive = 0
+    for it in reversed(intervals):
+        if not it["passed"]:
+            break
+        consecutive += 1
+    all_ok = (all(it["passed"] for it in intervals)
+              and integ["chain_ok"] and integ["one_event_per_fact"])
+    return {"status": "evaluated", "gate_usdt": GATE_USDT,
+            "n_rebalances": int(len(dec)), "intervals": intervals,
+            "consecutive_ok": consecutive if integ["chain_ok"]
+            and integ["one_event_per_fact"] else 0,
+            "integrity": integ, "passed": bool(all_ok)}
 
 
 def reconcile(run_fresh: bool = True) -> Dict:

@@ -56,6 +56,44 @@ def test_out_of_order_ts_keeps_chain(ledger):
     assert len(ledger.read()) == 3
 
 
+def test_interrupted_write_tolerated_and_repaired(ledger, tmp_path):
+    """Robustesse R0 : une écriture interrompue (dernière ligne tronquée) est
+    ignorée puis réparée au prochain append — aucun événement commis perdu."""
+    ledger.append([_ev("2026-07-20T02:45:00Z", "fee", -18.32)])
+    f = tmp_path / "ledger" / "ledger.jsonl"
+    with open(f, "a") as fh:
+        fh.write('{"ts": "2026-07-20T03:00:00Z", "kind": "fee", "amou')  # crash
+    assert ledger.verify_chain()                     # queue non commise ignorée
+    assert len(ledger.read()) == 1
+    ledger.append([_ev("2026-07-20T03:05:00Z", "fee", -5.0)])
+    assert ledger.verify_chain()
+    df = ledger.read()
+    assert len(df) == 2 and df["amount_usdt"].tolist() == [-18.32, -5.0]
+
+
+def test_middle_corruption_detected_and_blocks_append(ledger, tmp_path):
+    ledger.append([_ev("2026-07-20T02:45:00Z", "fee", -18.32),
+                   _ev("2026-07-20T02:46:00Z", "funding", 2.5)])
+    f = tmp_path / "ledger" / "ledger.jsonl"
+    lines = f.read_text().splitlines()
+    lines[0] = lines[0][:40]                         # corruption INTERNE
+    f.write_text("\n".join(lines) + "\n")
+    assert not ledger.verify_chain()
+    with pytest.raises(RuntimeError):
+        ledger.append([_ev("2026-07-20T04:00:00Z", "fee", -1.0)])
+
+
+def test_integrity_one_event_per_fact(ledger):
+    ledger.append([_ev("2026-07-20T02:45:00Z", "fee", -18.32),
+                   _ev("2026-07-20T02:45:00Z", "fee", -18.32,
+                       sleeve="basis_BTCUSDT"),      # autre sleeve : OK
+                   _ev("2026-07-20T02:45:00Z", "fee", -7.77)])  # MÊME fait, autre montant
+    integ = ledger.integrity()
+    assert not integ["one_event_per_fact"]
+    assert any("carry_BTCUSDT" in d for d in integ["duplicate_facts"])
+    assert integ["chain_ok"]
+
+
 def test_bad_kind_rejected(ledger):
     with pytest.raises(ValueError):
         ledger.append([_ev("2026-07-19T08:00:00Z", "bonus", 1.0)])

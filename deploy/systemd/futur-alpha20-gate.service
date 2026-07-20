@@ -1,0 +1,10 @@
+[Unit]
+Description=Gate forward ALPHA_20 (reconciliation par intervalle apres chaque rebalance, tag mecanique R0 a 3 verts)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_gate.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_gate.log
+StandardError=append:/home/qbee/futur/reports/alpha20_gate.log
+TimeoutStartSec=300

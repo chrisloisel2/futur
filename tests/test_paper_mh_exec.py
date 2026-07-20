@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
@@ -36,14 +37,15 @@ def test_replay_decision_arrival_and_horizon(tmp_path, monkeypatch):
     closes = rme._closes("BTCUSDT")
     row = {"event_time": pd.Timestamp("2026-07-20T02:10Z"),
            "engine": "LIQ_CASCADE"}
-    net, entry_ts, exit_ts = rme.replay_decision(row, closes, cost_bp=14.0)
+    net, entry_ts, exit_ts, gross = rme.replay_decision(row, closes, cost_bp=14.0)
     assert entry_ts == pd.Timestamp("2026-07-20T03:00Z")   # strictement après
     assert exit_ts == pd.Timestamp("2026-07-20T07:00Z")    # +4 h (cascade)
+    assert abs(gross - (103.5 / 101.5 - 1)) < 1e-12
     expected = (103.5 / 101.5 - 1) - 14.0 / 1e4
     assert abs(net - expected) < 1e-12
     # horizon 24 h pour crowding
     row["engine"] = "CROWDING_REVERSAL"
-    _, _, exit_ts = rme.replay_decision(row, closes, cost_bp=14.0)
+    _, _, exit_ts, _ = rme.replay_decision(row, closes, cost_bp=14.0)
     assert exit_ts == pd.Timestamp("2026-07-21T03:00Z")
     # données manquantes → None
     row["event_time"] = pd.Timestamp("2026-07-25T00:00Z")
@@ -76,8 +78,17 @@ def test_run_once_tracking_error(tmp_path, monkeypatch):
     out = pd.read_parquet(tmp_path / "out" / "exec_ledger.parquet")
     assert np.isfinite(out["net_exec"]).all()
     assert np.isnan(out["net_label"].iloc[1])              # pending côté labels
-    # TE calculable seulement avec ≥2 paires étiquetées → None ici
-    assert state["tracking_error_vs_labels"] is None
+    # décomposition : shortfall = écart de coûts (constant tant que pas de fills)
+    snap_cost = state["cost_bp_roundtrip"]
+    assert out["execution_shortfall"].iloc[0] == pytest.approx(
+        (rme.LABEL_COST_RT_BP - snap_cost) / 1e4)
+    # sampling = net_grid − net_label sur la décision étiquetée
+    assert out["sampling_error_1h"].iloc[0] == pytest.approx(
+        out["net_grid"].iloc[0] - 0.018)
+    e = state["errors"]
+    assert e["execution_shortfall_bps_mean"] is not None
+    assert e["model_tracking"]["reference_pf"] == pytest.approx(1.435)
+    assert e["model_tracking"]["realized_pf_labels"] is None   # < 10 labels
 
 
 def test_run_once_no_ledger(tmp_path, monkeypatch):

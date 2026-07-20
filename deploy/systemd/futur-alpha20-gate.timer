@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer 8h gate ALPHA_20 (05:00/13:00/21:00 heure machine, ~15 min apres les rebalances 04:45/12:45/20:45)
+
+[Timer]
+OnCalendar=*-*-* 05/8:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

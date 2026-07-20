@@ -119,13 +119,14 @@ def _dec(ts, fees_cum, carry_cum):
                              "mongo_carry_cum": carry_cum, "exec_usdt": {}})
 
 
-def test_forward_gate(monkeypatch, tmp_path):
+def test_forward_gate_per_interval(monkeypatch, tmp_path):
     from src.alpha20.accounting import event_ledger
     from src.alpha20.contracts import LedgerEvent
     monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
-    assert lr.forward_gate()["passed"] is None            # rien → pending
+    g = lr.forward_gate()
+    assert g["passed"] is None and g["consecutive_ok"] == 0   # rien → pending
     event_ledger.append([_dec("2026-07-20T02:30:00Z", -100.0, 10.0)])
-    assert lr.forward_gate()["status"] == "pending"       # 1 seul rebalance
+    assert lr.forward_gate()["status"] == "pending"           # 1 seul rebalance
     event_ledger.append([
         LedgerEvent(ts="2026-07-20T08:00:00Z", kind="funding",
                     sleeve="carry_BTCUSDT", venue="binance_usdm",
@@ -135,8 +136,31 @@ def test_forward_gate(monkeypatch, tmp_path):
         _dec("2026-07-20T10:30:00Z", -118.32, 12.5),
     ])
     g = lr.forward_gate()
-    assert g["passed"] and g["gap_fees_usdt"] == 0.0 and g["gap_carry_usdt"] == 0.0
-    # divergence Mongo vs ledger → gate rouge
-    event_ledger.append([_dec("2026-07-20T18:30:00Z", -140.0, 12.5)])
+    assert g["passed"] and g["consecutive_ok"] == 1
+    assert g["intervals"][-1]["gap_fees_usdt"] == 0.0
+    assert g["intervals"][-1]["gap_carry_usdt"] == 0.0
+    # intervalle 2 propre (aucun flux, cumuls inchangés) → 2 consécutifs
+    event_ledger.append([_dec("2026-07-20T18:30:00Z", -118.32, 12.5)])
     g = lr.forward_gate()
-    assert not g["passed"] and g["gap_fees_usdt"] > 0.01
+    assert g["passed"] and g["consecutive_ok"] == 2
+    # intervalle 3 divergent (Mongo bouge sans événement) → rouge, série cassée
+    event_ledger.append([_dec("2026-07-21T02:30:00Z", -140.0, 12.5)])
+    g = lr.forward_gate()
+    assert not g["passed"] and g["consecutive_ok"] == 0
+    assert g["intervals"][-1]["gap_fees_usdt"] > 0.01
+    assert g["intervals"][0]["passed"]                        # l'historique reste vert
+
+
+def test_forward_gate_ignores_audit_ingested_facts(monkeypatch, tmp_path):
+    from src.alpha20.accounting import event_ledger
+    from src.alpha20.contracts import LedgerEvent
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    event_ledger.append([
+        _dec("2026-07-20T02:30:00Z", -100.0, 0.0),
+        LedgerEvent(ts="2026-07-20T05:00:00Z", kind="fee", sleeve="portfolio",
+                    venue="binance_usdm", amount_usdt=-32.05,
+                    ref="AUDIT_2026-07-19.json"),             # fait ré-ingéré
+        _dec("2026-07-20T10:30:00Z", -100.0, 0.0),            # Mongo inchangé
+    ])
+    g = lr.forward_gate()
+    assert g["passed"]                                        # l'audit ne compte pas

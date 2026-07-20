@@ -40,17 +40,57 @@ def _event_id(ev: LedgerEvent) -> str:
     return hashlib.sha256(body.encode()).hexdigest()[:24]
 
 
-def _rows() -> List[dict]:
+def _load() -> "tuple":
+    """(rows valides, octets valides). Une DERNIÈRE ligne incomplète (écriture
+    interrompue par un crash) est ignorée : l'événement n'était pas commité.
+    Une ligne malformée AU MILIEU n'est pas réparable → chaîne invalide."""
     f = _ledger_file()
     if not f.exists():
-        return []
-    return [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+        return [], 0
+    raw = f.read_bytes()
+    rows, good = [], 0
+    lines = raw.split(b"\n")
+    for i, line in enumerate(lines):
+        if not line.strip():
+            good += len(line) + 1
+            continue
+        try:
+            rows.append(json.loads(line))
+            good += len(line) + 1
+        except ValueError:
+            # ligne illisible : queue tronquée (non commise) si RIEN de valide
+            # ne suit ; sinon corruption au milieu → ledger invalide
+            tail_valid = any(_parses(l) for l in lines[i + 1:] if l.strip())
+            if tail_valid:
+                return rows, -1          # -1 = corruption interne
+            break
+    return rows, min(good, len(raw))
+
+
+def _parses(line: bytes) -> bool:
+    try:
+        json.loads(line)
+        return True
+    except ValueError:
+        return False
+
+
+def _rows() -> List[dict]:
+    return _load()[0]
 
 
 def append(events: Iterable[LedgerEvent]) -> List[str]:
-    """Ajoute les événements nouveaux (idempotent), retourne leurs event_id."""
+    """Ajoute les événements nouveaux (idempotent), retourne leurs event_id.
+    Répare une queue d'écriture interrompue avant d'appendre."""
     LEDGER_DIR.mkdir(parents=True, exist_ok=True)
-    rows = _rows()
+    rows, good = _load()
+    if good == -1:
+        raise RuntimeError("ledger corrompu (ligne interne illisible) — "
+                           "aucune écriture autorisée, investiguer")
+    f = _ledger_file()
+    if f.exists() and good < f.stat().st_size:
+        with open(f, "rb+") as fh:      # tronque la ligne partielle non commise
+            fh.truncate(good)
     known = {r["event_id"] for r in rows}
     chain = rows[-1]["chain"] if rows else GENESIS
     written = []
@@ -72,9 +112,14 @@ def append(events: Iterable[LedgerEvent]) -> List[str]:
 
 
 def verify_chain() -> bool:
-    """Revalide toute la chaîne de hash — False = ledger altéré."""
+    """Revalide toute la chaîne de hash — False = ledger altéré (réécriture,
+    corruption interne). Une queue tronquée non commise n'invalide pas."""
+    rows, good = _load()
+    if good == -1:
+        return False
     chain = GENESIS
-    for row in _rows():
+    for row in rows:
+        row = dict(row)
         stored = row.pop("chain")
         chain = hashlib.sha256(
             (chain + json.dumps(row, sort_keys=True, default=str)).encode()
@@ -82,6 +127,19 @@ def verify_chain() -> bool:
         if chain != stored:
             return False
     return True
+
+
+def integrity() -> dict:
+    """Exactement UN événement comptable par fait économique : deux événements
+    fee/funding partageant (ts, kind, sleeve, ref) = double comptage (les
+    montants identiques sont déjà dédupliqués par event_id)."""
+    df = read(kinds=["fee", "funding"])
+    dups = []
+    if len(df):
+        g = df.groupby(["ts", "kind", "sleeve", "ref"]).size()
+        dups = [" ".join(map(str, k)) for k, n in g.items() if n > 1]
+    return {"chain_ok": verify_chain(), "duplicate_facts": dups,
+            "one_event_per_fact": not dups}
 
 
 def read(kinds: Optional[List[str]] = None,

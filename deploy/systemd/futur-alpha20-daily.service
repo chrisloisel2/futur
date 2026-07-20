@@ -1,0 +1,10 @@
+[Unit]
+Description=Tableau quotidien officiel ALPHA_20 (PnL brut->net, ES99, marge, delta, tracking MH, residu reconciliation)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/report_alpha20_daily.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_daily.log
+StandardError=append:/home/qbee/futur/reports/alpha20_daily.log
+TimeoutStartSec=300

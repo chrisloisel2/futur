@@ -324,6 +324,59 @@ def test_alpha20_emitter_records_real_funding(monkeypatch, tmp_path):
     assert df["sleeve"].iloc[0] == "carry_BTCUSDT"
 
 
+def test_emitter_failure_never_breaks_paper(monkeypatch):
+    """Robustesse R0 : ledger alpha20 indisponible (disque, Mongo, code) →
+    le paper continue, le mark aboutit, le doc Mongo est mis à jour."""
+    from src.alpha20.accounting import event_ledger
+    def boom(events):
+        raise RuntimeError("ledger indisponible")
+    monkeypatch.setattr(event_ledger, "append", boom)
+    _patch(monkeypatch, y_ann=0.06)
+    pp = _pp(_doc(datetime.now(timezone.utc)))
+    res = pp.mark_to_market()                        # ne doit PAS lever
+    assert res and len(pp.col.doc["carry"]) > 0      # rebalance bien exécuté
+
+
+def test_concurrent_double_mark_single_emission(monkeypatch, tmp_path):
+    """Robustesse R0 : deux marks concurrents → UN seul rebalance émis."""
+    import threading
+    from src.alpha20.accounting import event_ledger
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    _patch(monkeypatch, y_ann=0.06)
+    pp = _pp(_doc(datetime.now(timezone.utc)))
+    threads = [threading.Thread(target=pp.mark_to_market) for _ in range(2)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    df = event_ledger.read(kinds=["decision"])
+    assert len(df[df["ref"] == "rebalance"]) == 1
+    assert event_ledger.verify_chain()
+
+
+def test_restart_continuity_two_rebalances(monkeypatch, tmp_path):
+    """Robustesse R0 : le ledger est sans état en mémoire — un second
+    rebalance (après « restart ») prolonge la même chaîne, et le gate
+    forward réconcilie l'intervalle émis à la source."""
+    from src.alpha20.accounting import event_ledger
+    from src.alpha20.validation import live_reconciliation as lr
+    monkeypatch.setattr(event_ledger, "LEDGER_DIR", tmp_path / "ledger")
+    _patch(monkeypatch, y_ann=0.06)
+    now = datetime.now(timezone.utc)
+    pp = _pp(_doc(now))
+    pp.mark_to_market()                              # rebalance 1 (ouvertures)
+    doc = pp.col.doc
+    doc["next_rebalance_ms"] = int(now.timestamp() * 1000) - 1   # re-dû
+    pp2 = _pp(doc)                                   # « nouveau process »
+    pp2.mark_to_market()                             # rebalance 2
+    dec = event_ledger.read(kinds=["decision"])
+    assert len(dec[dec["ref"] == "rebalance"]) == 2
+    assert event_ledger.verify_chain()
+    g = lr.forward_gate()
+    assert g["status"] == "evaluated" and g["passed"]
+    assert g["consecutive_ok"] >= 1
+
+
 def test_resize_stamps_direction(monkeypatch):
     # ouverture initiale (net > marge) : le resize exécuté tamponne la direction
     _patch(monkeypatch, y_ann=0.06)

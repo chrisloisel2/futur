@@ -6,6 +6,13 @@
 # d'optimisation ni une contrainte de sizing.
 # ─────────────────────────────────────────────────────────────────────────────
 
+status: R0_FOUNDATION_DEPLOYED          # 2026-07-20 — gel des règles 72 h (→ 2026-07-23)
+                                        # tag alpha20-r0-ledger-trusted : mécanique,
+                                        # 3 intervalles consécutifs réconciliés
+
+references:                              # références PRÉ-ENREGISTRÉES de contrôle
+  mh_stack_pf_preregistered: 1.435       # PF de la stack MH (V12_PLUS_STACK_OVERLAY_MH)
+
 capital:
   initial_eur: 200000.0
   currency: EUR
