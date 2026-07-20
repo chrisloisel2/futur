@@ -368,6 +368,8 @@ def test_restart_continuity_two_rebalances(monkeypatch, tmp_path):
     doc = pp.col.doc
     doc["next_rebalance_ms"] = int(now.timestamp() * 1000) - 1   # re-dû
     pp2 = _pp(doc)                                   # « nouveau process »
+    import time as _t
+    _t.sleep(0.002)     # en prod : 8 h entre rebalances (même ms impossible)
     pp2.mark_to_market()                             # rebalance 2
     dec = event_ledger.read(kinds=["decision"])
     assert len(dec[dec["ref"] == "rebalance"]) == 2
