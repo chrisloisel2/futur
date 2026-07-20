@@ -10,6 +10,7 @@ et décomposer — aucune hypothèse, aucun agrégat externe.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict, Optional
 
 import pandas as pd
@@ -21,8 +22,9 @@ COST_KINDS = ("fee", "borrow", "gas", "infra", "transfer")
 TAX_KINDS = ("tax_provision",)
 
 
-def nav(initial_usdt: float, until: Optional[str] = None) -> float:
-    df = event_ledger.read()
+def nav(initial_usdt: float, until: Optional[str] = None,
+       ledger_dir: Optional[Path] = None) -> float:
+    df = event_ledger.read(ledger_dir=ledger_dir)
     if df.empty:
         return initial_usdt
     if until:
@@ -31,10 +33,10 @@ def nav(initial_usdt: float, until: Optional[str] = None) -> float:
     return initial_usdt + float(flows["amount_usdt"].sum())
 
 
-def r_net(nav_start_usdt: float, since: str,
-          until: Optional[str] = None) -> Dict:
+def r_net(nav_start_usdt: float, since: str, until: Optional[str] = None,
+         ledger_dir: Optional[Path] = None) -> Dict:
     """Décomposition complète du rendement net sur [since, until]."""
-    df = event_ledger.read(since=since)
+    df = event_ledger.read(since=since, ledger_dir=ledger_dir)
     if until is not None and not df.empty:
         df = df[df["ts"] <= until]
     if df.empty:
@@ -53,5 +55,5 @@ def r_net(nav_start_usdt: float, since: str,
         "by_sleeve": {k: round(float(v), 4) for k, v in
                       df.groupby("sleeve")["amount_usdt"].sum().to_dict().items()},
         "nav_start": nav_start_usdt,
-        "chain_ok": event_ledger.verify_chain(),
+        "chain_ok": event_ledger.verify_chain(ledger_dir),
     }

@@ -24,6 +24,8 @@ EVENT_KINDS = (
     "tax_provision",   # provision fiscale du mois
     "mark",            # marquage NAV
     "reconciliation",  # résultat d'un audit (résidu, verdict)
+    "reject",          # ordre refusé (broker, panne venue, kill switch)
+    "kill",            # activation/levée du kill switch d'un compte
 )
 
 

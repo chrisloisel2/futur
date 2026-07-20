@@ -111,6 +111,14 @@ def discover_quarterlies(underlying: str = None) -> List[Dict]:
                              now_ms=int(now * 1000))
 
 
+def quarterly_price(symbol: str) -> Optional[float]:
+    """Prix live d'un contrat trimestriel déjà découvert (ticker/price)."""
+    try:
+        return float(_get(f"{FAPI}/fapi/v1/ticker/price?symbol={symbol}")["price"])
+    except Exception:                        # noqa: BLE001
+        return None
+
+
 def parse_quarterlies(exchange_info: dict, underlying: str = None,
                       now_ms: int = 0) -> List[Dict]:
     """Parseur pur (testé hors réseau)."""

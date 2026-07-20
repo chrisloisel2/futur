@@ -1,0 +1,215 @@
+# configs/alpha20_runners.yaml — REGISTRE VERSIONNÉ des runners du tournoi
+# ALPHA_20 (ordre 2026-07-20). Régénéré uniquement par
+# scripts/build_alpha20_registry.py (jamais édité à la main pour git_commit/
+# config_hash — ces champs sont dérivés, DÉTERMINISTES, du bloc `config` de
+# chaque entrée + du HEAD git au moment du build). Toute variante hors de ce
+# fichier est un balayage de paramètres non autorisé : le tournoi n'exécute
+# QUE ce qui est listé ici avec status ACTIVE ou OBSERVE_ONLY.
+#
+# Limite explicite : les hypothèses économiques sont PRÉ-ENREGISTRÉES ; ce
+# fichier n'ajoute aucun clone opportuniste. Chaque runner ACTIVE mécanise un
+# mécanisme DÉJÀ validé (carry Δ-neutre V1.1, cash-and-carry BASIS_TERM
+# déclaré, consensus MH shadow) — pas une nouvelle hypothèse non testée.
+
+built_at: "2026-07-20T09:54:10.974347+00:00"          # stampé par le script de build
+git_commit: "1e3af95"                     # HEAD au moment du build
+
+runners:
+  # ── ACTIVE : entrent dans le tournoi ────────────────────────────────────
+  - runner_id: carry_basis_v12
+    family: carry_basis
+    status: ACTIVE
+    source: configs/portfolio_v1_2_candidate.yaml
+    assets: [BTCUSDT, ETHUSDT]
+    venue: binance_usdm
+    frequency: "8h (rebalance funding), décision sur barre journalière enrichie"
+    features_model: "règles déterministes — gate régime BULL/RECOVERY, ranker corrélation/meme/alt, edge gate causal par actif ; aucun ML"
+    sizing:
+      capital_standalone_eur: 200000.0
+      carry_fraction: 0.75
+      long_fraction: 0.0645
+      max_open_longs: 7
+    dependencies:
+      - src.institutional.backtest.multileg_backtester
+      - src.institutional.engines.registry
+      - src.institutional.universe.asset_quality_filter
+    config:
+      engines_long: [TRM_TREND_INST, PULLBACK_LONG, LIQUIDATION_REBOUND]
+      carry_assets: [BTCUSDT, ETHUSDT]
+      carry_fraction: 0.75
+      long_fraction: 0.0645
+      max_open_longs: 7
+      enable_asset_regime_gate: true
+      enable_regime_flip_exit: true
+      enable_intra_position_governor: true
+      enable_hedge: true
+      enable_ranker: true
+      ranker_max_per_bucket: 2
+      ranker_max_meme: 1
+      ranker_max_alt: 5
+      enable_asset_edge_gate: true
+      asset_edge_min_net: 0.0
+      asset_edge_min_signals: 20
+      carry_gate_v2: false            # REJECTED_AS_EXECUTION_GATE (V1.1_BASELINE.md) — jamais réactivé ici
+
+  - runner_id: carry_solusdt
+    family: carry_basis
+    status: ACTIVE
+    source: mécanisme carry Δ-neutre V1.1 (mono-actif), étendu — pas de nouvelle hypothèse
+    assets: [SOLUSDT]
+    venue: binance_usdm
+    frequency: "8h (rebalance funding)"
+    features_model: "carry Δ-neutre pur — funding perp vs coût de portage spot, aucun signal directionnel"
+    sizing:
+      capital_standalone_eur: 200000.0
+      carry_fraction: 1.0
+    dependencies: [src.institutional.backtest.multileg_backtester]
+    config:
+      engines_long: []
+      carry_assets: [SOLUSDT]
+      carry_fraction: 1.0
+      enable_long: false
+      enable_hedge: false
+      enable_asset_regime_gate: false
+
+  - runner_id: carry_bnbusdt
+    family: carry_basis
+    status: ACTIVE
+    source: mécanisme carry Δ-neutre V1.1 (mono-actif), étendu — pas de nouvelle hypothèse
+    assets: [BNBUSDT]
+    venue: binance_usdm
+    frequency: "8h (rebalance funding)"
+    features_model: "carry Δ-neutre pur — identique à carry_solusdt"
+    sizing:
+      capital_standalone_eur: 200000.0
+      carry_fraction: 1.0
+    dependencies: [src.institutional.backtest.multileg_backtester]
+    config:
+      engines_long: []
+      carry_assets: [BNBUSDT]
+      carry_fraction: 1.0
+      enable_long: false
+      enable_hedge: false
+      enable_asset_regime_gate: false
+
+  - runner_id: basis_term_v0
+    family: basis_term
+    status: ACTIVE
+    source: scripts/backtest_basis_term.py (règle déclarée, seuils rapportés, pas tunés)
+    assets: [BTCUSDT, ETHUSDT]         # seuls actifs avec historique trimestriel local
+    venue: binance_usdm
+    frequency: "quotidien (fenêtre d'échéance 10-120j) + découverte dynamique des contrats"
+    features_model: "cash-and-carry mécanique — basis annualisé ≥ seuil, convergence à l'échéance, aucun ML"
+    sizing:
+      capital_standalone_eur: 200000.0
+      sizing_per_asset: 0.25            # 25% rapporté (le 50% n'est pas primaire)
+    dependencies: [src.alpha20.costs.fee_registry.discover_quarterlies]
+    config:
+      entry_threshold_ann: 0.05         # seuil primaire déclaré (ladder 3/5/8% rapportée)
+      min_days_to_expiry: 10
+      max_days_to_expiry: 120
+      sizing_frac: 0.25
+
+  - runner_id: mh_events_exec
+    family: mh_events
+    status: ACTIVE
+    source: scripts/run_paper_mh_exec.py (déployé R0 2026-07-19/20) — LECTURE SEULE du shadow
+    assets: "dynamique — univers 50 filtré, symbole par décision du shadow"
+    venue: binance_usdm
+    frequency: "événementiel — vague shadow quotidienne (déverrouilleur J+30, ne pas modifier)"
+    features_model: "consensus multi-horizon (LightGBM 3 horizons, artefacts MH_*.pkl du shadow) — modèle GELÉ, alpha20 ne l'entraîne ni ne le modifie"
+    sizing:
+      capital_standalone_eur: 200000.0
+      weight_per_decision: 0.20
+      max_open: 5
+    dependencies:
+      - reports/liq_cascade/shadow/decisions.parquet (LECTURE SEULE)
+      - scripts/run_event_shadow_daily.py (NON MODIFIÉ)
+    config:
+      tier_filter: book
+      horizon_filter: MH_consensus
+      weight_per_decision: 0.20
+      max_open: 5
+
+  # ── EXCLUDED / BLOCKED : hors tournoi, justification obligatoire ────────
+  - runner_id: v1_1_baseline
+    family: protected_baseline
+    status: EXCLUDED
+    justification: >
+      Socle protégé par contrainte explicite de la mission ("ne touche pas à
+      V1.1 ni au shadow existant") — hors périmètre du tournoi par
+      construction, reste la référence externe non concurrencée.
+
+  - runner_id: funding_xvenue_v0
+    family: funding_xvenue
+    status: EXCLUDED
+    justification: >
+      NO_EDGE définitif (commit 1717fd8, 2026-07-19) — verrou permanent
+      (src.alpha20.validation.experiment_registry bloque tout nom contenant
+      "xvenue"). Jamais recyclé, y compris comme runner du tournoi.
+
+  - runner_id: carry_gate_v2_execution
+    family: carry_basis
+    status: BLOCKED
+    justification: >
+      REJECTED_AS_EXECUTION_GATE au niveau portefeuille (reports/
+      V1.1_BASELINE.md — churn/frais). Conservé uniquement comme feature de
+      recherche (KEPT_AS_RESEARCH_FEATURE), jamais comme gate d'exécution ni
+      comme runner autonome.
+
+  - runner_id: hyperliquid_metaorders
+    family: hl_metaorders
+    status: BLOCKED
+    justification: >
+      Collecteur de données actif depuis le 2026-07-18 — AUCUNE stratégie
+      exécutable définie à ce jour (protocole H1/H2 pré-enregistré mais non
+      testé). Rien à exécuter avant l'évaluation ≥2026-08-17, conditionnée à
+      ≥30 jours ET ≥300 événements éligibles côté carnet contemporain.
+
+  - runner_id: ctrend_v0_v1
+    family: ctrend
+    status: EXCLUDED
+    justification: "CTREND_REJECTED (859ebad) — le v0 positif était un biais de survivance (univers non point-in-time)."
+
+  - runner_id: options_positioning_all_variants
+    family: options_positioning
+    status: EXCLUDED
+    justification: "NO_EDGE / NO_EDGE_DEFINITIF (fdfa862, 684f497) sur toutes les variantes testées (flux OTM, 4h, daily)."
+
+  - runner_id: stablecoin_regime_overlay
+    family: stablecoin_regime
+    status: EXCLUDED
+    justification: "NO_EDGE en overlay (019f86d) — volet statistique PASS mais la règle de sizing v0 est classée, pas de re-tuning."
+
+  - runner_id: funding_extreme_level
+    family: basis_dispersion
+    status: EXCLUDED
+    justification: "NO_EDGE directionnel (a589e54) — funding extrême = continuation, pas retournement."
+
+  - runner_id: protocol_fundamentals
+    family: protocol_fundamentals
+    status: EXCLUDED
+    justification: "NO_EDGE (eef8646) — spread négatif malgré biais de survivance favorable."
+
+  - runner_id: onchain_flows
+    family: onchain_flows
+    status: EXCLUDED
+    justification: "NOT_TESTABLE (53d6f70) — Mongo whale vide, aucun flux CEX historique."
+
+  - runner_id: top_traders_divergence
+    family: top_traders
+    status: EXCLUDED
+    justification: "NO_EDGE (7ef8d83) — effet arbitré post-2024 (t=-0.75)."
+
+  - runner_id: liquidation_exhaustion
+    family: liquidation_exhaustion
+    status: EXCLUDED
+    justification: "NO_EDGE (9088b2c) — la confirmation CVD retourne le signe du setup."
+
+  - runner_id: legacy_ml_fleet_trm
+    family: legacy_ml
+    status: EXCLUDED
+    justification: >
+      Ancienne architecture ML per-asset (scripts/paper_multi_signal.py,
+      monitor_sol_e.py, Level 0-7) — c'est le SHADOW existant que la mission
+      interdit explicitement de reconstruire ou de toucher. Hors périmètre.

@@ -1,0 +1,75 @@
+# configs/alpha20_selection_protocol.yaml — PROTOCOLE DE SÉLECTION FIGÉ
+# (étape 7, ordre 2026-07-20). Écrit et gelé AVANT toute observation de
+# résultat de tournoi (aucune donnée de tournoi n'existe encore à cette date)
+# — même discipline que les protocoles pré-enregistrés de l'Edge Factory.
+# Toute modification de ce fichier après le début de la phase B invalide
+# l'observation en cours pour les runners concernés (config_hash du
+# protocole lui-même doit être vérifié inchangé en phase D).
+
+frozen_at: "2026-07-20T00:00:00Z"
+
+phase_a_smoke:
+  min_hours: 72
+  checks: [data_ok, risk_ok, restart_ok, ledger_ok]
+
+phase_b_observation:
+  min_days: 30
+  min_decisions: 300
+  configuration_immutable: true
+  leaderboard_informative_only: true
+
+phase_c_selection:
+  reject_rules:
+    - lookahead_detected
+    - invalid_ledger
+    - config_changed_during_observation
+    - max_drawdown_exceeded          # > 2,5%
+    - max_es99_exceeded              # > 0,5%
+    - margin_violation               # > 20%
+    - venue_violation                # > 15%
+    - naked_leg_violation            # > 30s
+    - net_return_negative
+    - cost_x2_negative
+    - unexplained_costs
+    - excess_event_dependency        # négatif sans le top-10 des événements
+    - insufficient_data_quality
+  thresholds:
+    max_drawdown: 0.025
+    max_es99: 0.005
+    margin_used_cap: 0.20
+    venue_unsecured_cap: 0.15
+    naked_leg_max_s: 30
+  rank_order:                        # ordre de classement des survivants
+    - bootstrap_lcb95
+    - dsr
+    - weekly_regime_stability
+    - cost_x2_positive
+    - drawdown_es99
+    - capacity
+    - execution_quality
+    - marginal_contribution
+  robustness_checks:
+    - remove_top5_events
+    - remove_top10_events
+    - block_bootstrap
+    - latency_hostile_scenario
+    - pnl_decision_correlation
+  cluster_correlation_threshold: 0.70
+  max_dominant_per_cluster: 1
+
+phase_d_confirmation:
+  min_days: 14
+  min_new_events: 100
+  no_recalibration: true
+  config_hash_must_match_provisional: true
+
+# Seuils PAR RUNNER quand le générique ne convient pas ("stratégie rare
+# reste en observation jusqu'au seuil défini dans son manifeste").
+runner_overrides:
+  mh_events_exec:
+    min_decisions: 30
+    justification: >
+      Événementiel rare — le shadow (déverrouilleur officiel, non modifié)
+      ne produit que ~1-2 décisions tier "book" par semaine à ce jour ; 300
+      décisions prendrait des années. Seuil réduit à 30, la durée minimale
+      de 30 jours reste inchangée et reste le facteur limitant réel.
