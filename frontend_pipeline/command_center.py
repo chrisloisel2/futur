@@ -708,6 +708,115 @@ def api_event_book():
     return cached("event_book", 20, load)
 
 
+# ── TOURNOI ALPHA_20 — runners paper-live isolés (bus/broker/ledgers) ────────
+
+def _tournament_mod():
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from src.alpha20.tournament import orchestrator, reconciliation
+    from src.alpha20.tournament.paper_account import PaperAccount
+    from src.alpha20.tournament.runner_registry import runnable_specs
+    return orchestrator, reconciliation, PaperAccount, runnable_specs
+
+
+@app.get("/api/tournament/live")
+def api_tournament_live():
+    """Rafraîchi toutes les ~4 s côté PWA — NAV/décisions/réconciliation
+    RECALCULÉS depuis le ledger de chaque runner (jamais le dashboard
+    quotidien, qui ne tourne qu'une fois par jour)."""
+    def load():
+        orchestrator, reconciliation, PaperAccount, runnable_specs = _tournament_mod()
+        rows = []
+        for spec in runnable_specs():
+            acc = PaperAccount(spec.runner_id, spec.capital_standalone_eur)
+            nav = acc.nav_usdt()
+            decisions = acc.read(kinds=["decision"])
+            fills = acc.read(kinds=["fill"])
+            rejects = acc.read(kinds=["reject"])
+            last_dec = (decisions.sort_values("ts").iloc[-1]
+                       if len(decisions) else None)
+            op_state = orchestrator.load_state(spec.runner_id)
+            gate = reconciliation.runner_gate(spec.runner_id,
+                                              spec.capital_standalone_eur)
+            hist = acc.nav_history().tail(300)
+            rows.append({
+                "runner_id": spec.runner_id, "family": spec.family,
+                "status": spec.status,
+                "assets": spec.assets if isinstance(spec.assets, list) else None,
+                "capital_eur": spec.capital_standalone_eur,
+                "nav_usdt": round(nav, 2),
+                "pnl_usdt": round(nav - spec.capital_standalone_eur, 2),
+                "pnl_pct": round(nav / spec.capital_standalone_eur - 1, 5),
+                "drawdown": round(acc.drawdown(), 5),
+                "n_events": acc.n_events(), "n_decisions": int(len(decisions)),
+                "n_fills": int(len(fills)), "n_rejects": int(len(rejects)),
+                "risk_state": op_state.get("last_risk_state", "risk_on"),
+                "last_decision": None if last_dec is None else {
+                    "ts": str(last_dec["ts"]), "sleeve": str(last_dec["sleeve"]),
+                    "signal": (last_dec["meta"] or {}).get("signal"),
+                    "reason": (last_dec["meta"] or {}).get("reason")},
+                "reconciliation": {"status": gate["status"],
+                                   "passed": gate["passed"],
+                                   "consecutive_ok": gate["consecutive_ok"]},
+                "curve": [{"t": str(t), "v": round(float(v), 2)}
+                         for t, v in hist.items()],
+                "age_days": round(acc.age_days(), 2),
+            })
+        return {"ts": pd.Timestamp.now(tz="UTC").isoformat(), "runners": rows}
+    return _clean(cached("tournament_live", 4, load))
+
+
+@app.get("/api/tournament/events")
+def api_tournament_events(limit: int = 40):
+    """Fil d'événements UNIFIÉ, toutes chaînes confondues — décisions, fills,
+    frais, funding, rejets, kill — trié par horodatage décroissant."""
+    def load():
+        _, _, PaperAccount, runnable_specs = _tournament_mod()
+        frames = []
+        for spec in runnable_specs():
+            acc = PaperAccount(spec.runner_id, spec.capital_standalone_eur)
+            df = acc.read(kinds=["decision", "fill", "fee", "funding",
+                                 "reject", "kill"])
+            if len(df):
+                df = df.copy()
+                df["runner_id"] = spec.runner_id
+                frames.append(df)
+        if not frames:
+            return {"events": []}
+        allev = pd.concat(frames, ignore_index=True).sort_values(
+            "ts", ascending=False).head(max(1, min(limit, 200)))
+        out = []
+        for _, r in allev.iterrows():
+            meta = r["meta"] or {}
+            out.append({"ts": str(r["ts"]), "runner_id": r["runner_id"],
+                       "kind": r["kind"], "sleeve": str(r["sleeve"]),
+                       "amount_usdt": round(float(r["amount_usdt"]), 4),
+                       "signal": meta.get("signal"), "reason": meta.get("reason")})
+        return {"events": out}
+    return _clean(cached("tournament_events", 4, load))
+
+
+@app.get("/api/tournament/selection")
+def api_tournament_selection():
+    """Statut du protocole de sélection — plus coûteux (bootstrap), rafraîchi
+    moins souvent que /live."""
+    def load():
+        import sys
+        sys.path.insert(0, str(ROOT))
+        from src.alpha20.tournament.runner_registry import runnable_specs
+        from src.alpha20.tournament.selection.phases import run_selection
+        specs = runnable_specs()
+        if not specs:
+            return {"verdict": "NO_SELECTION", "statuses": {}}
+        res = run_selection(specs)
+        return {"verdict": res["verdict"],
+               "statuses": {k: {"status": v["status"], "reasons": v.get("reasons", []),
+                               "phase": v.get("phase")}
+                           for k, v in res["statuses"].items()},
+               "selected": res.get("selected", [])}
+    return _clean(cached("tournament_selection", 45, load))
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
     return (STATIC / "command_center.html").read_text()

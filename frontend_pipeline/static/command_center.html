@@ -86,6 +86,16 @@
   .lab-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
   #crossChart{height:290px} #corrHeat{height:230px} #yearly{height:230px}
   .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+  /* tournoi */
+  .tcard{min-width:0;transition:box-shadow .3s}
+  .tcard.flash{box-shadow:0 0 0 1px rgba(8,145,178,.6),var(--glow) rgba(8,145,178,.25)}
+  .tcard .tnav{font-size:26px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
+  .tcard .tspark{height:34px;margin-top:6px}
+  .tcard .tmeta{font-size:11px;color:var(--ink3);margin-top:6px}
+  .tcard .tdec{font-size:11.5px;color:var(--ink2);margin-top:6px;line-height:1.4}
+  .badge.pos{border-color:rgba(5,150,105,.5);color:#34d399;background:rgba(5,150,105,.10)}
+  .badge.neg{border-color:rgba(220,38,38,.5);color:#f87171;background:rgba(220,38,38,.10)}
+  .badge.amb{border-color:rgba(217,119,6,.5);color:#fbbf24;background:rgba(217,119,6,.10)}
   html{-webkit-text-size-adjust:100%}
   body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent}
   .topbar{padding-top:calc(12px + env(safe-area-inset-top))}
@@ -132,6 +142,7 @@
   <button id="installBtn">📲 installer</button>
   <nav id="nav">
     <div class="tab active" data-v="portfolio" data-ico="▤">PORTEFEUILLE</div>
+    <div class="tab" data-v="tournament" data-ico="▦">TOURNOI</div>
     <div class="tab" data-v="cryptos" data-ico="◈">CRYPTOS</div>
     <div class="tab" data-v="forecasts" data-ico="✦">PRÉVISIONS</div>
     <div class="tab" data-v="world" data-ico="◉">WORLD</div>
@@ -193,6 +204,19 @@
       <table id="liveTbl"><tbody></tbody></table>
       <div class="sec-t" style="margin-top:12px">Verdicts walk-forward</div>
       <table id="verdictTbl"><tbody></tbody></table></div>
+  </section>
+</div>
+
+<!-- ============ TOURNOI ============ -->
+<div class="view" id="v-tournament">
+  <section class="panel blk" style="margin-top:0">
+    <div class="sec-t" style="margin-bottom:6px">Tournoi ALPHA_20 — runners paper-live isolés <span class="badge" id="tnVerdict">—</span></div>
+    <div class="footnote">Chaque runner : compte isolé 200 000, même bus de marché, même broker paper, ledger append-only séparé. Sélection mécanique figée à l'avance — aucun runner n'est déclaré rentable avant réconciliation + tests de robustesse. Aucun ordre réel ne peut partir.</div>
+  </section>
+  <div class="grid tiles" id="tnCards" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr))"></div>
+  <section class="panel blk">
+    <div class="sec-t">Fil d'événements — tous runners <span class="badge" id="tnEvCount"></span></div>
+    <table id="tnEvents"><thead><tr><th>heure</th><th>runner</th><th>type</th><th>sleeve</th><th>montant USDT</th><th>motif</th></tr></thead><tbody></tbody></table>
   </section>
 </div>
 
@@ -633,6 +657,66 @@ async function eventBook(){
   setTimeout(eventBook,30000);
 }
 
+// ── TOURNOI ALPHA_20 : runners paper-live isolés (4 s) ──
+let tnSel={},tnPrevNav={};
+const TN_SEL_CLASS={ELIGIBLE:"pos",SELECTED_PROVISIONAL:"pos",SELECTED_CONFIRMED:"pos",
+  OBSERVING:"",FRAGILE:"amb",REJECTED:"neg",INELIGIBLE:"neg"};
+function tnCard(r){
+  const sel=tnSel[r.runner_id]||{};
+  const selCls=TN_SEL_CLASS[sel.status]??"";
+  const selBadge=sel.status?`<span class="badge ${selCls}">${sel.status}</span>`:"";
+  const pnlUp=r.pnl_usdt>=0;
+  const vals=(r.curve||[]).map(p=>p.v);
+  const rec=r.reconciliation||{};
+  const dot=rec.status==="evaluated"&&rec.passed?"on":(rec.status==="invalid_ledger"?"off":"");
+  const riskCls=r.risk_state==="kill"?"neg":(r.risk_state==="cash"||r.risk_state==="risk_reduced"?"amb":"pos");
+  const ld=r.last_decision;
+  const ldTxt=ld?`<b>${ld.sleeve}</b> ${ld.signal||""}${ld.reason?" — "+ld.reason:""}`:"aucune décision encore";
+  const flash=tnPrevNav[r.runner_id]!=null&&tnPrevNav[r.runner_id]!==r.nav_usdt?"flash":"";
+  tnPrevNav[r.runner_id]=r.nav_usdt;
+  return `<div class="panel tile tcard ${flash}">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+      <div><b>${r.runner_id}</b><br><span style="color:var(--ink3);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em">${r.family}</span></div>
+      <div style="text-align:right">${selBadge}</div>
+    </div>
+    <div class="tnav">${r.nav_usdt.toLocaleString("fr-FR",{maximumFractionDigits:0})} <span style="font-size:14px;color:var(--ink3)">USDT</span></div>
+    <div class="${pnlUp?'pos':'neg'}" style="font-size:12.5px">${pnlUp?"▲":"▼"} ${pnlUp?"+":""}${r.pnl_usdt.toFixed(2)} (${(r.pnl_pct*100).toFixed(3)}%)</div>
+    <div class="tspark">${spark(vals)}</div>
+    <div class="tmeta">DD ${(r.drawdown*100).toFixed(2)}% · <span class="${riskCls}">${r.risk_state}</span> · <span class="led ${dot}"></span>réconciliation ${rec.status||"—"}${rec.consecutive_ok?` (${rec.consecutive_ok}✓)`:""}</div>
+    <div class="tdec">${ldTxt}</div>
+    <div class="tmeta">${r.n_decisions} décisions · ${r.n_fills} fills · ${r.n_rejects} rejets · âge ${r.age_days.toFixed(1)} j</div>
+  </div>`;
+}
+async function tournamentLive(){
+  try{
+    const [d,ev]=await Promise.all([j("/api/tournament/live"),j("/api/tournament/events?limit=40")]);
+    const cards=document.getElementById("tnCards");
+    if(cards)cards.innerHTML=d.runners.map(tnCard).join("")
+      ||'<div class="footnote">aucun runner ACTIVE dans le registre</div>';
+    const evs=ev.events||[];
+    document.getElementById("tnEvCount").textContent=evs.length+" récents";
+    document.querySelector("#tnEvents tbody").innerHTML=evs.map(e=>{
+      const amt=e.amount_usdt;
+      return `<tr><td>${new Date(e.ts).toLocaleTimeString("fr-FR")}</td><td>${e.runner_id}</td>`+
+        `<td>${e.kind}</td><td>${e.sleeve}</td>`+
+        `<td class="${amt>0?'pos':(amt<0?'neg':'')}">${amt.toFixed(4)}</td>`+
+        `<td style="color:var(--ink3);font-size:11px">${e.signal||""}${e.reason?" — "+e.reason:""}</td></tr>`;
+    }).join("")||`<tr><td colspan=6 style="color:var(--ink3)">aucun événement encore</td></tr>`;
+    setTimeout(()=>document.querySelectorAll(".tcard.flash").forEach(el=>el.classList.remove("flash")),700);
+  }catch(e){}
+  setTimeout(tournamentLive,4000);
+}
+async function tournamentSelection(){
+  try{
+    const d=await j("/api/tournament/selection");
+    tnSel=d.statuses||{};
+    const b=document.getElementById("tnVerdict");
+    b.textContent=d.verdict;
+    b.className="badge "+(d.verdict==="NO_SELECTION"?"":"pos");
+  }catch(e){}
+  setTimeout(tournamentSelection,45000);
+}
+
 // ── notifications portefeuille : toasts in-app + Notification navigateur ────
 // Les événements (gain/perte ±500 €, flips de gate, rolls, rebalances) sont
 // émis CÔTÉ SERVEUR par le moteur paper (timer 15 min, tourne PWA fermée) ;
@@ -682,7 +766,7 @@ async function pfEvents(){
   setTimeout(pfEvents,20000);
 }
 paintBell();pfEvents();
-boot();live();lab();worldmon();portfolioLive();eventBook();
+boot();live();lab();worldmon();portfolioLive();eventBook();tournamentSelection();tournamentLive();
 
 // ── PWA : service worker + prompt d'installation ──
 if("serviceWorker" in navigator){
