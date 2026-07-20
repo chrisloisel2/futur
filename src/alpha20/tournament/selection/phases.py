@@ -3,9 +3,16 @@ src/alpha20/tournament/selection/phases.py — moteur d'états du protocole FIG�
 (configs/alpha20_selection_protocol.yaml), étape 7.
 
 Statuts : INELIGIBLE, OBSERVING, FRAGILE, ELIGIBLE, SELECTED_PROVISIONAL,
-SELECTED_CONFIRMED, REJECTED. Verdict global possible : NO_SELECTION.
+SELECTED_CONFIRMED, REJECTED, OBSERVE_ONLY. Verdict global possible :
+NO_SELECTION.
 
 Règle de priorité (aucune ambiguïté entre les statuts) :
+  0. status registre (configs/alpha20_runners.yaml) ≠ ACTIVE (i.e.
+     OBSERVE_ONLY) → OBSERVE_ONLY, inconditionnel, avant tout calcul de
+     performance. Exclusion de gouvernance pure : le runner continue de
+     s'exécuter et de produire de la télémétrie (runner_registry.runnable
+     inclut OBSERVE_ONLY), mais n'entre JAMAIS dans eligible_ids/le
+     classement/le clustering, quelle que soit sa performance ;
   1. ledger invalide / smoke KO / qualité de données insuffisante → INELIGIBLE
      (structurel, prime sur tout le reste, à tout moment) ;
   2. avant les seuils de la phase B (durée + décisions) → OBSERVING ;
@@ -79,6 +86,9 @@ def _hard_rejects(spec: RunnerSpec, account: PaperAccount, gate: Dict,
 
 
 def selection_status(spec: RunnerSpec) -> Dict:
+    if spec.status != "ACTIVE":
+        return {"runner_id": spec.runner_id, "status": "OBSERVE_ONLY",
+                "reasons": ["registry_status_not_active"], "phase": "registry"}
     account = PaperAccount(spec.runner_id, spec.capital_standalone_eur)
     # Un ledger invalide passe AVANT tout — inconditionnel, sans gate d'âge.
     # Sinon une corruption qui vide `read()` (un fait manquant EST le

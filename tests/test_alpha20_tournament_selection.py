@@ -25,8 +25,8 @@ from src.alpha20.tournament.selection import clustering, phases
 from src.alpha20.tournament.selection.manifest import load_protocol
 
 
-def _spec(rid, capital=200000.0):
-    return RunnerSpec(runner_id=rid, family="test", status="ACTIVE",
+def _spec(rid, capital=200000.0, status="ACTIVE"):
+    return RunnerSpec(runner_id=rid, family="test", status=status,
                       git_commit="abc", config_hash=f"hash_{rid}",
                       sizing={"capital_standalone_eur": capital}, venue="binance_usdm",
                       config={"k": 1})
@@ -79,6 +79,32 @@ def test_eligible_runner_with_strong_stable_positive_returns():
     st = phases.selection_status(spec)
     assert st["status"] == "ELIGIBLE"
     assert st["bootstrap_lcb95"] is not None and st["bootstrap_lcb95"] > 0
+
+
+def test_observe_only_registry_status_never_becomes_eligible():
+    """Un runner OBSERVE_ONLY dans le registre (configs/alpha20_runners.yaml)
+    doit rester exclu de la sélection quelle que soit sa performance — sinon
+    OBSERVE_ONLY ne serait qu'un champ de schéma YAML sans effet réel."""
+    spec = _spec("obs_only", status="OBSERVE_ONLY")
+    _seed_history("obs_only", n_days=45, daily_mu=0.0025, daily_sigma=0.002, seed=7,
+                  n_decisions=350)
+    st = phases.selection_status(spec)
+    assert st["status"] == "OBSERVE_ONLY"
+    assert st["reasons"] == ["registry_status_not_active"]
+
+
+def test_observe_only_excluded_from_run_selection_alongside_eligible_active():
+    active = _spec("active_strong")
+    observe = _spec("obs_only", status="OBSERVE_ONLY")
+    _seed_history("active_strong", n_days=45, daily_mu=0.0025, daily_sigma=0.002,
+                  seed=7, n_decisions=350)
+    _seed_history("obs_only", n_days=45, daily_mu=0.0025, daily_sigma=0.002,
+                  seed=7, n_decisions=350)
+    result = phases.run_selection([active, observe])
+    assert result["statuses"]["obs_only"]["status"] == "OBSERVE_ONLY"
+    assert "obs_only" not in result["selected"]
+    assert result["statuses"]["active_strong"]["status"] in (
+        "ELIGIBLE", "SELECTED_PROVISIONAL")
 
 
 def test_fragile_when_bootstrap_lcb_non_positive():

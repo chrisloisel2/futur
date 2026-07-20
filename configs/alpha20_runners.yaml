@@ -11,8 +11,8 @@
 # mécanisme DÉJÀ validé (carry Δ-neutre V1.1, cash-and-carry BASIS_TERM
 # déclaré, consensus MH shadow) — pas une nouvelle hypothèse non testée.
 
-built_at: "2026-07-20T09:54:10.974347+00:00"          # stampé par le script de build
-git_commit: "1e3af95"                     # HEAD au moment du build
+built_at: "2026-07-20T22:28:41.084614+00:00"          # stampé par le script de build
+git_commit: "2fe693b"                     # HEAD au moment du build
 
 runners:
   # ── ACTIVE : entrent dans le tournoi ────────────────────────────────────
@@ -54,7 +54,12 @@ runners:
 
   - runner_id: carry_solusdt
     family: carry_basis
-    status: ACTIVE
+    status: OBSERVE_ONLY   # rétrogradé 2026-07-21 — backtest identique (659a433,
+                           # PORTFOLIO_OS_STATUS.md) déjà FAIL sur cet actif :
+                           # ret/mo +0.14%, DD -20%, PF 0.80. Voir experiment_registry
+                           # .closed_no_edge (configs/alpha20.yaml). Exécution/télémétrie
+                           # maintenues ; exclu de la sélection (src/alpha20/tournament/
+                           # selection/phases.py::selection_status).
     source: mécanisme carry Δ-neutre V1.1 (mono-actif), étendu — pas de nouvelle hypothèse
     assets: [SOLUSDT]
     venue: binance_usdm
@@ -74,7 +79,12 @@ runners:
 
   - runner_id: carry_bnbusdt
     family: carry_basis
-    status: ACTIVE
+    status: OBSERVE_ONLY   # rétrogradé 2026-07-21 — backtest identique (659a433,
+                           # PORTFOLIO_OS_STATUS.md) déjà FAIL sur cet actif :
+                           # ret/mo -0.33%, DD -26%, PF 0.26. Voir experiment_registry
+                           # .closed_no_edge (configs/alpha20.yaml). Exécution/télémétrie
+                           # maintenues ; exclu de la sélection (src/alpha20/tournament/
+                           # selection/phases.py::selection_status).
     source: mécanisme carry Δ-neutre V1.1 (mono-actif), étendu — pas de nouvelle hypothèse
     assets: [BNBUSDT]
     venue: binance_usdm

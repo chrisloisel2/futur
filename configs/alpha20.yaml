@@ -124,6 +124,40 @@ experiment_registry:
     - {name: funding_xvenue_v0, verdict: NO_EDGE, ref: "1717fd8",
        note: "JAMAIS recycler sous un autre nom (ordre explicite)"}
     - {name: naive_50_universe, verdict: NO_EDGE, ref: "0c6fd80", note: "churn-fees -39.6%"}
+    - name: carry_solusdt
+      mechanism: carry_v2_delta_neutral
+      verdict: FAIL
+      ref: "659a433"
+      report: reports/PORTFOLIO_OS_STATUS.md
+      report_date: "2026-06-28"
+      return_month: "+0.14%"
+      max_drawdown: "-20%"
+      profit_factor: 0.80
+      failed_gates: ["return_month > 0.30%", "max_drawdown < 1.50%"]
+      reactivation_requires:
+        - nouvelle hypothèse explicite
+        - changement matériel de mécanisme ou d'exécution
+        - nouveau rapport reproductible passant les gates
+      note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
+             sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
+             le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
+    - name: carry_bnbusdt
+      mechanism: carry_v2_delta_neutral
+      verdict: FAIL
+      ref: "659a433"
+      report: reports/PORTFOLIO_OS_STATUS.md
+      report_date: "2026-06-28"
+      return_month: "-0.33%"
+      max_drawdown: "-26%"
+      profit_factor: 0.26
+      failed_gates: ["rendement net positif", "return_month > 0.30%", "max_drawdown < 1.50%"]
+      reactivation_requires:
+        - nouvelle hypothèse explicite
+        - changement matériel de mécanisme ou d'exécution
+        - nouveau rapport reproductible passant les gates
+      note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
+             sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
+             le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
   not_testable:
     - {name: onchain_flows, verdict: NOT_TESTABLE, ref: "53d6f70"}
   validated_foundations:
