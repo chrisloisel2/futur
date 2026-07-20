@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer quotidien recherche de portefeuille ALPHA_20 (08:30 heure machine, apres la selection)
+
+[Timer]
+OnCalendar=*-*-* 08:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer quotidien dashboard tournoi ALPHA_20 (08:10 heure machine)
+
+[Timer]
+OnCalendar=*-*-* 08:10:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

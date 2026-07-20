@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer horaire tournoi ALPHA_20 (:05, meme cadence que le paper V1.1 existant)
+
+[Timer]
+OnCalendar=*-*-* *:05:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

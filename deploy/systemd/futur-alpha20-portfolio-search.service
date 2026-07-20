@@ -1,0 +1,10 @@
+[Unit]
+Description=ALPHA_20 tournoi — recherche de portefeuille sur les runners ELIGIBLE/SELECTED_*
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_portfolio_search.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_portfolio_search.log
+StandardError=append:/home/qbee/futur/reports/alpha20_portfolio_search.log
+TimeoutStartSec=300

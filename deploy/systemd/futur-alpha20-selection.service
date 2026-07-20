@@ -1,0 +1,10 @@
+[Unit]
+Description=ALPHA_20 tournoi — moteur de selection (Smoke/Observation/Selection/Confirmation, protocole fige)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_selection.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_selection.log
+StandardError=append:/home/qbee/futur/reports/alpha20_selection.log
+TimeoutStartSec=300

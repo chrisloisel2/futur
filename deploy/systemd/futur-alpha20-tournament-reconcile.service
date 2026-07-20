@@ -1,0 +1,10 @@
+[Unit]
+Description=ALPHA_20 tournoi — reconciliation par runner (NAV recalculee vs mark, <=0,01 USDT/intervalle)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_tournament_reconcile.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_tournament_reconcile.log
+StandardError=append:/home/qbee/futur/reports/alpha20_tournament_reconcile.log
+TimeoutStartSec=300

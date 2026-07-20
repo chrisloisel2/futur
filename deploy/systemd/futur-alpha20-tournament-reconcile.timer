@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer horaire reconciliation tournoi ALPHA_20 (:12, apres le cycle de :05)
+
+[Timer]
+OnCalendar=*-*-* *:12:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

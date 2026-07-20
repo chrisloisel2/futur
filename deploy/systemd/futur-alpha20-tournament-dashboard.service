@@ -1,0 +1,10 @@
+[Unit]
+Description=ALPHA_20 tournoi — dashboard quotidien machine-readable par runner
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_tournament_dashboard.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_tournament_dashboard.log
+StandardError=append:/home/qbee/futur/reports/alpha20_tournament_dashboard.log
+TimeoutStartSec=300

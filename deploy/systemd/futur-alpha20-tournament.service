@@ -1,0 +1,11 @@
+[Unit]
+Description=ALPHA_20 tournoi paper-live — un cycle (bus, runners isoles, broker paper, ledgers par runner)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python scripts/run_alpha20_tournament.py
+StandardOutput=append:/home/qbee/futur/reports/alpha20_tournament.log
+StandardError=append:/home/qbee/futur/reports/alpha20_tournament.log
+TimeoutStartSec=600
