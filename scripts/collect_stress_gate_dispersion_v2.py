@@ -120,20 +120,41 @@ def _raw_page_path(venue: str, kind: str, symbol: str, page_key: str) -> Path:
     return d / f"{symbol}_{page_key}.json"
 
 
-def _persist_page_idempotent(path: Path, body: bytes) -> str:
-    """N'écrase jamais une page déjà validée : si le fichier existe, vérifie
-    le hash au lieu de réécrire. Retourne le sha256 du contenu."""
-    digest = hashlib.sha256(body).hexdigest()
+def _identity_key(body: bytes) -> bytes:
+    return body
+
+
+def _bybit_list_key(body: bytes) -> bytes:
+    """Bug trouvé lors de run_20260721_full (bybit/funding/BTCUSDT FAILED) :
+    l'enveloppe de réponse Bybit contient un champ `time` (horodatage SERVEUR
+    de la réponse elle-même), différent à chaque appel même quand
+    `result.list` (la donnée de funding réelle) est identique — confirmé par
+    2 appels réels consécutifs au même endpoint (voir commit). Comparer les
+    octets bruts complets produit donc un faux conflit à chaque re-fetch
+    d'une page déjà persistée. Cette clé de comparaison isole le contenu
+    économiquement significatif ; le fichier persisté reste néanmoins la
+    réponse brute COMPLÈTE, inchangée, pour l'audit."""
+    return json.dumps(json.loads(body).get("result", {}).get("list", []),
+                      sort_keys=True).encode()
+
+
+def _persist_page_idempotent(path: Path, body: bytes, *,
+                             comparison_key_fn=_identity_key) -> str:
+    """N'écrase jamais une page déjà validée. Si le fichier existe, compare
+    `comparison_key_fn(contenu)` (pas les octets bruts par défaut inutiles à
+    comparer pour des endpoints avec enveloppe volatile — voir
+    _bybit_list_key) au lieu de réécrire. Retourne le sha256 du contenu
+    (brut) effectivement sur disque."""
     if path.exists():
-        existing = hashlib.sha256(path.read_bytes()).hexdigest()
-        if existing != digest:
+        existing_body = path.read_bytes()
+        if comparison_key_fn(existing_body) != comparison_key_fn(body):
             raise AcquisitionError(
-                f"{path} existe déjà avec un contenu DIFFÉRENT (hash {existing} "
-                f"!= {digest}) — jamais écrasé silencieusement, nouveau "
+                f"{path} existe déjà avec un contenu SIGNIFICATIVEMENT "
+                "différent — jamais écrasé silencieusement, nouveau "
                 "acquisition_run_id requis pour reconcilier")
-        return existing        # page identique déjà validée, rien à refaire
+        return hashlib.sha256(existing_body).hexdigest()  # no-op : contenu significatif identique
     path.write_bytes(body)
-    return digest
+    return hashlib.sha256(body).hexdigest()
 
 
 def _request_id(venue: str, endpoint: str, symbol: str, params: dict) -> str:
@@ -284,7 +305,8 @@ def bybit_funding_page(symbol: str, end_ms: int, *, http_get=http_get_json,
     if persist:
         page_key = f"end{end_ms}"
         _persist_page_idempotent(
-            _raw_page_path("bybit", "funding", symbol, page_key), body)
+            _raw_page_path("bybit", "funding", symbol, page_key), body,
+            comparison_key_fn=_bybit_list_key)
         _log_page(PageRecord(
             request_id=_request_id("bybit", "funding/history", symbol, params),
             retrieved_at_utc=now_utc_iso(), venue="bybit", endpoint="funding/history",
@@ -355,7 +377,8 @@ def bybit_markprice_page(symbol: str, end_ms: int, *, interval: str = "5",
     if persist:
         page_key = f"end{end_ms}_{interval}"
         _persist_page_idempotent(
-            _raw_page_path("bybit", "mark_price", symbol, page_key), body)
+            _raw_page_path("bybit", "mark_price", symbol, page_key), body,
+            comparison_key_fn=_bybit_list_key)
         _log_page(PageRecord(
             request_id=_request_id("bybit", "mark-price-kline", symbol, params),
             retrieved_at_utc=now_utc_iso(), venue="bybit", endpoint="mark-price-kline",

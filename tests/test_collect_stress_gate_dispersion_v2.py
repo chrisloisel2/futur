@@ -220,6 +220,34 @@ def test_max_pages_enforced_before_infinite_loop(monkeypatch):
     assert calls["n"] == 3    # MAX_PAGES(3) appels réels effectués, le 4e est refusé avant tout HTTP
 
 
+def test_bybit_rerun_with_only_envelope_time_field_differing_is_a_noop():
+    """Bug réel trouvé dans run_20260721_full : l'enveloppe Bybit contient un
+    `time` de réponse serveur qui diffère à chaque appel même quand
+    `result.list` est identique — ne doit PAS être traité comme un conflit."""
+    list_ = [_bybit_funding_row(1000)]
+    body1 = json.dumps({"retCode": 0, "result": {"list": list_}, "time": 111}).encode()
+    body2 = json.dumps({"retCode": 0, "result": {"list": list_}, "time": 222}).encode()
+    mock1 = _mock_sequence([(200, body1)])
+    C.bybit_funding_page("BTCUSDT", 3000, http_get=mock1)
+
+    mock2 = _mock_sequence([(200, body2)])
+    rows = C.bybit_funding_page("BTCUSDT", 3000, http_get=mock2)   # ne doit PAS lever
+    assert rows == list_
+    path = C._raw_page_path("bybit", "funding", "BTCUSDT", "end3000")
+    assert hashlib_equal(path, body1)   # fichier disque INCHANGÉ (le premier persisté fait foi)
+
+
+def test_bybit_rerun_with_genuinely_different_list_still_raises():
+    body1 = json.dumps({"retCode": 0, "result": {"list": [_bybit_funding_row(1000, rate="0.0001")]}, "time": 111}).encode()
+    body2 = json.dumps({"retCode": 0, "result": {"list": [_bybit_funding_row(1000, rate="0.9999")]}, "time": 222}).encode()
+    mock1 = _mock_sequence([(200, body1)])
+    C.bybit_funding_page("BTCUSDT", 4000, http_get=mock1)
+
+    mock2 = _mock_sequence([(200, body2)])
+    with pytest.raises(C.AcquisitionError):
+        C.bybit_funding_page("BTCUSDT", 4000, http_get=mock2)
+
+
 def test_acquisition_log_has_required_schema_fields():
     body = json.dumps([_binance_funding_row(1000)]).encode()
     mock = _mock_sequence([(200, body)])
