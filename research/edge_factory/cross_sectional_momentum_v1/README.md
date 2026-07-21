@@ -1,15 +1,25 @@
 # cross_sectional_momentum_v1 (MOMENTUM_CRYPTO_V1)
 
-> ## ❌ VERDICT : MOMENTUM_CRYPTO_V1_NO_EDGE — REVERSAL, PAS MOMENTUM (2026-07-21)
+> ## 🔶 QUARANTAINE (2026-07-21) — le verdict NO_EDGE ci-dessous est RETIRÉ
 >
-> Formule unique préenregistrée (0,4×mom7j + 0,4×mom30j + 0,2×mom90j −
+> Défaut confirmé : l'univers `CRYPTO_32` était un **snapshot du
+> 2026-06-30 appliqué à tout l'historique 2020-2026** — exactement le
+> biais de survivance déjà corrigé une fois dans ce dépôt (CTREND v0→v1).
+> La jambe short ne pouvait shorter que des survivants du top-50 actuel,
+> jamais les vrais perdants historiques délistés. Ce défaut invalide le
+> verdict de famille dans les deux sens. Détail :
+> [QUARANTINE_2026-07-21.md](QUARANTINE_2026-07-21.md). Audit et
+> reconstruction en cours avant tout nouveau verdict — aucune retouche de
+> paramètres, aucune inversion de signe.
+
+> ## ~~❌ VERDICT (RETIRÉ) : MOMENTUM_CRYPTO_V1_NO_EDGE — REVERSAL, PAS MOMENTUM (2026-07-21)~~
+>
+> ~~Formule unique préenregistrée (0,4×mom7j + 0,4×mom30j + 0,2×mom90j −
 > pénalité illiquidité − coût funding, résiduel bêta BTC), univers
 > crypto-only 32 noms, rebalance quotidien. CAGR net −66,9 %/an, Sharpe
-> −1,22, maxDD −99,9 %, toutes années négatives, coûts ×2 négatif. Ce
-> n'est pas un artefact de coûts : le diagnostic IC quotidien (corrélation
-> de rang signal → rendement du lendemain, univers complet) est **négatif
-> et significatif à l'horizon 7 jours (t = −3,18)** — le signal est un
-> reversal court terme, pas un momentum, à cette fréquence. Détail :
+> −1,22, maxDD −99,9 %, toutes années négatives, coûts ×2 négatif.~~
+> Ce verdict reposait sur l'univers survivant décrit ci-dessus — voir la
+> quarantaine. Détail historique (ne plus citer comme preuve) :
 > [results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md](results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md).
 
 Univers scindé le 2026-07-21 : voir

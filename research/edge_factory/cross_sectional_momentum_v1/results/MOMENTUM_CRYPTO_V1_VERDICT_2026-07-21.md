@@ -1,5 +1,12 @@
 # Verdict — MOMENTUM_CRYPTO_V1
 
+> **🔶 MIS EN QUARANTAINE le 2026-07-21, plus tard le même jour — voir
+> `../QUARANTINE_2026-07-21.md`.** L'univers `CRYPTO_32` ci-dessous est un
+> snapshot du 2026-06-30 appliqué à tout l'historique — biais de
+> survivance confirmé. Ce document reste comme trace de ce qui a été
+> calculé et pourquoi ce n'était pas fiable ; ne plus le citer comme
+> preuve d'un verdict NO_EDGE de famille.
+
 Formule unique préenregistrée (voir `PREREGISTRATION_CRYPTO_V1_ADDENDUM.md`),
 testée une seule fois (`n_trials=1`, aucune grille), univers crypto-only
 32 noms (31 classés + BTC hedge), 2020-04-29 → 2026-06-30.
