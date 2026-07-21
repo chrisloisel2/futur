@@ -91,6 +91,183 @@ def test_forward_window_completeness_rejects_incomplete_window_no_interpolation(
     assert result_holed["signals_rejected_incomplete_window"] == 1
 
 
+# ── appariement mutuel un-à-un (amendement settlement_timestamp_alignment_v1) ──
+
+def test_subsecond_jitter_pairs_same_settlement():
+    binance = [1000 + 11, 1000 + 8 * 3_600_000 + 16]   # jitter +11ms, +16ms
+    bybit = [1000, 1000 + 8 * 3_600_000]               # pile sur la grille
+    m = N.mutual_one_to_one_match(binance, bybit)
+    assert len(m["matches"]) == 2
+    assert set(m["matches"]) == {(binance[0], bybit[0]), (binance[1], bybit[1])}
+
+
+def test_match_over_one_second_rejected():
+    binance = [1000 + 1001]     # 1001ms > tolerance 1000ms
+    bybit = [1000]
+    m = N.mutual_one_to_one_match(binance, bybit, tolerance_ms=1000)
+    assert m["matches"] == []
+    assert binance[0] in m["unmatched_binance"]
+    assert bybit[0] in m["unmatched_bybit"]
+
+
+def test_exact_timestamp_still_matches():
+    m = N.mutual_one_to_one_match([5000], [5000])
+    assert m["matches"] == [(5000, 5000)]
+
+
+def test_ambiguous_candidate_rejected():
+    # un binance à équidistance de deux bybit, tous deux dans la tolérance
+    binance = [1_000_000]
+    bybit = [1_000_000 - 500, 1_000_000 + 500]
+    m = N.mutual_one_to_one_match(binance, bybit, tolerance_ms=1000)
+    assert m["matches"] == []
+    assert binance[0] in m["ambiguous_binance"]
+    assert set(m["ambiguous_bybit"]) == set(bybit)
+
+
+def test_event_cannot_be_reused():
+    # deux binance proches d'un seul bybit -> aucun appariement, jamais le plus proche choisi arbitrairement
+    binance = [1_000_000 - 100, 1_000_000 + 100]
+    bybit = [1_000_000]
+    m = N.mutual_one_to_one_match(binance, bybit, tolerance_ms=1000)
+    assert m["matches"] == []
+    used = [y for _, y in m["matches"]]
+    assert len(used) == len(set(used))   # jamais réutilisé (vide ici, mais invariant vérifié)
+
+
+def test_matching_is_input_order_invariant():
+    binance = [3000, 1000, 2000]
+    bybit = [2000 + 10, 1000 - 10, 3000 + 5]
+    m1 = N.mutual_one_to_one_match(binance, bybit)
+    m2 = N.mutual_one_to_one_match(list(reversed(binance)), list(reversed(bybit)))
+    assert sorted(m1["matches"]) == sorted(m2["matches"])
+
+
+def test_no_asof_or_forward_fill_in_matching():
+    """Un événement bybit isolé loin de tout binance ne doit jamais être
+    apparié par proximité au-delà de la tolérance, quelle que soit sa
+    position dans la série."""
+    binance = [0, 10_000_000]
+    bybit = [5_000_000]   # équidistant, hors tolérance des deux côtés
+    m = N.mutual_one_to_one_match(binance, bybit, tolerance_ms=1000)
+    assert m["matches"] == []
+    assert bybit[0] in m["unmatched_bybit"]
+
+
+# ── comparabilité des intervalles + construction du panel primaire ─────────
+
+HOUR = 3_600_000
+
+
+def _full_markprice_window(decision_ts: int) -> set:
+    return set(range(decision_ts, decision_ts + N.FORWARD_HORIZON_MS, N.BAR_STEP_MS))
+
+
+def _funding_row(rate="0.0001"):
+    return {"fundingRate": rate}
+
+
+def test_equal_8h_intervals_are_primary_eligible():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 8 * HOUR: _funding_row(), t: _funding_row()}
+    bybit = {t - 8 * HOUR + 5: _funding_row(), t + 5: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    eligible = [r for r in rows if r["binance_raw_timestamp"] == t]
+    assert len(eligible) == 1 and eligible[0]["eligible_primary"] is True
+    assert eligible[0]["binance_interval_hours"] == 8
+    assert eligible[0]["bybit_interval_hours"] == 8
+
+
+def test_equal_2h_intervals_are_primary_eligible():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 2 * HOUR: _funding_row(), t: _funding_row()}
+    bybit = {t - 2 * HOUR + 5: _funding_row(), t + 5: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == t][0]
+    assert row["eligible_primary"] is True
+    assert row["binance_interval_hours"] == row["bybit_interval_hours"] == 2
+
+
+def test_2h_vs_8h_interval_rejected():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 8 * HOUR: _funding_row(), t: _funding_row()}     # binance: 8h
+    bybit = {t - 2 * HOUR + 5: _funding_row(), t + 5: _funding_row()}  # bybit: 2h
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == t][0]
+    assert row["eligible_primary"] is False
+    assert row["primary_rejection_reason"] == "interval_mismatch"
+
+
+def test_unknown_interval_rejected():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 5 * HOUR: _funding_row(), t: _funding_row()}     # 5h : hors {2,4,8}
+    bybit = {t - 5 * HOUR + 5: _funding_row(), t + 5: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == t][0]
+    assert row["eligible_primary"] is False
+    assert row["primary_rejection_reason"] == "irregular_interval"
+
+
+def test_pair_available_at_uses_later_raw_timestamp():
+    base = N.SIGNAL_START_MS + 100 * HOUR
+    b_ts, y_ts = base, base + 300      # bybit 300ms après binance
+    binance = {b_ts - 8 * HOUR: _funding_row(), b_ts: _funding_row()}
+    bybit = {y_ts - 8 * HOUR: _funding_row(), y_ts: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(b_ts, y_ts))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == b_ts][0]
+    assert row["pair_available_at"] == y_ts   # le PLUS TARDIF, jamais le plus tôt
+
+
+def test_canonicalization_does_not_advance_decision_time():
+    """decision_timestamp doit toujours être STRICTEMENT postérieur à
+    pair_available_at, jamais égal ni antérieur — même si b_ts et y_ts sont
+    à quelques centaines de ms d'écart."""
+    base = N.SIGNAL_START_MS + 100 * HOUR
+    b_ts, y_ts = base, base + 300
+    binance = {b_ts - 8 * HOUR: _funding_row(), b_ts: _funding_row()}
+    bybit = {y_ts - 8 * HOUR: _funding_row(), y_ts: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(b_ts, y_ts))
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == b_ts][0]
+    assert row["decision_timestamp"] > row["pair_available_at"]
+
+
+def test_mark_price_gap_rejects_incomplete_forward_window():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 8 * HOUR: _funding_row(), t: _funding_row()}
+    bybit = {t - 8 * HOUR + 5: _funding_row(), t + 5: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    one_bar = sorted(markprice)[len(markprice) // 2]
+    markprice_with_gap = markprice - {one_bar}    # un trou au milieu, jamais interpolé
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice_with_gap)
+    row = [r for r in rows if r["binance_raw_timestamp"] == t][0]
+    assert row["eligible_primary"] is False
+    assert row["primary_rejection_reason"] == "incomplete_forward_window"
+
+
+def test_panel_hash_deterministic():
+    t = N.SIGNAL_START_MS + 100 * HOUR
+    binance = {t - 8 * HOUR: _funding_row(), t: _funding_row()}
+    bybit = {t - 8 * HOUR + 5: _funding_row(), t + 5: _funding_row()}
+    decision_ts = N.decision_timestamp_for(max(t, t + 5))
+    markprice = _full_markprice_window(decision_ts)
+    rows1 = N.build_primary_panel("TEST", binance, bybit, markprice)
+    rows2 = N.build_primary_panel("TEST", binance, bybit, markprice)
+    assert N.sha256_of(rows1) == N.sha256_of(rows2)
+
+
 def test_longest_gap_and_coverage_by_year():
     HOUR = 3_600_000
     ts = [N.SIGNAL_START_MS, N.SIGNAL_START_MS + HOUR, N.SIGNAL_START_MS + 100 * HOUR]
