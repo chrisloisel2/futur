@@ -1,5 +1,17 @@
 # funding_relative_value_cross_venue_v1
 
+> ## 🔒 STATUT : CLOSED_NO_EDGE (2026-07-21, décision humaine)
+>
+> Les trois venues instrumentées sont épuisées :
+> `Binance↔Bybit : NO_EDGE` · `Binance↔Hyperliquid : NO_EDGE` (`FUNDING_XVENUE_V0`)
+> · `historique de prix Hyperliquid : insuffisamment propre` (`NOT_CLEANLY_RETRIEVABLE`).
+> On ne retouche plus les seuils, le levier ou les frais pour la faire
+> fonctionner artificiellement. Réouverture possible seulement avec :
+> une 4ᵉ venue (OKX, Deribit, Coinbase International, Kraken) ; un funding
+> réellement prévisible (pas seulement instantané) ; ou une structure
+> différente (spot-margin/perp, options/perp) — jamais un retuning des
+> mêmes paramètres sur les mêmes 3 venues.
+
 > ## ❌ VERDICT : BINANCE_BYBIT_NO_EDGE (2026-07-21)
 >
 > Premier test réellement gaté (prix réels des deux côtés, moteur deux
@@ -35,7 +47,12 @@ filtre de risque).
 
 ## Prochaine étape
 
-Aucune candidate non fermée sur ce mécanisme précis (long bas/short haut,
-même actif, deux venues) avec les 3 venues actuellement instrumentées.
-Rouvrir nécessiterait soit une 4ᵉ venue candidate, soit une thèse
-matériellement différente — pas un retuning des mêmes seuils.
+Piste fermée (`CLOSED_NO_EDGE`). Aucune candidate non fermée sur ce
+mécanisme précis (long bas/short haut, même actif, deux venues) avec les 3
+venues actuellement instrumentées. Conditions de réouverture (une seule
+suffit, mais aucune n'est un simple retuning) :
+
+- une 4ᵉ venue candidate (OKX, Deribit, Coinbase International, Kraken) ;
+- un funding réellement prévisible (pas seulement instantané/réalisé) ;
+- une structure différente (spot-margin/perp, options/perp) plutôt que
+  perp/perp.
