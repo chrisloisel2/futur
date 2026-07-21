@@ -1,0 +1,89 @@
+experiment_id: calendar_basis_v1
+step: 3 — data inventory (no collector, no feature, no backtest run BY THIS PISTE)
+date: 2026-07-21
+machine: qbee@100.127.59.114, read-only inspection, ~/futur
+
+major_finding: >
+  This is not a green-field piste. A closely related mechanism — Binance BTC/ETH quarterly
+  calendar-term carry, cash-and-carry style — was already backtested on 2026-07-13
+  (commit 04e345e, predates the edge_factory program entirely) and is currently running as
+  a live paper tournament runner, basis_term_v0 (configs/alpha20_runners.yaml). See
+  reconciliation_with_prior_art below for how this changes the remaining work order.
+
+sources_available:
+  dated_futures: >
+    data/derivatives_backfill/binance_vision_quarterly/ — 48 parquet files (24 BTCUSDT +
+    24 ETHUSDT contracts, 210326..261225) + contracts.json (expiry map)
+  collector: scripts/backfill_binance_quarterly_vision.py — pulls from the Binance Vision
+    public static archive, incremental and idempotent; full historical backfill is free,
+    not just forward collection from today
+  prior_backtest: scripts/backtest_basis_term.py -> reports/liq_cascade/BASIS_TERM_BACKTEST.{json,md}
+    (commit 04e345e, 2026-07-13)
+  live_deployment: data/alpha20/tournament/{cycle_log,ledger,state}/basis_term_v0.* —
+    runner_id basis_term_v0, family basis_term, configs/alpha20_runners.yaml:95
+  deribit_check: data/options_backfill/deribit/trades/BTC/*.parquet sampled directly
+    (366,848 rows, June 2024) — confirmed options-only (0 null cp/strike); no dated-futures
+    instruments captured despite Deribit's API serving both
+
+period_covered: 2021-02-03 to 2026-07-19, near-continuous via overlapping contract windows
+  (verified: no gaps between BTCUSDT contracts, expired contracts retained not deleted)
+frequency: daily close only (open_time, close, date columns) — collector discards
+  open/high/low/volume even though the source archive has them
+universe_pit: n/a — fixed 2-asset list, not a ranked universe
+venues: Binance is the only venue with usable dated-futures data; the
+  data/derivatives_raw tree for Bybit/OKX has perps only (no dated-futures market type);
+  Deribit has options only, no futures despite API support for both
+symbols: BTCUSDT, ETHUSDT only
+maturities: >
+  real expiry dates available from contracts.json; Binance runs 2 concurrent quarterly
+  contracts at all times (front + back) — near-vs-far calendar spread is directly testable
+  with real dated maturities, no synthetic proxy needed
+shortability: n/a
+historical_fees: not empirical — the existing backtest assumes a flat 23bps round-trip
+  (7+7+7+2bps), not sourced from real exchange fee schedules
+timestamp_quality: UTC daily closes only; no finer granularity available from the
+  current collector
+gaps: none found in contract-to-contract coverage for BTCUSDT (spot-checked full history)
+survivorship_bias: n/a — BTCUSDT/ETHUSDT were never delisted; contract roll-off is a clean
+  structural feature (expired contracts retained as separate files), not a bias
+blocking_missing_data: >
+  a true SPOT price series does not exist anywhere on disk (config/data_sources.yml
+  declares a path for binance_vision_spot_klines with no data behind it). The existing
+  backtest substitutes perp close as a spot proxy, documented as an approximation
+  (|perp-spot| ~ a few bps premium).
+estimated_size: 376K (tiny — daily close-only, 2 symbols)
+collection_cost: >
+  free full historical backfill via the Binance Vision static archive if extended to
+  more symbols. Extending to Deribit or Bybit dated futures would need a new collector
+  (none exists today) — Deribit's get_instruments/trades API likely supports a similar
+  historical pull but this is unverified, no code found for it.
+
+classification: DATA_READY
+justification: >
+  A working, idempotent collector already populated continuous BTCUSDT/ETHUSDT
+  quarterly-futures data 2021-2026 with real expiry metadata. The one real gap (true spot
+  vs perp-proxy) is already documented and worked around in the existing backtest, and the
+  near-vs-far quarterly calendar spread needs no proxy at all.
+
+reconciliation_with_prior_art:
+  decision: 2026-07-21, human — do not build a parallel engine from scratch.
+  redirect: >
+    calendar_basis_v1 steps 4-8 are redirected toward an INDEPENDENT, edge_factory-disciplined
+    falsification of the existing basis_term_v0 mechanism, because the existing result has
+    not passed this repo's own gates:
+      - no DSR/PBO reported anywhere in scripts/backtest_basis_term.py or the results files
+      - the reported primary (entry5_size50, +8.39%/yr, maxDD -4.32%) was selected post-hoc
+        among 6 grid variants (entry3/5/8 x size25/50) with no primary preregistered before
+        the grid was run — the exact "grid search de seuils" pattern this program's own
+        README deprioritizes
+      - no leave-one-year / leave-one-asset check reported (only 2 assets exist, so
+        leave-one-asset here only tests BTC-only vs ETH-only concentration, but that check
+        is still absent)
+      - the cost figure is a flat estimate (23bps), not empirical
+      - configs/alpha20.yaml itself marks this runner status: a_qualifier, with the note
+        "carnets réels, rolls, règlement, contrat dynamique requis" — the tournament does
+        not treat this as a validated result, only as a running candidate
+  implication_for_step_4: >
+    treat entry5_size50 as a candidate to falsify under the full gate stack (DSR>=95%,
+    PBO<=10%, costs x2, leave-one-year, leave-one-asset BTC/ETH, execution-delay robustness),
+    not as an established result to extend or build a multi-leg engine on top of directly.
