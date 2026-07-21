@@ -288,6 +288,79 @@ primary_rate_comparability:
 de sensibilité secondaire, jamais un substitut du taux brut en cas d'échec
 du test primaire.
 
+## Amendement 2026-07-21 (septies) — groupement du seuil, ancrage exact de la cible, inférence primaire
+
+Écrit après le gel du dataset (`d87fdda`, `DATASET_READY_FOR_REVIEW`) mais
+**avant tout calcul de quantile, de drawdown ou de statistique économique**
+— aucun résultat dispersion→drawdown n'a encore été regardé au moment de
+cet amendement.
+
+### Groupement du seuil causal (asset × intervalle)
+
+La cadence SOL démontre qu'un règlement 2h et un règlement 8h ne partagent
+pas la même distribution de référence. Le seuil expanding est donc
+calculé **par groupe (symbol, observed_interval_hours)**, jamais tous
+actifs/intervalles confondus :
+
+```yaml
+threshold_group: [symbol, observed_interval_hours]
+q95_t: >
+  quantile(0.95) des dispersions du MÊME groupe (asset × intervalle),
+  strictement antérieures à pair_available_at_t (jamais égales ni
+  postérieures), fenêtre expanding 270 obs / warm-up min 180 (identique à
+  backtest_funding_extreme.py)
+insufficient_history: threshold_unavailable   # jamais emprunté à un autre groupe/intervalle
+cross_asset_leakage_forbidden: true   # une observation n'entre dans l'historique d'un événement
+                                       # évalué que si son pair_available_at est STRICTEMENT inférieur
+```
+
+### Ancrage exact de la cible (remplace la définition approximative de la
+### version Phase 1 du module, jamais utilisée pour un résultat)
+
+```yaml
+decision_bar: first Binance 5m bar with open_time > pair_available_at   # == decision_timestamp déjà défini
+reference_price: open of decision_bar     # PAS le close — connu au début de la barre, pas à sa fin
+forward_window: "[decision_bar.open_time, decision_bar.open_time + 24h)"   # inclut la barre de décision elle-même
+forward_trough: min(low) over forward_window
+forward_max_drawdown: forward_trough / reference_price - 1
+```
+
+Le low de la barre de décision est une cible future légitime ; son close
+n'est jamais utilisé comme information disponible au début de cette même
+barre.
+
+### Inférence primaire
+
+```yaml
+primary_inference:
+  outcome: {loss_magnitude: "-forward_max_drawdown"}
+  primary_effect:
+    delta: "mean(loss_magnitude | stress) - mean(loss_magnitude | non_stress)"
+    expected_sign: positive
+  bootstrap:
+    type: moving_calendar_block
+    block_length_days: 7
+    resamples: 10000
+    resample_all_assets_jointly: true
+    seed: 20260721
+  supporting_hac:
+    horizon_covered: at_least_24h
+    pooled_rows_treated_as_independent: false
+  gate:
+    rule: "delta > 0 AND bootstrap_ci95_lower_bound > 0 AND HAC same sign and supported"
+    primary_statistic: mean            # médiane, panel exact-ms, normalisation 8h = diagnostics secondaires seulement
+```
+
+### Vérification préflight obligatoire (avant tout calcul)
+
+Le script Phase 2 doit recalculer et comparer AU MANIFESTE GELÉ (`d87fdda`)
+tous les hashes, s'arrêter avec un code non nul au premier écart, et
+écrire un `unblinding_receipt` immuable avant de produire le moindre
+chiffre économique. `analysis_input_hash` doit engager également les
+barres mark-price effectivement utilisées pour les cibles 24h (pas
+seulement les lignes de funding éligibles) — élargissement nécessaire du
+hash gelé, fait maintenant, avant tout résultat.
+
 ## Budget
 
 Un seul cycle complet. Pas de cycle de sauvetage après échec.

@@ -257,6 +257,33 @@ def test_mark_price_gap_rejects_incomplete_forward_window():
     assert row["primary_rejection_reason"] == "incomplete_forward_window"
 
 
+def test_interval_uses_full_venue_series_not_matched_subset_only():
+    """Contrôle explicite demandé en relecture : l'intervalle observé doit
+    venir de la série COMPLETE propre à chaque venue (avant appariement),
+    jamais de la seule intersection des événements communs — sinon les
+    événements Bybit intermédiaires (2h) sans contrepartie Binance (8h)
+    disparaîtraient et les deux séries sembleraient artificiellement
+    espacées de 8h."""
+    base = N.SIGNAL_START_MS + 200 * HOUR
+    # Binance : 8h (base, base+8h). Bybit : 2h (base, +2h, +4h, +6h, +8h) —
+    # seuls base et base+8h sont appariés à Binance ; +2h/+4h/+6h n'ont pas
+    # de contrepartie Binance et doivent rester dans la série bybit propre.
+    binance = {base: _funding_row(), base + 8 * HOUR: _funding_row()}
+    bybit = {base: _funding_row(), base + 2 * HOUR: _funding_row(),
+            base + 4 * HOUR: _funding_row(), base + 6 * HOUR: _funding_row(),
+            base + 8 * HOUR: _funding_row()}
+    decision_ts = N.decision_timestamp_for(base + 8 * HOUR)
+    markprice = _full_markprice_window(decision_ts)
+    rows = N.build_primary_panel("TEST", binance, bybit, markprice)
+    row = [r for r in rows if r["binance_raw_timestamp"] == base + 8 * HOUR][0]
+    # bybit_interval_hours doit être 2h (base+6h -> base+8h), PAS 8h
+    # (ce qui arriverait si on ne regardait que les événements communs base/base+8h)
+    assert row["bybit_interval_hours"] == 2
+    assert row["binance_interval_hours"] == 8
+    assert row["eligible_primary"] is False
+    assert row["primary_rejection_reason"] == "interval_mismatch"
+
+
 def test_panel_hash_deterministic():
     t = N.SIGNAL_START_MS + 100 * HOUR
     binance = {t - 8 * HOUR: _funding_row(), t: _funding_row()}
