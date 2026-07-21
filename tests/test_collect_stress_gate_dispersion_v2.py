@@ -172,6 +172,54 @@ def hashlib_equal(path: Path, body: bytes) -> bool:
     return hashlib.sha256(path.read_bytes()).hexdigest() == hashlib.sha256(body).hexdigest()
 
 
+def test_binance_funding_raises_on_stalled_cursor(monkeypatch):
+    """API mal formée qui renvoie toujours la MÊME page pleine (1000 lignes,
+    cursor ne progresse jamais) -> arrêt explicite, jamais une boucle
+    infinie. Une page PARTIELLE stagnante n'exercerait pas ce chemin : elle
+    s'arrêterait déjà normalement via `len(page) < limit` (comportement
+    voulu, testé séparément)."""
+    monkeypatch.setattr(C.time, "sleep", lambda s: None)
+    same_full_page = [_binance_funding_row(1000 + i) for i in range(1000)]
+    calls = {"n": 0}
+
+    def stuck(url):
+        calls["n"] += 1
+        return 200, json.dumps(same_full_page).encode()
+
+    with pytest.raises(C.AcquisitionError, match="progress|identique"):
+        C.collect_binance_funding("BTCUSDT", 0, 10**9, http_get=stuck)
+    assert calls["n"] <= 2      # détecté dès la 2e page, pas après des centaines d'appels
+
+
+def test_bybit_funding_raises_on_stalled_cursor(monkeypatch):
+    monkeypatch.setattr(C.time, "sleep", lambda s: None)
+    full_page = [_bybit_funding_row(5000 - i) for i in range(200)]   # toujours la même plage
+
+    def stuck(url):
+        return 200, json.dumps({"result": {"list": full_page}}).encode()
+
+    with pytest.raises(C.AcquisitionError, match="progress|identique|recule"):
+        C.collect_bybit_funding("BTCUSDT", start_ms=0, end_ms=6000, http_get=stuck)
+
+
+def test_max_pages_enforced_before_infinite_loop(monkeypatch):
+    monkeypatch.setattr(C.time, "sleep", lambda s: None)
+    monkeypatch.setattr(C, "MAX_PAGES", 3)
+    calls = {"n": 0}
+
+    def always_full_advancing_page(url):
+        # page pleine (1000) qui avance légitimement -> ne s'arrêterait
+        # JAMAIS sans le garde-fou MAX_PAGES (simule une fenêtre "sans fin").
+        calls["n"] += 1
+        start = calls["n"] * 1_000_000
+        rows = [_binance_funding_row(start + i) for i in range(1000)]
+        return 200, json.dumps(rows).encode()
+
+    with pytest.raises(C.AcquisitionError, match="MAX_PAGES"):
+        C.collect_binance_funding("BTCUSDT", 0, 10**15, http_get=always_full_advancing_page)
+    assert calls["n"] == 3    # MAX_PAGES(3) appels réels effectués, le 4e est refusé avant tout HTTP
+
+
 def test_acquisition_log_has_required_schema_fields():
     body = json.dumps([_binance_funding_row(1000)]).encode()
     mock = _mock_sequence([(200, body)])

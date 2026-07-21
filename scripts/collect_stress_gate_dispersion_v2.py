@@ -37,10 +37,14 @@ RAW = OUT / "raw"
 LOG = OUT / "logs" / "acquisition.jsonl"
 
 SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]
-EXPERIMENT_START_MS = int(datetime(2022, 11, 3, tzinfo=timezone.utc).timestamp() * 1000)
-EXPERIMENT_END_MS = int(datetime(2026, 7, 14, tzinfo=timezone.utc).timestamp() * 1000)
+# Bornes gelées, PREREGISTRATION.md amendement (bis) : signal != prix.
+SIGNAL_START_MS = int(datetime(2022, 11, 3, tzinfo=timezone.utc).timestamp() * 1000)
+SIGNAL_END_MS = int(datetime(2026, 7, 14, tzinfo=timezone.utc).timestamp() * 1000)
+PRICE_START_MS = SIGNAL_START_MS
+PRICE_END_MS = int(datetime(2026, 7, 15, 1, tzinfo=timezone.utc).timestamp() * 1000)
 
 MAX_ATTEMPTS = 5
+MAX_PAGES = 2000             # échec explicite avant boucle infinie (amendement quater)
 RATE_LIMIT_SLEEP_S = 1.0     # ~1 req/s/collecteur, largement sous les limites documentées
 
 
@@ -169,12 +173,31 @@ def collect_binance_funding(symbol: str, start_ms: int, end_ms: int, *,
                             ) -> list[dict]:
     all_rows: list[dict] = []
     cursor = start_ms
+    prev_cursor: Optional[int] = None
+    prev_page_hash: Optional[str] = None
+    n_pages = 0
     while cursor < end_ms:
+        n_pages += 1
+        if n_pages > MAX_PAGES:
+            raise AcquisitionError(
+                f"binance funding {symbol}: MAX_PAGES={MAX_PAGES} dépassé "
+                "avant convergence — arrêt explicite, jamais une boucle infinie")
         page = binance_funding_page(symbol, cursor, end_ms, http_get=http_get)
         if not page:
             break
+        page_hash = hashlib.sha256(
+            json.dumps(page, sort_keys=True).encode()).hexdigest()
+        if page_hash == prev_page_hash:
+            raise AcquisitionError(
+                f"binance funding {symbol}: page identique à la précédente "
+                f"(cursor={cursor}) — aucune progression, arrêt")
         all_rows.extend(page)
         cursor = max(r["fundingTime"] for r in page) + 1
+        if prev_cursor is not None and cursor <= prev_cursor:
+            raise AcquisitionError(
+                f"binance funding {symbol}: cursor n'avance pas "
+                f"({cursor} <= {prev_cursor}) — arrêt")
+        prev_cursor, prev_page_hash = cursor, page_hash
         if len(page) < 1000:
             break
         time.sleep(sleep_s)
@@ -213,12 +236,31 @@ def collect_binance_markprice(symbol: str, start_ms: int, end_ms: int, *,
                               sleep_s: float = RATE_LIMIT_SLEEP_S) -> list[list]:
     all_rows: list[list] = []
     cursor = start_ms
+    prev_cursor: Optional[int] = None
+    prev_page_hash: Optional[str] = None
+    n_pages = 0
     while cursor < end_ms:
+        n_pages += 1
+        if n_pages > MAX_PAGES:
+            raise AcquisitionError(
+                f"binance mark_price {symbol}: MAX_PAGES={MAX_PAGES} dépassé "
+                "avant convergence — arrêt explicite, jamais une boucle infinie")
         page = binance_markprice_page(symbol, cursor, end_ms, interval=interval, http_get=http_get)
         if not page:
             break
+        page_hash = hashlib.sha256(
+            json.dumps(page, sort_keys=True).encode()).hexdigest()
+        if page_hash == prev_page_hash:
+            raise AcquisitionError(
+                f"binance mark_price {symbol}: page identique à la précédente "
+                f"(cursor={cursor}) — aucune progression, arrêt")
         all_rows.extend(page)
         cursor = page[-1][0] + 1     # open_time de la dernière barre + 1ms
+        if prev_cursor is not None and cursor <= prev_cursor:
+            raise AcquisitionError(
+                f"binance mark_price {symbol}: cursor n'avance pas "
+                f"({cursor} <= {prev_cursor}) — arrêt")
+        prev_cursor, prev_page_hash = cursor, page_hash
         if len(page) < 1500:
             break
         time.sleep(sleep_s)
@@ -256,17 +298,43 @@ def bybit_funding_page(symbol: str, end_ms: int, *, http_get=http_get_json,
 def collect_bybit_funding(symbol: str, start_ms: int, end_ms: int, *,
                           http_get=http_get_json, sleep_s: float = RATE_LIMIT_SLEEP_S
                           ) -> list[dict]:
+    """Le raw page count (loggé par bybit_funding_page) peut dépasser
+    largement la fenêtre demandée : `endTime` seul renvoie jusqu'à 200
+    enregistrements PRÉCÉDANT cette borne, quelle que soit leur ancienneté
+    (documenté). Le filtre `>= start_ms` ci-dessous est ce qui restreint le
+    résultat à la fenêtre réellement demandée — ne pas confondre les deux
+    compteurs (voir tests, invariant vérifié explicitement)."""
     all_rows: list[dict] = []
     cursor = end_ms
+    prev_cursor: Optional[int] = None
+    prev_page_hash: Optional[str] = None
+    n_pages = 0
     while True:
+        n_pages += 1
+        if n_pages > MAX_PAGES:
+            raise AcquisitionError(
+                f"bybit funding {symbol}: MAX_PAGES={MAX_PAGES} dépassé "
+                "avant convergence — arrêt explicite, jamais une boucle infinie")
         page = bybit_funding_page(symbol, cursor, http_get=http_get)
         if not page:
             break
+        page_hash = hashlib.sha256(
+            json.dumps(page, sort_keys=True).encode()).hexdigest()
+        if page_hash == prev_page_hash:
+            raise AcquisitionError(
+                f"bybit funding {symbol}: page identique à la précédente "
+                f"(cursor={cursor}) — aucune progression, arrêt")
         all_rows.extend(page)
         oldest = min(int(r["fundingRateTimestamp"]) for r in page)
+        cursor_new = oldest - 1
+        if prev_cursor is not None and cursor_new >= prev_cursor:
+            raise AcquisitionError(
+                f"bybit funding {symbol}: cursor ne recule pas "
+                f"({cursor_new} >= {prev_cursor}) — arrêt")
+        prev_cursor, prev_page_hash = cursor_new, page_hash
         if oldest <= start_ms or len(page) < 200:
             break
-        cursor = oldest - 1
+        cursor = cursor_new
         time.sleep(sleep_s)
     dedup = {int(r["fundingRateTimestamp"]): r for r in all_rows
             if int(r["fundingRateTimestamp"]) >= start_ms}
@@ -298,6 +366,55 @@ def bybit_markprice_page(symbol: str, end_ms: int, *, interval: str = "5",
     return rows
 
 
+# ── Orchestrateur — périmètre PRIMAIRE uniquement (amendement ter) ────────
+# 4 actifs x {funding Binance, funding Bybit, mark price Binance 5m} = 12
+# séries. PAS de mark price Bybit ici (auxiliaire QC seulement, hors scope
+# de ce run) : voir PREREGISTRATION.md.
+
+PRIMARY_SERIES = [(sym, venue, kind) for sym in SYMBOLS
+                 for venue, kind in (("binance", "funding"), ("bybit", "funding"),
+                                     ("binance", "mark_price"))]
+
+
+def _acquisition_run_id() -> str:
+    return "run_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def run_full_acquisition(*, run_id: Optional[str] = None,
+                         sleep_s: float = RATE_LIMIT_SLEEP_S) -> dict:
+    """Collecte séquentielle des 12 séries primaires sur la fenêtre gelée.
+    Reprenable : chaque page déjà persistée est un no-op idempotent (voir
+    _persist_page_idempotent), donc relancer après interruption ne refait
+    pas le travail déjà validé."""
+    run_id = run_id or _acquisition_run_id()
+    started = now_utc_iso()
+    summary: dict = {"acquisition_run_id": run_id, "started_at_utc": started,
+                     "collector_commit": "HEAD", "series": {}}
+    for sym, venue, kind in PRIMARY_SERIES:
+        key = f"{venue}/{kind}/{sym}"
+        print(f"[{run_id}] {key} ...", flush=True)
+        try:
+            if venue == "binance" and kind == "funding":
+                rows = collect_binance_funding(sym, SIGNAL_START_MS, SIGNAL_END_MS, sleep_s=sleep_s)
+            elif venue == "bybit" and kind == "funding":
+                rows = collect_bybit_funding(sym, SIGNAL_START_MS, SIGNAL_END_MS, sleep_s=sleep_s)
+            elif venue == "binance" and kind == "mark_price":
+                rows = collect_binance_markprice(sym, PRICE_START_MS, PRICE_END_MS, sleep_s=sleep_s)
+            else:
+                raise AcquisitionError(f"série hors périmètre primaire : {key}")
+        except AcquisitionError as e:
+            summary["series"][key] = {"status": "FAILED", "error": str(e)}
+            print(f"[{run_id}] {key} FAILED: {e}", flush=True)
+            continue
+        summary["series"][key] = {"status": "OK", "n_rows": len(rows)}
+        print(f"[{run_id}] {key} OK: {len(rows)} lignes", flush=True)
+    summary["completed_at_utc"] = now_utc_iso()
+    (OUT / "logs").mkdir(parents=True, exist_ok=True)
+    (OUT / "logs" / f"{run_id}_summary.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True))
+    return summary
+
+
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -305,32 +422,47 @@ def main() -> None:
     ap.add_argument("--symbol", choices=SYMBOLS)
     ap.add_argument("--venue", choices=["binance", "bybit"])
     ap.add_argument("--kind", choices=["funding", "mark_price"])
-    ap.add_argument("--start-ms", type=int, default=EXPERIMENT_START_MS)
-    ap.add_argument("--end-ms", type=int, default=EXPERIMENT_END_MS)
+    ap.add_argument("--start-ms", type=int)
+    ap.add_argument("--end-ms", type=int)
     ap.add_argument("--smoke-test", action="store_true",
-                    help="ne collecte qu'UNE page récente, pour vérifier la connectivité réelle sans lancer la collecte complète")
+                    help="ne collecte qu'UNE fenêtre de 3 jours, pour vérifier la connectivité réelle sans lancer la collecte complète")
+    ap.add_argument("--all", action="store_true",
+                    help="collecte complète des 12 séries primaires sur la fenêtre gelée (signal/prix, cf. PREREGISTRATION.md)")
+    ap.add_argument("--run-id", default=None)
     args = ap.parse_args()
 
-    if args.smoke_test:
-        end = args.end_ms
-        start = end - 3 * 24 * 3600 * 1000     # 3 jours seulement
-        args.start_ms, args.end_ms = start, end
+    if args.all:
+        summary = run_full_acquisition(run_id=args.run_id)
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        n_failed = sum(1 for s in summary["series"].values() if s["status"] == "FAILED")
+        raise SystemExit(1 if n_failed else 0)
 
     if not (args.symbol and args.venue and args.kind):
-        ap.error("--symbol --venue --kind requis (ou --smoke-test avec les trois)")
+        ap.error("--symbol --venue --kind requis (ou --smoke-test/--all)")
+
+    is_price = args.kind == "mark_price"
+    default_start = PRICE_START_MS if is_price else SIGNAL_START_MS
+    default_end = PRICE_END_MS if is_price else SIGNAL_END_MS
+    start_ms = args.start_ms if args.start_ms is not None else default_start
+    end_ms = args.end_ms if args.end_ms is not None else default_end
+
+    if args.smoke_test:
+        end_ms = default_end
+        start_ms = end_ms - 3 * 24 * 3600 * 1000     # 3 jours seulement
 
     if args.venue == "binance" and args.kind == "funding":
-        rows = collect_binance_funding(args.symbol, args.start_ms, args.end_ms)
+        rows = collect_binance_funding(args.symbol, start_ms, end_ms)
     elif args.venue == "binance" and args.kind == "mark_price":
-        rows = collect_binance_markprice(args.symbol, args.start_ms, args.end_ms)
+        rows = collect_binance_markprice(args.symbol, start_ms, end_ms)
     elif args.venue == "bybit" and args.kind == "funding":
-        rows = collect_bybit_funding(args.symbol, args.start_ms, args.end_ms)
+        rows = collect_bybit_funding(args.symbol, start_ms, end_ms)
     else:
-        raise SystemExit("bybit mark_price: utiliser bybit_markprice_page directement "
-                         "(pagination forward pas encore branchée en driver --all)")
+        raise SystemExit("bybit mark_price : hors périmètre primaire (auxiliaire QC "
+                         "uniquement, cf. PREREGISTRATION.md) — utiliser "
+                         "bybit_markprice_page directement si vraiment nécessaire")
 
     print(f"{args.venue}/{args.kind}/{args.symbol}: {len(rows)} lignes "
-         f"[{args.start_ms} .. {args.end_ms}]")
+         f"[{start_ms} .. {end_ms}]")
 
 
 if __name__ == "__main__":
