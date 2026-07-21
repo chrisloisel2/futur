@@ -39,6 +39,49 @@ stopping_rule:
   - no_post_result_threshold_rescue
 ```
 
+## Amendement 2026-07-21 (avant tout accès aux données historiques)
+
+Ajouté après un simple test de connectivité HTTP (`curl` vers
+`fapi.binance.com`/`api.bybit.com`, code 200 — aucune donnée de marché ni
+statistique économique observée) et avant toute collecte historique. Ce
+n'est pas un sauvetage post-résultat : quatre conventions manquaient dans
+la version initiale de ce document et sont fixées maintenant, par
+nécessité (le collecteur ne peut pas être écrit sans elles), pas après
+avoir vu un résultat.
+
+1. **Variable primaire** : dispersion du **funding rate réglé**
+   (`settled funding rate`, la valeur publiée par `fundingRate`/
+   `funding/history`), PAS le premium index. Confirme et précise la
+   formule déjà écrite plus bas (`abs(funding_perp_binance −
+   funding_perp_bybit)`) — pour lever toute ambiguïté avec l'hypothèse
+   distincte "dispersion du premium index", qui serait une hypothèse
+   différente si jamais testée un jour.
+2. **Série pour le drawdown forward** : **mark price Binance** (endpoint
+   `markPriceKlines`), pas index price, pas spot, pas Bybit. Choix motivé
+   économiquement : le mark price est la référence de marge/liquidation
+   — c'est la série sur laquelle un "drawdown de stress" se matérialise
+   réellement pour un compte à effet de levier, ce qui est directement
+   pertinent pour un overlay de risque. Binance est retenu comme venue
+   canonique unique (pas de moyenne/blend Binance-Bybit) pour la même
+   raison que carry_basis_v12 trade sur Binance USDM — évite d'introduire
+   une deuxième source de désynchronisation inter-venue dans le label
+   alors que le SIGNAL, lui, est déjà inter-venues.
+3. **Résolution du prix** : barres **5 minutes** (mark price). Assez fin
+   pour capter un creux intrajournalier réaliste (cascade de liquidation),
+   assez grossier pour rester une collecte tractable (288 barres/24h).
+4. **Disponibilité causale** (remplace la formulation précédente, plus
+   vague, "exécution barre suivante") :
+   ```
+   signal_timestamp      = timestamp de règlement du funding (0h/8h/16h UTC)
+   decision_timestamp    = première barre mark price 5m dont l'open est
+                           strictement postérieur à signal_timestamp
+   forward_window_start  = decision_timestamp
+   forward_window_end    = decision_timestamp + 24h
+   ```
+   Empêche explicitement que le low de la barre de règlement serve à la
+   fois d'information (dans le calcul du seuil) et de résultat (dans le
+   drawdown forward).
+
 ## Décisions primaires fixées avant tout résultat
 
 - **Horizon forward primaire** : 24 h. Choisi pour cohérence avec la
@@ -47,9 +90,10 @@ stopping_rule:
   dénouement de stress, assez court pour rester actionnable par l'overlay),
   pas pour reproduire le chiffre historique (qui utilisait aussi 24 h,
   mais ce n'est pas la raison du choix ici).
-- **Définition primaire du drawdown forward** : creux minimum du NAV
-  synthétique (spot mid) sur la fenêtre [t+1h, t+25h] relatif au prix en
-  t, exécution barre suivante (pas de signal-au-close-utilisé-au-close).
+- **Définition primaire du drawdown forward** : creux minimum du **mark
+  price Binance, barres 5 min** (voir amendement 2026-07-21) sur
+  `[forward_window_start, forward_window_end]` = `[decision_timestamp,
+  decision_timestamp + 24h]`, relatif au mark price en `decision_timestamp`.
 - **Transformation primaire de la dispersion** : `abs(funding_perp_binance
   − funding_perp_bybit)` au cycle funding 8 h le plus récent strictement
   antérieur à t.
