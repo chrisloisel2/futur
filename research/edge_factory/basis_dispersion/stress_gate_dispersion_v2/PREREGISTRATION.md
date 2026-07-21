@@ -25,6 +25,8 @@ universe:
   assets: [BTC, ETH, SOL, BNB]
   venues: [Binance, Bybit]
   membership: point_in_time
+  experiment_start_utc: "2022-11-03T00:00:00Z"   # début réel de l'overlap funding Bybit archivé (pas choisi pour un résultat)
+  experiment_end_utc: "2026-07-14T00:00:00Z"      # fixé avant collecte, >24h de marge avant "aujourd'hui" (2026-07-21) — volontairement distinct du 2026-06-28 historique pour ne pas donner l'impression de viser sa reproduction
 
 primary_prediction: high_causal_cross_venue_dispersion_predicts_worse_forward_drawdown
 
