@@ -70,16 +70,60 @@ collection_cost: >
   endpoints, no auth required, matching the exact free-collector pattern already proven
   in scripts/backfill_hyperliquid_funding_premium.py
 
-classification: COLLECTOR_REQUIRED
+classification: DATA_READY (2/3 venues — Binance + Bybit; see updates below)
 justification: >
-  Funding data is DATA_READY for all three venues (real, gap-checked, jitter-characterized).
-  The primary edge (step 4, event-level realized spread) needs real perp price series on
-  both legs, and Bybit has none while Hyperliquid has only 4 days. Both are cheap and fast
-  to backfill via already-proven public REST patterns — a small, bounded collector task,
-  not a blocked or unreproducible piste.
+  As of step 3 (2026-07-21), funding data was DATA_READY for all three venues but real
+  perp price was missing for Bybit (total) and thin for Hyperliquid (4 days). Both gaps
+  were investigated same-day: Bybit price was backfilled clean (see
+  update_2026-07-21_bybit_perp_price), Hyperliquid price was found NOT_CLEANLY_RETRIEVABLE
+  via free APIs (see update_2026-07-21_hyperliquid_perp_price). Net result: the vertical
+  slice can run on Binance + Bybit today; Hyperliquid stays a funding-only reference until
+  its price history is resolved separately.
 
 next_step: >
   Backfill Bybit perp price and extend Hyperliquid perp price as far back as the public
   API allows (or gate honestly on a short HL sample), then run step 4 reusing the
   FUNDING_XVENUE_V0 cost assumptions as a starting point, updated once real cost data
   is available.
+
+update_2026-07-21_hyperliquid_perp_price:
+  verdict: NOT_CLEANLY_RETRIEVABLE — no backfill built, mark Hyperliquid price unavailable
+  evidence:
+    - "candleSnapshot caps at the 5000 most recent candles per Hyperliquid's own docs
+      (hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint);
+      confirmed empirically for BTC hourly candles: a request spanning 2024-01-01 to
+      now returned data only from 2025-12-25 onward (~208 days), not the full range"
+    - "daily candleSnapshot appears to go back further (to 2020-08-19 for BTC) but every
+      row before 2023-02-26 has v=0.0, n=0 — synthetic/index-stitched, not real trading —
+      and daily granularity can't align to HL's hourly funding settlements anyway"
+    - "no endpoint returns historical mark/index/oracle price at any granularity;
+      metaAndAssetCtxs exposes markPx/oraclePx/premium only as a live snapshot, which is
+      exactly why the live ctxs collector (started 2026-07-18) is the only real source
+      and is only 4 days deep"
+    - "meta endpoint exposes a live isDelisted flag per asset but no listing/delisting
+      timestamp — point-in-time delisting dates aren't recoverable from it if ever needed"
+  implication: >
+    the funding_relative_value_cross_venue_v1 vertical slice proceeds on Binance + Bybit
+    (2 venues with real price history) for now; Hyperliquid stays funding-only (usable as
+    a rate reference, not as a priced leg) until either the live collector accrues enough
+    history on its own or the paid S3 tick archive is explicitly brought into scope
+    (neither decided here).
+
+update_2026-07-21_bybit_perp_price:
+  verdict: DONE — Bybit perp price gap closed
+  script: scripts/backfill_bybit_perp_prices.py (public /v5/market/kline, category=linear,
+    no auth, 1h resolution — matches the 8h funding settlement cadence with margin to spare)
+  output: data/derivatives_backfill/bybit/perp_klines_1h/<SYMBOL>.parquet
+  verified_coverage:
+    BTCUSDT: {from: "2020-03-25T10:00Z", to: "2026-07-21T21:00Z", rows: 55428, gaps: 0}
+    ETHUSDT: {from: "2021-03-15T00:00Z", to: "2026-07-21T22:00Z", rows: 46919, gaps: 0}
+    SOLUSDT: {from: "2021-10-15T00:00Z", to: "2026-07-21T21:00Z", rows: 41782, gaps: 0}
+    BNBUSDT: {from: "2021-06-29T07:00Z", to: "2026-07-21T21:00Z", rows: 44367, gaps: 0}
+  notes: >
+    earliest date per symbol is the real Bybit linear-perp listing date, read from the API
+    response itself (requested from 2019-01-01), not assumed. Idempotent, resumable, 0.25s
+    delay + backoff between paginated requests. Total 8.4MB on disk.
+  classification_update: >
+    funding_relative_value_cross_venue_v1 is now DATA_READY on Binance + Bybit (2 venues,
+    real funding + real price, gap-checked). Hyperliquid remains excluded from the priced
+    leg per the finding above (funding-only). The vertical slice proceeds on 2 venues.
