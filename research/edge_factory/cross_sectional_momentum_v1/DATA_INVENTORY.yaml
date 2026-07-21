@@ -131,3 +131,34 @@ update_2026-07-21_funding_expansion_and_verification:
     (unchanged since step 3), and the newly-surfaced universe-composition question
     (tokenized equities/commodities mixed into a nominally crypto momentum universe) —
     this last one is a decision point, not a data gap.
+
+update_2026-07-21_universe_split:
+  decision: >
+    human decision, same day: split into MOMENTUM_CRYPTO_V1 (primary, this
+    experiment going forward) and momentum_tokenized_macro_v1 (separate,
+    deprioritized directory, no data work). Verified via Binance's own
+    /fapi/v1/exchangeInfo underlyingType field for all 50 symbols (COIN vs
+    EQUITY/COMMODITY/KR_EQUITY) plus underlyingSubType (TradFi tag on all
+    17 non-crypto names) -- not guessed from memory.
+  crypto_33: [1000PEPEUSDT, AAVEUSDT, ADAUSDT, ALLOUSDT, AVAXUSDT, BCHUSDT,
+    BEATUSDT, BNBUSDT, BTCUSDT, BTWUSDT, DOGEUSDT, DOTUSDT, ENAUSDT, ETHUSDT,
+    FILUSDT, HUSDT, HYPEUSDT, LABUSDT, LINKUSDT, LTCUSDT, NEARUSDT, ONDOUSDT,
+    PAXGUSDT, SOLUSDT, SUIUSDT, TAOUSDT, TONUSDT, UNIUSDT, VELVETUSDT,
+    WLDUSDT, XLMUSDT, XRPUSDT, ZECUSDT]
+  tokenized_macro_17: [CRCLUSDT, INTCUSDT, MRVLUSDT, MSTRUSDT, MUUSDT,
+    NVDAUSDT, SNDKUSDT, SPCXUSDT, SOXLUSDT, QQQUSDT, EWYUSDT, DRAMUSDT,
+    SKHYNIXUSDT, XAUUSDT, XAGUSDT, BZUSDT, CLUSDT]
+  edge_cases:
+    - "PAXGUSDT: Binance tags it COIN/RWA (a gold-backed redeemable ERC-20
+      token), not COMMODITY like XAUUSDT (a synthetic gold-price perp with
+      no token backing) -- kept in crypto_33 per Binance's own tag, but its
+      economic driver is gold price, not crypto factors; if it ends up a
+      large PnL contributor the 15%-concentration gate should catch it"
+    - "TONUSDT: status=SETTLING (not TRADING) in the live exchangeInfo
+      snapshot as of 2026-07-21 -- excluded from the v1 backtest universe
+      (32 names used, not 33) rather than silently kept; historical data
+      up to now is presumably still valid but 'réellement tradable' going
+      forward is in question"
+  next_step: proceed to step 4 (event-level net edge) on the 32-name
+    crypto-only universe (33 minus TONUSDT), BTC held out as the beta-hedge
+    instrument rather than a ranked candidate (31 names actually ranked).
