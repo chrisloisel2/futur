@@ -97,6 +97,23 @@ def test_registry_locks_xvenue_forever():
     assert reopened_bnb["status"] == "reopened_with_thesis"
 
 
+def test_provenance_blocked_never_usable_as_evidence_even_with_thesis():
+    """cross_exchange_stress_gate_h2 (STRESS_GATE) : provenance non vérifiable,
+    PAS falsifié — donc PAS dans closed_no_edge, mais toujours bloqué en
+    entrée, même avec une thèse (contrairement à un NO_EDGE recyclable)."""
+    with pytest.raises(er.ProvenanceBlockedError):
+        er.guard_new_experiment("cross_exchange_stress_gate_h2")
+    with pytest.raises(er.ProvenanceBlockedError):
+        er.guard_new_experiment("cross_exchange_stress_gate_h2",
+                                "nouvelle thèse quelconque")
+    hit = er.lookup("cross_exchange_stress_gate_h2")
+    assert hit["section"] == "provenance_blocked"
+    assert hit["current_status"] == "UNVERIFIED_PROVENANCE"
+    # Le nom du successeur, lui, n'est PAS bloqué : c'est une expérience neuve.
+    fresh = er.guard_new_experiment("stress_gate_dispersion_v2_reproduction")
+    assert fresh["status"] == "new"
+
+
 def test_reconciliation_gate(monkeypatch, tmp_path):
     audit = {"run": "2026-07-19T00:00:00Z", "verdict": "COMPTABILITÉ_CONFIRMÉE",
              "checks": {"carry_vs_funding_api_usdt":

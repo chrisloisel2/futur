@@ -160,6 +160,36 @@ experiment_registry:
              le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
   not_testable:
     - {name: onchain_flows, verdict: NOT_TESTABLE, ref: "53d6f70"}
+  # ── Verdicts historiques dont la provenance exécutable n'est plus
+  #    vérifiable : NI falsifiés (pas de NO_EDGE), NI utilisables comme
+  #    preuve. Bloque la qualification de runner / le wiring portefeuille
+  #    tant que superseded_by_experiment n'a pas conclu. ───────────────────
+  provenance_blocked:
+    - name: cross_exchange_stress_gate_h2
+      mechanism: cross_venue_premium_dispersion_as_forward_liquidity_stress_indicator
+      historical_status: VALIDATED_SIGNAL
+      current_status: UNVERIFIED_PROVENANCE
+      historical_ref: "c78874b"
+      historical_report: reports/BINANCE_BYBIT_FUNDING_EDGE_REPORT.md
+      blocking_reasons:
+        - source_module_absent_from_all_reachable_git_refs
+        - original_data_manifest_unavailable
+        - original_result_not_reproducible_from_clean_checkout
+        - point_in_time_and_lookahead_properties_not_auditable
+      allowed_uses: [forensic_recovery, independent_preregistered_reproduction]
+      forbidden_uses:
+        - evidence_for_runner_qualification
+        - portfolio_wiring
+        - active_or_observe_only_runner_creation
+        - risk_allocation_decision
+      superseded_by_experiment: stress_gate_dispersion_v2_reproduction
+      historical_report_mutated: false
+      forensic_dir: research/forensics/stress_gate_c78874b/
+      note: "H3 (carry_gate_v2, meme source de donnees) a ete rejete au niveau
+             portefeuille (df3e1e5, reproductible, 9/9 tests) mais cela ne
+             falsifie PAS H2 (mecanisme different : filtre de stress, pas
+             gate de carry) — le blocage ici est UNIQUEMENT une question de
+             provenance executable, pas un verdict de recherche"
   validated_foundations:
     - {name: carry_basis_v12, status: socle, note: "V1.1 +4.8%/an DD1.9% ; aucun levier avant net live + churn guard"}
     - {name: basis_term, status: a_qualifier, note: "carnets réels, rolls, règlement, contrat dynamique requis"}

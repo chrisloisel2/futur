@@ -28,17 +28,28 @@ def closed_names() -> List[str]:
 
 
 def lookup(name: str) -> Optional[Dict]:
-    for section in ("closed_no_edge", "not_testable", "validated_foundations"):
+    for section in ("closed_no_edge", "not_testable", "provenance_blocked",
+                    "validated_foundations"):
         for e in _registry().get(section, []):
             if e["name"] == name:
                 return dict(e, section=section)
     return None
 
 
+class ProvenanceBlockedError(RuntimeError):
+    """Levée pour un nom classé `provenance_blocked` : le verdict historique
+    n'est ni falsifié (pas de NO_EDGE) ni utilisable comme preuve — distinct
+    de RecycledExperimentError (qui suppose un verdict de recherche rendu)."""
+    pass
+
+
 def guard_new_experiment(name: str, new_thesis: str = "") -> Dict:
     """À appeler AVANT tout nouveau protocole. Lève si l'idée est déjà classée
     et qu'aucune thèse nouvelle n'est fournie ; funding_xvenue est verrouillé
-    définitivement quelle que soit la thèse."""
+    définitivement quelle que soit la thèse. Un nom classé `provenance_blocked`
+    lève TOUJOURS (aucune thèse ne restaure une preuve dont la provenance est
+    invérifiable) — passer par le nom de l'expérience `superseded_by_experiment`
+    à la place, qui n'est lui-même pas bloqué."""
     if "xvenue" in name.lower():
         raise RecycledExperimentError(
             f"{name} : funding_xvenue est classé NO_EDGE définitif (1717fd8) — "
@@ -46,6 +57,14 @@ def guard_new_experiment(name: str, new_thesis: str = "") -> Dict:
     hit = lookup(name)
     if hit is None:
         return {"name": name, "status": "new"}
+    if hit["section"] == "provenance_blocked":
+        raise ProvenanceBlockedError(
+            f"{name} : {hit.get('current_status')} (historique "
+            f"{hit.get('historical_status')}, {hit.get('historical_ref')}) — "
+            f"provenance non vérifiable, PAS falsifié. Interdit comme preuve "
+            f"de qualification de runner ou d'allocation de risque tant que "
+            f"{hit.get('superseded_by_experiment')} n'a pas conclu. Voir "
+            f"{hit.get('forensic_dir')}")
     if hit["section"] == "validated_foundations":
         return dict(hit, status="foundation")
     if not new_thesis.strip():
