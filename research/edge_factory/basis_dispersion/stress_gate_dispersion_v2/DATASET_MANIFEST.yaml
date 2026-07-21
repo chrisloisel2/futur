@@ -5,8 +5,9 @@
 # gitignored — ce fichier est la référence trackée en git).
 
 frozen_at_utc: "2026-07-21T10:27:00Z"
+last_updated_utc: "2026-07-21T11:05:00Z"   # analysis_input_hash widened to include mark-price bars used (below), before any Phase 2 result
 collector_commit: "1786b74"
-normalize_commit: "b8faa67"
+normalize_commit: "ccb3e63"
 
 acquisition:
   run_ids: [run_20260721_full, "fix bybit/funding/BTCUSDT (collector 1786b74, single-series rerun)"]
@@ -29,7 +30,9 @@ hashes:
   markprice_report_hash: "35fc5477830aaa9c531bf16febf31170d798b1727a4f26a2b2b5376ced7da138"
   mini_audit_hash: "149b5cbd2b821e03c5ab5e1247f609a3b15e51bd8ed3ca8026d6699891b71837"
   primary_panel_report_hash: "7d70a95531628b8691b6f2799a932123b16416404b594a7704149efc8a46fc20"
-  analysis_input_hash: "829bdc997475e0e71f83eab52aace6fa2ca3bae0d2cb79436d419437cb86a464"
+  mark_price_bars_used_hash: "635a22fbe974d534905da50ab54dd0fe20538e150d4bbdd08204dd2ba8735f19"
+  analysis_input_hash: "49b81eb1d4e4f86c5440eeaaa48bfd721f4d17d49effad428918c28b2ce03180"   # widened: now also commits to mark-price bars used (previous value 829bdc9... covered funding pairs only)
+  preregistration_hash: "c7be37c140ae687f8a9b70f5970dc9c9ca554614bf5d807d0ad55f40a3af8b76"   # PREREGISTRATION.md as of ccb3e63
 
 verified_reproducible_on_rerun: true   # tous les hashes identiques bit-pour-bit sur un second run complet
 

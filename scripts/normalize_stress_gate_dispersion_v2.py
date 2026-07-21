@@ -478,6 +478,25 @@ def build_primary_panel(symbol: str, binance_funding: Dict[int, dict],
     return rows
 
 
+def mark_price_bars_used(eligible_rows: List[dict],
+                         markprice_unique: Dict[str, Dict[int, list]]) -> List[tuple]:
+    """Barres mark-price effectivement consommées par les fenêtres forward
+    24h des lignes éligibles — doivent être engagées dans analysis_input_hash
+    (sinon le panel de signaux est gelé mais les cibles pourraient encore
+    changer si les données de prix sont retouchées après coup)."""
+    used = set()
+    for r in eligible_rows:
+        symbol = r["symbol"]
+        dt = r["decision_timestamp"]
+        for bar_ts in range(int(dt), int(dt) + FORWARD_HORIZON_MS, BAR_STEP_MS):
+            used.add((symbol, bar_ts))
+    rows = []
+    for symbol, bar_ts in sorted(used):
+        close = markprice_unique[symbol][bar_ts][4]
+        rows.append((symbol, bar_ts, close))
+    return rows
+
+
 def sha256_of(obj) -> str:
     return hashlib.sha256(json.dumps(obj, sort_keys=True, default=str).encode()).hexdigest()
 
@@ -587,6 +606,7 @@ def main() -> None:
          if k not in ("eligible_primary", "primary_rejection_reason")}
         for r in all_panel_rows if r["eligible_primary"]]
     eligible_rows_sorted = sorted(eligible_rows, key=str)
+    mark_price_bars = mark_price_bars_used(eligible_rows, markprice_unique)
 
     hashes = {
         "raw_envelope_manifest_hash": sha256_of(raw_file_hashes),
@@ -601,7 +621,12 @@ def main() -> None:
         "markprice_report_hash": sha256_of(markprice_reports),
         "mini_audit_hash": sha256_of(mini_audits),
         "primary_panel_report_hash": sha256_of(panel_reports),
-        "analysis_input_hash": sha256_of(eligible_rows_sorted),
+        "mark_price_bars_used_hash": sha256_of(mark_price_bars),
+        "analysis_input_hash": sha256_of({"eligible_funding_pairs": eligible_rows_sorted,
+                                         "mark_price_bars_used": mark_price_bars}),
+        "preregistration_hash": hashlib.sha256(
+            (ROOT / "research" / "edge_factory" / "basis_dispersion" /
+             "stress_gate_dispersion_v2" / "PREREGISTRATION.md").read_bytes()).hexdigest(),
     }
     (MANIFESTS / "hashes.json").write_text(json.dumps(hashes, indent=2, sort_keys=True))
     print(json.dumps(hashes, indent=2))
