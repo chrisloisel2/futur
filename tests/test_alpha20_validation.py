@@ -109,9 +109,22 @@ def test_provenance_blocked_never_usable_as_evidence_even_with_thesis():
     hit = er.lookup("cross_exchange_stress_gate_h2")
     assert hit["section"] == "provenance_blocked"
     assert hit["current_status"] == "UNVERIFIED_PROVENANCE"
-    # Le nom du successeur, lui, n'est PAS bloqué : c'est une expérience neuve.
-    fresh = er.guard_new_experiment("stress_gate_dispersion_v2_reproduction")
-    assert fresh["status"] == "new"
+    assert hit["superseding_experiment_status"] == "closed_no_incremental_edge"
+
+
+def test_superseding_reproduction_closed_no_incremental_edge_not_permanent():
+    """stress_gate_dispersion_v2_reproduction a conclu (Phase 3, e863335) :
+    NO_INCREMENTAL_EDGE, pas NO_EDGE au sens absolu — bloqué sans thèse,
+    mais réouvrable avec une thèse nouvelle, comme tout closed_no_edge
+    ordinaire (contrairement au verrou permanent xvenue)."""
+    with pytest.raises(er.RecycledExperimentError):
+        er.guard_new_experiment("stress_gate_dispersion_v2_reproduction")
+    reopened = er.guard_new_experiment(
+        "stress_gate_dispersion_v2_reproduction",
+        "nouvelle thèse : mécanisme différent, pas juste un seuil/horizon modifié")
+    assert reopened["status"] == "reopened_with_thesis"
+    hit = er.lookup("stress_gate_dispersion_v2_reproduction")
+    assert hit["verdict"] == "NO_INCREMENTAL_EDGE"
 
 
 def test_reconciliation_gate(monkeypatch, tmp_path):

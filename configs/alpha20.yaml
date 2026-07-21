@@ -158,6 +158,37 @@ experiment_registry:
       note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
              sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
              le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
+    - name: stress_gate_dispersion_v2_reproduction
+      status: closed_no_incremental_edge   # PAS NO_EDGE au sens absolu — voir interpretation
+      verdict: NO_INCREMENTAL_EDGE
+      ref: "e863335"
+      report: research/edge_factory/basis_dispersion/stress_gate_dispersion_v2/results/PHASE3_FREEZE.md
+      primary_result:
+        raw_delta_loss: 0.00294
+        raw_bootstrap_ci_95: {lower: 0.000079, upper: 0.00598}
+        raw_hac_pvalue: 0.031
+      stability:
+        temporal_split: pass
+        leave_one_asset_out: pass
+        leave_one_year_out: pass_with_2022_noninformative   # warm-up consomme 2022 : aucune obs n'atteint threshold_available, pas une preuve contre FTX
+        leave_one_episode_out: pass
+        exact_timestamp_panel: pass
+      incremental_test:
+        beta_stress: 0.00130
+        bootstrap_ci_95: {lower: -0.00087}
+        pvalue: 0.30
+        verdict: fail
+      interpretation:
+        - stable descriptive risk association
+        - no demonstrated incremental information beyond trailing drawdown and realized volatility
+        - not qualified for runner or production feature
+      forbidden_reactivation_without_new_thesis:
+        - changing quantile only
+        - changing horizon only
+        - changing warmup only
+        - adding leverage
+        - removing controls
+        - restricting to the best asset or period
   not_testable:
     - {name: onchain_flows, verdict: NOT_TESTABLE, ref: "53d6f70"}
   # ── Verdicts historiques dont la provenance exécutable n'est plus
@@ -183,6 +214,7 @@ experiment_registry:
         - active_or_observe_only_runner_creation
         - risk_allocation_decision
       superseded_by_experiment: stress_gate_dispersion_v2_reproduction
+      superseding_experiment_status: closed_no_incremental_edge   # concluded 2026-07-21, e863335 — see experiment_registry.closed_no_edge entry of that name
       historical_report_mutated: false
       forensic_dir: research/forensics/stress_gate_c78874b/
       note: "H3 (carry_gate_v2, meme source de donnees) a ete rejete au niveau
