@@ -213,6 +213,81 @@ de "sauvetage" après un échec à l'étape 2 ou 3.
   reportée sur un moteur de rendement orthogonal (funding relative value
   cross-venue, calendar basis, ou paired relative value).
 
+## Amendement 2026-07-21 (quinquies) — settlement_timestamp_alignment_v1
+
+Mini-audit data-only exécuté d'abord (aucune cible économique construite,
+aucune relation dispersion→drawdown regardée) : jointure exacte en ms ne
+capture que 2553/4047 (63%) même sur BTC/ETH/BNB, identique aux 3 actifs.
+Cause confirmée sur données réelles : timestamps Binance portent 0-30ms de
+jitter hors grille, timestamps Bybit tombent exactement sur la grille.
+Rejet de l'option "garder l'exact" (sélection artificielle par format de
+timestamp, pas un signal économique) et de l'option "élargir après avoir
+vu le résultat". Tolérance fixée à **1000ms AVANT** le mini-audit, pas
+choisie après :
+
+```yaml
+preregistration_amendments:
+  - amendment_id: settlement_timestamp_alignment_v1
+    reason: >
+      Binance funding settlement timestamps contain sub-second reporting
+      jitter while Bybit timestamps are aligned to the exact UTC grid.
+      Exact millisecond equality discards economically simultaneous events.
+    observed_before_target_construction: true
+    economic_outcomes_inspected: false
+    primary_matching_rule:
+      type: mutual_nearest_one_to_one
+      tolerance_ms: 1000
+      asset_must_match: true
+      ambiguous_match: reject
+      unmatched_event: reject
+      forward_fill: forbidden
+      merge_asof: forbidden
+    canonical_timestamp_role:
+      used_for_pairing_only: true
+      used_as_information_availability_timestamp: false
+    pair_information_available_at:
+      formula: max(binance_raw_timestamp, bybit_raw_timestamp)
+    decision_timestamp:
+      formula: >
+        first Binance 5-minute mark-price bar beginning strictly after
+        pair_information_available_at
+```
+
+Mini-audit, résultat (`scripts/normalize_stress_gate_dispersion_v2.py::run_mini_audit`,
+données réelles collectées) :
+
+| Actif | n binance | n bybit | matchs exacts | matchs 1-à-1 ≤1s | ambigus | non appariés (b/y) | p50/p95/p99/max \|offset\| ms |
+|---|---:|---:|---:|---:|---:|---|---|
+| BTC/ETH/BNB (identique) | 4047 | 4047 | 2553 (63%) | **4047 (100%)** | 0 | 0/0 | 0/12/18/29 |
+| SOL | 4122 | 4407 | 2579 | 4119 (99.9% côté binance) | 0 | 3/288 |0/12/18/30 |
+
+Zéro ambiguïté sur les 4 actifs. Marge ~34× entre le jitter max observé
+(29-30ms) et la tolérance (1000ms) — la règle correspond à la structure
+constatée, pas resserrée ni élargie après inspection. Les 288 événements
+Bybit SOL non appariés sont dans la fenêtre où Bybit restait à 2h après le
+retour à 8h de Binance (cf. segmentation de cadence déjà documentée) — pas
+une anomalie de la règle de jointure elle-même.
+
+## Amendement 2026-07-21 (sexies) — comparabilité des intervalles, variable primaire
+
+La variable primaire reste le **taux réglé brut** (aucune normalisation
+d'intervalle silencieuse). Condition ajoutée avant admission au panel
+primaire :
+
+```yaml
+primary_rate_comparability:
+  feature: absolute_raw_settled_funding_rate_difference
+  previous_settlement_required_on_both_venues: true
+  equal_observed_interval_required: true
+  allowed_interval_hours: [2, 4, 8]
+  interval_mismatch: reject
+  irregular_or_unknown_interval: reject
+```
+
+`funding_rate_per_hour` / `funding_rate_8h_equivalent` restent des colonnes
+de sensibilité secondaire, jamais un substitut du taux brut en cas d'échec
+du test primaire.
+
 ## Budget
 
 Un seul cycle complet. Pas de cycle de sauvetage après échec.
