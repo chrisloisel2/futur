@@ -217,21 +217,30 @@ def assign_calendar_blocks(df: pd.DataFrame, block_days: int = BLOCK_DAYS) -> pd
 
 def moving_calendar_block_bootstrap(df: pd.DataFrame, *, block_days: int = BLOCK_DAYS,
                                     resamples: int = N_RESAMPLES, seed: int = SEED) -> np.ndarray:
+    """Vectorisé numpy — même séquence de tirage de blocs (rng.choice(blocks,
+    size=n_blocks, replace=True), même seed) que l'implémentation d'origine
+    à base de pd.concat par resample (trouvée trop lente en pratique : >60min
+    pour les appels répétés de Phase 3, cf. commit de correction). Résultat
+    numériquement vérifié identique sur le dataset réel gelé (Phase 2)."""
     d = df[df["threshold_available"] & df["loss_magnitude"].notna()].copy()
     d["block"] = assign_calendar_blocks(d, block_days)
     blocks = sorted(d["block"].unique())
-    by_block = {b: d[d["block"] == b] for b in blocks}
+    is_stress = d["is_stress"].to_numpy()
+    loss = d["loss_magnitude"].to_numpy(dtype=float)
+    block_arr = d["block"].to_numpy()
+    block_to_indices = {b: np.where(block_arr == b)[0] for b in blocks}
     rng = np.random.RandomState(seed)
     n_blocks = len(blocks)
     deltas = np.full(resamples, np.nan)
     for i in range(resamples):
         chosen = rng.choice(blocks, size=n_blocks, replace=True)
-        parts = [by_block[b] for b in chosen]
-        sample = pd.concat(parts, ignore_index=True)
-        stress = sample.loc[sample["is_stress"], "loss_magnitude"]
-        non_stress = sample.loc[~sample["is_stress"], "loss_magnitude"]
-        if len(stress) and len(non_stress):
-            deltas[i] = stress.mean() - non_stress.mean()
+        idx = np.concatenate([block_to_indices[b] for b in chosen])
+        s = is_stress[idx]
+        l = loss[idx]
+        stress_vals = l[s]
+        non_stress_vals = l[~s]
+        if len(stress_vals) and len(non_stress_vals):
+            deltas[i] = stress_vals.mean() - non_stress_vals.mean()
     return deltas[~np.isnan(deltas)]
 
 
