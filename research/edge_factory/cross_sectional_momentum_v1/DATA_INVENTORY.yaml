@@ -1,0 +1,84 @@
+experiment_id: cross_sectional_momentum_v1
+step: 3 — data inventory (no collector, no feature, no backtest run)
+date: 2026-07-21
+machine: qbee@100.127.59.114, read-only inspection, ~/futur
+
+sources_available:
+  pit_universe_and_price:
+    path: data/derivatives_backfill/um_klines_1d/ — 787 parquet files, Binance USDT-M
+      daily klines, delisted symbols retained
+    reused_by: scripts/backtest_ctrend_v1.py (commit 859ebad, verdict CTREND_REJECTED)
+      via build_membership() — 30d-median-quote-volume shifted t-1, >=$5M, >=31d
+      trailing history
+  liquid_majors_hourly: data/enriched/*_1h_enriched.parquet — 50 symbols, hourly,
+    through current date; no full-universe intraday history exists
+  funding: data/derivatives_backfill/{binance,bybit,okx,hyperliquid}/funding — 9
+    majors only, same store used by funding_relative_value_cross_venue_v1
+  open_interest: data/derivatives_backfill/binance/open_interest_hist — 9 majors,
+    ~3 weeks only
+  borrow_registry: src/alpha20/costs/borrow_registry.py — empty by default; its own
+    docstring states a flat 8%/year assumed default absent a manually saved snapshot
+  listings_backfill_caveat: >
+    data/listings_backfill/ (518 symbols) is NOT delisting/survivorship data despite
+    its name — it is a short window of data around each symbol's LISTING date for
+    scripts/test_perp_listing_event_study.py (a listing event study). Do not confuse
+    it with the PIT universe above.
+
+period_covered:
+  um_klines_1d: 2020-01-01 to 2026-06-30 (per-symbol span bounded by real listing/
+    delisting dates)
+  enriched: through live/current date
+frequency: daily across the full 787-symbol PIT store; hourly only for the 50-symbol
+  liquid-majors enriched store
+universe_pit: >
+  confirmed real, not a proxy — genuine delistings verified on disk: LUNAUSDT ends
+  2022-05-13, BTTUSDT ends 2022-01-26, LENDUSDT ends 2020-11-10; 28/787 symbols end
+  before the 2026-06-30 cutoff; 759/787 still active
+venues: Binance USDT-M perps for the broad 787-symbol store; Bybit/OKX/Hyperliquid
+  funding exist only for the same 9 majors as funding_relative_value_cross_venue_v1
+symbols: 787 total; 287 with >=2yr span; 190 with >=3yr span
+maturities: n/a — perps only
+shortability: >
+  no historical shortable/borrow-eligibility flag exists anywhere in the repo. The
+  structural assumption "any listed USDT-M perp is shortable" (symmetric margin
+  engine, no equity-style locate) is reasonable but UNVERIFIED — exactly the risk
+  flagged in the preregistration. Must remain a stated assumption, not treated as fact,
+  in any downstream result.
+historical_fees: trading fee assumed 15bps/side (reused from ctrend v1); short-financing
+  cost is NOT measured — borrow_registry.py defaults to a flat 8%/year assumption
+timestamp_quality: BTCUSDT daily row count (2373) matches expected calendar days almost
+  exactly, no material gaps for majors; not exhaustively checked across all 787 symbols
+gaps:
+  - funding-rate breadth only 9/787 symbols, far short of the 30-80 needed for a real
+    cross-sectional universe
+  - no shortability ground truth
+  - open-interest history thin (3 weeks) and narrow (9 symbols)
+survivorship_bias: >
+  confirmed avoided — the same build_membership() mechanism was already falsified once
+  on this exact question (CTREND v0 survivorship-biased +110% CAGR vs v1 PIT-corrected
+  -2.1%, reports/ctrend/CTREND_V1.md)
+blocking_missing_data: funding/short-financing history for the ~20-70 additional symbols
+  needed beyond the 9 majors already covered; shortability ground truth (unavailable,
+  must remain a flagged assumption rather than being collected)
+estimated_size: um_klines_1d 52MB/787 files; enriched 67GB/50 symbols; funding ~1.1MB/9
+  symbols
+collection_cost: >
+  funding expansion is LOW cost — Binance's public fapi/v1/fundingRate per-symbol
+  endpoint, identical fetch/cache pattern already exists (ctrend_v0.py,
+  scripts/backfill_multi_exchange_funding_free.py) — hours of engineering, not new
+  architecture. Shortability ground truth has no free source and should be treated as
+  permanently unverifiable, not pursued as a collection task.
+
+classification: COLLECTOR_REQUIRED
+justification: >
+  The hard part — a point-in-time universe with real, verified survivorship-bias removal
+  — is already built and has already survived one honest falsification cycle (CTREND).
+  The remaining gap, funding-cost breadth across a 30-80 name universe, is a small, cheap,
+  well-understood collector task, not a blocker requiring new infrastructure.
+
+next_step: >
+  Backfill funding-rate history for 25-70 additional symbols beyond the current 9 majors
+  (reuse the existing free collector pattern), then proceed to step 4 (event-level net
+  edge test per rebalance period), stating shortability explicitly as a structural
+  assumption rather than a verified fact, and applying the top_traders lesson
+  (leave-one-year check) before any positive verdict.
