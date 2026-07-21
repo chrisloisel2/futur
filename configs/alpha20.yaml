@@ -162,6 +162,31 @@ experiment_registry:
       note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
              sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
              le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
+    - name: basis_term_v0
+      mechanism: calendar_cash_and_carry_quarterly
+      verdict: FAIL
+      ref: "f27971d"
+      report: research/edge_factory/calendar_basis_v1/results/BASIS_TERM_V0_FALSIFICATION_2026-07-21.md
+      report_date: "2026-07-21"
+      candidate: entry5_size50
+      gates:
+        dsr: {value: 0.9975, threshold: 0.95, passed: true}
+        pbo: {value: 0.47, threshold: 0.10, passed: false}
+        costs_x2: {passed: true}
+        leave_one_year: {passed: true}
+        leave_one_asset: {passed: true}
+        holdout: {passed: true, note: "sous-alimenté, 7 trades, pas un vrai OOS aveugle"}
+      failed_gates: ["pbo <= 0.10"]
+      reactivation_requires:
+        - variante fixée AVANT tout résultat (pas une sélection a posteriori parmi une grille)
+        - nouveau rapport reproductible passant PBO en plus des autres gates
+        - période forward réellement nouvelle, pas déjà incluse dans l'échantillon de sélection
+      note: "primaire entry5_size50 sélectionné a posteriori parmi 6 variantes
+             (entry3/5/8 x size25/50) — PBO (CSCV) = 0.47, indiscernable du hasard.
+             Un seul gate qui échoue suffit à rejeter, malgré DSR/coûts×2/leave-one-year/
+             leave-one-asset qui passent individuellement. Rétrogradé OBSERVE_ONLY le
+             2026-07-21 (configs/alpha20_runners.yaml) ; exécution/télémétrie maintenues
+             pour collecte de forward paper uniquement, exclu de la sélection."
     - name: stress_gate_dispersion_v2_reproduction
       status: closed_no_incremental_edge   # PAS NO_EDGE au sens absolu — voir interpretation
       verdict: NO_INCREMENTAL_EDGE
@@ -228,7 +253,9 @@ experiment_registry:
              provenance executable, pas un verdict de recherche"
   validated_foundations:
     - {name: carry_basis_v12, status: socle, note: "V1.1 +4.8%/an DD1.9% ; aucun levier avant net live + churn guard"}
-    - {name: basis_term, status: a_qualifier, note: "carnets réels, rolls, règlement, contrat dynamique requis"}
+    # basis_term retiré le 2026-07-21 : falsification indépendante FAIL (PBO=0.47),
+    # voir experiment_registry.closed_no_edge.basis_term_v0 — ce n'est plus une
+    # fondation "à qualifier", c'est un mécanisme rejeté (OBSERVE_ONLY, non sélectionnable).
     - {name: mh_events, status: shadow_gele, note: "verdict 2026-08-09 ; sizing 20%/décision = expérience paper"}
     - {name: hl_metaorders, status: collecte, note: "évaluation ≥ 2026-08-17 si ≥30 j ET ≥300 événements éligibles"}
   pending_new_axes:                        # étape 9 uniquement
