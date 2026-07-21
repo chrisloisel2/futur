@@ -44,6 +44,10 @@ costs:
     binance_usdm: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
     binance_quarterly: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
     hyperliquid: {maker_bp: 1.0, taker_bp: 3.5, as_of: "2026-07-19", source: assumed}
+    # repris tel quel de reports/FUNDING_XVENUE_PROTOCOL.md (fee_bybit_bp=5.5) --
+    # sans ce défaut, fee_registry.effective_costs("bybit", ...) retombait
+    # silencieusement sur binance_usdm et mal-étiquetait le coût Bybit.
+    bybit: {maker_bp: 2.0, taker_bp: 5.5, as_of: "2026-07-21", source: assumed}
     borrow_ann: {rate: 0.08, as_of: "2026-07-19", source: assumed}
     slippage_bp_default: 2.0
     gas_infra_eur_monthly: 120.0          # serveurs + data ; à remplacer par factures
