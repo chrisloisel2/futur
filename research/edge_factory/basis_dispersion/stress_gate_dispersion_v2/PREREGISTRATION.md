@@ -25,8 +25,60 @@ universe:
   assets: [BTC, ETH, SOL, BNB]
   venues: [Binance, Bybit]
   membership: point_in_time
-  experiment_start_utc: "2022-11-03T00:00:00Z"   # début réel de l'overlap funding Bybit archivé (pas choisi pour un résultat)
-  experiment_end_utc: "2026-07-14T00:00:00Z"      # fixé avant collecte, >24h de marge avant "aujourd'hui" (2026-07-21) — volontairement distinct du 2026-06-28 historique pour ne pas donner l'impression de viser sa reproduction
+
+## Amendement 2026-07-21 (bis) — bornes signal vs. prix, avant collecte complète
+
+Une seule borne (`experiment_end_utc`) ne suffit pas : chaque signal
+admissible doit disposer de 24h complètes de mark price APRÈS son
+`decision_timestamp`. Convention retenue (la plus explicite des deux
+proposées) :
+
+```yaml
+signal_start_utc: "2022-11-03T00:00:00Z"   # = début réel de l'overlap funding Bybit archivé, pas choisi pour un résultat
+signal_end_utc:   "2026-07-14T00:00:00Z"   # borne des SIGNAUX (funding) — inchangée
+price_start_utc:  "2022-11-03T00:00:00Z"   # = signal_start_utc (aucune fenêtre forward ne regarde avant le premier signal)
+price_end_utc:    "2026-07-15T01:00:00Z"   # = signal_end_utc + 24h + 1h de marge (decision_timestamp peut être
+                                            #   jusqu'à ~5 min après signal_timestamp ; marge large et ronde)
+
+last_admissible_signal_rule: >
+  le dernier signal_timestamp <= signal_end_utc tel que
+  decision_timestamp(signal_timestamp) + 24h <= price_end_utc.
+  Valeur numérique résolue seulement une fois les données réelles en main
+  (rapport de couverture, commit 5) — pas devinée ici avant collecte.
+last_complete_forward_window_end_rule: >
+  = decision_timestamp(last_admissible_signal) + 24h, par construction <= price_end_utc.
+```
+
+Toute barre 5m manquante entre `price_start_utc` et `price_end_utc` réduit
+mécaniquement `last_admissible_signal` — jamais comblée par un forward-fill
+pour "sauver" un événement proche de la fin de fenêtre.
+
+## Amendement 2026-07-21 (ter) — périmètre de collecte réduit aux inputs primaires
+
+La cible forward préenregistrée n'utilise que **funding Binance, funding
+Bybit, et mark price Binance 5m**. Le mark price Bybit n'est PAS un input
+du test primaire (Bybit ne sert qu'à sa propre série de funding, dans le
+calcul de la dispersion). En conséquence :
+
+- Collecte réelle limitée à 4 actifs × {funding Binance, funding Bybit,
+  mark price Binance 5m} = 12 séries, pas 16.
+- Si le mark price Bybit est collecté un jour pour du contrôle qualité
+  seulement, il doit être marqué `role: auxiliary_qc`,
+  `used_in_primary_feature: false`, `used_in_primary_target: false`,
+  `included_in_analysis_input_hash: false` — jamais mélangé silencieusement
+  à l'input du test primaire.
+
+## Amendement 2026-07-21 (quater) — invariants de progression de pagination
+
+Ajoutés au collecteur avant le run complet (pas après un résultat — aucune
+statistique économique n'existe encore) :
+
+```text
+Bybit   : next_end   < previous_end    (progression stricte vers le passé)
+Binance : next_start > previous_start  (progression stricte vers le futur)
+page N identique (hash) à la page N-1  -> échec, jamais une boucle silencieuse
+max_pages explicite par endpoint       -> échec avant toute boucle infinie
+```
 
 primary_prediction: high_causal_cross_venue_dispersion_predicts_worse_forward_drawdown
 
