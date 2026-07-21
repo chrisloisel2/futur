@@ -82,3 +82,52 @@ next_step: >
   edge test per rebalance period), stating shortability explicitly as a structural
   assumption rather than a verified fact, and applying the top_traders lesson
   (leave-one-year check) before any positive verdict.
+
+update_2026-07-21_funding_expansion_and_verification:
+  funding_expansion:
+    method: >
+      scripts/backfill_binance_derivatives_free.py already accepts a --symbols CSV
+      argument — no new code needed, only a bigger symbol list. scripts/backfill_
+      multi_exchange_funding_free.py (checked first) is the Bybit/OKX collector, not
+      this one; confirmed distinct before writing anything.
+    universe: >
+      build_membership() from scripts/backtest_ctrend_v1.py, unmodified, run against
+      the real 787-symbol um_klines_1d panel evaluated at the latest bar (2026-06-30)
+      -> exactly 50 symbols (top-50 by 30d-median-quote-volume shifted t-1, >=$5M)
+    result: 50/50 symbols backfilled, zero errors. 17 legacy majors: full depth
+      (~6084 points, 2021-01-01 to live/current). 33 others: shorter but genuine,
+      listing-bounded spans (e.g. a symbol listed 2026-06-02 has 171 points) — spans
+      match real instrument start dates, not truncation.
+  MAJOR_FINDING_universe_composition: >
+    ~20 of the 50 symbols are NOT crypto perpetuals — they are Binance's tokenized
+    equity/commodity/index perpetuals (NVDAUSDT, MSTRUSDT, INTCUSDT, SKHYNIXUSDT,
+    SNDKUSDT, MRVLUSDT, QQQUSDT, SOXLUSDT, SPCXUSDT, EWYUSDT, XAUUSDT, XAGUSDT,
+    PAXGUSDT, BZUSDT/CLUSDT-oil among them), several listed only weeks-to-months ago.
+    This changes what "30-80 liquid perps" and "BTC-beta / sector neutralization"
+    concretely mean in the preregistration — an equities-linked perp doesn't share
+    crypto's risk factors the way a real altcoin perp does. Needs an explicit decision
+    (crypto-only filter vs. include as a distinct sector to neutralize against) BEFORE
+    step 4 uses this universe. Not decided in this document.
+  verification:
+    delisting_spot_checks: >
+      5 more genuine delistings confirmed beyond LUNA/BTT/LEND: MATICUSDT ends
+      2024-09-11 / POLUSDT starts 2024-09-13 (real MATIC->POL migration); RNDRUSDT
+      ends 2024-07-30 / RENDERUSDT starts 2024-07-26 (real Render/Solana rebrand);
+      BTTUSDT ends 2022-01-26 / 1000BTTCUSDT starts same day (real 1000:1
+      redenomination). 29 total delisted symbols found (up from 3 previously spot-
+      checked), several clustered on shared batch-delisting dates (2024-05-28,
+      2024-07-30, 2024-09-11) consistent with Binance's real scheduled-delisting
+      practice — store remains genuine, not fabricated or truncated.
+    shortability: no change — re-grepped both machines, still no historical
+      shortable/borrow-eligibility record anywhere; prior finding (unverified
+      structural assumption) stands.
+    fees_and_borrow: no change — data/alpha20/cost_snapshots/ still doesn't exist on
+      qbee (no real commissionRate or borrow snapshot); ctrend v1's 15bps/side and
+      borrow_registry.py's flat 8%/year (as_of 2026-07-19) remain the only figures,
+      both explicitly labeled assumed, nothing newer found.
+  updated_blocking_before_step_4: >
+    funding gap is now closed (50/50 symbols). Still open: shortability ground truth
+    (permanently unverifiable, stays a flagged assumption), stale fee/borrow figures
+    (unchanged since step 3), and the newly-surfaced universe-composition question
+    (tokenized equities/commodities mixed into a nominally crypto momentum universe) —
+    this last one is a decision point, not a data gap.
