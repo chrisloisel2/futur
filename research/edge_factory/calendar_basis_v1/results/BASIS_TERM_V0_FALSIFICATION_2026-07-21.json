@@ -1,0 +1,74 @@
+{
+  "target": "basis_term_v0",
+  "candidate": "entry5_size50",
+  "frozen_per_human_rule": true,
+  "no_new_variant_searched": true,
+  "date": "2026-07-21",
+  "reproduction": {
+    "method": "independent rebuild from raw data (binance_vision_quarterly parquet + contracts.json + enriched perp close as spot proxy), throwaway script outside the repo, never touched data/alpha20/tournament/ or any tracked file",
+    "matches_committed_report": true,
+    "trades": 38,
+    "roi_pct": 51.39,
+    "annualized_pct": 8.39,
+    "max_dd_pct": -4.32
+  },
+  "gates": {
+    "dsr": {
+      "value": 0.9975,
+      "threshold": 0.95,
+      "n_trials": 6,
+      "passed": true,
+      "caveat": "input is a raw daily MTM series with strong serial correlation within each held position (smooth basis decay); T=1701 pnl-days overstates independent information behind only 38 actual trades — literal-gate PASS, not fully uncaveated confidence"
+    },
+    "pbo": {
+      "value": 0.47,
+      "threshold": 0.10,
+      "method": "CSCV via src.alpha20.validation.promotion_gate.pbo_cscv on a 1873x6 daily-pnl trials_matrix (union of dates any of the 6 grid variants held a position, 0-filled elsewhere = flat/no-position, the real economic state)",
+      "passed": false,
+      "note": "near the ~0.50 value expected under pure noise — the post-hoc selection of entry5_size50 among 6 variants (entry3/5/8 x size25/50) shows overfitting probability indistinguishable from random chance"
+    },
+    "costs_x2": {
+      "assumed_cost_bp_roundtrip_x1": 23,
+      "assumed_cost_bp_roundtrip_x2": 46,
+      "roi_pct_x2": 44.89,
+      "annualized_pct_x2": 7.47,
+      "max_dd_pct_x2": -4.53,
+      "all_years_positive_x2": true,
+      "passed": true
+    },
+    "leave_one_year": {
+      "method": "drop each of 2021-2026 individually from the daily pnl series, recompound",
+      "annualized_pct_range": [5.28, 8.75],
+      "worst_case_year_dropped": "2024 (single best year; dropping it still leaves +5.28%/yr)",
+      "sign_flip": false,
+      "passed": true
+    },
+    "leave_one_asset": {
+      "btc_only": {"trades": 20, "roi_pct": 23.2, "annualized_pct": 4.14},
+      "eth_only": {"trades": 18, "roi_pct": 23.13, "annualized_pct": 4.34},
+      "combined_roi_pct": 51.39,
+      "concentration": "balanced ~45/45%, no single-asset dominance",
+      "passed": true
+    },
+    "holdout": {
+      "method": "train window 2021-2024 informs param choice, test strictly 2025-2026, params frozen not refit",
+      "trades_in_holdout": 7,
+      "roi_pct_holdout": 6.92,
+      "years_in_holdout": 1.24,
+      "naive_annualized_pct": 5.53,
+      "positive": true,
+      "underpowered": true,
+      "not_truly_blind": "entry5_size50 was selected post-hoc using the FULL 2021-2026 sample including this period, so 2025-2026 information already leaked into the selection decision — read as a consistency check, not an independent OOS test",
+      "passed_directionally_but_caveated": true
+    }
+  },
+  "overall_verdict": "FAILS disciplined falsification — PBO=0.47 vastly exceeds the <=0.10 gate; that single failure is sufficient on its own to reject entry5_size50 as a validated frozen candidate under this program's own rules, regardless of the other 5 checks passing or being directionally consistent",
+  "verified_files": [
+    "scripts/backtest_basis_term.py",
+    "src/alpha20/validation/promotion_gate.py",
+    "configs/alpha20.yaml",
+    "research/edge_factory/calendar_basis_v1/DATA_INVENTORY.yaml"
+  ],
+  "reproduction_artifacts_location": "qbee:~/basis_term_falsification/ (outside the git repo, not committed: falsify_basis_term.py, variants_summary.json, primary_trades.json, trials_matrix.parquet, full_log.txt)",
+  "live_tournament_state_touched": false
+}
