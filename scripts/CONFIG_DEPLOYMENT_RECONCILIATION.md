@@ -54,31 +54,38 @@ travail de qbee le 2026-07-21) **est bien toujours en place** —
 régression de cette décision précise, seulement l'écart pré-existant plus
 large entre les deux branches, non résolu ici.
 
-## Ce qui N'est PAS fait ici (décision humaine requise avant d'aller plus loin)
+## Mécanisme de refus au démarrage (2026-07-22, construit et déployé)
 
-Le mécanisme complet demandé —
+Décision humaine explicite reçue : construire le refus de démarrage.
+Fait, avec un choix de conception délibéré pour rester sûr :
 
-```text
-commit approuvé
-→ artefact de config signé/hashé
-→ déploiement atomique qbee
-→ vérification du hash au démarrage
-→ refus de démarrer si le hash live diffère
-```
+- `src/alpha20/deployment_guard.py` — `assert_deployment_matches_approved()`,
+  compare le hash SHA-256 live de `configs/{alpha20_runners,alpha20}.yaml`
+  contre `configs/DEPLOYMENT_MANIFEST.json` (jamais committé — **état
+  propre à chaque machine**, pas une vérité partagée Mac/qbee : les deux
+  dépôts peuvent légitimement diverger dans leur contenu global, ce garde
+  détecte seulement les changements NON approuvés depuis la dernière
+  génération volontaire du manifeste sur CETTE machine, il ne tranche pas
+  la question plus large de la fusion des deux branches).
+- Module séparé de `src/alpha20/guard.py` (garde anti-trading-réel
+  existante, déjà testée) plutôt qu'une extension — pour ne jamais risquer
+  de casser sa garantie déjà en place.
+- Câblé aux 7 points d'entrée qui appellent déjà `assert_paper_only()`
+  (orchestrateur, dashboard, réconciliation, sélection, recherche de
+  portefeuille) — même endroit, même pattern, `SystemExit(2)` si dérive.
+- `scripts/generate_deployment_manifest.py` — à exécuter manuellement
+  après toute modification humainement relue des fichiers suivis (jamais
+  automatiquement).
+- 4 tests (`tests/test_alpha20_deployment_guard.py`) + les 8 tests
+  existants de `guard.py` toujours verts (aucune régression).
+- Manifeste généré sur qbee depuis son état RÉEL actuel (post-correctif
+  `basis_term_v0`) — le garde passe dès maintenant ; testé en conditions
+  réelles via `scripts/run_alpha20_tournament_dashboard.py` (exit 0).
 
-— nécessite de modifier le **code de démarrage de l'orchestrateur du
-tournoi**, un système qui tourne actuellement en direct sur qbee. Ce n'est
-pas fait dans ce commit : c'est un changement plus invasif sur du code
-d'exécution live, qui mérite une confirmation explicite avant d'y toucher,
-pas une décision prise en cours d'audit d'un moteur de recherche sans
-rapport direct. Le diagnostic ci-dessus est le préalable neutre (constater
-la dérive) ; la décision de bloquer le démarrage sur dérive de hash est une
-étape séparée.
+## Ce qui reste non résolu
 
-## Prochaine étape
-
-1. Dès que qbee est joignable : lancer `verify_config_deployment.py
-   --remote qbee@100.127.59.114`, documenter l'état réel (dérive ou non)
-   pour `basis_term_v0` ET pour `carry_solusdt`/`carry_bnbusdt`.
-2. Décision humaine séparée : construire ou non le refus de démarrage sur
-   hash divergent dans l'orchestrateur.
+La réconciliation complète Mac/qbee (fusionner réellement les deux
+branches divergentes) reste une décision séparée, pas prise ici — ce
+garde protège contre la dérive **future** non approuvée sur une machine
+donnée, il ne résout pas la divergence **historique** déjà documentée plus
+haut entre `main` et `feat/free-derivatives-backfill`.

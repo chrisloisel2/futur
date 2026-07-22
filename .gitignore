@@ -3,6 +3,11 @@ data/
 datasets/
 ML-DL/
 
+# ── État d'approbation de déploiement, propre à chaque machine ──────────────
+# (src/alpha20/deployment_guard.py) — jamais une vérité partagée entre Mac et
+# qbee, jamais committé.
+configs/DEPLOYMENT_MANIFEST.json
+
 # ── Artefacts ML / checkpoints ────────────────────────────────────────────────
 training_output_corrected/
 ai/models/.venv/

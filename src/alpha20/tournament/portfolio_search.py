@@ -131,11 +131,13 @@ def search(specs, statuses: Dict[str, dict], selected_ids: List[str],
 
 
 if __name__ == "__main__":
+    from src.alpha20.deployment_guard import assert_deployment_matches_approved
     from src.alpha20.guard import assert_paper_only
     from src.alpha20.tournament.runner_registry import runnable_specs
     from src.alpha20.tournament.selection.phases import run_selection
 
     assert_paper_only()
+    assert_deployment_matches_approved()
     specs = runnable_specs()
     sel = run_selection(specs)
     eligible = [s for s in specs if sel["statuses"].get(s.runner_id, {}).get("status")
