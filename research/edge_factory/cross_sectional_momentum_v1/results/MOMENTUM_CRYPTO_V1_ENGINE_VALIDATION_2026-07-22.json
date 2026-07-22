@@ -1,0 +1,178 @@
+{
+  "experiment_id": "cross_sectional_momentum_v1 (MOMENTUM_CRYPTO_V1)",
+  "step": "4-7/8 -- ENGINE VALIDATION RUN, universe NOT YET PIT-corrected",
+  "warning": "universe_is_pit=False -- do not cite as a family-level verdict, see QUARANTINE_2026-07-21.md",
+  "date": "2026-07-22",
+  "universe": {
+    "ranked": [
+      "1000PEPEUSDT",
+      "AAVEUSDT",
+      "ADAUSDT",
+      "ALLOUSDT",
+      "AVAXUSDT",
+      "BCHUSDT",
+      "BEATUSDT",
+      "BNBUSDT",
+      "BTWUSDT",
+      "DOGEUSDT",
+      "DOTUSDT",
+      "ENAUSDT",
+      "ETHUSDT",
+      "FILUSDT",
+      "HUSDT",
+      "HYPEUSDT",
+      "LABUSDT",
+      "LINKUSDT",
+      "LTCUSDT",
+      "NEARUSDT",
+      "ONDOUSDT",
+      "PAXGUSDT",
+      "SOLUSDT",
+      "SUIUSDT",
+      "TAOUSDT",
+      "UNIUSDT",
+      "VELVETUSDT",
+      "WLDUSDT",
+      "XLMUSDT",
+      "XRPUSDT",
+      "ZECUSDT"
+    ],
+    "hedge_only": "BTCUSDT",
+    "excluded": [
+      "TONUSDT (SETTLING)"
+    ],
+    "n_ranked": 31
+  },
+  "params": {
+    "beta_window": 90,
+    "vol_window": 30,
+    "lookback_weights": {
+      "7": 0.4,
+      "30": 0.4,
+      "90": 0.2
+    },
+    "long_short_frac": 0.2,
+    "max_weight_per_name": 0.15,
+    "min_history_days": 120,
+    "fee_bp": 5.0,
+    "slippage_bp": 2.0,
+    "exec_delay_days": 2
+  },
+  "n_days": 2254,
+  "date_range": [
+    "2020-04-29 00:00:00+00:00",
+    "2026-06-30 00:00:00+00:00"
+  ],
+  "per_year_cagr_x1_pct": {
+    "2020": -34.472493408229354,
+    "2021": -37.05947155750916,
+    "2022": -28.638393692072373,
+    "2023": -14.078528542948753,
+    "2024": -24.911607227352594,
+    "2025": -61.577510995043504,
+    "2026": -89.35960940545934
+  },
+  "invariant_violations": {},
+  "user_gates": {
+    "cagr_net_x1_pct": {
+      "value": -44.11288155120893,
+      "threshold": 12.0,
+      "passed": false
+    },
+    "sharpe_x1": {
+      "value": -1.1836951847184047,
+      "threshold": 1.2,
+      "passed": false
+    },
+    "max_dd_pct": {
+      "value": -98.24701974100667,
+      "threshold": -15.0,
+      "passed": false
+    },
+    "costs_x2_positive": {
+      "value": -45.75625183099872,
+      "threshold": 0.0,
+      "passed": false
+    },
+    "leave_one_year_positive": {
+      "value": {
+        "2020": -45.196768883586614,
+        "2021": -45.38175310617716,
+        "2022": -46.69101204845032,
+        "2023": -48.56965677071784,
+        "2024": -47.22265431684944,
+        "2025": -39.91662527519383,
+        "2026": -35.40363913895409
+      },
+      "passed": false
+    },
+    "max_asset_concentration_pct": {
+      "value": 18.700089913928412,
+      "threshold": 15.0,
+      "passed": false,
+      "top_contributor": "HUSDT"
+    },
+    "dsr_positive": {
+      "value": 0.0013463002339496044,
+      "threshold": 0.0,
+      "passed": true
+    },
+    "pbo": {
+      "value": null,
+      "note": "non calcul\u00e9 -- une seule formule test\u00e9e, n_trials=1"
+    }
+  },
+  "promotion_gate_sleeve": [
+    {
+      "gate": "pf_min",
+      "passed": false,
+      "value": 0.8037901516535266,
+      "threshold": 1.3,
+      "note": ""
+    },
+    {
+      "gate": "costs_x2_positive",
+      "passed": false,
+      "value": -3.2249953924880157,
+      "threshold": 0.0,
+      "note": ""
+    },
+    {
+      "gate": "top10_events_removed_positive",
+      "passed": false,
+      "value": -4.286774437028663,
+      "threshold": 0.0,
+      "note": ""
+    },
+    {
+      "gate": "no_destructive_recent_year",
+      "passed": false,
+      "value": -0.9238738102221828,
+      "threshold": -0.01,
+      "note": "2026 ne doit pas d\u00e9truire le sleeve"
+    }
+  ],
+  "promotion_gate_research": [
+    {
+      "gate": "dsr_min",
+      "passed": false,
+      "value": 0.0013463002339496044,
+      "threshold": 0.95,
+      "note": ""
+    },
+    {
+      "gate": "max_corr_with_kept_sleeves",
+      "passed": true,
+      "value": 0.0,
+      "threshold": 0.25,
+      "note": ""
+    },
+    {
+      "gate": "min_capacity",
+      "passed": false,
+      "value": 0.0,
+      "threshold": 200000.0,
+      "note": ""
+    }
+  ]
+}

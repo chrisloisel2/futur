@@ -47,18 +47,49 @@ def compute_weights(score: pd.DataFrame, vol: pd.DataFrame, long_short_frac: flo
     return long_w - short_w, is_long, is_short
 
 
-def normalize_capped(raw_w: pd.DataFrame, cap: float) -> pd.DataFrame:
-    """Normalise chaque ligne à somme <= 1, cap par nom STRICTEMENT respecté.
+def _water_fill_row(weights: np.ndarray, cap: float) -> np.ndarray:
+    """Répartition proportionnelle sous contrainte de cap, maximisant la
+    somme atteinte (water-filling) : redistribue itérativement le budget
+    libéré par les noms plafonnés vers les noms pas encore plafonnés,
+    jusqu'à convergence. Ne dépasse jamais `cap` par construction."""
+    w = np.asarray(weights, dtype=float).copy()
+    active = w > 0
+    result = np.zeros_like(w)
+    if not active.any():
+        return result
+    budget = 1.0
+    for _ in range(active.sum() + 1):
+        if not active.any() or budget <= 1e-15:
+            break
+        sub_sum = w[active].sum()
+        if sub_sum <= 0:
+            break
+        scale = budget / sub_sum
+        candidate = w * scale
+        newly_capped = active & (candidate > cap)
+        if not newly_capped.any():
+            result[active] = candidate[active]
+            budget = 0.0
+            break
+        result[newly_capped] = cap
+        budget -= cap * newly_capped.sum()
+        active = active & ~newly_capped
+    return np.minimum(result, cap)
 
-    Ne renormalise PAS après le clip (l'ancienne version le faisait, ce qui
-    pouvait repousser des poids AU-DESSUS du cap en univers fin : avec moins
-    de 1/cap noms éligibles, il est mathématiquement impossible de sommer à 1
-    tout en respectant le cap). En univers fin, l'exposition brute de la
-    jambe reste < 1 plutôt que de violer le cap — corrigé suite à l'audit
-    d'invariants du 2026-07-21.
+
+def normalize_capped(raw_w: pd.DataFrame, cap: float) -> pd.DataFrame:
+    """Normalise chaque ligne à somme <= 1 par water-filling : le cap par nom
+    n'est JAMAIS dépassé, et la somme atteint exactement 1 dès que c'est
+    mathématiquement possible (n_noms_actifs * cap >= 1) — pas seulement
+    "au moins un nom plafonné => on abandonne le reste du budget", ce que
+    faisait la version précédente (un simple clip sans redistribution),
+    trouvé insuffisant par l'audit d'invariants du 2026-07-21 : sur 765/2373
+    jours, les deux jambes finissaient à des sommes différentes (jusqu'à 29
+    points de neutralité dollar perdue) alors que le budget aurait pu être
+    réparti plus loin sans violer le cap.
     """
-    w = raw_w.div(raw_w.sum(axis=1).replace(0, np.nan), axis=0).fillna(0.0)
-    return w.clip(upper=cap)
+    return raw_w.fillna(0.0).clip(lower=0.0).apply(
+        lambda row: pd.Series(_water_fill_row(row.to_numpy(), cap), index=row.index), axis=1)
 
 
 def compute_btc_hedge(signed_w: pd.DataFrame, beta_ex_btc: pd.DataFrame) -> pd.Series:

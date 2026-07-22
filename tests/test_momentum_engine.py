@@ -42,6 +42,38 @@ def test_normalize_capped_never_violates_cap_with_few_names():
     capped = normalize_capped(raw, cap=0.15)
     assert (capped.iloc[0] <= 0.15 + 1e-9).all()
     assert capped.sum(axis=1).iloc[0] <= 1.0 + 1e-9
+    # water-filling : le maximum faisable (3 x 0.15 = 0.45) doit être atteint,
+    # pas abandonné après le premier nom plafonné
+    assert capped.sum(axis=1).iloc[0] == pytest.approx(0.45, abs=1e-9)
+
+
+def test_normalize_capped_reaches_exactly_one_when_feasible():
+    # 10 noms, cap 15% (max faisable 1.5 >= 1) : la somme DOIT atteindre 1
+    # exactement, même si un nom domine au départ -- c'est la différence
+    # entre un simple clip (abandonne le budget libéré) et un vrai
+    # water-filling (le redistribue aux noms pas encore plafonnés).
+    raw = pd.DataFrame([{"N0": 100.0, **{f"N{i}": 1.0 for i in range(1, 10)}}])
+    capped = normalize_capped(raw, cap=0.15)
+    assert (capped.iloc[0] <= 0.15 + 1e-9).all()
+    assert capped.sum(axis=1).iloc[0] == pytest.approx(1.0, abs=1e-9)
+    assert capped.iloc[0]["N0"] == pytest.approx(0.15, abs=1e-9)
+
+
+def test_normalize_capped_dollar_neutrality_matches_across_legs_when_feasible():
+    # Deux jambes de même taille (10 noms chacune) mais distributions de
+    # vol différentes -- si le budget est atteignable des deux côtés
+    # (n x cap >= 1), les deux jambes doivent sommer à EXACTEMENT 1,
+    # donc signed_w = long_w - short_w doit sommer à 0 -- c'est
+    # l'invariant qui a motivé le passage au water-filling (765/2373
+    # jours violés avec le simple clip, cf. commit history).
+    long_raw = pd.DataFrame([{f"L{i}": v for i, v in
+                             enumerate([50.0] + [1.0] * 9)}])
+    short_raw = pd.DataFrame([{f"L{i}": v for i, v in
+                              enumerate([1.0] * 9 + [50.0])}])
+    long_w = normalize_capped(long_raw, cap=0.15)
+    short_w = normalize_capped(short_raw, cap=0.15)
+    assert long_w.sum(axis=1).iloc[0] == pytest.approx(1.0, abs=1e-9)
+    assert short_w.sum(axis=1).iloc[0] == pytest.approx(1.0, abs=1e-9)
 
 
 def test_compute_weights_sign_symmetry():
