@@ -30,11 +30,29 @@ modifie rien.
 python3 scripts/verify_config_deployment.py --remote qbee@100.127.59.114
 ```
 
-État au moment d'écrire ceci : qbee est injoignable en SSH (timeout
-réseau), donc la réconciliation réelle (comparer les hashes) **n'a pas pu
-être exécutée** — seul le fonctionnement du diagnostic lui-même (rapporter
-l'échec de connexion proprement, code de sortie 2) a été vérifié. À
-relancer dès que qbee est de nouveau joignable.
+## Résultat de la réconciliation réelle (2026-07-22, qbee de nouveau joignable)
+
+```text
+python3 scripts/verify_config_deployment.py --remote qbee@100.127.59.114
+```
+
+**Dérive confirmée** sur les deux fichiers, hash local ≠ hash qbee :
+
+| Fichier | local (commit `5e4f334`) | qbee (branche `feat/free-derivatives-backfill`, commit `2fe693b`) |
+|---|---|---|
+| `configs/alpha20_runners.yaml` | `7f01a543...` | `aed1d44f...` |
+| `configs/alpha20.yaml` | `ed00eccb...` | `123ea25a...` |
+
+Attendu et documenté : qbee tourne sur une branche jamais synchronisée avec
+`main`, la dérive porte sur bien plus que le seul changement de ce jour.
+
+**Vérification spécifique** : le champ qui comptait opérationnellement
+(`basis_term_v0: status: OBSERVE_ONLY`, appliqué manuellement au fichier de
+travail de qbee le 2026-07-21) **est bien toujours en place** —
+`grep -A2 'runner_id: basis_term_v0'` sur qbee confirme
+`status: OBSERVE_ONLY`. La dérive de hash globale ne signale donc pas une
+régression de cette décision précise, seulement l'écart pré-existant plus
+large entre les deux branches, non résolu ici.
 
 ## Ce qui N'est PAS fait ici (décision humaine requise avant d'aller plus loin)
 
