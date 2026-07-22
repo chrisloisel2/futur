@@ -1,26 +1,32 @@
 # cross_sectional_momentum_v1 (MOMENTUM_CRYPTO_V1)
 
-> ## 🔶 QUARANTAINE (2026-07-21) — le verdict NO_EDGE ci-dessous est RETIRÉ
+> ## ❌ VERDICT FINAL (post-audit) : MOMENTUM_CRYPTO_V1_NO_EDGE — CLEAN, PAS UN REVERSAL (2026-07-22)
 >
-> Défaut confirmé : l'univers `CRYPTO_32` était un **snapshot du
-> 2026-06-30 appliqué à tout l'historique 2020-2026** — exactement le
-> biais de survivance déjà corrigé une fois dans ce dépôt (CTREND v0→v1).
-> La jambe short ne pouvait shorter que des survivants du top-50 actuel,
-> jamais les vrais perdants historiques délistés. Ce défaut invalide le
-> verdict de famille dans les deux sens. Détail :
-> [QUARANTINE_2026-07-21.md](QUARANTINE_2026-07-21.md). Audit et
-> reconstruction en cours avant tout nouveau verdict — aucune retouche de
-> paramètres, aucune inversion de signe.
+> Après l'audit complet du 2026-07-21 (`QUARANTINE_2026-07-21.md` — moteur
+> d'exécution corrigé, poids water-filling, univers point-in-time réel de
+> 311 symboles reconstruit, funding réel backfillé, invariants vérifiés à
+> zéro violation sur 2254 jours), la formule unique préenregistrée donne :
+> **CAGR −20,4 %/an, Sharpe ≈ 0 (−0,04), DSR 0,46, maxDD −87,8 %**, PnL
+> annuel très bruité (de +113 % à −89 % selon l'année). Tous les gates
+> économiques échouent, mais **le verdict "reversal" du 2026-07-21 est
+> retiré** : c'était un artefact du même univers survivant et de la même
+> exécution mal alignée que ce qui a motivé l'audit. Sur le moteur
+> corrigé, il n'y a ni momentum ni reversal détectable — juste du bruit.
+> Détail : [results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md](results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md).
 
-> ## ~~❌ VERDICT (RETIRÉ) : MOMENTUM_CRYPTO_V1_NO_EDGE — REVERSAL, PAS MOMENTUM (2026-07-21)~~
->
-> ~~Formule unique préenregistrée (0,4×mom7j + 0,4×mom30j + 0,2×mom90j −
-> pénalité illiquidité − coût funding, résiduel bêta BTC), univers
-> crypto-only 32 noms, rebalance quotidien. CAGR net −66,9 %/an, Sharpe
-> −1,22, maxDD −99,9 %, toutes années négatives, coûts ×2 négatif.~~
-> Ce verdict reposait sur l'univers survivant décrit ci-dessus — voir la
-> quarantaine. Détail historique (ne plus citer comme preuve) :
-> [results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md](results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md).
+## Historique de l'audit (2026-07-21 → 2026-07-22)
+
+1. Premier run (univers `CRYPTO_32`, snapshot du 2026-06-30) → NO_EDGE,
+   diagnostiqué comme "reversal" (IC quotidien négatif significatif).
+2. Mise en quarantaine (`QUARANTINE_2026-07-21.md`) : univers survivant,
+   exécution non prouvée, comptabilité long-short non auditée.
+3. Corrections, une par une, chacune testée indépendamment :
+   exécution open-to-open (délai réel 2 jours), cap sans violation, tests
+   de symétrie de signe et d'identité comptable (10 tests), invariants
+   quotidiens (a trouvé et fait corriger un vrai bug de neutralité dollar
+   via water-filling), univers PIT réel (311 noms vs 32), funding
+   backfillé pour tous.
+4. Rerun final unique, formule inchangée → verdict ci-dessus.
 
 Univers scindé le 2026-07-21 : voir
 [PREREGISTRATION_CRYPTO_V1_ADDENDUM.md](PREREGISTRATION_CRYPTO_V1_ADDENDUM.md)
@@ -35,17 +41,27 @@ Univers scindé le 2026-07-21 : voir
   formule unique, univers crypto-only, gates.
 - [DATA_INVENTORY.yaml](DATA_INVENTORY.yaml) — étape 3, inventaire +
   extension funding (50 puis split 33 crypto/17 macro).
+- [QUARANTINE_2026-07-21.md](QUARANTINE_2026-07-21.md) — audit complet,
+  défauts trouvés et corrigés.
+- [momentum_engine.py](momentum_engine.py) — fonctions pures testées
+  (`tests/test_momentum_engine.py`, 10 tests).
+- [build_pit_universe.py](build_pit_universe.py) — reconstruction de
+  l'univers point-in-time (311 symboles).
 - [backtest_momentum_crypto_v1.py](backtest_momentum_crypto_v1.py) —
-  étapes 4-7, formule unique, `n_trials=1`.
-- [results/MOMENTUM_CRYPTO_V1_BACKTEST_2026-07-21.json](results/MOMENTUM_CRYPTO_V1_BACKTEST_2026-07-21.json) —
-  chiffres bruts.
-- [results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md](results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md) —
-  verdict complet + diagnostic IC.
+  étapes 4-7, formule unique, `n_trials=1`, univers PIT.
+- [results/MOMENTUM_CRYPTO_V1_PIT_FINAL_2026-07-22.json](results/MOMENTUM_CRYPTO_V1_PIT_FINAL_2026-07-22.json) —
+  chiffres bruts du run final.
+- [results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md](results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md) —
+  verdict final complet.
+- Runs antérieurs (historique, ne plus citer comme preuve) :
+  [results/MOMENTUM_CRYPTO_V1_BACKTEST_2026-07-21.json](results/MOMENTUM_CRYPTO_V1_BACKTEST_2026-07-21.json),
+  [results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md](results/MOMENTUM_CRYPTO_V1_VERDICT_2026-07-21.md),
+  [results/MOMENTUM_CRYPTO_V1_ENGINE_VALIDATION_2026-07-22.json](results/MOMENTUM_CRYPTO_V1_ENGINE_VALIDATION_2026-07-22.json).
 
 ## Prochaine étape
 
 Aucune nouvelle variante lancée immédiatement. Piste ouverte, non
 poursuivie maintenant : momentum classique construit sur rendements
-mensuels avec période de "skip" (littérature Jegadeesh-Titman), pour
-éviter la contamination par le reversal court terme identifié ici — une
-thèse différente, pas un retuning des mêmes seuils sur la même fréquence.
+mensuels avec période de "skip" (littérature Jegadeesh-Titman) — une
+thèse différente, avec son propre préenregistrement, pas une extension
+de celui-ci.

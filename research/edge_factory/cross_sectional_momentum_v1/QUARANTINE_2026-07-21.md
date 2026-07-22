@@ -1,5 +1,12 @@
 # QUARANTINE — MOMENTUM_CRYPTO_V1 verdict retiré
 
+> **✅ AUDIT TERMINÉ le 2026-07-22 — voir
+> [results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md](results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md)
+> pour le verdict final.** Tous les défauts listés ci-dessous ont été
+> corrigés et re-vérifiés (exécution, poids, univers, invariants). Le
+> nouveau verdict est NO_EDGE propre (Sharpe ≈ 0), PAS le reversal
+> significatif rapporté avant la mise en quarantaine.
+
 ```yaml
 cross_sectional_momentum_crypto_v1:
   previous_status: NO_EDGE

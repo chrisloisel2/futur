@@ -2,29 +2,24 @@
 """
 research/edge_factory/cross_sectional_momentum_v1/backtest_momentum_crypto_v1.py
 ─────────────────────────────────────────────────────────────────────────────
-MOMENTUM_CRYPTO_V1 — étapes 4-7. Réécrit le 2026-07-21 suite à l'audit
-(QUARANTINE_2026-07-21.md) : exécution alignée open-to-open avec un vrai
-délai (signal connu à close(t), exécuté à open(t+1), rendement capté
-open(t+1)->open(t+2) — jamais close-to-close avec un simple décalage d'un
-jour), cap de poids qui ne viole plus jamais la borne, invariants
-quotidiens vérifiés et rapportés. La logique de poids/rendement est dans
-momentum_engine.py (fonctions pures, testées indépendamment dans
-tests/test_momentum_engine.py — symétrie de signe, identité comptable,
-direction du classement).
+MOMENTUM_CRYPTO_V1 — étapes 4-7, univers PIT (audit QUARANTINE_2026-07-21.md
+complet) : exécution open-to-open avec délai réel de 2 jours, poids
+water-filling (cap jamais dépassé, neutralité dollar exacte quand
+faisable), invariants quotidiens vérifiés, et — dernière pièce de l'audit —
+univers point-in-time reconstruit par build_pit_universe.py (312 symboles
+crypto réellement actifs à chaque date, délistés compris) au lieu du
+snapshot CRYPTO_32 du 2026-06-30.
 
-Formule UNIQUE préenregistrée (aucune grille, n_trials=1) — inchangée
-depuis PREREGISTRATION_CRYPTO_V1_ADDENDUM.md :
+Formule UNIQUE préenregistrée (aucune grille, n_trials=1) — INCHANGÉE
+depuis PREREGISTRATION_CRYPTO_V1_ADDENDUM.md et depuis les runs de
+validation moteur précédents :
 
     score_i = 0.4*resid_mom7_i + 0.4*resid_mom30_i + 0.2*resid_mom90_i
               - illiq_penalty_i - funding_cost_i
 
-Univers : toujours CRYPTO_32 (snapshot du 2026-06-30) dans CETTE version —
-**l'univers PIT historique n'est PAS encore restauré ici** (commit séparé
-"data: restore full point-in-time historical crypto universe", puis rerun
-final dans "research: rerun unchanged 7/30/90 hypothesis once"). Ce script
-sert à valider que le MOTEUR (exécution, poids, invariants) est correct
-avant de changer l'univers — ne pas citer un résultat produit ici comme
-verdict de famille : voir QUARANTINE_2026-07-21.md.
+C'est le rerun final visé par l'audit : mêmes paramètres, même formule,
+moteur corrigé (exécution, cap, invariants) + univers corrigé (PIT). Ne
+lance PAS une nouvelle variante — un seul run, verdict pris tel quel.
 
     .venv/bin/python research/edge_factory/cross_sectional_momentum_v1/backtest_momentum_crypto_v1.py
 """
@@ -49,17 +44,8 @@ from src.alpha20.validation.promotion_gate import deflated_sharpe_ratio  # noqa:
 
 PRICE_DIR = ROOT / "data" / "derivatives_backfill" / "um_klines_1d"
 FUNDING_DIR = ROOT / "data" / "derivatives_backfill" / "binance" / "funding"
+RESULTS_DIR = ROOT / "research/edge_factory/cross_sectional_momentum_v1/results"
 
-# ATTENTION : snapshot du 2026-06-30, PAS un univers point-in-time. Voir le
-# bandeau ci-dessus et QUARANTINE_2026-07-21.md.
-CRYPTO_32 = [
-    "1000PEPEUSDT", "AAVEUSDT", "ADAUSDT", "ALLOUSDT", "AVAXUSDT", "BCHUSDT",
-    "BEATUSDT", "BNBUSDT", "BTWUSDT", "DOGEUSDT", "DOTUSDT", "ENAUSDT",
-    "ETHUSDT", "FILUSDT", "HUSDT", "HYPEUSDT", "LABUSDT", "LINKUSDT",
-    "LTCUSDT", "NEARUSDT", "ONDOUSDT", "PAXGUSDT", "SOLUSDT", "SUIUSDT",
-    "TAOUSDT", "UNIUSDT", "VELVETUSDT", "WLDUSDT", "XLMUSDT", "XRPUSDT",
-    "ZECUSDT",
-]
 BTC = "BTCUSDT"
 
 BETA_WINDOW = 90
@@ -73,10 +59,10 @@ SLIPPAGE_BP = 2.0
 EXEC_DELAY_DAYS = 2   # close(t) connu -> open(t+1) exécuté -> rendement open(t+1)->open(t+2)
 
 
-def load_field(symbol: str, field: str) -> pd.Series:
-    df = pd.read_parquet(PRICE_DIR / f"{symbol}_1d.parquet", columns=["open_time", field])
+def load_open(symbol: str) -> pd.Series:
+    df = pd.read_parquet(PRICE_DIR / f"{symbol}_1d.parquet", columns=["open_time", "open"])
     df["open_time"] = pd.to_datetime(df["open_time"], utc=True).dt.normalize()
-    return df.set_index("open_time")[field].rename(symbol)
+    return df.set_index("open_time")["open"].rename(symbol)
 
 
 def load_daily_funding(symbol: str) -> pd.Series:
@@ -117,11 +103,26 @@ def leave_one_year(returns: pd.Series) -> dict:
 
 
 def main() -> None:
-    universe = CRYPTO_32 + [BTC]
-    close = pd.concat([load_field(s, "close") for s in universe], axis=1).sort_index()
-    open_px = pd.concat([load_field(s, "open") for s in universe], axis=1).sort_index()
-    qvol = pd.concat([load_field(s, "quote_volume") for s in universe], axis=1).sort_index()
-    funding = pd.concat([load_daily_funding(s) for s in universe], axis=1).sort_index()
+    manifest = json.loads((RESULTS_DIR / "PIT_UNIVERSE_MANIFEST.json").read_text())
+    member = pd.read_parquet(RESULTS_DIR / "pit_universe_membership.parquet")
+    close = pd.read_parquet(RESULTS_DIR / "pit_universe_close.parquet")
+    qvol = pd.read_parquet(RESULTS_DIR / "pit_universe_qv.parquet")
+
+    # BTC est mathématiquement toujours membre du top-30 PIT (plus gros volume
+    # de tout l'univers) -- il apparaît donc déjà dans pit_universe_close.parquet.
+    # Il reste néanmoins hors classement : instrument de hedge bêta uniquement,
+    # jamais un candidat long/short (même architecture que la version CRYPTO_32
+    # précédente). On le retire des noms classés, mais sa série de prix/volume
+    # reste disponible dans `close`/`qvol` pour le calcul du bêta.
+    ranked_symbols = [s for s in close.columns if s != BTC]
+    member = member.reindex(close.index)
+
+    all_symbols = ranked_symbols + [BTC]
+    open_px = pd.concat([load_open(s) for s in all_symbols], axis=1).sort_index()
+    open_px = open_px.reindex(close.index)
+    qvol = qvol.reindex(close.index)
+
+    funding = pd.concat([load_daily_funding(s) for s in all_symbols], axis=1).sort_index()
     funding = funding.reindex(close.index).fillna(0.0)
 
     ret = close.pct_change()
@@ -139,39 +140,47 @@ def main() -> None:
 
     vol30 = ret.rolling(VOL_WINDOW).std()
 
-    log_qvol30 = np.log(qvol.rolling(VOL_WINDOW).median().clip(lower=1.0))
+    # cross-sectionnel calculé SEULEMENT sur les noms classés -- BTC (encore
+    # présent dans qvol, jamais retiré de ce DataFrame) fausserait la
+    # moyenne/écart-type s'il y restait : son volume domine largement
+    # celui de n'importe quel altcoin classé.
+    log_qvol30 = np.log(qvol[ranked_symbols].rolling(VOL_WINDOW).median().clip(lower=1.0))
     illiq_penalty = log_qvol30.sub(log_qvol30.mean(axis=1), axis=0).div(
         log_qvol30.std(axis=1), axis=0) * -1.0
 
     funding_cost = funding.rolling(VOL_WINDOW).mean().abs() * 365.0
 
     score_full = resid_mom_sum - illiq_penalty - funding_cost
-    score = score_full[CRYPTO_32]
+    score = score_full[ranked_symbols]
 
-    hist_ok = (close[CRYPTO_32].notna()
+    hist_ok = (close[ranked_symbols].notna()
               .rolling(MIN_HISTORY_DAYS, min_periods=MIN_HISTORY_DAYS).count()
               >= MIN_HISTORY_DAYS)
-    eligible_score = score.where(hist_ok)
+    # éligibilité = membre PIT du jour ET assez d'historique pour un signal
+    # bien défini (build_membership() exige seulement 31j, notre signal en
+    # exige 120 pour la fenêtre 90j + bêta 90j)
+    is_member = member[ranked_symbols].fillna(False).astype(bool)
+    eligible_score = score.where(hist_ok & is_member)
 
     signed_w, is_long, is_short = compute_weights(
-        eligible_score, vol30[CRYPTO_32], LONG_SHORT_FRAC, MAX_WEIGHT_PER_NAME)
-    btc_hedge_w = compute_btc_hedge(signed_w, beta[CRYPTO_32])
+        eligible_score, vol30[ranked_symbols], LONG_SHORT_FRAC, MAX_WEIGHT_PER_NAME)
+    btc_hedge_w = compute_btc_hedge(signed_w, beta[ranked_symbols])
 
     pr = portfolio_returns(signed_w, btc_hedge_w, open_px, funding,
-                          CRYPTO_32, BTC, EXEC_DELAY_DAYS)
+                          ranked_symbols, BTC, EXEC_DELAY_DAYS)
 
     cost_x1 = -(pr["turnover"] * (FEE_BP + SLIPPAGE_BP) / 10_000.0)
     cost_x2 = -(pr["turnover"] * (FEE_BP + SLIPPAGE_BP) * 2 / 10_000.0)
 
     net_x1 = pr["gross_ret"] + pr["funding_pnl"] + cost_x1
     net_x2 = pr["gross_ret"] + pr["funding_pnl"] + cost_x2
-    valid_index = hist_ok.any(axis=1)
+    valid_index = (hist_ok & is_member).any(axis=1)
     net_x1 = net_x1[valid_index].dropna()
     net_x2 = net_x2.reindex(net_x1.index)
 
     invariant_violations = check_daily_invariants(
         signed_w.reindex(net_x1.index), btc_hedge_w.reindex(net_x1.index),
-        beta[CRYPTO_32].reindex(net_x1.index), MAX_WEIGHT_PER_NAME, net_x1)
+        beta[ranked_symbols].reindex(net_x1.index), MAX_WEIGHT_PER_NAME, net_x1)
 
     asset_net = (pr["asset_gross"] + pr["asset_funding"]).reindex(net_x1.index)
     per_asset_total = asset_net.sum(axis=0)
@@ -184,6 +193,8 @@ def main() -> None:
     per_year = {str(y): cagr(g) for y, g in net_x1.groupby(net_x1.index.year)}
     loy = leave_one_year(net_x1)
 
+    n_symbols_with_funding = int((funding[ranked_symbols].abs().sum(axis=0) > 0).sum())
+
     result = MultiLegBacktestResult(
         trades=pd.DataFrame({"net_x1": net_x1, "net_x2": net_x2}),
         pnl_daily=net_x1,
@@ -192,9 +203,10 @@ def main() -> None:
         net_events=net_x1, net_events_x2=net_x2,
         returns_for_dsr=net_x1,
         trials_matrix=None,
-        meta={"universe": CRYPTO_32, "hedge": BTC, "excluded": ["TONUSDT"],
+        meta={"universe_size": len(ranked_symbols), "hedge": BTC,
              "n_trials": 1, "exec_delay_days": EXEC_DELAY_DAYS,
-             "universe_is_pit": False})
+             "universe_is_pit": True,
+             "n_symbols_with_funding_data": n_symbols_with_funding})
 
     sleeve_gates = result.run_sleeve_gate()
     research_gates = result.run_research_gate(n_trials=1)
@@ -219,12 +231,11 @@ def main() -> None:
 
     out = {
         "experiment_id": "cross_sectional_momentum_v1 (MOMENTUM_CRYPTO_V1)",
-        "step": "4-7/8 -- ENGINE VALIDATION RUN, universe NOT YET PIT-corrected",
-        "warning": "universe_is_pit=False -- do not cite as a family-level verdict, "
-                  "see QUARANTINE_2026-07-21.md",
+        "step": "4-7/8 -- FINAL RERUN, engine-corrected + PIT universe",
         "date": datetime.now(timezone.utc).date().isoformat(),
-        "universe": {"ranked": CRYPTO_32, "hedge_only": BTC,
-                    "excluded": ["TONUSDT (SETTLING)"], "n_ranked": len(CRYPTO_32)},
+        "universe": {"n_ranked_ever_member": len(ranked_symbols), "hedge_only": BTC,
+                    "n_symbols_with_funding_data": n_symbols_with_funding,
+                    "pit_universe_manifest_date": manifest.get("date")},
         "params": {"beta_window": BETA_WINDOW, "vol_window": VOL_WINDOW,
                   "lookback_weights": LOOKBACK_WEIGHTS, "long_short_frac": LONG_SHORT_FRAC,
                   "max_weight_per_name": MAX_WEIGHT_PER_NAME, "min_history_days": MIN_HISTORY_DAYS,
@@ -239,9 +250,8 @@ def main() -> None:
         "promotion_gate_research": [g.__dict__ for g in research_gates],
     }
 
-    out_path = ROOT / "research/edge_factory/cross_sectional_momentum_v1/results"
-    out_path.mkdir(parents=True, exist_ok=True)
-    fname = out_path / f"MOMENTUM_CRYPTO_V1_ENGINE_VALIDATION_{out['date']}.json"
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    fname = RESULTS_DIR / f"MOMENTUM_CRYPTO_V1_PIT_FINAL_{out['date']}.json"
     fname.write_text(json.dumps(out, indent=2, default=str))
     print(json.dumps(out, indent=2, default=str))
     print(f"\n-> {fname}")
