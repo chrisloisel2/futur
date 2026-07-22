@@ -128,6 +128,33 @@ experiment_registry:
     - {name: funding_xvenue_v0, verdict: NO_EDGE, ref: "1717fd8",
        note: "JAMAIS recycler sous un autre nom (ordre explicite)"}
     - {name: naive_50_universe, verdict: NO_EDGE, ref: "0c6fd80", note: "churn-fees -39.6%"}
+    - name: cross_sectional_momentum_crypto_v1
+      mechanism: long_short_residual_momentum_7_30_90d_beta_neutral
+      status: CLOSED_NO_EDGE
+      verdict: NO_EDGE
+      ref: "9c7fad5"
+      report: research/edge_factory/cross_sectional_momentum_v1/results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md
+      report_date: "2026-07-22"
+      final_metrics:
+        cagr_ann_pct: -20.4
+        sharpe: -0.04
+        max_dd_pct: -87.8
+        dsr: 0.46
+      failed_gates: ["cagr > 12%", "sharpe > 1.2", "max_dd < 15%", "costs_x2 positive",
+                    "leave_one_year positive", "dsr >= 0.95"]
+      reactivation_requires:
+        - thèse structurellement différente (pas un retuning de poids/horizon/signe)
+        - nouveau préenregistrement séparé
+      note: "formule gelée définitivement : AUCUN changement de poids, d'horizon ou de
+             signe pour la sauver. Un premier run (univers snapshot du 2026-06-30,
+             exécution close-to-close mal alignée) avait rapporté Sharpe -1.22 et un
+             faux diagnostic de reversal (IC t=-3.18) -- retiré après audit complet
+             (QUARANTINE_2026-07-21.md) : univers PIT réel restauré (311 symboles),
+             exécution open-to-open corrigée (délai réel 2j), poids water-filling,
+             invariants vérifiés à 0 violation. Sur le moteur corrigé : Sharpe -0.04,
+             ni momentum ni reversal détectable, juste du bruit. Le NO_EDGE est
+             confirmé mais le diagnostic 'reversal' de la première version ne l'est
+             plus -- ne pas le citer."
     - name: carry_solusdt
       mechanism: carry_v2_delta_neutral
       verdict: FAIL

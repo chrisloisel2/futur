@@ -1,5 +1,14 @@
 # cross_sectional_momentum_v1 (MOMENTUM_CRYPTO_V1)
 
+> ## 🔒 STATUT : CLOSED_NO_EDGE (2026-07-22, décision humaine, gelé définitivement)
+>
+> Formule (poids 0,4/0,4/0,2, horizons 7/30/90j, signe résiduel bêta BTC)
+> **gelée** : aucun changement de poids, d'horizon ou de signe pour la
+> sauver. Réouverture seulement sur thèse structurellement différente
+> avec son propre préenregistrement — pas un retuning de celle-ci.
+> Registre : `configs/alpha20.yaml` →
+> `experiment_registry.closed_no_edge.cross_sectional_momentum_crypto_v1`.
+
 > ## ❌ VERDICT FINAL (post-audit) : MOMENTUM_CRYPTO_V1_NO_EDGE — CLEAN, PAS UN REVERSAL (2026-07-22)
 >
 > Après l'audit complet du 2026-07-21 (`QUARANTINE_2026-07-21.md` — moteur
