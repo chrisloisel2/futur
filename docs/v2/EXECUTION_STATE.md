@@ -125,3 +125,94 @@ straight to Phase 1 per the master prompt's own "repo is ground truth" rule.
 This is a real, standing blocker (not resolved by working around it) —
 surface it to the user again if source review is asked for later without
 new file-location information.
+
+---
+
+## 2026-07-27, continued — Phase 1 diagnostic
+
+Full detail in `docs/v2/PHASE1_DIAGNOSTIC.md` and `docs/v2/INTERPRETER.md`.
+Summary:
+
+- **Interpreter pinned:** `/opt/homebrew/Caskroom/miniconda/base/bin/python3`
+  (3.12.2) — widest package coverage of the 4 reachable interpreters (11/12
+  required non-stdlib imports; only `lightgbm` missing, not installed this
+  session per the "don't fix before recording" rule).
+- **`tests/` (root):** `9 failed, 361 passed, 21 warnings, 4 errors in
+  14.98s`. Default `pytest tests/` aborts on the 4 collection errors (exit
+  2); re-ran with `--continue-on-collection-errors` for the full picture.
+  4 collection errors + 4 of the 9 failures are genuinely-missing modules
+  under `src/institutional/data/*` (never in git history at these paths, on
+  any branch). 3 failures are the deployment guard correctly refusing to
+  run without an approved manifest (test-fixture gap, not a guard bug). 2
+  failures are missing local enriched parquet data (data-locality, not a
+  code bug — this Mac has no local historical dataset per prior-session
+  memory).
+- **`trading-system/tests/`:** `5 failed, 4 passed, 7 skipped, 4 errors in
+  2.75s` (16 items collected). Confirms `trading-system/`'s `institutional.*`
+  package is a *second, differently-rooted* copy from root `src/institutional/`
+  — both broken on missing submodules, independently.
+- **Live/paper path traced and resolved the prior session's open question:**
+  `src/alpha20`'s live/paper decision path (`orchestrator.run_cycle` →
+  `PaperAccount.evaluate_risk` → `global_governor.evaluate`) does **not**
+  call `src/institutional/portfolio/constraints.py` or `invariants.py` at
+  all — those are backtest-only (sole caller: `meta_allocator.py`). The live
+  path has its own governor with different names/thresholds
+  (`net_delta_cap=0.05`, `margin_used_cap=0.20` off a 10% gross proxy,
+  `venue_unsecured_cap=0.15`). Proven executable in
+  `tests/test_v2_phase1_live_exposure_cap_diagnostic.py`: 150% gross/NAV
+  passes through unblocked; only a 5%-NAV net-delta breach fires. **This
+  upgrades last session's "UNVERIFIED" to a confirmed defect** — see
+  `MIGRATION.md`'s known-defect table, now updated.
+- **ML endpoint probe:** the actually-deployed dashboard
+  (`frontend_pipeline/command_center.py`, via Docker) has no ML/predict
+  endpoints — reads precomputed reports only. `frontend_pipeline/api_server.py`
+  (what `launch.sh` starts as "the API") *does* contain the named
+  EMA-fallback-and-trade defect (`_run_autonomous_trade` → `_fetch_ema_signal`
+  when the ML `PredictionEngine` isn't ready, and still trades on the
+  fallback) — but that file currently **cannot import**
+  (`ModuleNotFoundError: No module named 'mongo_utils'`; its dependencies
+  live only under `legacy/dead_frontend/` or don't exist at all). Net: the
+  defect is real in source but dead-by-breakage today, not silently live.
+  `api_server_paper.py` imports cleanly and mounts a router with an explicit
+  documented anti-mock policy, but its deployment status (is anything
+  actually running it?) is unverified from this repo alone.
+- **No fixes applied this pass** — per instruction, diagnostic recorded
+  first. See `docs/v2/PHASE1_DIAGNOSTIC.md` §"Next minimal modification" for
+  the smallest safe next change (a test fixture for the deployment-manifest
+  guard, and a separate design decision on `api_server.py`'s fate).
+
+### Updated open questions
+
+- Resolved this pass: live-path exposure-cap enforcement (was open,
+  now CONFIRMED-broken with an executable test).
+- Still open: whether `BasisTermAdapter` and `MHEventsAdapter` (2 of the 3
+  runner adapter classes) have the same transitive
+  `check_portfolio_invariants` reachability as `CarryBasisAdapter` — only
+  the latter was traced this session.
+- Still open: everything else listed in the prior session's "Open
+  questions" section above (secret history scan, live reachability of
+  Mongo/qdrant, `production/`/`Server/`/`hedge_fund/`/`deploy/` triage) —
+  none of that was revisited this pass.
+
+### Files modified this session (Phase 1 diagnostic portion)
+
+- `docs/v2/INTERPRETER.md` (new)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (new)
+- `docs/v2/MIGRATION.md` (known-defect table rows updated, not rewritten)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (new, 2 passing
+  diagnostic tests)
+
+### Next action (exact)
+
+1. Land the deployment-manifest test fixture (smallest, safest fix
+   identified — see `PHASE1_DIAGNOSTIC.md` §"Next minimal modification"
+   item 1) as its own commit, separate from any other change.
+2. Get a human decision on `frontend_pipeline/api_server.py`: repair its
+   imports (and, in the same change, remove or explicitly gate the
+   EMA-fallback-and-trade behavior — never repair the import alone) or
+   retire it. Do not bundle this with item 1.
+3. Trace `BasisTermAdapter`/`MHEventsAdapter` the same way `CarryBasisAdapter`
+   was traced, to close the one open question from this pass.
+4. Only after 1–3, and after the still-open items from the prior session are
+   at least triaged: draft the root `pyproject.toml` + `uv.lock`.
