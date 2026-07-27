@@ -302,6 +302,83 @@ EMA-fallback-and-trade behavior would re-introduce the named defect.
 `command_center.py` (what's actually deployed via Docker) does not have
 this pattern — it has no ML/predict endpoints at all, only report readers.
 
+## 6. Closing the open question: does `CarryBasisAdapter`'s internal `MultiLegBacktester` replay protect real paper capital?
+
+**Session 4.** Session 2/3 left this open: `check_portfolio_invariants` is
+reachable from the live path only transitively through
+`CarryBasisAdapter.decide()`'s internal `MultiLegBacktester(...).run()` call
+(diagram, §3 above) — but nobody had checked what that function actually
+enforces, or what happens to what it enforces once it gets back to the
+adapter. Both are now traced and proven executable in
+`tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (section 5, 2 new
+tests, 14/14 passing).
+
+**Finding (a) — the master prompt's literal claim is CONFIRMED, in the exact
+file it names, contradicting session 1's "not reproduced" verdict on that
+claim.** `src/institutional/portfolio/invariants.py::InvariantLimits`
+declares `max_gross_exposure: float = 1.00` and
+`max_net_long_exposure: float = 0.75` — the exact pair of names and values
+the master prompt quotes verbatim, and the exact file it links. But
+`check_portfolio_invariants()` computes `gross_exposure` and
+`net_long_exposure` and returns them in its exposures dict **without ever
+comparing either to its own declared limits** — it only ever raises on
+`hedge_exposure` (vs. `max_hedge_cap`) and the per-position checks (naked
+short, unlinked short/carry legs, carry-delta tolerance). Proven in
+`test_check_portfolio_invariants_never_enforces_its_own_gross_or_net_caps`:
+two long-only positions (no shorts, no hedges, so neither of the *other*
+invariant checks can incidentally mask this) at 2x equity return
+`gross_exposure=2.0`, `net_long_exposure=2.0` — both 2x their declared caps
+— with no exception raised.
+
+Session 1's "not reproduced" verdict (`EXECUTION_STATE.md`, tasks-completed
+item 4) checked a *different* file with a similarly-named field:
+`src/institutional/portfolio/constraints.py::PortfolioConstraints`, which
+has its own `max_gross_exposure: float = 0.75` (no `max_net_long_exposure`
+field at all) and *is* genuinely enforced by its `.check()` method — but
+that class is reachable only from `meta_allocator.py`, not from
+`invariants.py`, `multileg_backtester.py`, or `src/alpha20` at all. A third,
+independent definition also exists — `PortfolioBacktestConfig.max_gross_exposure
+= 0.75` in `src/institutional/backtest/portfolio_backtester.py:46`, enforced
+inline at lines 329-330 (position size is capped down before the loop adds
+it), reachable only from `PortfolioBacktester` (used by `meta_allocator.py`,
+`risk/governor.py`, and 2 walk-forward scripts — research/backtest, not the
+live path). A fourth — `risk_engine.py`'s `max_gross_exposure_pct = 1.00`,
+enforced (`RiskDecision.block(...)` at line 168), reachable only via
+`portfolio/allocator.py`, also not the live path. **Four independently
+-defined, non-unified "max gross exposure" mechanisms exist in this
+codebase, with three different default values (0.75 / 0.75 / 1.00 / 1.00)
+and three enforced vs. one silently decorative** — a concrete instance of
+the master prompt's "plusieurs runtimes concurrents" claim, not just a
+single missing check.
+
+**Finding (b) — even if it were enforced, it would not matter for live
+paper capital.** `CarryBasisAdapter.decide()` wraps the entire
+`MultiLegBacktester(...).run(start, end)` call in a blanket
+`except Exception as e: return [self._decision_abstain(f"backtest_error: {e}")], state`
+(`runner_adapters.py:117-122`). This catches **any** exception raised deep
+inside the replay — including a genuine `InvariantViolation` from the
+checks `check_portfolio_invariants` *does* enforce (naked short, hedge cap,
+carry-delta tolerance) — and downgrades it to an ordinary "abstain" decision
+event, indistinguishable from a routine no-op cycle: no halt, no alert, no
+visibility to the governor, no effect on the shared ledger or other
+runners. Proven in
+`test_carry_basis_adapter_swallows_invariant_violations_as_silent_abstain`
+by monkeypatching `MultiLegBacktester` to raise `InvariantViolation` and
+confirming `decide()` returns exactly one `signal="abstain"` event and
+leaves `state` unchanged, rather than propagating.
+
+### Verdict
+
+`CarryBasisAdapter`'s internal `MultiLegBacktester` replay is **not a live
+risk control on real paper capital**, for two independent, stacking
+reasons: it never checks the two specific limits (`max_gross_exposure`,
+`max_net_long_exposure`) it declares, and even the checks it does enforce
+are silently swallowed before they could ever block, alert, or protect
+anything the moment they'd matter. `CarryBasisAdapter`'s real sizing is
+whatever the internal backtest simulation decided; the shared ledger only
+receives a P&L mark-to-market delta from it, never an independently-checked
+order.
+
 ## Next minimal modification (deliberately not done yet)
 
 Session 3 fixed the exposure-cap diagnostic itself (section 4) but
@@ -332,10 +409,16 @@ order:
    the silent-EMA-fallback-and-trade behavior would reintroduce a named
    defect, so this is a design decision, not a one-line fix, and should not
    be bundled with anything else.
-4. Still open from session 2: trace whether `CarryBasisAdapter`'s internal
-   `MultiLegBacktester` replay (the only place `check_portfolio_invariants`
-   is transitively reachable from the live path) actually constrains that
-   runner's real paper capital, or is purely a signal-generation detail with
-   no live risk consequence — this session confirmed the adapter ignores
-   `risk_state` entirely but did not audit what its internal backtester call
-   *does* enforce.
+4. ~~Still open from session 2: trace whether `CarryBasisAdapter`'s internal
+   `MultiLegBacktester` replay ... actually constrains that runner's real
+   paper capital.~~ **CLOSED, session 4 — see §6.** It does not: the two
+   named limits it declares are never compared to what it computes, and
+   whatever it does enforce is caught by `decide()`'s blanket
+   `except Exception` before it can matter. New open item raised by this
+   finding, not yet actioned: `PortfolioBacktestConfig`
+   (`portfolio_backtester.py`), `PortfolioConstraints` (`constraints.py`),
+   `InvariantLimits` (`invariants.py`), and `risk_engine.py`'s own
+   dataclass are four independent, non-unified gross-exposure mechanisms
+   with three different default values — Phase 1's "un seul package Python"
+   / Phase 2's accounting-rebuild gate should collapse these to one, not
+   patch `invariants.py` in isolation.

@@ -383,16 +383,102 @@ $ cd trading-system && python3 -m pytest tests/ --continue-on-collection-errors 
 
 ### Next action (exact)
 
-1. `docs/v2/PHASE1_DIAGNOSTIC.md` §1-2's numbers are now stale (still say
-   "9 failed... 361 passed" and don't mention the orchestrator fix) — update
-   them to match this section before starting new work, so the doc and the
-   actual repo state don't diverge.
+1. ~~`docs/v2/PHASE1_DIAGNOSTIC.md` §1-2's numbers are now stale~~ **DONE, in
+   Commit 3 itself** (see the diff for `8e03e56` — §1-2 were updated in the
+   same commit as the orchestrator fix, this item was already resolved by
+   the time this list was written).
 2. Remaining known-broken items, still not fixed by design this session:
    genuinely-missing `src/institutional/data/*` submodules (4 files),
    missing local enriched parquet data (2 tests), `frontend_pipeline/api_server.py`'s
    broken imports + EMA-fallback design decision, `trading-system/`'s
    separately-rooted `institutional.*` package. None of these block further
    V2 planning work; they block trusting those specific code paths.
-3. Still open from session 2: whether `CarryBasisAdapter`'s internal
+3. ~~Still open from session 2: whether `CarryBasisAdapter`'s internal
    `MultiLegBacktester` replay enforces any real risk control on that
-   runner's live paper capital, given it ignores `risk_state` entirely.
+   runner's live paper capital, given it ignores `risk_state` entirely.~~
+   **CLOSED, session 4 below.**
+
+---
+
+## 2026-07-28, session 4 — closed the last open Phase 1 question; corrected a session-1 misattribution
+
+Picked up the one remaining non-design-decision item from session 3's next
+action list (items 2 and 3 of `PHASE1_DIAGNOSTIC.md`'s "Next minimal
+modification" are explicit design decisions requiring the user's go-ahead —
+wiring `GovernorDecision.scale` into execution, and repair-vs-retire for
+`api_server.py` — left untouched, as instructed). Full detail in
+`docs/v2/PHASE1_DIAGNOSTIC.md` §6.
+
+**Traced `check_portfolio_invariants()` (`src/institutional/portfolio/invariants.py`),
+the one place it's transitively reachable from the live path (via
+`CarryBasisAdapter`'s internal `MultiLegBacktester` replay), and found two
+stacking defects, both now proven by executable test
+(`tests/test_v2_phase1_live_exposure_cap_diagnostic.py`, 12→14 tests, all
+passing):**
+
+1. `InvariantLimits` declares `max_gross_exposure=1.00` and
+   `max_net_long_exposure=0.75` — the exact pair the master prompt quotes —
+   but `check_portfolio_invariants()` computes both and never compares them
+   to the limits. **This corrects session 1's "not reproduced" verdict**,
+   which checked a different file (`constraints.py::PortfolioConstraints`,
+   genuinely enforced, but reachable only from `meta_allocator.py`, not from
+   `invariants.py` or the live path). Found two more independent
+   gross-exposure definitions while tracing this
+   (`portfolio_backtester.py::PortfolioBacktestConfig`, `risk_engine.py`'s
+   own dataclass — both enforced, both research/backtest-only) — 4
+   non-unified mechanisms total, only the live-reachable one (`invariants.py`)
+   is silently decorative.
+2. Even if it were enforced, it wouldn't matter: `CarryBasisAdapter.decide()`
+   wraps its entire `MultiLegBacktester(...).run()` call in a blanket
+   `except Exception`, so a real `InvariantViolation` (naked short, hedge
+   cap, carry-delta — the checks that *do* fire) gets silently downgraded to
+   an "abstain" ledger event. Proven by monkeypatching an
+   `InvariantViolation` through the actual call path and confirming
+   `decide()` swallows it rather than propagating.
+
+**No production code changed this session** — diagnostic only, consistent
+with sessions 1-3's discipline; the design decision this finding feeds into
+(should `check_portfolio_invariants` actually gate `CarryBasisAdapter`'s
+live marks, and should the 4 gross-exposure mechanisms be unified) belongs
+to Phase 2 (accounting rebuild) per the master prompt's own phase ordering,
+not a same-session patch.
+
+Full suite re-run for the record, unchanged except for the 2 new tests:
+`tests/`: `6 failed, 378 passed, 21 warnings, 4 errors in 15.78s` (was 376
+passed before this session's 2 additions — same 6 failures/4 errors,
+previously root-caused, untouched).
+
+### Files modified this session
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (2 new tests,
+  section 5 — 12 → 14 tests, all passing)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (new §6; "Next minimal modification" item 4
+  closed)
+- `docs/v2/MIGRATION.md` (known-defect table row rewritten to hold both the
+  session-3 live-path finding and this session's `invariants.py` finding
+  without conflating them)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+1. Both remaining Phase 1 items are explicit design decisions, not one-line
+   fixes, and need the user's go-ahead before any code changes (per
+   `PHASE1_DIAGNOSTIC.md`'s "Next minimal modification" items 2-3):
+   - Should `risk_reduced`/`cash` reduce order size (wire
+     `GovernorDecision.scale` into `PaperBroker.execute()` / the 2 adapters
+     that check `risk_state`), and should `CarryBasisAdapter` respect
+     `risk_state` (including `kill`) and its own internal invariant
+     violations, at all?
+   - Repair or retire `frontend_pipeline/api_server.py`?
+2. New item raised by this session's finding: the 4 independent
+   gross-exposure-limit mechanisms (`constraints.py`, `portfolio_backtester.py`,
+   `invariants.py`, `risk_engine.py`) should collapse to one canonical
+   implementation as part of Phase 2 (accounting rebuild), not be patched
+   independently.
+3. Everything else still open from sessions 1-3 and not revisited this
+   pass: secret history scan, live reachability of Mongo/qdrant,
+   `production/`/`Server/`/`hedge_fund/`/`deploy/` triage, `BasisTermAdapter`/
+   `MHEventsAdapter`'s full transitive reachability (only `CarryBasisAdapter`
+   has been traced end-to-end).
+4. Only after 1-2 are resolved with the user: draft the root
+   `pyproject.toml` + `uv.lock` (Phase 1 gate item, still not started).

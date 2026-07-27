@@ -37,6 +37,11 @@ from src.alpha20.tournament.paper_account import PaperAccount
 from src.alpha20.tournament.runner_adapters import (
     BasisTermAdapter, CarryBasisAdapter, MHEventsAdapter,
 )
+from src.alpha20.tournament.runner_registry import RunnerSpec
+from src.institutional.portfolio.invariants import (
+    InvariantLimits, InvariantViolation, check_portfolio_invariants,
+)
+from src.institutional.portfolio.position import PortfolioPosition, PositionLeg
 
 CAPITAL_USDT = 100_000.0
 VENUE = "binance_usdm"
@@ -229,3 +234,96 @@ def test_mh_events_adapter_blocks_new_positions_only_on_literal_kill():
     assert 'risk_state == "kill"' in body
     assert ".scale" not in body
     assert 'cfg["weight_per_decision"]' in body
+
+
+# ── 5. session 4 -- closes the session-2/3 open question: does
+#      CarryBasisAdapter's internal MultiLegBacktester replay (the one place
+#      check_portfolio_invariants is transitively reachable from the live
+#      path, per PHASE1_DIAGNOSTIC.md §3) constrain real paper capital? ─────
+#
+# Answer: no, for two independent reasons proven below.
+#
+# (a) src/institutional/portfolio/invariants.py::InvariantLimits declares
+#     max_gross_exposure=1.00 and max_net_long_exposure=0.75 -- the exact
+#     pair of names/values the master prompt quotes verbatim -- but
+#     check_portfolio_invariants() computes gross_exposure/net_long_exposure
+#     and returns them WITHOUT ever comparing them to those limits (it only
+#     raises on hedge_exposure, naked shorts, unlinked short legs, and carry
+#     delta tolerance). This is a DIFFERENT file from the one prior sessions
+#     checked for this claim (src/institutional/portfolio/constraints.py,
+#     "not reproduced" in session 1's EXECUTION_STATE.md entry) -- that file
+#     has its own, separately-enforced max_gross_exposure=0.75 (no
+#     max_net_long_exposure field at all), reachable only from
+#     meta_allocator.py, not from invariants.py or the live path at all. The
+#     master prompt's literal claim, verified against the file it actually
+#     names, is CONFIRMED true, not "not reproduced."
+#
+# (b) Even so, it would not matter for live paper capital: CarryBasisAdapter
+#     .decide() wraps the entire MultiLegBacktester(...).run() call in a
+#     blanket `except Exception` (runner_adapters.py, immediately after the
+#     MultiLegBacktester(...).run(start, end) call) and converts ANY
+#     exception -- including a genuine InvariantViolation from the checks
+#     that DO fire (naked short, hedge cap, carry-delta tolerance) -- into an
+#     ordinary "abstain" decision event. No halt, no alert, no visibility to
+#     the governor or other runners, no consequence beyond skipping one
+#     mark-to-market update for this runner this cycle.
+
+def test_check_portfolio_invariants_never_enforces_its_own_gross_or_net_caps():
+    """Two long-only positions worth 2x equity -- no shorts, no hedges, so
+    neither the naked-short nor the hedge-cap check can mask this -- blow
+    both max_gross_exposure (1.00) and max_net_long_exposure (0.75) by 2x
+    and check_portfolio_invariants() still returns cleanly, no
+    InvariantViolation raised. It computes the exact numbers that would be
+    needed to enforce the cap and then does not compare them to it."""
+    equity = 100_000.0
+    positions = [
+        PortfolioPosition("p1", "DIRECTIONAL_LONG", "eng", "BTCUSDT", "t0", legs=[
+            PositionLeg("l1", "p1", "BTCUSDT", "LONG_SPOT", "t0", 50_000.0, 1.0,
+                       50_000.0, mark_price=50_000.0),
+        ]),
+        PortfolioPosition("p2", "DIRECTIONAL_LONG", "eng", "ETHUSDT", "t0", legs=[
+            PositionLeg("l2", "p2", "ETHUSDT", "LONG_SPOT", "t0", 150_000.0, 1.0,
+                       150_000.0, mark_price=150_000.0),
+        ]),
+    ]
+    limits = InvariantLimits()
+    assert (limits.max_gross_exposure, limits.max_net_long_exposure) == (1.00, 0.75)
+
+    exposures = check_portfolio_invariants(positions, equity, limits)  # must not raise
+
+    assert exposures["gross_exposure"] == 2.0       # 2x the declared 1.00 cap
+    assert exposures["net_long_exposure"] == 2.0     # 2x the declared 0.75 cap
+    assert exposures["gross_exposure"] > limits.max_gross_exposure
+    assert exposures["net_long_exposure"] > limits.max_net_long_exposure
+
+
+def test_carry_basis_adapter_swallows_invariant_violations_as_silent_abstain(monkeypatch):
+    """Even the invariants check_portfolio_invariants DOES enforce (naked
+    short / hedge cap / carry-delta) would never reach live paper capital
+    either: CarryBasisAdapter.decide() catches them as a generic Exception
+    and downgrades to an "abstain" ledger event, indistinguishable from a
+    routine no-op cycle."""
+    import src.institutional.backtest.multileg_backtester as mlb_mod
+
+    violation_message = "SHORT NU détecté (pos fake, injected by this test)"
+
+    class _RaisingBacktester:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, start, end):
+            raise InvariantViolation(violation_message)
+
+    monkeypatch.setattr(mlb_mod, "MultiLegBacktester", _RaisingBacktester)
+
+    spec = RunnerSpec("carry_basis_test", "carry_basis", "ACTIVE", "deadbeef", None)
+    adapter = CarryBasisAdapter(spec)
+    events, new_state = adapter.decide(_snapshot(), PaperBroker(), {})
+
+    assert new_state == {}, "state must be unchanged on the exception path"
+    assert len(events) == 1
+    assert events[0].meta["signal"] == "abstain"
+    assert events[0].meta["reason"] == f"backtest_error: {violation_message}"
+    # nothing marks this differently from any other caught exception (a
+    # missing-data error, a bug, ...) -- InvariantViolation gets no special
+    # handling, confirming (b) above.
