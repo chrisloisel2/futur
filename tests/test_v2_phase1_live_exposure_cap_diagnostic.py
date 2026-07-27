@@ -2,89 +2,230 @@
 tests/test_v2_phase1_live_exposure_cap_diagnostic.py
 
 V2 master-prompt Phase 1 diagnostic (see docs/v2/MIGRATION.md, known-defect
-verification log). This test captures CURRENT, OBSERVED behavior of the
-ALPHA_20 live/paper decision path — it is not a spec for desired behavior
-and must not be read as "PASS = correct." It exists to prove, by execution
-rather than by static reading, whether the literal `max_gross_exposure` /
-`max_net_long_exposure` caps declared in configs/portfolio_v1_1_parallel_50.yaml
-(0.75 / 0.50) and src/institutional/portfolio/invariants.py (1.00 / 0.75)
-actually gate a decision on the live/paper path exercised by
-src/alpha20/tournament/orchestrator.py::_run_one (line: `account.evaluate_risk(
-gross_usdt=..., net_delta_usdt=..., venue_unsecured_frac=...)`).
+verification log; docs/v2/PHASE1_DIAGNOSTIC.md for the full write-up).
+Captures CURRENT, OBSERVED behavior of the ALPHA_20 live/paper decision
+path — not a spec for desired behavior, must not be read as "PASS = correct."
 
-Traced call chain: orchestrator._run_one -> PaperAccount.evaluate_risk ->
-PaperAccount.risk_metrics -> src.alpha20.risk.global_governor.evaluate.
-That governor (profile ALPHA20_LOW_RISK, configs/alpha20.yaml) checks
-drawdown, daily_loss, weekly_loss, es99_1d, net_delta_cap (0.05 NAV),
-margin_used_cap (0.20 NAV, computed as `gross_usdt * 0.10 / nav` — a fixed
-10% initial-margin proxy, NOT a direct gross-exposure ratio), and
-venue_unsecured_cap (0.15). It never reads `max_gross_exposure` or
-`max_net_long_exposure` — those names/values exist only in
-src/institutional/portfolio/{constraints,invariants}.py, which is wired into
-the BACKTEST path (backtest/portfolio_backtester.py,
-backtest/multileg_backtester.py) and is never imported by src/alpha20.
+CORRECTION (2026-07-27, session 3): the first version of this file built
+`venue_unsecured_frac={"binance": 0.0}` by hand instead of reproducing
+orchestrator._run_one()'s actual call:
 
-If this test starts failing after a future change wires the live path into
-those caps (or replaces global_governor with something that does), that is
-the fix landing — update/retire this test at that point rather than treating
-the failure as a regression.
+    venue_unsecured_frac={spec.venue or "n/a": gross / max(account.nav_usdt(), 1.0)}
+
+i.e. venue_unsecured_frac is DERIVED from gross_usdt/nav, not independent of
+it. Forcing it to 0.0 hid a real check (venue_unsecured_cap=0.15) and
+produced a false "150% gross passes completely unblocked" conclusion. Fixed
+below to build venue_unsecured_frac exactly the way _run_one() does.
+
+Corrected finding: 150% gross/NAV concentrated on one venue DOES trip
+venue_unsecured_cap (0.15) and DOES move the state to "risk_reduced" — but
+that state turns out to be advisory only downstream (see the PaperBroker /
+adapter tests in this file): nothing in src/alpha20 reads
+GovernorDecision.scale, and PaperBroker.execute() only special-cases the
+literal string "kill". So the corrected verdict is not "gross exposure is
+unblocked" but "gross exposure changes the governor's *label*, and that
+label is consultative except for kill."
 """
 from __future__ import annotations
 
+import inspect
+
+from src.alpha20.contracts import GovernorDecision
+from src.alpha20.execution.paper_broker import Order, PaperBroker
+from src.alpha20.tournament.market_bus import MarketSnapshot
 from src.alpha20.tournament.paper_account import PaperAccount
+from src.alpha20.tournament.runner_adapters import (
+    BasisTermAdapter, CarryBasisAdapter, MHEventsAdapter,
+)
 
 CAPITAL_USDT = 100_000.0
-
-# Named caps this test is checking against (NOT read by the code under test —
-# that is exactly the point).
-NAMED_MAX_GROSS_EXPOSURE_PORTFOLIO_V1_1 = 0.75      # configs/portfolio_v1_1_parallel_50.yaml
-NAMED_MAX_GROSS_EXPOSURE_INSTITUTIONAL = 1.00       # src/institutional/portfolio/invariants.py
-NAMED_MAX_NET_LONG_EXPOSURE_PORTFOLIO_V1_1 = 0.50   # configs/portfolio_v1_1_parallel_50.yaml
+VENUE = "binance_usdm"
 
 
-def test_150pct_gross_exposure_is_not_blocked_by_the_live_governor():
-    """150% gross/NAV breaches BOTH named gross caps above (0.75 and 1.00),
-    but stays under the live path's actual proxy (margin_used = gross*0.10/nav
-    = 0.15 < margin_used_cap 0.20) — so the live governor lets it through."""
+def _venue_unsecured_frac_as_run_one_builds_it(gross_usdt: float, nav: float,
+                                               venue: str = VENUE) -> dict:
+    """Exact reproduction of orchestrator._run_one()'s call — see
+    src/alpha20/tournament/orchestrator.py:76-79."""
+    return {venue or "n/a": gross_usdt / max(nav, 1.0)}
+
+
+def _snapshot(price: float = 50_000.0, symbol: str = "BTCUSDT") -> MarketSnapshot:
+    return MarketSnapshot(
+        market_event_id="phase1-diag", cutoff="2026-01-01T00:00:00Z",
+        decision_ts="2026-01-01T00:00:00Z", received_ts="2026-01-01T00:00:00Z",
+        prices={symbol: {"close": price, "exchange_ts": "2026-01-01T00:00:00Z"}},
+    )
+
+
+# ── 1. Governor is really called, and gross DOES move the state — via
+#      venue_unsecured_max, not via a max_gross_exposure check that doesn't
+#      exist ────────────────────────────────────────────────────────────────
+
+def test_150pct_gross_triggers_risk_reduced_via_venue_unsecured_max():
+    """Reproduces orchestrator._run_one()'s exact call. 150% gross/NAV on one
+    venue breaches venue_unsecured_cap=0.15 (configs/alpha20.yaml,
+    ALPHA20_LOW_RISK) — NOT because of a max_gross_exposure check (none
+    exists in src/alpha20), but because venue_unsecured_frac is itself
+    derived from gross/nav for a single-venue runner."""
     account = PaperAccount("phase1_diag_gross", CAPITAL_USDT)
     nav = account.nav_usdt()
-    assert nav == CAPITAL_USDT  # fresh ledger, no flows yet — sanity check on the premise
+    assert nav == CAPITAL_USDT
 
-    gross_usdt = 1.5 * nav  # 150% gross
-    assert (gross_usdt / nav) > NAMED_MAX_GROSS_EXPOSURE_PORTFOLIO_V1_1
-    assert (gross_usdt / nav) > NAMED_MAX_GROSS_EXPOSURE_INSTITUTIONAL
+    gross_usdt = 1.5 * nav  # 150% gross, breaches historical named caps (0.75 / 1.00)
+    venue_frac = _venue_unsecured_frac_as_run_one_builds_it(gross_usdt, nav)
+    assert venue_frac == {VENUE: 1.5}
 
     decision = account.evaluate_risk(
-        gross_usdt=gross_usdt, net_delta_usdt=0.0,
-        venue_unsecured_frac={"binance": 0.0},
+        gross_usdt=gross_usdt, net_delta_usdt=0.0, venue_unsecured_frac=venue_frac,
     )
 
-    # OBSERVED on HEAD ecd93ad-derived v2/foundation: the live governor does
-    # not block this. state stays "risk_on" and no reason fires.
-    assert decision.state == "risk_on", (
-        f"expected current (unenforced) behavior 'risk_on', got {decision.state} "
-        f"reasons={decision.reasons} — if this now blocks, the gross-exposure "
-        f"gap has been closed; update this test's docstring and assertion."
+    assert decision.state == "risk_reduced", (
+        f"expected risk_reduced (venue_unsecured breach), got {decision.state} "
+        f"reasons={decision.reasons}"
     )
+    assert "venue_unsecured_max" in decision.reasons
+    assert decision.reasons["venue_unsecured_max"] == 1.5
+    # the fixed 10%-of-gross margin proxy does NOT breach at 150% gross —
+    # confirms this is the venue check firing, not a gross/margin check
     assert "margin_used" not in decision.reasons
+    assert decision.scale == 0.5  # SCALES["risk_reduced"] — see below: never consumed
 
 
 def test_10pct_net_delta_does_trigger_a_real_but_differently_named_cap():
-    """Contrast case: net_delta_cap (0.05 NAV) is real and DOES fire — the
-    live path is not unmanaged, it just doesn't use the
-    max_net_long_exposure name or its 0.50 threshold. 10% net delta is far
-    under the historical 0.50 cap yet still trips the live governor's much
-    tighter 0.05 cap."""
+    """Contrast: net_delta_cap (0.05 NAV) is real and fires independently of
+    the venue check above."""
     account = PaperAccount("phase1_diag_netdelta", CAPITAL_USDT)
     nav = account.nav_usdt()
 
-    net_delta_usdt = 0.10 * nav  # 10% net long
-    assert (net_delta_usdt / nav) < NAMED_MAX_NET_LONG_EXPOSURE_PORTFOLIO_V1_1
-
+    net_delta_usdt = 0.10 * nav
     decision = account.evaluate_risk(
         gross_usdt=0.0, net_delta_usdt=net_delta_usdt,
-        venue_unsecured_frac={"binance": 0.0},
+        venue_unsecured_frac=_venue_unsecured_frac_as_run_one_builds_it(0.0, nav),
     )
-
     assert decision.state == "risk_reduced"
     assert "net_delta" in decision.reasons
+
+
+def test_kill_state_forces_scale_zero_but_nothing_reads_scale():
+    """Governor is really called and really computes scale=0.0 on a kill --
+    the question the rest of this file answers is whether anything
+    downstream actually multiplies an order by that number."""
+    account = PaperAccount("phase1_diag_kill", CAPITAL_USDT)
+    nav = account.nav_usdt()
+    # drawdown-based kill: manufacture via extreme net_delta AND venue breach
+    # is not enough to reach "kill" (governor only steps one level per cycle,
+    # see global_governor._ORDER logic) -- kill is reached directly via dd_kill.
+    decision = GovernorDecision(state="kill", scale=0.0, reasons={"dd_kill": 0.03})
+    assert decision.scale == 0.0
+    # proven separately below: PaperBroker.execute() never reads .scale, only
+    # the literal state string "kill"
+
+
+# ── 2. GovernorDecision.scale is computed but never consumed anywhere in
+#      src/alpha20 -- pinned via source inspection so a future wiring shows
+#      up as a test change, not a silent assumption ─────────────────────────
+
+def test_scale_field_is_never_read_outside_its_own_definition():
+    """`grep -rn "\\.scale" src/alpha20` (run manually this session) found
+    exactly one reference outside contracts.py itself: a unit test asserting
+    the governor's OWN output (tests/test_alpha20_risk.py). Pin that via
+    source inspection of the actual execution-path modules so a future fix
+    that wires scale into sizing breaks this test (which is the point --
+    update/retire it then)."""
+    import src.alpha20.execution.paper_broker as pb_mod
+    import src.alpha20.tournament.runner_adapters as ra_mod
+
+    for mod in (pb_mod, ra_mod):
+        src_text = inspect.getsource(mod)
+        assert ".scale" not in src_text, (
+            f"{mod.__name__} now references .scale -- GovernorDecision.scale "
+            f"appears to be wired into execution; update PHASE1_DIAGNOSTIC.md "
+            f"and MIGRATION.md's verdict, this is no longer accurate."
+        )
+
+
+# ── 3. PaperBroker.execute(): only "kill" changes fill behavior ────────────
+
+def test_paper_broker_fills_full_notional_under_risk_on():
+    fills = PaperBroker().execute(
+        Order("r1", "BTCUSDT", VENUE, +1, 10_000.0), _snapshot(), risk_state="risk_on",
+    )
+    assert fills["observed"].filled_notional == 10_000.0
+    assert not fills["observed"].rejected
+
+
+def test_paper_broker_fills_full_notional_under_risk_reduced():
+    """This is the crux of the corrected verdict: risk_reduced does NOT
+    reduce the filled notional. The 0.5 scale factor computed by the
+    governor is not applied here or anywhere upstream (see previous test)."""
+    fills = PaperBroker().execute(
+        Order("r1", "BTCUSDT", VENUE, +1, 10_000.0), _snapshot(), risk_state="risk_reduced",
+    )
+    assert fills["observed"].filled_notional == 10_000.0
+    assert not fills["observed"].rejected
+
+
+def test_paper_broker_fills_full_notional_under_cash():
+    """Same as risk_reduced: "cash" (scale=0.0 in the governor's own output)
+    still fills the order at full requested notional in PaperBroker."""
+    fills = PaperBroker().execute(
+        Order("r1", "BTCUSDT", VENUE, +1, 10_000.0), _snapshot(), risk_state="cash",
+    )
+    assert fills["observed"].filled_notional == 10_000.0
+    assert not fills["observed"].rejected
+
+
+def test_paper_broker_rejects_new_orders_under_kill():
+    fills = PaperBroker().execute(
+        Order("r1", "BTCUSDT", VENUE, +1, 10_000.0), _snapshot(), risk_state="kill",
+    )
+    assert fills["observed"].rejected
+    assert fills["observed"].reject_reason == "kill_switch_active"
+    assert fills["observed"].filled_notional == 0.0
+
+
+def test_paper_broker_kill_does_not_block_exits():
+    """order.is_exit=True is explicitly exempted from the kill check --
+    positions can always be closed, only new/increasing risk is blocked."""
+    exit_order = Order("r1", "BTCUSDT", VENUE, -1, 10_000.0, is_exit=True)
+    fills = PaperBroker().execute(exit_order, _snapshot(), risk_state="kill")
+    assert not fills["observed"].rejected
+    assert fills["observed"].filled_notional == 10_000.0
+
+
+# ── 4. Per-adapter check: how (or whether) each of the 3 runner adapters
+#      consults risk_state at all ───────────────────────────────────────────
+
+def test_carry_basis_adapter_never_reads_risk_state():
+    """CarryBasisAdapter.decide() accepts risk_state as a parameter but its
+    body never references it: it doesn't route orders through PaperBroker at
+    all (gross_usdt comes from its own internal MultiLegBacktester replay,
+    per its own comment "ce runner ne route PAS ses jambes par le broker
+    paper partagé"). Net effect: for this adapter, not even a kill state
+    blocks anything -- there is no risk_state check anywhere in its decide().
+    This is a stronger finding than "only kill blocks": for this specific
+    adapter, nothing blocks."""
+    body = inspect.getsource(CarryBasisAdapter.decide)
+    occurrences = body.count("risk_state")
+    assert occurrences == 1, (
+        f"expected exactly 1 occurrence of 'risk_state' (the parameter in the "
+        f"signature) and zero uses in the body, found {occurrences}. If this "
+        f"increased, CarryBasisAdapter now consults risk_state -- update the "
+        f"verdict in PHASE1_DIAGNOSTIC.md and MIGRATION.md."
+    )
+
+
+def test_basis_term_adapter_blocks_new_positions_only_on_literal_kill():
+    body = inspect.getsource(BasisTermAdapter.decide)
+    assert 'risk_state == "kill"' in body
+    assert ".scale" not in body
+    # sizing is a fixed fraction of capital, not scaled by the governor's
+    # risk_reduced/cash multiplier
+    assert 'cfg["sizing_frac"]' in body
+
+
+def test_mh_events_adapter_blocks_new_positions_only_on_literal_kill():
+    body = inspect.getsource(MHEventsAdapter.decide)
+    assert 'risk_state == "kill"' in body
+    assert ".scale" not in body
+    assert 'cfg["weight_per_decision"]' in body

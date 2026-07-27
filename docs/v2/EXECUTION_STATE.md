@@ -267,3 +267,66 @@ missing documents:
 Proceed to Commit 2 (risk-diagnostic correction, see below) and Commit 3
 (orchestrator test repair) in this same session — both are self-contained
 and don't depend on the blocked source files.
+
+---
+
+## 2026-07-27, session 3, continued — Commit 2: risk diagnostic correction
+
+The session-2 exposure-cap test was wrong: it built
+`venue_unsecured_frac={"binance": 0.0}` by hand instead of reproducing
+`orchestrator._run_one()`'s actual call, which derives it from
+`gross_usdt/nav`. That hid a real check and produced a false "150% gross
+passes completely unblocked" conclusion. Corrected this session:
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` rewritten:
+  2 tests → 12 tests, all passing
+  (`python3 -m pytest tests/test_v2_phase1_live_exposure_cap_diagnostic.py -v`
+  → `12 passed in 0.72s`). Now reproduces `_run_one()`'s exact
+  `venue_unsecured_frac` formula, and directly tests `PaperBroker.execute()`
+  under all 4 governor states plus each of the 3 runner adapters
+  individually.
+- **Corrected finding:** 150% gross/NAV on one venue **does** trip
+  `venue_unsecured_cap=0.15` and moves the governor to `state="risk_reduced"`
+  — the governor is real and its state is real, contrary to the session-2
+  claim. The actual gap is one level downstream:
+  `GovernorDecision.scale` (0.5/0.0 for risk_reduced/cash) is **never read**
+  anywhere in `src/alpha20` (pinned via source-inspection test — will fail
+  the moment this changes, which is the intended signal to update these
+  docs). `PaperBroker.execute()` only special-cases the literal string
+  `"kill"`; `risk_reduced`/`cash` fill at full notional, same as `risk_on`.
+- **Per-adapter finding (new this session):** `BasisTermAdapter` and
+  `MHEventsAdapter` both have an explicit `risk_state == "kill"` guard
+  before opening new positions. `CarryBasisAdapter` — the first of the 3 —
+  **never references `risk_state` at all** in its `decide()` body (it
+  doesn't route orders through `PaperBroker`; it computes its own
+  `gross_usdt` from an internal `MultiLegBacktester` replay). So for that
+  specific runner, not even `kill` blocks anything through this mechanism.
+- **Reformulated verdict** (replaces the session-2 "CONFIRMED (defect
+  reproduced)" framing, which was too coarse): named caps not wired (still
+  true) + governor genuinely called and computes real states (corrected —
+  was previously understated) + `scale` computed but never applied (new,
+  precise finding) + `risk_reduced`/`cash` are consultative only, ledger-
+  visible but not order-size-changing (new, precise finding) + only `kill`
+  is an actual execution block, and only where an adapter checks for it
+  (new, precise finding — `CarryBasisAdapter` is the exception).
+  `docs/v2/PHASE1_DIAGNOSTIC.md` §3-4 and `docs/v2/MIGRATION.md`'s
+  known-defect table both rewritten to match.
+
+### Files modified this session (Commit 2 portion)
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (rewritten, 12
+  tests)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (§3, §4, and "Next minimal modification"
+  rewritten)
+- `docs/v2/MIGRATION.md` (known-defect table row rewritten)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+Commit 3: fix the 3 failing `test_alpha20_tournament_orchestrator.py` tests
+by monkeypatching `orchestrator.assert_deployment_matches_approved` to a
+no-op inside the `no_network`-style fixture those tests use — not by
+fabricating a global approved-manifest file, since
+`test_alpha20_deployment_guard.py` already owns testing the fail-closed
+behavior itself. Then re-run both `tests/` and `trading-system/tests/` and
+record the new pass/fail counts.
