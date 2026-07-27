@@ -330,3 +330,69 @@ fabricating a global approved-manifest file, since
 `test_alpha20_deployment_guard.py` already owns testing the fail-closed
 behavior itself. Then re-run both `tests/` and `trading-system/tests/` and
 record the new pass/fail counts.
+
+---
+
+## 2026-07-27, session 3, continued — Commit 3: orchestrator test fix
+
+Added one line to the `no_network` fixture in
+`tests/test_alpha20_tournament_orchestrator.py`:
+`monkeypatch.setattr(orchestrator, "assert_deployment_matches_approved", lambda: None)`,
+with a comment pointing at `test_alpha20_deployment_guard.py` as the real
+owner of that behavior's test coverage. No fake global manifest created.
+
+**Results:**
+
+```
+$ python3 -m pytest tests/test_alpha20_tournament_orchestrator.py -v
+5 passed in 1.50s   (was 2 passed, 3 failed before this fix)
+
+$ python3 -m pytest tests/test_alpha20_deployment_guard.py -v
+4 passed in 0.30s   (unchanged -- confirms the fail-closed behavior is
+                     still independently covered, not weakened)
+
+$ python3 -m pytest tests/ --continue-on-collection-errors -q
+6 failed, 376 passed, 4 errors in 15.91s   (exit 1)
+  -- was 9 failed, 361 passed, 4 errors before this session's Commit 2+3
+  -- delta: -3 failed (the orchestrator fix), +15 passed (+3 from the
+     orchestrator fix, +12 from Commit 2's rewritten diagnostic test file)
+  -- the remaining 6 failed + 4 errors are the same, already-diagnosed,
+     unrelated issues from docs/v2/PHASE1_DIAGNOSTIC.md §1 (genuinely
+     missing src/institutional/data/* modules; missing local enriched
+     parquet data) -- untouched, as expected
+
+$ cd trading-system && python3 -m pytest tests/ --continue-on-collection-errors -q
+5 failed, 4 passed, 7 skipped, 4 errors in 2.34s   (exit 1)
+  -- unchanged from session 2, as expected -- nothing this session touched
+     trading-system/
+```
+
+### Files modified this session (Commit 3 portion)
+
+- `tests/test_alpha20_tournament_orchestrator.py` (`no_network` fixture,
+  +1 line + comment)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Current overall test state (both suites, end of session 3)
+
+- `tests/`: 376 passed / 6 failed / 4 collection errors. All 6 failures and
+  4 errors are previously root-caused (see `PHASE1_DIAGNOSTIC.md` §1) and
+  deliberately not fixed this session — none are new, none are hidden.
+- `trading-system/tests/`: 4 passed / 5 failed / 7 skipped / 4 errors,
+  unchanged, previously root-caused (`PHASE1_DIAGNOSTIC.md` §2).
+
+### Next action (exact)
+
+1. `docs/v2/PHASE1_DIAGNOSTIC.md` §1-2's numbers are now stale (still say
+   "9 failed... 361 passed" and don't mention the orchestrator fix) — update
+   them to match this section before starting new work, so the doc and the
+   actual repo state don't diverge.
+2. Remaining known-broken items, still not fixed by design this session:
+   genuinely-missing `src/institutional/data/*` submodules (4 files),
+   missing local enriched parquet data (2 tests), `frontend_pipeline/api_server.py`'s
+   broken imports + EMA-fallback design decision, `trading-system/`'s
+   separately-rooted `institutional.*` package. None of these block further
+   V2 planning work; they block trusting those specific code paths.
+3. Still open from session 2: whether `CarryBasisAdapter`'s internal
+   `MultiLegBacktester` replay enforces any real risk control on that
+   runner's live paper capital, given it ignores `risk_state` entirely.

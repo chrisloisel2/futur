@@ -67,6 +67,12 @@ def no_network(monkeypatch, tmp_path):
     monkeypatch.setattr(pp, "live_funding", lambda s: None)
     monkeypatch.setattr(pp, "btc_regime", lambda: "UNKNOWN")
     monkeypatch.setattr(orchestrator, "assert_paper_only", lambda: None)
+    # Fail-closed behavior of the deployment guard itself is covered by
+    # tests/test_alpha20_deployment_guard.py (no real manifest -> refuses to
+    # start). These tests are about orchestrator isolation/timeout/Mongo
+    # independence, not the guard, so bypass it rather than fabricating a
+    # global approved-manifest file.
+    monkeypatch.setattr(orchestrator, "assert_deployment_matches_approved", lambda: None)
 
 
 def test_one_broken_runner_never_blocks_the_others(no_network, monkeypatch):

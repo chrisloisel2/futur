@@ -10,6 +10,11 @@ itself on top of `d5e27b2` / forensic tag `forensic-baseline-2026-07-27` at
 
 ## 1. `tests/` (root suite)
 
+**Updated 2026-07-27, session 3, Commit 3** — the numbers in this section
+were re-run after fixing the 3 orchestrator tests (see the bullet below and
+`docs/v2/EXECUTION_STATE.md`'s Commit 3 entry). Original session-1 numbers
+struck through where superseded.
+
 ```
 $ python3 -m pytest tests/ -ra --tb=short -q
 ... 4 errors during collection, pytest aborts (exit 2) before running anything
@@ -20,8 +25,11 @@ with `--continue-on-collection-errors` to get a full picture in one pass:
 
 ```
 $ python3 -m pytest tests/ -ra --tb=short -q --continue-on-collection-errors
-9 failed, 361 passed, 21 warnings, 4 errors in 14.98s   (exit 1)
+6 failed, 376 passed, 21 warnings, 4 errors in 15.91s   (exit 1)
 ```
+(was: `9 failed, 361 passed, 21 warnings, 4 errors in 14.98s` before Commit
+2's 12 new diagnostic tests and Commit 3's orchestrator fix — net +15
+passed / -3 failed, reconciled below.)
 
 **4 collection errors — genuinely missing modules, not an environment
 problem:**
@@ -37,23 +45,27 @@ problem:**
 and `atomic_parquet.py` — these four modules were never committed at this
 path on this repo, on any branch.
 
-**9 failures, three distinct root causes:**
+**6 failures (was 9), two remaining root causes — the third was fixed this
+session:**
 
 - **4×** `tests/test_derivatives_collector.py` — same missing-module cause
   as above (`src.institutional.data.derivatives_collector`), but the import
   is inside the test function rather than at module top level, so pytest
   collects the file and fails each test individually instead of one
   collection error.
-- **3×** `tests/test_alpha20_tournament_orchestrator.py` — `SystemExit: 2`
-  raised by `src/alpha20/deployment_guard.py:60`, message: *"DEPLOYMENT
-  GUARD — aucun manifeste approuvé trouvé
-  (configs/DEPLOYMENT_MANIFEST.json). Démarrage refusé."* This is the
-  fail-closed deployment-drift guard (git log `eb94ddf`) doing exactly what
-  it's designed to do — there is no approved manifest file in this checkout
-  — but these 3 tests don't mock/bypass it, so they fail rather than
-  exercising the orchestrator behavior they're named for. **Not a bug in
-  the guard; a test-fixture gap** (the tests need an approved-manifest
-  fixture, not a guard bypass).
+- ~~**3×** `tests/test_alpha20_tournament_orchestrator.py`~~ **FIXED,
+  Commit 3.** Was: `SystemExit: 2` raised by
+  `src/alpha20/deployment_guard.py:60`, message: *"DEPLOYMENT GUARD — aucun
+  manifeste approuvé trouvé (configs/DEPLOYMENT_MANIFEST.json). Démarrage
+  refusé."* — the fail-closed deployment-drift guard (git log `eb94ddf`)
+  doing exactly what it's designed to do, but these 3 tests didn't
+  mock/bypass it. Fixed by adding
+  `monkeypatch.setattr(orchestrator, "assert_deployment_matches_approved", lambda: None)`
+  to the `no_network` fixture — not a global fake manifest, since
+  `tests/test_alpha20_deployment_guard.py` already independently covers the
+  fail-closed behavior itself (re-run and confirmed still 4/4 passing after
+  this change, so the guard's own test coverage wasn't weakened). Now
+  `test_alpha20_tournament_orchestrator.py`: `5 passed in 1.50s`.
 - **2×** `tests/test_hedge_governor_backtest.py`,
   `tests/test_portfolio_multileg.py` — `ValueError: no prices`, caused by
   `data/enriched/BTCUSDT_1h_enriched.parquet` and `ETHUSDT_1h_enriched.parquet`
@@ -61,12 +73,20 @@ path on this repo, on any branch.
   Mac has no local enriched historical dataset (it lives on
   `qbee@100.127.59.114`). **Data-locality gap, not a code bug.**
 
+Plus **12 new passing tests** from
+`tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (Commit 2, section 4
+below) — accounts for the rest of the +15 passed delta (3 orchestrator + 12
+diagnostic = 15).
+
 ## 2. `trading-system/tests/`
+
+Re-run in session 3, Commit 3, for completeness — **unchanged**, as
+expected (nothing this session touched `trading-system/`):
 
 ```
 $ cd trading-system && python3 -m pytest tests/ -ra --tb=short -q --continue-on-collection-errors
 collected 16 items / 4 errors
-5 failed, 4 passed, 7 skipped, 4 errors in 2.75s   (exit 1)
+5 failed, 4 passed, 7 skipped, 4 errors in 2.34s   (exit 1)
 ```
 
 All 4 collection errors and 3 of the 5 failures are `ModuleNotFoundError:
