@@ -216,3 +216,54 @@ Summary:
    was traced, to close the one open question from this pass.
 4. Only after 1–3, and after the still-open items from the prior session are
    at least triaged: draft the root `pyproject.toml` + `uv.lock`.
+
+---
+
+## 2026-07-27, session 3 — source docs re-verified still blocked; two claims classified via repo evidence instead
+
+Re-searched for `project_sources/01-Audit.txt` /
+`02-Etat-de-l-art.txt` a third time (same methodology as sessions 1-2):
+still zero hits anywhere on this machine. `docs/v2/SOURCE_REVIEW.md`
+rewritten (not appended) to state this plainly and to stop re-searching
+without a new lead — the search has now been run 3 times with an identical
+null result.
+
+However, the two specific claims named this session (seven-layer
+architecture; old SOL/BNB results) turned out to be independently
+verifiable from files already committed in the repo, without needing the
+missing documents:
+
+- **Seven-layer architecture → HISTORICAL_ONLY/SUPERSEDED, confirmed.**
+  `legacy/audit.md:33,67-75` documents the old `ai/models/level_0..7`
+  cascade (NumPy/TensorFlow/PyTorch); that same file already called most
+  levels mocked/disconnected at the time (`:923-929`, `:971`, `:978`).
+  Confirmed physically gone from the live tree — moved to
+  `legacy/ai/models/` (only levels 0,1,2,7 survived even there) — and
+  replaced by a simpler, currently-live `ai/level_0`/`ai/level_2` design
+  ("Couche 0"/"Couche 2" per the newer `legacy/docs/audit.md`).
+- **Old SOL/BNB results → SUPERSEDED, evidence found, exact "+0.3-0.5%/month"
+  figure NOT independently corroborated.** `legacy/dead_reports/BILAN_AVANCEMENT_MAI_2026.md`:
+  SOLUSDT val_PF=999 on n=2 trades (flagged "non significatif" in the
+  document itself — classic small-sample artifact), BNBUSDT val_PF=0.11
+  ("Rejeté val"), explicit recommendation to disable both from live.
+  `reports/experiments.yaml`'s BTC+ETH+BNB+SOL entries all show
+  `pf_oos` 0.0-0.89 (losing OOS) with decision `incubate`/`reject`, never
+  promoted. Grepped for the literal "+0.3–0.5%/mois" figure in every
+  plausible phrasing across `reports/`, `research/`, `legacy/*.md`: no
+  match found. The SUPERSEDED classification stands on the small-sample/
+  rejected/never-promoted evidence above regardless; the specific number
+  may be in the still-missing source documents and can't be cross-checked
+  without them.
+
+### Files modified this session (Commit 1 portion)
+
+- `docs/v2/SOURCE_REVIEW.md` (rewritten, not appended — real classification
+  of the 2 claims that could be evidenced from the repo; still explicitly
+  BLOCKED on the 2 named source files themselves)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+Proceed to Commit 2 (risk-diagnostic correction, see below) and Commit 3
+(orchestrator test repair) in this same session — both are self-contained
+and don't depend on the blocked source files.
