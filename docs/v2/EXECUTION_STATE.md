@@ -106,3 +106,22 @@ No `pytest` run yet this session — there is no root `pyproject.toml`/`pytest.i
 2. Verify whether `src/alpha20`'s live/paper decision path calls `src/institutional/portfolio/constraints.py` — resolves the open exposure-cap-enforcement question definitively instead of leaving it UNVERIFIED.
 3. Second-pass triage of the five `UNVERIFIED` top-level dirs (`Server`, `production`, `trading-system`, `hedge_fund`, `deploy`) to move them to a real classification before Phase 1 migration starts.
 4. Only after 1–3: draft the root `pyproject.toml` + `uv.lock` and the `futur validate` / `futur replay --fixture smoke` CLI skeleton required by the Phase 1 gate.
+
+---
+
+## 2026-07-27, continued — source document review attempt (addendum)
+
+Asked to review `project_sources/01-Audit.txt` (claimed SHA-256
+`516cee6261e15c8d30d963940d079e968c3ea2149a2304864250c50799bd2b5c`) and
+`project_sources/02-Etat-de-l-art.txt` (claimed SHA-256
+`9fbe135e48afd0ec3b287735098b1890e254d7d752e0c366ad2db6cc8919e00e`) before
+starting Phase 1. **Neither file was found anywhere on this machine** —
+repeated the prior search plus additional bounded searches of
+`~/Downloads`, `~/Desktop`, `~/Documents`, and this session's other working
+directories. Full detail and exact commands in `docs/v2/SOURCE_REVIEW.md`,
+which is created but marked `BLOCKED` — it does not classify any claims,
+since no file content exists to classify without inventing it. Proceeding
+straight to Phase 1 per the master prompt's own "repo is ground truth" rule.
+This is a real, standing blocker (not resolved by working around it) —
+surface it to the user again if source review is asked for later without
+new file-location information.
