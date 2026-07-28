@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "futur"
+version = "0.1.0"
+description = "Canonical Python base for the futur trading system rebuild (Phase 3: packaging only -- no strategy or Truth Engine code lives here yet)."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "pyyaml",
+    "lightgbm",
+    "scikit-learn",
+    "joblib",
+    "pymongo",
+    "websockets",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff",
+    "mypy",
+]
+
+[project.scripts]
+futur = "futur.cli:main"
+
+# ── package discovery ────────────────────────────────────────────────────
+# Two package roots, deliberately mixed:
+#   - `src` (and everything under it, `src.alpha20`/`src.institutional`/...)
+#     keeps its existing dotted-prefix import path -- renaming it would
+#     touch hundreds of `from src.X import Y` call sites across src/,
+#     tests/, scripts/, research/ for zero behavioral gain in a packaging
+#     phase that must not touch strategies. Documented debt: see
+#     docs/FOUNDATION_AUDIT.md and docs/CLEAN_CLONE.md.
+#   - `futur` is a genuinely new, top-level package (no `src.` prefix,
+#     matching the mission's required `futur.cli:main` entry point) that
+#     physically lives at src/futur/ per the target layout, remapped via
+#     package-dir below. It is the ONLY public CLI surface.
+[tool.setuptools.packages.find]
+where = [".", "src"]
+include = ["src", "src.alpha20", "src.alpha20.*", "src.institutional", "src.institutional.*", "futur", "futur.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit", "tests/integration", "tests/architecture"]
+pythonpath = ["."]
+addopts = "-ra --tb=short"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+# Codebase has never been linted; start from Ruff's own defaults rather
+# than an aspirational strict set that would drown real findings in noise
+# from 1700+ never-linted files outside this phase's scope.
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+# `ignore_missing_imports`: src/ has function-local imports of ai/core/
+# scripts/ (sibling directories, not installed packages -- see
+# docs/FOUNDATION_AUDIT.md) that mypy can't resolve statically. Not
+# `strict`: 1700+ files have never been type-checked; turning strict mode
+# on here would produce a wall of pre-existing findings unrelated to this
+# packaging phase, not a meaningful new signal.
