@@ -17,6 +17,7 @@ from src.futur.truth.events import Instrument
 class SpotPosition:
     instrument: Instrument
     quantity: float = 0.0
+    last_price: float = 0.0    # last fill price -- exposure fallback when unmarked (margin.py)
 
     def market_value(self, mark_price: float) -> float:
         return self.quantity * mark_price

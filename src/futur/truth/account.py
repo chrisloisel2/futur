@@ -178,6 +178,7 @@ class Account:
         self.cash -= signed_qty * price
         self.cash -= fee
         pos.quantity = new_qty
+        pos.last_price = price
 
     def _apply_perp_fill(self, instrument: Instrument, signed_qty: float,
                          price: float, fee: float) -> None:
