@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import math
 
-from src.futur.truth.events import FillPayload
+from src.futur.truth.events import FillPayload, LiquidationPayload
 from src.futur.truth.ledger import Ledger
 from src.futur.truth.margin import MarginConfig, compute_margin_state
 from src.futur.truth.orders import OrderSide
@@ -121,21 +121,29 @@ def _check_client_order_id_consistency(account) -> None:
 
 
 def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
-    """Independent of Account's own bookkeeping: sums signed fill
-    quantities straight from the ledger (not from _apply_perp_fill's
-    weighted-average state machine) and compares to the live position.
-    Net signed quantity is unaffected by how PnL/avg-price get computed,
-    so this catches a real class of bug -- a position update that drifted
-    from what the recorded fills actually said -- without duplicating the
-    PnL logic itself."""
+    """Independent of Account's own bookkeeping: replays signed quantity
+    changes straight from the ledger's FILL and LIQUIDATION events (not
+    from _apply_perp_fill's/_apply_liquidation's weighted-average-cost
+    state) and compares the final total to the live position. Net signed
+    quantity is unaffected by how PnL/avg-price get computed, so this
+    catches a real class of bug -- a position update that drifted from
+    what the recorded history actually said -- without duplicating the
+    PnL logic itself. LIQUIDATION's directional effect depends on which
+    side the position was on AT THAT POINT, so this replays in ledger
+    order rather than summing independently of order (a liquidation
+    always moves quantity toward zero, never away from it)."""
     expected: dict = {}
     for entry in ledger.entries:
         event = entry.event
-        if not isinstance(event.payload, FillPayload):
-            continue
-        p = event.payload
-        signed = p.quantity if OrderSide(p.side) == OrderSide.BUY else -p.quantity
-        expected[p.instrument.key] = expected.get(p.instrument.key, 0.0) + signed
+        if isinstance(event.payload, FillPayload):
+            p = event.payload
+            signed = p.quantity if OrderSide(p.side) == OrderSide.BUY else -p.quantity
+            expected[p.instrument.key] = expected.get(p.instrument.key, 0.0) + signed
+        elif isinstance(event.payload, LiquidationPayload):
+            lp = event.payload
+            running = expected.get(lp.instrument.key, 0.0)
+            direction = 1.0 if running > 0 else -1.0
+            expected[lp.instrument.key] = running - direction * lp.quantity_closed
 
     for key, pos in account.spot_positions.items():
         exp = expected.get(key, 0.0)
@@ -146,7 +154,8 @@ def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
         exp = expected.get(key, 0.0)
         if abs(pos.quantity - exp) > _EPS:
             raise InvariantViolation(
-                f"perp position {key}: quantity {pos.quantity} != sum of fills {exp}")
+                f"perp position {key}: quantity {pos.quantity} != sum of fills/"
+                f"liquidations {exp}")
 
 
 def _check_cash_equals_categorized_flows(account) -> None:

@@ -34,12 +34,14 @@ from src.futur.truth.events import (
     FundingPayload,
     Instrument,
     InstrumentType,
+    LiquidationPayload,
     MarginUpdatePayload,
     MarkPayload,
     OrderAcknowledgedPayload,
     OrderCancelledPayload,
     OrderRejectedPayload,
     OrderSubmittedPayload,
+    ReconciliationPayload,
 )
 from src.futur.truth.orders import Order, OrderSide, OrderStatus, OrderType
 from src.futur.truth.positions import PerpPosition, SpotPosition
@@ -59,6 +61,13 @@ class ShortSpotNotAllowedError(Exception):
 
 class UnknownOrderError(Exception):
     pass
+
+
+class UnknownPositionError(Exception):
+    pass
+
+
+_LIQUIDATION_EPS = 1e-6
 
 
 def _require_finite(value: float, label: str) -> None:
@@ -251,9 +260,48 @@ class Account:
         self.cash += p.amount    # signed: + received, - paid
         self.cumulative_funding += p.amount
 
-    # ── margin / liquidation snapshots (informational at this stage) ──────
+    # ── margin snapshots (informational) ────────────────────────────────
     def _apply_margin_update(self, p: MarginUpdatePayload) -> None:
         self.last_margin_snapshot[p.instrument.key] = p
+
+    # ── liquidation ──────────────────────────────────────────────────────
+    def _apply_liquidation(self, p: LiquidationPayload) -> None:
+        """Forced closure of `quantity_closed` of an existing perp
+        position at `price`, with an explicit fee -- same realized-PnL
+        math as a normal closing fill (see _apply_perp_fill's reduction
+        case), but never a fill: no Order is involved, so this bypasses
+        the order/fill machinery entirely by design. Never partially
+        implicit -- if there's no such position, or the close is larger
+        than what's open, this raises rather than silently clamping."""
+        pos = self.perp_positions.get(p.instrument.key)
+        if pos is None or pos.quantity == 0.0:
+            raise UnknownPositionError(
+                f"liquidation for {p.instrument.key} but no open perp position exists")
+        if p.quantity_closed <= 0:
+            raise ValueError(
+                f"liquidation quantity_closed must be > 0, got {p.quantity_closed!r}")
+        if p.quantity_closed > abs(pos.quantity) + _LIQUIDATION_EPS:
+            raise ValueError(
+                f"liquidation quantity_closed {p.quantity_closed} exceeds open "
+                f"position {pos.quantity} for {p.instrument.key}")
+        direction = 1.0 if pos.quantity > 0 else -1.0
+        realized_pnl = (p.price - pos.avg_entry_price) * p.quantity_closed * direction
+
+        self.cash += realized_pnl
+        self.cash -= p.fee
+        self.cumulative_realized_pnl += realized_pnl
+        self.cumulative_fees_paid += p.fee
+
+        new_qty = pos.quantity - direction * p.quantity_closed
+        pos.quantity = new_qty
+        if abs(new_qty) < _LIQUIDATION_EPS:
+            pos.quantity = 0.0
+            pos.avg_entry_price = 0.0
+
+    # ── reconciliation (verdict recording -- comparison logic in
+    #    reconciliation.py) ──────────────────────────────────────────────
+    def _apply_reconciliation(self, p: ReconciliationPayload) -> None:
+        self.last_reconciliation = p
 
     # ── derived quantities ───────────────────────────────────────────────
     def expected_cash_from_categories(self) -> float:
