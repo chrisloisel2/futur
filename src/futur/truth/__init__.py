@@ -6,6 +6,7 @@ reconciliation. Explicitly excludes strategies, signals, features, ML,
 exchange connectivity, and any real historical data.
 
 Must never import from src.alpha20, src.institutional, legacy,
-frontend_pipeline, or trading-system -- enforced by
+frontend_pipeline, or the second, divergent runtime copy under the repo's
+hyphenated trading·system directory -- enforced by
 tests/architecture/test_no_forbidden_imports_from_src.py.
 """
