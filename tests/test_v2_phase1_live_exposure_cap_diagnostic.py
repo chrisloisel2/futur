@@ -25,13 +25,32 @@ GovernorDecision.scale, and PaperBroker.execute() only special-cases the
 literal string "kill". So the corrected verdict is not "gross exposure is
 unblocked" but "gross exposure changes the governor's *label*, and that
 label is consultative except for kill."
+
+SUPERSEDED IN PART (2026-07-28, Phase 2 rebuild): the paragraph above and
+`test_scale_field_is_never_read_outside_its_own_definition` below described
+a real defect at the time, per your explicit go-ahead this is now fixed.
+`GovernorDecision.scale` is applied by `BasisTermAdapter`/`MHEventsAdapter`
+to the requested notional BEFORE `Order()` is constructed (never to
+exit/closing orders, which stay unaffected on purpose — reducing risk must
+never be blocked by a risk-scale meant to limit new risk). `CarryBasisAdapter`
+remains unchanged (still doesn't route through PaperBroker at all -- a
+separate, deeper gap, see docs/v2/PHASE1_DIAGNOSTIC.md §6). Section 6 below
+covers the new behavior; the PaperBroker-level tests in section 3 remain
+accurate descriptions of PaperBroker.execute() in isolation, which was NOT
+changed -- it still only special-cases literal "kill", by design: scaling
+now happens one layer up, in the adapter, before PaperBroker ever sees the
+order.
 """
 from __future__ import annotations
 
 import inspect
+import types
 
-from src.alpha20.contracts import GovernorDecision
-from src.alpha20.execution.paper_broker import Order, PaperBroker
+import pandas as pd
+import pytest
+
+from src.alpha20.contracts import GovernorDecision, clamp_scale
+from src.alpha20.execution.paper_broker import Fill, Order, PaperBroker
 from src.alpha20.tournament.market_bus import MarketSnapshot
 from src.alpha20.tournament.paper_account import PaperAccount
 from src.alpha20.tournament.runner_adapters import (
@@ -126,27 +145,27 @@ def test_kill_state_forces_scale_zero_but_nothing_reads_scale():
     # the literal state string "kill"
 
 
-# ── 2. GovernorDecision.scale is computed but never consumed anywhere in
-#      src/alpha20 -- pinned via source inspection so a future wiring shows
-#      up as a test change, not a silent assumption ─────────────────────────
+# ── 2. RETIRED (was: "GovernorDecision.scale is computed but never consumed
+#      anywhere"). Phase 2, 2026-07-28: it now is -- orchestrator.py passes
+#      decision.scale to adapter.decide(), which applies it to the requested
+#      notional before Order() is built. See section 6 for the replacement
+#      tests. Kept as a positive assertion (not deleted) so the history of
+#      "this was a real gap, then fixed on your explicit instruction" stays
+#      visible in the same file that documented the gap. ───────────────────
 
-def test_scale_field_is_never_read_outside_its_own_definition():
-    """`grep -rn "\\.scale" src/alpha20` (run manually this session) found
-    exactly one reference outside contracts.py itself: a unit test asserting
-    the governor's OWN output (tests/test_alpha20_risk.py). Pin that via
-    source inspection of the actual execution-path modules so a future fix
-    that wires scale into sizing breaks this test (which is the point --
-    update/retire it then)."""
-    import src.alpha20.execution.paper_broker as pb_mod
-    import src.alpha20.tournament.runner_adapters as ra_mod
+def test_orchestrator_now_passes_decision_scale_to_adapter_decide():
+    """Replaces test_scale_field_is_never_read_outside_its_own_definition
+    (session 2-4), which asserted the opposite of what's now true by
+    design. orchestrator._run_one's call to adapter.decide() must pass
+    decision.scale, not just decision.state -- source-inspection pin so a
+    future refactor that silently drops the argument breaks this test."""
+    import src.alpha20.tournament.orchestrator as orch_mod
 
-    for mod in (pb_mod, ra_mod):
-        src_text = inspect.getsource(mod)
-        assert ".scale" not in src_text, (
-            f"{mod.__name__} now references .scale -- GovernorDecision.scale "
-            f"appears to be wired into execution; update PHASE1_DIAGNOSTIC.md "
-            f"and MIGRATION.md's verdict, this is no longer accurate."
-        )
+    src_text = inspect.getsource(orch_mod._run_one)
+    assert "decision.scale" in src_text, (
+        "orchestrator._run_one no longer passes decision.scale to "
+        "adapter.decide() -- this reintroduces the gap Phase 2 fixed."
+    )
 
 
 # ── 3. PaperBroker.execute(): only "kill" changes fill behavior ────────────
@@ -327,3 +346,199 @@ def test_carry_basis_adapter_swallows_invariant_violations_as_silent_abstain(mon
     # nothing marks this differently from any other caught exception (a
     # missing-data error, a bug, ...) -- InvariantViolation gets no special
     # handling, confirming (b) above.
+
+
+# ── 6. Phase 2, 2026-07-28: GovernorDecision.scale wired into execution,
+#      per your explicit decision. Four acceptance criteria, each proven
+#      below: (a) strict [0,1] bounds, (b) scale=0 forbids the order
+#      (nothing submitted, not a $0 order), (c) scale=0.5 exactly halves the
+#      requested notional, (d) nothing downstream can re-inflate the size
+#      (scale is applied once, before Order() is built; PaperBroker and the
+#      fill-scenario math only ever shrink notional via fill_frac <= 1.0,
+#      confirmed in section 3's tests, which are unchanged). gross/net/
+#      margin/concentration stay priority because they are exactly what
+#      determines `state` (and hence `scale`) upstream, in
+#      global_governor.evaluate() -- unchanged by this commit; the
+#      venue_unsecured/net_delta tests in section 1 above still pass
+#      unmodified, confirming this. ───────────────────────────────────────
+
+class _RecordingBroker:
+    """Stand-in for PaperBroker that records every Order it's asked to
+    execute and fills it in full -- lets a test assert exactly what notional
+    an adapter decided to submit, without needing PaperBroker's own fee/
+    slippage arithmetic (already covered separately in section 3)."""
+
+    def __init__(self):
+        self.orders: list[Order] = []
+
+    def execute(self, order, snapshot, risk_state="risk_on"):
+        self.orders.append(order)
+        f = Fill("observed", order.notional_usdt, 100.0, 0.0, 0.0, "test",
+                 0.0, "test", 150, False, None, 0.0)
+        return {"observed": f}
+
+
+def test_governor_decision_scale_rejects_out_of_range_values():
+    """Strict [0, 1] bounds, enforced at construction -- a GovernorDecision
+    with scale > 1.0 (would inflate) or < 0.0 (nonsensical) can't even be
+    built."""
+    with pytest.raises(ValueError):
+        GovernorDecision(state="risk_on", scale=1.5, reasons={})
+    with pytest.raises(ValueError):
+        GovernorDecision(state="cash", scale=-0.1, reasons={})
+    # boundary values are valid
+    GovernorDecision(state="risk_on", scale=1.0, reasons={})
+    GovernorDecision(state="cash", scale=0.0, reasons={})
+
+
+def test_clamp_scale_never_inflates_only_shrinks_or_passes_through():
+    """The defense-in-depth clamp used by adapters: within [0,1] it's a
+    no-op, outside it always moves TOWARD the range, never away from it --
+    i.e. it can never turn a smaller number into a larger one."""
+    assert clamp_scale(0.5) == 0.5
+    assert clamp_scale(0.0) == 0.0
+    assert clamp_scale(1.0) == 1.0
+    assert clamp_scale(1.7) == 1.0     # shrinks, doesn't pass through
+    assert clamp_scale(-0.3) == 0.0    # clamps up to the floor, not below
+
+
+def _snapshot_with_quarterly(spot_price=50_000.0, symbol="BTCUSDT",
+                             quarterly_symbol="BTCUSDT_Q", days_to_expiry=30):
+    basis_price = spot_price * (1 + 0.10 * days_to_expiry / 365)  # ~10% ann.
+    return MarketSnapshot(
+        market_event_id="scale-wiring-test", cutoff="2026-01-01T00:00:00Z",
+        decision_ts="2026-01-01T00:00:00Z", received_ts="2026-01-01T00:00:00Z",
+        prices={symbol: {"close": spot_price, "exchange_ts": "2026-01-01T00:00:00Z"}},
+        quarterlies={symbol: [{"symbol": quarterly_symbol,
+                               "days_to_expiry": days_to_expiry,
+                               "price": basis_price}]},
+    )
+
+
+def _basis_term_spec():
+    return RunnerSpec(
+        "basis_term_test", "basis_term", "ACTIVE", "deadbeef", None,
+        assets=["BTCUSDT"], venue=VENUE,
+        config={"entry_threshold_ann": 0.05, "min_days_to_expiry": 10,
+               "max_days_to_expiry": 120, "sizing_frac": 0.25})
+
+
+def test_basis_term_adapter_scale_zero_forbids_the_order():
+    adapter = BasisTermAdapter(_basis_term_spec())
+    broker = _RecordingBroker()
+    events, new_state = adapter.decide(_snapshot_with_quarterly(), broker, {},
+                                       risk_state="risk_on", scale=0.0)
+    assert broker.orders == [], "scale=0 must forbid order creation entirely, not submit a $0 order"
+    assert new_state.get("positions", {}) == {}
+    rejects = [e for e in events if e.kind == "reject"]
+    assert len(rejects) == 1
+    assert rejects[0].meta["reason"] == "governor_scale_zero"
+    assert rejects[0].meta["governor_scale"] == 0.0
+
+
+def test_basis_term_adapter_scale_half_exactly_halves_requested_notional():
+    spec = _basis_term_spec()
+    full = BasisTermAdapter(spec)
+    broker_full = _RecordingBroker()
+    full.decide(_snapshot_with_quarterly(), broker_full, {}, risk_state="risk_on", scale=1.0)
+    full_notional = broker_full.orders[0].notional_usdt
+    assert full_notional == pytest.approx(spec.capital_standalone_eur * 0.25)
+
+    half = BasisTermAdapter(spec)
+    broker_half = _RecordingBroker()
+    half.decide(_snapshot_with_quarterly(), broker_half, {}, risk_state="risk_on", scale=0.5)
+    half_notional = broker_half.orders[0].notional_usdt
+    assert half_notional == pytest.approx(full_notional / 2)
+    # both legs (spot + quarterly) get the same scaled notional
+    assert all(o.notional_usdt == pytest.approx(half_notional) for o in broker_half.orders)
+
+
+def test_basis_term_adapter_exit_orders_are_never_scaled_down():
+    """Closing an existing position must never be shrunk or blocked by the
+    current cycle's risk-scale -- scale exists to limit NEW risk, and
+    withholding an exit would leave MORE risk on, the opposite of what a
+    risk-reduced/cash state is for. Tested at scale=0.0, the most extreme
+    case: the exit still executes at full original notional."""
+    spec = _basis_term_spec()
+    adapter = BasisTermAdapter(spec)
+    broker = _RecordingBroker()
+    state = {"positions": {"BTCUSDT": {
+        "symbol": "OLD_Q", "notional_usdt": 50_000.0, "basis_entry": 0.05,
+        "days_to_expiry_at_open": 30, "cycles_elapsed": 0,
+    }}}
+    # OLD_Q no longer among live quarterlies -> adapter treats it as converged/rolled
+    snapshot = _snapshot_with_quarterly(quarterly_symbol="NEW_Q")
+    events, new_state = adapter.decide(snapshot, broker, state,
+                                       risk_state="risk_on", scale=0.0)
+    assert len(broker.orders) == 2, "both exit legs (spot + quarterly) must execute"
+    assert all(o.notional_usdt == 50_000.0 for o in broker.orders), \
+        "exit notional must equal the position's actual size, unscaled"
+    assert new_state["positions"] == {}
+
+
+def _fake_mh_module(tmp_path, book_rows):
+    ledger_path = tmp_path / "shadow_decisions.parquet"
+    pd.DataFrame(book_rows).to_parquet(ledger_path)
+    rmh_ns = types.SimpleNamespace(SHADOW_LEDGER=ledger_path,
+                                   select_book=lambda df, ts: df)
+    return types.SimpleNamespace(
+        rmh=rmh_ns,
+        _closes=lambda symbol: pd.Series(dtype=float),
+        replay_decision=lambda row, closes, cost_bp: (0.01, "t0", "t1", 0.01),
+        LABEL_COST_RT_BP=14.0,
+    )
+
+
+def _mh_events_spec():
+    return RunnerSpec(
+        "mh_events_test", "mh_events", "ACTIVE", "deadbeef", None, venue=VENUE,
+        config={"tier_filter": "book", "horizon_filter": "MH_consensus",
+               "weight_per_decision": 0.20, "max_open": 5})
+
+
+def _mh_book_row():
+    return [{"horizon": "MH_consensus_h4", "event_time": "2026-01-01T00:00:00Z",
+             "symbol": "BTCUSDT", "engine": "test_engine", "score": 0.75,
+             "net_labeled": 0.01}]
+
+
+def test_mh_events_adapter_scale_zero_forbids_the_order(monkeypatch, tmp_path):
+    spec = _mh_events_spec()
+    adapter = MHEventsAdapter(spec)
+    monkeypatch.setattr(adapter, "_mod", lambda: _fake_mh_module(tmp_path, _mh_book_row()))
+    broker = _RecordingBroker()
+    events, new_state = adapter.decide(_snapshot(), broker, {},
+                                       risk_state="risk_on", scale=0.0)
+    assert broker.orders == [], "scale=0 must forbid order creation entirely"
+    rejects = [e for e in events if e.kind == "reject"]
+    assert len(rejects) == 1
+    assert rejects[0].meta["reason"] == "governor_scale_zero"
+    assert rejects[0].meta["governor_scale"] == 0.0
+
+
+def test_mh_events_adapter_scale_half_exactly_halves_requested_notional(monkeypatch, tmp_path):
+    spec = _mh_events_spec()
+
+    full = MHEventsAdapter(spec)
+    monkeypatch.setattr(full, "_mod", lambda: _fake_mh_module(tmp_path, _mh_book_row()))
+    broker_full = _RecordingBroker()
+    full.decide(_snapshot(), broker_full, {}, risk_state="risk_on", scale=1.0)
+    full_notional = broker_full.orders[0].notional_usdt
+    assert full_notional == pytest.approx(spec.capital_standalone_eur * 0.20)
+
+    half = MHEventsAdapter(spec)
+    monkeypatch.setattr(half, "_mod", lambda: _fake_mh_module(tmp_path, _mh_book_row()))
+    broker_half = _RecordingBroker()
+    half.decide(_snapshot(), broker_half, {}, risk_state="risk_on", scale=0.5)
+    half_notional = broker_half.orders[0].notional_usdt
+    assert half_notional == pytest.approx(full_notional / 2)
+
+
+def test_scale_default_is_full_size_backward_compatible():
+    """Callers that don't pass scale (old call sites, if any remain) get
+    scale=1.0 -- full requested size, identical to pre-Phase-2 behavior."""
+    spec = _basis_term_spec()
+    adapter = BasisTermAdapter(spec)
+    broker = _RecordingBroker()
+    adapter.decide(_snapshot_with_quarterly(), broker, {}, risk_state="risk_on")
+    assert broker.orders[0].notional_usdt == pytest.approx(spec.capital_standalone_eur * 0.25)
