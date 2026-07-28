@@ -334,3 +334,91 @@ class Event:
             ts_event=self.ts_event, ts_received=self.ts_received,
             payload=self.payload, sequence=sequence,
         )
+
+
+# ── canonical serialization ─────────────────────────────────────────────────
+#
+# ONE dict representation of an Event, used by everyone who needs to turn an
+# Event into JSON-safe data: the JSONL fixture reader/writer (replay.py) and
+# the ledger's own hash chain and durable WAL (ledger.py). Living here rather
+# than in either of those means neither has to import the other to share it
+# (ledger.py <- engine.py <- replay.py would be circular), and there is only
+# ever one place that decides what "the same event" serializes to -- the
+# thing the mission's "canonical serialization" requirement is about: the
+# bytes that get hashed must be exactly the bytes that get persisted and
+# exactly the bytes that get read back.
+#
+# Every Decimal is stringified explicitly (str(), never bare through
+# json.dumps' default float handling) so the round trip never touches
+# float/binary rounding; every Enum already used the plain str value
+# (EventType/OrderSide/ProductType are all `class X(str, Enum)`, so
+# `.value` is what payload __post_init__ expects back on the way in).
+
+_PAYLOAD_CLASS_FOR_EVENT_TYPE: dict[str, type] = {
+    EventType.CASH_DEPOSIT.value: CashDepositPayload,
+    EventType.CASH_WITHDRAWAL.value: CashWithdrawalPayload,
+    EventType.ORDER_SUBMITTED.value: OrderSubmittedPayload,
+    EventType.ORDER_ACKNOWLEDGED.value: OrderAcknowledgedPayload,
+    EventType.ORDER_REJECTED.value: OrderRejectedPayload,
+    EventType.ORDER_CANCELLED.value: OrderCancelledPayload,
+    EventType.FILL.value: FillPayload,
+    EventType.MARK.value: MarkPayload,
+    EventType.FUNDING.value: FundingPayload,
+    EventType.BORROW_COST.value: BorrowCostPayload,
+    EventType.FEE.value: FeePayload,
+    EventType.MARGIN_UPDATE.value: MarginUpdatePayload,
+    EventType.LIQUIDATION.value: LiquidationPayload,
+    EventType.RECONCILIATION.value: ReconciliationPayload,
+}
+
+_PRODUCT_FIELD_EVENT_TYPES = {
+    EventType.ORDER_SUBMITTED.value, EventType.FILL.value, EventType.MARK.value,
+    EventType.FUNDING.value, EventType.MARGIN_UPDATE.value, EventType.LIQUIDATION.value,
+}
+
+
+def _product_to_dict(product: ProductSpec) -> dict:
+    return {
+        "venue": product.venue, "symbol": product.symbol,
+        "type": product.type.value, "base_ccy": product.base_ccy,
+        "quote_ccy": product.quote_ccy, "tick_size": str(product.tick_size),
+        "lot_size": str(product.lot_size),
+        "multiplier": str(product.multiplier),
+    }
+
+
+def _product_from_dict(d: dict) -> ProductSpec:
+    d = dict(d)
+    d["type"] = ProductType(d["type"])
+    return ProductSpec(**d)
+
+
+def event_to_dict(event: Event) -> dict:
+    payload_dict = dict(vars(event.payload))
+    if "instrument" in payload_dict:
+        payload_dict["instrument"] = _product_to_dict(payload_dict["instrument"])
+    for k, v in list(payload_dict.items()):
+        if isinstance(v, Decimal):
+            payload_dict[k] = str(v)
+    return {
+        "event_id": event.event_id,
+        "event_type": event.event_type.value,
+        "ts_event": event.ts_event,
+        "ts_received": event.ts_received,
+        "sequence": event.sequence,
+        "payload": payload_dict,
+    }
+
+
+def event_from_dict(d: dict) -> Event:
+    event_type = EventType(d["event_type"])
+    payload_dict = dict(d["payload"])
+    if d["event_type"] in _PRODUCT_FIELD_EVENT_TYPES:
+        payload_dict["instrument"] = _product_from_dict(payload_dict["instrument"])
+    payload_cls = _PAYLOAD_CLASS_FOR_EVENT_TYPE[d["event_type"]]
+    return Event(
+        event_id=d["event_id"], event_type=event_type,
+        ts_event=d["ts_event"], ts_received=d["ts_received"],
+        payload=payload_cls(**payload_dict),
+        sequence=d.get("sequence", -1),
+    )

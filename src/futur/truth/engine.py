@@ -19,8 +19,17 @@ from src.futur.truth.margin import MarginConfig
 @dataclass
 class TruthEngine:
     account: Account = field(default_factory=Account)
-    ledger: Ledger = field(default_factory=Ledger)
     margin_config: MarginConfig = field(default_factory=MarginConfig)
+    ledger: Ledger | None = None
+
+    def __post_init__(self) -> None:
+        if self.ledger is None:
+            self.ledger = Ledger(margin_config=self.margin_config)
+        elif self.ledger.margin_config != self.margin_config:
+            raise ValueError(
+                "TruthEngine.margin_config must match the margin_config the "
+                "ledger's hash chain was bound to at construction -- got "
+                f"engine={self.margin_config!r} ledger={self.ledger.margin_config!r}")
 
     def apply(self, event: Event) -> Event:
         """Append `event` to the ledger (which assigns its real sequence
@@ -30,7 +39,9 @@ class TruthEngine:
         be un-appended) and the account has already been mutated, so a
         caller catching this should treat the whole engine as poisoned,
         not attempt to continue."""
-        stamped = self.ledger.append(event)
+        ledger = self.ledger
+        assert ledger is not None   # __post_init__ always resolves this
+        stamped = ledger.append(event)
         self.account.apply_event(stamped)
-        invariants.check(self.account, self.ledger, self.margin_config)
+        invariants.check(self.account, ledger, self.margin_config)
         return stamped

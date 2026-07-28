@@ -28,6 +28,7 @@ itself, so invariants.py's cash-vs-categories cross-check is meaningful.
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from decimal import Decimal
 
@@ -125,8 +126,24 @@ class Account:
 
     # ── dispatch ─────────────────────────────────────────────────────────
     def apply_event(self, event: Event) -> None:
+        """All-or-nothing: an event either fully applies or leaves every
+        field exactly as it was. Without this, a handler that mutates more
+        than one thing before its own validation can raise (e.g.
+        `_apply_fill` marks the Order as filled via `order.apply_fill()`
+        *before* `_apply_spot_fill` gets a chance to reject a short-spot
+        fill) would leave the Order's fill bookkeeping incremented while
+        cash/positions never moved -- a real partial mutation, invisible
+        until something else reads the inconsistent state later. Snapshot
+        before, restore on any exception, so a rejected event is
+        indistinguishable from an event that was never received."""
         handler = getattr(self, f"_apply_{event.event_type.value.lower()}")
-        handler(event.payload)
+        snapshot = copy.deepcopy(self.__dict__)
+        try:
+            handler(event.payload)
+        except BaseException:
+            self.__dict__.clear()
+            self.__dict__.update(snapshot)
+            raise
 
     # ── cash ─────────────────────────────────────────────────────────────
     def _check_currency(self, currency: str) -> None:

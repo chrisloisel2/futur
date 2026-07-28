@@ -33,9 +33,10 @@ def test_duplicate_event_id_rejected():
 
 def test_no_delete_or_update_api_exists():
     """Structural, not behavioral: the append-only guarantee comes from
-    this class simply not exposing any other mutator."""
+    this class simply not exposing any other mutator. `close()` releases
+    a WAL file handle -- it doesn't let a caller edit or remove history."""
     public_methods = {name for name in dir(Ledger) if not name.startswith("_")}
-    assert public_methods == {"append", "entries", "events", "head_hash"}
+    assert public_methods == {"append", "close", "entries", "events", "head_hash"}
 
 
 def test_entries_and_events_are_read_only_views():
@@ -52,9 +53,31 @@ def test_entries_and_events_are_read_only_views():
 
 
 def test_genesis_hash_before_any_append():
+    """The genesis is bound to (engine_version, margin_config), not the raw
+    all-zero constant -- GENESIS_HASH is only the ROOT the binding starts
+    from (see ledger.py's _compute_genesis_hash)."""
     ledger = Ledger()
-    assert ledger.head_hash == GENESIS_HASH
+    assert ledger.head_hash != GENESIS_HASH
+    assert len(ledger.head_hash) == 64
     assert len(ledger) == 0
+
+
+def test_genesis_hash_is_deterministic_for_the_same_default_config():
+    assert Ledger().head_hash == Ledger().head_hash
+
+
+def test_genesis_hash_depends_on_margin_config():
+    from src.futur.truth.margin import MarginConfig
+    default = Ledger()
+    custom = Ledger(margin_config=MarginConfig(initial_margin_rate=0.20,
+                                               maintenance_margin_rate=0.10))
+    assert default.head_hash != custom.head_hash
+
+
+def test_genesis_hash_depends_on_engine_version():
+    a = Ledger(engine_version="truth-engine/1")
+    b = Ledger(engine_version="truth-engine/2-test-only")
+    assert a.head_hash != b.head_hash
 
 
 def test_hash_chains_to_previous_head():
