@@ -1,0 +1,43 @@
+# RETIRED (Phase 3 rebuild, 2026-07-28) -- renamed from pyproject.toml so no
+# build tool discovers this as an active project manifest. This described a
+# second, divergently-broken `institutional` package, distinct from and
+# incompatible with the canonical one at src/institutional/ (root
+# pyproject.toml) -- see docs/FOUNDATION_AUDIT.md §5 and
+# docs/v2/PHASE1_DIAGNOSTIC.md §2 for the two-independent-copies evidence.
+# Kept for historical reference, not deleted. Do not `git mv` this back to
+# pyproject.toml -- if trading-system/'s code is ever reconciled with
+# src/institutional/, it should be diffed and merged into the canonical
+# tree, not revived as a second live manifest.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "institutional"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "INSTITUTIONAL_ENGINE — moteur algorithmique institutionnel"
+dependencies = []   # stdlib uniquement pour les contrats
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths  = ["tests"]
+addopts    = "-v --tb=short"
+pythonpath = ["src"]
+
+[tool.mypy]
+python_version  = "3.11"
+strict          = true
+warn_return_any = true
+
+[tool.ruff]
+target-version = "py311"
+line-length    = 100
