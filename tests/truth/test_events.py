@@ -1,4 +1,4 @@
-"""tests/truth/test_events.py -- Instrument and Event/payload construction."""
+"""tests/truth/test_events.py -- ProductSpec and Event/payload construction."""
 from __future__ import annotations
 
 import pytest
@@ -7,31 +7,31 @@ from src.futur.truth.events import (
     CashDepositPayload,
     Event,
     EventType,
-    Instrument,
-    InstrumentType,
     MarkPayload,
     OrderRejectedPayload,
+    ProductSpec,
+    ProductType,
 )
 
 
-def _instrument(itype=InstrumentType.SPOT) -> Instrument:
-    return Instrument(venue="TESTX", symbol="BTCUSD", type=itype,
+def _instrument(itype=ProductType.SPOT) -> ProductSpec:
+    return ProductSpec(venue="TESTX", symbol="BTCUSD", type=itype,
                       base_ccy="BTC", quote_ccy="USD",
                       tick_size=0.5, lot_size=0.001)
 
 
 def test_instrument_key_distinguishes_spot_and_perp_same_symbol():
-    spot = _instrument(InstrumentType.SPOT)
-    perp = _instrument(InstrumentType.PERPETUAL)
+    spot = _instrument(ProductType.SPOT)
+    perp = _instrument(ProductType.LINEAR_PERP)
     assert spot.key != perp.key
 
 
 def test_instrument_rejects_non_positive_tick_or_lot_size():
     with pytest.raises(ValueError):
-        Instrument(venue="TESTX", symbol="X", type=InstrumentType.SPOT,
+        ProductSpec(venue="TESTX", symbol="X", type=ProductType.SPOT,
                   base_ccy="X", quote_ccy="USD", tick_size=0.0, lot_size=1.0)
     with pytest.raises(ValueError):
-        Instrument(venue="TESTX", symbol="X", type=InstrumentType.SPOT,
+        ProductSpec(venue="TESTX", symbol="X", type=ProductType.SPOT,
                   base_ccy="X", quote_ccy="USD", tick_size=1.0, lot_size=-1.0)
 
 

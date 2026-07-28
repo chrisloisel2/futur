@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from enum import Enum
 
 from src.futur.truth.events import Event
@@ -36,6 +37,14 @@ class DuplicateEventError(Exception):
 def _json_default(obj: object) -> object:
     if isinstance(obj, Enum):
         return obj.value
+    if isinstance(obj, Decimal):
+        # str(), never float() -- a Decimal's string form preserves its
+        # exact digits and scale (str(Decimal("50000.00000000")) is
+        # exactly "50000.00000000"), so two processes hashing the same
+        # Decimal always get the same bytes. Converting to float first
+        # would reintroduce the binary-rounding problem this whole engine
+        # moved to Decimal specifically to avoid.
+        return str(obj)
     raise TypeError(f"not JSON-serializable in a ledger entry: {type(obj)!r}")
 
 

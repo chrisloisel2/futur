@@ -1,6 +1,7 @@
 """tests/truth/test_replay.py -- serialization round-trip + determinism."""
 from __future__ import annotations
 
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -11,8 +12,8 @@ from src.futur.truth.events import (
     Event,
     EventType,
     FillPayload,
-    Instrument,
-    InstrumentType,
+    ProductSpec,
+    ProductType,
 )
 from src.futur.truth.orders import OrderStatus
 from src.futur.truth.replay import (
@@ -26,7 +27,7 @@ from src.futur.truth.replay import (
 
 FIXTURE = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "truth" / "basic_replay.jsonl"
 
-SPOT = Instrument(venue="SIM", symbol="BTCUSD", type=InstrumentType.SPOT,
+SPOT = ProductSpec(venue="SIM", symbol="BTCUSD", type=ProductType.SPOT,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.01, lot_size=0.0001)
 
 
@@ -69,9 +70,9 @@ def test_basic_replay_fixture_processes_all_14_scenarios_without_violation():
     assert engine.account.orders["o4"].status == OrderStatus.CANCELLED
     assert engine.account.last_reconciliation.verdict == "MATCH"
     # spot: bought 2.0, sold 0.5 -> 1.5 left
-    assert summary.spot_positions["SIM:BTCUSD:SPOT"] == pytest.approx(1.5)
+    assert summary.spot_positions["SIM:BTCUSD:SPOT"] == Decimal("1.5")
     # perp: opened 1.0, partial-filled +1.2 (=2.2), liquidated -1.0 -> 1.2 left
-    assert summary.perp_positions["SIM:BTCUSD-PERP:PERPETUAL"] == pytest.approx(1.2)
+    assert summary.perp_positions["SIM:BTCUSD-PERP:LINEAR_PERP"] == Decimal("1.2")
 
 
 def test_replaying_the_same_fixture_twice_gives_identical_hash_and_state():

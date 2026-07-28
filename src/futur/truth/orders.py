@@ -7,15 +7,19 @@ event can follow any of them):
                          \\-> REJECTED     \\-> FILLED           ^
                                             \\-> CANCELLED   ----'
                                                               (more fills)
+
+All quantities/prices are Decimal, quantized to the product's own
+lot_size/tick_size at construction -- so "filled_quantity <= quantity" is
+an exact Decimal comparison, no epsilon needed (see numeric.py).
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 
-from src.futur.truth.events import Instrument
-
-_EPS = 1e-9
+from src.futur.truth.events import ProductSpec
+from src.futur.truth.numeric import to_decimal
 
 
 class OrderType(str, Enum):
@@ -69,33 +73,40 @@ def validate_transition(current: OrderStatus, target: OrderStatus) -> None:
 class Order:
     order_id: str
     client_order_id: str
-    instrument: Instrument
+    instrument: ProductSpec
     side: OrderSide
     order_type: OrderType
-    quantity: float
-    limit_price: float | None = None
+    quantity: Decimal
+    limit_price: Decimal | None = None
     status: OrderStatus = OrderStatus.CREATED
-    filled_quantity: float = 0.0
+    filled_quantity: Decimal = Decimal(0)
 
     def __post_init__(self) -> None:
+        self.quantity = self.instrument.quantize_quantity(to_decimal(self.quantity))
+        self.filled_quantity = self.instrument.quantize_quantity(to_decimal(self.filled_quantity))
         if self.quantity <= 0:
             raise ValueError(f"order quantity must be > 0, got {self.quantity!r}")
         if self.order_type == OrderType.LIMIT and self.limit_price is None:
             raise ValueError("LIMIT order requires limit_price")
+        if self.limit_price is not None:
+            self.limit_price = self.instrument.quantize_price(to_decimal(self.limit_price))
 
     @property
-    def remaining_quantity(self) -> float:
+    def remaining_quantity(self) -> Decimal:
         return self.quantity - self.filled_quantity
 
     def transition_to(self, target: OrderStatus) -> None:
         validate_transition(self.status, target)
         self.status = target
 
-    def apply_fill(self, fill_quantity: float) -> None:
+    def apply_fill(self, fill_quantity: Decimal) -> None:
         """Mutates filled_quantity and status together -- the only path by
         which filled_quantity changes, so "filled_quantity <= quantity" and
         "no fill after a terminal status" are enforced at the single point
-        that could violate them, not just checked after the fact."""
+        that could violate them, not just checked after the fact. Exact
+        Decimal comparison -- both sides are quantized to the same
+        lot_size, so there is no rounding residue to tolerate."""
+        fill_quantity = self.instrument.quantize_quantity(to_decimal(fill_quantity))
         if self.status in TERMINAL_STATUSES:
             raise InvalidOrderTransition(
                 f"cannot fill an order in terminal status {self.status.value}")
@@ -106,12 +117,12 @@ class Order:
         if fill_quantity <= 0:
             raise ValueError(f"fill_quantity must be > 0, got {fill_quantity!r}")
         new_filled = self.filled_quantity + fill_quantity
-        if new_filled > self.quantity + _EPS:
+        if new_filled > self.quantity:
             raise ValueError(
                 f"fill would over-fill order {self.order_id}: "
                 f"{new_filled} > {self.quantity}")
-        self.filled_quantity = min(new_filled, self.quantity)
-        self.status = (OrderStatus.FILLED if self.remaining_quantity <= _EPS
+        self.filled_quantity = new_filled
+        self.status = (OrderStatus.FILLED if self.remaining_quantity == 0
                        else OrderStatus.PARTIALLY_FILLED)
 
 
@@ -119,17 +130,21 @@ class Order:
 class Fill:
     fill_id: str
     order_id: str
-    instrument: Instrument
-    price: float
-    quantity: float
+    instrument: ProductSpec
+    price: Decimal
+    quantity: Decimal
     side: OrderSide
-    fee: float
+    fee: Decimal
     fee_ccy: str
     liquidity: str | None = None
     venue: str = ""
     external_id: str | None = None
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "price", self.instrument.quantize_price(to_decimal(self.price)))
+        object.__setattr__(self, "quantity",
+                          self.instrument.quantize_quantity(to_decimal(self.quantity)))
+        object.__setattr__(self, "fee", to_decimal(self.fee))
         if self.price <= 0:
             raise ValueError(f"fill price must be > 0, got {self.price!r}")
         if self.quantity <= 0:

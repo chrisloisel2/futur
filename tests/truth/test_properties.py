@@ -8,6 +8,7 @@ specific hand-checked numbers.
 from __future__ import annotations
 
 import math
+from decimal import Decimal
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -19,23 +20,28 @@ from src.futur.truth.events import (
     Event,
     EventType,
     FillPayload,
-    Instrument,
-    InstrumentType,
     LiquidationPayload,
     MarkPayload,
     OrderAcknowledgedPayload,
     OrderSubmittedPayload,
+    ProductSpec,
+    ProductType,
 )
 from src.futur.truth.margin import MarginConfig, can_open_additional_notional, compute_exposures
+from src.futur.truth.numeric import quantize_cash
 from src.futur.truth.orders import OrderSide, OrderType
 from src.futur.truth.positions import PerpPosition
 from src.futur.truth.replay import replay
 
-SPOT = Instrument(venue="SIM", symbol="BTCUSD", type=InstrumentType.SPOT,
+
+def _d(value) -> Decimal:
+    return Decimal(str(value))
+
+SPOT = ProductSpec(venue="SIM", symbol="BTCUSD", type=ProductType.SPOT,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.01, lot_size=0.0001)
-PERP = Instrument(venue="SIM", symbol="BTCUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP = ProductSpec(venue="SIM", symbol="BTCUSD-PERP", type=ProductType.LINEAR_PERP,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.01, lot_size=0.0001)
-PERP2 = Instrument(venue="SIM", symbol="ETHUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP2 = ProductSpec(venue="SIM", symbol="ETHUSD-PERP", type=ProductType.LINEAR_PERP,
                    base_ccy="ETH", quote_ccy="USD", tick_size=0.01, lot_size=0.0001)
 
 
@@ -45,7 +51,7 @@ def _ev(i, event_type, payload) -> Event:
                 payload=payload)
 
 
-def _open(engine: TruthEngine, i: int, instrument: Instrument, order_id: str,
+def _open(engine: TruthEngine, i: int, instrument: ProductSpec, order_id: str,
          side: OrderSide, quantity: float, price: float, fee: float = 0.0) -> int:
     engine.apply(_ev(i, EventType.ORDER_SUBMITTED, OrderSubmittedPayload(
         order_id=order_id, client_order_id=f"c-{order_id}", instrument=instrument,
@@ -71,13 +77,15 @@ def test_no_fill_creates_cash_spot_buy(price, quantity, fee):
     engine.apply(_ev(0, EventType.CASH_DEPOSIT, CashDepositPayload(1e12, "USD")))
     cash_before = engine.account.cash
     _open(engine, 1, SPOT, "o1", OrderSide.BUY, quantity, price, fee)
-    expected_change = -(quantity * price) - fee
-    # isclose, not == : cash_before is 1e12, so this test's own independent
-    # formula and the engine's two sequential -= operations can land a few
-    # ULPs apart even when both are correct -- exact equality would be
-    # testing float rounding order, not the accounting logic.
-    assert math.isclose(engine.account.cash, cash_before + expected_change,
-                        rel_tol=1e-9, abs_tol=1e-6)
+    # Decimal arithmetic is exact (no ULP drift the way float was), so this
+    # mirrors _apply_spot_fill's own formula -- price/quantity tick/lot-
+    # quantized and each cash term quantized separately, exactly like the
+    # engine does (FillPayload does the same quantization at construction)
+    # -- and checks EXACT equality.
+    price_q, quantity_q = SPOT.quantize_price(price), SPOT.quantize_quantity(quantity)
+    trade_cashflow = quantize_cash(-(quantity_q * price_q))
+    fee_q = quantize_cash(_d(fee))
+    assert engine.account.cash == quantize_cash(cash_before + trade_cashflow - fee_q)
 
 
 @given(price=price_st, quantity=qty_st, fee=fee_st)
@@ -88,7 +96,7 @@ def test_no_fill_creates_cash_perp_open(price, quantity, fee):
     engine.apply(_ev(0, EventType.CASH_DEPOSIT, CashDepositPayload(1e12, "USD")))
     cash_before = engine.account.cash
     _open(engine, 1, PERP, "o1", OrderSide.BUY, quantity, price, fee)
-    assert engine.account.cash == cash_before - fee
+    assert engine.account.cash == quantize_cash(cash_before - _d(fee))
 
 
 # ── 2. a round trip with no price movement loses exactly the costs ─────────
@@ -100,8 +108,16 @@ def test_spot_round_trip_same_price_loses_exactly_the_fees(price, quantity, fee1
     engine.apply(_ev(0, EventType.CASH_DEPOSIT, CashDepositPayload(1e12, "USD")))
     cash_start = engine.account.cash
     i = _open(engine, 1, SPOT, "o1", OrderSide.BUY, quantity, price, fee1)
+    # mirrors _apply_spot_fill's own formula (buy then sell at the same
+    # price), tick/lot- and cash-quantized at each step exactly like the
+    # engine does, so this is an EXACT equality rather than an approximation.
+    price_q, quantity_q = SPOT.quantize_price(price), SPOT.quantize_quantity(quantity)
+    fee1_q, fee2_q = quantize_cash(_d(fee1)), quantize_cash(_d(fee2))
+    trade_cashflow = quantize_cash(quantity_q * price_q)
+    cash_after_buy = quantize_cash(cash_start - trade_cashflow - fee1_q)
     _open(engine, i, SPOT, "o2", OrderSide.SELL, quantity, price, fee2)
-    assert math.isclose(engine.account.cash, cash_start - fee1 - fee2, rel_tol=1e-9, abs_tol=1e-6)
+    cash_after_sell = quantize_cash(cash_after_buy + trade_cashflow - fee2_q)
+    assert engine.account.cash == cash_after_sell
 
 
 @given(price=price_st, quantity=qty_st)
@@ -145,12 +161,13 @@ def test_position_equals_sum_of_signed_fill_quantities(quantities):
     engine = TruthEngine()
     engine.apply(_ev(0, EventType.CASH_DEPOSIT, CashDepositPayload(1e12, "USD")))
     i = 1
-    running = 0.0
+    running = Decimal(0)
     for j, qty in enumerate(quantities):
         i = _open(engine, i, PERP, f"o{j}", OrderSide.BUY, qty, 50_000.0, 0.0)
-        running += qty
-    assert math.isclose(engine.account.perp_positions[PERP.key].quantity, running,
-                        rel_tol=1e-9, abs_tol=1e-6)
+        # FillPayload lot-quantizes quantity at construction, so the running
+        # tally must match that same rounding, not the raw Hypothesis float.
+        running += PERP.quantize_quantity(qty)
+    assert engine.account.perp_positions[PERP.key].quantity == running
 
 
 # ── 6. closing all positions makes exposure null ────────────────────────────
@@ -231,14 +248,15 @@ def test_collateral_is_a_single_shared_pool_not_reused_per_instrument(equity, no
     account.perp_positions[PERP.key] = PerpPosition(
         instrument=PERP, quantity=notional_a / 50_000.0, avg_entry_price=50_000.0)
 
-    can_open_b_ignoring_a = notional_b * config.initial_margin_rate <= equity
+    equity_d, notional_a_d, notional_b_d = _d(equity), _d(notional_a), _d(notional_b)
+    can_open_b_ignoring_a = notional_b_d * config.initial_margin_rate <= equity_d
     can_open_b_accounting_for_a = can_open_additional_notional(account, config, notional_b)
 
     # whenever accounting for A's usage would forbid B, the naive
     # (wrong) per-instrument-isolated check must not be the one that ran
     if not can_open_b_accounting_for_a:
-        combined_im = notional_a * config.initial_margin_rate + notional_b * config.initial_margin_rate
-        assert combined_im > equity   # confirms it's genuinely oversubscribed, not a bug
+        combined_im = notional_a_d * config.initial_margin_rate + notional_b_d * config.initial_margin_rate
+        assert combined_im > equity_d   # confirms it's genuinely oversubscribed, not a bug
     if can_open_b_ignoring_a and not can_open_b_accounting_for_a:
         pass   # exactly the case this property exists to catch -- and it's handled correctly above
 
@@ -261,5 +279,5 @@ def test_liquidation_never_improves_nav_beyond_minus_fee(entry, mark, quantity, 
         instrument=PERP, quantity_closed=quantity, price=mark, fee=fee)))
     nav_after = engine.account.nav()
 
-    assert nav_after <= nav_before + 1e-6           # never improves NAV
-    assert math.isclose(nav_after, nav_before - fee, rel_tol=1e-6, abs_tol=1e-3)
+    assert nav_after <= nav_before + Decimal("0.000001")           # never improves NAV
+    assert math.isclose(nav_after, nav_before - _d(fee), rel_tol=1e-6, abs_tol=1e-3)

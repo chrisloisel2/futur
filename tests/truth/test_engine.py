@@ -1,6 +1,8 @@
 """tests/truth/test_engine.py -- TruthEngine.apply() ties everything together."""
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from src.futur.truth.engine import TruthEngine
@@ -36,7 +38,7 @@ def test_apply_raises_and_the_bad_event_stays_on_the_ledger():
     append-only) still shows the event that caused it -- the mission's
     "toute violation doit arrêter le replay avec une erreur explicite"."""
     engine = TruthEngine()
-    engine.account.cash = 500.0   # corrupt state directly, bypassing normal bookkeeping
+    engine.account.cash = Decimal("500.0")   # corrupt state directly, bypassing normal bookkeeping
     with pytest.raises(InvariantViolation):
         engine.apply(_ev(EventType.CASH_DEPOSIT, CashDepositPayload(1.0, "USD"), "d1"))
     assert len(engine.ledger) == 1   # the event was appended before the check ran

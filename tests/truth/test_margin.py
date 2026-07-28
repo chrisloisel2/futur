@@ -9,11 +9,11 @@ from src.futur.truth.events import (
     Event,
     EventType,
     FillPayload,
-    Instrument,
-    InstrumentType,
     MarkPayload,
     OrderAcknowledgedPayload,
     OrderSubmittedPayload,
+    ProductSpec,
+    ProductType,
 )
 from src.futur.truth.margin import (
     MarginConfig,
@@ -24,9 +24,9 @@ from src.futur.truth.margin import (
 )
 from src.futur.truth.orders import OrderSide, OrderType
 
-PERP = Instrument(venue="TESTX", symbol="BTCUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP = ProductSpec(venue="TESTX", symbol="BTCUSD-PERP", type=ProductType.LINEAR_PERP,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
-PERP2 = Instrument(venue="OTHERX", symbol="ETHUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP2 = ProductSpec(venue="OTHERX", symbol="ETHUSD-PERP", type=ProductType.LINEAR_PERP,
                    base_ccy="ETH", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
 
 
@@ -40,7 +40,7 @@ def _deposit(account: Account, amount: float, eid: str = "dep") -> None:
     account.apply_event(_ev(EventType.CASH_DEPOSIT, CashDepositPayload(amount, "USD"), eid))
 
 
-def _open(account: Account, instrument: Instrument, order_id: str, side: OrderSide,
+def _open(account: Account, instrument: ProductSpec, order_id: str, side: OrderSide,
          quantity: float, price: float) -> None:
     account.apply_event(_ev(EventType.ORDER_SUBMITTED, OrderSubmittedPayload(
         order_id=order_id, client_order_id=f"c-{order_id}", instrument=instrument,

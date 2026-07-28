@@ -11,8 +11,8 @@ from futur.cli import main
 FIXTURE = str(Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "truth" / "basic_replay.jsonl")
 
 _INSTRUMENT = {"venue": "SIM", "symbol": "BTCUSD", "type": "SPOT", "base_ccy": "BTC",
-              "quote_ccy": "USD", "tick_size": 0.5, "lot_size": 0.001,
-              "contract_multiplier": 1.0}
+              "quote_ccy": "USD", "tick_size": "0.5", "lot_size": "0.001",
+              "multiplier": "1.0"}
 
 
 def _write_jsonl(path: Path, events: list) -> None:
@@ -53,9 +53,11 @@ def test_truth_validate_fails_on_a_domain_error(tmp_path):
          "payload": {"amount": 100.0, "currency": "EUR"},
          "ts_event": "t0", "ts_received": "t0"},
     ])
-    # CurrencyMismatchError, not an InvariantViolation -- propagates as a
-    # normal exception (still a non-zero exit if actually run as a process)
-    with pytest.raises(Exception, match="multi-currency"):
+    # UnsupportedCurrencyError, fired at payload construction (parsing the
+    # JSONL) before the engine even sees the event -- not an
+    # InvariantViolation, so it propagates as a normal exception (still a
+    # non-zero exit if actually run as a process)
+    with pytest.raises(Exception, match="not supported"):
         main(["truth", "validate", str(bad)])
 
 

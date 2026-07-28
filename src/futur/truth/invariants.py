@@ -6,29 +6,29 @@ exception -- any violation raises InvariantViolation (or lets the
 underlying ValueError/TypeError through), so a broken invariant stops
 processing immediately and loudly. Nothing here uses a bare
 `except Exception` to paper over a check.
+
+All comparisons are EXACT Decimal equality -- no `math.isclose`, no
+epsilon, anywhere in this file. That's only correct because every value
+that reaches here is already quantized (numeric.quantize_cash for money,
+ProductSpec.quantize_price/quantize_quantity for price/quantity) at the
+point it's produced (account.py, orders.py) -- two quantities that are
+"supposed to be equal" are computed from the same quantized inputs via
+the same rounding rule, so they land on the exact same Decimal value, not
+just a close one. A tolerance would hide the exact bug this file exists to
+catch. (Tolerance still has a legitimate place -- external reconciliation
+against a real venue's numbers, which can't be assumed to use the same
+quantization; see reconciliation.py's own explicit, per-field tolerance.)
 """
 from __future__ import annotations
 
-import math
+from decimal import Decimal
 
 from src.futur.truth.events import FillPayload, LiquidationPayload
 from src.futur.truth.ledger import Ledger
 from src.futur.truth.margin import MarginConfig, compute_margin_state
 from src.futur.truth.orders import OrderSide
 
-_EPS = 1e-6
-
-
-def _close(a: float, b: float) -> bool:
-    """Relative + absolute tolerance, not a bare fixed epsilon -- a fixed
-    `abs(a - b) > 1e-6` is fine for order quantities but breaks down for
-    cumulative cash/position sums at real-world scale (float64 has ~15-17
-    significant digits, so at 1e12 the smallest representable difference
-    is already ~1e-4, larger than a fixed 1e-6). Found by Hypothesis
-    generating a large deposit, not by hand-picked examples -- every
-    hand-written test in this suite happened to use numbers small enough
-    to never hit this."""
-    return math.isclose(a, b, rel_tol=1e-9, abs_tol=_EPS)
+ZERO = Decimal(0)
 
 
 class InvariantViolation(Exception):
@@ -36,34 +36,34 @@ class InvariantViolation(Exception):
 
 
 def _check_finite_scalars(account) -> None:
-    if not math.isfinite(account.cash):
+    if not account.cash.is_finite():
         raise InvariantViolation(f"cash is not finite: {account.cash!r}")
     nav = account.nav()
-    if not math.isfinite(nav):
+    if not nav.is_finite():
         raise InvariantViolation(f"NAV is not finite: {nav!r}")
 
 
 def _check_positive_prices(account) -> None:
     for key, price in account.marks.items():
-        if not (math.isfinite(price) and price > 0):
+        if not (price.is_finite() and price > 0):
             raise InvariantViolation(f"mark price for {key} is not positive/finite: {price!r}")
 
 
 def _check_finite_quantities(account) -> None:
     for key, pos in account.spot_positions.items():
-        if not math.isfinite(pos.quantity):
+        if not pos.quantity.is_finite():
             raise InvariantViolation(f"spot quantity for {key} is not finite: {pos.quantity!r}")
     for key, pos in account.perp_positions.items():
-        if not math.isfinite(pos.quantity):
+        if not pos.quantity.is_finite():
             raise InvariantViolation(f"perp quantity for {key} is not finite: {pos.quantity!r}")
-        if not math.isfinite(pos.avg_entry_price):
+        if not pos.avg_entry_price.is_finite():
             raise InvariantViolation(
                 f"perp avg_entry_price for {key} is not finite: {pos.avg_entry_price!r}")
 
 
 def _check_order_fill_bounds(account) -> None:
     for order_id, order in account.orders.items():
-        if order.filled_quantity > order.quantity + _EPS:
+        if order.filled_quantity > order.quantity:
             raise InvariantViolation(
                 f"order {order_id}: filled_quantity {order.filled_quantity} > "
                 f"quantity {order.quantity}")
@@ -73,7 +73,7 @@ def _check_no_naked_short_spot(account) -> None:
     if account.allow_short_spot:
         return
     for key, pos in account.spot_positions.items():
-        if pos.quantity < -_EPS:
+        if pos.quantity < 0:
             raise InvariantViolation(
                 f"spot position {key} is negative ({pos.quantity}) without "
                 f"allow_short_spot enabled")
@@ -81,13 +81,13 @@ def _check_no_naked_short_spot(account) -> None:
 
 def _check_margin_non_negative_and_ordered(account, margin_config: MarginConfig) -> None:
     state = compute_margin_state(account, margin_config)
-    if state.initial_margin_required < -_EPS:
+    if state.initial_margin_required < 0:
         raise InvariantViolation(
             f"initial_margin_required is negative: {state.initial_margin_required}")
-    if state.maintenance_margin_required < -_EPS:
+    if state.maintenance_margin_required < 0:
         raise InvariantViolation(
             f"maintenance_margin_required is negative: {state.maintenance_margin_required}")
-    if state.maintenance_margin_required > state.initial_margin_required + _EPS:
+    if state.maintenance_margin_required > state.initial_margin_required:
         raise InvariantViolation(
             f"maintenance_margin_required ({state.maintenance_margin_required}) > "
             f"initial_margin_required ({state.initial_margin_required})")
@@ -125,7 +125,7 @@ def _check_client_order_id_consistency(account) -> None:
             if (other.instrument.key != first.instrument.key
                     or other.side != first.side
                     or other.order_type != first.order_type
-                    or abs(other.quantity - first.quantity) > _EPS):
+                    or other.quantity != first.quantity):
                 raise InvariantViolation(
                     f"client_order_id {client_id!r} maps to conflicting orders: "
                     f"{first.order_id!r} and {other.order_id!r} disagree on "
@@ -150,21 +150,21 @@ def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
         if isinstance(event.payload, FillPayload):
             p = event.payload
             signed = p.quantity if OrderSide(p.side) == OrderSide.BUY else -p.quantity
-            expected[p.instrument.key] = expected.get(p.instrument.key, 0.0) + signed
+            expected[p.instrument.key] = expected.get(p.instrument.key, ZERO) + signed
         elif isinstance(event.payload, LiquidationPayload):
             lp = event.payload
-            running = expected.get(lp.instrument.key, 0.0)
-            direction = 1.0 if running > 0 else -1.0
+            running = expected.get(lp.instrument.key, ZERO)
+            direction = Decimal(1) if running > 0 else Decimal(-1)
             expected[lp.instrument.key] = running - direction * lp.quantity_closed
 
     for key, pos in account.spot_positions.items():
-        exp = expected.get(key, 0.0)
-        if not _close(pos.quantity, exp):
+        exp = expected.get(key, ZERO)
+        if pos.quantity != exp:
             raise InvariantViolation(
                 f"spot position {key}: quantity {pos.quantity} != sum of fills {exp}")
     for key, pos in account.perp_positions.items():
-        exp = expected.get(key, 0.0)
-        if not _close(pos.quantity, exp):
+        exp = expected.get(key, ZERO)
+        if pos.quantity != exp:
             raise InvariantViolation(
                 f"perp position {key}: quantity {pos.quantity} != sum of fills/"
                 f"liquidations {exp}")
@@ -172,7 +172,7 @@ def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
 
 def _check_cash_equals_categorized_flows(account) -> None:
     expected = account.expected_cash_from_categories()
-    if not _close(account.cash, expected):
+    if account.cash != expected:
         raise InvariantViolation(
             f"cash ({account.cash}) does not equal the sum of deposits/withdrawals/"
             f"trades/fees/funding/borrow ({expected})")

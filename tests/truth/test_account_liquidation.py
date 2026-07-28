@@ -1,6 +1,8 @@
 """tests/truth/test_account_liquidation.py -- forced closure + reconciliation recording."""
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from src.futur.truth.account import Account, UnknownPositionError
@@ -9,16 +11,17 @@ from src.futur.truth.events import (
     Event,
     EventType,
     FillPayload,
-    Instrument,
-    InstrumentType,
     LiquidationPayload,
+    MarkPayload,
     OrderAcknowledgedPayload,
     OrderSubmittedPayload,
+    ProductSpec,
+    ProductType,
     ReconciliationPayload,
 )
 from src.futur.truth.orders import OrderSide, OrderType
 
-PERP = Instrument(venue="TESTX", symbol="BTCUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP = ProductSpec(venue="TESTX", symbol="BTCUSD-PERP", type=ProductType.LINEAR_PERP,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
 
 
@@ -68,10 +71,10 @@ def test_partial_liquidation_realizes_pnl_and_reduces_position():
     account.apply_event(_ev(EventType.LIQUIDATION, LiquidationPayload(
         instrument=PERP, quantity_closed=1.0, price=40_000.0, fee=25.0), "liq1"))
     pos = account.perp_positions[PERP.key]
-    assert pos.quantity == pytest.approx(1.0)
-    assert pos.avg_entry_price == pytest.approx(50_000.0)   # unchanged for what's left
-    expected_realized = (40_000.0 - 50_000.0) * 1.0   # a loss
-    assert account.cash == pytest.approx(cash_before + expected_realized - 25.0)
+    assert pos.quantity == Decimal("1.0")
+    assert pos.avg_entry_price == Decimal("50000.0")   # unchanged for what's left
+    expected_realized = Decimal("40000.0") - Decimal("50000.0")   # a loss, qty 1.0
+    assert account.cash == cash_before + expected_realized - Decimal("25.0")
 
 
 def test_full_liquidation_zeroes_position_and_resets_avg_price():
@@ -82,10 +85,26 @@ def test_full_liquidation_zeroes_position_and_resets_avg_price():
     account.apply_event(_ev(EventType.LIQUIDATION, LiquidationPayload(
         instrument=PERP, quantity_closed=1.0, price=60_000.0, fee=15.0), "liq1"))
     pos = account.perp_positions[PERP.key]
-    assert pos.quantity == pytest.approx(0.0)
-    assert pos.avg_entry_price == pytest.approx(0.0)
-    expected_realized = (60_000.0 - 50_000.0) * 1.0 * -1.0   # short losing as price rises
-    assert account.cash == pytest.approx(cash_before + expected_realized - 15.0)
+    assert pos.quantity == 0
+    assert pos.avg_entry_price == 0
+    expected_realized = (Decimal("60000.0") - Decimal("50000.0")) * -1   # short losing as price rises
+    assert account.cash == cash_before + expected_realized - Decimal("15.0")
+
+
+def test_liquidation_slippage_is_a_separate_cost_from_fee():
+    """NAV_before - NAV_after == fee + slippage (verified exactly here at
+    the account level; the full identity across a realistic scenario is
+    exercised again independently in commit 4's oracle-checked fixtures)."""
+    account = Account()
+    _deposit(account, 100_000.0)
+    _open(account, "o1", OrderSide.BUY, 2.0, price=50_000.0)
+    account.apply_event(_ev(EventType.MARK, MarkPayload(PERP, 50_000.0), "m0"))
+    nav_before = account.nav()
+    account.apply_event(_ev(EventType.LIQUIDATION, LiquidationPayload(
+        instrument=PERP, quantity_closed=1.0, price=50_000.0, fee=Decimal("20.0"),
+        slippage=Decimal("7.5")), "liq1"))
+    nav_after = account.nav()
+    assert nav_before - nav_after == Decimal("27.5")   # exactly fee + slippage
 
 
 def test_reconciliation_event_recorded_on_account():

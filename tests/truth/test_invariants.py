@@ -8,6 +8,8 @@ state that violates invariant X, does check() actually catch it?
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from src.futur.truth.account import Account
@@ -16,10 +18,10 @@ from src.futur.truth.events import (
     Event,
     EventType,
     FillPayload,
-    Instrument,
-    InstrumentType,
     OrderAcknowledgedPayload,
     OrderSubmittedPayload,
+    ProductSpec,
+    ProductType,
 )
 from src.futur.truth.invariants import InvariantViolation, check
 from src.futur.truth.ledger import Ledger
@@ -27,9 +29,9 @@ from src.futur.truth.margin import MarginConfig
 from src.futur.truth.orders import Order, OrderSide, OrderStatus, OrderType
 from src.futur.truth.positions import PerpPosition, SpotPosition
 
-SPOT = Instrument(venue="TESTX", symbol="BTCUSD", type=InstrumentType.SPOT,
+SPOT = ProductSpec(venue="TESTX", symbol="BTCUSD", type=ProductType.SPOT,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
-PERP = Instrument(venue="TESTX", symbol="BTCUSD-PERP", type=InstrumentType.PERPETUAL,
+PERP = ProductSpec(venue="TESTX", symbol="BTCUSD-PERP", type=ProductType.LINEAR_PERP,
                   base_ccy="BTC", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
 
 
@@ -62,7 +64,7 @@ def test_cash_not_finite_rejected():
 
 def test_negative_mark_price_rejected():
     account = Account()
-    account.marks[SPOT.key] = -100.0
+    account.marks[SPOT.key] = Decimal("-100.0")
     with pytest.raises(InvariantViolation, match="mark price"):
         check(account, _empty_ledger(), MarginConfig())
 
@@ -121,10 +123,10 @@ def test_maintenance_margin_exceeding_initial_rejected():
     account = Account(cash=1_000_000.0)
     account.perp_positions[PERP.key] = PerpPosition(instrument=PERP, quantity=10.0,
                                                     avg_entry_price=50_000.0)
-    account.marks[PERP.key] = 50_000.0
+    account.marks[PERP.key] = Decimal("50000.0")
     bad_config = object.__new__(MarginConfig)   # bypass __post_init__'s own check
-    object.__setattr__(bad_config, "initial_margin_rate", 0.05)
-    object.__setattr__(bad_config, "maintenance_margin_rate", 0.10)
+    object.__setattr__(bad_config, "initial_margin_rate", Decimal("0.05"))
+    object.__setattr__(bad_config, "maintenance_margin_rate", Decimal("0.10"))
     with pytest.raises(InvariantViolation, match="maintenance_margin_required"):
         check(account, _empty_ledger(), bad_config)
 
@@ -175,6 +177,6 @@ def test_position_not_matching_sum_of_fills_rejected():
 
 def test_cash_not_matching_categorized_flows_rejected():
     account = Account()
-    account.cash = 500.0   # set directly, bypassing _apply_cash_deposit's category tracking
+    account.cash = Decimal("500.0")   # set directly, bypassing _apply_cash_deposit's category tracking
     with pytest.raises(InvariantViolation, match="does not equal the sum"):
         check(account, _empty_ledger(), MarginConfig())

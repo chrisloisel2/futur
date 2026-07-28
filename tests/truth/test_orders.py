@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from src.futur.truth.events import Instrument, InstrumentType
+from src.futur.truth.events import ProductSpec, ProductType
 from src.futur.truth.orders import (
     Fill,
     InvalidOrderTransition,
@@ -15,8 +15,8 @@ from src.futur.truth.orders import (
 )
 
 
-def _instrument() -> Instrument:
-    return Instrument(venue="TESTX", symbol="BTCUSD", type=InstrumentType.SPOT,
+def _instrument() -> ProductSpec:
+    return ProductSpec(venue="TESTX", symbol="BTCUSD", type=ProductType.SPOT,
                       base_ccy="BTC", quote_ccy="USD", tick_size=0.5, lot_size=0.001)
 
 
