@@ -155,6 +155,8 @@ if [[ "$NO_API" -eq 1 ]]; then
   exit 0
 fi
 
-export PYTHONPATH="$ROOT_DIR:$ROOT_DIR/frontend_pipeline:${PYTHONPATH:-}"
-cd "$ROOT_DIR/frontend_pipeline"
-exec "$PYTHON_BIN" api_server.py
+echo "frontend_pipeline/api_server.py was retired during the Phase 2 rebuild" >&2
+echo "(mixed API/autonomous-loop/EMA-fallback/Mongo/non-canonical paper account" >&2
+echo "-- see docs/FOUNDATION_AUDIT.md). No replacement API exists yet; none will" >&2
+echo "until the Truth Engine is stable. Use --no-api to run Docker services only." >&2
+exit 1
