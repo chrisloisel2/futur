@@ -19,6 +19,7 @@ reconciliation, and a full terminal close of both spot and perp.
 from __future__ import annotations
 
 from decimal import Decimal
+from pathlib import Path
 
 from src.futur.truth.engine import TruthEngine
 from src.futur.truth.events import (
@@ -39,6 +40,7 @@ from src.futur.truth.events import (
 from src.futur.truth.margin import MarginConfig, can_open_additional_notional, compute_margin_state
 from src.futur.truth.orders import OrderSide, OrderType
 from src.futur.truth.reconciliation import ExternalSnapshot, reconcile
+from src.futur.truth.replay import replay_file
 from tests.truth import oracle
 
 SPOT = ProductSpec(venue="ORACLE", symbol="BTCUSD", type=ProductType.SPOT,
@@ -375,3 +377,31 @@ def test_nav_decomposition_identity_with_both_spot_and_perp_open():
     assert engine.account.nav() == nav_expected
     assert engine.account.nav() == (
         engine.account.cash + engine.account.spot_market_value() + engine.account.perp_unrealized_pnl())
+
+
+# ── committed JSONL exports of the scenarios above, for `futur truth
+#    validate` (final gate) -- these carry the same events, not
+#    independently hand-verified again here (the Python scenarios above
+#    already are); this just proves the exported fixture files stay valid
+#    and in sync with the scenarios they're named after. ──────────────────
+
+_REFERENCE_FIXTURES_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "truth" / "reference"
+
+
+def test_every_committed_reference_fixture_exists_and_validates():
+    fixtures = sorted(_REFERENCE_FIXTURES_DIR.glob("*.jsonl"))
+    assert len(fixtures) >= 12, "expected the full Phase 4B commit 4 reference fixture set"
+    for path in fixtures:
+        replay_file(path)   # raises InvariantViolation (or a domain error) if not clean
+
+
+def test_spot_buy_with_fee_fixture_matches_the_oracle_number():
+    _, summary = replay_file(_REFERENCE_FIXTURES_DIR / "spot_buy_with_fee.jsonl")
+    expected = Decimal(200000) + oracle.spot_buy_cash_delta(2.0, 50_000.0, 15.0)
+    assert summary.final_cash == expected == Decimal("99985.00000000")
+
+
+def test_liquidation_fixture_matches_the_oracle_nav_identity():
+    _, summary = replay_file(_REFERENCE_FIXTURES_DIR / "liquidation_fee_and_slippage.jsonl")
+    assert summary.final_cash == Decimal("99958.00000000")
+    assert summary.final_nav == Decimal("99958.00000000")
