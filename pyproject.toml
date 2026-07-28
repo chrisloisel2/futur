@@ -53,6 +53,7 @@ dev = [
     "pytest-cov>=4.1",
     "ruff",
     "mypy",
+    "hypothesis>=6.100",
 ]
 
 [project.scripts]
@@ -75,7 +76,7 @@ where = [".", "src"]
 include = ["src", "src.alpha20", "src.alpha20.*", "src.institutional", "src.institutional.*", "futur", "futur.*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/unit", "tests/integration", "tests/architecture"]
+testpaths = ["tests/unit", "tests/integration", "tests/architecture", "tests/truth"]
 pythonpath = ["."]
 addopts = "-ra --tb=short"
 
