@@ -34,7 +34,7 @@ class _OkAdapter:
     def required_universe(self, state): return []
     def required_funding(self, state): return []
     def required_quarterly_pairs(self, state): return []
-    def decide(self, snapshot, broker, state, risk_state="risk_on"):
+    def decide(self, snapshot, broker, state, risk_state="risk_on", scale=1.0):
         return [], dict(state, ticked=state.get("ticked", 0) + 1)
 
 
@@ -44,7 +44,7 @@ class _BoomAdapter:
     def required_universe(self, state): return []
     def required_funding(self, state): return []
     def required_quarterly_pairs(self, state): return []
-    def decide(self, snapshot, broker, state, risk_state="risk_on"):
+    def decide(self, snapshot, broker, state, risk_state="risk_on", scale=1.0):
         raise RuntimeError("runner cassé exprès")
 
 
@@ -54,7 +54,7 @@ class _SlowAdapter:
     def required_universe(self, state): return []
     def required_funding(self, state): return []
     def required_quarterly_pairs(self, state): return []
-    def decide(self, snapshot, broker, state, risk_state="risk_on"):
+    def decide(self, snapshot, broker, state, risk_state="risk_on", scale=1.0):
         time.sleep(5)
         return [], state
 

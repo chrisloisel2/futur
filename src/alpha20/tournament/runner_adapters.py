@@ -26,7 +26,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 
-from src.alpha20.contracts import LedgerEvent
+from src.alpha20.contracts import LedgerEvent, clamp_scale
 from src.alpha20.execution.paper_broker import Order, PaperBroker
 from src.alpha20.tournament.market_bus import MarketSnapshot
 from src.alpha20.tournament.runner_registry import RunnerSpec
@@ -41,16 +41,19 @@ def _now_iso() -> str:
 
 def _decision_event(spec: RunnerSpec, snapshot: MarketSnapshot, symbol: str,
                     signal: str, before: float, after: float,
-                    arrival_price, reason: str) -> LedgerEvent:
+                    arrival_price, reason: str,
+                    scale: float = None) -> LedgerEvent:
+    meta = {"market_event_id": snapshot.market_event_id,
+            "runner_id": spec.runner_id, "config_hash": spec.config_hash,
+            "cutoff": snapshot.cutoff, "signal": signal,
+            "position_before_usdt": round(before, 2),
+            "position_after_usdt": round(after, 2),
+            "arrival_price": arrival_price, "reason": reason}
+    if scale is not None:
+        meta["governor_scale"] = scale
     return LedgerEvent(
         ts=_now_iso(), kind="decision", sleeve=symbol, venue=spec.venue or "n/a",
-        amount_usdt=0.0, ref="tournament_cycle",
-        meta={"market_event_id": snapshot.market_event_id,
-              "runner_id": spec.runner_id, "config_hash": spec.config_hash,
-              "cutoff": snapshot.cutoff, "signal": signal,
-              "position_before_usdt": round(before, 2),
-              "position_after_usdt": round(after, 2),
-              "arrival_price": arrival_price, "reason": reason})
+        amount_usdt=0.0, ref="tournament_cycle", meta=meta)
 
 
 # ── carry/basis (V1.2, SOL, BNB — même mécanisme, config différente) ────────
@@ -83,7 +86,15 @@ class CarryBasisAdapter:
             else datetime.now(timezone.utc).date().isoformat()
 
     def decide(self, snapshot: MarketSnapshot, broker: PaperBroker,
-              state: dict, risk_state: str = "risk_on") -> Tuple[List[LedgerEvent], dict]:
+              state: dict, risk_state: str = "risk_on",
+              scale: float = 1.0) -> Tuple[List[LedgerEvent], dict]:
+        # `scale` accepted for signature parity with the other 2 adapters
+        # (orchestrator._run_one calls all 3 identically) but INTENTIONALLY
+        # NOT applied here -- this adapter doesn't route through PaperBroker
+        # or construct Order objects at all; it marks-to-market an internal
+        # MultiLegBacktester replay. Wiring the governor's output into that
+        # replay is a separate, deeper change, tracked as a known open gap
+        # in docs/v2/PHASE1_DIAGNOSTIC.md §6 -- not silently fixed here.
         from src.institutional.engines.registry import build_engine
         from src.institutional.backtest.multileg_backtester import (
             MultiLegBacktester, MultiLegConfig)
@@ -186,7 +197,9 @@ class BasisTermAdapter:
         return list(self.spec.assets)
 
     def decide(self, snapshot: MarketSnapshot, broker: PaperBroker,
-              state: dict, risk_state: str = "risk_on") -> Tuple[List[LedgerEvent], dict]:
+              state: dict, risk_state: str = "risk_on",
+              scale: float = 1.0) -> Tuple[List[LedgerEvent], dict]:
+        scale = clamp_scale(scale)
         cfg = self.spec.config
         events = []
         positions = dict(state.get("positions", {}))
@@ -242,15 +255,20 @@ class BasisTermAdapter:
                     self.spec, snapshot, asset, "abstain", 0.0, 0.0, spot,
                     f"basis annualisé {basis_ann:.2%} < seuil {cfg['entry_threshold_ann']:.2%}"))
                 continue
-            if risk_state == "kill":
+            if risk_state == "kill" or scale <= 0.0:
+                reason = "kill_switch_active" if risk_state == "kill" else "governor_scale_zero"
                 events.append(LedgerEvent(ts=_now_iso(), kind="reject",
                                           sleeve=f"basis_{asset}", venue=self.spec.venue,
                                           amount_usdt=0.0, ref="kill_switch",
-                                          meta={"reason": "kill_switch_active"}))
+                                          meta={"reason": reason, "governor_scale": scale}))
                 events.append(_decision_event(self.spec, snapshot, asset, "abstain",
-                                              0.0, 0.0, spot, "kill switch actif"))
+                                              0.0, 0.0, spot,
+                                              f"ordre interdit: {reason}", scale))
                 continue
-            notional = capital * cfg["sizing_frac"]
+            # scale applied to the REQUESTED notional before Order() is built --
+            # nothing downstream (broker, fill scenarios) ever sees the
+            # unscaled size, so nothing later can re-inflate it.
+            notional = capital * cfg["sizing_frac"] * scale
             scen_spot = broker.execute(Order(self.spec.runner_id, asset, self.spec.venue,
                                              +1, notional, "spot", "taker"),
                                        snapshot, risk_state)
@@ -278,7 +296,7 @@ class BasisTermAdapter:
                                 "cycles_elapsed": 0}
             open_ev = _decision_event(self.spec, snapshot, asset, "open",
                                       0.0, notional, spot,
-                                      f"basis_ann={basis_ann:.2%} ≥ seuil")
+                                      f"basis_ann={basis_ann:.2%} ≥ seuil", scale)
             # scénarios de robustesse (observed/coûts×1.5/×2/latence/fills
             # partiels/panne venue), calculés SIMULTANÉMENT — jamais utilisés
             # pour ajuster la décision, seulement pour l'audit de robustesse
@@ -337,7 +355,9 @@ class MHEventsAdapter:
         return self._rme
 
     def decide(self, snapshot: MarketSnapshot, broker: PaperBroker,
-              state: dict, risk_state: str = "risk_on") -> Tuple[List[LedgerEvent], dict]:
+              state: dict, risk_state: str = "risk_on",
+              scale: float = 1.0) -> Tuple[List[LedgerEvent], dict]:
+        scale = clamp_scale(scale)
         rme = self._mod()
         if not rme.rmh.SHADOW_LEDGER.exists():
             return [_decision_event(self.spec, snapshot, "n/a", "abstain",
@@ -360,22 +380,27 @@ class MHEventsAdapter:
             closes = rme._closes(r["symbol"])
             rep = rme.replay_decision(r, closes, cost_bp)
             new_seen.append(str(r["event_time"]))
-            notional = self.spec.capital_standalone_eur * cfg["weight_per_decision"]
+            requested_notional = self.spec.capital_standalone_eur * cfg["weight_per_decision"]
             if rep is None:
                 events.append(_decision_event(self.spec, snapshot, r["symbol"],
                                               "abstain", 0.0, 0.0, None,
                                               "données de replay indisponibles"))
                 continue
             net_exec, entry_ts, exit_ts, gross = rep
-            if risk_state == "kill":
+            if risk_state == "kill" or scale <= 0.0:
+                reason = "kill_switch_active" if risk_state == "kill" else "governor_scale_zero"
                 events.append(LedgerEvent(ts=_now_iso(), kind="reject",
                                           sleeve=f"mh_{r['engine']}", venue=self.spec.venue,
                                           amount_usdt=0.0, ref="kill_switch",
-                                          meta={"reason": "kill_switch_active"}))
+                                          meta={"reason": reason, "governor_scale": scale}))
                 events.append(_decision_event(self.spec, snapshot, r["symbol"],
                                               "abstain", 0.0, 0.0, None,
-                                              "kill switch actif"))
+                                              f"ordre interdit: {reason}", scale))
                 continue
+            # scale applied to the REQUESTED notional before Order() is built --
+            # nothing downstream (broker, fill scenarios) ever sees the
+            # unscaled size, so nothing later can re-inflate it.
+            notional = requested_notional * scale
             scen = broker.execute(Order(self.spec.runner_id, r["symbol"],
                                         self.spec.venue, 1, notional, "perp",
                                         "taker"), snapshot, risk_state)
@@ -397,7 +422,7 @@ class MHEventsAdapter:
             dec_ev = _decision_event(
                 self.spec, snapshot, r["symbol"], "mh_consensus_replay",
                 0.0, notional, fill.avg_price,
-                f"engine={r['engine']} score={r['score']:.3f}")
+                f"engine={r['engine']} score={r['score']:.3f}", scale)
             dec_ev.meta["scenarios"] = {n: {"fee_bp": f.fee_bp, "rejected": f.rejected}
                                         for n, f in scen.items()}
             events.append(dec_ev)
