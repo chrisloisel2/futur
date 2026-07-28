@@ -31,6 +31,7 @@ from src.futur.truth.events import (
     Event,
     FeePayload,
     FillPayload,
+    FundingPayload,
     Instrument,
     InstrumentType,
     MarginUpdatePayload,
@@ -41,7 +42,7 @@ from src.futur.truth.events import (
     OrderSubmittedPayload,
 )
 from src.futur.truth.orders import Order, OrderSide, OrderStatus, OrderType
-from src.futur.truth.positions import SpotPosition
+from src.futur.truth.positions import PerpPosition, SpotPosition
 
 
 class CurrencyMismatchError(Exception):
@@ -180,9 +181,51 @@ class Account:
 
     def _apply_perp_fill(self, instrument: Instrument, signed_qty: float,
                          price: float, fee: float) -> None:
-        raise NotImplementedError(
-            "perpetual fill accounting lands in the next commit "
-            "(truth: implement perpetual accounting)")
+        """Weighted-average-cost perpetual accounting. The full notional
+        never touches cash -- only realized PnL (folded in immediately,
+        per this module's convention) and the fee do.
+
+        Three cases, by how `signed_qty` relates to the existing position:
+          - flat, or same sign as the existing position -> pure increase:
+            weighted-average the entry price, no realized PnL.
+          - opposite sign, |signed_qty| <= |existing| -> pure reduction:
+            realize PnL on the closed portion at (price - avg_entry), sign-
+            adjusted for long vs. short; avg_entry_price of the remaining
+            open portion is unchanged (it's still the same original cost
+            basis, just a smaller quantity of it).
+          - opposite sign, |signed_qty| > |existing| -> flip: realize PnL on
+            the entire existing position, then open a brand-new position
+            in the other direction at the fill price for the remainder.
+        """
+        pos = self.perp_positions.setdefault(instrument.key, PerpPosition(instrument=instrument))
+        old_qty, old_avg = pos.quantity, pos.avg_entry_price
+        realized_pnl = 0.0
+
+        same_direction = old_qty == 0.0 or (old_qty > 0) == (signed_qty > 0)
+        if same_direction:
+            new_qty = old_qty + signed_qty
+            new_avg = ((old_qty * old_avg + signed_qty * price) / new_qty
+                      if new_qty != 0.0 else 0.0)
+        else:
+            closing_qty = min(abs(signed_qty), abs(old_qty))
+            direction = 1.0 if old_qty > 0 else -1.0
+            realized_pnl += (price - old_avg) * closing_qty * direction
+            if abs(signed_qty) <= abs(old_qty):
+                new_qty = old_qty + signed_qty
+                new_avg = old_avg if new_qty != 0.0 else 0.0
+            else:
+                remainder = signed_qty + old_qty     # what's left after fully offsetting old_qty
+                new_qty = remainder
+                new_avg = price
+
+        self.cash += realized_pnl
+        self.cash -= fee
+        pos.quantity = new_qty
+        pos.avg_entry_price = new_avg
+
+    def _apply_funding(self, p: FundingPayload) -> None:
+        self._check_currency(p.currency)
+        self.cash += p.amount    # signed: + received, - paid
 
     # ── margin / liquidation snapshots (informational at this stage) ──────
     def _apply_margin_update(self, p: MarginUpdatePayload) -> None:
@@ -198,5 +241,14 @@ class Account:
             total += pos.market_value(mark)
         return total
 
+    def perp_unrealized_pnl(self) -> float:
+        total = 0.0
+        for key, pos in self.perp_positions.items():
+            mark = self.marks.get(key)
+            if mark is None:
+                continue   # never marked yet -- contributes nothing, not an error
+            total += pos.unrealized_pnl(mark)
+        return total
+
     def nav(self) -> float:
-        return self.cash + self.spot_market_value()
+        return self.cash + self.spot_market_value() + self.perp_unrealized_pnl()
