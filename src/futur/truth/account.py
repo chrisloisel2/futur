@@ -83,6 +83,20 @@ class Account:
     last_margin_snapshot: dict = field(default_factory=dict)      # Instrument.key -> MarginUpdatePayload
     last_reconciliation: object = None
 
+    # Cumulative cash-flow categories -- updated IN THE SAME METHOD as
+    # `cash` itself, every time, never computed after the fact. This is a
+    # double-entry-style cross-check (invariants.py sums these and compares
+    # to `cash`): it can't prove a formula is right, but it catches the
+    # class of bug where an edit updates `cash` without updating its
+    # category (or vice versa) -- a partial/incomplete change to a handler.
+    cumulative_deposits: float = 0.0
+    cumulative_withdrawals: float = 0.0
+    cumulative_fees_paid: float = 0.0       # fill.fee + standalone FEE events
+    cumulative_borrow_paid: float = 0.0
+    cumulative_funding: float = 0.0          # signed
+    cumulative_realized_pnl: float = 0.0      # perp only
+    cumulative_spot_trade_cashflow: float = 0.0   # signed: -buy notional, +sell notional
+
     # ── dispatch ─────────────────────────────────────────────────────────
     def apply_event(self, event: Event) -> None:
         handler = getattr(self, f"_apply_{event.event_type.value.lower()}")
@@ -101,6 +115,7 @@ class Account:
         if p.amount <= 0:
             raise ValueError(f"deposit amount must be > 0, got {p.amount!r}")
         self.cash += p.amount
+        self.cumulative_deposits += p.amount
 
     def _apply_cash_withdrawal(self, p: CashWithdrawalPayload) -> None:
         self._check_currency(p.currency)
@@ -108,18 +123,21 @@ class Account:
         if p.amount <= 0:
             raise ValueError(f"withdrawal amount must be > 0, got {p.amount!r}")
         self.cash -= p.amount
+        self.cumulative_withdrawals += p.amount
 
     def _apply_borrow_cost(self, p: BorrowCostPayload) -> None:
         self._check_currency(p.currency)
         if p.amount < 0:
             raise ValueError(f"borrow cost must be >= 0, got {p.amount!r}")
         self.cash -= p.amount
+        self.cumulative_borrow_paid += p.amount
 
     def _apply_fee(self, p: FeePayload) -> None:
         self._check_currency(p.currency)
         if p.amount < 0:
             raise ValueError(f"fee must be >= 0, got {p.amount!r}")
         self.cash -= p.amount
+        self.cumulative_fees_paid += p.amount
 
     # ── orders ───────────────────────────────────────────────────────────
     def _apply_order_submitted(self, p: OrderSubmittedPayload) -> None:
@@ -177,6 +195,8 @@ class Account:
         # regardless of side, expressed once via the signed quantity.
         self.cash -= signed_qty * price
         self.cash -= fee
+        self.cumulative_spot_trade_cashflow -= signed_qty * price
+        self.cumulative_fees_paid += fee
         pos.quantity = new_qty
         pos.last_price = price
 
@@ -221,18 +241,34 @@ class Account:
 
         self.cash += realized_pnl
         self.cash -= fee
+        self.cumulative_realized_pnl += realized_pnl
+        self.cumulative_fees_paid += fee
         pos.quantity = new_qty
         pos.avg_entry_price = new_avg
 
     def _apply_funding(self, p: FundingPayload) -> None:
         self._check_currency(p.currency)
         self.cash += p.amount    # signed: + received, - paid
+        self.cumulative_funding += p.amount
 
     # ── margin / liquidation snapshots (informational at this stage) ──────
     def _apply_margin_update(self, p: MarginUpdatePayload) -> None:
         self.last_margin_snapshot[p.instrument.key] = p
 
     # ── derived quantities ───────────────────────────────────────────────
+    def expected_cash_from_categories(self) -> float:
+        """Independent cross-check total (invariants.py compares this to
+        `cash`) -- see the cumulative_* fields' docstring above."""
+        return (
+            self.cumulative_deposits
+            - self.cumulative_withdrawals
+            - self.cumulative_fees_paid
+            - self.cumulative_borrow_paid
+            + self.cumulative_funding
+            + self.cumulative_realized_pnl
+            + self.cumulative_spot_trade_cashflow
+        )
+
     def spot_market_value(self) -> float:
         total = 0.0
         for key, pos in self.spot_positions.items():
