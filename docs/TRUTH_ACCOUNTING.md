@@ -16,7 +16,12 @@ exchange connectivity, real historical data, complex tax estimation, a
 sophisticated multi-strategy portfolio, or stochastic slippage modelling.
 `src/futur/truth/` imports nothing from `src.alpha20`, `src.institutional`,
 `legacy`, `frontend_pipeline`, or the second `trading-system` runtime copy
--- enforced by `tests/architecture/test_no_forbidden_imports_from_src.py`.
+-- `legacy`/`frontend_pipeline`/`trading-system` are enforced repo-wide by
+`tests/architecture/test_no_forbidden_imports_from_src.py`;
+`src.alpha20`/`src.institutional` specifically are enforced for the truth
+domain by `tests/architecture/test_truth_domain_has_no_alpha20_dependency.py`
+(added Phase 4C -- the direction is one-way: `src.alpha20`'s shadow adapter
+may import truth, truth must never import it back).
 The old runtime keeps running; as of Phase 4C, one runner (CarryBasisAdapter)
 feeds TruthEngine a copy of its events in a read-only shadow (see
 `docs/PHASE4C_CARRY_SHADOW.md`) -- TruthEngine still does not decide, size,
