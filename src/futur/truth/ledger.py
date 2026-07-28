@@ -43,6 +43,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -181,6 +182,39 @@ class Ledger:
         self._entries.append(LedgerEntry(event=stamped, cumulative_hash=cum_hash))
         self._seen_event_ids.add(event.event_id)
         self._next_sequence += 1
+        return stamped
+
+    def append_if_valid(self, event: Event, validate: Callable[[Event], None]) -> Event:
+        """Two-phase append used by `TruthEngine.apply()`: stamps and stages
+        `event` in memory (so `validate` sees a ledger that already
+        includes it, exactly like `append()`'s callers used to observe),
+        calls `validate(stamped_event)`, and only WRITES the durable WAL
+        line -- the point at which the event becomes truly persisted --
+        if `validate` returns without raising. If `validate` raises, the
+        staged entry is popped back off, its event_id is un-reserved, and
+        the sequence counter is rewound -- the ledger ends up byte-for-byte
+        identical to before this call, nothing was ever written to disk,
+        and the SAME event_id can be resubmitted afterward. The exception
+        propagates to the caller either way."""
+        if event.event_id in self._seen_event_ids:
+            raise DuplicateEventError(f"duplicate event_id: {event.event_id!r}")
+        stamped = event.with_sequence(self._next_sequence)
+        cum_hash = hash_entry(self.head_hash, stamped)
+        self._entries.append(LedgerEntry(event=stamped, cumulative_hash=cum_hash))
+        self._seen_event_ids.add(event.event_id)
+        self._next_sequence += 1
+        try:
+            validate(stamped)
+        except BaseException:
+            self._entries.pop()
+            self._seen_event_ids.discard(event.event_id)
+            self._next_sequence -= 1
+            raise
+        if self._wal_file is not None:
+            record = {"event": event_to_dict(stamped), "cumulative_hash": cum_hash}
+            self._wal_file.write(json.dumps(record, sort_keys=True) + "\n")
+            self._wal_file.flush()
+            os.fsync(self._wal_file.fileno())
         return stamped
 
     def close(self) -> None:

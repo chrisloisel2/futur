@@ -124,6 +124,21 @@ class Account:
         ):
             setattr(self, attr, quantize_cash(getattr(self, attr)))
 
+    # ── snapshot / restore ───────────────────────────────────────────────
+    def snapshot(self) -> dict:
+        """A deep copy of every field, for all-or-nothing rollback. Public
+        (not just `apply_event`'s own local use) so a caller that needs to
+        undo MORE than one handler call -- e.g. `TruthEngine.apply()`
+        rolling back a handler that individually succeeded but left the
+        account violating a cross-cutting invariant checked afterward --
+        can snapshot before and restore after, using the exact same
+        mechanism."""
+        return copy.deepcopy(self.__dict__)
+
+    def restore(self, snapshot: dict) -> None:
+        self.__dict__.clear()
+        self.__dict__.update(snapshot)
+
     # ── dispatch ─────────────────────────────────────────────────────────
     def apply_event(self, event: Event) -> None:
         """All-or-nothing: an event either fully applies or leaves every
@@ -135,14 +150,19 @@ class Account:
         cash/positions never moved -- a real partial mutation, invisible
         until something else reads the inconsistent state later. Snapshot
         before, restore on any exception, so a rejected event is
-        indistinguishable from an event that was never received."""
+        indistinguishable from an event that was never received.
+
+        This only covers the ONE handler call -- it does not protect
+        against a LATER, separate check (like invariants.check()) that
+        finds the resulting state invalid; that's `TruthEngine.apply()`'s
+        job, using the same `snapshot`/`restore` pair around the wider
+        handler-plus-invariants sequence."""
         handler = getattr(self, f"_apply_{event.event_type.value.lower()}")
-        snapshot = copy.deepcopy(self.__dict__)
+        snap = self.snapshot()
         try:
             handler(event.payload)
         except BaseException:
-            self.__dict__.clear()
-            self.__dict__.update(snapshot)
+            self.restore(snap)
             raise
 
     # ── cash ─────────────────────────────────────────────────────────────

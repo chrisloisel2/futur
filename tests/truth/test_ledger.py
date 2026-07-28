@@ -34,9 +34,12 @@ def test_duplicate_event_id_rejected():
 def test_no_delete_or_update_api_exists():
     """Structural, not behavioral: the append-only guarantee comes from
     this class simply not exposing any other mutator. `close()` releases
-    a WAL file handle -- it doesn't let a caller edit or remove history."""
+    a WAL file handle, and `append_if_valid()` is a two-phase append (see
+    engine.py) -- neither lets a caller edit or remove COMMITTED
+    history."""
     public_methods = {name for name in dir(Ledger) if not name.startswith("_")}
-    assert public_methods == {"append", "close", "entries", "events", "head_hash"}
+    assert public_methods == {"append", "append_if_valid", "close", "entries",
+                              "events", "head_hash"}
 
 
 def test_entries_and_events_are_read_only_views():

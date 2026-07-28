@@ -6,6 +6,7 @@ cancel/fill races, overfills).
 from __future__ import annotations
 
 import json
+from decimal import Decimal
 
 import pytest
 
@@ -193,9 +194,11 @@ def test_rejected_short_spot_fill_leaves_the_order_and_account_untouched():
     assert engine.account.cash == cash_before
     assert "f-o1" not in engine.account.seen_fill_ids
     assert SPOT.key not in engine.account.spot_positions
-    # the ledger itself is append-only and fail-stop -- the rejected event
-    # still shows up in the history, only the ACCOUNT rolled back.
-    assert len(engine.ledger) == 4
+    # (Phase 4C) the ledger rolls back too -- a rejected event is not
+    # durably reserved, so it never shows up in history and its event_id
+    # is free to be resubmitted (e.g. corrected).
+    assert len(engine.ledger) == 3
+    assert "f-o1" not in {e.event_id for e in engine.ledger.events()}
 
 
 def test_overfill_is_rejected_without_mutating_the_already_partial_fill():
@@ -215,6 +218,56 @@ def test_overfill_is_rejected_without_mutating_the_already_partial_fill():
     assert engine.account.orders["o1"].filled_quantity == filled_before
     assert engine.account.spot_positions[SPOT.key].quantity == qty_before
     assert engine.account.cash == cash_before
+
+
+def test_wal_backed_engine_rejects_overfill_and_restart_matches_pre_rejection_state(tmp_path):
+    """Phase 4C commit 1's mandated durability/atomicity test: a WAL-backed
+    engine, valid events applied, then an over-fill attempted. The
+    rejected event must leave the ledger's state, hash, and sequence
+    IDENTICAL to just before it, and a restart from the WAL must land on
+    that exact same state -- with the rejected event_id neither persisted
+    nor reserved (a resubmission under the same id must succeed)."""
+    wal = tmp_path / "engine.jsonl"
+    ledger = Ledger(wal_path=wal)
+    engine = TruthEngine(ledger=ledger)
+    engine.apply(_deposit("d1"))
+    engine.apply(_submit("o1", OrderSide.BUY, 1.0))
+    engine.apply(_ack("o1"))
+    engine.apply(_fill("o1", OrderSide.BUY, 0.4, 50_000.0, fill_id="f1"))
+
+    hash_before = engine.ledger.head_hash
+    sequence_before = len(engine.ledger)
+    cash_before = engine.account.cash
+    filled_before = engine.account.orders["o1"].filled_quantity
+
+    with pytest.raises(ValueError, match="over-fill"):
+        engine.apply(_fill("o1", OrderSide.BUY, 0.8, 50_000.0, fill_id="f2"))   # 0.4+0.8 > 1.0
+
+    # state, hash, and sequence identical to just before the rejected event
+    assert engine.ledger.head_hash == hash_before
+    assert len(engine.ledger) == sequence_before
+    assert engine.account.cash == cash_before
+    assert engine.account.orders["o1"].filled_quantity == filled_before
+    engine.ledger.close()
+
+    # restart: reload from the WAL alone
+    reloaded_ledger = Ledger(wal_path=wal)
+    assert reloaded_ledger.head_hash == hash_before
+    assert len(reloaded_ledger) == sequence_before
+    persisted_ids = {e.event_id for e in reloaded_ledger.events()}
+    assert "f2" not in persisted_ids   # rejected event_id never persisted
+
+    reloaded_engine = TruthEngine.from_ledger(reloaded_ledger)
+    assert reloaded_engine.account.cash == cash_before
+    assert reloaded_engine.account.orders["o1"].filled_quantity == filled_before
+
+    # rejected event_id not reserved -- a fresh event under the SAME id
+    # (e.g. the corrected fill, or an unrelated event reusing the id once
+    # freed) is accepted, not blocked as a phantom duplicate
+    stamped = reloaded_engine.apply(_fill("o1", OrderSide.BUY, 0.6, 50_000.0, fill_id="f2"))
+    assert stamped.event_id == "f2"
+    assert reloaded_engine.account.orders["o1"].filled_quantity == Decimal("1.0")
+    reloaded_engine.ledger.close()
 
 
 # ── races: ACK/fill and cancel/fill ─────────────────────────────────────

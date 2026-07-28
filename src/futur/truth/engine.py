@@ -1,9 +1,10 @@
 """src/futur/truth/engine.py -- ties ledger, account, and invariants together.
 
 `TruthEngine.apply(event)` is the single entrypoint for changing state:
-append to the ledger, apply to the account, check every invariant. Live
-processing and pure replay (replay.py) both go through this one method --
-there is no second path that could drift from it.
+stage on the ledger, apply to the account, check every invariant, and only
+THEN durably commit -- live processing and pure replay (replay.py) both go
+through this one method, so there is no second path that could drift from
+it.
 """
 from __future__ import annotations
 
@@ -31,17 +32,44 @@ class TruthEngine:
                 "ledger's hash chain was bound to at construction -- got "
                 f"engine={self.margin_config!r} ledger={self.ledger.margin_config!r}")
 
+    @classmethod
+    def from_ledger(cls, ledger: Ledger) -> TruthEngine:
+        """Rebuilds a full engine (including derived Account state -- cash,
+        positions, orders) from a Ledger that already has history, e.g. one
+        just reloaded from its WAL after a restart. The ledger's own hash
+        chain is already verified at that point (Ledger.__init__ does that
+        on load); this replays every event through Account.apply_event()
+        directly (not TruthEngine.apply(), which would try to re-stage and
+        re-commit already-committed events and reject them as duplicates)
+        to rebuild the state that lives only in Account, not the ledger
+        itself."""
+        engine = cls(margin_config=ledger.margin_config, ledger=ledger)
+        for event in ledger.events():
+            engine.account.apply_event(event)
+        return engine
+
     def apply(self, event: Event) -> Event:
-        """Append `event` to the ledger (which assigns its real sequence
-        number), apply the stamped event to the account, then run every
-        invariant. If a violation is found, it raises straight out of
-        here -- the event is already in the ledger (append-only, it can't
-        be un-appended) and the account has already been mutated, so a
-        caller catching this should treat the whole engine as poisoned,
-        not attempt to continue."""
+        """All-or-nothing at the ENGINE level, not just within the account's
+        own handler (Account.apply_event already covers that): stages
+        `event` on the ledger, applies it to the account, and checks every
+        invariant, all BEFORE the event is durably committed to the WAL or
+        its event_id is permanently reserved. If either the account
+        rejects the event or the resulting state violates an invariant,
+        both the ledger's staged entry and the account's mutation are
+        rolled back -- the engine ends up exactly as it was before this
+        call, and the SAME event_id can be resubmitted (e.g. a corrected
+        version). A rejection therefore does not poison the engine; the
+        caller may continue applying further events."""
         ledger = self.ledger
         assert ledger is not None   # __post_init__ always resolves this
-        stamped = ledger.append(event)
-        self.account.apply_event(stamped)
-        invariants.check(self.account, ledger, self.margin_config)
-        return stamped
+        account_snapshot = self.account.snapshot()
+
+        def validate(stamped: Event) -> None:
+            self.account.apply_event(stamped)
+            invariants.check(self.account, ledger, self.margin_config)
+
+        try:
+            return ledger.append_if_valid(event, validate)
+        except BaseException:
+            self.account.restore(account_snapshot)
+            raise
