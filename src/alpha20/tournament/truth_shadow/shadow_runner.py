@@ -1,5 +1,5 @@
-"""src/alpha20/tournament/truth_shadow/shadow_runner.py -- Phase 4C commit 3:
-a read-only, no-effect "double run" of CarryBasisAdapter onto TruthEngine.
+"""src/alpha20/tournament/truth_shadow/shadow_runner.py -- a read-only,
+no-effect "double run" of CarryBasisAdapter onto TruthEngine.
 
 Contract:
 
@@ -29,10 +29,17 @@ Contract:
      TruthEngine is caught INSIDE `_observe()` and returned as
      `ShadowCycleResult.error` -- it never propagates out of
      `run_cycle()`, so it can never affect the legacy result already
-     computed and already returned (see
-     test_shadow_runner.py::test_a_shadow_exception_never_touches_the_
-     already_returned_legacy_result for the guarantee this is verified,
-     not just asserted in a docstring).
+     computed and already returned.
+
+Phase 4D commit 6: `_capture_multileg_result` now ALSO monkeypatches
+`MultiLegBacktester._load` (the same narrow, reversible pattern already
+used for `.run`) to capture the REAL per-asset close-price series it
+returns -- these are handed to the mapper for MARK events, replacing the
+earlier phase's algebraic price_pnl inversion. `cycle_ts` for the whole
+observation is the backtest's own `end` argument (captured from the same
+`.run()` call), not wall-clock time -- correct and reproducible for a
+real historical replay, which has nothing to do with when this code
+happens to execute.
 """
 from __future__ import annotations
 
@@ -46,16 +53,28 @@ from src.alpha20.tournament.market_bus import MarketSnapshot
 from src.alpha20.tournament.runner_adapters import build_adapter
 from src.alpha20.tournament.runner_registry import RunnerSpec
 from src.alpha20.tournament.truth_shadow.mapping import LegLedgerToTruthEvents, borrow_delta_event
+from src.alpha20.tournament.truth_shadow.product_specs import ProductSpecRegistry
 from src.futur.truth.engine import TruthEngine
 from src.futur.truth.events import Event
 
 
 @dataclass
 class ShadowConfig:
-    """`enabled=False` is the kill switch (Phase 4C commit 3 point 4) --
-    see the module docstring's point 4 for exactly what it skips."""
+    """`enabled=False` is the kill switch -- see the module docstring's
+    point 4 for exactly what it skips."""
     enabled: bool = True
     venue: str = "binance_usdm"
+
+
+@dataclass
+class CapturedRun:
+    """Everything observed from one real, unmodified decide() call --
+    the MultiLegResult, the exact per-asset price series it consumed
+    (for MARK events), and the backtest's own end timestamp (for cycle
+    event timestamps)."""
+    result: Any
+    market_prices: dict[str, pd.Series]
+    run_end: str | None
 
 
 @dataclass
@@ -72,16 +91,18 @@ class ShadowCycleResult:
 
 
 def _capture_multileg_result(spec: RunnerSpec, snapshot: MarketSnapshot, state: dict
-                             ) -> tuple[list, dict, Any]:
+                             ) -> tuple[list, dict, CapturedRun]:
     """Calls the REAL, unmodified CarryBasisAdapter.decide() and captures
-    the MultiLegResult it computes internally, via a narrow, reversible
-    monkeypatch of MultiLegBacktester.run -- restored in a `finally`, even
-    if decide() raises. This is the "double run" the mission names this
-    commit after: the SAME computation CarryBasisAdapter.decide() already
-    performs, observed rather than reimplemented -- reimplementing
-    MultiLegConfig's ~20-field construction here would risk silently
-    drifting from the real one over time; capturing the real call's own
-    return value cannot drift, by construction.
+    the MultiLegResult it computes internally, PLUS the exact real
+    per-asset price series MultiLegBacktester._load() fed it and the
+    backtest's own `end` argument -- via narrow, reversible monkeypatches
+    of MultiLegBacktester.run/._load, both restored in a `finally`, even
+    if decide() raises. This is the "double run": the SAME computation
+    CarryBasisAdapter.decide() already performs, observed rather than
+    reimplemented -- reimplementing MultiLegConfig's ~20-field
+    construction here would risk silently drifting from the real one over
+    time; capturing the real call's own return values cannot drift, by
+    construction.
 
     NOT safe to call concurrently with another decide() call on the same
     runner in the same process -- the patch is process-global for its
@@ -91,19 +112,32 @@ def _capture_multileg_result(spec: RunnerSpec, snapshot: MarketSnapshot, state: 
 
     captured: dict[str, Any] = {}
     original_run = mlb_mod.MultiLegBacktester.run
+    original_load = mlb_mod.MultiLegBacktester._load
+
+    def _capturing_load(self: Any, assets: Any, start: str, end: str) -> Any:
+        prices, funding = original_load(self, assets, start, end)
+        captured["prices"] = prices
+        captured["funding"] = funding
+        return prices, funding
 
     def _capturing_run(self: Any, start: str, end: str) -> Any:
+        captured["run_end"] = end
         result = original_run(self, start, end)
         captured["result"] = result
         return result
 
     adapter = build_adapter(spec)
-    mlb_mod.MultiLegBacktester.run = _capturing_run   # type: ignore[method-assign]
+    mlb_mod.MultiLegBacktester.run = _capturing_run          # type: ignore[method-assign]
+    mlb_mod.MultiLegBacktester._load = _capturing_load       # type: ignore[method-assign]
     try:
         events, new_state = adapter.decide(snapshot, broker=None, state=state)
     finally:
-        mlb_mod.MultiLegBacktester.run = original_run   # type: ignore[method-assign]
-    return events, new_state, captured.get("result")
+        mlb_mod.MultiLegBacktester.run = original_run        # type: ignore[method-assign]
+        mlb_mod.MultiLegBacktester._load = original_load     # type: ignore[method-assign]
+    captured_run = CapturedRun(result=captured.get("result"),
+                               market_prices=captured.get("prices") or {},
+                               run_end=captured.get("run_end"))
+    return events, new_state, captured_run
 
 
 class CarryBasisShadowRunner:
@@ -112,13 +146,15 @@ class CarryBasisShadowRunner:
 
     def __init__(self, spec: RunnerSpec, config: ShadowConfig | None = None,
                 engine: TruthEngine | None = None,
+                registry: ProductSpecRegistry | None = None,
                 capture_fn: Callable[[RunnerSpec, MarketSnapshot, dict],
-                                     tuple[list, dict, Any]] = _capture_multileg_result):
+                                     tuple[list, dict, CapturedRun]] = _capture_multileg_result):
         self.spec = spec
         self.config = config or ShadowConfig(venue=spec.venue or "binance_usdm")
         self.engine = engine or TruthEngine()
         self._capture_fn = capture_fn
-        self._mapper = LegLedgerToTruthEvents(venue=self.config.venue)
+        self._mapper = LegLedgerToTruthEvents(
+            venue=self.config.venue, registry=registry or ProductSpecRegistry.from_json_file())
         self._cycle_index = 0
         self._last_borrow_cumulative = 0.0
 
@@ -131,21 +167,26 @@ class CarryBasisShadowRunner:
             events, new_state = adapter.decide(snapshot, broker=None, state=state)
             return events, new_state, ShadowCycleResult(skipped=True)
 
-        events, new_state, result = self._capture_fn(self.spec, snapshot, state)
-        shadow_result = self._observe(result)
+        events, new_state, captured = self._capture_fn(self.spec, snapshot, state)
+        shadow_result = self._observe(captured)
         return events, new_state, shadow_result
 
-    def _observe(self, result: Any) -> ShadowCycleResult:
+    def _observe(self, captured: CapturedRun) -> ShadowCycleResult:
         """Point 5: every exception raised below is caught HERE, inside
         this method, never left to propagate out of run_cycle()."""
         self._cycle_index += 1
         try:
+            result = captured.result
             if result is None:
                 return ShadowCycleResult(skipped=False)
             leg_ledger = result.leg_ledger.copy(deep=True)   # point 2: immutable copy
             pnl_by_type = dict(result.pnl_by_type)
-            cycle_ts = str(pd.Timestamp.now(tz="UTC"))
-            truth_events = self._mapper.events_for_cycle(leg_ledger, cycle_ts)
+            # the backtest's own `end` is the correct "as of" timestamp for
+            # this cycle's events -- NOT wall-clock time, which would be
+            # meaningless (and irreproducible) for a real historical replay.
+            cycle_ts = captured.run_end or str(pd.Timestamp.now(tz="UTC"))
+            truth_events = self._mapper.events_for_cycle(leg_ledger, cycle_ts,
+                                                          captured.market_prices)
             borrow_ev = borrow_delta_event(
                 pnl_by_type.get("borrow", 0.0), self._last_borrow_cumulative,
                 cycle_ts, self._cycle_index)

@@ -1,7 +1,7 @@
-"""src/alpha20/tournament/truth_shadow/mapping.py -- Phase 4C commit 2:
-converts CarryBasisAdapter's legacy leg/portfolio ledgers into
-src.futur.truth Events, with an explicit, documented field-by-field
-mapping table and strict rejection of anything it cannot map honestly.
+"""src/alpha20/tournament/truth_shadow/mapping.py -- converts
+CarryBasisAdapter's legacy leg/portfolio ledgers into src.futur.truth
+Events, with an explicit, documented field-by-field mapping table and
+strict rejection of anything it cannot map honestly.
 
 Source data (from src.institutional.backtest.multileg_backtester.
 MultiLegResult, produced by re-running MultiLegBacktester exactly the way
@@ -14,6 +14,11 @@ copy of the strategy, only converts an ALREADY-COMPUTED result):
     entry_price, exit_price, price_pnl, funding_pnl, costs, net_pnl.
   - `pnl_by_type` (dict): directional, carry_funding, hedge, fees, borrow
     -- portfolio-level CUMULATIVE totals since the backtest's own start.
+  - `market_prices` (Phase 4D commit 6, dict[asset] -> pandas Series of
+    real close prices, datetime-indexed): the EXACT per-asset price
+    series MultiLegBacktester._load() fed into its own `px(a, t)` closure
+    -- captured via a reversible monkeypatch in shadow_runner.py, never
+    reconstructed or inverted from a derived field.
 
 CarryBasisAdapter itself is re-run from `paper_start` to the latest bar on
 EVERY cycle (a fresh, deterministic replay, not an incremental one), so
@@ -32,22 +37,25 @@ documented decision):
 
   leg_ledger.asset (e.g. "BTCUSDT")
       -> ProductSpec.symbol = asset (unchanged, traceable to the source)
-      -> ProductSpec.base_ccy = asset with the "USDT" suffix stripped
+      -> ProductSpec.base_ccy / tick_size / lot_size / multiplier: looked
+         up in a REAL, versioned registry (product_specs.py), extracted
+         from Binance's own official exchangeInfo endpoints and frozen
+         with a SHA-256 of the full raw response (Phase 4D commit 6 --
+         earlier phases used a neutral 1E-8 grid; that placeholder is
+         gone). An asset/product with no entry in the registry raises
+         ProductSpecUnavailableError (BLOCKED_PRODUCT_SPEC), never a
+         fallback grid.
       -> ProductSpec.quote_ccy = "USD"
          DOCUMENTED CONVENTION, not a silent guess: this codebase's legacy
-         runners quote exclusively in USDT: (Binance USD-M), and Truth's
-         mono-currency scope only recognizes "USD" (see
+         runners quote exclusively in USDT (Binance USD-M/spot), and
+         Truth's mono-currency scope only recognizes "USD" (see
          SUPPORTED_QUOTE_CURRENCIES). USDT is treated 1:1 as USD, the
          same convention the legacy backtester itself uses implicitly
-         (amount_usdt fields, no FX model anywhere in either domain).
-         Any asset NOT ending in "USDT" is REJECTED (UnmappableLegError),
-         not guessed at.
-      -> ProductSpec.tick_size = ProductSpec.lot_size = "1E-8"
-         DOCUMENTED CONVENTION: MultiLegBacktester models continuous
-         float prices/quantities, no exchange tick/lot grid at all. Using
-         the finest precision Truth supports means the engine's own
-         quantization introduces no discretization the legacy model never
-         had -- a neutral default, not an invented market parameter.
+         (amount_usdt fields, no FX model anywhere in either domain) --
+         LIMITED TO THIS SHADOW: this is not a claim that USDT carries no
+         depeg risk, and no such risk is modeled or validated anywhere in
+         this package. Any asset NOT ending in "USDT" is REJECTED
+         (UnmappableLegError), not guessed at.
       -> ProductSpec.venue = the shadow's configured venue (from
          RunnerSpec.venue, e.g. "binance_usdm") -- read from the spec,
          never invented.
@@ -65,7 +73,9 @@ documented decision):
   leg_ledger.qty, .entry_price, .entry_time
       -> the ENTRY fill's quantity/price/timestamp, taken verbatim -- this
          is the one and only source for these numbers, never re-derived
-         or rounded beyond Truth's own ProductSpec quantization.
+         or rounded beyond Truth's own ProductSpec quantization (now a
+         REAL tick/lot grid -- see test_off_grid_price_and_quantity_are_
+         quantized_to_the_real_product_spec for proof this isn't a no-op).
 
   leg_ledger.exit_price, .exit_time (only when exit_time is not null)
       -> the EXIT fill's price/timestamp, taken verbatim, quantity =
@@ -96,12 +106,17 @@ documented decision):
          see funding_pnl_cum, but only ever surfaces the running total in
          leg_ledger).
 
-  MARK: leg_ledger has no mark_price column. For an OPEN leg (exit_time
-  is null), PositionLeg.price_pnl() is `delta_sign * qty * (mark - entry)`
-  -- inverting that with the row's OWN price_pnl/qty/entry_price recovers
-  the exact mark price the backtester used, algebraically, not guessed:
-      mark = entry_price + price_pnl / (delta_sign * qty)
-  Emitted only if it differs from the last mark seen for that leg_id (an
+  MARK (Phase 4D commit 6 -- CHANGED from earlier phases): sourced
+  DIRECTLY from `market_prices[asset]`, the real close-price series
+  captured from MultiLegBacktester._load()'s own return value, looked up
+  "as of" the cycle timestamp with the EXACT SAME searchsorted semantics
+  as the backtester's own `px(a, t)` closure (most recent bar at or
+  before t, never a future one). Earlier phases inverted
+  PositionLeg.price_pnl() algebraically to recover an implied mark price
+  -- that path is REMOVED; a leg with no matching series in
+  `market_prices` raises MarkSourceUnavailableError (BLOCKED_MARK_SOURCE)
+  rather than falling back to inversion or a guess. Emitted only if the
+  looked-up price differs from the last mark seen for that leg_id (an
   optimization against redundant MARK events, not a requirement).
 
   Portfolio-level pnl_by_type["borrow"]: NOT tracked per-leg anywhere in
@@ -146,6 +161,7 @@ from decimal import Decimal
 
 import pandas as pd
 
+from src.alpha20.tournament.truth_shadow.product_specs import ProductSpecRegistry
 from src.futur.truth.events import (
     BorrowCostPayload,
     Event,
@@ -165,7 +181,6 @@ from src.institutional.portfolio.position import LEG_DELTA_SIGN, LEG_FUNDING_SIG
 
 QUOTE_SUFFIX = "USDT"
 QUOTE_CCY = "USD"
-_NEUTRAL_GRID = Decimal("0.00000001")     # see the module docstring's tick/lot rationale
 
 _REQUIRED_COLUMNS = (
     "position_id", "leg_id", "asset", "leg_type", "entry_time", "entry_price",
@@ -180,6 +195,12 @@ class UnmappableLegError(Exception):
     """A leg_ledger row could not be honestly converted -- a missing
     field, an unrecognized product, or a value that would require
     guessing. Raised, never silently skipped or defaulted."""
+
+
+class MarkSourceUnavailableError(UnmappableLegError):
+    """No real market price series is available for an open leg's
+    instrument -- the BLOCKED_MARK_SOURCE condition. Never falls back to
+    algebraic inversion or a guessed price."""
 
 
 def _require(condition: bool, message: str) -> None:
@@ -198,15 +219,15 @@ def _is_missing(value: object) -> bool:
         return False
 
 
-def product_spec_for_leg(asset: str, leg_type: str, venue: str) -> ProductSpec:
+def product_spec_for_leg(asset: str, leg_type: str, venue: str,
+                         registry: ProductSpecRegistry) -> ProductSpec:
     """See the module docstring's field mapping table for the full
-    rationale behind every choice made here."""
+    rationale behind every choice made here. Raises
+    ProductSpecUnavailableError (via `registry.lookup`) if `asset` has no
+    real, versioned spec on file -- never a fallback grid."""
     _require(isinstance(asset, str) and asset.endswith(QUOTE_SUFFIX),
              f"asset {asset!r} does not end in {QUOTE_SUFFIX!r} -- unmappable "
              f"to Truth's USD-only scope (no silent FX conversion)")
-    base_ccy = asset[: -len(QUOTE_SUFFIX)]
-    _require(bool(base_ccy), f"asset {asset!r} has no base currency after "
-             f"stripping {QUOTE_SUFFIX!r}")
     _require(leg_type in LEG_TYPES, f"leg_type {leg_type!r} is not one of the "
              f"known legacy LEG_TYPES {sorted(LEG_TYPES)} -- unmappable")
     if leg_type in _SPOT_LEG_TYPES:
@@ -218,9 +239,11 @@ def product_spec_for_leg(asset: str, leg_type: str, venue: str) -> ProductSpec:
             f"leg_type {leg_type!r} is a recognized LEG_TYPES member but has no "
             f"SPOT/LINEAR_PERP mapping defined -- the mapping table in this "
             f"module's docstring must be updated before this can be shadowed")
+    real = registry.lookup(asset, product_type.value)
     return ProductSpec(venue=venue, symbol=asset, type=product_type,
-                       base_ccy=base_ccy, quote_ccy=QUOTE_CCY,
-                       tick_size=_NEUTRAL_GRID, lot_size=_NEUTRAL_GRID)
+                       base_ccy=real.base_ccy, quote_ccy=QUOTE_CCY,
+                       tick_size=real.tick_size, lot_size=real.lot_size,
+                       multiplier=real.multiplier)
 
 
 def _entry_side(leg_type: str) -> OrderSide:
@@ -230,6 +253,20 @@ def _entry_side(leg_type: str) -> OrderSide:
 
 def _exit_side(leg_type: str) -> OrderSide:
     return OrderSide.SELL if _entry_side(leg_type) == OrderSide.BUY else OrderSide.BUY
+
+
+def _price_asof(series: pd.Series, ts: pd.Timestamp) -> Decimal | None:
+    """Exactly MultiLegBacktester's own `px(a, t)` closure: the most
+    recent bar at or before `ts`, never a future one (no lookahead)."""
+    if series is None or len(series) == 0:
+        return None
+    idx = series.index.searchsorted(ts, side="right") - 1
+    if idx < 0:
+        return None
+    value = series.iloc[idx]
+    if _is_missing(value):
+        return None
+    return to_decimal(float(value))
 
 
 @dataclass
@@ -245,30 +282,39 @@ class _LegState:
 class LegLedgerToTruthEvents:
     """Stateful converter -- one instance per shadowed runner, reused
     across cycles. `venue` comes from the runner's own RunnerSpec, never
-    invented."""
+    invented. `registry` supplies real, versioned ProductSpecs (Phase 4D
+    commit 6) -- see product_specs.py."""
     venue: str
+    registry: ProductSpecRegistry
     _seen: dict[str, _LegState] = field(default_factory=dict)
 
-    def events_for_cycle(self, leg_ledger: pd.DataFrame, cycle_ts: str) -> list[Event]:
+    def events_for_cycle(self, leg_ledger: pd.DataFrame, cycle_ts: str,
+                         market_prices: dict[str, pd.Series]) -> list[Event]:
         """Returns the DELTA of Truth events for this cycle's leg_ledger
         snapshot, in the documented deterministic order (leg_id order,
-        each leg's own sequence contiguous). Raises UnmappableLegError on
-        the first row that cannot be honestly converted -- nothing
-        partial is returned."""
+        each leg's own sequence contiguous). `market_prices` must be the
+        REAL per-asset close-price series captured from
+        MultiLegBacktester._load() (see shadow_runner.py) -- used for
+        MARK events on any still-open leg. Raises UnmappableLegError (or
+        MarkSourceUnavailableError specifically) on the first row that
+        cannot be honestly converted -- nothing partial is returned."""
         events: list[Event] = []
         if leg_ledger.empty:
             return events
+        cycle_ts_pd = pd.Timestamp(cycle_ts)
         for _, row in leg_ledger.sort_values("leg_id").iterrows():
-            events.extend(self._events_for_row(row, cycle_ts))
+            events.extend(self._events_for_row(row, cycle_ts, cycle_ts_pd, market_prices))
         return events
 
-    def _events_for_row(self, row: pd.Series, cycle_ts: str) -> list[Event]:
+    def _events_for_row(self, row: pd.Series, cycle_ts: str, cycle_ts_pd: pd.Timestamp,
+                        market_prices: dict[str, pd.Series]) -> list[Event]:
         for col in _REQUIRED_COLUMNS:
             _require(col in row.index, f"leg_ledger is missing required column {col!r}")
             _require(not _is_missing(row[col]),
                      f"leg {row.get('leg_id', '?')!r}: required field {col!r} is missing/NaN")
         leg_id = str(row["leg_id"])
-        product = product_spec_for_leg(str(row["asset"]), str(row["leg_type"]), self.venue)
+        asset = str(row["asset"])
+        product = product_spec_for_leg(asset, str(row["leg_type"]), self.venue, self.registry)
         qty = to_decimal(row["qty"])
         _require(qty > 0, f"leg {leg_id!r}: qty must be > 0, got {qty!r}")
 
@@ -288,7 +334,8 @@ class LegLedgerToTruthEvents:
                 events.extend(self._exit_events(row, leg_id, product, qty))
                 state.exit_emitted = True
         else:
-            events.extend(self._mark_event(row, leg_id, product, qty, state, cycle_ts))
+            events.extend(self._mark_event(row, leg_id, asset, product, state, cycle_ts,
+                                           cycle_ts_pd, market_prices))
 
         return events
 
@@ -371,12 +418,20 @@ class LegLedgerToTruthEvents:
                      ts_event=ts, ts_received=ts,
                      payload=FundingPayload(instrument=product, amount=delta, currency=QUOTE_CCY))]
 
-    def _mark_event(self, row: pd.Series, leg_id: str, product: ProductSpec, qty: Decimal,
-                    state: _LegState, cycle_ts: str) -> list[Event]:
-        sign = Decimal(str(LEG_DELTA_SIGN[str(row["leg_type"])]))
-        price_pnl = to_decimal(row["price_pnl"])
-        entry_price = to_decimal(row["entry_price"])
-        mark = entry_price + price_pnl / (sign * qty)
+    def _mark_event(self, row: pd.Series, leg_id: str, asset: str, product: ProductSpec,
+                    state: _LegState, cycle_ts: str, cycle_ts_pd: pd.Timestamp,
+                    market_prices: dict[str, pd.Series]) -> list[Event]:
+        series = market_prices.get(asset)
+        if series is None:
+            raise MarkSourceUnavailableError(
+                f"leg {leg_id!r}: no real market price series for asset {asset!r} -- "
+                f"BLOCKED_MARK_SOURCE (never inverted from price_pnl)")
+        mark = _price_asof(series, cycle_ts_pd)
+        if mark is None:
+            raise MarkSourceUnavailableError(
+                f"leg {leg_id!r}: market price series for {asset!r} has no bar at or "
+                f"before {cycle_ts_pd} -- BLOCKED_MARK_SOURCE")
+        mark = product.quantize_price(mark)
         if state.last_mark_price is not None and mark == state.last_mark_price:
             return []
         state.last_mark_price = mark

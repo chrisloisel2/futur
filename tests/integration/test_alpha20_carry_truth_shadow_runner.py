@@ -1,6 +1,7 @@
-"""tests/integration/test_alpha20_carry_truth_shadow_runner.py -- Phase 4C
-commit 3: the shadow runner's no-effect contract (kill switch, and a
-shadow-side exception never touching the already-returned legacy result).
+"""tests/integration/test_alpha20_carry_truth_shadow_runner.py -- the
+shadow runner's no-effect contract (kill switch, and a shadow-side
+exception never touching the already-returned legacy result), including
+Phase 4D commit 6's real captured market prices.
 """
 from __future__ import annotations
 
@@ -12,6 +13,7 @@ from src.alpha20.tournament.market_bus import MarketSnapshot
 from src.alpha20.tournament.runner_registry import RunnerSpec
 from src.alpha20.tournament.truth_shadow.mapping import UnmappableLegError
 from src.alpha20.tournament.truth_shadow.shadow_runner import (
+    CapturedRun,
     CarryBasisShadowRunner,
     ShadowConfig,
     _capture_multileg_result,
@@ -42,33 +44,45 @@ def _leg_row(**overrides) -> dict:
     return base
 
 
-def _fake_result(*rows, borrow: float = 0.0) -> SimpleNamespace:
-    return SimpleNamespace(
-        leg_ledger=pd.DataFrame(list(rows)),
+def _prices(asset: str = "BTCUSDT", price: float = 50_000.0,
+           ts: str = "2026-01-01T00:00:00Z") -> dict[str, pd.Series]:
+    return {asset: pd.Series([price], index=pd.to_datetime([ts], utc=True))}
+
+
+def _fake_captured(*rows, borrow: float = 0.0, market_prices: dict | None = None,
+                   run_end: str = "2026-01-01T00:00:00Z") -> CapturedRun:
+    result = SimpleNamespace(
+        leg_ledger=pd.DataFrame(list(rows)) if rows else pd.DataFrame(),
         pnl_by_type={"directional": 0.0, "carry_funding": 0.0, "hedge": 0.0,
                     "fees": 0.0, "borrow": borrow},
     )
+    return CapturedRun(result=result, market_prices=market_prices or _prices(), run_end=run_end)
+
+
+def _empty_captured() -> CapturedRun:
+    return CapturedRun(result=None, market_prices={}, run_end=None)
 
 
 class _SpyCapture:
     """Injectable capture_fn stand-in -- records how many times it was
-    called and always returns a pre-baked (events, new_state, result)."""
+    called and always returns a pre-baked (events, new_state, captured)."""
 
-    def __init__(self, events, new_state, result):
+    def __init__(self, events, new_state, captured: CapturedRun):
         self.events = events
         self.new_state = new_state
-        self.result = result
+        self.captured = captured
         self.calls = 0
 
     def __call__(self, spec, snapshot, state):
         self.calls += 1
-        return self.events, self.new_state, self.result
+        return self.events, self.new_state, self.captured
 
 
 # ── kill switch ──────────────────────────────────────────────────────────
 
 def test_kill_switch_never_invokes_the_capture_function():
-    spy = _SpyCapture(events=["sentinel-event"], new_state={"sentinel": True}, result=None)
+    spy = _SpyCapture(events=["sentinel-event"], new_state={"sentinel": True},
+                      captured=_empty_captured())
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(enabled=False, venue=VENUE),
                                     capture_fn=spy)
     _events, _new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
@@ -83,8 +97,8 @@ def test_kill_switch_never_invokes_the_capture_function():
 def test_enabled_shadow_returns_the_legacy_result_completely_unmodified():
     sentinel_events = ["sentinel-event-1", "sentinel-event-2"]
     sentinel_state = {"paper_start": "2026-01-01", "sentinel": True}
-    result = _fake_result(_leg_row())
-    spy = _SpyCapture(events=sentinel_events, new_state=sentinel_state, result=result)
+    captured = _fake_captured(_leg_row())
+    spy = _SpyCapture(events=sentinel_events, new_state=sentinel_state, captured=captured)
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
 
     events, new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
@@ -98,10 +112,10 @@ def test_enabled_shadow_returns_the_legacy_result_completely_unmodified():
 
 
 def test_shadow_never_mutates_the_leg_ledger_it_was_given():
-    result = _fake_result(_leg_row())
-    original_ledger = result.leg_ledger
+    captured = _fake_captured(_leg_row())
+    original_ledger = captured.result.leg_ledger
     snapshot_before = original_ledger.copy(deep=True)
-    spy = _SpyCapture(events=[], new_state={}, result=result)
+    spy = _SpyCapture(events=[], new_state={}, captured=captured)
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
 
     runner.run_cycle(_snapshot(), state={})
@@ -115,8 +129,8 @@ def test_a_shadow_exception_never_touches_the_already_returned_legacy_result():
     sentinel_events = ["sentinel-event"]
     sentinel_state = {"sentinel": True}
     # a non-USDT asset forces UnmappableLegError deep inside the mapper
-    bad_result = _fake_result(_leg_row(asset="BTCEUR"))
-    spy = _SpyCapture(events=sentinel_events, new_state=sentinel_state, result=bad_result)
+    bad_captured = _fake_captured(_leg_row(asset="BTCEUR"))
+    spy = _SpyCapture(events=sentinel_events, new_state=sentinel_state, captured=bad_captured)
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
 
     events, new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
@@ -133,8 +147,8 @@ def test_a_shadow_exception_does_not_raise_out_of_run_cycle():
     """Same scenario as above, phrased as the literal guarantee: calling
     run_cycle() with a poisoned result must not raise -- if this test
     itself raises, that IS the failure."""
-    bad_result = _fake_result(_leg_row(qty=-1.0))   # nonpositive qty -> UnmappableLegError
-    spy = _SpyCapture(events=[], new_state={}, result=bad_result)
+    bad_captured = _fake_captured(_leg_row(qty=-1.0))   # nonpositive qty -> UnmappableLegError
+    spy = _SpyCapture(events=[], new_state={}, captured=bad_captured)
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
     _events, _new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
     assert shadow_result.error is not None
@@ -144,12 +158,8 @@ def test_engine_invariant_violation_is_also_isolated():
     """Not just mapping errors -- an InvariantViolation raised by
     engine.apply() itself (e.g. a duplicate event_id across two legs
     that collide) must be caught the same way."""
-    # two DIFFERENT leg_ids that would race to the SAME synthesized order_id
-    # is hard to construct without reaching into internals; simpler and
-    # equally valid: engine already primed with an account state that will
-    # make a subsequent event invalid.
-    result = _fake_result(_leg_row(leg_id="leg_1", costs=10.0))
-    spy = _SpyCapture(events=["e"], new_state={"s": 1}, result=result)
+    captured = _fake_captured(_leg_row(leg_id="leg_1", costs=10.0))
+    spy = _SpyCapture(events=["e"], new_state={"s": 1}, captured=captured)
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
     _events, _new_state, first_result = runner.run_cycle(_snapshot(), state={})
     assert first_result.ok is True
@@ -157,8 +167,8 @@ def test_engine_invariant_violation_is_also_isolated():
     # same leg observed again with COST DECREASED -- rejected by the mapper
     # itself as unmappable (monotonicity), proving the SAME engine instance
     # keeps working across cycles and isolates a later failure too
-    result2 = _fake_result(_leg_row(leg_id="leg_1", costs=1.0))
-    spy2 = _SpyCapture(events=["e2"], new_state={"s": 2}, result=result2)
+    captured2 = _fake_captured(_leg_row(leg_id="leg_1", costs=1.0))
+    spy2 = _SpyCapture(events=["e2"], new_state={"s": 2}, captured=captured2)
     runner._capture_fn = spy2
     events2, new_state2, second_result = runner.run_cycle(_snapshot(), state={})
     assert events2 == ["e2"] and new_state2 == {"s": 2}
@@ -168,7 +178,7 @@ def test_engine_invariant_violation_is_also_isolated():
 # ── result is None (no real data / abstain) handled gracefully ─────────
 
 def test_no_multileg_result_is_a_clean_no_op_not_an_error():
-    spy = _SpyCapture(events=["abstain-event"], new_state={"x": 1}, result=None)
+    spy = _SpyCapture(events=["abstain-event"], new_state={"x": 1}, captured=_empty_captured())
     runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
     events, _new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
     assert events == ["abstain-event"]
@@ -176,14 +186,49 @@ def test_no_multileg_result_is_a_clean_no_op_not_an_error():
     assert shadow_result.applied_events == []
 
 
-# ── wiring sanity: the real capture function, no real data available ───
+# ── wiring sanity: the real capture function ─────────────────────────────
 
-def test_real_capture_function_handles_missing_market_data_gracefully():
-    """No enriched parquet data exists in this environment -- decide()
-    is expected to abstain (its own try/except around
-    MultiLegBacktester.run), and _capture_multileg_result must not raise
-    just because nothing was captured."""
-    events, new_state, result = _capture_multileg_result(_spec(), _snapshot(), state={})
+def test_real_capture_function_returns_a_captured_run_with_prices_and_run_end():
+    """Real data now exists (Phase 4D commits 6/7) -- the real
+    CarryBasisAdapter.decide() call, monkeypatch-observed, must return an
+    actual MultiLegResult plus the real per-asset price series it
+    consumed and the backtest's own end timestamp."""
+    spec = RunnerSpec(runner_id="carry_basis_v12", family="carry_basis", status="ACTIVE",
+                      git_commit="test", config_hash=None, venue=VENUE,
+                      config={"engines_long": [], "carry_assets": ["BTCUSDT", "ETHUSDT"],
+                             "carry_fraction": 0.75, "enable_carry": True})
+    state = {"paper_start": "2026-06-01"}
+    events, new_state, captured = _capture_multileg_result(spec, _snapshot(), state)
     assert isinstance(events, list)
     assert isinstance(new_state, dict)
-    assert result is None   # no prices available -> MultiLegBacktester.run() never completed
+    assert isinstance(captured, CapturedRun)
+    assert captured.result is not None
+    assert "BTCUSDT" in captured.market_prices
+    assert "ETHUSDT" in captured.market_prices
+    assert len(captured.market_prices["BTCUSDT"]) > 0
+    assert captured.run_end is not None
+
+
+def test_instrumentation_does_not_alter_arguments_or_returned_objects():
+    """Commit 6 point 8: the monkeypatch capture must be purely an
+    observer. Calls the REAL, unmodified decide() path twice on the same
+    (deterministic) inputs -- once through the patched capture function,
+    once completely unpatched -- and requires byte-identical events/
+    new_state content either way. If the instrumentation altered
+    anything it observed, these would differ."""
+    from src.alpha20.tournament.runner_adapters import build_adapter
+
+    spec = RunnerSpec(runner_id="carry_basis_v12", family="carry_basis", status="ACTIVE",
+                      git_commit="test", config_hash=None, venue=VENUE,
+                      config={"engines_long": [], "carry_assets": ["BTCUSDT"],
+                             "carry_fraction": 0.75, "enable_carry": True})
+    state = {"paper_start": "2026-06-01"}
+
+    patched_events, patched_state, _captured = _capture_multileg_result(spec, _snapshot(), state)
+    unpatched_events, unpatched_state = build_adapter(spec).decide(
+        _snapshot(), broker=None, state=state)
+
+    assert len(patched_events) == len(unpatched_events)
+    for a, b in zip(patched_events, unpatched_events, strict=True):
+        assert a.kind == b.kind and a.sleeve == b.sleeve and a.amount_usdt == b.amount_usdt
+    assert patched_state == unpatched_state

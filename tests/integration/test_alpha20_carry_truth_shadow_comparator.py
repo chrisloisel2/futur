@@ -16,10 +16,12 @@ from src.alpha20.tournament.truth_shadow.comparator import (
     DifferentialLog,
 )
 from src.alpha20.tournament.truth_shadow.mapping import LegLedgerToTruthEvents
+from src.alpha20.tournament.truth_shadow.product_specs import ProductSpecRegistry
 from src.futur.truth.engine import TruthEngine
 from src.futur.truth.reconciliation import ToleranceConfig
 
 VENUE = "binance_usdm"
+REGISTRY = ProductSpecRegistry.from_json_file()
 
 
 def _leg_row(**overrides) -> dict:
@@ -61,8 +63,11 @@ def _setup_engine_and_ledgers(cash_start=200_000.0):
                        ts_event="2026-01-01T00:00:00Z", ts_received="2026-01-01T00:00:00Z",
                        payload=CashDepositPayload(cash_start, "USD")))
 
-    mapper = LegLedgerToTruthEvents(venue=VENUE)
-    events = mapper.events_for_cycle(leg_ledger, cycle_ts="2026-01-01T00:00:00Z")
+    mapper = LegLedgerToTruthEvents(venue=VENUE, registry=REGISTRY)
+    market_prices = {"BTCUSDT": pd.Series([50_000.0], index=pd.to_datetime(
+        ["2026-01-01T00:00:00Z"], utc=True))}
+    events = mapper.events_for_cycle(leg_ledger, cycle_ts="2026-01-01T00:00:00Z",
+                                     market_prices=market_prices)
     applied = [engine.apply(e) for e in events]
 
     # legacy numbers matching exactly: cash_start - notional(spot) - fees(both legs)

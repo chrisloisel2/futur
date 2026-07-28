@@ -1,7 +1,19 @@
 # ── Données volumineuses ─────────────────────────────────────────────────────
-data/
+# `data/*` (not `data/`) so the exceptions below can re-include specific
+# subdirectories -- a directory-level ignore (`data/`) makes git skip
+# descending into it entirely, and a `!` negation can't undo that (git
+# docs: "not possible to re-include content if a parent directory of that
+# content is excluded").
+data/*
 datasets/
 ML-DL/
+# Phase 4D exceptions: small, curated, non-market-data files that belong in
+# version control -- the real ProductSpec registry (a few KB, extracted from
+# venue exchangeInfo, not a fetched market data blob) and its provenance
+# manifests (Phase 4D commit 7 -- hashes/schema/row-counts, never the actual
+# klines/funding/enriched parquet files themselves).
+!data/venue_specs
+!data/manifests
 
 # ── État d'approbation de déploiement, propre à chaque machine ──────────────
 # (src/alpha20/deployment_guard.py) — jamais une vérité partagée entre Mac et
