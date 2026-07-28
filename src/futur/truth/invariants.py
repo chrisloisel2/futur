@@ -19,6 +19,18 @@ from src.futur.truth.orders import OrderSide
 _EPS = 1e-6
 
 
+def _close(a: float, b: float) -> bool:
+    """Relative + absolute tolerance, not a bare fixed epsilon -- a fixed
+    `abs(a - b) > 1e-6` is fine for order quantities but breaks down for
+    cumulative cash/position sums at real-world scale (float64 has ~15-17
+    significant digits, so at 1e12 the smallest representable difference
+    is already ~1e-4, larger than a fixed 1e-6). Found by Hypothesis
+    generating a large deposit, not by hand-picked examples -- every
+    hand-written test in this suite happened to use numbers small enough
+    to never hit this."""
+    return math.isclose(a, b, rel_tol=1e-9, abs_tol=_EPS)
+
+
 class InvariantViolation(Exception):
     pass
 
@@ -147,12 +159,12 @@ def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
 
     for key, pos in account.spot_positions.items():
         exp = expected.get(key, 0.0)
-        if abs(pos.quantity - exp) > _EPS:
+        if not _close(pos.quantity, exp):
             raise InvariantViolation(
                 f"spot position {key}: quantity {pos.quantity} != sum of fills {exp}")
     for key, pos in account.perp_positions.items():
         exp = expected.get(key, 0.0)
-        if abs(pos.quantity - exp) > _EPS:
+        if not _close(pos.quantity, exp):
             raise InvariantViolation(
                 f"perp position {key}: quantity {pos.quantity} != sum of fills/"
                 f"liquidations {exp}")
@@ -160,7 +172,7 @@ def _check_positions_equal_sum_of_fills(account, ledger: Ledger) -> None:
 
 def _check_cash_equals_categorized_flows(account) -> None:
     expected = account.expected_cash_from_categories()
-    if abs(account.cash - expected) > _EPS:
+    if not _close(account.cash, expected):
         raise InvariantViolation(
             f"cash ({account.cash}) does not equal the sum of deposits/withdrawals/"
             f"trades/fees/funding/borrow ({expected})")
