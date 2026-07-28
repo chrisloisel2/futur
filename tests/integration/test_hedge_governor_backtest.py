@@ -15,7 +15,14 @@ def _leg_types(res):
 
 
 # 7. hedge seul (sans long) ne doit jamais ouvrir de short (run G du brief)
-def test_hedge_without_long_opens_nothing():
+def test_hedge_without_long_opens_nothing(synthetic_load_enriched):
+    """Phase 3: this machine (and any clean clone) has no local
+    data/enriched/BTCUSDT_1h_enriched.parquet -- synthetic_load_enriched
+    (tests/integration/conftest.py) substitutes a deterministic synthetic
+    price series so MultiLegBacktester.run() has *some* valid prices to
+    load. Only the structural invariant is asserted (no naked short opens
+    without a long leg) -- never a P&L number, which synthetic data cannot
+    honestly support."""
     cfg = MultiLegConfig(enable_long=False, enable_carry=False, enable_hedge=True)
     bt = MultiLegBacktester(long_engines=[], config=cfg, carry_assets=[])
     res = bt.run("2024-01-01", "2024-03-31")

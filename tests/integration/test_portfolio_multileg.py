@@ -63,7 +63,13 @@ def test_exposures_computed():
 
 
 # ── backtester smoke (carry-only sur données réelles, fenêtre courte) ─────────
-def test_multileg_carry_only_runs_no_naked_short():
+def test_multileg_carry_only_runs_no_naked_short(synthetic_load_enriched):
+    """Phase 3: no local data/enriched/BTCUSDT_1h_enriched.parquet on this
+    machine or any clean clone -- synthetic_load_enriched
+    (tests/integration/conftest.py) substitutes a deterministic synthetic
+    price+funding series. Assertions stay structural (invariants hold, the
+    carry_funding bucket exists) -- a specific P&L number would not be
+    honest against synthetic data."""
     from src.institutional.backtest.multileg_backtester import MultiLegBacktester, MultiLegConfig
     cfg = MultiLegConfig(enable_long=False, enable_carry=True, enable_hedge=False)
     bt = MultiLegBacktester(long_engines=[], config=cfg, carry_assets=["BTCUSDT"])
