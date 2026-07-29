@@ -55,7 +55,7 @@ from src.alpha20.tournament.runner_registry import RunnerSpec
 from src.alpha20.tournament.truth_shadow.mapping import LegLedgerToTruthEvents, borrow_delta_event
 from src.alpha20.tournament.truth_shadow.product_specs import ProductSpecRegistry
 from src.futur.truth.engine import TruthEngine
-from src.futur.truth.events import Event
+from src.futur.truth.events import CashDepositPayload, Event, EventType
 
 
 @dataclass
@@ -69,12 +69,14 @@ class ShadowConfig:
 @dataclass
 class CapturedRun:
     """Everything observed from one real, unmodified decide() call --
-    the MultiLegResult, the exact per-asset price series it consumed
-    (for MARK events), and the backtest's own end timestamp (for cycle
-    event timestamps)."""
+    the MultiLegResult, the exact real per-asset price series it consumed
+    (for MARK events), the backtest's own end timestamp (for cycle event
+    timestamps), and the actual MultiLegConfig instance it constructed
+    (for provenance -- see product of `effective_config_sha256()`)."""
     result: Any
     market_prices: dict[str, pd.Series]
     run_end: str | None
+    effective_config: Any = None
 
 
 @dataclass
@@ -84,6 +86,17 @@ class ShadowCycleResult:
     error: BaseException | None = None
     leg_ledger: pd.DataFrame | None = None
     pnl_by_type: dict | None = None
+    portfolio_ledger: pd.DataFrame | None = None
+    effective_config_sha256: str | None = None
+    # Account.snapshot() taken immediately after applying each event in
+    # `applied_events` (same index), i.e. the account exactly AS OF that
+    # event -- not the final/terminal account. A single decide() call can
+    # span a full multi-week replay window in one batch, so by the time a
+    # caller inspects `engine.account` after run_cycle() returns, it is
+    # already the TERMINAL state for every event, not that event's own
+    # state. Phase 4D commit 9: DifferentialComparator needs the as-of
+    # snapshot for per-instrument (timestamp-aware) comparisons.
+    account_snapshots: list[dict] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -122,6 +135,7 @@ def _capture_multileg_result(spec: RunnerSpec, snapshot: MarketSnapshot, state: 
 
     def _capturing_run(self: Any, start: str, end: str) -> Any:
         captured["run_end"] = end
+        captured["effective_config"] = self.config
         result = original_run(self, start, end)
         captured["result"] = result
         return result
@@ -136,8 +150,29 @@ def _capture_multileg_result(spec: RunnerSpec, snapshot: MarketSnapshot, state: 
         mlb_mod.MultiLegBacktester._load = original_load     # type: ignore[method-assign]
     captured_run = CapturedRun(result=captured.get("result"),
                                market_prices=captured.get("prices") or {},
-                               run_end=captured.get("run_end"))
+                               run_end=captured.get("run_end"),
+                               effective_config=captured.get("effective_config"))
     return events, new_state, captured_run
+
+
+def effective_config_sha256(config: Any) -> str:
+    """Canonical SHA-256 of a MultiLegConfig instance -- every field,
+    including nested dataclasses (IntraGovernorConfig, InvariantLimits,
+    HedgeConfig, FundingGateConfig), sorted-key JSON. Used as provenance
+    identifier #4 (the "effective serialized config hash") -- proves what
+    ACTUALLY ran matches what's recorded, independent of the registry's
+    own config_hash (identifier #3)."""
+    import dataclasses
+    import hashlib
+    import json
+
+    def _default(obj: Any) -> Any:
+        if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+            return dataclasses.asdict(obj)
+        return str(obj)
+
+    payload = json.dumps(dataclasses.asdict(config), default=_default, sort_keys=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 class CarryBasisShadowRunner:
@@ -157,6 +192,7 @@ class CarryBasisShadowRunner:
             venue=self.config.venue, registry=registry or ProductSpecRegistry.from_json_file())
         self._cycle_index = 0
         self._last_borrow_cumulative = 0.0
+        self._cash_seeded = False
 
     def run_cycle(self, snapshot: MarketSnapshot, state: dict
                  ) -> tuple[list, dict, ShadowCycleResult]:
@@ -193,8 +229,55 @@ class CarryBasisShadowRunner:
             self._last_borrow_cumulative = pnl_by_type.get("borrow", 0.0)
             if borrow_ev is not None:
                 truth_events.append(borrow_ev)
-            applied = [self.engine.apply(ev) for ev in truth_events]
+            applied: list[Event] = []
+            account_snapshots: list[dict] = []
+            seed_ev = self._seed_cash_event(captured, leg_ledger, cycle_ts)
+            if seed_ev is not None:
+                applied.append(self.engine.apply(seed_ev))
+                account_snapshots.append(self.engine.account.snapshot())
+            for ev in truth_events:
+                applied.append(self.engine.apply(ev))
+                # captured immediately after THIS event, before the next one
+                # mutates the account further -- see ShadowCycleResult's
+                # account_snapshots docstring for why this can't be
+                # reconstructed later from the final engine.account.
+                account_snapshots.append(self.engine.account.snapshot())
+            config_hash = (effective_config_sha256(captured.effective_config)
+                          if captured.effective_config is not None else None)
             return ShadowCycleResult(skipped=False, applied_events=applied,
-                                     leg_ledger=leg_ledger, pnl_by_type=pnl_by_type)
+                                     leg_ledger=leg_ledger, pnl_by_type=pnl_by_type,
+                                     portfolio_ledger=result.portfolio_ledger.copy(deep=True),
+                                     effective_config_sha256=config_hash,
+                                     account_snapshots=account_snapshots)
         except Exception as exc:   # noqa: BLE001 -- shadow isolation, see class docstring
             return ShadowCycleResult(skipped=False, error=exc)
+
+    def _seed_cash_event(self, captured: CapturedRun, leg_ledger: pd.DataFrame,
+                         cycle_ts: str) -> Event | None:
+        """One-time CASH_DEPOSIT seeding the shadow account with the SAME
+        real starting capital legacy's own MultiLegBacktester began from
+        (`captured.effective_config.initial_capital` -- the real,
+        provenance-tracked config object captured from the actual run,
+        never a guessed number; see effective_config_sha256). Without
+        this, an unfunded TruthEngine() starting from cash=0 makes every
+        cash/nav/exposure figure diverge from legacy's own
+        portfolio_ledger by the ENTIRE starting balance -- not a genuine
+        legacy-vs-Truth economic disagreement, just a shadow account that
+        was never given the money legacy started with. Fires at most once
+        per runner instance (`self._cash_seeded`), matching legacy's own
+        single upfront capitalization at backtest start."""
+        if self._cash_seeded:
+            return None
+        capital = getattr(captured.effective_config, "initial_capital", None)
+        if capital is None or capital <= 0:
+            return None
+        self._cash_seeded = True
+        ts = cycle_ts
+        if leg_ledger is not None and not leg_ledger.empty:
+            entry_times = pd.to_datetime(leg_ledger["entry_time"], utc=True).dropna()
+            if len(entry_times):
+                ts = entry_times.min().isoformat()
+        return Event(event_id="shadow-seed-cash-deposit", event_type=EventType.CASH_DEPOSIT,
+                    ts_event=ts, ts_received=ts,
+                    payload=CashDepositPayload(amount=capital,
+                                               currency=self.engine.account.base_currency))

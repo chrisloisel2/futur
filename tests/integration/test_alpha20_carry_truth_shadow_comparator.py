@@ -212,6 +212,112 @@ def test_comparison_row_rejects_unknown_classification():
                      tolerance_applied="0", classification="SOMETHING_ELSE", cause="")
 
 
+# ── as-of-event vs as-of-terminal (Phase 4D commit 9 fix) ───────────────
+
+def _setup_two_sequential_carry_pairs():
+    """Two NON-overlapping CARRY_LONG_SPOT/CARRY_SHORT_PERP pairs on the
+    SAME asset (BTCUSDT): leg_1/leg_2 open 01-01, close 01-05; leg_3/leg_4
+    open 01-10, still open at cycle_ts 01-15. A single real decide() call
+    maps and applies EVERY event across the whole window in one batch --
+    exactly the real replay's shape -- so by the time all events are
+    applied, the FINAL BTCUSDT spot position reflects ONLY leg_3 (qty=2.0),
+    while leg_1's own entry event (01-01) should be compared against what
+    was open AT THAT TIME (qty=1.5, leg_1 alone). This is the exact
+    mismatch class that produced 1238 UNEXPLAINED_DIVERGENCE rows on the
+    first real 60-day replay before this fix."""
+    leg1_spot = _leg_row(leg_id="leg_1", position_id="CARRY_1",
+                        entry_time="2026-01-01T00:00:00Z", exit_time="2026-01-05T00:00:00Z",
+                        qty=1.5, entry_price=50_000.0, exit_price=51_000.0,
+                        notional=75_000.0, costs=37.5)
+    leg1_perp = _perp_leg_row(leg_id="leg_2", position_id="CARRY_1",
+                             entry_time="2026-01-01T00:00:00Z", exit_time="2026-01-05T00:00:00Z",
+                             qty=1.5, entry_price=50_000.0, exit_price=51_000.0,
+                             notional=75_000.0, costs=37.5)
+    leg2_spot = _leg_row(leg_id="leg_3", position_id="CARRY_2",
+                        entry_time="2026-01-10T00:00:00Z", exit_time=None,
+                        qty=2.0, entry_price=52_000.0, notional=104_000.0, costs=52.0)
+    leg2_perp = _perp_leg_row(leg_id="leg_4", position_id="CARRY_2",
+                             entry_time="2026-01-10T00:00:00Z", exit_time=None,
+                             qty=2.0, entry_price=52_000.0, notional=104_000.0, costs=52.0)
+    leg_ledger = pd.DataFrame([leg1_spot, leg1_perp, leg2_spot, leg2_perp])
+
+    engine = TruthEngine()
+    from src.futur.truth.events import CashDepositPayload, Event, EventType
+    engine.apply(Event(event_id="seed", event_type=EventType.CASH_DEPOSIT,
+                       ts_event="2026-01-01T00:00:00Z", ts_received="2026-01-01T00:00:00Z",
+                       payload=CashDepositPayload(500_000.0, "USD")))
+
+    mapper = LegLedgerToTruthEvents(venue=VENUE, registry=REGISTRY)
+    idx = pd.to_datetime([f"2026-01-{d:02d}T00:00:00Z" for d in range(1, 16)], utc=True)
+    prices = pd.Series([50_000.0 + 100 * i for i in range(15)], index=idx)
+    events = mapper.events_for_cycle(leg_ledger, cycle_ts="2026-01-15T00:00:00Z",
+                                     market_prices={"BTCUSDT": prices})
+
+    applied = []
+    account_snapshots = []
+    for e in events:
+        applied.append(engine.apply(e))
+        account_snapshots.append(engine.account.snapshot())
+    return engine, leg_ledger, applied, account_snapshots
+
+
+def test_asof_account_snapshot_makes_early_event_instrument_comparison_match(tmp_path):
+    engine, leg_ledger, applied, account_snapshots = _setup_two_sequential_carry_pairs()
+    comparator = DifferentialComparator(run_id="run1", venue=VENUE)
+    log = DifferentialLog(tmp_path / "diff.jsonl")
+    rows = comparator.compare_cycle(engine, applied, leg_ledger, pd.DataFrame(), log,
+                                    account_snapshots=account_snapshots)
+    log.close()
+
+    leg1_entry_qty_rows = [r for r in rows
+                           if r.event_id == "leg_1-fill-entry" and r.field == "spot_qty"]
+    assert leg1_entry_qty_rows
+    assert all(r.classification == "MATCH" for r in leg1_entry_qty_rows), leg1_entry_qty_rows
+    assert all(Decimal(r.legacy_value) == Decimal("1.5") for r in leg1_entry_qty_rows)
+    assert all(Decimal(r.truth_value) == Decimal("1.5") for r in leg1_entry_qty_rows)
+
+
+def test_omitting_account_snapshots_reproduces_the_terminal_state_mismatch(tmp_path):
+    """Guards the wiring itself: if a caller forgets to pass
+    account_snapshots (e.g. a future edit to the replay driver), the
+    comparator falls back to the live/final engine.account for every
+    event -- which is EXACTLY the bug commit 9 fixed. leg_1's own entry
+    event (open BTCUSDT qty=1.5 as of 01-01) gets compared against the
+    FINAL account state (BTCUSDT qty=2.0, only leg_3 still open by
+    01-15), a real 0.5 mismatch -- SHADOW_MAPPING_ERROR, not MATCH."""
+    engine, leg_ledger, applied, _ = _setup_two_sequential_carry_pairs()
+    comparator = DifferentialComparator(run_id="run1", venue=VENUE)
+    log = DifferentialLog(tmp_path / "diff.jsonl")
+    rows = comparator.compare_cycle(engine, applied, leg_ledger, pd.DataFrame(), log)
+    log.close()
+
+    leg1_entry_qty_rows = [r for r in rows
+                           if r.event_id == "leg_1-fill-entry" and r.field == "spot_qty"]
+    assert leg1_entry_qty_rows
+    assert all(r.classification == "SHADOW_MAPPING_ERROR" for r in leg1_entry_qty_rows)
+    assert all(Decimal(r.difference) == Decimal("0.5") for r in leg1_entry_qty_rows)
+
+
+def test_portfolio_fields_are_compared_exactly_once_at_terminal_event(tmp_path):
+    """Portfolio-level fields (cash/nav/fees/...) must appear exactly once
+    per run -- against the TERMINAL event -- never once per state-changing
+    event, now that a single decide() call can span many real events."""
+    engine, leg_ledger, applied, account_snapshots = _setup_two_sequential_carry_pairs()
+    state_changing = [e for e in applied if e.event_type.value in
+                      ("FILL", "MARK", "FUNDING", "FEE", "BORROW_COST")]
+    assert len(state_changing) > 1   # sanity: this scenario really is multi-event
+    comparator = DifferentialComparator(run_id="run1", venue=VENUE)
+    log = DifferentialLog(tmp_path / "diff.jsonl")
+    rows = comparator.compare_cycle(engine, applied, leg_ledger, pd.DataFrame(), log,
+                                    account_snapshots=account_snapshots)
+    log.close()
+
+    cash_rows = [r for r in rows if r.field == "cash"]
+    assert len(cash_rows) == 1
+    last_event = state_changing[-1]
+    assert cash_rows[0].event_id == last_event.event_id
+
+
 # ── only state-changing events are compared ─────────────────────────────
 
 class _NullLog:

@@ -55,12 +55,19 @@ def _fake_captured(*rows, borrow: float = 0.0, market_prices: dict | None = None
         leg_ledger=pd.DataFrame(list(rows)) if rows else pd.DataFrame(),
         pnl_by_type={"directional": 0.0, "carry_funding": 0.0, "hedge": 0.0,
                     "fees": 0.0, "borrow": borrow},
+        portfolio_ledger=pd.DataFrame(),
     )
     return CapturedRun(result=result, market_prices=market_prices or _prices(), run_end=run_end)
 
 
 def _empty_captured() -> CapturedRun:
     return CapturedRun(result=None, market_prices={}, run_end=None)
+
+
+def _perp_leg_row(**overrides) -> dict:
+    base = _leg_row(leg_id="leg_2", leg_type="CARRY_SHORT_PERP")
+    base.update(overrides)
+    return base
 
 
 class _SpyCapture:
@@ -207,6 +214,55 @@ def test_real_capture_function_returns_a_captured_run_with_prices_and_run_end():
     assert "ETHUSDT" in captured.market_prices
     assert len(captured.market_prices["BTCUSDT"]) > 0
     assert captured.run_end is not None
+
+
+# ── account_snapshots: as-of-event state for the comparator (Phase 4D commit 9) ──
+
+def test_account_snapshots_are_aligned_with_applied_events_and_capture_as_of_state():
+    """ShadowCycleResult.account_snapshots[i] must be the account exactly
+    AS OF applied_events[i], not the final/terminal account -- required so
+    DifferentialComparator can compare an early event against what was
+    genuinely true at that event's own time, not against the state after
+    every later event (including a later leg's own entry) has also been
+    applied. Two non-overlapping BTCUSDT carry pairs: leg_1/leg_2 open
+    01-01 and close 01-05 (qty 1.5); leg_3/leg_4 open 01-10 and are still
+    open at run_end 01-15 (qty 2.0) -- so the FINAL BTCUSDT spot position
+    (2.0) genuinely differs from what was open right after leg_1's own
+    entry (1.5)."""
+    rows = [
+        _leg_row(leg_id="leg_1", position_id="CARRY_1", entry_time="2026-01-01T00:00:00Z",
+                exit_time="2026-01-05T00:00:00Z", qty=1.5, entry_price=50_000.0,
+                exit_price=51_000.0, notional=75_000.0, costs=37.5),
+        _perp_leg_row(leg_id="leg_2", position_id="CARRY_1", entry_time="2026-01-01T00:00:00Z",
+                     exit_time="2026-01-05T00:00:00Z", qty=1.5, entry_price=50_000.0,
+                     exit_price=51_000.0, notional=75_000.0, costs=37.5),
+        _leg_row(leg_id="leg_3", position_id="CARRY_2", entry_time="2026-01-10T00:00:00Z",
+                exit_time=None, qty=2.0, entry_price=52_000.0, notional=104_000.0, costs=52.0),
+        _perp_leg_row(leg_id="leg_4", position_id="CARRY_2", entry_time="2026-01-10T00:00:00Z",
+                     exit_time=None, qty=2.0, entry_price=52_000.0, notional=104_000.0, costs=52.0),
+    ]
+    idx = pd.to_datetime([f"2026-01-{d:02d}T00:00:00Z" for d in range(1, 16)], utc=True)
+    prices = pd.Series([50_000.0 + 100 * i for i in range(15)], index=idx)
+    captured = _fake_captured(*rows, market_prices={"BTCUSDT": prices},
+                              run_end="2026-01-15T00:00:00Z")
+    spy = _SpyCapture(events=["e"], new_state={}, captured=captured)
+    runner = CarryBasisShadowRunner(_spec(), config=ShadowConfig(venue=VENUE), capture_fn=spy)
+
+    _events, _new_state, shadow_result = runner.run_cycle(_snapshot(), state={})
+
+    assert shadow_result.ok is True
+    assert len(shadow_result.account_snapshots) == len(shadow_result.applied_events)
+
+    leg1_entry_idx = next(i for i, e in enumerate(shadow_result.applied_events)
+                          if e.event_id == "leg_1-fill-entry")
+    asof_spot = shadow_result.account_snapshots[leg1_entry_idx]["spot_positions"]
+    btc_key = next(iter(asof_spot))   # single spot instrument in this scenario
+    assert asof_spot[btc_key].quantity == 1.5
+
+    # the FINAL account (after every event) has genuinely moved on --
+    # proving the snapshot really is a distinct, earlier moment in time
+    final_spot = runner.engine.account.spot_positions
+    assert final_spot[btc_key].quantity == 2.0
 
 
 def test_instrumentation_does_not_alter_arguments_or_returned_objects():
