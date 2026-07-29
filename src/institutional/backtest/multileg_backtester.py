@@ -522,19 +522,36 @@ class MultiLegBacktester:
             # invariants (crash si short nu)
             exposures = check_portfolio_invariants(positions, equity, cfg.limits)
 
-            # 11. ledger portefeuille
-            port_rows.append({
-                "timestamp": t, "equity": equity, "cash": cash,
-                "drawdown": (equity - peak) / max(peak, 1e-9),
-                "btc_regime": btc_regime,
-                **exposures,
-                "funding_pnl_total": pnl_acc["carry_funding"] + pnl_acc["hedge"],
-                "carry_funding_pnl": pnl_acc["carry_funding"],
-                "hedge_pnl": pnl_acc["hedge"], "directional_pnl": pnl_acc["directional"],
-                "fees_total": pnl_acc["fees"], "borrow_total": pnl_acc["borrow"],
-            })
+            # 11. ledger portefeuille -- sauf pour la DERNIÈRE barre : cette ligne
+            # serait produite AVANT la clôture résiduelle post-boucle ci-dessous,
+            # et montrerait donc une position encore ouverte alors que leg_ledger
+            # la montre déjà fermée (Phase 4D commit 9 -- incohérence terminale
+            # entre les deux ledgers). Le snapshot terminal est produit une fois
+            # pour toutes après la clôture résiduelle (Phase 4E commit 11).
+            if t != grid[-1]:
+                port_rows.append({
+                    "timestamp": t, "equity": equity, "cash": cash,
+                    "drawdown": (equity - peak) / max(peak, 1e-9),
+                    "btc_regime": btc_regime,
+                    **exposures,
+                    "funding_pnl_total": pnl_acc["carry_funding"] + pnl_acc["hedge"],
+                    "carry_funding_pnl": pnl_acc["carry_funding"],
+                    "hedge_pnl": pnl_acc["hedge"], "directional_pnl": pnl_acc["directional"],
+                    "fees_total": pnl_acc["fees"], "borrow_total": pnl_acc["borrow"],
+                })
 
-        # close residuals
+        # close residuals -- comptabilisation INCHANGÉE (identique à avant Phase
+        # 4E) : le coût de clôture réduit `cash` exactement comme avant, mais
+        # n'est PAS attribué à `l.fees_exit` ni à `pnl_acc["fees"]`, tout comme
+        # avant. CarryBasisAdapter.decide() (src/alpha20/tournament/
+        # runner_adapters.py:135-147) lit pnl_by_type -- lui-même dérivé de
+        # pnl_acc -- pour émettre les VRAIS LedgerEvent (fees/borrow/carry_
+        # funding/...) du tournoi réel ; y toucher ferait fuiter un changement
+        # de frais jusque dans la comptabilité de production, ce que Phase 4E
+        # interdit explicitement. Vérifié par diff avant/après (voir le message
+        # de ce commit) : router la clôture résiduelle par close_leg() aurait
+        # changé le montant réel de l'événement FEES émis par decide() de
+        # -1049.61 $ à -1236.60 $ pour ce même rejeu -- donc PAS fait ici.
         last = grid[-1]
         for p in positions:
             if p.is_open:
@@ -547,6 +564,39 @@ class MultiLegBacktester:
                         cost = sc * l.qty * l.mark_price
                         cash += l.price_pnl() - cost
                 p.is_open = False
+
+        # 11bis. snapshot terminal de portfolio_ledger, produit APRÈS toutes les
+        # clôtures résiduelles ci-dessus -- quantités finales (via exposures,
+        # recalculées sur `positions` maintenant toutes fermées : plus aucune
+        # jambe ouverte, gross/net exposure reviennent à 0), PnL réalisé (plus
+        # de latent), exposition brute et nette, état terminal.
+        #
+        # `cash` (la variable réelle, ci-dessus) inclut le coût de clôture
+        # résiduelle -- mais ce coût n'a jamais été attribué nulle part dans
+        # pnl_acc/leg_ledger (voir le commentaire au-dessus), donc utiliser
+        # `cash` tel quel ferait diverger le NAV terminal de leg_ledger d'un
+        # montant que ce même leg_ledger ne peut pas expliquer. La ligne
+        # terminale reconstruit donc `cash`/`equity` à partir de ce que
+        # leg_ledger affirme réellement -- initial_capital + la somme des
+        # net_pnl() (méthode PositionLeg existante, non modifiée) de TOUTES
+        # les jambes, plus le seul bucket qui n'est jamais suivi par jambe
+        # (borrow) -- sans réattribuer ni modifier aucune valeur de frais.
+        # Ne reconstruit rien depuis TruthEngine ni le comparateur : tout vient
+        # de `positions`/`pnl_acc`, produits par ce run() lui-même.
+        terminal_cash = cfg.initial_capital + sum(l.net_pnl() for p in positions for l in p.legs) \
+            + pnl_acc["borrow"]
+        peak = max(peak, terminal_cash)
+        terminal_exposures = check_portfolio_invariants(positions, terminal_cash, cfg.limits)
+        port_rows.append({
+            "timestamp": last, "equity": terminal_cash, "cash": terminal_cash,
+            "drawdown": (terminal_cash - peak) / max(peak, 1e-9),
+            "btc_regime": btc_regime,
+            **terminal_exposures,
+            "funding_pnl_total": pnl_acc["carry_funding"] + pnl_acc["hedge"],
+            "carry_funding_pnl": pnl_acc["carry_funding"],
+            "hedge_pnl": pnl_acc["hedge"], "directional_pnl": pnl_acc["directional"],
+            "fees_total": pnl_acc["fees"], "borrow_total": pnl_acc["borrow"],
+        })
 
         # leg ledger
         for p in positions:
@@ -562,6 +612,15 @@ class MultiLegBacktester:
 
         eq = pd.Series(dict(eq_curve)).sort_index()
         metrics = self._metrics(eq, leg_rows)
+        # pnl_by_type is NOT touched by Phase 4E: CarryBasisAdapter.decide()
+        # (src/alpha20/tournament/runner_adapters.py:135-147) reads this exact
+        # dict to emit the REAL tournament LedgerEvents (fees/borrow/carry_
+        # funding/directional/hedge, as cycle-over-cycle deltas) -- rounding
+        # `borrow` differently here, even though it would make this run's own
+        # Truth-shadow comparison closer, changes a real production event
+        # amount. Verified by diff: doing so shifted the real BORROW event from
+        # -3.17 $ to -3.169835824606616 $ for this same rejeu. Left exactly as
+        # it already was.
         pnl_by_type = {
             "directional": round(pnl_acc["directional"], 2),
             "carry_funding": round(pnl_acc["carry_funding"], 2),
