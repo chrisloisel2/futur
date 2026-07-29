@@ -30,9 +30,11 @@ neither series needs trimming to align with the other.
    of funding events) is the only lookback state carry-open eligibility
    depends on; 14 days is double that, a fixed safety margin, not tuned
    after seeing what it produces.
-3. **`paper_start`** = `end` − 60 days = `2026-05-30T21:00:00Z`, i.e. an
-   ACTIVE replay window of 60 days, preceded by (`paper_start` −
-   `2024-07-01`) ≈ 695 days of real history already sitting behind it for
+3. **`paper_start`** = `end` − 60 days = `2026-05-29T21:00:00Z`
+   (`2026-05-29` as the date string `CarryBasisAdapter.decide()`
+   consumes), i.e. an ACTIVE replay window of 60 days, preceded by
+   (`paper_start` − `2024-07-01`) ≈ 693 days of real history already
+   sitting behind it for
    the funding-gate's own rolling lookback (far more than the 14-day
    minimum above -- the warm-up requirement is trivially satisfied by the
    data's own range, not by shrinking the active window to fit it).

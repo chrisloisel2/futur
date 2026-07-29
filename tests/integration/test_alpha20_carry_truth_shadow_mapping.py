@@ -114,20 +114,31 @@ def test_off_grid_price_and_quantity_are_quantized_to_the_real_product_spec():
 
 # ── LegLedgerToTruthEvents: entry ────────────────────────────────────────
 
-def test_open_leg_first_cycle_emits_order_ack_fill_then_fee_and_mark():
+def test_open_leg_same_day_as_entry_emits_no_mark_yet():
+    """MARK is sampled once per REAL calendar day of the leg's own
+    lifetime, starting the day AFTER entry -- on entry day itself there
+    is no "next day" bar yet to sample."""
     adapter = _adapter()
-    ledger = _ledger(_row())   # costs=37.5 (nonzero); market price == entry (mark still emitted
-                               # on first observation regardless of whether it changed)
+    ledger = _ledger(_row())   # costs=37.5 (nonzero)
     events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T00:00:00Z",
                                       market_prices=_prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_000.0}))
     kinds = [e.event_type for e in events]
     assert kinds == [EventType.ORDER_SUBMITTED, EventType.ORDER_ACKNOWLEDGED, EventType.FILL,
-                     EventType.FEE, EventType.MARK]
+                     EventType.FEE]
     fill = events[2]
     assert fill.payload.price == Decimal(50000)
     assert fill.payload.quantity == Decimal("1.5")
-    assert fill.payload.side == "BUY"   # CARRY_LONG_SPOT delta_sign +1
-    assert fill.payload.fee == 0   # combined cost handled separately, see FEE test
+
+
+def test_open_leg_observed_a_day_later_emits_its_first_real_mark():
+    adapter = _adapter()
+    ledger = _ledger(_row())   # entry_time defaults to 2026-01-01T00:00:00Z
+    prices = _prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_000.0, "2026-01-02T00:00:00Z": 50_500.0})
+    events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
+    marks = [e for e in events if e.event_type == EventType.MARK]
+    assert len(marks) == 1
+    assert marks[0].payload.price == Decimal("50500.00")
+    assert marks[0].ts_event == "2026-01-02T00:00:00+00:00"
 
 
 def test_same_leg_same_cycle_state_reobserved_emits_nothing_new():
@@ -202,11 +213,11 @@ def test_funding_delta_emitted_for_carry_short_perp():
 def test_mark_price_comes_from_the_real_market_price_series():
     adapter = _adapter()
     ledger = _ledger(_row(qty=1.5, entry_price=50_000.0, price_pnl=750.0))
-    # the REAL price as-of the cycle timestamp -- NOT derived from price_pnl
-    # at all (750.0/1.5 would algebraically imply 50500, but the real quoted
+    # the REAL price a day later -- NOT derived from price_pnl at all
+    # (750.0/1.5 would algebraically imply 50500, but the real quoted
     # price is deliberately different here to prove no inversion happens)
-    prices = _prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_777.0})
-    events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T00:00:00Z", market_prices=prices)
+    prices = _prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_000.0, "2026-01-02T00:00:00Z": 50_777.0})
+    events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
     marks = [e for e in events if e.event_type == EventType.MARK]
     assert len(marks) == 1
     assert marks[0].payload.price == Decimal("50777.00")   # quantized to spot tick 0.01
@@ -214,13 +225,13 @@ def test_mark_price_comes_from_the_real_market_price_series():
 
 def test_mark_uses_the_most_recent_bar_at_or_before_the_cycle_timestamp_no_lookahead():
     adapter = _adapter()
-    ledger = _ledger(_row())
+    ledger = _ledger(_row())   # entry_time = 2026-01-01T00:00:00Z
     prices = _prices("BTCUSDT", {
         "2026-01-01T00:00:00Z": 50_000.0,
-        "2026-01-01T01:00:00Z": 50_100.0,
-        "2026-01-02T00:00:00Z": 99_999.0,   # a FUTURE bar relative to the cycle below
+        "2026-01-02T00:00:00Z": 50_100.0,
+        "2026-01-03T00:00:00Z": 99_999.0,   # a FUTURE bar relative to the cycle below
     })
-    events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T01:00:00Z", market_prices=prices)
+    events = adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
     mark = next(e for e in events if e.event_type == EventType.MARK)
     assert mark.payload.price == Decimal("50100.00")   # not the future 99999.0
 
@@ -228,9 +239,9 @@ def test_mark_uses_the_most_recent_bar_at_or_before_the_cycle_timestamp_no_looka
 def test_mark_not_repeated_when_unchanged():
     adapter = _adapter()
     ledger = _ledger(_row(qty=1.5, entry_price=50_000.0, price_pnl=750.0))
-    prices = _prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_500.0, "2026-01-01T08:00:00Z": 50_500.0})
-    adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T00:00:00Z", market_prices=prices)
-    events2 = adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T08:00:00Z", market_prices=prices)
+    prices = _prices("BTCUSDT", {"2026-01-01T00:00:00Z": 50_500.0, "2026-01-02T00:00:00Z": 50_500.0})
+    adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
+    events2 = adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
     assert not [e for e in events2 if e.event_type == EventType.MARK]
 
 
@@ -238,15 +249,15 @@ def test_missing_market_price_series_is_blocked_mark_source_not_inverted():
     adapter = _adapter()
     ledger = _ledger(_row())
     with pytest.raises(MarkSourceUnavailableError, match="BLOCKED_MARK_SOURCE"):
-        adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T00:00:00Z", market_prices={})
+        adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices={})
 
 
 def test_market_price_series_with_no_bar_before_cycle_ts_is_blocked_mark_source():
     adapter = _adapter()
-    ledger = _ledger(_row())
-    prices = _prices("BTCUSDT", {"2026-06-01T00:00:00Z": 50_000.0})   # AFTER the cycle ts
+    ledger = _ledger(_row())   # entry_time = 2026-01-01T00:00:00Z, sampled at 2026-01-02
+    prices = _prices("BTCUSDT", {"2026-06-01T00:00:00Z": 50_000.0})   # AFTER the sample point
     with pytest.raises(MarkSourceUnavailableError, match="BLOCKED_MARK_SOURCE"):
-        adapter.events_for_cycle(ledger, cycle_ts="2026-01-01T00:00:00Z", market_prices=prices)
+        adapter.events_for_cycle(ledger, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
 
 
 # ── exit / terminal close ──────────────────────────────────────────────
@@ -257,15 +268,20 @@ def test_leg_closes_emits_exit_order_ack_fill_with_opposite_side():
     adapter.events_for_cycle(_ledger(_row()), cycle_ts="2026-01-01T00:00:00Z", market_prices=prices)
     closed = _ledger(_row(exit_time="2026-01-02T00:00:00Z", exit_price=51_000.0,
                           price_pnl=1500.0, costs=45.0))
-    events = adapter.events_for_cycle(closed, cycle_ts="2026-01-01T08:00:00Z", market_prices=prices)
+    events = adapter.events_for_cycle(closed, cycle_ts="2026-01-02T00:00:00Z", market_prices=prices)
     fills = [e for e in events if e.event_type == EventType.FILL]
     assert len(fills) == 1
     exit_fill = fills[0]
     assert exit_fill.payload.side == "SELL"   # closing a BUY-opened CARRY_LONG_SPOT
     assert exit_fill.payload.price == Decimal(51000)
     assert exit_fill.payload.quantity == Decimal("1.5")
-    # closed legs stop emitting MARK
-    assert not [e for e in events if e.event_type == EventType.MARK]
+    # a CLOSED leg still gets its real intermediate mark(s) -- it genuinely
+    # was open for a full real day (2026-01-01 -> 2026-01-02), the real
+    # market price during that lifetime is not withheld just because the
+    # leg has since closed
+    marks = [e for e in events if e.event_type == EventType.MARK]
+    assert len(marks) == 1
+    assert marks[0].payload.price == Decimal("51000.00")
 
 
 def test_leg_first_observed_already_closed_attributes_full_cost_to_the_closing_event():

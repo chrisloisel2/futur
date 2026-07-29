@@ -106,16 +106,27 @@ documented decision):
          see funding_pnl_cum, but only ever surfaces the running total in
          leg_ledger).
 
-  MARK (Phase 4D commit 6 -- CHANGED from earlier phases): sourced
-  DIRECTLY from `market_prices[asset]`, the real close-price series
-  captured from MultiLegBacktester._load()'s own return value, looked up
-  "as of" the cycle timestamp with the EXACT SAME searchsorted semantics
-  as the backtester's own `px(a, t)` closure (most recent bar at or
-  before t, never a future one). Earlier phases inverted
-  PositionLeg.price_pnl() algebraically to recover an implied mark price
-  -- that path is REMOVED; a leg with no matching series in
-  `market_prices` raises MarkSourceUnavailableError (BLOCKED_MARK_SOURCE)
-  rather than falling back to inversion or a guess. Emitted only if the
+  MARK (Phase 4D commit 6 -- CHANGED from earlier phases, refined in
+  commit 8): sourced DIRECTLY from `market_prices[asset]`, the real
+  close-price series captured from MultiLegBacktester._load()'s own
+  return value, looked up with the EXACT SAME searchsorted semantics as
+  the backtester's own `px(a, t)` closure (most recent bar at or before
+  t, never a future one). Earlier phases inverted PositionLeg.price_pnl()
+  algebraically to recover an implied mark price -- that path is REMOVED;
+  a leg with no matching series in `market_prices` raises
+  MarkSourceUnavailableError (BLOCKED_MARK_SOURCE) rather than falling
+  back to inversion or a guess.
+
+  Sampled once per REAL calendar day across the leg's OWN real lifetime
+  (entry_time -> exit_time, or entry_time -> the observation timestamp if
+  still open) -- NOT only "if currently open" (commit 8 finding:
+  MultiLegBacktester.run() force-closes every still-open position at its
+  own `end` when the backtest window ends, so a leg observed via
+  independently truncated re-runs is NEVER seen "genuinely still open,"
+  regardless of how fine the observation cadence is -- sampling from the
+  leg's own known real lifetime instead of the live "is it open right
+  now" state sidesteps that structural dead end entirely, and does not
+  depend on the shadow being invoked more than once). Emitted only if the
   looked-up price differs from the last mark seen for that leg_id (an
   optimization against redundant MARK events, not a requirement).
 
@@ -276,6 +287,7 @@ class _LegState:
     costs_seen: Decimal = Decimal(0)
     funding_seen: Decimal = Decimal(0)
     last_mark_price: Decimal | None = None
+    marked_days: set = field(default_factory=set)
 
 
 @dataclass
@@ -327,15 +339,13 @@ class LegLedgerToTruthEvents:
 
         events.extend(self._fee_delta_events(row, leg_id, state, cycle_ts))
         events.extend(self._funding_delta_events(row, leg_id, product, state, cycle_ts))
+        events.extend(self._mark_events_for_leg(row, leg_id, asset, product, state,
+                                                cycle_ts_pd, market_prices))
 
         exit_time = row.get("exit_time")
-        if not _is_missing(exit_time):
-            if not state.exit_emitted:
-                events.extend(self._exit_events(row, leg_id, product, qty))
-                state.exit_emitted = True
-        else:
-            events.extend(self._mark_event(row, leg_id, asset, product, state, cycle_ts,
-                                           cycle_ts_pd, market_prices))
+        if not _is_missing(exit_time) and not state.exit_emitted:
+            events.extend(self._exit_events(row, leg_id, product, qty))
+            state.exit_emitted = True
 
         return events
 
@@ -418,26 +428,58 @@ class LegLedgerToTruthEvents:
                      ts_event=ts, ts_received=ts,
                      payload=FundingPayload(instrument=product, amount=delta, currency=QUOTE_CCY))]
 
-    def _mark_event(self, row: pd.Series, leg_id: str, asset: str, product: ProductSpec,
-                    state: _LegState, cycle_ts: str, cycle_ts_pd: pd.Timestamp,
-                    market_prices: dict[str, pd.Series]) -> list[Event]:
+    def _mark_events_for_leg(self, row: pd.Series, leg_id: str, asset: str, product: ProductSpec,
+                             state: _LegState, cycle_ts_pd: pd.Timestamp,
+                             market_prices: dict[str, pd.Series]) -> list[Event]:
+        """Samples REAL daily bars across the leg's OWN real lifetime
+        (entry_time -> exit_time, or entry_time -> `cycle_ts_pd` if still
+        open), one MARK per calendar day, from `market_prices[asset]` --
+        the exact series MultiLegBacktester._load() fed the backtest.
+
+        This does NOT depend on observing the leg "still open" at the
+        moment this method runs: a fully-CLOSED leg's marks are just as
+        real and just as required (Phase 4D commit 8's "marks spot/perp
+        issus des données réelles" coverage) as an open one's. It is
+        computed directly, once, from the leg's own real entry/exit
+        timestamps -- not tied to how many times, or when, this shadow
+        happens to be invoked, so it does not depend on simulating
+        discrete "cycles over time" against a backtester
+        (MultiLegBacktester.run()) that always force-closes every
+        still-open position at its OWN end -- which would otherwise make
+        "genuinely still open at observation time" structurally
+        unobservable through repeated truncated re-runs, independent of
+        cadence."""
         series = market_prices.get(asset)
         if series is None:
             raise MarkSourceUnavailableError(
                 f"leg {leg_id!r}: no real market price series for asset {asset!r} -- "
                 f"BLOCKED_MARK_SOURCE (never inverted from price_pnl)")
-        mark = _price_asof(series, cycle_ts_pd)
-        if mark is None:
-            raise MarkSourceUnavailableError(
-                f"leg {leg_id!r}: market price series for {asset!r} has no bar at or "
-                f"before {cycle_ts_pd} -- BLOCKED_MARK_SOURCE")
-        mark = product.quantize_price(mark)
-        if state.last_mark_price is not None and mark == state.last_mark_price:
+        entry_ts = pd.Timestamp(row["entry_time"])
+        exit_time = row.get("exit_time")
+        end_ts = pd.Timestamp(exit_time) if not _is_missing(exit_time) else cycle_ts_pd
+        if end_ts <= entry_ts:
             return []
-        state.last_mark_price = mark
-        return [Event(event_id=f"{leg_id}-mark-{cycle_ts}", event_type=EventType.MARK,
-                     ts_event=cycle_ts, ts_received=cycle_ts,
-                     payload=MarkPayload(instrument=product, price=mark))]
+        sample_points = pd.date_range(entry_ts.normalize() + pd.Timedelta(days=1), end_ts,
+                                      freq="1D", tz="UTC")
+        events: list[Event] = []
+        for t in sample_points:
+            if t in state.marked_days:
+                continue
+            state.marked_days.add(t)
+            mark = _price_asof(series, t)
+            if mark is None:
+                raise MarkSourceUnavailableError(
+                    f"leg {leg_id!r}: market price series for {asset!r} has no bar at or "
+                    f"before {t} -- BLOCKED_MARK_SOURCE")
+            mark = product.quantize_price(mark)
+            if state.last_mark_price is not None and mark == state.last_mark_price:
+                continue
+            state.last_mark_price = mark
+            ts_str = t.isoformat()
+            events.append(Event(event_id=f"{leg_id}-mark-{ts_str}", event_type=EventType.MARK,
+                                ts_event=ts_str, ts_received=ts_str,
+                                payload=MarkPayload(instrument=product, price=mark)))
+        return events
 
 
 def borrow_delta_event(cumulative_borrow_usdt: float, previous_cumulative_borrow_usdt: float,
