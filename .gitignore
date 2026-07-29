@@ -65,6 +65,7 @@ trading-system/__pycache__/
 __pycache__/
 *.pyc
 *.pyo
+*.py[cod]
 .pytest_cache/
 .mypy_cache/
 *.egg-info/
