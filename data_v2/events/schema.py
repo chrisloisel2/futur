@@ -7,6 +7,17 @@ Not built yet against real Data V2 output (the four P0 backfills aren't
 complete) -- this module only defines and validates the CONTRACT, so
 detectors/labels/scanner can be written and tested against synthetic data
 now, and pointed at the real join later without changing their code.
+
+Pre-unblinding fix (2026-08-10, review round 3): residual_return_1h alone
+was not enough -- FORCED_FLOW_REVERSAL needs a genuine residual_return_15m
+(an earlier version faked it as residual_return_1h / 4, flagged in its own
+comment as a placeholder), and non-overlapping labels need a genuine
+residual_logret_5m base increment (summing overlapping 1h-return samples
+taken every 5m, as an earlier labels.py version did, inflates/distorts
+expectancy -- see data_v2/events/labels.py). All three are now required,
+built causally from real price + BTC/ETH betas (data_v2.events.residuals).
+research_available_at is also required -- labels must start from a bar's
+own causal availability, not its raw timestamp (see labels.py).
 """
 from __future__ import annotations
 
@@ -14,6 +25,7 @@ import pandas as pd
 
 REQUIRED_COLUMNS = (
     "timestamp",
+    "research_available_at",
     "symbol",
     "close",
     "oi",
@@ -26,6 +38,8 @@ REQUIRED_COLUMNS = (
     "basis",
     "basis_z_1d",
     "basis_z_7d",
+    "residual_logret_5m",
+    "residual_return_15m",
     "residual_return_1h",
     "volume",
 )
@@ -42,3 +56,5 @@ def validate_schema(df: pd.DataFrame) -> None:
         raise ValueError(f"feature frame missing required columns: {missing}")
     if not pd.api.types.is_datetime64_any_dtype(df["timestamp"]):
         raise ValueError("timestamp column must be datetime64")
+    if not pd.api.types.is_datetime64_any_dtype(df["research_available_at"]):
+        raise ValueError("research_available_at column must be datetime64")

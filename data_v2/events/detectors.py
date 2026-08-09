@@ -11,6 +11,22 @@ Each detector takes a single-symbol causal feature frame (data_v2.events.
 schema.REQUIRED_COLUMNS) except relative_value_dislocation, which needs a
 cross-sectional panel (one frame per symbol, same timestamps) to compute
 relative basis/flow/residual z-scores at each bar.
+
+Pre-unblinding fix (2026-08-10, review round 3):
+  1. _trailing_percentile_rank / _rolling_std used to include the CURRENT
+     bar in the window used to threshold that same bar -- circular (a bar
+     was being judged "extreme" partly against itself). Both now compare
+     the current value against a window built ONLY from t-1 and earlier.
+  2. FORCED_FLOW_REVERSAL now reads the real residual_return_15m column
+     (data_v2.events.residuals) instead of the earlier residual_return_1h/4
+     placeholder.
+  3. trigger_residual_sign is captured at detection time for
+     RELATIVE_VALUE_DISLOCATION and FORCED_FLOW_REVERSAL (CROWDING already
+     captured crowded_side) -- direction is NOT a fixed constant per
+     family; see data_v2/events/labels.py's per-event direction logic.
+  4. research_available_at is carried into the events output -- labels
+     must start from a bar's own causal availability, not its raw
+     timestamp.
 """
 from __future__ import annotations
 
@@ -35,15 +51,24 @@ def _min_periods(window_bars: int) -> int:
 
 
 def _trailing_percentile_rank(series: pd.Series, window_bars: int) -> pd.Series:
-    """Percentile rank (0-1) of the current value within the trailing
-    window, INCLUDING the current bar but never a future one."""
-    return series.rolling(window_bars, min_periods=_min_periods(window_bars)).apply(
-        lambda w: (w <= w.iloc[-1]).mean(), raw=False
-    )
+    """Percentile rank (0-1) of the current value within the STRICTLY
+    PRIOR window (t-window_bars .. t-1) -- current bar never contributes to
+    its own threshold. Implemented as one rolling window of window_bars+1
+    values ending at t: the last element (raw=True -> w[-1]) is the current
+    value, everything before it (w[:-1]) is the history it's ranked
+    against."""
+    def _rank(w: np.ndarray) -> float:
+        hist, current = w[:-1], w[-1]
+        return float((hist <= current).mean())
+
+    return series.rolling(window_bars + 1, min_periods=_min_periods(window_bars) + 1).apply(_rank, raw=True)
 
 
 def _rolling_std(series: pd.Series, window_bars: int) -> pd.Series:
-    return series.rolling(window_bars, min_periods=_min_periods(window_bars)).std()
+    """Std of the STRICTLY PRIOR window (t-window_bars .. t-1) -- shift(1)
+    before rolling so the current bar's own value never enters the std
+    it's about to be compared against."""
+    return series.shift(1).rolling(window_bars, min_periods=_min_periods(window_bars)).std()
 
 
 def _apply_cooldown(mask: pd.Series, cooldown_bars: int) -> pd.Series:
@@ -83,9 +108,13 @@ def detect_deleveraging(df: pd.DataFrame, *, symbol: str, lookback_days: int = 3
     mask = (price_shock & oi_collapse & sell_extreme & vol_high).fillna(False)
     mask = _apply_cooldown(mask, COOLDOWN_BARS_DELEVERAGING)
 
-    events = df.loc[mask, ["timestamp"]].copy()
+    events = df.loc[mask, ["timestamp", "research_available_at"]].copy()
     events["symbol"] = symbol
     events["family"] = "DELEVERAGING"
+    # DELEVERAGING is defined as a down-shock fade -- direction is fixed +1
+    # (long) by construction of the family itself (protocol section 1),
+    # unlike CROWDING/RELATIVE_VALUE/FORCED_FLOW_REVERSAL which can trigger
+    # on either side and need a captured sign (see labels.py).
     if "liq_long_usd_5m" in df.columns:
         events["liq_confirmed"] = (df.loc[mask, "liq_long_usd_5m"] > 0).to_numpy()
     return EventSet(family="DELEVERAGING", events=events.reset_index(drop=True))
@@ -108,7 +137,7 @@ def detect_crowding(df: pd.DataFrame, *, symbol: str, lookback_days: int = 90) -
     mask = (funding_extreme & basis_extreme & oi_building & same_direction).fillna(False)
     mask = _apply_cooldown(mask, COOLDOWN_BARS_DEFAULT)
 
-    events = df.loc[mask, ["timestamp"]].copy()
+    events = df.loc[mask, ["timestamp", "research_available_at"]].copy()
     events["symbol"] = symbol
     events["family"] = "CROWDING"
     events["crowded_side"] = np.where(funding_sign.loc[mask] > 0, "long", "short")
@@ -120,21 +149,27 @@ def detect_relative_value_dislocation(
 ) -> EventSet:
     """Needs the full cross-sectional panel (one frame per symbol, aligned
     timestamps) -- relative basis/flow z-scores are computed ACROSS symbols
-    at each bar, not within one symbol's own history."""
+    at each bar (contemporaneous, not a temporal-lookahead question), while
+    residual_extreme (a TIME-SERIES rolling std per symbol) uses the same
+    strictly-prior-window discipline as the per-symbol detectors."""
     window = lookback_days * BARS_PER_DAY
     for sym, df in panel.items():
         validate_schema(df)
 
     symbols = sorted(panel.keys())
     timestamps = panel[symbols[0]]["timestamp"]
+    research_available_at = panel[symbols[0]]["research_available_at"]
 
     residual = pd.DataFrame({s: panel[s].set_index("timestamp")["residual_return_1h"] for s in symbols})
     basis_z = pd.DataFrame({s: panel[s].set_index("timestamp")["basis_z_1d"] for s in symbols})
     flow = pd.DataFrame({s: panel[s].set_index("timestamp")["signed_volume"] for s in symbols})
 
-    residual_std = residual.rolling(window, min_periods=max(20, window // 10)).std()
+    residual_std = residual.shift(1).rolling(window, min_periods=_min_periods(window)).std()
     residual_extreme = residual.abs() >= 2.0 * residual_std
 
+    # cross-sectional (same bar, across symbols) -- contemporaneous, not a
+    # temporal lookahead: every symbol's information at bar t is used to
+    # rank every OTHER symbol at that same bar t, never at t+1.
     relative_basis_z = basis_z.sub(basis_z.median(axis=1), axis=0)
     relative_basis_extreme = relative_basis_z.abs() >= 2.0
 
@@ -154,11 +189,18 @@ def detect_relative_value_dislocation(
     for sym in symbols:
         sym_mask = _apply_cooldown(mask[sym], COOLDOWN_BARS_DEFAULT)
         if sym_mask.any():
-            ev = pd.DataFrame({"timestamp": timestamps[sym_mask.to_numpy()].to_numpy()})
+            fired = sym_mask.to_numpy()
+            ev = pd.DataFrame({
+                "timestamp": timestamps[fired].to_numpy(),
+                "research_available_at": research_available_at[fired].to_numpy(),
+            })
             ev["symbol"] = sym
             ev["family"] = "RELATIVE_VALUE_DISLOCATION"
+            ev["trigger_residual_sign"] = np.sign(residual.loc[sym_mask, sym]).to_numpy()
             rows.append(ev)
-    events = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(columns=["timestamp", "symbol", "family"])
+    events = pd.concat(rows, ignore_index=True) if rows else pd.DataFrame(
+        columns=["timestamp", "research_available_at", "symbol", "family", "trigger_residual_sign"]
+    )
     return EventSet(family="RELATIVE_VALUE_DISLOCATION", events=events)
 
 
@@ -176,17 +218,16 @@ def detect_forced_flow_reversal(df: pd.DataFrame, *, symbol: str, lookback_days:
 
     oi_collapse = df["oi_delta_pct_1h"] <= -0.05
 
-    price_residual_15m = df["residual_return_1h"] / 4.0  # protocol placeholder: real 15m residual
-    # column not yet in REQUIRED_COLUMNS -- computed from the 1h residual as
-    # a rough proxy ONLY until a genuine residual_return_15m column exists;
-    # flagged here rather than silently treated as equivalent.
-    price_std_15m = _rolling_std(price_residual_15m, window)
-    price_shock = price_residual_15m.abs() >= 2.5 * price_std_15m
+    # real residual_return_15m (data_v2.events.residuals), not the earlier
+    # residual_return_1h/4 placeholder.
+    price_std_15m = _rolling_std(df["residual_return_15m"], window)
+    price_shock = df["residual_return_15m"].abs() >= 2.5 * price_std_15m
 
     mask = (flow_extreme & oi_collapse & price_shock).fillna(False)
     mask = _apply_cooldown(mask, COOLDOWN_BARS_DEFAULT)
 
-    events = df.loc[mask, ["timestamp"]].copy()
+    events = df.loc[mask, ["timestamp", "research_available_at"]].copy()
     events["symbol"] = symbol
     events["family"] = "FORCED_FLOW_REVERSAL"
+    events["trigger_residual_sign"] = np.sign(df.loc[mask, "residual_return_15m"]).to_numpy()
     return EventSet(family="FORCED_FLOW_REVERSAL", events=events.reset_index(drop=True))

@@ -52,6 +52,7 @@ sys.path.insert(0, str(ROOT))
 from data_v2.validation.validator import validate_series  # noqa: E402
 from data_v2.temporal.available_at import add_temporal_columns  # noqa: E402
 from data_pipeline.taker_flow_guard import looks_like_placeholder_taker_flow  # noqa: E402
+from data_v2.normalized.perp_ohlcv.build_perp_5m import month_range  # noqa: E402
 
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
 OUT_PATH = ROOT / "reports/DATA_V2_READINESS.json"
@@ -71,6 +72,30 @@ def _load_year_partitioned(base_dir: Path, symbol: str, filename: str) -> Option
 def _load_oi(symbol: str) -> Optional[pd.DataFrame]:
     path = ROOT / f"data/derivatives_backfill/binance_vision_metrics/{symbol}_metrics_5m.parquet"
     return pd.read_parquet(path) if path.exists() else None
+
+
+def _load_funding(symbol: str) -> Optional[pd.DataFrame]:
+    path = ROOT / f"data/derivatives_backfill/binance/funding/{symbol}.parquet"
+    return pd.read_parquet(path) if path.exists() else None
+
+
+def _spot_absence_confirmed(symbol: str, expected_start: Optional[pd.Timestamp], expected_end: Optional[pd.Timestamp]) -> bool:
+    """True only if the spot builder actually tried every expected month for
+    this symbol and every one came back 404 -- i.e. genuine proof no spot
+    market exists, not merely "we haven't backfilled it yet" (which must
+    NOT be treated as NOT_APPLICABLE, or a real gap would silently vanish
+    from the coverage denominator)."""
+    manifest_path = ROOT / f"data_v2/normalized/spot_ohlcv/venue=binance/symbol={symbol}/manifest.json"
+    if not manifest_path.exists():
+        return False  # never attempted
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("done_months"):
+        return False  # some spot data WAS found -- not absent
+    if expected_start is None or expected_end is None:
+        return False
+    expected_months = {f"{y:04d}-{m:02d}" for y, m in month_range(expected_start.date(), expected_end.date())}
+    missing = set(manifest.get("missing_months", []))
+    return expected_months.issubset(missing)
 
 
 def _agg_trades_manifest_counts(symbol: str) -> tuple[int, int]:
@@ -106,7 +131,24 @@ DATASET_SPECS = {
         required_positive_columns=["spot_close"],
         source_available_from=None, source_kind="binance_vision_monthly",
         check_taker_flow=True,
-        optional=True,  # not every perp symbol has a spot market -- absence is not a gate failure by itself
+        # NOT_APPLICABLE requires PROOF (every expected month tried, all
+        # 404 -- see _spot_absence_confirmed), not merely "no file on disk".
+        # An earlier version treated absence itself as NOT_APPLICABLE,
+        # which would let a spot market that genuinely exists but simply
+        # hasn't been backfilled yet (or failed to backfill) silently drop
+        # out of the coverage denominator and inflate spot_coverage_gt_98pct.
+        confirm_absence_fn=_spot_absence_confirmed,
+    ),
+    "funding": dict(
+        loader=_load_funding, timestamp_col="timestamp", bar_seconds=8 * 3600,
+        required_positive_columns=None,
+        required_nonnegative_columns=None,  # funding_rate is legitimately signed; mark_price NaN pre-2023-10-31 is a known, accepted gap, not corruption
+        source_available_from=None, source_kind="binance_vision_daily",
+        check_taker_flow=False,
+        # DATA_READY per prior audit (329 files, 0/311 PIT symbols missing)
+        # -- included here so "funding_coverage_100pct" in hard_gates is an
+        # actually-measured fact, not the hardcoded True an earlier version
+        # of this script had.
     ),
     "agg_trades_flow_1m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/1m/venue=binance", sym, "flow.parquet"),
@@ -149,8 +191,17 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
 
     if df is None or df.empty:
         row["notes"] = "no data on disk yet"
-        if spec.get("optional"):
-            row["verdict"] = "NOT_APPLICABLE"
+        confirm_absence_fn = spec.get("confirm_absence_fn")
+        if confirm_absence_fn is not None:
+            im_row = im.loc[im["symbol"] == symbol]
+            listing_ts = pd.Timestamp(im_row.iloc[0]["listing_ts"]) if len(im_row) and pd.notna(im_row.iloc[0]["listing_ts"]) else None
+            delisting_ts = pd.Timestamp(im_row.iloc[0]["delisting_ts"]) if len(im_row) and pd.notna(im_row.iloc[0]["delisting_ts"]) else None
+            candidates = [t for t in (listing_ts, spec.get("source_available_from")) if t is not None]
+            exp_start = max(candidates) if candidates else None
+            exp_end = delisting_ts if delisting_ts is not None else now
+            if confirm_absence_fn(symbol, exp_start, exp_end):
+                row["verdict"] = "NOT_APPLICABLE"
+                row["notes"] = "confirmed absent: every expected month attempted, all 404 -- no market exists"
         return row
 
     report = validate_series(
@@ -247,7 +298,7 @@ def build(now: Optional[pd.Timestamp] = None) -> dict:
         "duplicate_pk": int(applicable_all["duplicates"].sum()) == 0,
         "gate_fail": int(applicable_all["failed_days"].sum()) == 0,
         "pit_violation": not bool((applicable_all["pit_violations"] > 0).any()),
-        "funding_coverage_100pct": True,  # funding is DATA_READY per prior audit, not re-scanned here (out of DATASET_SPECS scope)
+        "funding_coverage_100pct": dataset_summaries["funding"]["pass_pct"] >= 0.99,
         "oi_coverage_gt_95pct": dataset_summaries["oi_vision_5m"]["pass_pct"] > 0.95,
         "perp_coverage_gt_98pct": dataset_summaries["perp_5m"]["pass_pct"] > 0.98,
         "spot_coverage_gt_98pct": dataset_summaries["spot_5m"]["pass_pct"] > 0.98,

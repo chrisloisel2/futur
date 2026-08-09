@@ -3,86 +3,132 @@ data_v2/events/labels.py
 ─────────────────────────────────────────────────────────────────────────────
 Multi-horizon labels for Event Scanner V1 events, per reports/
 EVENT_SCANNER_V1_PROTOCOL.md's "Labels" section: residual_ret_h, MFE_h,
-MAE_h, time_to_MFE_h at h in {15m, 1h, 4h, 8h}, computed from each event's
-research_available_at (not its raw timestamp) forward on the SAME symbol's
-residual-return path. No label may be computed before the event's own
-causal cutoff, and none of this touches the event's own detection features
-(no leakage from label back into signal -- labels are appended AFTER
-detection, never merged into the feature frame detectors read).
+MAE_h, time_to_MFE_h at h in {15m, 1h, 4h, 8h}.
 
-Direction convention (fixed by the protocol, not chosen post-hoc):
-  DELEVERAGING, FORCED_FLOW_REVERSAL -> scored LONG (fade the down-move)
-  CROWDING, RELATIVE_VALUE_DISLOCATION -> scored SHORT the crowded/extreme side
+Pre-unblinding fixes (2026-08-10, review round 3), all load-bearing:
+
+1. Non-overlapping base increment. An earlier version cumsum'd
+   residual_return_1h sampled every 5m bar as if each sample were an
+   independent marginal return -- but a rolling 1h return computed every
+   5m OVERLAPS its 11 neighbours 92% of the time, so that cumsum summed
+   twelve heavily-overlapping 1h windows on top of each other, wildly
+   inflating/distorting expectancy, MFE, MAE, PF. Fixed: the only thing
+   ever summed now is residual_logret_5m (data_v2.events.residuals), a
+   genuine non-overlapping 5m increment -- 15m = sum of the next 3, 1h =
+   the next 12, 4h = the next 48, 8h = the next 96. expm1() at the end
+   converts the summed log-return back to a simple return.
+
+2. Entry point is research_available_at, not the triggering bar's own
+   timestamp. A bar labelled 10:00 (open time) whose own
+   research_available_at is ~10:05 (it isn't knowable until it closes --
+   see data_v2.temporal.available_at) was, in an earlier version, used as
+   the START of the forward-return path via frame["timestamp"] -- which
+   means the very 10:00->10:05 move that produced the trigger condition
+   was being counted a second time as if it were FORWARD performance.
+   Fixed: entry_bar is the first bar whose own timestamp >= the event's
+   research_available_at (i.e. skip the triggering bar's own 5m return;
+   start summing from the bar after it).
+
+3. Direction is no longer a fixed constant per family. DELEVERAGING is
+   always a down-shock fade (+1, long). The other three can trigger on
+   either side and must read back what actually happened at detection
+   time (data_v2.events.detectors' captured crowded_side /
+   trigger_residual_sign columns) -- see _direction_for_event. Getting
+   this wrong can silently turn a real symmetric edge into a fake
+   cancelled-out NO_EDGE.
 """
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
 
+from data_v2.events.costs import compute_event_cost
+
 HORIZONS_MINUTES = {"15m": 15, "1h": 60, "4h": 240, "8h": 480}
 BAR_MINUTES = 5
 
-DIRECTION_BY_FAMILY = {
-    "DELEVERAGING": 1,
-    "FORCED_FLOW_REVERSAL": 1,
-    "CROWDING": -1,
-    "RELATIVE_VALUE_DISLOCATION": -1,
-}
+
+def _direction_for_event(row: "pd.Series", family: str) -> int:
+    if family == "DELEVERAGING":
+        return 1
+    if family in ("FORCED_FLOW_REVERSAL", "RELATIVE_VALUE_DISLOCATION"):
+        return -int(np.sign(row["trigger_residual_sign"]))
+    if family == "CROWDING":
+        return -1 if row["crowded_side"] == "long" else 1
+    raise ValueError(f"unknown family: {family}")
 
 
-def _forward_path(residual_return: pd.Series, start_idx: int, n_bars: int) -> np.ndarray:
-    return residual_return.to_numpy()[start_idx : start_idx + n_bars + 1]
-
-
-def label_events(events: pd.DataFrame, symbol_frame: pd.DataFrame, *, family: str) -> pd.DataFrame:
-    """events: output of a detector (timestamp, symbol, family, ...) for ONE
-    symbol. symbol_frame: that same symbol's full causal feature frame
-    (must contain 'timestamp' and 'residual_return_1h', sorted ascending).
-    Returns events with residual_ret_h/MFE_h/MAE_h/time_to_MFE_h columns
-    added for each of the four horizons.
+def label_events(
+    events: pd.DataFrame, symbol_frame: pd.DataFrame, *, family: str, tick_size: Optional[float] = None
+) -> pd.DataFrame:
+    """events: output of a detector (timestamp, research_available_at,
+    symbol, family, + family-specific trigger columns) for ONE symbol.
+    symbol_frame: that same symbol's full causal feature frame (must
+    contain 'timestamp', 'research_available_at', 'residual_logret_5m',
+    'close', sorted ascending, regular 5m grid). Returns events with
+    residual_ret_h/MFE_h/MAE_h/time_to_MFE_h added for each horizon, plus
+    event_cost_x1/event_cost_x2 (data_v2.events.costs, per-event -- NaN if
+    tick_size isn't provided, never silently a flat default).
     """
     if events.empty:
         return events.copy()
 
-    direction = DIRECTION_BY_FAMILY[family]
     frame = symbol_frame.reset_index(drop=True)
-    ts_to_idx = pd.Series(frame.index, index=frame["timestamp"])
-    # additive cumulation of the per-bar residual series (not log1p/expm1 --
-    # residual_return_1h is treated as already a small, summable per-bar
-    # quantity here; a real, non-overlapping per-5m marginal residual
-    # series is a follow-up feature-engineering task, not required to prove
-    # this label mechanism is correct).
-    cum_ret = frame["residual_return_1h"].fillna(0).cumsum().to_numpy()
+    bar_ts = frame["timestamp"].to_numpy()
+    log_ret_5m = frame["residual_logret_5m"].fillna(0).to_numpy()
+    close = frame["close"].to_numpy()
+    n_frame = len(frame)
 
     out = events.copy()
+    # first bar whose OWN timestamp >= the event's research_available_at --
+    # this is what excludes the triggering bar's own 5m move (whose CLOSE
+    # produced the trigger) from ever counting as "forward" performance.
+    entry_idx = np.searchsorted(bar_ts, out["research_available_at"].to_numpy(), side="left")
+    out["entry_idx"] = entry_idx
+    out["entry_timestamp"] = [
+        frame["timestamp"].iloc[i] if 0 <= i < n_frame else pd.NaT for i in entry_idx
+    ]
+
+    entry_price = np.array([close[i] if 0 <= i < n_frame else np.nan for i in entry_idx])
+    event_costs = [
+        compute_event_cost(p, tick_size) if tick_size is not None else (np.nan, np.nan)
+        for p in entry_price
+    ]
+    out["entry_price"] = entry_price
+    out["event_cost_x1"] = [c[0] for c in event_costs]
+    out["event_cost_x2"] = [c[1] for c in event_costs]
+
+    directions = np.array([_direction_for_event(row, family) for _, row in out.iterrows()])
+    out["direction"] = directions
+
     for label, minutes in HORIZONS_MINUTES.items():
         n_bars = max(1, minutes // BAR_MINUTES)
         rets, mfes, maes, ttms = [], [], [], []
-        for ts in out["timestamp"]:
-            idx = ts_to_idx.get(ts)
-            if idx is None or idx + n_bars >= len(cum_ret):
+        for i, direction in zip(entry_idx, directions):
+            if i < 0 or i + n_bars > n_frame:
                 rets.append(np.nan); mfes.append(np.nan); maes.append(np.nan); ttms.append(np.nan)
                 continue
-            path = cum_ret[idx : idx + n_bars + 1] - cum_ret[idx]
-            path = direction * path
-            final_ret = path[-1]
-            mfe = np.nanmax(path[1:]) if n_bars > 0 else np.nan
-            mae = np.nanmin(path[1:]) if n_bars > 0 else np.nan
-            ttm = int(np.nanargmax(path[1:]) + 1) * BAR_MINUTES if n_bars > 0 else np.nan
-            rets.append(final_ret); mfes.append(mfe); maes.append(mae); ttms.append(ttm)
+            # non-overlapping 5m increments only, starting AT entry_idx
+            increments = log_ret_5m[i : i + n_bars] * direction
+            path = np.cumsum(increments)
+            final_log_ret = path[-1]
+            mfe = float(np.expm1(np.max(path)))
+            mae = float(np.expm1(np.min(path)))
+            ttm = int(np.argmax(path) + 1) * BAR_MINUTES
+            rets.append(float(np.expm1(final_log_ret))); mfes.append(mfe); maes.append(mae); ttms.append(ttm)
         out[f"residual_ret_{label}"] = rets
         out[f"MFE_{label}"] = mfes
         out[f"MAE_{label}"] = maes
         out[f"time_to_MFE_{label}"] = ttms
 
-    out["direction"] = direction
     return out
 
 
 def label_events_multi_symbol(
-    events: pd.DataFrame, panel: Dict[str, pd.DataFrame], *, family: str
+    events: pd.DataFrame, panel: Dict[str, pd.DataFrame], *, family: str,
+    tick_size_by_symbol: Optional[Dict[str, float]] = None,
 ) -> pd.DataFrame:
     """Same as label_events but for a cross-symbol events frame (e.g.
     RELATIVE_VALUE_DISLOCATION output) -- groups by symbol and labels each
@@ -93,5 +139,6 @@ def label_events_multi_symbol(
     for symbol, group in events.groupby("symbol"):
         if symbol not in panel:
             continue
-        parts.append(label_events(group, panel[symbol], family=family))
+        tick_size = (tick_size_by_symbol or {}).get(symbol)
+        parts.append(label_events(group, panel[symbol], family=family, tick_size=tick_size))
     return pd.concat(parts, ignore_index=True) if parts else events.copy()

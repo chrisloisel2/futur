@@ -21,15 +21,28 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
+from data_v2.events.costs import STRESS_COST_X1, STRESS_COST_X2
+
 HORIZONS = ("15m", "1h", "4h", "8h")
 
-# cost model: 2x taker fee (open+close) + 1 tick slippage estimate per side,
-# expressed in the same log-return-ish units as residual_ret_h. Matches the
-# "cost_rt" convention already used elsewhere on this project (e.g.
-# scripts/backtest_ctrend_v1.py's cost_rt=0.0030 round-trip default) --
-# reused here rather than inventing a new figure. cost x2 doubles it.
-COST_X1 = 0.0030
-COST_X2 = COST_X1 * 2
+# Pre-unblinding fix (2026-08-10, review round 3): a flat COST_X1/X2
+# (30/60bps) used to be subtracted from every event's return regardless of
+# symbol or price level -- that can both kill a real edge on a cheap/fine-
+# tick symbol and understate cost on an expensive/coarse-tick one. The
+# PRIMARY cost figure is now per-event (data_v2.events.labels' event_cost_x1
+# /event_cost_x2, from data_v2.events.costs -- 2x taker fee + 1 tick
+# slippage per side, computed from each event's own entry_price/tick_size).
+# STRESS_COST_X1/X2 (the old flat 30/60bps) are kept and reported
+# separately as an explicit secondary stress test, never silently
+# substituted for the real per-event formula.
+PRIMARY_CLASSIFICATION_HORIZON = "1h"
+# reports/EVENT_SCANNER_V1_PROTOCOL.md amendment (2026-08-10, pre-
+# unblinding, before any real scan has been run): 1h is THE horizon
+# classification is decided on. 15m/4h/8h are reported as diagnostics only
+# and must never be used to rescue a family that fails on 1h -- that
+# would reopen exactly the multiple-testing problem pre-registration exists
+# to close ("finalement le meilleur horizon etait 4h", chosen after seeing
+# results).
 
 MIN_YEAR_N_FOR_CONSISTENCY_CHECK = 20
 MIN_POOLED_N = 100
@@ -53,6 +66,8 @@ class HorizonStats:
     gross_expectancy: float
     net_expectancy_cost_x1: float
     net_expectancy_cost_x2: float
+    net_expectancy_stress_cost_x1: float
+    net_expectancy_stress_cost_x2: float
     win_rate: float
     profit_factor: float
     mean_mfe: float
@@ -64,26 +79,48 @@ class HorizonStats:
             "gross_expectancy": self.gross_expectancy,
             "net_expectancy_cost_x1": self.net_expectancy_cost_x1,
             "net_expectancy_cost_x2": self.net_expectancy_cost_x2,
+            "net_expectancy_stress_cost_x1": self.net_expectancy_stress_cost_x1,
+            "net_expectancy_stress_cost_x2": self.net_expectancy_stress_cost_x2,
             "win_rate": self.win_rate, "profit_factor": self.profit_factor,
             "mean_mfe": self.mean_mfe, "mean_mae": self.mean_mae,
         }
 
 
-def _horizon_stats(returns: pd.Series, mfe: pd.Series, mae: pd.Series, horizon: str) -> HorizonStats:
+def _horizon_stats(
+    returns: pd.Series, mfe: pd.Series, mae: pd.Series, horizon: str,
+    event_cost_x1: Optional[pd.Series] = None, event_cost_x2: Optional[pd.Series] = None,
+) -> HorizonStats:
     r = returns.dropna()
     n = len(r)
     if n == 0:
-        return HorizonStats(horizon, 0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+        return HorizonStats(horizon, 0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
     gross = float(r.mean())
     wins = r[r > 0]
     losses = r[r < 0]
     win_rate = float((r > 0).mean())
     profit_factor = float(wins.sum() / abs(losses.sum())) if len(losses) and losses.sum() != 0 else np.nan
+
+    # PRIMARY: per-event cost (data_v2.events.costs), NaN-safe -- an event
+    # with no tick_size available (event_cost_x1 NaN) is simply excluded
+    # from the net-of-cost mean rather than silently costed at 0.
+    if event_cost_x1 is not None:
+        net1 = (r - event_cost_x1.reindex(r.index)).dropna()
+        net_x1 = float(net1.mean()) if len(net1) else np.nan
+    else:
+        net_x1 = np.nan
+    if event_cost_x2 is not None:
+        net2 = (r - event_cost_x2.reindex(r.index)).dropna()
+        net_x2 = float(net2.mean()) if len(net2) else np.nan
+    else:
+        net_x2 = np.nan
+
     return HorizonStats(
         horizon=horizon, n=n,
         gross_expectancy=gross,
-        net_expectancy_cost_x1=gross - COST_X1,
-        net_expectancy_cost_x2=gross - COST_X2,
+        net_expectancy_cost_x1=net_x1,
+        net_expectancy_cost_x2=net_x2,
+        net_expectancy_stress_cost_x1=gross - STRESS_COST_X1,
+        net_expectancy_stress_cost_x2=gross - STRESS_COST_X2,
         win_rate=win_rate, profit_factor=profit_factor,
         mean_mfe=float(mfe.dropna().mean()) if mfe.notna().any() else np.nan,
         mean_mae=float(mae.dropna().mean()) if mae.notna().any() else np.nan,
@@ -144,16 +181,24 @@ def build_family_report(
         return FamilyReport(family=family, n_total=0, classification="KILL",
                              classification_reason="no events detected")
 
+    cost_x1 = labelled_events["event_cost_x1"] if "event_cost_x1" in labelled_events.columns else None
+    cost_x2 = labelled_events["event_cost_x2"] if "event_cost_x2" in labelled_events.columns else None
+
     years = pd.to_datetime(labelled_events["timestamp"]).dt.year
     for horizon in HORIZONS:
         ret_col, mfe_col, mae_col = f"residual_ret_{horizon}", f"MFE_{horizon}", f"MAE_{horizon}"
-        by_horizon[horizon] = _horizon_stats(labelled_events[ret_col], labelled_events[mfe_col], labelled_events[mae_col], horizon)
+        by_horizon[horizon] = _horizon_stats(
+            labelled_events[ret_col], labelled_events[mfe_col], labelled_events[mae_col], horizon,
+            cost_x1, cost_x2,
+        )
 
         for year in sorted(years.unique()):
             year_mask = years == year
             stats = _horizon_stats(
                 labelled_events.loc[year_mask, ret_col], labelled_events.loc[year_mask, mfe_col],
                 labelled_events.loc[year_mask, mae_col], horizon,
+                cost_x1.loc[year_mask] if cost_x1 is not None else None,
+                cost_x2.loc[year_mask] if cost_x2 is not None else None,
             )
             by_year.setdefault(str(year), {})[horizon] = stats
 
@@ -164,13 +209,18 @@ def build_family_report(
                 stats = _horizon_stats(
                     labelled_events.loc[tier_mask, ret_col], labelled_events.loc[tier_mask, mfe_col],
                     labelled_events.loc[tier_mask, mae_col], horizon,
+                    cost_x1.loc[tier_mask] if cost_x1 is not None else None,
+                    cost_x2.loc[tier_mask] if cost_x2 is not None else None,
                 )
                 by_tier.setdefault(tier, {})[horizon] = stats
 
-    pooled = by_horizon["1h"]  # classification anchored on the 1h horizon
-    by_year_1h = {y: hs["1h"].to_dict() for y, hs in by_year.items()}
+    # classification is decided EXCLUSIVELY on PRIMARY_CLASSIFICATION_HORIZON
+    # (1h, protocol amendment 2026-08-10) -- 15m/4h/8h are diagnostics only
+    # and never rescue a family that fails on the primary horizon.
+    pooled = by_horizon[PRIMARY_CLASSIFICATION_HORIZON]
+    by_year_primary = {y: hs[PRIMARY_CLASSIFICATION_HORIZON].to_dict() for y, hs in by_year.items()}
     classification, reason = _classify(
-        by_year_1h, pooled.net_expectancy_cost_x1, pooled.net_expectancy_cost_x2,
+        by_year_primary, pooled.net_expectancy_cost_x1, pooled.net_expectancy_cost_x2,
         pooled.profit_factor, pooled.n,
     )
 
