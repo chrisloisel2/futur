@@ -1,0 +1,115 @@
+"""
+tests/unit/test_data_v2_basis.py
+─────────────────────────────────────────────────────────────────────────────
+Data V2 step 9: perp/spot basis. Covers a real regression caught while
+building this against real BTCUSDT data: pd.merge_asof(..., on="timestamp")
+keeps the LEFT frame's (mark's, jittery) timestamp in its output, so
+indexing the result by that column and then exact-joining against the
+(clean 5m-grid) perp/spot frame silently dropped every settlement except
+the ones with exactly zero jitter (85/183 real BTCUSDT settlements matched
+before the fix, 183/183 after -- see data_v2/features/basis.py).
+
+Gate:
+    python3 -m pytest tests/unit/test_data_v2_basis.py -q
+"""
+from __future__ import annotations
+
+import shutil
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import pytest
+
+sys.path.insert(0, str(Path(__file__).parents[2]))
+
+from data_v2.features import basis as basis_mod
+
+
+@pytest.fixture()
+def fake_universe(tmp_path, monkeypatch):
+    perp_dir = tmp_path / "perp/venue=binance"
+    spot_dir = tmp_path / "spot/venue=binance"
+    out_dir = tmp_path / "basis/venue=binance"
+    funding_dir = tmp_path / "funding"
+    premium_dir = tmp_path / "premium"
+    for d in (perp_dir, spot_dir, out_dir, funding_dir, premium_dir):
+        d.mkdir(parents=True)
+
+    monkeypatch.setattr(basis_mod, "PERP_DIR", perp_dir)
+    monkeypatch.setattr(basis_mod, "SPOT_DIR", spot_dir)
+    monkeypatch.setattr(basis_mod, "OUT_DIR", out_dir)
+    monkeypatch.setattr(basis_mod, "FUNDING_DIR", funding_dir)
+    monkeypatch.setattr(basis_mod, "PREMIUM_DIR", premium_dir)
+    return {"perp": perp_dir, "spot": spot_dir, "out": out_dir, "funding": funding_dir, "premium": premium_dir}
+
+
+def _write_5m(root: Path, symbol: str, year: int, idx: pd.DatetimeIndex, col: str, values) -> None:
+    d = root / f"symbol={symbol}" / f"year={year}"
+    d.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({"timestamp": idx, col: values}).to_parquet(d / "f.parquet", index=False)
+
+
+def test_perp_spot_basis_matches_manual_ratio(fake_universe):
+    idx = pd.date_range("2024-03-01", periods=300, freq="5min", tz="UTC")
+    rng = np.random.default_rng(1)
+    spot_close = 100 + np.cumsum(rng.normal(0, 0.1, len(idx)))
+    perp_close = spot_close * (1 + rng.normal(0, 0.0005, len(idx)))
+    _write_5m(fake_universe["perp"], "FOOUSDT", 2024, idx, "close", perp_close)
+    _write_5m(fake_universe["spot"], "FOOUSDT", 2024, idx, "spot_close", spot_close)
+
+    df = basis_mod.build_basis_symbol("FOOUSDT")
+    expected = perp_close / spot_close - 1.0
+    np.testing.assert_allclose(df["perp_spot_basis"].to_numpy(), expected, rtol=1e-10)
+
+
+def test_basis_only_where_both_legs_present_no_forward_fill(fake_universe):
+    idx_perp = pd.date_range("2024-03-01", periods=10, freq="5min", tz="UTC")
+    idx_spot = idx_perp[3:]  # spot starts later -- no bars for the first 3
+    _write_5m(fake_universe["perp"], "BARUSDT", 2024, idx_perp, "close", np.full(10, 100.0))
+    _write_5m(fake_universe["spot"], "BARUSDT", 2024, idx_spot, "spot_close", np.full(7, 100.0))
+
+    df = basis_mod.build_basis_symbol("BARUSDT")
+    assert len(df) == 7  # inner join, not 10 with NaN/ffill for the missing spot bars
+    assert df["timestamp"].min() == idx_spot[0]
+
+
+def test_mark_spot_basis_matches_despite_millisecond_jitter(fake_universe):
+    idx = pd.date_range("2024-03-01", periods=300, freq="5min", tz="UTC")
+    close = np.full(len(idx), 100.0)
+    _write_5m(fake_universe["perp"], "BAZUSDT", 2024, idx, "close", close)
+    _write_5m(fake_universe["spot"], "BAZUSDT", 2024, idx, "spot_close", close)
+
+    settlement_ts = [
+        idx[96],                                    # zero jitter
+        idx[192] + pd.Timedelta(milliseconds=3),    # a few ms of jitter, like real Binance data
+        idx[288] + pd.Timedelta(milliseconds=1),
+    ]
+    funding_df = pd.DataFrame({"timestamp": settlement_ts, "funding_rate": [0.0001, 0.0002, 0.0003],
+                                "mark_price": [101.0, 99.0, 102.0]})
+    funding_df.to_parquet(fake_universe["funding"] / "BAZUSDT.parquet", index=False)
+
+    df = basis_mod.build_basis_symbol("BAZUSDT")
+    matched = df["mark_spot_basis"].notna().sum()
+    assert matched == 3, f"expected all 3 jittery settlements to match despite ms jitter, got {matched}"
+    assert df.loc[df["timestamp"] == idx[96], "mark_spot_basis"].iloc[0] == pytest.approx(0.01)
+
+
+def test_premium_index_passthrough(fake_universe):
+    idx = pd.date_range("2024-03-01", periods=5, freq="5min", tz="UTC")
+    close = np.full(5, 100.0)
+    _write_5m(fake_universe["perp"], "QUXUSDT", 2024, idx, "close", close)
+    _write_5m(fake_universe["spot"], "QUXUSDT", 2024, idx, "spot_close", close)
+    pd.DataFrame({"ts": idx, "premium": np.linspace(0.001, 0.002, 5)}).to_parquet(
+        fake_universe["premium"] / "QUXUSDT_premium_5m.parquet", index=False
+    )
+
+    df = basis_mod.build_basis_symbol("QUXUSDT")
+    assert df["premium_index"].notna().all()
+
+
+def test_missing_spot_returns_none(fake_universe):
+    idx = pd.date_range("2024-03-01", periods=5, freq="5min", tz="UTC")
+    _write_5m(fake_universe["perp"], "NOSPOTUSDT", 2024, idx, "close", np.full(5, 100.0))
+    assert basis_mod.build_basis_symbol("NOSPOTUSDT") is None

@@ -15,6 +15,11 @@ ML-DL/
 !data/venue_specs
 !data/manifests
 
+# data_v2/ (Data V2 rebuild) -- same policy: build code is tracked, the
+# generated parquet lakes and per-symbol progress manifests are not.
+data_v2/normalized/**/venue=*/
+data_v2/normalized/**/manifest.json
+
 # ── État d'approbation de déploiement, propre à chaque machine ──────────────
 # (src/alpha20/deployment_guard.py) — jamais une vérité partagée entre Mac et
 # qbee, jamais committé.
@@ -44,6 +49,11 @@ trading-system/__pycache__/
 *.hdf5
 *.pkl
 *.pickle
+# exception to the blanket *.parquet rule above -- small (~20KB), curated,
+# same rationale as data/venue_specs: a reviewable Data V2 PIT fact table,
+# not a fetched market-data blob (must come after the *.parquet rule --
+# gitignore negations only override rules earlier in the file).
+!data_v2/instruments/instrument_master.parquet
 *.pt
 *.pth
 *.onnx

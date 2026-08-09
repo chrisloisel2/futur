@@ -39,6 +39,8 @@ from core.settings import configure_project_imports
 
 configure_project_imports()
 
+from data_pipeline.taker_flow_guard import assert_no_placeholder_taker_flow
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Listes de features exportées
@@ -217,6 +219,7 @@ def compute_features_1m(df: pd.DataFrame) -> pd.DataFrame:
     Colonnes requises : open, high, low, close, volume,
                         taker_buy_base_asset_volume, number_of_trades
     """
+    assert_no_placeholder_taker_flow(df, context="core.features.minute.compute_features_1m")
     df = df.copy()
 
     open_  = df["open"].astype(np.float64)
@@ -469,6 +472,7 @@ def compute_multitf_context(df_1m: pd.DataFrame) -> pd.DataFrame:
         shift(1) sur chaque timeframe agrégé avant le reindex ffill.
         → à chaque barre 1m, on voit uniquement les barres agrégées COMPLÈTES.
     """
+    assert_no_placeholder_taker_flow(df_1m, context="core.features.minute.compute_multitf_context")
     results = []
 
     for freq, prefix in [("5min", "ctx5"), ("15min", "ctx15"), ("1h", "ctx1h")]:

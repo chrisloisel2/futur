@@ -105,10 +105,12 @@ def standardize_ohlcv_columns(df: pd.DataFrame, timestamp_col: str = "timestamp"
         out["number_of_trades"] = pd.to_numeric(out["number_of_trades"], errors="coerce").fillna(0)
     if "quote_asset_volume" not in out.columns and {"close", "volume"}.issubset(out.columns):
         out["quote_asset_volume"] = out["close"] * out["volume"]
-    if "taker_buy_base_asset_volume" not in out.columns:
-        out["taker_buy_base_asset_volume"] = out.get("volume", pd.Series(0.0, index=out.index)) * 0.5
-    if "taker_buy_quote_asset_volume" not in out.columns:
-        out["taker_buy_quote_asset_volume"] = out.get("quote_asset_volume", pd.Series(0.0, index=out.index)) * 0.5
+    # NOTE: taker_buy_base_asset_volume / taker_buy_quote_asset_volume are
+    # deliberately NOT synthesized here when absent. A prior version filled
+    # them with volume * 0.5 / quote_asset_volume * 0.5, which fabricated a
+    # constant 50/50 aggressor split baked into data/enriched — see
+    # data_pipeline/taker_flow_guard.py. Leave them missing so callers can
+    # tell "no real flow data" apart from "flat 50/50 flow".
     if "number_of_trades" not in out.columns:
         out["number_of_trades"] = 0
     out = out[~out.index.duplicated(keep="last")].sort_index()
