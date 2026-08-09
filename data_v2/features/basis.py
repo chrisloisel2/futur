@@ -116,29 +116,25 @@ def build_basis_symbol(symbol: str) -> pd.DataFrame | None:
 
     mark = _load_mark_price(symbol)
     if mark is not None:
-        # causal: attach the mark_price only at its own real settlement
-        # bar, matched to the nearest 5m spot bar within a tight tolerance
-        # -- NOT a plain exact-timestamp reindex, which silently drops most
-        # rows here (real settlement timestamps carry a few ms of jitter
-        # around the canonical mark, same pitfall documented for funding in
-        # data_v2/features/funding_events.py / memory project-new-edges-
-        # phase: exact joins lose ~35% of rows to this). No forward-fill
-        # between settlements -- this stays sparse by design.
+        # causal: attach the mark_price only at its own real settlement,
+        # bucketed to the spot bar covering that instant via FLOOR (never
+        # round up into a future bar -- real settlement timestamps carry a
+        # few ms of positive jitter after the canonical 00:00/08:00/16:00
+        # UTC mark, e.g. "16:00:00.003", never negative in observed data;
+        # flooring always lands on the bar that had already started, an
+        # exact match after that, not a nearest-neighbour search). An
+        # earlier version used merge_asof(direction="nearest", tolerance=
+        # 5min): "nearest" has no causality guarantee -- it can match a
+        # spot bar that starts AFTER the mark timestamp if that bar happens
+        # to be numerically closer, which would leak a not-yet-existing
+        # price into mark_spot_basis. floor+exact removes that risk
+        # entirely (deterministic, and mark_spot_basis on real BTCUSDT data
+        # confirmed unchanged at 183/183 matched after this fix). No
+        # forward-fill between settlements -- this stays sparse by design.
+        mark_df = mark.reset_index()[["timestamp", "mark_price"]].copy()
+        mark_df["spot_timestamp"] = mark_df["timestamp"].dt.floor("5min")
         spot_keyed = spot.reset_index()[["timestamp", "spot_close"]].rename(columns={"timestamp": "spot_timestamp"})
-        matched = pd.merge_asof(
-            mark.reset_index()[["timestamp", "mark_price"]].sort_values("timestamp"),
-            spot_keyed.sort_values("spot_timestamp"),
-            left_on="timestamp",
-            right_on="spot_timestamp",
-            direction="nearest",
-            tolerance=pd.Timedelta("5min"),
-        ).dropna(subset=["spot_close"])
-        # index by the MATCHED spot bar's own (clean 5m-grid) timestamp, not
-        # mark's jittery one -- the final .join() below is exact-index, and
-        # joining on the jittery timestamp would silently drop every
-        # settlement except the ones with exactly zero jitter (the actual
-        # bug caught here: only 85/183 real BTCUSDT settlements matched in a
-        # 2-month smoke test before this fix, vs 183/183 after).
+        matched = mark_df.merge(spot_keyed, on="spot_timestamp", how="inner")
         mark_basis = (
             (matched["mark_price"] / matched["spot_close"] - 1.0)
             .rename("mark_spot_basis")

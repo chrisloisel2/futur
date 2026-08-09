@@ -96,6 +96,33 @@ def test_mark_spot_basis_matches_despite_millisecond_jitter(fake_universe):
     assert df.loc[df["timestamp"] == idx[96], "mark_spot_basis"].iloc[0] == pytest.approx(0.01)
 
 
+def test_mark_spot_basis_join_is_causal_never_matches_a_future_bar(fake_universe):
+    """A settlement a couple seconds BEFORE a 5m boundary must bucket to
+    the PRIOR (already-started) bar, never the next one. An earlier version
+    used merge_asof(direction="nearest", tolerance=5min): "nearest" has no
+    causality guarantee -- given a settlement close to the midpoint between
+    two bars, it can match the bar that starts AFTER the settlement,
+    leaking a not-yet-existing price into mark_spot_basis. floor+exact
+    removes that possibility outright (deterministic backward bucketing)."""
+    idx = pd.date_range("2024-03-01", periods=10, freq="5min", tz="UTC")
+    close = np.array([100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 999.0])
+    _write_5m(fake_universe["perp"], "PREUSDT", 2024, idx, "close", close)
+    _write_5m(fake_universe["spot"], "PREUSDT", 2024, idx, "spot_close", close)
+
+    # settlement 2 seconds before idx[9] (price 999.0, the "future" bar
+    # relative to this settlement) -- must bucket to idx[8] (price 100.0),
+    # not "round to nearest" and pick up the not-yet-started bar's price.
+    settlement_ts = idx[9] - pd.Timedelta(seconds=2)
+    funding_df = pd.DataFrame({"timestamp": [settlement_ts], "funding_rate": [0.0001], "mark_price": [100.0]})
+    funding_df.to_parquet(fake_universe["funding"] / "PREUSDT.parquet", index=False)
+
+    df = basis_mod.build_basis_symbol("PREUSDT")
+    matched = df.loc[df["mark_spot_basis"].notna()]
+    assert len(matched) == 1
+    assert matched["timestamp"].iloc[0] == idx[8]  # the prior bar, not idx[9]
+    assert matched["mark_spot_basis"].iloc[0] == pytest.approx(0.0)  # 100/100 - 1, not 100/999 - 1
+
+
 def test_premium_index_passthrough(fake_universe):
     idx = pd.date_range("2024-03-01", periods=5, freq="5min", tz="UTC")
     close = np.full(5, 100.0)

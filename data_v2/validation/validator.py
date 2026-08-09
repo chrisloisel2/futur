@@ -9,6 +9,25 @@ from that, plus the integrity checks the plan calls for: expected_rows,
 actual_rows, coverage_pct, gap_count, max_gap, duplicate_pk,
 temporal_inversion, schema_drift, staleness, corruption, listing_alignment.
 
+expected_start/expected_end are computed INDEPENDENTLY of the data's own
+observed window (window_start/window_end) -- an earlier version derived
+them FROM window_start/window_end (only ever trimming inward for listing/
+delisting, never extending outward), which meant a dataset with 500 rows
+from 2026-07-01 to 2026-07-22 but a real 3-year expected history would
+self-report ~100% coverage: expected_rows was computed from the data's own
+tiny window, not from listing_ts..now. Fixed: expected_start defaults to
+max(listing_ts, source_available_from); expected_end defaults to
+delisting_ts or `now`. A registry that only checked "acquisition succeeded,
+file isn't corrupt" (scripts/validate_derivatives_store.py's old
+gate = len(bad)==0 and len(parts)>0) could show status=PASS on exactly this
+500-row-of-3-years case -- PASS meant "valid acquisition", not "sufficient
+history to search for alpha in". This validator's coverage_pct/passed are
+meant to mean the latter.
+
+staleness_gate_days is now BLOCKING (fails the gate for a still-active,
+non-delisted symbol whose last row is older than the gate), not just an
+informational note.
+
 Usage:
     from data_v2.validation.validator import validate_series
     report = validate_series(
@@ -22,7 +41,6 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import timedelta
 from typing import Iterable, Optional
 
 import numpy as np
@@ -35,6 +53,8 @@ class ValidationReport:
     source: str
     window_start: Optional[pd.Timestamp]
     window_end: Optional[pd.Timestamp]
+    expected_start: Optional[pd.Timestamp]
+    expected_end: Optional[pd.Timestamp]
     expected_rows: int
     actual_rows: int
     coverage_pct: float
@@ -44,8 +64,10 @@ class ValidationReport:
     temporal_inversion: int
     schema_drift: list = field(default_factory=list)
     staleness: Optional[pd.Timedelta] = None
+    staleness_gate_violated: bool = False
     corruption: int = 0
     listing_alignment: str = "unknown"  # ok | rows_before_listing | rows_after_delisting | both | no_instrument_master
+    expected_span_known: bool = False
     notes: list = field(default_factory=list)
 
     @property
@@ -59,6 +81,7 @@ class ValidationReport:
             # "unknown" (no instrument_master passed in) is uninformative,
             # not a failure -- only a confirmed mismatch fails the gate.
             and self.listing_alignment in ("ok", "unknown")
+            and not self.staleness_gate_violated
         )
 
     def to_dict(self) -> dict:
@@ -67,6 +90,9 @@ class ValidationReport:
             "source": self.source,
             "window_start": str(self.window_start) if self.window_start is not None else None,
             "window_end": str(self.window_end) if self.window_end is not None else None,
+            "expected_start": str(self.expected_start) if self.expected_start is not None else None,
+            "expected_end": str(self.expected_end) if self.expected_end is not None else None,
+            "expected_span_known": self.expected_span_known,
             "expected_rows": self.expected_rows,
             "actual_rows": self.actual_rows,
             "coverage_pct": round(self.coverage_pct, 4),
@@ -76,6 +102,7 @@ class ValidationReport:
             "temporal_inversion": self.temporal_inversion,
             "schema_drift": self.schema_drift,
             "staleness_days": self.staleness.total_seconds() / 86400 if self.staleness is not None else None,
+            "staleness_gate_violated": self.staleness_gate_violated,
             "corruption": self.corruption,
             "listing_alignment": self.listing_alignment,
             "passed": self.passed,
@@ -110,9 +137,27 @@ def validate_series(
     instrument_master: Optional[pd.DataFrame] = None,
     now: Optional[pd.Timestamp] = None,
     staleness_gate_days: float = 3.0,
+    expected_start: Optional[pd.Timestamp] = None,
+    expected_end: Optional[pd.Timestamp] = None,
+    source_available_from: Optional[pd.Timestamp] = None,
 ) -> ValidationReport:
     """Validate one (symbol, source) time series against real coverage/
-    integrity expectations, not just "file opens and isn't empty"."""
+    integrity expectations, not just "file opens and isn't empty".
+
+    expected_start: explicit override; if None, derived as
+        max(listing_ts, source_available_from) from whichever of those two
+        is available. Passing neither and no instrument_master row means
+        expected span is UNKNOWN -- falls back to the data's own window
+        (flagged via expected_span_known=False), not silently treated as
+        100% coverage of something knowable.
+    expected_end: explicit override; if None, derived as delisting_ts (if
+        delisted) else `now` -- a still-active symbol is expected to have
+        data up to today, not just up to whatever its last actual row is.
+    source_available_from: the SOURCE's own historical floor (e.g. Binance
+        Vision futures metrics start 2020-09-01 regardless of a symbol's
+        own listing date) -- independent of listing_ts, the later of the
+        two wins.
+    """
     pk_cols = list(pk_cols) if pk_cols else [timestamp_col]
     now = now or pd.Timestamp.utcnow()
     if now.tzinfo is None:
@@ -123,6 +168,7 @@ def validate_series(
     if df.empty:
         return ValidationReport(
             symbol=symbol, source=source, window_start=None, window_end=None,
+            expected_start=None, expected_end=None,
             expected_rows=0, actual_rows=0, coverage_pct=0.0, gap_count=0, max_gap=None,
             duplicate_pk=0, temporal_inversion=0, schema_drift=["empty_dataframe"],
             staleness=None, corruption=0, listing_alignment="unknown",
@@ -169,7 +215,9 @@ def validate_series(
     gap_count = int(gap_mask.sum())
     max_gap = diffs.max() if len(diffs) else None
 
-    # listing alignment
+    # listing alignment (this one legitimately compares the DATA's own
+    # bounds against listing/delisting -- "are there rows outside the
+    # PIT-valid window", unrelated to the expected_rows fix above)
     listing_ts, delisting_ts = _listing_bounds(instrument_master, symbol)
     if listing_ts is None and delisting_ts is None and instrument_master is not None:
         listing_alignment = "no_instrument_master_row"
@@ -187,31 +235,65 @@ def validate_series(
         else:
             listing_alignment = "ok"
 
-    # expected rows, bounded by listing/delisting when known
-    eff_start = window_start
-    eff_end = window_end
-    if listing_ts is not None and (eff_start is None or listing_ts > eff_start):
-        eff_start = max(listing_ts, eff_start) if eff_start is not None else listing_ts
-    if delisting_ts is not None and (eff_end is None or delisting_ts < eff_end):
-        eff_end = min(delisting_ts, eff_end) if eff_end is not None else delisting_ts
+    # expected_start/expected_end: INDEPENDENT of window_start/window_end.
+    # This is the fix -- computing these from the data's own observed
+    # window (as an earlier version did) makes any short recent slice
+    # self-report ~100% coverage of itself.
+    eff_start = expected_start
+    if eff_start is None:
+        candidates = [t for t in (listing_ts, source_available_from) if t is not None]
+        eff_start = max(candidates) if candidates else None
+
+    eff_end = expected_end
+    if eff_end is None:
+        eff_end = delisting_ts if delisting_ts is not None else now
+
+    expected_span_known = eff_start is not None and eff_end is not None and eff_end > eff_start
+    if not expected_span_known:
+        # No independent expected_start/expected_end resolvable (no
+        # listing_ts/source_available_from/explicit override) -- fall back
+        # to the data's OWN observed span (window_start..window_end), NOT
+        # its row count. Row count would make coverage_pct trivially 1.0
+        # always (actual_rows/len(dedup_ts) == 1), hiding internal gaps.
+        # The span-based fallback still catches gaps within the observed
+        # window; it just can't catch missing HISTORY before window_start
+        # (that needs listing_ts) -- flagged via expected_span_known=False.
+        eff_start, eff_end = window_start, window_end
+        notes.append(
+            "expected_start/expected_end not independently resolvable (no "
+            "listing_ts/source_available_from/explicit override) -- falling "
+            "back to the data's own observed span for gap detection; "
+            "coverage_pct here can NOT catch missing history before the "
+            "first observed row, treat as partial information, not 100%"
+        )
+
     if eff_start is not None and eff_end is not None and eff_end > eff_start:
         expected_rows = int((eff_end - eff_start) / expected_step) + 1
     else:
         expected_rows = len(dedup_ts)
-        notes.append("expected_rows fallback to actual span: no reliable listing/delisting bound")
 
     actual_rows = len(dedup_ts)
     coverage_pct = (actual_rows / expected_rows) if expected_rows else 0.0
 
+    # staleness -- BLOCKING for a still-active (non-delisted) symbol,
+    # measured against `now`, not just left as an informational note.
     staleness = (now - window_end) if window_end is not None else None
-    if staleness is not None and staleness.total_seconds() / 86400 > staleness_gate_days and delisting_ts is None:
-        notes.append(f"stale: last row {staleness} ago (gate {staleness_gate_days}d) and symbol not delisted")
+    staleness_gate_violated = False
+    if delisting_ts is None and staleness is not None:
+        if staleness.total_seconds() / 86400 > staleness_gate_days:
+            staleness_gate_violated = True
+            notes.append(
+                f"BLOCKING staleness: last row {staleness} ago > gate "
+                f"{staleness_gate_days}d and symbol not delisted"
+            )
 
     return ValidationReport(
         symbol=symbol,
         source=source,
         window_start=window_start,
         window_end=window_end,
+        expected_start=eff_start,
+        expected_end=eff_end,
         expected_rows=expected_rows,
         actual_rows=actual_rows,
         coverage_pct=coverage_pct,
@@ -221,7 +303,9 @@ def validate_series(
         temporal_inversion=temporal_inversion,
         schema_drift=schema_drift,
         staleness=staleness,
+        staleness_gate_violated=staleness_gate_violated,
         corruption=corruption,
         listing_alignment=listing_alignment,
+        expected_span_known=expected_span_known,
         notes=notes,
     )

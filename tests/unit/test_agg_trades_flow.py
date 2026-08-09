@@ -129,3 +129,49 @@ def test_manifest_checkpoints_after_each_batch_not_only_at_symbol_end(tmp_path, 
     import json
     manifest = json.loads(manifest_path.read_text())
     assert len(manifest["done_days"]) == 4  # exactly the first (successful) batch, not 0 and not all 10
+
+
+def test_gate_mismatch_is_fail_closed_not_written_not_done(tmp_path, monkeypatch):
+    """A day whose aggressor split doesn't reconcile to total USD must be
+    written NOWHERE and marked done NOWHERE -- an earlier version still
+    wrote the (silently wrong) bars and checkpointed the day as done,
+    making a corrupted day indistinguishable from a good one downstream."""
+    monkeypatch.setattr(flow_mod, "OUT_1M", tmp_path / "1m/venue=binance")
+    monkeypatch.setattr(flow_mod, "OUT_5M", tmp_path / "5m/venue=binance")
+
+    bad_day = date(2024, 1, 3)
+
+    def fake_fetch_day(symbol, d):
+        return _fake_trades(d, n=200)
+
+    real_aggregate_bars = flow_mod.aggregate_bars
+
+    def corrupting_aggregate_bars(trades, freq):
+        bars = real_aggregate_bars(trades, freq)
+        if trades.index[0].date() == bad_day:
+            bars["aggressive_buy_usd"] = bars["aggressive_buy_usd"] * 0.5  # break reconciliation
+        return bars
+
+    monkeypatch.setattr(flow_mod, "fetch_day", fake_fetch_day)
+    monkeypatch.setattr(flow_mod, "aggregate_bars", corrupting_aggregate_bars)
+
+    r = flow_mod.build_symbol("GATEUSDT", date(2024, 1, 1), date(2024, 1, 5), workers=2, batch_days=5)
+    assert r["gate_fail_days"] == 1
+
+    manifest_path = tmp_path / "1m/venue=binance/symbol=GATEUSDT/manifest.json"
+    import json
+    manifest = json.loads(manifest_path.read_text())
+    assert bad_day.isoformat() in manifest["failed_days"]
+    assert bad_day.isoformat() not in manifest["done_days"]
+
+    out = pd.read_parquet(flow_mod.OUT_5M / "symbol=GATEUSDT/year=2024/flow.parquet")
+    written_days = set(pd.to_datetime(out["timestamp"]).dt.date)
+    assert bad_day not in written_days  # nothing from the mismatched day made it to disk
+    assert len(written_days) == 4  # the other 4 days of the 5-day window did
+
+    # failed_days must be retryable: re-running with the bug "fixed" should pick it up
+    monkeypatch.setattr(flow_mod, "aggregate_bars", real_aggregate_bars)
+    r2 = flow_mod.build_symbol("GATEUSDT", date(2024, 1, 1), date(2024, 1, 5), workers=2, batch_days=5)
+    assert r2["new_days"] == 1  # only the previously-failed day is retried
+    manifest = json.loads(manifest_path.read_text())
+    assert bad_day.isoformat() in manifest["done_days"]

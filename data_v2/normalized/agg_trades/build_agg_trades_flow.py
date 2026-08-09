@@ -16,7 +16,14 @@ the resting order, so the SELLER crossed the spread -- an aggressive SELL.
 is_buyer_maker=False -> the BUYER crossed the spread -- an aggressive BUY.
 Step 8 gate: aggressive_buy_usd + aggressive_sell_usd must equal total
 traded USD for the bar (every trade is classified, none dropped, no
-artificial 50/50 split) -- enforced by build_agg_trades_flow_test.py.
+artificial 50/50 split) -- enforced by tests/unit/test_agg_trades_flow.py.
+FAIL-CLOSED: a mismatched day is neither written nor marked done_days -- an
+earlier version counted the mismatch (gate_fail_days) but still wrote and
+checkpointed the day, so a silently-corrupted day was indistinguishable
+from a good one downstream. failed_days tracks these separately in the
+manifest and is excluded from the done-skip-set, so a mismatched day is
+retried on the next run rather than permanently accepted or permanently
+lost.
 
 Per-bar columns (1m and 5m, computed independently from raw trades -- p95/
 vwap are not re-derivable from already-aggregated 1m rows by summing):
@@ -179,9 +186,11 @@ def rss_gb() -> float:
 
 def load_manifest(symbol_dir: Path) -> dict:
     mf = symbol_dir / "manifest.json"
-    return json.loads(mf.read_text()) if mf.exists() else {
+    manifest = json.loads(mf.read_text()) if mf.exists() else {
         "done_days": [], "missing_days": [], "last_cvd_1m": 0.0, "last_cvd_5m": 0.0,
     }
+    manifest.setdefault("failed_days", [])
+    return manifest
 
 
 def save_manifest(symbol_dir: Path, manifest: dict) -> None:
@@ -268,11 +277,23 @@ def build_symbol(symbol: str, start: date, end: date, workers: int = 6, batch_da
                     continue
                 b1 = aggregate_bars(trades, "1min")
                 b5 = aggregate_bars(trades, "5min")
-                # step 8 gate: every trade classified, buy+sell == total, no fabrication
+                # step 8 gate, now FAIL-CLOSED: every trade must be
+                # classified, buy+sell == total. A mismatch means the
+                # aggressor split is untrustworthy for this day -- write
+                # NOTHING and do NOT mark done_days (an earlier version
+                # counted the mismatch but still wrote and checkpointed the
+                # day as done, i.e. a silently-corrupted day looked
+                # identical to a good one downstream). failed_days is
+                # tracked separately and deliberately excluded from the
+                # `done` skip-set above, so a mismatched day is retried on
+                # the next run, not permanently accepted or permanently lost.
                 total_usd = trades["usd"].sum()
                 classified = b1["aggressive_buy_usd"].sum() + b1["aggressive_sell_usd"].sum()
                 if not np.isclose(total_usd, classified, rtol=1e-6):
                     n_gate_fail += 1
+                    manifest["failed_days"].append(d.isoformat())
+                    del trades
+                    continue
                 bars_1m_by_day[d] = b1
                 bars_5m_by_day[d] = b5
                 manifest["done_days"].append(d.isoformat())
@@ -287,6 +308,7 @@ def build_symbol(symbol: str, start: date, end: date, workers: int = 6, batch_da
         manifest["last_cvd_5m"] = last_cvd_5m
         manifest["done_days"] = sorted(set(manifest["done_days"]))
         manifest["missing_days"] = sorted(set(manifest["missing_days"]))
+        manifest["failed_days"] = sorted(set(manifest["failed_days"]))
         save_manifest(manifest_dir_1m, manifest)  # checkpoint after every batch, not just at symbol end
         del bars_1m_by_day, bars_5m_by_day
 

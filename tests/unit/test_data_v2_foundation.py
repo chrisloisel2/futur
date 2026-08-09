@@ -67,9 +67,16 @@ def _make_5m_series(n_days: int, gap_at: int | None = None) -> pd.DataFrame:
     return pd.DataFrame({"create_time": idx, "sum_open_interest": np.random.default_rng(0).uniform(1, 100, len(idx))})
 
 
+def _fresh_now(df: pd.DataFrame, col: str = "create_time") -> pd.Timestamp:
+    """now= pinned just 1 day after the series' own last row -- avoids
+    tripping the (now-blocking) staleness gate in tests that aren't about
+    staleness, regardless of the series' own length."""
+    return df[col].max() + pd.Timedelta(days=1)
+
+
 def test_validator_full_coverage_passes():
     df = _make_5m_series(10)
-    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300)
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300, now=_fresh_now(df))
     assert report.coverage_pct > 0.99
     assert report.gap_count == 0
     assert report.passed
@@ -77,7 +84,7 @@ def test_validator_full_coverage_passes():
 
 def test_validator_detects_gap():
     df = _make_5m_series(10, gap_at=500)
-    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300)
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300, now=_fresh_now(df))
     assert report.gap_count >= 1
     assert report.coverage_pct < 1.0
 
@@ -85,7 +92,8 @@ def test_validator_detects_gap():
 def test_validator_detects_duplicate_pk():
     df = _make_5m_series(3)
     dup = pd.concat([df, df.iloc[:5]], ignore_index=True)
-    report = validate_series(dup, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300, pk_cols=["create_time"])
+    report = validate_series(dup, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              pk_cols=["create_time"], now=_fresh_now(df))
     assert report.duplicate_pk == 10  # 5 rows x 2 occurrences each
     assert not report.passed
 
@@ -95,7 +103,7 @@ def test_validator_detects_corruption_non_positive_required_column():
     df.loc[df.index[0], "sum_open_interest"] = -5.0
     report = validate_series(
         df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
-        required_positive_columns=["sum_open_interest"],
+        required_positive_columns=["sum_open_interest"], now=_fresh_now(df),
     )
     assert report.corruption >= 1
     assert not report.passed
@@ -104,8 +112,49 @@ def test_validator_detects_corruption_non_positive_required_column():
 def test_validator_flags_rows_before_listing():
     df = _make_5m_series(5)  # starts 2024-01-01
     im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2024-01-03", tz="UTC"), "delisting_ts": pd.NaT}])
-    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300, instrument_master=im)
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=_fresh_now(df))
     assert report.listing_alignment == "rows_before_listing"
+    assert not report.passed
+
+
+def test_validator_blocking_staleness_fails_gate_for_active_symbol():
+    df = _make_5m_series(5)  # last row 2024-01-06-ish
+    im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2023-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    far_future_now = pd.Timestamp("2024-06-01", tz="UTC")  # ~5 months after last row, symbol still "active"
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=far_future_now, staleness_gate_days=3.0)
+    assert report.staleness_gate_violated
+    assert not report.passed
+
+
+def test_validator_delisted_symbol_is_not_penalized_for_staleness():
+    df = _make_5m_series(5)
+    delist_ts = df["create_time"].max()
+    im = pd.DataFrame([{"symbol": "OLDUSDT", "listing_ts": pd.Timestamp("2023-01-01", tz="UTC"), "delisting_ts": delist_ts}])
+    far_future_now = pd.Timestamp("2026-01-01", tz="UTC")
+    report = validate_series(df, symbol="OLDUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=far_future_now)
+    assert not report.staleness_gate_violated  # delisted -- no data after delisting is expected, not "stale"
+
+
+def test_validator_fails_on_short_recent_slice_of_long_expected_history():
+    """The literal scenario this fix targets: a registry could show
+    status=PASS for e.g. an OI REST file with ~500 rows spanning 2026-07-01
+    to 2026-07-22 while the symbol has genuinely existed (and Vision data
+    should exist) for 3 years -- PASS meant "valid acquisition", not
+    "sufficient history to search for alpha in". coverage_pct must reflect
+    the full expected span (listing_ts -> now), not the data's own window.
+    """
+    idx = pd.date_range("2026-07-01", periods=500, freq="1h", tz="UTC")
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "XUSDT", "listing_ts": pd.Timestamp("2023-07-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    now = pd.Timestamp("2026-07-22", tz="UTC")
+
+    report = validate_series(df, symbol="XUSDT", timestamp_col="create_time", bar_seconds=3600,
+                              instrument_master=im, now=now)
+    assert report.expected_span_known
+    assert report.coverage_pct < 0.05  # 500 rows vs ~3 years hourly (~26280 expected)
     assert not report.passed
 
 
