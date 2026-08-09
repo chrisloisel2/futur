@@ -175,3 +175,4 @@ def test_gate_mismatch_is_fail_closed_not_written_not_done(tmp_path, monkeypatch
     assert r2["new_days"] == 1  # only the previously-failed day is retried
     manifest = json.loads(manifest_path.read_text())
     assert bad_day.isoformat() in manifest["done_days"]
+    assert bad_day.isoformat() not in manifest["failed_days"]  # cleared once repaired, not stuck forever

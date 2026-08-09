@@ -68,10 +68,20 @@ class ValidationReport:
     corruption: int = 0
     listing_alignment: str = "unknown"  # ok | rows_before_listing | rows_after_delisting | both | no_instrument_master
     expected_span_known: bool = False
+    strict_alpha_readiness: bool = False
     notes: list = field(default_factory=list)
 
     @property
     def passed(self) -> bool:
+        if self.strict_alpha_readiness and not self.expected_span_known:
+            # For a local/dev check, "we don't know the true expected span"
+            # is acceptable (coverage_pct falls back to the data's own
+            # observed window, still useful for gap detection). For
+            # DATA_V2_READY it is NOT: a source whose expected coverage is
+            # unknown must not be able to contribute to a READY verdict --
+            # its coverage_pct could be silently meaningless (see the
+            # fallback-branch note in validate_series).
+            return False
         return (
             self.coverage_pct >= 0.98
             and self.duplicate_pk == 0
@@ -93,6 +103,7 @@ class ValidationReport:
             "expected_start": str(self.expected_start) if self.expected_start is not None else None,
             "expected_end": str(self.expected_end) if self.expected_end is not None else None,
             "expected_span_known": self.expected_span_known,
+            "strict_alpha_readiness": self.strict_alpha_readiness,
             "expected_rows": self.expected_rows,
             "actual_rows": self.actual_rows,
             "coverage_pct": round(self.coverage_pct, 4),
@@ -140,6 +151,7 @@ def validate_series(
     expected_start: Optional[pd.Timestamp] = None,
     expected_end: Optional[pd.Timestamp] = None,
     source_available_from: Optional[pd.Timestamp] = None,
+    strict_alpha_readiness: bool = False,
 ) -> ValidationReport:
     """Validate one (symbol, source) time series against real coverage/
     integrity expectations, not just "file opens and isn't empty".
@@ -157,6 +169,13 @@ def validate_series(
         Vision futures metrics start 2020-09-01 regardless of a symbol's
         own listing date) -- independent of listing_ts, the later of the
         two wins.
+    strict_alpha_readiness: when True, `passed` additionally REQUIRES
+        expected_span_known -- a source whose true expected coverage is
+        unknown must not be able to contribute to a DATA_V2_READY verdict,
+        even if its (meaningless, in that case) coverage_pct happens to
+        look fine. False (the default) is appropriate for local/dev checks
+        where "we don't know the true span but the data looks internally
+        consistent" is still a useful signal.
     """
     pk_cols = list(pk_cols) if pk_cols else [timestamp_col]
     now = now or pd.Timestamp.utcnow()
@@ -172,6 +191,7 @@ def validate_series(
             expected_rows=0, actual_rows=0, coverage_pct=0.0, gap_count=0, max_gap=None,
             duplicate_pk=0, temporal_inversion=0, schema_drift=["empty_dataframe"],
             staleness=None, corruption=0, listing_alignment="unknown",
+            strict_alpha_readiness=strict_alpha_readiness,
             notes=["dataframe is empty"],
         )
 
@@ -307,5 +327,6 @@ def validate_series(
         corruption=corruption,
         listing_alignment=listing_alignment,
         expected_span_known=expected_span_known,
+        strict_alpha_readiness=strict_alpha_readiness,
         notes=notes,
     )

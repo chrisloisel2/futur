@@ -297,6 +297,13 @@ def build_symbol(symbol: str, start: date, end: date, workers: int = 6, batch_da
                 bars_1m_by_day[d] = b1
                 bars_5m_by_day[d] = b5
                 manifest["done_days"].append(d.isoformat())
+                if d.isoformat() in manifest["failed_days"]:
+                    # this day previously failed the gate and is now clean
+                    # on retry -- without this, failed_days would keep
+                    # reporting a day that has since been repaired,
+                    # producing a false failed_days > 0 in the readiness
+                    # report.
+                    manifest["failed_days"].remove(d.isoformat())
                 n_new += 1
                 del trades
 

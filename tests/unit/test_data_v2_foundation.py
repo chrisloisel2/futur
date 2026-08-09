@@ -158,6 +158,41 @@ def test_validator_fails_on_short_recent_slice_of_long_expected_history():
     assert not report.passed
 
 
+def test_validator_strict_mode_fails_when_expected_span_unknown_even_if_coverage_looks_fine():
+    """Without an instrument_master row (or explicit expected_start/end),
+    coverage_pct falls back to the data's own observed span -- internally
+    consistent (no gaps), but meaningless as a "is history complete" signal.
+    strict_alpha_readiness must not let that count toward DATA_V2_READY."""
+    df = _make_5m_series(10)  # perfect internal coverage, no external expectation given
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              now=_fresh_now(df), strict_alpha_readiness=True)
+    assert not report.expected_span_known
+    assert report.coverage_pct > 0.99  # looks fine in isolation...
+    assert not report.passed  # ...but strict mode must still fail it
+
+
+def test_validator_strict_mode_passes_when_expected_span_known_and_coverage_is_real():
+    df = _make_5m_series(10)
+    im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": df["create_time"].min(), "delisting_ts": pd.NaT}])
+    # now pinned right at the last bar (not _fresh_now's +1 day) -- this
+    # test is about strict_alpha_readiness passing on genuinely complete
+    # coverage, not about exercising the (separate, correct) staleness gap
+    # that "now" being later than the last row would legitimately create.
+    now = df["create_time"].max() + pd.Timedelta(minutes=1)
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=now, strict_alpha_readiness=True)
+    assert report.expected_span_known
+    assert report.passed
+
+
+def test_validator_non_strict_mode_unaffected_by_unknown_span():
+    df = _make_5m_series(10)
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              now=_fresh_now(df))  # strict_alpha_readiness=False (default)
+    assert not report.expected_span_known
+    assert report.passed  # default mode: unknown span doesn't block a local/dev pass
+
+
 @pytest.mark.skipif(not (Path("data/derivatives_backfill/binance_vision_metrics/BTCUSDT_metrics_5m.parquet")).exists(),
                      reason="real OI vision data not present")
 def test_validator_against_real_oi_data_reports_plausible_coverage():
@@ -232,28 +267,17 @@ def test_funding_real_btc_data_settles_every_8h():
 
 
 # ── available_at ────────────────────────────────────────────────────────
-
-
-def test_add_temporal_columns_batch_source_lags_event_time():
-    df = pd.DataFrame({"open_time": [pd.Timestamp("2024-06-15", tz="UTC")]})
-    out = add_temporal_columns(df, event_time_col="open_time", source_kind="binance_vision_daily")
-    assert out["available_at"].iloc[0] > out["event_time"].iloc[0]
-
-
-def test_add_temporal_columns_live_stream_uses_recv_time():
-    df = pd.DataFrame({
-        "timestamp": [pd.Timestamp("2024-06-15 00:00:00", tz="UTC")],
-        "recv_time": [pd.Timestamp("2024-06-15 00:00:00.150", tz="UTC")],
-    })
-    out = add_temporal_columns(df, event_time_col="timestamp", source_kind="live_stream", received_at_col="recv_time")
-    assert out["received_at"].iloc[0] == pd.Timestamp("2024-06-15 00:00:00.150", tz="UTC")
-    assert out["available_at"].iloc[0] > out["received_at"].iloc[0]
+# add_temporal_columns' own behavior (market vs archive vs research vs
+# execution availability) is covered exhaustively in
+# tests/unit/test_available_at.py; only assert_causal's generic contract
+# (independent of how the available_at-ish column was produced) is tested
+# here.
 
 
 def test_assert_causal_raises_on_leakage():
     df = pd.DataFrame({
         "feature_ts": [pd.Timestamp("2024-01-01 00:00", tz="UTC")],
-        "available_at": [pd.Timestamp("2024-01-02 00:00", tz="UTC")],  # available AFTER the feature ts: leakage
+        "research_available_at": [pd.Timestamp("2024-01-02 00:00", tz="UTC")],  # after feature ts: leakage
     })
     with pytest.raises(ValueError):
         assert_causal(df, as_of_col="feature_ts")
@@ -262,6 +286,6 @@ def test_assert_causal_raises_on_leakage():
 def test_assert_causal_passes_when_available_before_as_of():
     df = pd.DataFrame({
         "feature_ts": [pd.Timestamp("2024-01-02 00:00", tz="UTC")],
-        "available_at": [pd.Timestamp("2024-01-01 00:00", tz="UTC")],
+        "research_available_at": [pd.Timestamp("2024-01-01 00:00", tz="UTC")],
     })
     assert_causal(df, as_of_col="feature_ts")  # must not raise

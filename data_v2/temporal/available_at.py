@@ -1,59 +1,75 @@
 """
 data_v2/temporal/available_at.py
 ─────────────────────────────────────────────────────────────────────────────
-Data V2 step 12: canonical temporal columns on every normalized observation,
-and the one absolute rule of this dataset -- a feature computed "as of" t may
-only read rows whose available_at <= t.
+Data V2 step 12: canonical temporal columns on every normalized observation.
 
-Seven columns, always in this order of increasing lateness:
-  event_time          -- when the thing actually happened, exchange-side
-                          (already called `timestamp` in the live raw store,
-                          e.g. scripts/validate_derivatives_store.py; kept
-                          as an alias input, not renamed away).
-  exchange_time       -- exchange-reported time for the event, when distinct
-                          from event_time; defaults to event_time.
-  market_available_at -- the earliest instant the fact is knowable IN
-                          PRINCIPLE, independent of our ingestion pathway.
-                          For a bar (kline/OI/premium bucket), that is its
-                          CLOSE time, not its open/label time -- you cannot
-                          know a 5m bar's high/low/close/volume before the
-                          bar closes (event_time + bar_seconds). For a point
-                          event (an aggTrade), the event itself is the
-                          instant of availability (bar_seconds=0).
-  archive_published_at -- when THIS specific ingestion pathway could
-                          actually have the bytes. For a live stream this is
-                          the real network receipt time (the existing
-                          `recv_time` field; scripts/validate_derivatives_
-                          store.py already checks recv_time >= event_time).
-                          For a Binance Vision batch archive there is no
-                          socket-receipt instant -- it is market_available_at
-                          plus the archive's own real publication lag (see
-                          BATCH_PUBLICATION_LAG). Kept SEPARATE from
-                          market_available_at on purpose: conflating them
-                          would let a J+1 archive-publication lag silently
-                          leak into what should be a pure "the bar closed"
-                          fact, or conversely let a pure market fact silently
-                          stand in for archive availability it doesn't have.
-  received_at          -- alias of archive_published_at, kept for backward
-                          compatibility with earlier Data V2 code/tests that
-                          only knew this name.
-  available_at         -- the causal cutoff: max(market_available_at,
-                          archive_published_at) plus a small ingestion
-                          margin. THIS is the column every feature builder
-                          must compare against, never event_time.
-  ingested_at           -- when THIS pipeline run wrote the row (wall clock
-                          at normalization time) -- audit/debug only, never
-                          used for causality.
+Six columns, plus two DERIVED causal cutoffs for two DIFFERENT questions --
+this split is the point of this module, not a stylistic choice:
+
+  event_time            -- when the thing actually happened, exchange-side.
+  exchange_time         -- exchange-reported time for the event, when
+                            distinct from event_time; defaults to event_time.
+  market_available_at   -- the earliest instant the fact is knowable IN
+                            PRINCIPLE, independent of how WE happened to
+                            acquire it. For a bar (kline/OI/premium bucket),
+                            that is its CLOSE time, not its open/label time.
+                            For a point event (an aggTrade), the event
+                            itself (bar_seconds=0).
+  archive_published_at  -- when THIS specific ingestion pathway (a Binance
+                            Vision zip, or a live socket) actually had the
+                            bytes. For a live stream this is the real
+                            network receipt time. For a Vision batch
+                            archive it is market_available_at plus the
+                            archive's own real publication lag.
+  ingested_at            -- when THIS pipeline run wrote the row -- audit/
+                            debug only, never used for causality.
+
+  research_available_at -- the causal cutoff for BACKTESTING/RESEARCH:
+                            "what could a trader connected to Binance have
+                            known at this instant?" -- NOT "what date did
+                            WE happen to download the historical zip?". For
+                            a source you can justify was genuinely, publicly
+                            observable in real time (Binance broadcasts live
+                            aggTrade/kline/bookTicker websockets, and OI via
+                            REST poll, for essentially this entire dataset's
+                            history -- Vision archives are a same-data
+                            convenience republish, not a new disclosure),
+                            research_available_at = market_available_at
+                            (+ a small, fixed observation margin -- even an
+                            idealized live trader has some reaction lag).
+                            For a source you canNOT justify this for, it
+                            falls back to archive_published_at -- do not
+                            claim live-observability you can't defend.
+                            THIS is the column research/backtest feature
+                            builders must compare against.
+  execution_available_at -- the causal cutoff for LIVE EXECUTION:
+                            received_at (the real, source-specific receipt
+                            time -- archive_published_at under the hood)
+                            plus a live processing_latency. THIS is the
+                            column a live/paper execution engine replay
+                            must compare against -- it is deliberately
+                            LATER than research_available_at for a batch
+                            source, because "provably observable live" and
+                            "this specific historical pipeline can act on
+                            it" are different facts.
+
+An earlier version of this module used a single available_at =
+max(market_available_at, archive_published_at) + margin as THE causal
+cutoff for everything. That silently forced every batch-sourced row (i.e.
+this entire Data V2 corpus so far: OI/perp/spot/aggTrades all come from
+Vision archives) onto its ~J+1 archive-publication lag even for research
+use -- a historical aggTrade broadcast live on Binance's public websocket
+at 10:00 would only "become available" at J+1 in a backtest, which
+understates how much a real trader could have known and is not the
+causality question research actually needs answered.
 
 Two leakage modes this module exists to prevent, both concrete and both
 caught by tests/unit/test_available_at.py:
-  1. Treating a Vision row's available_at as its event_time: a backtest
-     could "see" a 2024-06-15 5m bar's OI/kline data at 2024-06-15 00:05,
-     when the archive containing it did not exist publicly until
-     2024-06-16+.
+  1. Treating a Vision-only row's research_available_at as its event_time
+     when the source has NO justified live equivalent: still leakage.
   2. Treating a bar's OPEN time as when it becomes knowable: a 5m bar
      labelled 10:00 covers [10:00, 10:05) -- its close/high/low/volume are
-     not known until 10:05, regardless of archive lag on top of that.
+     not known until 10:05, regardless of source or lag on top of that.
 """
 from __future__ import annotations
 
@@ -67,6 +83,8 @@ BATCH_PUBLICATION_LAG = {
     "binance_rest_snapshot": pd.Timedelta(minutes=1),
 }
 
+DEFAULT_PROCESSING_LATENCY = pd.Timedelta(milliseconds=150)
+
 SourceKind = Literal["live_stream", "binance_vision_daily", "binance_vision_monthly", "binance_rest_snapshot"]
 
 
@@ -75,14 +93,24 @@ def add_temporal_columns(
     *,
     event_time_col: str,
     source_kind: SourceKind,
+    provably_live_observable: bool,
     bar_seconds: int = 0,
     exchange_time_col: Optional[str] = None,
     received_at_col: Optional[str] = None,
     ingestion_margin: pd.Timedelta = pd.Timedelta(seconds=5),
+    processing_latency: pd.Timedelta = DEFAULT_PROCESSING_LATENCY,
     now: Optional[pd.Timestamp] = None,
 ) -> pd.DataFrame:
     """Return a copy of df with event_time/exchange_time/market_available_at/
-    archive_published_at/received_at/available_at/ingested_at added.
+    archive_published_at/research_available_at/execution_available_at/
+    ingested_at added.
+
+    provably_live_observable: REQUIRED, no default -- forces a deliberate,
+    justified call at each call site (aggTrades, klines, and OI all have
+    genuine Binance live WS/REST equivalents predating this dataset's
+    history -> True; a source you cannot make that case for -> False, and
+    research_available_at correctly falls back to the slower
+    archive_published_at instead of silently claiming live availability).
 
     bar_seconds: 0 for a point event (an aggTrade -- knowable the instant it
     happens). For a bar/bucket (kline, OI 5m bucket, premium 5m bucket) pass
@@ -108,9 +136,14 @@ def add_temporal_columns(
         archive_published_at = market_available_at + lag
 
     out["archive_published_at"] = archive_published_at
-    out["received_at"] = archive_published_at  # backward-compat alias
-    out["available_at"] = pd.concat([market_available_at, archive_published_at], axis=1).max(axis=1) + ingestion_margin
     out["ingested_at"] = now if now is not None else pd.Timestamp.now(tz="UTC")
+
+    out["research_available_at"] = (
+        market_available_at + ingestion_margin if provably_live_observable
+        else archive_published_at + ingestion_margin
+    )
+    out["execution_available_at"] = archive_published_at + processing_latency
+
     return out
 
 
@@ -118,13 +151,15 @@ def assert_causal(
     df: pd.DataFrame,
     *,
     as_of_col: str,
-    available_at_col: str = "available_at",
+    available_at_col: str = "research_available_at",
 ) -> None:
     """Raise if any row's available_at is later than the timestamp a
     feature built from it claims to be "as of" -- the absolute leakage
     guard the plan requires. Call this right before a feature/label join,
     not just at ingestion time, since the violation that matters is at the
-    point of use."""
+    point of use. Defaults to research_available_at (the backtest/research
+    causal cutoff) -- pass available_at_col="execution_available_at" when
+    checking a live/paper execution replay instead."""
     as_of = pd.to_datetime(df[as_of_col], utc=True)
     available_at = pd.to_datetime(df[available_at_col], utc=True)
     violations = available_at > as_of
@@ -132,8 +167,8 @@ def assert_causal(
         n = int(violations.sum())
         first_idx = violations.idxmax()
         raise ValueError(
-            f"Causality violation: {n} row(s) have available_at > {as_of_col} "
-            f"(e.g. row {first_idx}: available_at={available_at.loc[first_idx]} > "
+            f"Causality violation: {n} row(s) have {available_at_col} > {as_of_col} "
+            f"(e.g. row {first_idx}: {available_at_col}={available_at.loc[first_idx]} > "
             f"{as_of_col}={as_of.loc[first_idx]}). A feature at t may only depend "
-            f"on rows with available_at <= t."
+            f"on rows with {available_at_col} <= t."
         )
