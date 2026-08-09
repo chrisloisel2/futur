@@ -109,6 +109,27 @@ def test_validator_detects_corruption_non_positive_required_column():
     assert not report.passed
 
 
+def test_validator_required_nonnegative_allows_exact_zero_but_not_negative():
+    # a newly-listed thin OI contract can genuinely show sum_open_interest
+    # == 0.0 for a few bars -- that must NOT count as corruption (required_
+    # positive_columns would wrongly flag it; required_nonnegative_columns
+    # is for exactly this case: only a negative value is truly impossible).
+    df = _make_5m_series(3)
+    df.loc[df.index[0], "sum_open_interest"] = 0.0
+    report = validate_series(
+        df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+        required_nonnegative_columns=["sum_open_interest"], now=_fresh_now(df),
+    )
+    assert report.corruption == 0
+
+    df.loc[df.index[1], "sum_open_interest"] = -1.0
+    report2 = validate_series(
+        df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+        required_nonnegative_columns=["sum_open_interest"], now=_fresh_now(df),
+    )
+    assert report2.corruption == 1
+
+
 def test_validator_flags_rows_before_listing():
     df = _make_5m_series(5)  # starts 2024-01-01
     im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2024-01-03", tz="UTC"), "delisting_ts": pd.NaT}])

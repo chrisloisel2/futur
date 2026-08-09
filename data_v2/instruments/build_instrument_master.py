@@ -94,13 +94,37 @@ def build() -> pd.DataFrame:
     exchange_info = fetch_exchange_info()
 
     rows = []
-    n_live, n_delisted_klines, n_unresolved = 0, 0, 0
+    n_live, n_settling, n_delisted_klines, n_unresolved = 0, 0, 0, 0
     for symbol in symbols:
         info = exchange_info.get(symbol)
         bounds = klines_1d_bounds(symbol)
 
         if info is not None and info["status"] == "TRADING":
             n_live += 1
+            listing_ts = info["onboard_ts"]
+            if pd.isna(listing_ts) and bounds is not None:
+                listing_ts = bounds[0]
+            delisting_ts = pd.NaT
+            valid_until = pd.NaT
+            base, quote = info["base"], info["quote"]
+            tick_size, step_size, min_notional = (
+                info["tick_size"],
+                info["step_size"],
+                info["min_notional"],
+            )
+            contract_type = info["contract_type"]
+        elif info is not None:
+            # present in exchangeInfo but not TRADING -- e.g. SETTLING
+            # (127 symbols observed live on 2026-08-09, a large delisting
+            # wave in progress) or PENDING_TRADING. Real onboardDate/tick/
+            # step/min_notional ARE still available from exchangeInfo for
+            # these -- only symbols fully ABSENT from exchangeInfo (verified:
+            # BTTUSDT/LUNAUSDT, genuinely delisted, are absent, not present
+            # with some other status) fall to the um_klines_1d-bounds branch
+            # below. Not yet formally delisted (still tracked by Binance),
+            # so delisting_ts stays NaT/open rather than guessing an end
+            # date from daily klines that may lag or lead the real wind-down.
+            n_settling += 1
             listing_ts = info["onboard_ts"]
             if pd.isna(listing_ts) and bounds is not None:
                 listing_ts = bounds[0]
@@ -144,8 +168,11 @@ def build() -> pd.DataFrame:
                 "contract_size": 1.0,
                 "valid_from": listing_ts,
                 "valid_until": valid_until,
-                "source": "exchange_info_live" if (info is not None and info["status"] == "TRADING") else (
-                    "um_klines_1d_bounds" if bounds is not None else "unresolved"
+                "source": (
+                    "exchange_info_live" if (info is not None and info["status"] == "TRADING")
+                    else f"exchange_info_live_status_{info['status'].lower()}" if info is not None
+                    else "um_klines_1d_bounds" if bounds is not None
+                    else "unresolved"
                 ),
             }
         )
@@ -153,7 +180,8 @@ def build() -> pd.DataFrame:
     out = pd.DataFrame(rows).sort_values("symbol").reset_index(drop=True)
     print(
         f"instrument_master: {len(out)} symbols "
-        f"({n_live} live/exchange_info, {n_delisted_klines} delisted/um_klines_1d, "
+        f"({n_live} TRADING, {n_settling} present-but-non-TRADING (SETTLING/PENDING_TRADING), "
+        f"{n_delisted_klines} delisted/um_klines_1d (absent from exchangeInfo), "
         f"{n_unresolved} unresolved -- no exchangeInfo entry AND no um_klines_1d file)"
     )
     if n_unresolved:

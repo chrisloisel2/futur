@@ -145,6 +145,7 @@ def validate_series(
     pk_cols: Optional[Iterable[str]] = None,
     expected_columns: Optional[Iterable[str]] = None,
     required_positive_columns: Optional[Iterable[str]] = None,
+    required_nonnegative_columns: Optional[Iterable[str]] = None,
     instrument_master: Optional[pd.DataFrame] = None,
     now: Optional[pd.Timestamp] = None,
     staleness_gate_days: float = 3.0,
@@ -206,7 +207,13 @@ def validate_series(
         if missing:
             schema_drift.append(f"missing_columns:{missing}")
 
-    # corruption: NaN/inf/non-positive on required numeric columns
+    # corruption: NaN/inf/non-positive on required numeric columns. Two
+    # variants -- a price/close CAN NEVER legitimately be exactly 0, but
+    # open interest CAN (verified on real data: a newly-listed thin
+    # contract can show a genuine sum_open_interest == 0.0 for a few 5m
+    # bars right after listing -- flagging that as "corruption" via a
+    # strict >0 check was a false positive; only a negative OI is actually
+    # impossible).
     if required_positive_columns:
         for col in required_positive_columns:
             if col not in df.columns:
@@ -214,6 +221,14 @@ def validate_series(
                 continue
             numeric = pd.to_numeric(df[col], errors="coerce")
             bad = numeric.isna() | ~np.isfinite(numeric) | (numeric <= 0)
+            corruption += int(bad.sum())
+    if required_nonnegative_columns:
+        for col in required_nonnegative_columns:
+            if col not in df.columns:
+                schema_drift.append(f"missing_required_column:{col}")
+                continue
+            numeric = pd.to_numeric(df[col], errors="coerce")
+            bad = numeric.isna() | ~np.isfinite(numeric) | (numeric < 0)
             corruption += int(bad.sum())
 
     ts_sorted = ts[valid].sort_values()
@@ -244,8 +259,17 @@ def validate_series(
     elif instrument_master is None:
         listing_alignment = "unknown"
     else:
-        before = listing_ts is not None and window_start is not None and window_start < listing_ts - pd.Timedelta(hours=1)
-        after = delisting_ts is not None and window_end is not None and window_end > delisting_ts + pd.Timedelta(hours=1)
+        # 24h grace, not 1h: real Vision OI data was observed starting ~9h
+        # before a symbol's exchangeInfo onboardDate (AIAUSDT) -- listing/
+        # delisting timestamps from different sources/feeds have some
+        # natural slop at the boundary. Violations larger than a day (e.g.
+        # ANTUSDT's OI data continuing ~4 weeks past its last daily kline,
+        # or a ticker rename like RNDRUSDT->RENDERUSDT) stay flagged --
+        # that is real, useful signal about a specific symbol's PIT
+        # boundary needing a dedicated look, not noise to widen away.
+        grace = pd.Timedelta(hours=24)
+        before = listing_ts is not None and window_start is not None and window_start < listing_ts - grace
+        after = delisting_ts is not None and window_end is not None and window_end > delisting_ts + grace
         if before and after:
             listing_alignment = "both"
         elif before:
