@@ -1,0 +1,298 @@
+{
+  "history": [
+    {
+      "ts": "2026-07-20T10:31:48.596002+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-21T06:20:56.575344+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-22T06:20:56.533678+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-23T11:58:06.206602+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-24T06:20:25.545823+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-27T08:33:25.478480+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-28T06:20:36.919987+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-29T06:20:37.009073+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-30T06:20:48.511054+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-07-31T06:20:48.487456+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-01T06:20:48.532043+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-02T06:20:48.554320+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-03T06:20:48.844098+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-04T06:20:48.377822+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-05T06:20:48.466088+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-06T06:20:48.500097+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-08T12:04:34.586785+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-08-09T06:20:20.428102+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "OBSERVING",
+        "mh_events_exec": "OBSERVING"
+      }
+    }
+  ],
+  "provisional": {},
+  "latest": {
+    "ts": "2026-08-09T06:20:20.428102+00:00",
+    "verdict": "NO_SELECTION",
+    "statuses": {
+      "carry_basis_v12": {
+        "runner_id": "carry_basis_v12",
+        "status": "OBSERVING",
+        "reasons": [],
+        "phase": "observation",
+        "observation": {
+          "age_days": 19.83,
+          "min_days": 30,
+          "n_decisions": 18,
+          "min_decisions": 300,
+          "ready_for_selection": false,
+          "leaderboard_informative_only": true
+        }
+      },
+      "carry_solusdt": {
+        "runner_id": "carry_solusdt",
+        "status": "OBSERVING",
+        "reasons": [],
+        "phase": "observation",
+        "observation": {
+          "age_days": 19.83,
+          "min_days": 30,
+          "n_decisions": 18,
+          "min_decisions": 300,
+          "ready_for_selection": false,
+          "leaderboard_informative_only": true
+        }
+      },
+      "carry_bnbusdt": {
+        "runner_id": "carry_bnbusdt",
+        "status": "OBSERVING",
+        "reasons": [],
+        "phase": "observation",
+        "observation": {
+          "age_days": 19.83,
+          "min_days": 30,
+          "n_decisions": 18,
+          "min_decisions": 300,
+          "ready_for_selection": false,
+          "leaderboard_informative_only": true
+        }
+      },
+      "basis_term_v0": {
+        "runner_id": "basis_term_v0",
+        "status": "OBSERVING",
+        "reasons": [],
+        "phase": "observation",
+        "observation": {
+          "age_days": 19.83,
+          "min_days": 30,
+          "n_decisions": 692,
+          "min_decisions": 300,
+          "ready_for_selection": false,
+          "leaderboard_informative_only": true
+        }
+      },
+      "mh_events_exec": {
+        "runner_id": "mh_events_exec",
+        "status": "OBSERVING",
+        "reasons": [],
+        "phase": "observation",
+        "observation": {
+          "age_days": 19.83,
+          "min_days": 30,
+          "n_decisions": 0,
+          "min_decisions": 30,
+          "ready_for_selection": false,
+          "leaderboard_informative_only": true
+        }
+      }
+    },
+    "protocol_hash": "53a265970fffd082dbfc5ade"
+  }
+}

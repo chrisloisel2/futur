@@ -190,8 +190,10 @@ def write_daily(rows: List[Dict]) -> Path:
 
 
 if __name__ == "__main__":
+    from src.alpha20.deployment_guard import assert_deployment_matches_approved
     from src.alpha20.guard import assert_paper_only
     assert_paper_only()
+    assert_deployment_matches_approved()
     rows = build_dashboard()
     p = write_daily(rows)
     for r in rows:

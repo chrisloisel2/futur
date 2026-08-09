@@ -8,11 +8,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.alpha20.deployment_guard import assert_deployment_matches_approved
 from src.alpha20.guard import assert_paper_only
 from src.alpha20.tournament.dashboard import build_dashboard, write_daily
 
 if __name__ == "__main__":
     assert_paper_only()
+    assert_deployment_matches_approved()
     rows = build_dashboard()
     path = write_daily(rows)
     for r in rows:

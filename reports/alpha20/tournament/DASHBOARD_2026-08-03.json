@@ -1,0 +1,319 @@
+{
+  "date": "2026-08-03",
+  "runners": [
+    {
+      "runner_id": "carry_basis_v12",
+      "family": "carry_basis",
+      "status": "ACTIVE",
+      "config_hash": "9e025f4590c1dd39aec94210",
+      "git_commit": "1e3af95",
+      "age_days": 13.82,
+      "n_events": 281,
+      "n_decisions": 13,
+      "n_fills": 0,
+      "n_rejects": 0,
+      "availability": {
+        "n_cycles": 248,
+        "availability": 1.0
+      },
+      "exposure": {
+        "gross_usdt": 2.889281528889517,
+        "margin_used_frac": 0.0,
+        "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
+      },
+      "nav_usdt": 200212.97,
+      "pnl_gross_usdt": 393.85,
+      "costs": {
+        "borrow": -0.88,
+        "fee": -180.0
+      },
+      "tax_provision_usdt": -0.0,
+      "pnl_net_before_tax_usdt": 212.97,
+      "pnl_net_after_tax_usdt": 212.97,
+      "return_total": 0.00106,
+      "max_drawdown": 0.0009,
+      "sharpe_ann": null,
+      "sortino_ann": null,
+      "note": "< 30 points",
+      "dsr": null,
+      "dsr_n_trials": 5,
+      "es95_1d": null,
+      "es99_1d": null,
+      "profit_factor": null,
+      "expectancy_usdt": null,
+      "capacity_eur": null,
+      "execution_quality": {
+        "mean_execution_shortfall_bps": null
+      },
+      "reconciliation": {
+        "status": "evaluated",
+        "passed": true,
+        "consecutive_ok": 247,
+        "eligible": true
+      },
+      "cuts": {
+        "by_week": {
+          "2026-07-20/2026-07-26": -0.00084,
+          "2026-07-27/2026-08-02": 0.00159,
+          "2026-08-03/2026-08-09": 0.00031
+        },
+        "by_regime": {
+          "BEAR": 0.00127,
+          "BULL": -0.0002
+        },
+        "by_asset": {},
+        "by_cost_scenario_fee_bp": {}
+      }
+    },
+    {
+      "runner_id": "carry_solusdt",
+      "family": "carry_basis",
+      "status": "ACTIVE",
+      "config_hash": "e0cc3cdbf3b236b648cf5563",
+      "git_commit": "1e3af95",
+      "age_days": 13.82,
+      "n_events": 267,
+      "n_decisions": 13,
+      "n_fills": 0,
+      "n_rejects": 0,
+      "availability": {
+        "n_cycles": 248,
+        "availability": 1.0
+      },
+      "exposure": {
+        "gross_usdt": 2.00640250429797,
+        "margin_used_frac": 0.0,
+        "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
+      },
+      "nav_usdt": 199935.22,
+      "pnl_gross_usdt": 55.33,
+      "costs": {
+        "borrow": -0.11,
+        "fee": -120.0
+      },
+      "tax_provision_usdt": -0.0,
+      "pnl_net_before_tax_usdt": -64.78,
+      "pnl_net_after_tax_usdt": -64.78,
+      "return_total": -0.00032,
+      "max_drawdown": 0.0006,
+      "sharpe_ann": null,
+      "sortino_ann": null,
+      "note": "< 30 points",
+      "dsr": null,
+      "dsr_n_trials": 5,
+      "es95_1d": null,
+      "es99_1d": null,
+      "profit_factor": null,
+      "expectancy_usdt": null,
+      "capacity_eur": null,
+      "execution_quality": {
+        "mean_execution_shortfall_bps": null
+      },
+      "reconciliation": {
+        "status": "evaluated",
+        "passed": true,
+        "consecutive_ok": 247,
+        "eligible": true
+      },
+      "cuts": {
+        "by_week": {
+          "2026-07-20/2026-07-26": 0.0,
+          "2026-07-27/2026-08-02": -0.00052,
+          "2026-08-03/2026-08-09": 0.00019
+        },
+        "by_regime": {
+          "BEAR": -0.00032,
+          "BULL": 0.0
+        },
+        "by_asset": {},
+        "by_cost_scenario_fee_bp": {}
+      }
+    },
+    {
+      "runner_id": "carry_bnbusdt",
+      "family": "carry_basis",
+      "status": "ACTIVE",
+      "config_hash": "18a5748907bd401ab24eac13",
+      "git_commit": "1e3af95",
+      "age_days": 13.82,
+      "n_events": 280,
+      "n_decisions": 13,
+      "n_fills": 0,
+      "n_rejects": 0,
+      "availability": {
+        "n_cycles": 248,
+        "availability": 1.0
+      },
+      "exposure": {
+        "gross_usdt": 2.021052521229438,
+        "margin_used_frac": 0.0,
+        "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
+      },
+      "nav_usdt": 199920.28,
+      "pnl_gross_usdt": 279.46,
+      "costs": {
+        "borrow": -0.49,
+        "fee": -358.69
+      },
+      "tax_provision_usdt": -0.0,
+      "pnl_net_before_tax_usdt": -79.72,
+      "pnl_net_after_tax_usdt": -79.72,
+      "return_total": -0.0004,
+      "max_drawdown": 0.00107,
+      "sharpe_ann": null,
+      "sortino_ann": null,
+      "note": "< 30 points",
+      "dsr": null,
+      "dsr_n_trials": 5,
+      "es95_1d": null,
+      "es99_1d": null,
+      "profit_factor": null,
+      "expectancy_usdt": null,
+      "capacity_eur": null,
+      "execution_quality": {
+        "mean_execution_shortfall_bps": null
+      },
+      "reconciliation": {
+        "status": "evaluated",
+        "passed": true,
+        "consecutive_ok": 247,
+        "eligible": true
+      },
+      "cuts": {
+        "by_week": {
+          "2026-07-20/2026-07-26": -0.00055,
+          "2026-07-27/2026-08-02": -0.00016,
+          "2026-08-03/2026-08-09": 0.00031
+        },
+        "by_regime": {
+          "BEAR": 0.0001,
+          "BULL": -0.0005
+        },
+        "by_asset": {},
+        "by_cost_scenario_fee_bp": {}
+      }
+    },
+    {
+      "runner_id": "basis_term_v0",
+      "family": "basis_term",
+      "status": "OBSERVE_ONLY",
+      "config_hash": "eb754f95bb0af73a9318baf4",
+      "git_commit": "1e3af95",
+      "age_days": 13.82,
+      "n_events": 745,
+      "n_decisions": 496,
+      "n_fills": 0,
+      "n_rejects": 0,
+      "availability": {
+        "n_cycles": 248,
+        "availability": 1.0
+      },
+      "exposure": {
+        "gross_usdt": null,
+        "margin_used_frac": 0.0,
+        "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
+      },
+      "nav_usdt": 200000.0,
+      "pnl_gross_usdt": 0.0,
+      "costs": {},
+      "tax_provision_usdt": -0.0,
+      "pnl_net_before_tax_usdt": 0.0,
+      "pnl_net_after_tax_usdt": 0.0,
+      "return_total": 0.0,
+      "max_drawdown": -0.0,
+      "sharpe_ann": null,
+      "sortino_ann": null,
+      "note": "< 30 points",
+      "dsr": null,
+      "dsr_n_trials": 5,
+      "es95_1d": null,
+      "es99_1d": null,
+      "profit_factor": null,
+      "expectancy_usdt": null,
+      "capacity_eur": null,
+      "execution_quality": {
+        "mean_execution_shortfall_bps": null
+      },
+      "reconciliation": {
+        "status": "evaluated",
+        "passed": true,
+        "consecutive_ok": 247,
+        "eligible": true
+      },
+      "cuts": {
+        "by_week": {
+          "2026-07-20/2026-07-26": 0.0,
+          "2026-07-27/2026-08-02": 0.0,
+          "2026-08-03/2026-08-09": 0.0
+        },
+        "by_regime": {
+          "BEAR": 0.0,
+          "BULL": 0.0
+        },
+        "by_asset": {},
+        "by_cost_scenario_fee_bp": {}
+      }
+    },
+    {
+      "runner_id": "mh_events_exec",
+      "family": "mh_events",
+      "status": "ACTIVE",
+      "config_hash": "573236e126034c85dcc347d0",
+      "git_commit": "1e3af95",
+      "age_days": 13.82,
+      "n_events": 249,
+      "n_decisions": 0,
+      "n_fills": 0,
+      "n_rejects": 0,
+      "availability": {
+        "n_cycles": 248,
+        "availability": 1.0
+      },
+      "exposure": {
+        "gross_usdt": null,
+        "margin_used_frac": 0.0,
+        "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
+      },
+      "nav_usdt": 200000.0,
+      "pnl_gross_usdt": 0.0,
+      "costs": {},
+      "tax_provision_usdt": -0.0,
+      "pnl_net_before_tax_usdt": 0.0,
+      "pnl_net_after_tax_usdt": 0.0,
+      "return_total": 0.0,
+      "max_drawdown": -0.0,
+      "sharpe_ann": null,
+      "sortino_ann": null,
+      "note": "< 30 points",
+      "dsr": null,
+      "dsr_n_trials": 5,
+      "es95_1d": null,
+      "es99_1d": null,
+      "profit_factor": null,
+      "expectancy_usdt": null,
+      "capacity_eur": null,
+      "execution_quality": {
+        "mean_execution_shortfall_bps": null
+      },
+      "reconciliation": {
+        "status": "evaluated",
+        "passed": true,
+        "consecutive_ok": 247,
+        "eligible": true
+      },
+      "cuts": {
+        "by_week": {
+          "2026-07-20/2026-07-26": 0.0,
+          "2026-07-27/2026-08-02": 0.0,
+          "2026-08-03/2026-08-09": 0.0
+        },
+        "by_regime": {
+          "BEAR": 0.0,
+          "BULL": 0.0
+        },
+        "by_asset": {},
+        "by_cost_scenario_fee_bp": {}
+      }
+    }
+  ]
+}

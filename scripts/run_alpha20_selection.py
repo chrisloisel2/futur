@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.alpha20.deployment_guard import assert_deployment_matches_approved  # noqa: E402
 from src.alpha20.guard import assert_paper_only                         # noqa: E402
 from src.alpha20.tournament.runner_registry import runnable_specs        # noqa: E402
 from src.alpha20.tournament.selection.manifest import protocol_hash      # noqa: E402
@@ -38,6 +39,7 @@ def _load() -> dict:
 
 def main() -> None:
     assert_paper_only()
+    assert_deployment_matches_approved()
     specs = runnable_specs()
     by_id = {s.runner_id: s for s in specs}
     state = _load()

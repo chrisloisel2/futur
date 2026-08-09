@@ -1,0 +1,208 @@
+{
+ "run": "2026-07-19T21:47:07.267772+00:00",
+ "verdict": "BUG_DE_COMPTABILIT\u00c9",
+ "identity": {
+  "carry_eur": 29.94,
+  "basis_eur": 9.97,
+  "borrow_eur": -0.474486,
+  "longs_realized_eur": 0.0,
+  "fees_eur": -251.15,
+  "longs_latent_eur": 204.7,
+  "value_eur_recomputed": 199992.99,
+  "value_eur_last_history": 199992.99,
+  "fx_now": 1.1436
+ },
+ "checks": {
+  "identite_interne_eur": {
+   "gap": 0.0,
+   "tol": 30.0,
+   "ok": true,
+   "note": "recalcul vs dernier point d'historique"
+  },
+  "carry_vs_funding_api_usdt": {
+   "ledger": 34.244,
+   "attendu": 35.692,
+   "gap": -1.448,
+   "tol": 1.0,
+   "ok": false
+  },
+  "fees_vs_bareme_usdt": {
+   "ledger": -287.22,
+   "attendu": -189.29,
+   "gap": -97.93,
+   "tol": 5.0,
+   "ok": false
+  },
+  "basis_vs_klines_usdt": {
+   "ledger": 11.4,
+   "attendu": 5.82,
+   "gap": 5.58,
+   "tol": 2.0,
+   "ok": false
+  },
+  "borrow_usdt": {
+   "ledger": -0.542622,
+   "ok": true,
+   "note": "gross \u2264 1\u00d7E sur la p\u00e9riode \u2192 borrow \u2248 0 attendu"
+  },
+  "longs_realized": {
+   "ledger": 0.0,
+   "ok": true,
+   "note": "aucun flip OFF depuis l'ouverture (journal)"
+  }
+ },
+ "carry_detail": [
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-18T00:00:00+00:00",
+   "rate": 3.074e-05,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 2.815
+  },
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-18T08:00:00+00:00",
+   "rate": 6.955e-05,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 6.368
+  },
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-18T16:00:00.001000+00:00",
+   "rate": 3.326e-05,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 3.045
+  },
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-19T00:00:00.003000+00:00",
+   "rate": 4.06e-06,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 0.372
+  },
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-19T08:00:00+00:00",
+   "rate": 6.905e-05,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 6.322
+  },
+  {
+   "symbol": "BTCUSDT",
+   "funding_time": "2026-07-19T16:00:00.001000+00:00",
+   "rate": 5.235e-05,
+   "notional_usdt": 91560.0,
+   "accrual_usdt": 4.793
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-17T16:00:00.004000+00:00",
+   "rate": 2.442e-05,
+   "notional_usdt": 80115.0,
+   "accrual_usdt": 1.956
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-18T00:00:00+00:00",
+   "rate": 2.552e-05,
+   "notional_usdt": 80115.0,
+   "accrual_usdt": 2.045
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-18T08:00:00+00:00",
+   "rate": 3.939e-05,
+   "notional_usdt": 45780.0,
+   "accrual_usdt": 1.803
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-18T16:00:00.001000+00:00",
+   "rate": 3.042e-05,
+   "notional_usdt": 45780.0,
+   "accrual_usdt": 1.393
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-19T00:00:00.003000+00:00",
+   "rate": -1.262e-05,
+   "notional_usdt": 45780.0,
+   "accrual_usdt": -0.578
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-19T08:00:00+00:00",
+   "rate": 4.255e-05,
+   "notional_usdt": 45780.0,
+   "accrual_usdt": 1.948
+  },
+  {
+   "symbol": "ETHUSDT",
+   "funding_time": "2026-07-19T16:00:00.001000+00:00",
+   "rate": 7.448e-05,
+   "notional_usdt": 45780.0,
+   "accrual_usdt": 3.41
+  }
+ ],
+ "fees_lines": [
+  {
+   "line": "2026-07-17T10:02:55Z carry_ETHUSDT 0.00E\u21920.35E (|\u0394|=80,115 USDT)",
+   "fee_usdt": 32.05
+  },
+  {
+   "line": "2026-07-17T10:02:55Z basis_BTCUSDT 0.00E\u21920.28E (|\u0394|=64,092 USDT)",
+   "fee_usdt": 25.64
+  },
+  {
+   "line": "2026-07-17T10:02:55Z basis_ETHUSDT 0.00E\u21920.22E (|\u0394|=50,358 USDT)",
+   "fee_usdt": 20.14
+  },
+  {
+   "line": "2026-07-17T18:02:59Z carry_BTCUSDT 0.00E\u21920.40E (|\u0394|=91,560 USDT)",
+   "fee_usdt": 36.62
+  },
+  {
+   "line": "2026-07-17T18:02:59Z basis_BTCUSDT 0.28E\u21920.25E (|\u0394|=6,867 USDT)",
+   "fee_usdt": 2.75
+  },
+  {
+   "line": "2026-07-17T18:02:59Z basis_ETHUSDT 0.22E\u21920.00E (|\u0394|=50,358 USDT)",
+   "fee_usdt": 20.14
+  },
+  {
+   "line": "2026-07-18T02:15:51Z carry_ETHUSDT 0.35E\u21920.20E (|\u0394|=34,335 USDT)",
+   "fee_usdt": 13.73
+  },
+  {
+   "line": "2026-07-18T02:15:51Z basis_BTCUSDT 0.25E\u21920.00E (|\u0394|=57,225 USDT)",
+   "fee_usdt": 22.89
+  },
+  {
+   "line": "2026-07-18T02:15:51Z long_BTCUSDT 0\u219218162 USDT (taker 5 bps)",
+   "fee_usdt": 9.08
+  },
+  {
+   "line": "2026-07-18T02:15:51Z long_ETHUSDT 0\u219212489 USDT (taker 5 bps)",
+   "fee_usdt": 6.24
+  }
+ ],
+ "basis_lines": [
+  {
+   "symbol": "BTCUSDT",
+   "basis_entry": 0.00814,
+   "days": 69.9,
+   "accrual_usdt": 4.77
+  },
+  {
+   "symbol": "ETHUSDT",
+   "basis_entry": 0.00439,
+   "days": 69.9,
+   "accrual_usdt": 1.05
+  }
+ ],
+ "trail_source": "futur_ui.portfolio_events (journal) + alloc ouverture",
+ "anomalies": [
+  "Double rebalance 2026-07-18T10:15:50/52 (marks concurrents PWA 2,5 s + timer 15 min) \u2014 cibles inchang\u00e9es donc 0 frais constat\u00e9, mais lost-update possible (replace_one plein doc).",
+  "Pas de journal par \u00e9criture dans le ledger (agr\u00e9gats seuls) \u2014 l'audit repose sur portfolio_events + reconstruction."
+ ]
+}

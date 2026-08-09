@@ -31,6 +31,7 @@ from typing import Dict
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
+from src.alpha20.deployment_guard import assert_deployment_matches_approved  # noqa: E402
 from src.alpha20.guard import assert_paper_only                    # noqa: E402
 from src.alpha20.execution.paper_broker import PaperBroker          # noqa: E402
 from src.alpha20.tournament import market_bus                       # noqa: E402
@@ -107,6 +108,7 @@ def _run_one(spec, snapshot, broker: PaperBroker) -> dict:
 
 def run_cycle() -> Dict[str, dict]:
     assert_paper_only()
+    assert_deployment_matches_approved()
     specs = runnable_specs()
     if not specs:
         print("[tournament] aucun runner ACTIVE/OBSERVE_ONLY — rien à faire", flush=True)

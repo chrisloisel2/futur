@@ -1,0 +1,38 @@
+{
+  "date": "2026-07-20",
+  "equity_eur": 199775.26,
+  "pnl_gross_cum_eur": 47.36,
+  "fees_cum_eur": -250.95,
+  "borrow_cum_eur": -1.858651,
+  "tax_provision_mtd_eur": 0.0,
+  "pnl_net_cum_eur": -205.45,
+  "es99_1d": {
+    "value": null,
+    "n_obs": 68,
+    "method": "insuffisant"
+  },
+  "margin_used_proxy": 0.0951,
+  "net_delta_frac": 0.1341,
+  "mh_tracking": {
+    "labels": {
+      "n": 0,
+      "pf": null
+    },
+    "errors": {
+      "sampling_error_1h_bps_mean": null,
+      "execution_shortfall_bps_mean": null,
+      "model_tracking": {
+        "reference_pf": 1.435,
+        "realized_pf_labels": null,
+        "n_labels": 0,
+        "gap": null
+      }
+    }
+  },
+  "reconciliation": {
+    "status": "pending",
+    "consecutive_ok": 0,
+    "last_gap_fees_usdt": null,
+    "last_gap_carry_usdt": null
+  }
+}

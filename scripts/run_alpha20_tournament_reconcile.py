@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.alpha20.deployment_guard import assert_deployment_matches_approved
 from src.alpha20.guard import assert_paper_only
 from src.alpha20.tournament.reconciliation import all_runners_gate
 from src.alpha20.tournament.runner_registry import runnable_specs
@@ -19,6 +20,7 @@ OUT = ROOT / "reports" / "alpha20" / "tournament" / "reconciliation_state.json"
 
 if __name__ == "__main__":
     assert_paper_only()
+    assert_deployment_matches_approved()
     specs = runnable_specs()
     gates = all_runners_gate(specs)
     OUT.parent.mkdir(parents=True, exist_ok=True)

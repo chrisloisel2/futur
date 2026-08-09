@@ -94,7 +94,16 @@ runners:
 
   - runner_id: basis_term_v0
     family: basis_term
-    status: ACTIVE
+    status: OBSERVE_ONLY   # rétrogradé 2026-07-21 — falsification indépendante
+                           # (f27971d, research/edge_factory/calendar_basis_v1/results/
+                           # BASIS_TERM_V0_FALSIFICATION_2026-07-21.md) : primaire
+                           # entry5_size50 sélectionné a posteriori parmi 6 variantes,
+                           # PBO (CSCV) = 0.47 contre seuil <=0.10 — indiscernable du
+                           # hasard. DSR/coûts×2/leave-one-year/leave-one-asset passent
+                           # individuellement mais un seul gate qui échoue suffit à
+                           # rejeter. Exécution/télémétrie maintenues (forward paper
+                           # uniquement) ; exclu de la sélection (src/alpha20/tournament/
+                           # selection/phases.py::selection_status).
     source: scripts/backtest_basis_term.py (règle déclarée, seuils rapportés, pas tunés)
     assets: [BTCUSDT, ETHUSDT]         # seuls actifs avec historique trimestriel local
     venue: binance_usdm

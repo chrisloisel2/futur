@@ -1,0 +1,13 @@
+{
+  "approved_at": "2026-07-22T07:05:18.363394+00:00",
+  "git_commit": "2fe693bb7d43354cb294db0971169ed9dc1ac60f",
+  "git_branch": "feat/free-derivatives-backfill",
+  "tracked_files": [
+    "configs/alpha20_runners.yaml",
+    "configs/alpha20.yaml"
+  ],
+  "config_hash": {
+    "configs/alpha20_runners.yaml": "aed1d44fa9af0d385fb9c20d01b4ae6f4bd12fee1f2172abb79502012481c8ae",
+    "configs/alpha20.yaml": "123ea25ad92ee61a360acb65ac761390fcbdf6c668c381db013070ae765892c0"
+  }
+}
