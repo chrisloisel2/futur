@@ -44,7 +44,10 @@ def test_instrument_master_covers_pit_universe_with_no_gaps():
     assert im["symbol"].is_unique
     assert im["listing_ts"].notna().all()
     # every currently-live row must carry real filter values, not fabricated
-    live = im[im["source"] == "exchange_info_live"]
+    # (InstrumentMaster V2: "source" was replaced by exchangeinfo_status,
+    # which carries the same "currently TRADING" signal plus every other
+    # live exchangeInfo status, e.g. SETTLING -- see build_instrument_master.py)
+    live = im[im["exchangeinfo_status"] == "TRADING"]
     assert live["tick_size"].notna().all()
     assert live["step_size"].notna().all()
 
