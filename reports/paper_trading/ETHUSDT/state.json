@@ -1,7 +1,7 @@
 {
   "symbol": "ETHUSDT",
   "start_date": "2026-05-24T01:08:02.945163+00:00",
-  "total_signals": 1378,
+  "total_signals": 1397,
   "total_trades": 3,
   "total_wins": 3,
   "total_losses": 0,
@@ -13,7 +13,7 @@
   "consecutive_losses": 0,
   "last_trade_time": "2026-05-29T16:27:28.327620+00:00",
   "weekly_pnl_pct": 0.0,
-  "weekly_start_time": "2026-08-03T09:39:39.578780+00:00",
+  "weekly_start_time": "2026-08-10T10:44:19.139180+00:00",
   "crash_halt_until": null,
   "drift_alerts": 0,
   "accounting_errors": 0
