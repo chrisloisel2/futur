@@ -26,6 +26,23 @@ candidate: nothing has been backfilled for it, so it will simply start
 from the (already correct, new) listing_ts whenever it eventually runs --
 flagging it here would be noise, not an actionable repair.
 
+Round 2 (2026-08-11, after first running the actual delta backfill): a gap
+between the canonical listing_ts and a dataset's observed start on disk is
+NOT automatically actionable -- the source itself can genuinely have no
+data there (confirmed via that backfiller's own manifest `missing_*`
+record, i.e. it WAS already attempted and 404'd, not merely "not yet
+attempted"). Found on real data: 130/132 oi_vision_5m symbols initially
+flagged turned out to have their ENTIRE remaining gap already recorded as
+`missing` in Binance Vision's futures metrics endpoint -- e.g. ADAUSDT and
+ZRXUSDT both confirmed-404 for all 456 days from 2020-09-01 (the
+documented VISION_OI_FLOOR) through 2021-11-30, meaning the metrics
+endpoint's TRUE per-symbol floor is later than VISION_OI_FLOOR for most of
+the universe, a fact this script cannot know in advance -- only the
+backfiller's own manifest can prove it after trying. A gap fully covered
+by the relevant manifest's missing-period record is reported separately
+under `confirmed_unavailable`, not `repairs` -- it is resolved, just not
+fillable, and must not be flagged as still-actionable forever.
+
 Usage:
     /home/qbee/futur/.venv/bin/python3 scripts/build_backfill_bound_repair.py
 """
@@ -33,6 +50,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -59,26 +77,75 @@ GAP_TOLERANCE = pd.Timedelta(hours=24)
 # listed before 2020-09-01 (e.g. ETHUSDT, 2019-11-27) would get flagged for
 # a "gap" that is partly impossible to fill (no OI archive exists before
 # the floor, no amount of delta-backfilling changes that).
+def _missing_days(manifest_path: Path, key: str = "missing") -> set:
+    if not manifest_path.exists():
+        return set()
+    return set(json.loads(manifest_path.read_text()).get(key, []))
+
+
+def _missing_months(manifest_path: Path) -> set:
+    if not manifest_path.exists():
+        return set()
+    return set(json.loads(manifest_path.read_text()).get("missing_months", []))
+
+
 DATASETS = {
-    "oi_vision_5m": dict(loader=_load_oi, ts_col="create_time", source_available_from=VISION_OI_FLOOR),
+    "oi_vision_5m": dict(
+        loader=_load_oi, ts_col="create_time", source_available_from=VISION_OI_FLOOR, granularity="day",
+        missing_fn=lambda s: _missing_days(ROOT / f"data/derivatives_backfill/binance_vision_metrics/{s}_manifest.json"),
+    ),
     "perp_5m": dict(
         loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/perp_ohlcv/venue=binance", s, "perp_5m.parquet"),
-        ts_col="timestamp", source_available_from=None,
+        ts_col="timestamp", source_available_from=None, granularity="month",
+        missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/perp_ohlcv/venue=binance/symbol={s}/manifest.json"),
     ),
     "spot_5m": dict(
         loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", s, "spot_5m.parquet"),
-        ts_col="timestamp", source_available_from=None,
+        ts_col="timestamp", source_available_from=None, granularity="month",
+        missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/spot_ohlcv/venue=binance/symbol={s}/manifest.json"),
     ),
     "agg_trades_flow_5m": dict(
         loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/5m/venue=binance", s, "flow.parquet"),
-        ts_col="timestamp", source_available_from=None,
+        ts_col="timestamp", source_available_from=None, granularity="day",
+        missing_fn=lambda s: _missing_days(
+            ROOT / f"data_v2/normalized/agg_trades_flow/1m/venue=binance/symbol={s}/manifest.json", key="missing_days"
+        ),
     ),
 }
+
+
+def _gap_confirmed_unfillable(start: pd.Timestamp, end: pd.Timestamp, missing: set, granularity: str) -> bool:
+    """True iff EVERY period in [start, end) is already in `missing` --
+    i.e. the backfiller already tried the whole current gap and every
+    single period 404'd, so there is nothing left to fetch. `end`'s own
+    period is excluded: it already has real data by construction
+    (observed_start_on_disk), so it's never itself a candidate."""
+    if not missing:
+        return False
+    if granularity == "day":
+        d = start.date()
+        while d < end.date():
+            if d.isoformat() not in missing:
+                return False
+            d += timedelta(days=1)
+        return True
+    if granularity == "month":
+        y, m = start.year, start.month
+        while (y, m) < (end.year, end.month):
+            if f"{y:04d}-{m:02d}" not in missing:
+                return False
+            m += 1
+            if m > 12:
+                m = 1
+                y += 1
+        return True
+    raise ValueError(f"unknown granularity: {granularity}")
 
 
 def build(im: Optional[pd.DataFrame] = None) -> dict:
     im = im if im is not None else pd.read_parquet(INSTRUMENT_MASTER)
     repairs = []
+    confirmed_unavailable = []
     n_checked = 0
     for _, row in im.iterrows():
         symbol = row["symbol"]
@@ -95,26 +162,37 @@ def build(im: Optional[pd.DataFrame] = None) -> dict:
             source_floor = spec["source_available_from"]
             repair_target = max(canonical_listing_ts, source_floor) if source_floor is not None else canonical_listing_ts
             gap = observed_start - repair_target
-            if gap > GAP_TOLERANCE:
-                repairs.append({
-                    "symbol": symbol,
-                    "dataset": dataset,
-                    "canonical_listing_ts": str(canonical_listing_ts),
-                    "repair_target_start": str(repair_target),
-                    "listing_ts_source": row["listing_ts_source"],
-                    "metadata_conflict": bool(row["metadata_conflict"]),
-                    "observed_start_on_disk": str(observed_start),
-                    "gap_days": round(gap.total_seconds() / 86400, 2),
-                    "action": "delta_backfill_earlier_window",
-                })
+            if gap <= GAP_TOLERANCE:
+                continue
+
+            entry = {
+                "symbol": symbol,
+                "dataset": dataset,
+                "canonical_listing_ts": str(canonical_listing_ts),
+                "repair_target_start": str(repair_target),
+                "listing_ts_source": row["listing_ts_source"],
+                "metadata_conflict": bool(row["metadata_conflict"]),
+                "observed_start_on_disk": str(observed_start),
+                "gap_days": round(gap.total_seconds() / 86400, 2),
+            }
+            missing = spec["missing_fn"](symbol)
+            if _gap_confirmed_unfillable(repair_target, observed_start, missing, spec["granularity"]):
+                entry["reason"] = "source confirmed no data for this entire window (backfiller's own manifest)"
+                confirmed_unavailable.append(entry)
+            else:
+                entry["action"] = "delta_backfill_earlier_window"
+                repairs.append(entry)
 
     repairs.sort(key=lambda r: (-r["gap_days"], r["symbol"], r["dataset"]))
+    confirmed_unavailable.sort(key=lambda r: (-r["gap_days"], r["symbol"], r["dataset"]))
     by_dataset = {}
     for dataset in DATASETS:
         entries = [r for r in repairs if r["dataset"] == dataset]
+        unavailable = [r for r in confirmed_unavailable if r["dataset"] == dataset]
         by_dataset[dataset] = {
             "symbols_needing_delta_backfill": len(entries),
             "total_gap_days": round(sum(r["gap_days"] for r in entries), 1),
+            "symbols_confirmed_unavailable": len(unavailable),
         }
 
     return {
@@ -123,8 +201,10 @@ def build(im: Optional[pd.DataFrame] = None) -> dict:
         "gap_tolerance_hours": GAP_TOLERANCE.total_seconds() / 3600,
         "pairs_checked": n_checked,
         "repairs_needed": len(repairs),
+        "confirmed_unavailable_count": len(confirmed_unavailable),
         "by_dataset": by_dataset,
         "repairs": repairs,
+        "confirmed_unavailable": confirmed_unavailable,
     }
 
 
@@ -136,7 +216,9 @@ def main() -> None:
     print(f"Checked {out['pairs_checked']} (symbol, dataset) pairs with data already on disk.")
     print(f"{out['repairs_needed']} need a delta backfill for a newly-revealed earlier window:")
     for dataset, s in out["by_dataset"].items():
-        print(f"  {dataset:22} {s['symbols_needing_delta_backfill']:3} symbols, {s['total_gap_days']:8.1f} total gap-days")
+        print(f"  {dataset:22} {s['symbols_needing_delta_backfill']:3} actionable, {s['total_gap_days']:8.1f} gap-days, "
+              f"{s['symbols_confirmed_unavailable']:3} confirmed unavailable (not actionable)")
+    print(f"{out['confirmed_unavailable_count']} pairs have a gap confirmed unfillable (source 404s the whole window).")
     print(f"-> {OUT_PATH}")
 
 

@@ -156,7 +156,12 @@ def build_symbol(symbol: str, start: date, end: date) -> dict:
         new = pd.concat(frames).sort_index()
         new = new[~new.index.duplicated(keep="last")]
         if out_path.exists():
-            old = pd.read_parquet(out_path)
+            # the file is written with "timestamp" as a plain column
+            # (reset_index().to_parquet(...) below) -- reading it back
+            # without restoring the DatetimeIndex mixes a RangeIndex (old)
+            # with a DatetimeIndex (new) in the concat below, and
+            # sort_index() then crashes comparing Timestamp to int.
+            old = pd.read_parquet(out_path).set_index("timestamp")
             new = pd.concat([old, new]).sort_index()
             new = new[~new.index.duplicated(keep="last")]
         tmp = out_path.with_suffix(".tmp.parquet")
