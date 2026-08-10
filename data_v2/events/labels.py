@@ -36,6 +36,19 @@ Pre-unblinding fixes (2026-08-10, review round 3), all load-bearing:
    trigger_residual_sign columns) -- see _direction_for_event. Getting
    this wrong can silently turn a real symmetric edge into a fake
    cancelled-out NO_EDGE.
+
+Pre-unblinding fix (2026-08-10, review round 4):
+
+4. Entry price is the entry bar's OPEN, not its close. An earlier version
+   used `close[entry_idx]` -- the price AFTER that bar's own move already
+   happened -- to price the cost of entering the position. The bar's OPEN
+   is the fair tradeable price at the instant the entry becomes possible
+   (the start of the bar), before any of that bar's own return has
+   accrued; using close overstated how favorably a real order could have
+   been priced. This only affects event_cost_x1/x2 (data_v2.events.costs'
+   slippage_per_side = tick_size/entry_price) -- the return path itself is
+   computed from residual_logret_5m increments, independent of the price
+   level.
 """
 from __future__ import annotations
 
@@ -67,7 +80,7 @@ def label_events(
     symbol, family, + family-specific trigger columns) for ONE symbol.
     symbol_frame: that same symbol's full causal feature frame (must
     contain 'timestamp', 'research_available_at', 'residual_logret_5m',
-    'close', sorted ascending, regular 5m grid). Returns events with
+    'open', sorted ascending, regular 5m grid). Returns events with
     residual_ret_h/MFE_h/MAE_h/time_to_MFE_h added for each horizon, plus
     event_cost_x1/event_cost_x2 (data_v2.events.costs, per-event -- NaN if
     tick_size isn't provided, never silently a flat default).
@@ -78,7 +91,7 @@ def label_events(
     frame = symbol_frame.reset_index(drop=True)
     bar_ts = frame["timestamp"].to_numpy()
     log_ret_5m = frame["residual_logret_5m"].fillna(0).to_numpy()
-    close = frame["close"].to_numpy()
+    open_ = frame["open"].to_numpy()
     n_frame = len(frame)
 
     out = events.copy()
@@ -91,7 +104,7 @@ def label_events(
         frame["timestamp"].iloc[i] if 0 <= i < n_frame else pd.NaT for i in entry_idx
     ]
 
-    entry_price = np.array([close[i] if 0 <= i < n_frame else np.nan for i in entry_idx])
+    entry_price = np.array([open_[i] if 0 <= i < n_frame else np.nan for i in entry_idx])
     event_costs = [
         compute_event_cost(p, tick_size) if tick_size is not None else (np.nan, np.nan)
         for p in entry_price

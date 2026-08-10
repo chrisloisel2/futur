@@ -47,6 +47,17 @@ PRIMARY_CLASSIFICATION_HORIZON = "1h"
 MIN_YEAR_N_FOR_CONSISTENCY_CHECK = 20
 MIN_POOLED_N = 100
 CANDIDATE_PF_MIN = 1.15
+# Pre-unblinding fix (round 4): net_expectancy_cost_x1/x2 are means computed
+# only over events with a non-NaN per-event cost (data_v2.events.costs) --
+# an event with no resolvable tick_size (e.g. InstrumentMaster gap) is
+# excluded from that mean rather than costed at 0. Without this gate, a
+# family with N=500 total events but only 200 costable could still reach
+# CANDIDATE off the 200 costable events' stats alone, while `n` in the
+# report still reads 500 -- silently presenting a partial-coverage result
+# as if it described the whole family. 1.0 (not some lesser threshold): the
+# point of this gate is that CANDIDATE must never be reachable while any
+# detected event's cost is unverified, full stop.
+MIN_COST_COVERAGE_FOR_CANDIDATE = 1.0
 
 LARGE_ALT_TIER_SIZE = 20  # top-20 by 30d median quote volume at event time, per protocol
 
@@ -63,6 +74,8 @@ def assign_asset_tier(symbol: str, *, is_large_alt: bool) -> str:
 class HorizonStats:
     horizon: str
     n: int
+    costable_n: int
+    cost_coverage: float
     gross_expectancy: float
     net_expectancy_cost_x1: float
     net_expectancy_cost_x2: float
@@ -76,6 +89,7 @@ class HorizonStats:
     def to_dict(self) -> dict:
         return {
             "horizon": self.horizon, "n": self.n,
+            "costable_n": self.costable_n, "cost_coverage": self.cost_coverage,
             "gross_expectancy": self.gross_expectancy,
             "net_expectancy_cost_x1": self.net_expectancy_cost_x1,
             "net_expectancy_cost_x2": self.net_expectancy_cost_x2,
@@ -93,7 +107,7 @@ def _horizon_stats(
     r = returns.dropna()
     n = len(r)
     if n == 0:
-        return HorizonStats(horizon, 0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
+        return HorizonStats(horizon, 0, 0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)
     gross = float(r.mean())
     wins = r[r > 0]
     losses = r[r < 0]
@@ -103,19 +117,27 @@ def _horizon_stats(
     # PRIMARY: per-event cost (data_v2.events.costs), NaN-safe -- an event
     # with no tick_size available (event_cost_x1 NaN) is simply excluded
     # from the net-of-cost mean rather than silently costed at 0.
+    # costable_n/cost_coverage (round 4) track exactly how many of the `n`
+    # events actually went into that mean -- a net_expectancy_cost_x1 built
+    # from a minority of events must never be presented as if it described
+    # all of them (see MIN_COST_COVERAGE_FOR_CANDIDATE in _classify).
     if event_cost_x1 is not None:
-        net1 = (r - event_cost_x1.reindex(r.index)).dropna()
+        aligned_cost_x1 = event_cost_x1.reindex(r.index)
+        costable_n = int(aligned_cost_x1.notna().sum())
+        net1 = (r - aligned_cost_x1).dropna()
         net_x1 = float(net1.mean()) if len(net1) else np.nan
     else:
+        costable_n = 0
         net_x1 = np.nan
     if event_cost_x2 is not None:
         net2 = (r - event_cost_x2.reindex(r.index)).dropna()
         net_x2 = float(net2.mean()) if len(net2) else np.nan
     else:
         net_x2 = np.nan
+    cost_coverage = costable_n / n
 
     return HorizonStats(
-        horizon=horizon, n=n,
+        horizon=horizon, n=n, costable_n=costable_n, cost_coverage=cost_coverage,
         gross_expectancy=gross,
         net_expectancy_cost_x1=net_x1,
         net_expectancy_cost_x2=net_x2,
@@ -149,7 +171,7 @@ class FamilyReport:
 
 
 def _classify(by_year_cost_x1: dict, pooled_cost_x1: float, pooled_cost_x2: float,
-              pooled_pf: float, pooled_n: int) -> tuple[str, str]:
+              pooled_pf: float, pooled_n: int, pooled_cost_coverage: float) -> tuple[str, str]:
     if pooled_n < MIN_POOLED_N:
         return "KILL", f"pooled N={pooled_n} < {MIN_POOLED_N}"
     if pooled_cost_x1 is not None and pooled_cost_x1 <= 0:
@@ -163,7 +185,22 @@ def _classify(by_year_cost_x1: dict, pooled_cost_x1: float, pooled_cost_x2: floa
     if pooled_cost_x2 is None or pooled_cost_x2 <= 0 or (pooled_pf or 0) < CANDIDATE_PF_MIN:
         return "WEAK", f"cost x2 net={pooled_cost_x2}, PF={pooled_pf} < {CANDIDATE_PF_MIN}"
 
-    return "CANDIDATE", f"cost x2 net={pooled_cost_x2:.5f} > 0, PF={pooled_pf:.2f} >= {CANDIDATE_PF_MIN}, N={pooled_n}"
+    # Pre-unblinding fix (round 4): the net-of-cost stats above are means
+    # over only the COSTABLE subset of pooled_n events -- if that subset is
+    # a minority (e.g. 200 costable out of 500 detected), a positive result
+    # on it says nothing about the other 300 and must never be promoted to
+    # CANDIDATE. This gate is independent of and in addition to the PF/net
+    # checks above, which is why it survives them and still blocks here.
+    if pooled_cost_coverage is None or pooled_cost_coverage < MIN_COST_COVERAGE_FOR_CANDIDATE:
+        uncostable = pooled_n - round((pooled_cost_coverage or 0.0) * pooled_n)
+        coverage_pct = f"{(pooled_cost_coverage or 0.0):.1%}"
+        return "WEAK", (
+            f"cost coverage {coverage_pct} < {MIN_COST_COVERAGE_FOR_CANDIDATE:.0%} "
+            f"({uncostable} of {pooled_n} events have no computable per-event cost -- "
+            "net-of-cost stats are not representative of the full pooled sample)"
+        )
+
+    return "CANDIDATE", f"cost x2 net={pooled_cost_x2:.5f} > 0, PF={pooled_pf:.2f} >= {CANDIDATE_PF_MIN}, N={pooled_n}, cost_coverage=100%"
 
 
 def build_family_report(
@@ -221,7 +258,7 @@ def build_family_report(
     by_year_primary = {y: hs[PRIMARY_CLASSIFICATION_HORIZON].to_dict() for y, hs in by_year.items()}
     classification, reason = _classify(
         by_year_primary, pooled.net_expectancy_cost_x1, pooled.net_expectancy_cost_x2,
-        pooled.profit_factor, pooled.n,
+        pooled.profit_factor, pooled.n, pooled.cost_coverage,
     )
 
     return FamilyReport(

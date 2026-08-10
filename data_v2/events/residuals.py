@@ -14,13 +14,18 @@ its own comment) -- neither was ever actually computed from price. This
 module builds all three real series (5m/15m/1h) from close prices using
 one shared set of causal 2-factor betas.
 
-Betas are refit EVERY bar (not literally "daily, frozen intraday" as the
-protocol's prose describes) -- both are causal (shift(1) guarantees beta_t
-only uses data through t-1, never t), continuous refitting is the more
-conservative/adaptive choice, not a leakage risk. A strict daily-refit-
-freeze schedule is a possible future refinement, not required for
-correctness; documented here rather than silently deviating from the
-protocol's wording without a note.
+Pre-unblinding fix (2026-08-10, review round 4): betas used to be refit
+EVERY bar, documented at the time as a deliberate deviation from the
+protocol's "daily, frozen intraday" description. Reverted back to match
+the protocol's actual wording: `_causal_2factor_betas` (still shift(1),
+still causal) is computed as before, but only its value at the FIRST bar
+of each UTC calendar day is kept (`_freeze_daily`) -- every other bar that
+day reuses that same frozen value. This means the very first calendar day
+of any panel has no prior day to base a beta on and is legitimately NaN
+end to end (not a bug: there is nothing to freeze yet), and a symbol's
+beta can only change once every 288 bars instead of every bar, matching
+what the protocol actually describes rather than the more-adaptive-but-
+undocumented continuous refit.
 """
 from __future__ import annotations
 
@@ -39,6 +44,20 @@ BETA_MIN_PERIODS = 20  # small enough to be testable on short synthetic panels
 
 def _log_return(close: pd.Series, bars: int) -> pd.Series:
     return np.log(close / close.shift(bars))
+
+
+def _freeze_daily(beta: pd.Series) -> pd.Series:
+    """Keep beta's value only at the first bar of each UTC calendar day,
+    then forward-fill it across the rest of that day. The value being
+    frozen already only depends on data through the PRIOR bar (shift(1) in
+    _causal_2factor_betas), so day D's frozen beta is built entirely from
+    day D-1 and earlier -- freezing does not add lookahead, it removes the
+    intraday updates the protocol's prose never called for."""
+    if not isinstance(beta.index, pd.DatetimeIndex):
+        raise TypeError("beta series must be indexed by a DatetimeIndex to apply the daily freeze")
+    day = beta.index.floor("1D")
+    is_first_bar_of_day = ~pd.Series(day, index=beta.index).duplicated(keep="first")
+    return beta.where(is_first_bar_of_day).ffill()
 
 
 def _causal_2factor_betas(
@@ -100,6 +119,7 @@ def compute_residual_returns(
             continue
 
         beta_btc, beta_eth = _causal_2factor_betas(ret_1h, btc_ret_1h, eth_ret_1h, window_bars, min_periods)
+        beta_btc, beta_eth = _freeze_daily(beta_btc), _freeze_daily(beta_eth)
 
         out[symbol] = pd.DataFrame({
             "residual_logret_5m": ret_5m - (beta_btc * btc_ret_5m + beta_eth * eth_ret_5m),

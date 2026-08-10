@@ -27,6 +27,7 @@ columns (built by `data_v2/events/schema.py::REQUIRED_COLUMNS`):
 
 | column | source |
 |---|---|
+| `open` | perp_5m — the entry bar's fair tradeable price, see "Labels" |
 | `close` | perp_5m |
 | `oi` | oi_vision_5m (`sum_open_interest`) |
 | `oi_delta_pct_1h` | oi.pct_change(12) |
@@ -35,6 +36,7 @@ columns (built by `data_v2/events/schema.py::REQUIRED_COLUMNS`):
 | `basis` (`perp_spot_basis`), `basis_z_1d`, `basis_z_7d` | data_v2/features/basis.py |
 | `residual_logret_5m`, `residual_return_15m`, `residual_return_1h` | causal beta-hedge vs BTC/ETH, see below (`data_v2/events/residuals.py`) |
 | `research_available_at` | `data_v2/temporal/available_at.py` — the causal cutoff labels start from, see "Four horizons only" |
+| `liq_feed_available` | per-bar bool: was the declared-liquidation feed actually up at this bar? See amendment round 4, item 11 |
 | `liq_long_usd_5m`, `liq_short_usd_5m` | declared liquidations (Bybit/OKX live since 2026-07-04 — DATA_READY_WITH_INFERRED_LIQUIDATIONS per prior audit; optional confirmation signal only, never a gate, per that audit's own design) |
 
 For BTC/ETH themselves, residual = raw return at each frequency (no
@@ -44,10 +46,11 @@ window, shift(1) so beta at t only uses data through t-1) gives `beta_btc`,
 `beta_eth`; the SAME pair of betas is applied to the 5m/15m/1h return
 series to get `residual_logret_5m`/`residual_return_15m`/
 `residual_return_1h` = actual return − (beta_btc × BTC return + beta_eth ×
-ETH return) at that frequency. (Implementation note, not a methodology
-change: betas are refit every bar rather than literally once/day-and-
-frozen — both are causal; continuous refitting is the more adaptive
-choice, not a lookahead risk.)
+ETH return) at that frequency. Betas are refit once per UTC calendar day
+(at that day's first bar, from data through the prior day) and held frozen
+for the rest of the day, matching this section's original wording — see
+amendment round 4, item 10, for why an interim continuous-refit version
+was reverted.
 
 ## Four families (exactly these, no fifth added mid-scan)
 
@@ -86,6 +89,10 @@ liq_long_usd_5m + liq_short_usd_5m  ranked >= P95 (trailing 30d, same symbol)
 oi_delta_pct_1h                     <= -5%   (collapse, sharper than DELEVERAGING's -3%)
 price_residual shock                 |price_residual_15m| >= 2.5 * rolling_std(price_residual_15m, 30d)
 ```
+The liquidation-vs-flow choice is made PER BAR from `liq_feed_available`
+(amendment round 4, item 11), not once for the whole symbol: a bar where
+the feed was down uses the flow fallback even if a later bar of the same
+symbol has the feed up and uses the liquidation rank instead.
 
 All percentile/z-score lookbacks are trailing and causal (never include the
 current or future bar). All four families are evaluated independently —
@@ -108,7 +115,10 @@ in residual-return space over [0, h]), `MAE_h` (max adverse excursion),
 `research_available_at` — i.e. the triggering bar's own 5m move (whose
 close is what produced the trigger condition) is excluded from every
 horizon's forward path; a signal produced at close 10:05 can never benefit
-from the 10:00→10:05 move that triggered it.
+from the 10:00→10:05 move that triggered it. The entry price used for cost
+purposes (see "Cost model") is that entry bar's OWN OPEN, not its close —
+the fair tradeable price before that bar's own move has happened
+(amendment round 4, item 9).
 
 **Base increment**: horizons are built by SUMMING `residual_logret_5m`
 (non-overlapping 5m log-returns) over the entry bar and the following
@@ -141,13 +151,21 @@ entry_price)` (2 sides, each paying one taker fee and losing one tick to
 slippage), `cost_x2 = 2×cost_x1`. `taker_fee_rate` defaults to 5bp
 (`configs/alpha20.yaml`'s binance_usdm taker convention); `tick_size` and
 `entry_price` come from `data_v2/instruments/instrument_master.parquet`
-and the event's own entry bar, respectively — cost is symbol- and price-
-level-specific, never a single number applied to every event regardless of
-venue/price. **Secondary, reported alongside but never substituted for the
-primary figure**: a flat stress cost (`STRESS_COST_X1`=30bp,
-`STRESS_COST_X2`=60bp, this project's existing `cost_rt` convention, e.g.
-`scripts/backtest_ctrend_v1.py`) — useful as a blunt sensitivity check, not
-as the classification input.
+and the event's own entry bar's OPEN, respectively — cost is symbol- and
+price-level-specific, never a single number applied to every event
+regardless of venue/price. **Secondary, reported alongside but never
+substituted for the primary figure**: a flat stress cost (`STRESS_COST_X1`
+=30bp, `STRESS_COST_X2`=60bp, this project's existing `cost_rt`
+convention, e.g. `scripts/backtest_ctrend_v1.py`) — useful as a blunt
+sensitivity check, not as the classification input.
+
+**Cost coverage gate** (amendment round 4, item 8): `event_cost_x1` is NaN
+for any event whose symbol has no resolvable `tick_size` (an
+InstrumentMaster gap) — its net-of-cost stats are computed only over the
+events that DO have a cost, tracked per (family, horizon) as `costable_n`/
+`cost_coverage = costable_n / n`. A family can never reach CANDIDATE while
+`cost_coverage < 100%` on `PRIMARY_CLASSIFICATION_HORIZON`, however
+positive the costable subset looks — see "Classification".
 
 ## Statistics computed per (family, horizon)
 
@@ -177,8 +195,9 @@ to close.
 - **WEAK**: net expectancy (cost×1) > 0 pooled AND consistent sign year-
   over-year (1h), but net expectancy (cost×2) <= 0, OR PF < 1.15 (1h).
 - **CANDIDATE**: net expectancy (cost×2) > 0, PF >= 1.15, consistent sign
-  across years with >=20 events, N >= 100 pooled (all on 1h). A CANDIDATE
-  is what "merits ML" per this project's standing rule (memory
+  across years with >=20 events, N >= 100 pooled, AND `cost_coverage ==
+  100%` (all on 1h, see "Cost coverage gate" above — amendment round 4).
+  A CANDIDATE is what "merits ML" per this project's standing rule (memory
   project-data-v2-rebuild) — it is not itself a green light to deploy
   capital (see project_new_edges_phase.md's own independence/robustness
   bar for that decision, applied separately once a family reaches
@@ -248,3 +267,85 @@ in this amendment — only the CORRECTNESS of how each was computed. Items
 1-9 are bug fixes to match this document's own stated intent (e.g. "never
 include the current or future bar" was already written above before this
 amendment; the code simply didn't do it yet).
+
+**2026-08-10, pre-unblinding review (round 4, PREUNBLINDING_R4_FINAL)** —
+same standing as round 3: found by external review of the CODE against
+this document and against `reports/DATA_V2_READINESS.json` (still
+`DATA_V2_READY: false`), not by seeing any scan output:
+
+8. `_classify` (`data_v2/events/scanner.py`) could reach CANDIDATE off a
+   minority of a family's detected events: net-of-cost stats are means
+   over only the events with a resolvable per-event cost
+   (`event_cost_x1`/`x2` NaN wherever `tick_size` is unresolved in
+   InstrumentMaster), but the pooled `n` used for the `N >= 100` gate
+   counted ALL detected events regardless. A family with 500 detected
+   events and only 200 costable could pass on the 200 alone while
+   reporting N=500. Fixed: `costable_n`/`cost_coverage` are now tracked
+   per (family, horizon), and `cost_coverage == 100%` is a hard,
+   independent requirement for CANDIDATE (see "Cost coverage gate" above)
+   — a family with any uncostable event caps at WEAK, however strong the
+   costable subset's own stats look.
+9. DELEVERAGING's `liq_confirmed` and FORCED_FLOW_REVERSAL's liquidation-
+   vs-flow branch both keyed off column PRESENCE
+   (`"liq_long_usd_5m" in df.columns`), which cannot distinguish "the
+   liquidation feed was down for this bar" from "the feed was up and saw
+   zero liquidations" — the feed only exists from 2026-07-04 per the
+   Input feature frame table above, so every bar before that date (and any
+   bar where the feed was genuinely down) was silently read as "checked,
+   zero liquidations" rather than "unknown". Fixed: a new required
+   `liq_feed_available` column (per bar, bool) is read directly.
+   `liq_confirmed` is now a nullable bool (`<NA>` when the feed was down at
+   that bar, real True/False only when it was up); FORCED_FLOW_REVERSAL
+   picks the liquidation-rank or flow-rank threshold PER BAR from this
+   column instead of once for the whole symbol.
+10. `data_v2/events/residuals.py`'s betas were refit every bar, documented
+    at the time (round 3) as a deliberate, noted deviation from this
+    section's "60-day trailing window ... betas refit every bar rather
+    than literally once/day-and-frozen" implementation note. Reverted:
+    betas are now computed once per UTC calendar day (at that day's first
+    bar, from a causal rolling window through the prior day) and frozen
+    for the rest of the day, matching the section's actual prose. Still
+    causal (the frozen value only ever depends on data strictly before the
+    day it's used in); the first calendar day of any panel has no prior
+    day to freeze from and is legitimately residual=NaN end to end.
+11. RELATIVE_VALUE_DISLOCATION's `research_available_at` was read from a
+    single, arbitrary symbol (`panel[symbols[0]]`) for every fired event
+    regardless of which symbol actually fired — silently assuming every
+    symbol in the panel becomes knowable at the same instant. Since a
+    fired event depends on a cross-sectional stat (median/mean/std) built
+    from every symbol with real data at that bar, the event cannot be
+    knowable before the SLOWEST contributing symbol's own
+    `research_available_at`. Fixed to the row-wise MAX of
+    `research_available_at` over exactly the symbols that contributed a
+    non-NaN value to that bar's residual/basis_z/flow computation.
+12. `_min_periods` (`data_v2/events/detectors.py`) capped the warm-up
+    requirement at 20 observations regardless of the nominal 30d/60d/90d
+    window (`min(window_bars, 20)`) — so a rolling std/percentile could
+    already gate a detection right after a symbol's listing or the start
+    of the backfilled history, off ~100 minutes of data standing in for a
+    30/60/90-day baseline. Fixed: the default is now the FULL nominal
+    window (complete warm-up); a `min_periods_override` parameter exists
+    solely so unit tests can exercise short synthetic panels — production
+    call sites (the real scan) must never pass it.
+13. `data_v2/events/labels.py` priced `entry_price` from the entry bar's
+    CLOSE, i.e. the price AFTER that bar's own move had already happened
+    — overstating how favorably a real order could have been filled and
+    understating `event_cost_x1`/`x2`'s slippage term. Fixed to the entry
+    bar's OWN OPEN (added as a required column, `open`, in schema.py).
+    Only the cost figure is affected — the return path itself is built
+    from `residual_logret_5m` increments and does not depend on the entry
+    price level.
+14. `data_v2/features/basis.py`'s `basis_z_1d`/`basis_z_7d` rolled the mean
+    /std directly over `basis` (the bar's own current value included in
+    the window it was then judged against — the same circularity already
+    fixed for the event detectors in round 3, item 1, but never applied
+    here), with `min_periods = window // 3` (a third of a day/week
+    standing in for a full day/week). Fixed to `basis.shift(1)` before the
+    rolling mean/std (strictly the prior 288/2016 bars) with
+    `min_periods` = the full window — the first day (resp. week) of any
+    symbol's basis history is now legitimately NaN rather than an
+    unreliable early estimate.
+
+No detection threshold, cooldown, or classification cutoff number changed
+in this amendment either — items 8-14 are, again, CORRECTNESS fixes to
+match this document's stated intent, not new methodology.

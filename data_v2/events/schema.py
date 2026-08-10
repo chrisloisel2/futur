@@ -18,6 +18,20 @@ expectancy -- see data_v2/events/labels.py). All three are now required,
 built causally from real price + BTC/ETH betas (data_v2.events.residuals).
 research_available_at is also required -- labels must start from a bar's
 own causal availability, not its raw timestamp (see labels.py).
+
+Pre-unblinding fix (2026-08-10, review round 4):
+  - `open` added as required -- labels.py enters a position at the entry
+    bar's OPEN (the fair tradeable price before that bar's own move), not
+    its close, which would price the entry after part of the bar's own
+    move already happened.
+  - `liq_feed_available` added as required (bool, one entry per bar). The
+    liquidation feed (Bybit/OKX declared liquidations) only exists from
+    2026-07-04 onward per the protocol's own note -- before that, or for
+    any bar where the feed was genuinely down, `liq_long_usd_5m`/
+    `liq_short_usd_5m` are not "0 liquidations", they are "unknown". Without
+    this column, a detector reading 0 there cannot tell a real quiet bar
+    from a bar with no feed at all -- see detectors.py's DELEVERAGING
+    liq_confirmed and FORCED_FLOW_REVERSAL's per-bar liq/flow fallback.
 """
 from __future__ import annotations
 
@@ -27,6 +41,7 @@ REQUIRED_COLUMNS = (
     "timestamp",
     "research_available_at",
     "symbol",
+    "open",
     "close",
     "oi",
     "oi_delta_pct_1h",
@@ -42,6 +57,7 @@ REQUIRED_COLUMNS = (
     "residual_return_15m",
     "residual_return_1h",
     "volume",
+    "liq_feed_available",
 )
 
 OPTIONAL_COLUMNS = (

@@ -136,6 +136,59 @@ def test_premium_index_passthrough(fake_universe):
     assert df["premium_index"].notna().all()
 
 
+def test_basis_z_1d_excludes_current_bar_from_its_own_threshold(fake_universe):
+    """Round-4 fix: basis_z_1d's mean/std must come from basis.shift(1) --
+    the strictly PRIOR 288 bars -- never including the bar's own value. A
+    huge one-bar spike must not be able to inflate the very mean/std it is
+    then measured against (which would silently damp its own z-score)."""
+    idx = pd.date_range("2024-03-01", periods=400, freq="5min", tz="UTC")
+    rng = np.random.default_rng(5)
+    spot_close = np.full(len(idx), 100.0)
+    perp_close = spot_close * (1 + rng.normal(0, 0.0001, len(idx)))
+    spike_pos = 350
+    perp_close[spike_pos] = spot_close[spike_pos] * 1.05  # huge, isolated 5% spike
+    _write_5m(fake_universe["perp"], "SPKUSDT", 2024, idx, "close", perp_close)
+    _write_5m(fake_universe["spot"], "SPKUSDT", 2024, idx, "spot_close", spot_close)
+
+    df = basis_mod.build_basis_symbol("SPKUSDT")
+    basis = df["perp_spot_basis"]
+
+    # manually recompute the STRICTLY PRIOR window's mean/std for the spike
+    # bar and confirm basis_z_1d matches it exactly -- if the spike were
+    # (bug) included in its own window, the manual prior-only figure would
+    # disagree with whatever the code produced.
+    prior = basis.iloc[spike_pos - 288 : spike_pos]  # the 288 bars strictly before the spike
+    expected_z = (basis.iloc[spike_pos] - prior.mean()) / prior.std()
+    assert df["basis_z_1d"].iloc[spike_pos] == pytest.approx(expected_z, rel=1e-9)
+
+    # the bar strictly AFTER the spike, by contrast, must have the spike
+    # inside ITS prior window (this is expected, not a bug -- confirms the
+    # window is genuinely history-based, not just "always excludes bar
+    # spike_pos").
+    prior_next = basis.iloc[spike_pos - 287 : spike_pos + 1]
+    expected_z_next = (basis.iloc[spike_pos + 1] - prior_next.mean()) / prior_next.std()
+    assert df["basis_z_1d"].iloc[spike_pos + 1] == pytest.approx(expected_z_next, rel=1e-9)
+
+
+def test_basis_z_1d_requires_complete_288_bar_warmup(fake_universe):
+    """Round-4 fix: min_periods is the FULL 288-bar window, not 288//3 --
+    basis_z_1d must be NaN until a complete day of history exists, not
+    fire off a third of a day's worth of (unreliable) mean/std."""
+    idx = pd.date_range("2024-03-01", periods=300, freq="5min", tz="UTC")
+    rng = np.random.default_rng(6)
+    spot_close = 100 + np.cumsum(rng.normal(0, 0.05, len(idx)))
+    perp_close = spot_close * (1 + rng.normal(0, 0.0005, len(idx)))
+    _write_5m(fake_universe["perp"], "WARMUSDT", 2024, idx, "close", perp_close)
+    _write_5m(fake_universe["spot"], "WARMUSDT", 2024, idx, "spot_close", spot_close)
+
+    df = basis_mod.build_basis_symbol("WARMUSDT")
+    # bars 0..287 (index positions 0-287, i.e. the first 288 rows) can never
+    # have a complete strictly-prior 288-bar window -- all must be NaN.
+    assert df["basis_z_1d"].iloc[:288].isna().all()
+    # bar 288 (the 289th row) is the first with a full prior window.
+    assert df["basis_z_1d"].iloc[288:].notna().all()
+
+
 def test_missing_spot_returns_none(fake_universe):
     idx = pd.date_range("2024-03-01", periods=5, freq="5min", tz="UTC")
     _write_5m(fake_universe["perp"], "NOSPOTUSDT", 2024, idx, "close", np.full(5, 100.0))

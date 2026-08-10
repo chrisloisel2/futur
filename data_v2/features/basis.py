@@ -9,7 +9,22 @@ legs genuinely have a bar.
 
 Columns:
   perp_spot_basis   = perp_close / spot_close - 1
-  basis_z_1d/_7d     = perp_spot_basis rolling z-score (288 / 2016 bars)
+  basis_z_1d/_7d     = perp_spot_basis rolling z-score (288 / 2016 bars).
+                        Pre-unblinding fix (2026-08-10, round 4): the mean/
+                        std used to build the z-score are now computed from
+                        basis.shift(1) -- i.e. strictly the PRIOR 288/2016
+                        bars, never including the current bar itself (the
+                        same current-bar-must-never-judge-itself discipline
+                        already applied to the event detectors' percentile/
+                        std thresholds, data_v2/events/detectors.py). An
+                        earlier version rolled over `basis` directly, so
+                        the window used to judge bar t as "extreme"
+                        included bar t's own value. min_periods is now the
+                        FULL window (288/2016), not window//3 -- a z-score
+                        built from a third of a day/week is not that
+                        day/week's baseline; the first 1 (resp. 7) days of
+                        any symbol's basis history are legitimately NaN
+                        rather than an unreliable early estimate.
   basis_change_5m/15m/1h = perp_spot_basis.diff(1/3/12)
   premium_index      = real Binance Vision premium-index series
                         (data/derivatives_backfill/binance_vision_premium),
@@ -98,11 +113,16 @@ def build_basis_symbol(symbol: str) -> pd.DataFrame | None:
 
     joined["perp_spot_basis"] = joined["perp_close"] / joined["spot_close"] - 1.0
     basis = joined["perp_spot_basis"]
-    joined["basis_z_1d"] = (basis - basis.rolling(ROLL_1D, min_periods=ROLL_1D // 3).mean()) / basis.rolling(
-        ROLL_1D, min_periods=ROLL_1D // 3
+    # strictly historical: the mean/std a bar's z-score is judged against
+    # come from shift(1) -- the PRIOR ROLL_1D/ROLL_7D bars only, never
+    # including the bar's own value -- with min_periods=the full window
+    # (complete 1d/7d warm-up), not a fraction of it.
+    basis_hist = basis.shift(1)
+    joined["basis_z_1d"] = (basis - basis_hist.rolling(ROLL_1D, min_periods=ROLL_1D).mean()) / basis_hist.rolling(
+        ROLL_1D, min_periods=ROLL_1D
     ).std()
-    joined["basis_z_7d"] = (basis - basis.rolling(ROLL_7D, min_periods=ROLL_7D // 3).mean()) / basis.rolling(
-        ROLL_7D, min_periods=ROLL_7D // 3
+    joined["basis_z_7d"] = (basis - basis_hist.rolling(ROLL_7D, min_periods=ROLL_7D).mean()) / basis_hist.rolling(
+        ROLL_7D, min_periods=ROLL_7D
     ).std()
     joined["basis_change_5m"] = basis.diff(1)
     joined["basis_change_15m"] = basis.diff(3)
