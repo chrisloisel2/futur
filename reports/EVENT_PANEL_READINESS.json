@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-08-11 14:56:10.320261+00:00",
+  "symbols_materialized": 0,
+  "symbols_scanned": 0,
+  "row_count": 0,
+  "min_timestamp": null,
+  "max_timestamp": null,
+  "coverage_by_source": {},
+  "gate_values": {
+    "duplicate_pk": 0,
+    "future_joins": 0,
+    "pit_violations": 0,
+    "causality_violations": 0,
+    "required_feature_silent_ffill": 0,
+    "invalid_warmup_rows": 0,
+    "irregular_grid_unexplained": 0,
+    "label_future_leak": 0
+  },
+  "hard_gates": {
+    "duplicate_pk": true,
+    "future_joins": true,
+    "pit_violations": true,
+    "causality_violations": true,
+    "required_feature_silent_ffill": true,
+    "invalid_warmup_rows": true,
+    "irregular_grid_unexplained": true,
+    "label_future_leak": true,
+    "row_count_positive": false
+  },
+  "EVENT_PANEL_READY": false,
+  "schema_hash": "d88d93c0c2b2cd4193b495aa81e8a8c3ae6cc589d731792ae5d32e25b3ec875f",
+  "provenance_hash": "42ee98be80550b7f6d5e41edf1fec2f297605836cfdd54ddf90055ccf54ef53f",
+  "per_symbol": {},
+  "notes": "Panel not yet materialized at scale: build_event_feature_panel.py's own --min-free-gb=15.0 disk floor correctly refuses to run while real free disk is under that floor -- same root cause and same honest-disclosure posture as DATA_V2_READINESS.json's aggTrades constraint."
+}
