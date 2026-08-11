@@ -12,16 +12,39 @@ Honnêteté : pas de liquidations historiques ici (indisponibles gratuitement).
 Sortie consolidée par actif : data/derivatives_backfill/binance/<stream>/<SYM>.parquet
 (écriture atomique) + registry. Rien d'inventé ; seulement ce que l'API rend.
 
+This is the CANONICAL writer for data/derivatives_backfill/binance/funding/
+{symbol}.parquet -- the exact path reports/DATA_V2_READINESS.json's
+"funding" dataset reads (verified by repo inspection 2026-08-11 before
+touching anything; scripts/collect_funding_rate_binance.py looks similar
+but writes to a DIFFERENT path, data/raw/binance_funding_rate/ -- not this
+store, do not use it for a P0 funding top-up).
+
+Fix (2026-08-11): backfill_funding() used to ALWAYS refetch the full
+--start..now range and overwrite the file outright each run -- safe today
+only because Binance's fundingRate endpoint still happens to serve the
+full multi-year history (verified live), but fragile: any future
+retention change on Binance's side would silently truncate the on-disk
+store on the next run, and every run re-fetches years of already-known
+data. Now genuinely incremental: reads the existing parquet (if any),
+fetches only from its last known timestamp forward, merges+dedupes+sorts,
+atomic-writes the union -- existing history is never lost even if the API
+ever serves a shorter window later. Default --symbols is now the full PIT
+universe (instrument_master.parquet) instead of a hardcoded 9-symbol
+list -- the on-disk store already covers ~312 symbols; the old default
+would have silently left all but 9 of them stale on every future run.
+
     python3 scripts/backfill_binance_derivatives_free.py --start 2021-01-01
 """
 from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import time
 import urllib.request
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 
@@ -32,8 +55,43 @@ from src.institutional.data.atomic_parquet import atomic_write_parquet
 B = "https://fapi.binance.com"
 OUT = ROOT / "data" / "derivatives_backfill" / "binance"
 REG = ROOT / "artifacts" / "data_registry" / "derivatives_backfill_store.yaml"
-SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
-           "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT"]
+INSTRUMENT_MASTER = ROOT / "data_v2" / "instruments" / "instrument_master.parquet"
+CORE_SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT",
+                "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT"]
+
+
+def free_gb(path: Path) -> float:
+    return shutil.disk_usage(path).free / (1024 ** 3)
+
+
+def default_symbols() -> list[str]:
+    """Full PIT universe when instrument_master exists (the real target --
+    the on-disk funding store already covers ~312 symbols; refreshing only
+    CORE_SYMBOLS would silently leave the rest stale), else the small core
+    list as an environment-independent fallback."""
+    if INSTRUMENT_MASTER.exists():
+        im = pd.read_parquet(INSTRUMENT_MASTER, columns=["symbol"])
+        return sorted(im["symbol"].unique().tolist())
+    return CORE_SYMBOLS
+
+
+def merge_funding(existing: Optional[pd.DataFrame], new: pd.DataFrame) -> pd.DataFrame:
+    """Union of existing on-disk rows and newly-fetched rows, deduplicated
+    by timestamp (keep the newer fetch's value on a genuine clash) and
+    sorted -- never drops a row that was on disk before this run."""
+    if existing is None or existing.empty:
+        combined = new
+    elif new.empty:
+        combined = existing
+    else:
+        combined = pd.concat([existing, new], ignore_index=True)
+    if combined.empty:
+        return combined
+    return (
+        combined.drop_duplicates(subset="timestamp", keep="last")
+        .sort_values("timestamp")
+        .reset_index(drop=True)
+    )
 
 
 def _get(url: str, tries: int = 3):
@@ -83,23 +141,46 @@ def backfill_oi_hist(sym: str) -> pd.DataFrame:
     return df[["timestamp", "open_interest", "open_interest_usd"]].sort_values("timestamp").reset_index(drop=True)
 
 
+def top_up_funding(sym: str, start_ms: int) -> pd.DataFrame:
+    """Incremental: read the existing on-disk parquet (if any), fetch only
+    from its last known timestamp forward (never re-fetching -- and never
+    losing -- history already on disk), merge, return the union sorted and
+    deduplicated. `start_ms` is only used as the floor for a symbol with no
+    existing file yet (first-time backfill)."""
+    path = OUT / "funding" / f"{sym}.parquet"
+    existing = pd.read_parquet(path) if path.exists() else None
+    fetch_from_ms = start_ms
+    if existing is not None and not existing.empty:
+        last_ts = pd.to_datetime(existing["timestamp"], utc=True).max()
+        fetch_from_ms = max(start_ms, int(last_ts.value // 1_000_000) + 1)
+    new = backfill_funding(sym, fetch_from_ms)
+    return merge_funding(existing, new)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--start", default="2021-01-01")
-    ap.add_argument("--symbols", default=",".join(SYMBOLS))
+    ap.add_argument("--symbols", default=None, help="comma-separated; default = full PIT universe")
+    ap.add_argument("--min-free-gb", type=float, default=5.0)
     args = ap.parse_args()
     start_ms = int(pd.Timestamp(args.start, tz="UTC").timestamp() * 1000)
-    syms = [s.strip() for s in args.symbols.split(",")]
+    syms = [s.strip() for s in args.symbols.split(",")] if args.symbols else default_symbols()
 
     registry = {}
-    print(f"{'Asset':<10}{'funding pts':>12}{'funding span':>26}{'OI hist pts':>12}")
-    print("─" * 62)
-    for sym in syms:
+    print(f"Funding top-up: {len(syms)} symbols, start={args.start}", flush=True)
+    print(f"{'Asset':<14}{'funding pts':>12}{'funding span':>26}{'OI hist pts':>12}")
+    print("─" * 66)
+    for i, sym in enumerate(syms, 1):
+        headroom = free_gb(ROOT)
+        if headroom < args.min_free_gb:
+            print(f"\nSTOP: free space {headroom:.1f}GB < --min-free-gb {args.min_free_gb}GB "
+                  f"after {i - 1}/{len(syms)} symbols. Resumable -- re-run to continue.", flush=True)
+            sys.exit(1)
         try:
-            fund = backfill_funding(sym, start_ms)
+            fund = top_up_funding(sym, start_ms)
             oi = backfill_oi_hist(sym)
         except Exception as e:
-            print(f"{sym:<10}  ERREUR {e}"); registry[sym] = {"status": "ERROR", "error": str(e)}; continue
+            print(f"{sym:<14}  ERREUR {e}"); registry[sym] = {"status": "ERROR", "error": str(e)}; continue
         ent = {"status": "PASS"}
         if len(fund):
             p = OUT / "funding" / f"{sym}.parquet"
@@ -113,8 +194,9 @@ def main() -> None:
                               "span": [str(oi['timestamp'].min()), str(oi['timestamp'].max())]}
         registry[sym] = ent
         fspan = ent.get("funding", {}).get("span", ["", ""])
-        print(f"{sym:<10}{ent.get('funding',{}).get('rows',0):>12}"
-              f"{(fspan[0][:10]+'→'+fspan[1][:10]):>26}{ent.get('oi_hist',{}).get('rows',0):>12}")
+        print(f"  [{i:3}/{len(syms)}] {sym:<14}{ent.get('funding',{}).get('rows',0):>10}"
+              f"{(fspan[0][:10]+'→'+fspan[1][:10]):>26}{ent.get('oi_hist',{}).get('rows',0):>12} "
+              f"free={headroom:.1f}GB", flush=True)
 
     REG.parent.mkdir(parents=True, exist_ok=True)
     import yaml
