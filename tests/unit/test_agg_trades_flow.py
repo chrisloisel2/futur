@@ -141,6 +141,124 @@ def test_canonicalize_cvd_is_noop_safe_on_empty_symbol(tmp_path):
     assert result is None
 
 
+# ── canonicalize_cvd: the 6 cases required by the Data V2 Phase 1 mission ──
+# (duplicate timestamps, idempotent restart, multi-year partitions, numeric
+# tolerance -- resume-after-checkpoint and earlier-history-insertion are
+# already covered above by test_manifest_checkpoints_after_each_batch_
+# not_only_at_symbol_end and test_cvd_canonicalized_after_earlier_data_
+# inserted_later respectively)
+
+
+def _write_year_file(root: Path, symbol: str, year: int, rows: pd.DataFrame) -> None:
+    d = root / f"symbol={symbol}" / f"year={year}"
+    d.mkdir(parents=True, exist_ok=True)
+    rows.to_parquet(d / "flow.parquet", index=False)
+
+
+def _flow_rows(timestamps, signed_volumes) -> pd.DataFrame:
+    ts = pd.to_datetime(timestamps, utc=True)
+    sv = np.asarray(signed_volumes, dtype=float)
+    return pd.DataFrame({
+        "timestamp": ts,
+        "aggressive_buy_usd": np.clip(sv, 0, None),
+        "aggressive_sell_usd": np.clip(-sv, 0, None),
+        "signed_volume": sv,
+        "CVD": np.nan,  # deliberately wrong/stale -- canonicalize_cvd must overwrite it
+    })
+
+
+def test_canonicalize_cvd_deduplicates_exact_duplicate_timestamps(tmp_path):
+    """Two rows sharing the exact same timestamp (e.g. a crash-and-resume
+    that wrote the same bar twice from two overlapping batches) must
+    collapse to one row, not double-count its signed_volume into CVD."""
+    root = tmp_path / "5m/venue=binance"
+    rows = _flow_rows(
+        ["2024-01-01 00:00", "2024-01-01 00:00", "2024-01-01 00:05"],  # first two are duplicates
+        [10.0, 999.0, 5.0],  # duplicate has a different (later-write-wins) value
+    )
+    _write_year_file(root, "DUPUSDT", 2024, rows)
+
+    final_cvd = flow_mod.canonicalize_cvd(root, "DUPUSDT")
+
+    out = pd.read_parquet(root / "symbol=DUPUSDT/year=2024/flow.parquet")
+    assert len(out) == 2  # deduplicated, not 3
+    assert out["timestamp"].is_unique
+    # keep="last" -- the second (999.0) write wins for the duplicated bar
+    expected_cvd = pd.Series([999.0, 999.0 + 5.0])
+    np.testing.assert_allclose(out.sort_values("timestamp")["CVD"].to_numpy(), expected_cvd.to_numpy())
+    assert final_cvd == pytest.approx(1004.0)
+
+
+def test_canonicalize_cvd_idempotent_restart_produces_identical_result(tmp_path):
+    """Running canonicalize_cvd twice in a row (e.g. a crash right after
+    the first call, before the manifest's last_cvd_* was updated, causing
+    a caller to re-invoke it) must be a true no-op the second time --
+    same rows, same CVD values, same final total."""
+    root = tmp_path / "5m/venue=binance"
+    rows = _flow_rows(
+        ["2024-01-01 00:00", "2024-01-01 00:05", "2024-01-01 00:10"],
+        [3.0, -1.5, 2.0],
+    )
+    _write_year_file(root, "IDEMUSDT", 2024, rows)
+
+    first_final = flow_mod.canonicalize_cvd(root, "IDEMUSDT")
+    first_out = pd.read_parquet(root / "symbol=IDEMUSDT/year=2024/flow.parquet").sort_values("timestamp")
+
+    second_final = flow_mod.canonicalize_cvd(root, "IDEMUSDT")
+    second_out = pd.read_parquet(root / "symbol=IDEMUSDT/year=2024/flow.parquet").sort_values("timestamp")
+
+    assert first_final == pytest.approx(second_final)
+    pd.testing.assert_frame_equal(
+        first_out.reset_index(drop=True), second_out.reset_index(drop=True),
+    )
+
+
+def test_canonicalize_cvd_spans_multiple_year_partitions_correctly(tmp_path):
+    """CVD must be one continuous cumulative sum across a year-file
+    BOUNDARY, not reset to 0 at the start of each year's parquet -- the
+    partitioning is a storage detail (one file per calendar year), not a
+    semantic reset point."""
+    root = tmp_path / "5m/venue=binance"
+    _write_year_file(root, "MULTIYRUSDT", 2023, _flow_rows(
+        ["2023-12-31 23:50", "2023-12-31 23:55"], [10.0, -4.0],
+    ))
+    _write_year_file(root, "MULTIYRUSDT", 2024, _flow_rows(
+        ["2024-01-01 00:00", "2024-01-01 00:05"], [7.0, 2.0],
+    ))
+
+    final_cvd = flow_mod.canonicalize_cvd(root, "MULTIYRUSDT")
+
+    out_2023 = pd.read_parquet(root / "symbol=MULTIYRUSDT/year=2023/flow.parquet").sort_values("timestamp")
+    out_2024 = pd.read_parquet(root / "symbol=MULTIYRUSDT/year=2024/flow.parquet").sort_values("timestamp")
+    # true running total: 10, 6, 13, 15 -- 2024's first row continues from
+    # 2023's last (6), it does NOT restart at 7.
+    np.testing.assert_allclose(out_2023["CVD"].to_numpy(), [10.0, 6.0])
+    np.testing.assert_allclose(out_2024["CVD"].to_numpy(), [13.0, 15.0])
+    assert final_cvd == pytest.approx(15.0)
+
+
+def test_canonicalize_cvd_invariant_delta_equals_signed_volume(tmp_path):
+    """The hard invariant the mission requires: CVD[t] - CVD[t-1] ~=
+    signed_flow[t] for every consecutive pair, within numeric tolerance --
+    checked directly on canonicalize_cvd's own output, on real-shaped
+    (non-round) floating point values."""
+    root = tmp_path / "5m/venue=binance"
+    rng = np.random.default_rng(7)
+    n = 500
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    signed = rng.normal(0, 1234.5678, n)
+    _write_year_file(root, "INVUSDT", 2024, _flow_rows(idx, signed))
+
+    flow_mod.canonicalize_cvd(root, "INVUSDT")
+    out = pd.read_parquet(root / "symbol=INVUSDT/year=2024/flow.parquet").sort_values("timestamp").reset_index(drop=True)
+
+    delta = out["CVD"].diff().dropna().to_numpy()
+    expected = out["signed_volume"].iloc[1:].to_numpy()
+    np.testing.assert_allclose(delta, expected, rtol=1e-9, atol=1e-9)
+    # and the very first bar's CVD equals its own signed_volume (baseline 0 + itself)
+    assert out["CVD"].iloc[0] == pytest.approx(out["signed_volume"].iloc[0])
+
+
 def test_manifest_checkpoints_after_each_batch_not_only_at_symbol_end(tmp_path, monkeypatch):
     monkeypatch.setattr(flow_mod, "OUT_1M", tmp_path / "1m/venue=binance")
     monkeypatch.setattr(flow_mod, "OUT_5M", tmp_path / "5m/venue=binance")
