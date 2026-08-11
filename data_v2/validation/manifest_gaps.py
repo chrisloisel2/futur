@@ -69,27 +69,58 @@ def _missing_months(manifest_path: Path) -> set:
     return set(json.loads(manifest_path.read_text()).get("missing_months", []))
 
 
+def _done_months(manifest_path: Path) -> set:
+    if not manifest_path.exists():
+        return set()
+    return set(json.loads(manifest_path.read_text()).get("done_months", []))
+
+
+def _done_days(manifest_path: Path, key: str = "done_days") -> set:
+    if not manifest_path.exists():
+        return set()
+    return set(json.loads(manifest_path.read_text()).get(key, []))
+
+
 # Per P0 dataset: how to load it, the granularity its backfiller tracks
-# confirmed-missing periods at (day or month), and how to read that
-# backfiller's own manifest for the confirmed-missing set. agg_trades_flow_1m
-# is not a separate key -- the 1m and 5m builders share one manifest
-# (data_v2/normalized/agg_trades/build_agg_trades_flow.py writes only under
-# OUT_1M's manifest.json), so callers evaluating agg_trades_flow_1m reuse
-# the agg_trades_flow_5m entry.
+# confirmed-missing/done periods at (day or month), and how to read that
+# backfiller's own manifest for each. agg_trades_flow_1m is not a separate
+# key -- the 1m and 5m builders share one manifest (data_v2/normalized/
+# agg_trades/build_agg_trades_flow.py writes only under OUT_1M's
+# manifest.json), so callers evaluating agg_trades_flow_1m reuse the
+# agg_trades_flow_5m entry.
+#
+# done_fn (2026-08-11, LENDUSDT fix): the missing-period check alone can
+# only prove a gap unfillable when the manifest recorded an explicit 404
+# for every period in it -- but a MONTHLY-cadence source can have a real
+# gap INSIDE a month that was never missing at all, just started partway
+# through (real case: LENDUSDT's perp_5m July-2020 file fetched fine and
+# is in done_months, but its own first row is 2020-07-23, not the 21st its
+# canonical_listing_ts implied -- missing_months is empty for that month,
+# so the old missing-only check could never classify this as unfillable
+# and left it "actionable" forever, even though re-fetching an
+# already-done month can only ever reproduce the identical file). done_fn
+# closes that: if the WHOLE gap falls inside one period already recorded
+# DONE, the source's own real data has already been fetched and provably
+# starts where it starts -- see gap_confirmed_unfillable's intra-period
+# branch. Generic by construction (no symbol-specific logic): applies to
+# any archive with a similar intra-period start.
 DATASET_MANIFEST_SPECS = {
     "oi_vision_5m": dict(
         loader=load_oi, ts_col="create_time", source_available_from=VISION_OI_FLOOR, granularity="day",
         missing_fn=lambda s: _missing_days(ROOT / f"data/derivatives_backfill/binance_vision_metrics/{s}_manifest.json"),
+        done_fn=lambda s: _done_days(ROOT / f"data/derivatives_backfill/binance_vision_metrics/{s}_manifest.json", key="done"),
     ),
     "perp_5m": dict(
         loader=lambda s: load_year_partitioned(ROOT / "data_v2/normalized/perp_ohlcv/venue=binance", s, "perp_5m.parquet"),
         ts_col="timestamp", source_available_from=None, granularity="month",
         missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/perp_ohlcv/venue=binance/symbol={s}/manifest.json"),
+        done_fn=lambda s: _done_months(ROOT / f"data_v2/normalized/perp_ohlcv/venue=binance/symbol={s}/manifest.json"),
     ),
     "spot_5m": dict(
         loader=lambda s: load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", s, "spot_5m.parquet"),
         ts_col="timestamp", source_available_from=None, granularity="month",
         missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/spot_ohlcv/venue=binance/symbol={s}/manifest.json"),
+        done_fn=lambda s: _done_months(ROOT / f"data_v2/normalized/spot_ohlcv/venue=binance/symbol={s}/manifest.json"),
     ),
     "agg_trades_flow_5m": dict(
         loader=lambda s: load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/5m/venue=binance", s, "flow.parquet"),
@@ -97,17 +128,38 @@ DATASET_MANIFEST_SPECS = {
         missing_fn=lambda s: _missing_days(
             ROOT / f"data_v2/normalized/agg_trades_flow/1m/venue=binance/symbol={s}/manifest.json", key="missing_days"
         ),
+        done_fn=lambda s: _done_days(
+            ROOT / f"data_v2/normalized/agg_trades_flow/1m/venue=binance/symbol={s}/manifest.json", key="done_days"
+        ),
     ),
 }
 
 
-def gap_confirmed_unfillable(start: pd.Timestamp, end: pd.Timestamp, missing: set, granularity: str) -> bool:
-    """True iff EVERY period in [start, end) is already recorded as
-    confirmed-missing (404'd) in the relevant backfiller's own manifest --
-    i.e. the whole gap has already been attempted and there is nothing
-    left to fetch. `end`'s own period is excluded from the check: it
-    already has real data by construction (it's the data's own observed
-    start), so it is never itself a missing candidate."""
+def gap_confirmed_unfillable(
+    start: pd.Timestamp, end: pd.Timestamp, missing: set, granularity: str, done: Optional[set] = None
+) -> bool:
+    """True iff the gap [start, end) is provably unfillable, by either of
+    two independent proofs:
+      1. EVERY period in [start, end) is already recorded as confirmed-
+         missing (404'd) in the relevant backfiller's own manifest -- the
+         whole gap has already been attempted and there is nothing left to
+         fetch. `end`'s own period is excluded (it already has real data
+         by construction: it's the data's own observed start).
+      2. The ENTIRE gap falls inside a single period already recorded DONE
+         (successfully fetched, never missing) -- a monthly/daily archive
+         that was fetched and processed but genuinely starts partway
+         through that period. Re-fetching an already-done period can only
+         reproduce the identical file, so this is just as unfillable as
+         case 1, and `missing` alone can never see it (the period was
+         never missing). Generic: works for any granularity/source, no
+         symbol-specific logic.
+    """
+    if done and granularity == "month" and (start.year, start.month) == (end.year, end.month):
+        if f"{start.year:04d}-{start.month:02d}" in done:
+            return True
+    if done and granularity == "day" and start.date() == end.date():
+        if start.date().isoformat() in done:
+            return True
     if not missing:
         return False
     if granularity == "day":

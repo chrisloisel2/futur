@@ -112,7 +112,8 @@ def build(im: Optional[pd.DataFrame] = None) -> dict:
                 "gap_days": round(gap.total_seconds() / 86400, 2),
             }
             missing = spec["missing_fn"](symbol)
-            if _gap_confirmed_unfillable(repair_target, observed_start, missing, spec["granularity"]):
+            done = spec.get("done_fn", lambda s: set())(symbol)
+            if _gap_confirmed_unfillable(repair_target, observed_start, missing, spec["granularity"], done=done):
                 entry["reason"] = "source confirmed no data for this entire window (backfiller's own manifest)"
                 confirmed_unavailable.append(entry)
             else:

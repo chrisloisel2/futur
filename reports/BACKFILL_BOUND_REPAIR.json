@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-10 23:56:45.932102+00:00",
+  "generated_at": "2026-08-11 13:08:06.056029+00:00",
   "instrument_master": "/home/qbee/futur-data-v2/data_v2/instruments/instrument_master.parquet",
   "gap_tolerance_hours": 24.0,
-  "pairs_checked": 748,
-  "repairs_needed": 1,
-  "confirmed_unavailable_count": 184,
+  "pairs_checked": 920,
+  "repairs_needed": 0,
+  "confirmed_unavailable_count": 210,
   "by_dataset": {
     "oi_vision_5m": {
       "symbols_needing_delta_backfill": 0,
@@ -12,34 +12,22 @@
       "symbols_confirmed_unavailable": 130
     },
     "perp_5m": {
-      "symbols_needing_delta_backfill": 1,
-      "total_gap_days": 2.0,
-      "symbols_confirmed_unavailable": 22
+      "symbols_needing_delta_backfill": 0,
+      "total_gap_days": 0,
+      "symbols_confirmed_unavailable": 40
     },
     "spot_5m": {
       "symbols_needing_delta_backfill": 0,
       "total_gap_days": 0,
-      "symbols_confirmed_unavailable": 30
+      "symbols_confirmed_unavailable": 37
     },
     "agg_trades_flow_5m": {
       "symbols_needing_delta_backfill": 0,
       "total_gap_days": 0,
-      "symbols_confirmed_unavailable": 2
+      "symbols_confirmed_unavailable": 3
     }
   },
-  "repairs": [
-    {
-      "symbol": "LENDUSDT",
-      "dataset": "perp_5m",
-      "canonical_listing_ts": "2020-07-21 08:00:00.001000+00:00",
-      "repair_target_start": "2020-07-21 08:00:00.001000+00:00",
-      "listing_ts_source": "first_funding_ts",
-      "metadata_conflict": true,
-      "observed_start_on_disk": "2020-07-23 09:00:00+00:00",
-      "gap_days": 2.04,
-      "action": "delta_backfill_earlier_window"
-    }
-  ],
+  "repairs": [],
   "confirmed_unavailable": [
     {
       "symbol": "BIGTIMEUSDT",
@@ -1153,6 +1141,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "TONUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2024-03-01 00:00:00+00:00",
+      "repair_target_start": "2024-03-01 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2024-08-08 10:00:00+00:00",
+      "gap_days": 160.42,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "PUMPUSDT",
       "dataset": "spot_5m",
       "canonical_listing_ts": "2025-04-12 00:00:00+00:00",
@@ -1186,6 +1185,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "VIRTUALUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2024-12-10 00:00:00+00:00",
+      "repair_target_start": "2024-12-10 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2025-04-11 14:00:00+00:00",
+      "gap_days": 122.58,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "BTCUSDT",
       "dataset": "perp_5m",
       "canonical_listing_ts": "2019-09-08 17:55:00+00:00",
@@ -1194,6 +1204,17 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2020-01-01 00:00:00+00:00",
       "gap_days": 114.25,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "TURBOUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2024-05-30 00:00:00+00:00",
+      "repair_target_start": "2024-05-30 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2024-09-16 10:00:00+00:00",
+      "gap_days": 109.42,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1263,6 +1284,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "WIFUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2024-01-18 00:00:00+00:00",
+      "repair_target_start": "2024-01-18 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2024-03-05 14:00:00+00:00",
+      "gap_days": 47.58,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "ARPAUSDT",
       "dataset": "oi_vision_5m",
       "canonical_listing_ts": "2021-10-18 07:00:00+00:00",
@@ -1271,6 +1303,17 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2021-12-01 00:00:00+00:00",
       "gap_days": 43.71,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "MASKUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2021-07-16 07:00:00+00:00",
+      "repair_target_start": "2021-07-16 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2021-08-27 03:30:00+00:00",
+      "gap_days": 41.85,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1307,6 +1350,28 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "XPLUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2025-08-22 00:00:00+00:00",
+      "repair_target_start": "2025-08-22 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2025-09-25 13:00:00+00:00",
+      "gap_days": 34.54,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "REEFUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2021-01-25 07:00:00+00:00",
+      "repair_target_start": "2021-01-25 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2021-02-22 07:05:00+00:00",
+      "gap_days": 28.0,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "CHZUSDT",
       "dataset": "perp_5m",
       "canonical_listing_ts": "2020-12-28 08:00:00.019000+00:00",
@@ -1326,6 +1391,17 @@
       "metadata_conflict": false,
       "observed_start_on_disk": "2025-01-10 13:00:00+00:00",
       "gap_days": 21.54,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "ALGOUSDT",
+      "dataset": "agg_trades_flow_5m",
+      "canonical_listing_ts": "2020-05-26 16:00:00+00:00",
+      "repair_target_start": "2020-05-26 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2020-06-16 09:00:00+00:00",
+      "gap_days": 20.71,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1384,6 +1460,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "XMRUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2020-01-19 16:00:00+00:00",
+      "repair_target_start": "2020-01-19 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2020-02-03 08:00:00+00:00",
+      "gap_days": 14.67,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "BCHUSDT",
       "dataset": "perp_5m",
       "canonical_listing_ts": "2019-12-19 08:55:00+00:00",
@@ -1428,6 +1515,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "WLFIUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2025-08-23 00:00:00+00:00",
+      "repair_target_start": "2025-08-23 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2025-09-01 13:00:00+00:00",
+      "gap_days": 9.54,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "SOMIUSDT",
       "dataset": "spot_5m",
       "canonical_listing_ts": "2025-08-25 00:00:00+00:00",
@@ -1458,6 +1556,17 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2025-03-27 21:00:00+00:00",
       "gap_days": 7.21,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "SANDUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2021-01-18 07:00:00+00:00",
+      "repair_target_start": "2021-01-18 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2021-01-25 07:00:00+00:00",
+      "gap_days": 7.0,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1538,6 +1647,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "STMXUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2021-03-17 07:00:00+00:00",
+      "repair_target_start": "2021-03-17 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2021-03-22 07:00:00+00:00",
+      "gap_days": 5.0,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "CYBERUSDT",
       "dataset": "oi_vision_5m",
       "canonical_listing_ts": "2023-08-16 16:00:00+00:00",
@@ -1562,6 +1682,17 @@
     {
       "symbol": "OPENUSDT",
       "dataset": "oi_vision_5m",
+      "canonical_listing_ts": "2025-09-04 16:00:00+00:00",
+      "repair_target_start": "2025-09-04 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2025-09-08 13:00:00+00:00",
+      "gap_days": 3.88,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "OPENUSDT",
+      "dataset": "perp_5m",
       "canonical_listing_ts": "2025-09-04 16:00:00+00:00",
       "repair_target_start": "2025-09-04 16:00:00+00:00",
       "listing_ts_source": "first_funding_ts",
@@ -1659,6 +1790,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "PERPUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-03-03 16:00:00+00:00",
+      "repair_target_start": "2023-03-03 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-03-06 12:00:00+00:00",
+      "gap_days": 2.83,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "ESPUSDT",
       "dataset": "spot_5m",
       "canonical_listing_ts": "2026-02-10 00:00:00+00:00",
@@ -1703,6 +1845,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "PENDLEUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-07-25 16:00:00+00:00",
+      "repair_target_start": "2023-07-25 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-07-28 02:30:00+00:00",
+      "gap_days": 2.44,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "LQTYUSDT",
       "dataset": "oi_vision_5m",
       "canonical_listing_ts": "2023-03-08 07:00:00+00:00",
@@ -1736,6 +1889,39 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "LENDUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2020-07-21 08:00:00.001000+00:00",
+      "repair_target_start": "2020-07-21 08:00:00.001000+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2020-07-23 09:00:00+00:00",
+      "gap_days": 2.04,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "LINAUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2021-03-17 07:00:00+00:00",
+      "repair_target_start": "2021-03-17 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2021-03-19 07:00:00+00:00",
+      "gap_days": 2.0,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "XTZUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2020-02-04 08:00:00.001000+00:00",
+      "repair_target_start": "2020-02-04 08:00:00.001000+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2020-02-06 08:00:00+00:00",
+      "gap_days": 2.0,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "MAGICUSDT",
       "dataset": "oi_vision_5m",
       "canonical_listing_ts": "2023-01-23 07:00:00+00:00",
@@ -1744,6 +1930,17 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2023-01-25 03:05:00+00:00",
       "gap_days": 1.84,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "MAGICUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-01-23 07:00:00+00:00",
+      "repair_target_start": "2023-01-23 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-01-25 03:00:00+00:00",
+      "gap_days": 1.83,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1846,6 +2043,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "SIRENUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2025-03-20 16:00:00+00:00",
+      "repair_target_start": "2025-03-20 16:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2025-03-22 09:00:00+00:00",
+      "gap_days": 1.71,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "RESOLVUSDT",
       "dataset": "spot_5m",
       "canonical_listing_ts": "2025-06-10 00:00:00+00:00",
@@ -1890,6 +2098,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "LEVERUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-03-29 00:00:00+00:00",
+      "repair_target_start": "2023-03-29 00:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-03-30 12:15:00+00:00",
+      "gap_days": 1.51,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "BLURUSDT",
       "dataset": "oi_vision_5m",
       "canonical_listing_ts": "2023-04-27 00:00:00+00:00",
@@ -1898,6 +2117,28 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2023-04-28 12:05:00+00:00",
       "gap_days": 1.5,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "BLURUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-04-27 00:00:00+00:00",
+      "repair_target_start": "2023-04-27 00:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-04-28 12:00:00+00:00",
+      "gap_days": 1.5,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "TRUMPUSDT",
+      "dataset": "spot_5m",
+      "canonical_listing_ts": "2025-01-18 00:00:00+00:00",
+      "repair_target_start": "2025-01-18 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": false,
+      "observed_start_on_disk": "2025-01-19 08:30:00+00:00",
+      "gap_days": 1.35,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
@@ -1941,6 +2182,17 @@
       "listing_ts_source": "exchangeinfo_onboard_ts",
       "metadata_conflict": true,
       "observed_start_on_disk": "2023-02-20 14:30:00+00:00",
+      "gap_days": 1.31,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "STXUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2023-02-20 07:00:00+00:00",
+      "repair_target_start": "2023-02-20 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2023-02-21 14:30:00+00:00",
       "gap_days": 1.31,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
@@ -2033,6 +2285,17 @@
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     },
     {
+      "symbol": "LDOUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2022-09-21 07:00:00+00:00",
+      "repair_target_start": "2022-09-21 07:00:00+00:00",
+      "listing_ts_source": "exchangeinfo_onboard_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2022-09-22 12:00:00+00:00",
+      "gap_days": 1.21,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
       "symbol": "LINAUSDT",
       "dataset": "spot_5m",
       "canonical_listing_ts": "2021-03-17 07:00:00+00:00",
@@ -2063,6 +2326,17 @@
       "metadata_conflict": true,
       "observed_start_on_disk": "2022-08-25 12:00:00+00:00",
       "gap_days": 1.21,
+      "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
+    },
+    {
+      "symbol": "ZILUSDT",
+      "dataset": "perp_5m",
+      "canonical_listing_ts": "2020-06-17 08:00:00.007000+00:00",
+      "repair_target_start": "2020-06-17 08:00:00.007000+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": true,
+      "observed_start_on_disk": "2020-06-18 09:00:00+00:00",
+      "gap_days": 1.04,
       "reason": "source confirmed no data for this entire window (backfiller's own manifest)"
     }
   ]

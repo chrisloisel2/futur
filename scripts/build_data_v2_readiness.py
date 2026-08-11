@@ -239,7 +239,8 @@ def _confirmed_unavailable_expected_start(
         return None  # no gap at all, nothing to adjust
 
     missing = manifest_spec["missing_fn"](symbol)
-    if gap_confirmed_unfillable(repair_target, window_start, missing, manifest_spec["granularity"]):
+    done = manifest_spec.get("done_fn", lambda s: set())(symbol)
+    if gap_confirmed_unfillable(repair_target, window_start, missing, manifest_spec["granularity"], done=done):
         return window_start
     return None
 
