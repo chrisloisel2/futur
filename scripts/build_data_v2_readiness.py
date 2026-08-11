@@ -111,6 +111,19 @@ DATASET_SPECS = {
         required_positive_columns=["close"],
         source_available_from=None, source_kind="binance_vision_monthly",
         check_taker_flow=True,
+        # Monthly Vision archives cannot possibly contain the current,
+        # still-open month -- staleness for this source has an inherent
+        # sawtooth of ~0 to ~35-40 days (days elapsed in the current month
+        # + Vision's own publication lag for the month just closed), never
+        # the ~3 days appropriate for a daily-cadence source. The default
+        # 3.0 gate was flagging essentially every non-delisted symbol as
+        # BLOCKING-stale even immediately after a fully successful backfill
+        # run (confirmed empirically: median staleness 10.0 days across 312
+        # symbols right after both perp_5m and spot_5m builders reported
+        # "nothing left to fetch"). 40 days covers the worst point in that
+        # cycle; still catches a symbol whose backfill genuinely stalled
+        # for 2+ months.
+        staleness_gate_days=40.0,
     ),
     "spot_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", sym, "spot_5m.parquet"),
@@ -118,6 +131,7 @@ DATASET_SPECS = {
         required_positive_columns=["spot_close"],
         source_available_from=None, source_kind="binance_vision_monthly",
         check_taker_flow=True,
+        staleness_gate_days=40.0,  # same monthly-cadence reasoning as perp_5m above
         # NOT_APPLICABLE requires PROOF (every expected month tried, all
         # 404 -- see _spot_absence_confirmed), not merely "no file on disk".
         # An earlier version treated absence itself as NOT_APPLICABLE,
@@ -252,6 +266,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         expected_start=confirmed_unavailable_start,
         strict_alpha_readiness=True,
         variable_cadence=spec.get("variable_cadence", False),
+        staleness_gate_days=spec.get("staleness_gate_days", 3.0),
     )
     if confirmed_unavailable_start is not None:
         row["confirmed_unavailable_prefix_excluded"] = True
