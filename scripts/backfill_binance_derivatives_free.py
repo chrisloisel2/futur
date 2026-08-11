@@ -75,6 +75,17 @@ def default_symbols() -> list[str]:
     return CORE_SYMBOLS
 
 
+def load_delisting_map() -> dict:
+    """symbol -> proven delisting_ts, for symbols instrument_master has
+    confirmed ABSENT from live exchangeInfo. Used to cap the funding
+    top-up: see the 2026-08-11 fake-post-delisting-feed fix below."""
+    if not INSTRUMENT_MASTER.exists():
+        return {}
+    im = pd.read_parquet(INSTRUMENT_MASTER, columns=["symbol", "delisting_ts"])
+    im = im[im["delisting_ts"].notna()]
+    return dict(zip(im["symbol"], pd.to_datetime(im["delisting_ts"], utc=True)))
+
+
 def merge_funding(existing: Optional[pd.DataFrame], new: pd.DataFrame) -> pd.DataFrame:
     """Union of existing on-disk rows and newly-fetched rows, deduplicated
     by timestamp (keep the newer fetch's value on a genuine clash) and
@@ -141,19 +152,45 @@ def backfill_oi_hist(sym: str) -> pd.DataFrame:
     return df[["timestamp", "open_interest", "open_interest_usd"]].sort_values("timestamp").reset_index(drop=True)
 
 
-def top_up_funding(sym: str, start_ms: int) -> pd.DataFrame:
+def top_up_funding(
+    sym: str, start_ms: int, delisting_ts: Optional[pd.Timestamp] = None
+) -> pd.DataFrame:
     """Incremental: read the existing on-disk parquet (if any), fetch only
     from its last known timestamp forward (never re-fetching -- and never
     losing -- history already on disk), merge, return the union sorted and
     deduplicated. `start_ms` is only used as the floor for a symbol with no
-    existing file yet (first-time backfill)."""
+    existing file yet (first-time backfill).
+
+    Bug found + fixed 2026-08-11: Binance's /fapi/v1/fundingRate endpoint
+    does NOT stop or 404 once a perp contract is delisted -- it keeps
+    emitting a frozen placeholder feed (constant funding_rate=0.0001,
+    near-static markPrice) indefinitely, with fresh-looking timestamps
+    extending right up to "now" on every call. A pre-fix run of this
+    top-up blindly appended that phantom feed for EOSUSDT/MATICUSDT/
+    SXPUSDT (61 fake rows each, past their proven delisting_ts) --
+    exactly the "no event after proven delisting" fake-fill this store
+    must never contain. `delisting_ts`, when instrument_master has
+    confirmed it (symbol ABSENT from live exchangeInfo), is now a hard
+    upper bound: any existing on-disk row past it is stripped before
+    every run (self-healing -- no separate one-off cleanup script or
+    hardcoded symbol list needed) and no fetch is issued past it. A
+    symbol delisted after the last instrument_master rebuild won't be
+    capped until the next rebuild -- a narrow, self-correcting window,
+    not a silent gap."""
     path = OUT / "funding" / f"{sym}.parquet"
     existing = pd.read_parquet(path) if path.exists() else None
+    if existing is not None and not existing.empty and delisting_ts is not None:
+        existing = existing[pd.to_datetime(existing["timestamp"], utc=True) <= delisting_ts]
     fetch_from_ms = start_ms
     if existing is not None and not existing.empty:
         last_ts = pd.to_datetime(existing["timestamp"], utc=True).max()
         fetch_from_ms = max(start_ms, int(last_ts.value // 1_000_000) + 1)
-    new = backfill_funding(sym, fetch_from_ms)
+    if delisting_ts is not None and fetch_from_ms > int(delisting_ts.value // 1_000_000):
+        new = pd.DataFrame()
+    else:
+        new = backfill_funding(sym, fetch_from_ms)
+        if delisting_ts is not None and not new.empty:
+            new = new[pd.to_datetime(new["timestamp"], utc=True) <= delisting_ts]
     return merge_funding(existing, new)
 
 
@@ -165,6 +202,7 @@ def main() -> None:
     args = ap.parse_args()
     start_ms = int(pd.Timestamp(args.start, tz="UTC").timestamp() * 1000)
     syms = [s.strip() for s in args.symbols.split(",")] if args.symbols else default_symbols()
+    delisting_map = load_delisting_map()
 
     registry = {}
     print(f"Funding top-up: {len(syms)} symbols, start={args.start}", flush=True)
@@ -177,7 +215,7 @@ def main() -> None:
                   f"after {i - 1}/{len(syms)} symbols. Resumable -- re-run to continue.", flush=True)
             sys.exit(1)
         try:
-            fund = top_up_funding(sym, start_ms)
+            fund = top_up_funding(sym, start_ms, delisting_ts=delisting_map.get(sym))
             oi = backfill_oi_hist(sym)
         except Exception as e:
             print(f"{sym:<14}  ERREUR {e}"); registry[sym] = {"status": "ERROR", "error": str(e)}; continue
