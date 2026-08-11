@@ -142,6 +142,40 @@ def test_validator_flags_rows_before_listing():
     assert not report.passed
 
 
+def test_validator_listing_alignment_grace_days_widens_tolerance_for_month_cadence():
+    """The spot_5m/perp_5m case: a month-granularity archive fetched
+    "the month containing the true listing timestamp" genuinely includes
+    real days from earlier in that month -- e.g. listed 2024-01-28 but the
+    fetched archive starts 2024-01-01. With the default (~1 day) grace this
+    is a PIT violation; with a month-scale grace (e.g. 31 days) it's
+    correctly recognized as real, benign pre-listing-month data."""
+    idx = pd.date_range("2024-01-01", periods=5 * 288, freq="5min", tz="UTC")
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2024-01-28", tz="UTC"), "delisting_ts": pd.NaT}])
+
+    default_report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                                      instrument_master=im, now=_fresh_now(df))
+    assert default_report.listing_alignment == "rows_before_listing"
+
+    widened_report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                                      instrument_master=im, now=_fresh_now(df), listing_alignment_grace_days=31.0)
+    assert widened_report.listing_alignment == "ok"
+
+
+def test_validator_listing_alignment_grace_days_still_catches_a_real_violation():
+    """A genuine multi-month PIT mismatch (e.g. a ticker rename, or data
+    continuing long past a real delisting) must stay flagged even at the
+    widened month-cadence grace -- the grace absorbs "one archive month
+    of slack", not an unbounded amount."""
+    idx = pd.date_range("2024-01-01", periods=5 * 288, freq="5min", tz="UTC")
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2024-06-01", tz="UTC"), "delisting_ts": pd.NaT}])
+
+    report = validate_series(df, symbol="BTCUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=_fresh_now(df), listing_alignment_grace_days=31.0)
+    assert report.listing_alignment == "rows_before_listing"
+
+
 def test_validator_blocking_staleness_fails_gate_for_active_symbol():
     df = _make_5m_series(5)  # last row 2024-01-06-ish
     im = pd.DataFrame([{"symbol": "BTCUSDT", "listing_ts": pd.Timestamp("2023-01-01", tz="UTC"), "delisting_ts": pd.NaT}])

@@ -124,6 +124,11 @@ DATASET_SPECS = {
         # cycle; still catches a symbol whose backfill genuinely stalled
         # for 2+ months.
         staleness_gate_days=40.0,
+        # same granularity-mismatch reasoning: fetching "the month
+        # containing the true listing timestamp" always pulls in some real
+        # days from earlier in that month -- 31 days covers the worst case
+        # (listed on the last day of a month).
+        listing_alignment_grace_days=31.0,
     ),
     "spot_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", sym, "spot_5m.parquet"),
@@ -132,6 +137,7 @@ DATASET_SPECS = {
         source_available_from=None, source_kind="binance_vision_monthly",
         check_taker_flow=True,
         staleness_gate_days=40.0,  # same monthly-cadence reasoning as perp_5m above
+        listing_alignment_grace_days=31.0,  # same monthly-cadence reasoning as perp_5m above
         # spot's expected coverage is bound to first_perp_kline_ts, not the
         # composite instrument_master listing_ts (which can be earlier --
         # see build_spot_5m.py's module docstring, 2026-08-11 fix). NaN ->
@@ -245,6 +251,44 @@ def _confirmed_unavailable_expected_start(
     return None
 
 
+FAIL_REASON_CODES = (
+    "NO_DATA", "COVERAGE", "STALE", "PIT", "CORRUPTION", "DUPLICATES",
+    "FAILED_MANIFEST", "CAUSALITY_VIOLATION", "FAKE_FLOW",
+)
+
+
+def _classify_fail_reasons(row: dict, report=None) -> list:
+    """Every reason this (dataset, symbol) row is FAIL, so the report is
+    immediately diagnosable per-cause rather than a single opaque
+    boolean. Multiple reasons can co-occur (e.g. STALE and COVERAGE at
+    once) -- all applicable ones are listed, not just the first found."""
+    if row["verdict"] != "FAIL":
+        return []
+    reasons = []
+    if row["actual_rows"] == 0:
+        reasons.append("NO_DATA")
+        return reasons  # nothing else is measurable with zero rows
+    if report is not None and not report.expected_span_known:
+        reasons.append("COVERAGE")  # can't even confirm sufficient coverage
+    elif row["coverage_pct"] < 0.98:
+        reasons.append("COVERAGE")
+    if report is not None and report.staleness_gate_violated:
+        reasons.append("STALE")
+    if row["pit_violations"] > 0:
+        reasons.append("PIT")
+    if row["corruption"] > 0:
+        reasons.append("CORRUPTION")
+    if row["duplicates"] > 0:
+        reasons.append("DUPLICATES")
+    if row["failed_days"] > 0:
+        reasons.append("FAILED_MANIFEST")
+    if row["market_causality_violations"] > 0 or row["execution_causality_violations"] > 0:
+        reasons.append("CAUSALITY_VIOLATION")
+    if row["fake_flow_detected"]:
+        reasons.append("FAKE_FLOW")
+    return reasons or ["COVERAGE"]  # FAIL must always have >=1 reason; COVERAGE is the honest catch-all
+
+
 def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd.Timestamp) -> dict:
     spec = DATASET_SPECS[dataset]
     df = spec["loader"](symbol)
@@ -262,6 +306,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         "fake_flow_detected": False,
         "confirmed_unavailable_prefix_excluded": False,
         "verdict": "FAIL",
+        "fail_reasons": [],
     }
 
     if dataset.startswith("agg_trades_flow"):
@@ -280,6 +325,8 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
             if confirm_absence_fn(symbol, exp_start, exp_end):
                 row["verdict"] = "NOT_APPLICABLE"
                 row["notes"] = "confirmed absent: every expected month attempted, all 404 -- no market exists"
+        if row["verdict"] == "FAIL":
+            row["fail_reasons"] = ["NO_DATA"]
         return row
 
     baseline_expected_start = _expected_start_baseline(dataset, symbol, im)
@@ -311,6 +358,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         strict_alpha_readiness=True,
         variable_cadence=spec.get("variable_cadence", False),
         staleness_gate_days=spec.get("staleness_gate_days", 3.0),
+        listing_alignment_grace_days=spec.get("listing_alignment_grace_days", 1.0),
     )
 
     # causality sanity check -- these two invariants must hold by
@@ -353,6 +401,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         "verdict": verdict,
         "notes": report.notes,
     })
+    row["fail_reasons"] = _classify_fail_reasons(row, report)
     return row
 
 
@@ -373,6 +422,10 @@ def build(now: Optional[pd.Timestamp] = None) -> dict:
         d = df_rows[df_rows["dataset"] == dataset]
         applicable = d[d["verdict"] != "NOT_APPLICABLE"]
         n_pass = int((applicable["verdict"] == "PASS").sum())
+        fail_reason_counts = {code: 0 for code in FAIL_REASON_CODES}
+        for reasons in applicable["fail_reasons"]:
+            for r in reasons:
+                fail_reason_counts[r] = fail_reason_counts.get(r, 0) + 1
         dataset_summaries[dataset] = {
             "expected_symbols": len(applicable),
             "available_symbols": int((applicable["actual_rows"] > 0).sum()),
@@ -386,6 +439,10 @@ def build(now: Optional[pd.Timestamp] = None) -> dict:
             "total_execution_causality_violations": int(applicable["execution_causality_violations"].sum()),
             "any_fake_flow_detected": bool(applicable["fake_flow_detected"].any()),
             "any_pit_violation": bool((applicable["pit_violations"] > 0).any()),
+            # per-cause breakdown -- "why doesn't this dataset pass", at a glance
+            "fail_reason_counts": fail_reason_counts,
+            "not_applicable_symbols": int((d["verdict"] == "NOT_APPLICABLE").sum()),
+            "confirmed_unavailable_prefix_symbols": int(applicable["confirmed_unavailable_prefix_excluded"].sum()),
         }
 
     applicable_all = df_rows[df_rows["verdict"] != "NOT_APPLICABLE"]
@@ -426,7 +483,11 @@ def main() -> None:
     print(f"Dataset summaries ({out['pit_universe_size']} PIT symbols):")
     for name, s in out["dataset_summaries"].items():
         print(f"  {name:22} pass={s['pass_symbols']:3}/{s['expected_symbols']:3} ({s['pass_pct']*100:5.1f}%) "
-              f"mean_coverage={s['mean_coverage_pct']*100:5.1f}% failed_days={s['total_failed_days']}")
+              f"mean_coverage={s['mean_coverage_pct']*100:5.1f}% failed_days={s['total_failed_days']} "
+              f"not_applicable={s['not_applicable_symbols']} confirmed_unavailable_prefix={s['confirmed_unavailable_prefix_symbols']}")
+        nonzero_reasons = {k: v for k, v in s["fail_reason_counts"].items() if v}
+        if nonzero_reasons:
+            print(f"    fail causes: {nonzero_reasons}")
     print("\nHard gates:")
     for k, v in out["hard_gates"].items():
         print(f"  {k:28} {'OK' if v else 'FAIL'}")

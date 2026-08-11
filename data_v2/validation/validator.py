@@ -154,6 +154,7 @@ def validate_series(
     source_available_from: Optional[pd.Timestamp] = None,
     strict_alpha_readiness: bool = False,
     variable_cadence: bool = False,
+    listing_alignment_grace_days: float = 1.0,
 ) -> ValidationReport:
     """Validate one (symbol, source) time series against real coverage/
     integrity expectations, not just "file opens and isn't empty".
@@ -278,15 +279,28 @@ def validate_series(
     elif instrument_master is None:
         listing_alignment = "unknown"
     else:
-        # 24h grace, not 1h: real Vision OI data was observed starting ~9h
-        # before a symbol's exchangeInfo onboardDate (AIAUSDT) -- listing/
-        # delisting timestamps from different sources/feeds have some
-        # natural slop at the boundary. Violations larger than a day (e.g.
-        # ANTUSDT's OI data continuing ~4 weeks past its last daily kline,
-        # or a ticker rename like RNDRUSDT->RENDERUSDT) stay flagged --
-        # that is real, useful signal about a specific symbol's PIT
-        # boundary needing a dedicated look, not noise to widen away.
-        grace = pd.Timedelta(hours=24)
+        # 24h grace by default: real Vision OI data was observed starting
+        # ~9h before a symbol's exchangeInfo onboardDate (AIAUSDT) --
+        # listing/delisting timestamps from different sources/feeds have
+        # some natural slop at the boundary. Violations larger than that
+        # (e.g. ANTUSDT's OI data continuing ~4 weeks past its last daily
+        # kline, or a ticker rename like RNDRUSDT->RENDERUSDT) stay
+        # flagged -- real, useful signal about a specific symbol's PIT
+        # boundary, not noise to widen away.
+        #
+        # Callers on a MONTH-cadence source (perp_5m/spot_5m) must pass a
+        # much larger listing_alignment_grace_days (~31): Vision only
+        # publishes whole-month archives, so fetching "the month containing
+        # the true listing timestamp" always pulls in some real days from
+        # earlier in that same month -- e.g. spot_5m bound to
+        # first_perp_kline_ts=2020-01-31 still fetches all of January 2020,
+        # so window_start=2020-01-01 is genuine market data, not a PIT leak
+        # (basis.py's inner join with perp only ever uses the intersection
+        # anyway -- these extra pre-perp days simply never get used). A 24h
+        # grace flagged ~141/312 spot_5m symbols on exactly this pattern; a
+        # day-cadence source (OI, funding, aggTrades) has no such structural
+        # slack and must keep the tight default.
+        grace = pd.Timedelta(days=listing_alignment_grace_days)
         before = listing_ts is not None and window_start is not None and window_start < listing_ts - grace
         after = delisting_ts is not None and window_end is not None and window_end > delisting_ts + grace
         if before and after:
