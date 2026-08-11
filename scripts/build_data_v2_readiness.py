@@ -132,6 +132,12 @@ DATASET_SPECS = {
         source_available_from=None, source_kind="binance_vision_monthly",
         check_taker_flow=True,
         staleness_gate_days=40.0,  # same monthly-cadence reasoning as perp_5m above
+        # spot's expected coverage is bound to first_perp_kline_ts, not the
+        # composite instrument_master listing_ts (which can be earlier --
+        # see build_spot_5m.py's module docstring, 2026-08-11 fix). NaN ->
+        # fail closed (expected_span left unknown, never a fabricated
+        # fallback date).
+        listing_ts_field="first_perp_kline_ts",
         # NOT_APPLICABLE requires PROOF (every expected month tried, all
         # 404 -- see _spot_absence_confirmed), not merely "no file on disk".
         # An earlier version treated absence itself as NOT_APPLICABLE,
@@ -178,33 +184,55 @@ DATASET_SPECS = {
 }
 
 
+def _symbol_listing_field(im: pd.DataFrame, symbol: str, field: str) -> Optional[pd.Timestamp]:
+    """Read instrument_master's `field` for `symbol` -- None if the symbol
+    row is missing or the field itself is NaN (never a fabricated
+    fallback; callers must fail closed on None, not substitute a different
+    field silently)."""
+    im_row = im.loc[im["symbol"] == symbol]
+    if im_row.empty or pd.isna(im_row.iloc[0][field]):
+        return None
+    return pd.Timestamp(im_row.iloc[0][field])
+
+
+def _expected_start_baseline(dataset: str, symbol: str, im: pd.DataFrame) -> Optional[pd.Timestamp]:
+    """The dataset's own notion of "when this symbol's history should
+    start" -- instrument_master's generic composite listing_ts for most
+    datasets, but first_perp_kline_ts specifically for spot_5m (see
+    DATASET_SPECS["spot_5m"]["listing_ts_field"] and build_spot_5m.py's
+    module docstring: funding/OI frequently observe a symbol slightly
+    BEFORE its first perp kline, so the composite listing_ts silently
+    pulled spot's expected coverage window back earlier than perp/basis
+    can ever use). None (field NaN) means fail closed -- no fallback to a
+    different field, no invented date."""
+    field = DATASET_SPECS[dataset].get("listing_ts_field", "listing_ts")
+    return _symbol_listing_field(im, symbol, field)
+
+
 def _confirmed_unavailable_expected_start(
-    dataset: str, symbol: str, im: pd.DataFrame, df: pd.DataFrame, timestamp_col: str
+    dataset: str, symbol: str, im: pd.DataFrame, df: pd.DataFrame, timestamp_col: str,
+    baseline_expected_start: Optional[pd.Timestamp],
 ) -> Optional[pd.Timestamp]:
     """If the gap between this symbol's theoretical expected_start
-    (listing_ts, capped by the dataset's own source_available_from) and
-    the data's own real first row is CONFIRMED unfillable -- the
-    backfiller's own manifest already 404'd every single period in that
-    gap, see data_v2.validation.manifest_gaps -- return the data's real
-    first row as an expected_start override, so that confirmed-
+    (baseline_expected_start, capped by the dataset's own
+    source_available_from) and the data's own real first row is CONFIRMED
+    unfillable -- the backfiller's own manifest already 404'd every single
+    period in that gap, see data_v2.validation.manifest_gaps -- return the
+    data's real first row as an expected_start override, so that confirmed-
     unavailable prefix stops permanently counting against coverage_pct
     (the exact bug: ADAUSDT/ZRXUSDT's OI could never reach the 95%
     coverage gate no matter how complete the backfill was, because their
     first 456 days are genuinely 404 at the source, not unfetched).
-    None means "no adjustment" -- validate_series computes expected_start
-    itself as usual (funding has no confirmed-unavailable tracking here;
-    DATA_READY per the prior audit already established it has none)."""
+    None means "no adjustment" -- caller falls back to baseline_expected_start
+    (funding has no confirmed-unavailable tracking here; DATA_READY per the
+    prior audit already established it has none)."""
     manifest_key = "agg_trades_flow_5m" if dataset == "agg_trades_flow_1m" else dataset
     manifest_spec = DATASET_MANIFEST_SPECS.get(manifest_key)
-    if manifest_spec is None:
+    if manifest_spec is None or baseline_expected_start is None:
         return None
 
-    im_row = im.loc[im["symbol"] == symbol]
-    if im_row.empty or pd.isna(im_row.iloc[0]["listing_ts"]):
-        return None
-    listing_ts = pd.Timestamp(im_row.iloc[0]["listing_ts"])
     source_floor = manifest_spec["source_available_from"]
-    repair_target = max(listing_ts, source_floor) if source_floor is not None else listing_ts
+    repair_target = max(baseline_expected_start, source_floor) if source_floor is not None else baseline_expected_start
 
     window_start = pd.to_datetime(df[timestamp_col], utc=True).min()
     if pd.isna(window_start) or window_start <= repair_target:
@@ -243,9 +271,8 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         row["notes"] = "no data on disk yet"
         confirm_absence_fn = spec.get("confirm_absence_fn")
         if confirm_absence_fn is not None:
-            im_row = im.loc[im["symbol"] == symbol]
-            listing_ts = pd.Timestamp(im_row.iloc[0]["listing_ts"]) if len(im_row) and pd.notna(im_row.iloc[0]["listing_ts"]) else None
-            delisting_ts = pd.Timestamp(im_row.iloc[0]["delisting_ts"]) if len(im_row) and pd.notna(im_row.iloc[0]["delisting_ts"]) else None
+            listing_ts = _expected_start_baseline(dataset, symbol, im)
+            delisting_ts = _symbol_listing_field(im, symbol, "delisting_ts")
             candidates = [t for t in (listing_ts, spec.get("source_available_from")) if t is not None]
             exp_start = max(candidates) if candidates else None
             exp_end = delisting_ts if delisting_ts is not None else now
@@ -254,22 +281,36 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
                 row["notes"] = "confirmed absent: every expected month attempted, all 404 -- no market exists"
         return row
 
+    baseline_expected_start = _expected_start_baseline(dataset, symbol, im)
     confirmed_unavailable_start = _confirmed_unavailable_expected_start(
-        dataset, symbol, im, df, spec["timestamp_col"]
+        dataset, symbol, im, df, spec["timestamp_col"], baseline_expected_start
     )
+    # Fail closed: if the dataset's own listing_ts_field (first_perp_kline_ts
+    # for spot_5m, listing_ts otherwise) is NaN for this symbol, force an
+    # explicit "unknown" expected_start (pd.NaT) rather than silently
+    # falling back to validate_series' own generic-listing_ts default --
+    # that fallback would defeat the whole point of binding spot to a
+    # different, more correct field.
+    if confirmed_unavailable_start is not None:
+        effective_expected_start = confirmed_unavailable_start
+        row["confirmed_unavailable_prefix_excluded"] = True
+    elif baseline_expected_start is not None:
+        effective_expected_start = baseline_expected_start
+    else:
+        effective_expected_start = pd.NaT
+        row["notes"] = f"no {spec.get('listing_ts_field', 'listing_ts')} proof -- expected coverage left unknown, not fabricated"
+
     report = validate_series(
         df, symbol=symbol, timestamp_col=spec["timestamp_col"], bar_seconds=spec["bar_seconds"],
         source=dataset, instrument_master=im, now=now,
         required_positive_columns=spec["required_positive_columns"] or None,
         required_nonnegative_columns=spec.get("required_nonnegative_columns") or None,
         source_available_from=spec["source_available_from"],
-        expected_start=confirmed_unavailable_start,
+        expected_start=effective_expected_start,
         strict_alpha_readiness=True,
         variable_cadence=spec.get("variable_cadence", False),
         staleness_gate_days=spec.get("staleness_gate_days", 3.0),
     )
-    if confirmed_unavailable_start is not None:
-        row["confirmed_unavailable_prefix_excluded"] = True
 
     # causality sanity check -- these two invariants must hold by
     # construction; a violation is a real bug, not (yet) a feature-join leak

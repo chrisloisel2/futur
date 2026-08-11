@@ -31,6 +31,16 @@ def _im_row(symbol: str, listing_ts) -> pd.DataFrame:
     return pd.DataFrame([{"symbol": symbol, "listing_ts": listing_ts, "delisting_ts": pd.NaT}])
 
 
+def _baseline(listing_ts):
+    """What _expected_start_baseline would compute for a generic (non-spot)
+    dataset -- these tests exercise _confirmed_unavailable_expected_start
+    directly, which now takes the baseline as an explicit argument (the
+    caller, evaluate_dataset_symbol, computes it via _expected_start_baseline
+    using each dataset's own listing_ts_field -- see test_data_v2_readiness_
+    spot_bound.py for the spot-specific first_perp_kline_ts behavior)."""
+    return None if pd.isna(listing_ts) else pd.Timestamp(listing_ts)
+
+
 def test_confirmed_unavailable_gap_shifts_expected_start(monkeypatch):
     """The exact ADAUSDT/ZRXUSDT case: OI data confirmed-404 for the whole
     gap between listing_ts and the real first row -- expected_start must
@@ -46,7 +56,9 @@ def test_confirmed_unavailable_gap_shifts_expected_start(monkeypatch):
     }
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
 
-    result = readiness_mod._confirmed_unavailable_expected_start("oi_vision_5m", "ADAUSDT", im, df, "create_time")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "oi_vision_5m", "ADAUSDT", im, df, "create_time", _baseline(TS("2020-01-31")),
+    )
     assert result == df["create_time"].min()
 
 
@@ -60,7 +72,9 @@ def test_no_adjustment_when_gap_not_confirmed_unavailable(monkeypatch):
     }
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
 
-    result = readiness_mod._confirmed_unavailable_expected_start("oi_vision_5m", "FOOUSDT", im, df, "create_time")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "oi_vision_5m", "FOOUSDT", im, df, "create_time", _baseline(TS("2020-01-31")),
+    )
     assert result is None
 
 
@@ -74,7 +88,9 @@ def test_no_adjustment_when_no_gap_at_all(monkeypatch):
     }
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
 
-    result = readiness_mod._confirmed_unavailable_expected_start("oi_vision_5m", "FOOUSDT", im, df, "create_time")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "oi_vision_5m", "FOOUSDT", im, df, "create_time", _baseline(TS("2021-12-01")),
+    )
     assert result is None
 
 
@@ -91,7 +107,9 @@ def test_agg_trades_flow_1m_reuses_5m_manifest_spec(monkeypatch):
     }
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
 
-    result = readiness_mod._confirmed_unavailable_expected_start("agg_trades_flow_1m", "FOOUSDT", im, df, "timestamp")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "agg_trades_flow_1m", "FOOUSDT", im, df, "timestamp", _baseline(TS("2020-01-01")),
+    )
     assert result == df["timestamp"].min()
 
 
@@ -100,7 +118,9 @@ def test_funding_has_no_manifest_spec_so_never_adjusted(monkeypatch):
     df = pd.DataFrame({"timestamp": pd.date_range("2021-01-01", periods=5, freq="8h", tz="UTC")})
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", {})  # funding not in DATASET_MANIFEST_SPECS
 
-    result = readiness_mod._confirmed_unavailable_expected_start("funding", "FOOUSDT", im, df, "timestamp")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "funding", "FOOUSDT", im, df, "timestamp", _baseline(TS("2020-01-01")),
+    )
     assert result is None
 
 
@@ -114,5 +134,38 @@ def test_unresolved_listing_ts_returns_none(monkeypatch):
     }
     monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
 
-    result = readiness_mod._confirmed_unavailable_expected_start("oi_vision_5m", "FOOUSDT", im, df, "create_time")
+    result = readiness_mod._confirmed_unavailable_expected_start(
+        "oi_vision_5m", "FOOUSDT", im, df, "create_time", _baseline(pd.NaT),
+    )
     assert result is None
+
+
+# ── _expected_start_baseline: spot_5m uses first_perp_kline_ts, not the ───
+# ── composite listing_ts (2026-08-11 fix) ──────────────────────────────────
+
+
+def _im_row_v2(symbol: str, *, listing_ts, first_perp_kline_ts) -> pd.DataFrame:
+    return pd.DataFrame([{
+        "symbol": symbol, "listing_ts": listing_ts, "first_perp_kline_ts": first_perp_kline_ts,
+        "delisting_ts": pd.NaT,
+    }])
+
+
+def test_expected_start_baseline_spot_uses_first_perp_kline_ts_not_listing_ts():
+    # composite listing_ts is EARLIER (e.g. funding observed the symbol
+    # first) -- spot's baseline must ignore that and use first_perp_kline_ts.
+    im = _im_row_v2("AGIXUSDT", listing_ts=TS("2023-02-15 07:00:00"), first_perp_kline_ts=TS("2023-02-16"))
+    result = readiness_mod._expected_start_baseline("spot_5m", "AGIXUSDT", im)
+    assert result == TS("2023-02-16")
+
+
+def test_expected_start_baseline_non_spot_dataset_uses_generic_listing_ts():
+    im = _im_row_v2("AGIXUSDT", listing_ts=TS("2023-02-15 07:00:00"), first_perp_kline_ts=TS("2023-02-16"))
+    result = readiness_mod._expected_start_baseline("perp_5m", "AGIXUSDT", im)
+    assert result == TS("2023-02-15 07:00:00")
+
+
+def test_expected_start_baseline_spot_fails_closed_when_first_perp_kline_ts_missing():
+    im = _im_row_v2("FOOUSDT", listing_ts=TS("2023-02-15"), first_perp_kline_ts=pd.NaT)
+    result = readiness_mod._expected_start_baseline("spot_5m", "FOOUSDT", im)
+    assert result is None  # never falls back to the generic listing_ts

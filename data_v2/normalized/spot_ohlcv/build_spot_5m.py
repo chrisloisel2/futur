@@ -8,9 +8,22 @@ data_v2/features/basis.py can causally join perp_spot_basis. Same
 aggregate-only policy as perp 5m (see build_perp_5m.py docstring): nothing
 raw written to disk, Vision archives are re-fetchable later if needed.
 
-Bounded to the SAME window as the symbol's perp listing (not spot's own,
-often earlier, listing date) -- basis needs both legs to exist simultaneously,
-so backfilling spot history that predates the perp is not useful here.
+Bounded to the symbol's PROVEN first perp kline (instrument_master's
+first_perp_kline_ts), not spot's own often-earlier listing date -- basis
+needs both legs to exist simultaneously, so backfilling spot history that
+predates the perp is not useful here.
+
+Fix (2026-08-11): an earlier version bounded on instrument_master's
+composite `listing_ts` = min(exchangeinfo_onboard_ts, first_perp_kline_ts,
+first_funding_ts, first_oi_ts) -- funding/OI frequently observe a symbol
+slightly BEFORE its first perp kline exists (86/312 symbols in the current
+InstrumentMaster), so that composite silently pulled spot's start back
+earlier than perp actually starts: wasted fetches for months no basis join
+could ever use, and a PIT-alignment false-positive once perp's own real
+listing_ts is compared against spot rows that predate it. Bounding on
+first_perp_kline_ts specifically fixes both. If first_perp_kline_ts is
+unknown for a symbol, fail closed (skip it, log why) rather than invent a
+fallback date.
 
 Output: data_v2/normalized/spot_ohlcv/venue=binance/symbol={SYM}/year={Y}/
         spot_5m.parquet
@@ -62,6 +75,24 @@ def load_manifest(symbol_dir: Path) -> dict:
 
 def save_manifest(symbol_dir: Path, manifest: dict) -> None:
     (symbol_dir / "manifest.json").write_text(json.dumps(manifest))
+
+
+def resolve_spot_fetch_window(
+    first_perp_kline_ts, delisting_ts, today: date
+) -> tuple[date, date] | None:
+    """The spot fetch window for one symbol, bounded by its PROVEN first
+    perp kline (never the composite instrument_master listing_ts, which
+    can be earlier if funding/OI observed the symbol before its first perp
+    kline exists -- see module docstring). Returns None (fail closed) if
+    first_perp_kline_ts is unknown for this symbol -- callers must skip
+    the symbol, never substitute a fabricated fallback date.
+    delisting_ts caps the end; None/NaT means "still listed", capped at
+    `today` (the caller's own now-2-days floor)."""
+    if pd.isna(first_perp_kline_ts):
+        return None
+    start = pd.Timestamp(first_perp_kline_ts).date()
+    end = pd.Timestamp(delisting_ts).date() if pd.notna(delisting_ts) else today
+    return start, min(end, today)
 
 
 def build_symbol(symbol: str, start: date, end: date) -> dict:
@@ -138,11 +169,14 @@ def main() -> None:
             print(f"\nSTOP: free space {headroom:.1f}GB < --min-free-gb {args.min_free_gb}GB "
                   f"after {i - 1}/{len(im)} symbols. Resumable -- re-run to continue.", flush=True)
             sys.exit(1)
-        # bounded by PERP listing_ts (basis needs both legs), not spot's own listing
-        start = pd.Timestamp(row.listing_ts).date() if pd.notna(row.listing_ts) else date(2019, 9, 1)
-        end = pd.Timestamp(row.delisting_ts).date() if pd.notna(row.delisting_ts) else today
+        window = resolve_spot_fetch_window(row.first_perp_kline_ts, row.delisting_ts, today)
+        if window is None:
+            print(f"  [{i:3}/{len(im)}] {row.symbol:14} SKIP: no first_perp_kline_ts proof for this "
+                  f"symbol -- fail-closed, not fetching from an invented date", flush=True)
+            continue
+        start, end = window
         try:
-            r = build_symbol(row.symbol, start, min(end, today))
+            r = build_symbol(row.symbol, start, end)
         except Exception as e:
             print(f"  [{i:3}/{len(im)}] {row.symbol:14} ERROR {type(e).__name__}: {e}", flush=True)
             continue
