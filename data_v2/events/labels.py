@@ -49,6 +49,20 @@ Pre-unblinding fix (2026-08-10, review round 4):
    slippage_per_side = tick_size/entry_price) -- the return path itself is
    computed from residual_logret_5m increments, independent of the price
    level.
+
+Bug found + fixed 2026-08-11 (Data V2 mission, section 13): the forward
+path used `frame["residual_logret_5m"].fillna(0)` before summing --
+turning a genuinely UNKNOWN 5m increment (a real data gap inside the
+horizon window, which the real panel will have wherever a source dataset
+has a coverage hole) into a fabricated zero return. That silently
+understates MFE/MAE magnitude and can flip a genuinely-incomplete path
+into a reported win or loss that never actually happened -- exactly the
+"fillna(0) turns unknown data into a null return" pattern the protocol's
+own labels section forbids. Fixed: NaN increments are no longer filled;
+any horizon whose window contains at least one NaN residual_logret_5m
+gets residual_ret_h/MFE_h/MAE_h/time_to_MFE_h = NaN and a new
+label_path_complete_h = False column, exactly like the pre-existing
+"not enough future bars yet" case just below it.
 """
 from __future__ import annotations
 
@@ -90,7 +104,7 @@ def label_events(
 
     frame = symbol_frame.reset_index(drop=True)
     bar_ts = frame["timestamp"].to_numpy()
-    log_ret_5m = frame["residual_logret_5m"].fillna(0).to_numpy()
+    log_ret_5m = frame["residual_logret_5m"].to_numpy()  # NaN kept as NaN -- see 2026-08-11 fix note above
     open_ = frame["open"].to_numpy()
     n_frame = len(frame)
 
@@ -118,23 +132,33 @@ def label_events(
 
     for label, minutes in HORIZONS_MINUTES.items():
         n_bars = max(1, minutes // BAR_MINUTES)
-        rets, mfes, maes, ttms = [], [], [], []
+        rets, mfes, maes, ttms, path_complete = [], [], [], [], []
         for i, direction in zip(entry_idx, directions):
             if i < 0 or i + n_bars > n_frame:
                 rets.append(np.nan); mfes.append(np.nan); maes.append(np.nan); ttms.append(np.nan)
+                path_complete.append(False)
                 continue
             # non-overlapping 5m increments only, starting AT entry_idx
-            increments = log_ret_5m[i : i + n_bars] * direction
+            raw_increments = log_ret_5m[i : i + n_bars]
+            if np.isnan(raw_increments).any():
+                # a real data gap inside the horizon window -- the future
+                # path is genuinely unknown, not zero (see fix note above)
+                rets.append(np.nan); mfes.append(np.nan); maes.append(np.nan); ttms.append(np.nan)
+                path_complete.append(False)
+                continue
+            increments = raw_increments * direction
             path = np.cumsum(increments)
             final_log_ret = path[-1]
             mfe = float(np.expm1(np.max(path)))
             mae = float(np.expm1(np.min(path)))
             ttm = int(np.argmax(path) + 1) * BAR_MINUTES
             rets.append(float(np.expm1(final_log_ret))); mfes.append(mfe); maes.append(mae); ttms.append(ttm)
+            path_complete.append(True)
         out[f"residual_ret_{label}"] = rets
         out[f"MFE_{label}"] = mfes
         out[f"MAE_{label}"] = maes
         out[f"time_to_MFE_{label}"] = ttms
+        out[f"label_path_complete_{label}"] = path_complete
 
     return out
 

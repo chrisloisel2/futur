@@ -544,6 +544,78 @@ def test_label_events_sums_nonoverlapping_5m_increments():
     assert labelled["residual_ret_1h"].iloc[0] == pytest.approx(expected_1h, abs=1e-9)
 
 
+def test_label_events_nan_increment_inside_horizon_yields_nan_not_zero_fill():
+    """Bug found 2026-08-11: a real data gap (NaN residual_logret_5m)
+    anywhere inside a horizon window used to be fillna(0)'d -- silently
+    turning an unknown increment into a fabricated zero return. It must
+    instead make that horizon's label NaN and label_path_complete False,
+    per the protocol's labels section."""
+    n = 200
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    log_ret = np.zeros(n)
+    event_idx = 50
+    entry_idx = event_idx + 1
+    log_ret[entry_idx : entry_idx + 12] = 0.001
+    log_ret[entry_idx + 5] = np.nan  # one real gap inside the 1h window
+    frame = pd.DataFrame({
+        "timestamp": idx, "research_available_at": _research_available_at_exact_close(idx).to_numpy(),
+        "residual_logret_5m": log_ret, "open": np.full(n, 100.0), "close": np.full(n, 100.0),
+    })
+    events = pd.DataFrame({
+        "timestamp": [idx[event_idx]], "research_available_at": [frame.loc[event_idx, "research_available_at"]],
+        "symbol": ["FOOUSDT"],
+    })
+
+    labelled = label_events(events, frame, family="DELEVERAGING")
+    # 15m window (3 bars) has no gap -- unaffected
+    assert labelled["label_path_complete_15m"].iloc[0] == True  # noqa: E712
+    assert np.isfinite(labelled["residual_ret_15m"].iloc[0])
+    # 1h window (12 bars) contains the gap -- must be NaN, never a fabricated 0
+    assert labelled["label_path_complete_1h"].iloc[0] == False  # noqa: E712
+    assert np.isnan(labelled["residual_ret_1h"].iloc[0])
+    assert np.isnan(labelled["MFE_1h"].iloc[0])
+    assert np.isnan(labelled["MAE_1h"].iloc[0])
+    assert np.isnan(labelled["time_to_MFE_1h"].iloc[0])
+
+
+def test_label_events_path_complete_true_when_no_gap_and_enough_future_bars():
+    n = 200
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    log_ret = np.full(n, 0.0001)
+    event_idx = 50
+    frame = pd.DataFrame({
+        "timestamp": idx, "research_available_at": _research_available_at_exact_close(idx).to_numpy(),
+        "residual_logret_5m": log_ret, "open": np.full(n, 100.0), "close": np.full(n, 100.0),
+    })
+    events = pd.DataFrame({
+        "timestamp": [idx[event_idx]], "research_available_at": [frame.loc[event_idx, "research_available_at"]],
+        "symbol": ["FOOUSDT"],
+    })
+    labelled = label_events(events, frame, family="DELEVERAGING")
+    for label in ("15m", "1h", "4h", "8h"):
+        assert labelled[f"label_path_complete_{label}"].iloc[0] == True  # noqa: E712
+
+
+def test_label_events_insufficient_future_bars_is_also_path_incomplete():
+    """Pre-existing 'not enough future bars yet' case must report
+    label_path_complete=False too, not just NaN values in isolation."""
+    n = 60
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    log_ret = np.full(n, 0.0001)
+    event_idx = n - 2  # too close to the end of the frame for any horizon
+    frame = pd.DataFrame({
+        "timestamp": idx, "research_available_at": _research_available_at_exact_close(idx).to_numpy(),
+        "residual_logret_5m": log_ret, "open": np.full(n, 100.0), "close": np.full(n, 100.0),
+    })
+    events = pd.DataFrame({
+        "timestamp": [idx[event_idx]], "research_available_at": [frame.loc[event_idx, "research_available_at"]],
+        "symbol": ["FOOUSDT"],
+    })
+    labelled = label_events(events, frame, family="DELEVERAGING")
+    assert labelled["label_path_complete_15m"].iloc[0] == False  # noqa: E712
+    assert np.isnan(labelled["residual_ret_15m"].iloc[0])
+
+
 def test_label_events_entry_excludes_triggering_bars_own_move():
     """The exact bug from review: a move that PRODUCED the trigger must not
     also count as forward performance."""
