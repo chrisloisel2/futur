@@ -229,6 +229,64 @@ def test_validator_against_real_oi_data_reports_plausible_coverage():
     assert report.coverage_pct > 0.5  # real feed has known ~2985 gaps>5m per prior audit, not perfect
 
 
+# ── variable_cadence (funding, 2026-08-11) ─────────────────────────────
+
+
+def test_validator_variable_cadence_dense_settlement_not_penalized():
+    """The exact bug found on AIAUSDT: real funding settling every 1h/4h
+    (Binance's dynamic funding interval) instead of the standard 8h used
+    to report an impossible >100% coverage_pct under a fixed 3/day
+    expectation. Under variable_cadence, a denser-than-8h real cadence
+    must read as ~complete coverage, not be treated as "too many rows"."""
+    idx = pd.date_range("2026-01-01", periods=30 * 24, freq="1h", tz="UTC")  # settles every hour, 30 days
+    df = pd.DataFrame({"timestamp": idx, "funding_rate": 0.0001})
+    im = pd.DataFrame([{"symbol": "DENSEUSDT", "listing_ts": idx[0], "delisting_ts": pd.NaT}])
+    now = idx[-1] + pd.Timedelta(hours=1)
+
+    report = validate_series(df, symbol="DENSEUSDT", timestamp_col="timestamp", bar_seconds=8 * 3600,
+                              instrument_master=im, now=now, variable_cadence=True)
+    assert report.coverage_pct == pytest.approx(1.0, abs=1e-6)
+    assert report.passed
+
+
+def test_validator_variable_cadence_still_catches_a_real_missed_settlement():
+    """A genuine gap (no settlement for 20h, well past the 8h ceiling) must
+    still show up as missing coverage under variable_cadence -- it isn't a
+    blanket "never fails" mode, only "denser than expected never fails"."""
+    idx = list(pd.date_range("2026-01-01", periods=10, freq="8h", tz="UTC"))
+    del idx[5]  # remove one settlement -> a 16h gap where 8h was expected
+    df = pd.DataFrame({"timestamp": idx, "funding_rate": 0.0001})
+    im = pd.DataFrame([{"symbol": "GAPUSDT", "listing_ts": idx[0], "delisting_ts": pd.NaT}])
+    now = idx[-1] + pd.Timedelta(hours=1)
+
+    report = validate_series(df, symbol="GAPUSDT", timestamp_col="timestamp", bar_seconds=8 * 3600,
+                              instrument_master=im, now=now, variable_cadence=True)
+    assert report.coverage_pct < 0.98
+    assert report.gap_count == 1
+
+
+def test_validator_variable_cadence_standard_8h_symbol_unaffected():
+    idx = pd.date_range("2026-01-01", periods=30, freq="8h", tz="UTC")
+    df = pd.DataFrame({"timestamp": idx, "funding_rate": 0.0001})
+    im = pd.DataFrame([{"symbol": "STDUSDT", "listing_ts": idx[0], "delisting_ts": pd.NaT}])
+    now = idx[-1] + pd.Timedelta(hours=1)
+
+    report = validate_series(df, symbol="STDUSDT", timestamp_col="timestamp", bar_seconds=8 * 3600,
+                              instrument_master=im, now=now, variable_cadence=True)
+    assert report.coverage_pct == pytest.approx(1.0, abs=1e-6)
+
+
+@pytest.mark.skipif(not Path("data/derivatives_backfill/binance/funding/AIAUSDT.parquet").exists(),
+                     reason="real AIAUSDT funding data not present")
+def test_validator_variable_cadence_on_real_aiausdt_funding_no_longer_over_100pct():
+    df = pd.read_parquet("data/derivatives_backfill/binance/funding/AIAUSDT.parquet")
+    im = pd.read_parquet("data_v2/instruments/instrument_master.parquet")
+    now = pd.Timestamp.now(tz="UTC")
+    report = validate_series(df, symbol="AIAUSDT", timestamp_col="timestamp", bar_seconds=8 * 3600,
+                              instrument_master=im, now=now, variable_cadence=True)
+    assert report.coverage_pct <= 1.0 + 1e-6  # the real ~147% anomaly must be gone
+
+
 # ── funding events ──────────────────────────────────────────────────────
 
 

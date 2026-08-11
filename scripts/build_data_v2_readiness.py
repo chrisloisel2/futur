@@ -53,30 +53,17 @@ from data_v2.validation.validator import validate_series  # noqa: E402
 from data_v2.temporal.available_at import add_temporal_columns  # noqa: E402
 from data_pipeline.taker_flow_guard import looks_like_placeholder_taker_flow  # noqa: E402
 from data_v2.normalized.perp_ohlcv.build_perp_5m import month_range  # noqa: E402
+from data_v2.validation.manifest_gaps import (  # noqa: E402
+    DATASET_MANIFEST_SPECS,
+    VISION_OI_FLOOR,
+    gap_confirmed_unfillable,
+    load_funding as _load_funding,
+    load_oi as _load_oi,
+    load_year_partitioned as _load_year_partitioned,
+)
 
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
 OUT_PATH = ROOT / "reports/DATA_V2_READINESS.json"
-
-VISION_OI_FLOOR = pd.Timestamp("2020-09-01", tz="UTC")  # Binance Vision futures metrics history floor
-
-
-def _load_year_partitioned(base_dir: Path, symbol: str, filename: str) -> Optional[pd.DataFrame]:
-    parts = sorted((base_dir / f"symbol={symbol}").glob(f"year=*/{filename}"))
-    if not parts:
-        return None
-    frames = [pd.read_parquet(p) for p in parts]
-    df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="timestamp").sort_values("timestamp")
-    return df
-
-
-def _load_oi(symbol: str) -> Optional[pd.DataFrame]:
-    path = ROOT / f"data/derivatives_backfill/binance_vision_metrics/{symbol}_metrics_5m.parquet"
-    return pd.read_parquet(path) if path.exists() else None
-
-
-def _load_funding(symbol: str) -> Optional[pd.DataFrame]:
-    path = ROOT / f"data/derivatives_backfill/binance/funding/{symbol}.parquet"
-    return pd.read_parquet(path) if path.exists() else None
 
 
 def _spot_absence_confirmed(symbol: str, expected_start: Optional[pd.Timestamp], expected_end: Optional[pd.Timestamp]) -> bool:
@@ -149,6 +136,16 @@ DATASET_SPECS = {
         # -- included here so "funding_coverage_100pct" in hard_gates is an
         # actually-measured fact, not the hardcoded True an earlier version
         # of this script had.
+        # variable_cadence (2026-08-11): 8h is Binance's documented STANDARD
+        # interval, but some contracts use a shorter DYNAMIC interval --
+        # verified on real data, AIAUSDT mixes 1h and 4h settlements. A
+        # fixed "3/day" row-count expectation made denser-cadence symbols
+        # report an impossible >100% coverage_pct (the ~147% anomaly) and
+        # could never actually catch a missed settlement. bar_seconds is
+        # now the MAXIMUM allowed interval for gap detection, not a literal
+        # expected spacing -- see data_v2.validation.validator's
+        # variable_cadence docstring.
+        variable_cadence=True,
     ),
     "agg_trades_flow_1m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/1m/venue=binance", sym, "flow.parquet"),
@@ -167,6 +164,44 @@ DATASET_SPECS = {
 }
 
 
+def _confirmed_unavailable_expected_start(
+    dataset: str, symbol: str, im: pd.DataFrame, df: pd.DataFrame, timestamp_col: str
+) -> Optional[pd.Timestamp]:
+    """If the gap between this symbol's theoretical expected_start
+    (listing_ts, capped by the dataset's own source_available_from) and
+    the data's own real first row is CONFIRMED unfillable -- the
+    backfiller's own manifest already 404'd every single period in that
+    gap, see data_v2.validation.manifest_gaps -- return the data's real
+    first row as an expected_start override, so that confirmed-
+    unavailable prefix stops permanently counting against coverage_pct
+    (the exact bug: ADAUSDT/ZRXUSDT's OI could never reach the 95%
+    coverage gate no matter how complete the backfill was, because their
+    first 456 days are genuinely 404 at the source, not unfetched).
+    None means "no adjustment" -- validate_series computes expected_start
+    itself as usual (funding has no confirmed-unavailable tracking here;
+    DATA_READY per the prior audit already established it has none)."""
+    manifest_key = "agg_trades_flow_5m" if dataset == "agg_trades_flow_1m" else dataset
+    manifest_spec = DATASET_MANIFEST_SPECS.get(manifest_key)
+    if manifest_spec is None:
+        return None
+
+    im_row = im.loc[im["symbol"] == symbol]
+    if im_row.empty or pd.isna(im_row.iloc[0]["listing_ts"]):
+        return None
+    listing_ts = pd.Timestamp(im_row.iloc[0]["listing_ts"])
+    source_floor = manifest_spec["source_available_from"]
+    repair_target = max(listing_ts, source_floor) if source_floor is not None else listing_ts
+
+    window_start = pd.to_datetime(df[timestamp_col], utc=True).min()
+    if pd.isna(window_start) or window_start <= repair_target:
+        return None  # no gap at all, nothing to adjust
+
+    missing = manifest_spec["missing_fn"](symbol)
+    if gap_confirmed_unfillable(repair_target, window_start, missing, manifest_spec["granularity"]):
+        return window_start
+    return None
+
+
 def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd.Timestamp) -> dict:
     spec = DATASET_SPECS[dataset]
     df = spec["loader"](symbol)
@@ -182,6 +217,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         "pit_violations": 0,
         "market_causality_violations": 0, "execution_causality_violations": 0,
         "fake_flow_detected": False,
+        "confirmed_unavailable_prefix_excluded": False,
         "verdict": "FAIL",
     }
 
@@ -204,14 +240,21 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
                 row["notes"] = "confirmed absent: every expected month attempted, all 404 -- no market exists"
         return row
 
+    confirmed_unavailable_start = _confirmed_unavailable_expected_start(
+        dataset, symbol, im, df, spec["timestamp_col"]
+    )
     report = validate_series(
         df, symbol=symbol, timestamp_col=spec["timestamp_col"], bar_seconds=spec["bar_seconds"],
         source=dataset, instrument_master=im, now=now,
         required_positive_columns=spec["required_positive_columns"] or None,
         required_nonnegative_columns=spec.get("required_nonnegative_columns") or None,
         source_available_from=spec["source_available_from"],
+        expected_start=confirmed_unavailable_start,
         strict_alpha_readiness=True,
+        variable_cadence=spec.get("variable_cadence", False),
     )
+    if confirmed_unavailable_start is not None:
+        row["confirmed_unavailable_prefix_excluded"] = True
 
     # causality sanity check -- these two invariants must hold by
     # construction; a violation is a real bug, not (yet) a feature-join leak

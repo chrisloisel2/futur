@@ -28,8 +28,8 @@ lost.
 Per-bar columns (1m and 5m, computed independently from raw trades -- p95/
 vwap are not re-derivable from already-aggregated 1m rows by summing):
   aggressive_buy_usd, aggressive_sell_usd, signed_volume (buy-sell, USD),
-  CVD (running cumulative signed_volume, carried across days via manifest
-  state -- see _CVD_STATE_KEY), CVD_delta (= signed_volume, kept as an
+  CVD (running cumulative signed_volume -- see "CVD canonicalization"
+  below), CVD_delta (= signed_volume, kept as an
   explicit alias per the plan's column list), trade_count,
   large_trade_buy_usd/sell_usd (trades >= LARGE_TRADE_USD, a fixed
   threshold -- a design choice, not derived from data, see LARGE_TRADE_USD),
@@ -41,6 +41,29 @@ kept on disk. Vision daily archives are public/permanent and can be
 re-fetched later if raw ticks are ever needed. This is explicitly the
 heaviest step in the whole plan (CPU + network); expect a multi-hour to
 multi-day background run for the full 312-symbol history.
+
+CVD canonicalization (2026-08-11, InstrumentMaster V2 delta-backfill
+fallout): CVD used to be carried forward incrementally, purely via
+manifest["last_cvd_1m"/"last_cvd_5m"] -- correct ONLY if every call to
+build_symbol strictly APPENDS days after whatever was previously the
+latest. A delta backfill breaks that assumption: when InstrumentMaster V2
+pushes a symbol's listing_ts EARLIER (real case: AIAUSDT, 36 new days
+inserted BEFORE its previously-earliest day), the newly-inserted early
+days got last_cvd = the PREVIOUS run's FINAL cumulative total (wildly
+wrong -- they should start from 0, being the new true beginning), and the
+pre-existing later days were never revisited to absorb the newly-inserted
+early segment's own net signed_volume into their own CVD. The result was
+two internally-consistent but mutually-incompatible CVD segments glued
+together at the insertion boundary. Fixed: canonicalize_cvd() is now
+called unconditionally at the end of every build_symbol() call -- it
+rereads ALL of a symbol's on-disk year files (1m and 5m independently),
+sorts by true timestamp, and rebuilds CVD as one cumsum from the actual
+earliest row, then rewrites every year file and refreshes the manifest's
+last_cvd_* to the true final value. This makes CVD correct regardless of
+what order calls happened to insert data in, at the cost of a full re-read
++ rewrite of the symbol's history each call -- accepted, since aggTrades
+flow files (5m/1m aggregates, not raw ticks) are small enough for this to
+be cheap relative to the network fetch it follows.
 
 Usage:
     /home/qbee/futur/.venv/bin/python3 \\
@@ -60,6 +83,7 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -198,6 +222,11 @@ def save_manifest(symbol_dir: Path, manifest: dict) -> None:
 
 
 def _write_year_partitions(out_root: Path, symbol: str, frame_by_day: dict[date, pd.DataFrame], last_cvd: float) -> tuple[int, float]:
+    """Writes new bars with a locally-correct CVD (last_cvd + this batch's
+    cumsum) -- a cheap, correct-for-append approximation. This is NOT the
+    canonical CVD across a symbol's whole history if earlier data has ever
+    been inserted after the fact; canonicalize_cvd() (called at the end of
+    build_symbol) is what makes the on-disk CVD correct end to end."""
     if not frame_by_day:
         return 0, last_cvd
     combined = pd.concat(frame_by_day.values()).sort_index()
@@ -219,6 +248,32 @@ def _write_year_partitions(out_root: Path, symbol: str, frame_by_day: dict[date,
         tmp.replace(out_path)
         total_rows += len(new)
     return total_rows, new_last_cvd
+
+
+def canonicalize_cvd(out_root: Path, symbol: str) -> Optional[float]:
+    """Rebuild CVD from scratch across ALL of a symbol's on-disk year
+    files, in true chronological order -- the only way to guarantee CVD is
+    correct once data can be inserted out of order (a delta backfill
+    revealing an earlier true listing_ts). Returns the true final CVD
+    value (for manifest bookkeeping), or None if the symbol has no data on
+    disk yet."""
+    symbol_dir = out_root / f"symbol={symbol}"
+    year_files = sorted(symbol_dir.glob("year=*/flow.parquet"))
+    if not year_files:
+        return None
+    frames = [pd.read_parquet(p) for p in year_files]
+    combined = pd.concat(frames, ignore_index=True)
+    combined["timestamp"] = pd.to_datetime(combined["timestamp"], utc=True)
+    combined = combined.sort_values("timestamp").drop_duplicates(subset="timestamp", keep="last")
+    combined["CVD"] = combined["signed_volume"].cumsum()
+
+    for y, chunk in combined.groupby(combined["timestamp"].dt.year):
+        year_dir = symbol_dir / f"year={y}"
+        out_path = year_dir / "flow.parquet"
+        tmp = out_path.with_suffix(".tmp.parquet")
+        chunk.reset_index(drop=True).to_parquet(tmp, index=False)
+        tmp.replace(out_path)
+    return float(combined["CVD"].iloc[-1])
 
 
 def _chunked(items: list, size: int):
@@ -318,6 +373,18 @@ def build_symbol(symbol: str, start: date, end: date, workers: int = 6, batch_da
         manifest["failed_days"] = sorted(set(manifest["failed_days"]))
         save_manifest(manifest_dir_1m, manifest)  # checkpoint after every batch, not just at symbol end
         del bars_1m_by_day, bars_5m_by_day
+
+    if n_new > 0:
+        # canonicalize whenever new data was actually written -- cheap
+        # no-op skip otherwise (a pure "nothing new" re-run would just
+        # reread+rewrite the whole history for no reason).
+        canon_1m = canonicalize_cvd(OUT_1M, symbol)
+        canon_5m = canonicalize_cvd(OUT_5M, symbol)
+        if canon_1m is not None:
+            manifest["last_cvd_1m"] = canon_1m
+        if canon_5m is not None:
+            manifest["last_cvd_5m"] = canon_5m
+        save_manifest(manifest_dir_1m, manifest)
 
     return {
         "symbol": symbol, "new_days": n_new, "missing_days": n_missing,

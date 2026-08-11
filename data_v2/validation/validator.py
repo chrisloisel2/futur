@@ -153,6 +153,7 @@ def validate_series(
     expected_end: Optional[pd.Timestamp] = None,
     source_available_from: Optional[pd.Timestamp] = None,
     strict_alpha_readiness: bool = False,
+    variable_cadence: bool = False,
 ) -> ValidationReport:
     """Validate one (symbol, source) time series against real coverage/
     integrity expectations, not just "file opens and isn't empty".
@@ -177,6 +178,24 @@ def validate_series(
         look fine. False (the default) is appropriate for local/dev checks
         where "we don't know the true span but the data looks internally
         consistent" is still a useful signal.
+    variable_cadence: for a source whose real interval is not fixed --
+        funding is the concrete case: Binance's own docs describe 8h as
+        the standard settlement interval, but some contracts can use a
+        shorter DYNAMIC interval (verified on real data: AIAUSDT mixes 1h
+        and 4h settlements). bar_seconds is then the MAXIMUM allowed
+        interval, not a literal expected cadence -- a plain expected_rows
+        = span / bar_seconds under-counts a denser real cadence and
+        reports an impossible >100% coverage_pct instead of ever being
+        able to catch a real missed settlement (this is exactly the ~147%
+        anomaly first seen on AIAUSDT's funding coverage). When True,
+        coverage_pct is instead 1 - (excess gap time beyond bar_seconds) /
+        (total expected span) -- indifferent to how dense the real
+        cadence is, still exactly as sensitive to a genuine missed
+        settlement (any gap longer than bar_seconds counts as excess).
+        expected_rows becomes a non-informational echo of actual_rows in
+        this mode (a literal row count has no single correct value under a
+        variable cadence); gap_count/max_gap are unaffected and remain the
+        precise "was any settlement actually missed" signal.
     """
     pk_cols = list(pk_cols) if pk_cols else [timestamp_col]
     now = now or pd.Timestamp.utcnow()
@@ -311,13 +330,33 @@ def validate_series(
             "first observed row, treat as partial information, not 100%"
         )
 
-    if eff_start is not None and eff_end is not None and eff_end > eff_start:
-        expected_rows = int((eff_end - eff_start) / expected_step) + 1
-    else:
-        expected_rows = len(dedup_ts)
-
     actual_rows = len(dedup_ts)
-    coverage_pct = (actual_rows / expected_rows) if expected_rows else 0.0
+    if variable_cadence:
+        # gap-EXCESS based coverage (see variable_cadence in the
+        # docstring): bar_seconds is the MAXIMUM allowed interval here,
+        # not a literal expected row spacing. A denser-than-bar_seconds
+        # real cadence must never look like "missing" coverage; only a
+        # span longer than bar_seconds anywhere (boundaries or internal)
+        # is genuinely unaccounted-for time.
+        if eff_start is not None and eff_end is not None and eff_end > eff_start:
+            total_span = (eff_end - eff_start).total_seconds()
+            excess = 0.0
+            if window_start is not None and window_start > eff_start:
+                excess += max(0.0, (window_start - eff_start).total_seconds() - expected_step.total_seconds())
+            if window_end is not None and eff_end > window_end:
+                excess += max(0.0, (eff_end - window_end).total_seconds() - expected_step.total_seconds())
+            internal_excess = (diffs[diffs > expected_step] - expected_step).dt.total_seconds().sum()
+            excess += float(internal_excess)
+            coverage_pct = max(0.0, 1.0 - excess / total_span) if total_span > 0 else 0.0
+        else:
+            coverage_pct = 0.0
+        expected_rows = actual_rows  # not a meaningful count under variable cadence -- see docstring
+    else:
+        if eff_start is not None and eff_end is not None and eff_end > eff_start:
+            expected_rows = int((eff_end - eff_start) / expected_step) + 1
+        else:
+            expected_rows = len(dedup_ts)
+        coverage_pct = (actual_rows / expected_rows) if expected_rows else 0.0
 
     # staleness -- BLOCKING for a still-active (non-delisted) symbol,
     # measured against `now`, not just left as an informational note.

@@ -50,7 +50,6 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -59,7 +58,10 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from scripts.build_data_v2_readiness import _load_oi, _load_year_partitioned, VISION_OI_FLOOR  # noqa: E402
+from data_v2.validation.manifest_gaps import (  # noqa: E402
+    DATASET_MANIFEST_SPECS as DATASETS,
+    gap_confirmed_unfillable as _gap_confirmed_unfillable,
+)
 
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
 OUT_PATH = ROOT / "reports/BACKFILL_BOUND_REPAIR.json"
@@ -69,77 +71,11 @@ OUT_PATH = ROOT / "reports/BACKFILL_BOUND_REPAIR.json"
 # smaller is normal jitter between sources, not a real repair candidate.
 GAP_TOLERANCE = pd.Timedelta(hours=24)
 
-# source_available_from mirrors build_data_v2_readiness.py's own
-# DATASET_SPECS: the earliest instant the SOURCE itself can possibly have
-# data, independent of any symbol's listing_ts. Only oi_vision_5m has a
-# documented one (VISION_OI_FLOOR, Binance Vision futures metrics'
-# archive-wide floor) -- without capping the repair target at it, a symbol
-# listed before 2020-09-01 (e.g. ETHUSDT, 2019-11-27) would get flagged for
-# a "gap" that is partly impossible to fill (no OI archive exists before
-# the floor, no amount of delta-backfilling changes that).
-def _missing_days(manifest_path: Path, key: str = "missing") -> set:
-    if not manifest_path.exists():
-        return set()
-    return set(json.loads(manifest_path.read_text()).get(key, []))
-
-
-def _missing_months(manifest_path: Path) -> set:
-    if not manifest_path.exists():
-        return set()
-    return set(json.loads(manifest_path.read_text()).get("missing_months", []))
-
-
-DATASETS = {
-    "oi_vision_5m": dict(
-        loader=_load_oi, ts_col="create_time", source_available_from=VISION_OI_FLOOR, granularity="day",
-        missing_fn=lambda s: _missing_days(ROOT / f"data/derivatives_backfill/binance_vision_metrics/{s}_manifest.json"),
-    ),
-    "perp_5m": dict(
-        loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/perp_ohlcv/venue=binance", s, "perp_5m.parquet"),
-        ts_col="timestamp", source_available_from=None, granularity="month",
-        missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/perp_ohlcv/venue=binance/symbol={s}/manifest.json"),
-    ),
-    "spot_5m": dict(
-        loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", s, "spot_5m.parquet"),
-        ts_col="timestamp", source_available_from=None, granularity="month",
-        missing_fn=lambda s: _missing_months(ROOT / f"data_v2/normalized/spot_ohlcv/venue=binance/symbol={s}/manifest.json"),
-    ),
-    "agg_trades_flow_5m": dict(
-        loader=lambda s: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/5m/venue=binance", s, "flow.parquet"),
-        ts_col="timestamp", source_available_from=None, granularity="day",
-        missing_fn=lambda s: _missing_days(
-            ROOT / f"data_v2/normalized/agg_trades_flow/1m/venue=binance/symbol={s}/manifest.json", key="missing_days"
-        ),
-    ),
-}
-
-
-def _gap_confirmed_unfillable(start: pd.Timestamp, end: pd.Timestamp, missing: set, granularity: str) -> bool:
-    """True iff EVERY period in [start, end) is already in `missing` --
-    i.e. the backfiller already tried the whole current gap and every
-    single period 404'd, so there is nothing left to fetch. `end`'s own
-    period is excluded: it already has real data by construction
-    (observed_start_on_disk), so it's never itself a candidate."""
-    if not missing:
-        return False
-    if granularity == "day":
-        d = start.date()
-        while d < end.date():
-            if d.isoformat() not in missing:
-                return False
-            d += timedelta(days=1)
-        return True
-    if granularity == "month":
-        y, m = start.year, start.month
-        while (y, m) < (end.year, end.month):
-            if f"{y:04d}-{m:02d}" not in missing:
-                return False
-            m += 1
-            if m > 12:
-                m = 1
-                y += 1
-        return True
-    raise ValueError(f"unknown granularity: {granularity}")
+# DATASETS / _gap_confirmed_unfillable now live in data_v2.validation.
+# manifest_gaps -- shared with build_data_v2_readiness.py, which also
+# needs to know whether a gap is confirmed-unfillable (to exclude it from
+# its own coverage denominator). See that module's docstring for why this
+# moved out of here.
 
 
 def build(im: Optional[pd.DataFrame] = None) -> dict:

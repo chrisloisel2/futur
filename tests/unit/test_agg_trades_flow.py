@@ -16,6 +16,7 @@ Gate:
 """
 from __future__ import annotations
 
+import json
 import sys
 from datetime import date
 from pathlib import Path
@@ -105,6 +106,39 @@ def test_cvd_is_cumulative_across_batches(tmp_path, monkeypatch):
     # symbol history, not reset at each batch boundary.
     expected_cvd = out["signed_volume"].cumsum()
     np.testing.assert_allclose(out["CVD"].to_numpy(), expected_cvd.to_numpy(), rtol=1e-9)
+
+
+def test_cvd_canonicalized_after_earlier_data_inserted_later(tmp_path, monkeypatch):
+    """The real bug found running the InstrumentMaster V2 delta backfill on
+    AIAUSDT: a first build_symbol call for [Jan 5, Jan 10] writes CVD
+    starting from 0 (correct, at the time). A LATER call (a delta backfill
+    revealing an earlier true listing_ts) for [Jan 1, Jan 4] must not just
+    tack those days on with their own local 0-based CVD, and must not
+    leave the Jan 5-10 days' CVD un-shifted -- the WHOLE series must end up
+    as one true cumulative sum from Jan 1 onward."""
+    monkeypatch.setattr(flow_mod, "OUT_1M", tmp_path / "1m/venue=binance")
+    monkeypatch.setattr(flow_mod, "OUT_5M", tmp_path / "5m/venue=binance")
+    monkeypatch.setattr(flow_mod, "fetch_day", lambda symbol, d: _fake_trades(d, n=200))
+
+    # first pass: symbol appears to start Jan 5 (its "listing_ts" at the time)
+    flow_mod.build_symbol("AIAUSDT", date(2024, 1, 5), date(2024, 1, 10), workers=2, batch_days=3)
+    # second pass: InstrumentMaster V2 proved it actually existed from Jan 1
+    flow_mod.build_symbol("AIAUSDT", date(2024, 1, 1), date(2024, 1, 4), workers=2, batch_days=3)
+
+    out = pd.read_parquet(flow_mod.OUT_5M / "symbol=AIAUSDT/year=2024/flow.parquet")
+    out = out.sort_values("timestamp").reset_index(drop=True)
+    # true canonical CVD: one cumsum over the WHOLE, correctly-ordered history
+    expected_cvd = out["signed_volume"].cumsum()
+    np.testing.assert_allclose(out["CVD"].to_numpy(), expected_cvd.to_numpy(), rtol=1e-9)
+    # and the manifest's carried last_cvd must match the true final value,
+    # not whatever the second (earlier-days-only) batch computed locally
+    manifest = json.loads((flow_mod.OUT_1M / "symbol=AIAUSDT/manifest.json").read_text())
+    assert manifest["last_cvd_5m"] == pytest.approx(float(expected_cvd.iloc[-1]))
+
+
+def test_canonicalize_cvd_is_noop_safe_on_empty_symbol(tmp_path):
+    result = flow_mod.canonicalize_cvd(tmp_path / "5m/venue=binance", "GHOSTUSDT")
+    assert result is None
 
 
 def test_manifest_checkpoints_after_each_batch_not_only_at_symbol_end(tmp_path, monkeypatch):
