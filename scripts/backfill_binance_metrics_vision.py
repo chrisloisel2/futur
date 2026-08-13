@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import shutil
 import sys
 import time
 import urllib.request
@@ -39,9 +40,27 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "derivatives_backfill" / "binance_vision_metrics"
 BASE = "https://data.binance.vision/data/futures/um/daily/metrics"
+INSTRUMENT_MASTER = ROOT / "data_v2" / "instruments" / "instrument_master.parquet"
 
 CORE_12 = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT",
            "AVAXUSDT", "LINKUSDT", "BNBUSDT", "LTCUSDT", "NEARUSDT", "APTUSDT"]
+
+
+def free_gb(path: Path) -> float:
+    return shutil.disk_usage(path).free / (1024 ** 3)
+
+
+def default_symbols() -> list[str]:
+    """Full PIT universe when instrument_master exists -- this store backs
+    oi_vision_5m for all 312 symbols in DATA_V2_READINESS.json, not just
+    CORE_12 (found 2026-08-13: OI had gone stale for everything outside
+    CORE_12 while this session's attention was on aggTrades -- the CORE_12
+    default silently meant the other ~300 symbols never got refreshed by a
+    plain re-run of this script)."""
+    if INSTRUMENT_MASTER.exists():
+        im = pd.read_parquet(INSTRUMENT_MASTER, columns=["symbol"])
+        return sorted(im["symbol"].unique().tolist())
+    return CORE_12
 
 NUMERIC_COLS = ["sum_open_interest", "sum_open_interest_value",
                 "count_toptrader_long_short_ratio", "sum_toptrader_long_short_ratio",
@@ -127,24 +146,30 @@ def backfill_symbol(sym: str, start: date, end: date, workers: int = 8) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--symbols", default=",".join(CORE_12))
+    ap.add_argument("--symbols", default=None, help="comma-separated; default = full PIT universe")
     ap.add_argument("--start", default="2021-01-01")
     ap.add_argument("--end", default=None, help="défaut : J-2")
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--min-free-gb", type=float, default=15.0)
     args = ap.parse_args()
 
     start = date.fromisoformat(args.start)
     end = date.fromisoformat(args.end) if args.end else date.today() - timedelta(days=2)
-    syms = [s.strip() for s in args.symbols.split(",") if s.strip()]
+    syms = [s.strip() for s in args.symbols.split(",") if s.strip()] if args.symbols else default_symbols()
 
     print(f"Backfill metrics Vision : {len(syms)} symboles, {start} → {end}", flush=True)
     t0 = time.time()
     reg = {}
-    for sym in syms:
+    for i, sym in enumerate(syms, 1):
+        headroom = free_gb(ROOT)
+        if headroom < args.min_free_gb:
+            print(f"\nSTOP: free space {headroom:.1f}GB < --min-free-gb {args.min_free_gb}GB "
+                  f"after {i - 1}/{len(syms)} symbols. Resumable -- re-run to continue.", flush=True)
+            sys.exit(1)
         r = backfill_symbol(sym, start, end, workers=args.workers)
         reg[sym] = r
-        print(f"  {sym:10} new={r.get('new',0):5}  404={r.get('n404',0):4}  "
-              f"err={r.get('errors',0):3}  rows={r.get('rows_total','-')}", flush=True)
+        print(f"  [{i:3}/{len(syms)}] {sym:10} new={r.get('new',0):5}  404={r.get('n404',0):4}  "
+              f"err={r.get('errors',0):3}  rows={r.get('rows_total','-')}  free={headroom:.1f}GB", flush=True)
 
     (OUT_DIR / "registry.json").write_text(json.dumps(
         {"generated_at": pd.Timestamp.utcnow().isoformat(), "window": [str(start), str(end)],
