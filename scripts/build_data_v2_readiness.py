@@ -506,6 +506,15 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
     else:
         effective_expected_end = baseline_expected_end
 
+    # scattered confirmed-unavailable days/months ANYWHERE in the window
+    # (not just a single boundary run) -- see validate_series'
+    # confirmed_unavailable_periods docstring. Reuses the exact same
+    # manifest missing_fn already used for the boundary checks above.
+    manifest_key = "agg_trades_flow_5m" if dataset == "agg_trades_flow_1m" else dataset
+    manifest_spec = DATASET_MANIFEST_SPECS.get(manifest_key)
+    confirmed_unavailable_periods = manifest_spec["missing_fn"](symbol) if manifest_spec else None
+    confirmed_unavailable_granularity = manifest_spec["granularity"] if manifest_spec else "day"
+
     report = validate_series(
         df, symbol=symbol, timestamp_col=spec["timestamp_col"], bar_seconds=spec["bar_seconds"],
         source=dataset, instrument_master=im, now=now,
@@ -518,6 +527,8 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         variable_cadence=spec.get("variable_cadence", False),
         staleness_gate_days=spec.get("staleness_gate_days", 3.0),
         listing_alignment_grace_days=spec.get("listing_alignment_grace_days", 1.0),
+        confirmed_unavailable_periods=confirmed_unavailable_periods,
+        confirmed_unavailable_granularity=confirmed_unavailable_granularity,
     )
 
     # causality sanity check -- these two invariants must hold by

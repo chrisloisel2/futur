@@ -135,6 +135,33 @@ def _listing_bounds(instrument_master: Optional[pd.DataFrame], symbol: str):
     return listing_ts, delisting_ts
 
 
+def _excluded_bars_for_confirmed_unavailable(
+    eff_start: pd.Timestamp, eff_end: pd.Timestamp, confirmed_unavailable_periods: Optional[set],
+    granularity: str, expected_step: pd.Timedelta,
+) -> int:
+    """Count of bars within [eff_start, eff_end] that fall on a period
+    (day or month, matching `granularity`) the caller has proven
+    unavailable at the source -- see confirmed_unavailable_periods'
+    docstring on validate_series. Works regardless of where the period
+    falls in the window (leading, trailing, or scattered)."""
+    if not confirmed_unavailable_periods or expected_step.total_seconds() <= 0:
+        return 0
+    bars_per_day = int(round(pd.Timedelta(days=1) / expected_step))
+    excluded = 0
+    if granularity == "day":
+        for d in pd.date_range(eff_start.normalize(), eff_end.normalize(), freq="1D"):
+            if d.date().isoformat() in confirmed_unavailable_periods:
+                excluded += bars_per_day
+    elif granularity == "month":
+        month_starts = pd.date_range(eff_start.normalize().replace(day=1), eff_end, freq="MS")
+        for period_start in month_starts:
+            key = f"{period_start.year:04d}-{period_start.month:02d}"
+            if key in confirmed_unavailable_periods:
+                days_in_month = pd.Period(key, freq="M").days_in_month
+                excluded += days_in_month * bars_per_day
+    return excluded
+
+
 def validate_series(
     df: pd.DataFrame,
     *,
@@ -155,6 +182,8 @@ def validate_series(
     strict_alpha_readiness: bool = False,
     variable_cadence: bool = False,
     listing_alignment_grace_days: float = 1.0,
+    confirmed_unavailable_periods: Optional[set] = None,
+    confirmed_unavailable_granularity: str = "day",
 ) -> ValidationReport:
     """Validate one (symbol, source) time series against real coverage/
     integrity expectations, not just "file opens and isn't empty".
@@ -172,6 +201,25 @@ def validate_series(
         Vision futures metrics start 2020-09-01 regardless of a symbol's
         own listing date) -- independent of listing_ts, the later of the
         two wins.
+    confirmed_unavailable_periods: set of period keys (day "YYYY-MM-DD" or
+        month "YYYY-MM", matching confirmed_unavailable_granularity) that
+        the caller's own backfiller manifest has PROVEN unavailable at the
+        source (real 404s, not merely unfetched) -- excluded from the
+        coverage denominator regardless of WHERE in [expected_start,
+        expected_end] they fall (leading, trailing, or scattered
+        throughout a symbol's history). Bug found 2026-08-14: the
+        pre-existing confirmed-unavailable handling (build_data_v2_
+        readiness.py's _confirmed_unavailable_expected_start/_end) only
+        ever excluded a single CONTIGUOUS run at a boundary -- a symbol
+        with real, scattered, individually-confirmed-404 days spread
+        throughout its history (e.g. ALPHAUSDT: 574 confirmed-missing
+        days out of ~2089 in its expected window, independently verified
+        against the live Binance Vision archive) could never reach a high
+        coverage_pct no matter how exhaustively it was backfilled, because
+        those scattered days permanently counted against the denominator.
+        Only ever excludes bars (bar_seconds granularity) -- variable_
+        cadence sources ignore this entirely (their own excess-based
+        coverage_pct already only counts genuinely-too-long gaps).
     strict_alpha_readiness: when True, `passed` additionally REQUIRES
         expected_span_known -- a source whose true expected coverage is
         unknown must not be able to contribute to a DATA_V2_READY verdict,
@@ -367,7 +415,12 @@ def validate_series(
         expected_rows = actual_rows  # not a meaningful count under variable cadence -- see docstring
     else:
         if eff_start is not None and eff_end is not None and eff_end > eff_start:
-            expected_rows = int((eff_end - eff_start) / expected_step) + 1
+            raw_expected_rows = int((eff_end - eff_start) / expected_step) + 1
+            excluded_rows = _excluded_bars_for_confirmed_unavailable(
+                eff_start, eff_end, confirmed_unavailable_periods,
+                confirmed_unavailable_granularity, expected_step,
+            )
+            expected_rows = max(1, raw_expected_rows - excluded_rows)
         else:
             expected_rows = len(dedup_ts)
         coverage_pct = (actual_rows / expected_rows) if expected_rows else 0.0

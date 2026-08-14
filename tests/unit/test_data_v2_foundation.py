@@ -255,6 +255,69 @@ def test_validator_fails_on_short_recent_slice_of_long_expected_history():
     assert not report.passed
 
 
+def test_validator_confirmed_unavailable_days_excluded_from_coverage_even_when_scattered():
+    """Bug found 2026-08-14 (user-authorized fix): the pre-existing
+    confirmed-unavailable handling only ever excluded a single contiguous
+    boundary run. A symbol with real, scattered, individually-confirmed
+    404 days spread throughout its history (the real ALPHAUSDT pattern,
+    574/2089 days) could never reach a high coverage_pct no matter how
+    exhaustively backfilled, because those scattered days permanently
+    counted against the denominator. confirmed_unavailable_periods must
+    exclude them regardless of position in the window."""
+    idx = pd.date_range("2024-01-01", periods=10 * 288, freq="5min", tz="UTC")  # 10 days, full coverage
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "XUSDT", "listing_ts": pd.Timestamp("2024-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    now = pd.Timestamp("2024-01-21", tz="UTC")  # expected window is 20 days, only 10 have real data
+
+    # without the fix: 10 real days / 20 expected days = 50% coverage
+    baseline = validate_series(df, symbol="XUSDT", timestamp_col="create_time", bar_seconds=300,
+                                instrument_master=im, now=now, expected_end=now)
+    assert baseline.coverage_pct == pytest.approx(0.5, abs=0.01)
+
+    # the missing 10 days are scattered confirmed-404s (not contiguous,
+    # not a simple boundary run) -- must be fully excluded from the denominator
+    confirmed_missing = {
+        (pd.Timestamp("2024-01-01") + pd.Timedelta(days=d)).date().isoformat()
+        for d in range(10, 20)
+    }
+    fixed = validate_series(df, symbol="XUSDT", timestamp_col="create_time", bar_seconds=300,
+                             instrument_master=im, now=now, expected_end=now,
+                             confirmed_unavailable_periods=confirmed_missing,
+                             confirmed_unavailable_granularity="day")
+    assert fixed.coverage_pct == pytest.approx(1.0, abs=0.01)
+
+
+def test_validator_confirmed_unavailable_days_do_not_over_exclude_real_gaps():
+    """Only genuinely confirmed-unavailable periods are excluded -- an
+    UN-confirmed gap (not in confirmed_unavailable_periods) must still
+    count against coverage, even if it looks similar."""
+    idx = pd.date_range("2024-01-01", periods=10 * 288, freq="5min", tz="UTC")
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "XUSDT", "listing_ts": pd.Timestamp("2024-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    now = pd.Timestamp("2024-01-21", tz="UTC")
+
+    report = validate_series(df, symbol="XUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=now, expected_end=now,
+                              confirmed_unavailable_periods=set(),  # nothing confirmed -- e.g. never attempted
+                              confirmed_unavailable_granularity="day")
+    assert report.coverage_pct == pytest.approx(0.5, abs=0.01)  # unchanged -- still a real, uncounted gap
+
+
+def test_validator_confirmed_unavailable_months_excluded_for_month_granularity():
+    idx = pd.date_range("2024-01-01", periods=31 * 288, freq="5min", tz="UTC")  # full January, real data
+    df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1.0})
+    im = pd.DataFrame([{"symbol": "XUSDT", "listing_ts": pd.Timestamp("2024-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    now = pd.Timestamp("2024-03-01", tz="UTC")  # expected span covers Jan+Feb, but no data past January
+
+    confirmed_missing_months = {"2024-02"}  # February confirmed unavailable at the source
+    report = validate_series(df, symbol="XUSDT", timestamp_col="create_time", bar_seconds=300,
+                              instrument_master=im, now=now, expected_end=now,
+                              confirmed_unavailable_periods=confirmed_missing_months,
+                              confirmed_unavailable_granularity="month")
+    # expected span becomes ~just January -- fully covered by real data
+    assert report.coverage_pct > 0.95
+
+
 def test_validator_strict_mode_fails_when_expected_span_unknown_even_if_coverage_looks_fine():
     """Without an instrument_master row (or explicit expected_start/end),
     coverage_pct falls back to the data's own observed span -- internally
