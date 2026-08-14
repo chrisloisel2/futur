@@ -211,16 +211,31 @@ def test_expected_end_baseline_none_for_non_monthly_dataset_unchanged_behavior()
     assert result is None  # validate_series' own now-fallback still applies, untouched
 
 
-def test_expected_end_baseline_none_when_symbol_confirmed_delisted():
-    # delisting_ts is a real, tighter bound than the publication watermark
-    # and must take priority -- validate_series' own internal fallback
-    # (delisting_ts if known, else now) already handles this correctly,
-    # so the override here must step aside (return None) rather than
-    # clobber it with the watermark.
+def test_expected_end_baseline_uses_own_last_observation_when_delisted():
+    # Bug found 2026-08-14 (external review): composite delisting_ts is
+    # max(last_perp_kline_ts, last_funding_ts, last_oi_ts) -- misleadingly
+    # LATE for perp_5m specifically if funding kept reporting long after
+    # perp's own klines genuinely stopped (the real EOSUSDT pattern: perp
+    # stopped 2025-05-21, composite delisting_ts is 2026-07-22). perp_5m's
+    # own delisted_end_field (last_perp_kline_ts) must take priority over
+    # the composite bound, not the other way around.
+    im = pd.DataFrame([{
+        "symbol": "DEADUSDT", "listing_ts": TS("2023-02-15"), "first_perp_kline_ts": TS("2023-02-16"),
+        "last_perp_kline_ts": TS("2023-06-01"), "delisting_ts": TS("2024-01-01"),  # composite is much later
+    }])
+    now = TS("2026-08-14")
+    result = readiness_mod._expected_end_baseline("perp_5m", "DEADUSDT", im, now)
+    assert result == TS("2023-06-01")  # perp's own bound, not the later composite
+
+
+def test_expected_end_baseline_none_when_delisted_but_dataset_has_no_override_field():
+    # aggTrades has no last_*_ts field in instrument_master -- must defer
+    # to validate_series' own composite delisting_ts fallback (None here),
+    # not crash or invent one.
     im = pd.DataFrame([{
         "symbol": "DEADUSDT", "listing_ts": TS("2023-02-15"), "first_perp_kline_ts": TS("2023-02-16"),
         "delisting_ts": TS("2024-01-01"),
     }])
     now = TS("2026-08-14")
-    result = readiness_mod._expected_end_baseline("perp_5m", "DEADUSDT", im, now)
+    result = readiness_mod._expected_end_baseline("agg_trades_flow_5m", "DEADUSDT", im, now)
     assert result is None

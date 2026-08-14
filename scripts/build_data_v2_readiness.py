@@ -129,6 +129,9 @@ DATASET_SPECS = {
         required_nonnegative_columns=["sum_open_interest"],  # 0 is a real, observed value near listing; negative is not
         source_available_from=VISION_OI_FLOOR, source_kind="binance_vision_daily",
         check_taker_flow=False,
+        # a delisted symbol's OWN last real OI observation, not the
+        # cross-source composite delisting_ts (see _expected_end_baseline).
+        delisted_end_field="last_oi_ts",
     ),
     "perp_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/perp_ohlcv/venue=binance", sym, "perp_5m.parquet"),
@@ -158,6 +161,9 @@ DATASET_SPECS = {
         # a source that structurally cannot have the current, still-open
         # month yet -- see _monthly_publication_watermark's docstring.
         publication_watermark_fn=_monthly_publication_watermark,
+        # a delisted symbol's OWN last real perp kline, not the
+        # cross-source composite delisting_ts (see _expected_end_baseline).
+        delisted_end_field="last_perp_kline_ts",
     ),
     "spot_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", sym, "spot_5m.parquet"),
@@ -174,6 +180,12 @@ DATASET_SPECS = {
         # fail closed (expected_span left unknown, never a fabricated
         # fallback date).
         listing_ts_field="first_perp_kline_ts",
+        # same symmetry on the end side: spot's own last real observation
+        # isn't separately tracked in instrument_master, so it is bound to
+        # perp's own last kline too (see _expected_end_baseline) -- spot
+        # exists to build the perp/spot basis, so it should never need
+        # coverage beyond what perp itself proves.
+        delisted_end_field="last_perp_kline_ts",
         # NOT_APPLICABLE requires PROOF (every expected month tried, all
         # 404 -- see _spot_absence_confirmed), not merely "no file on disk".
         # An earlier version treated absence itself as NOT_APPLICABLE,
@@ -202,6 +214,9 @@ DATASET_SPECS = {
         # expected spacing -- see data_v2.validation.validator's
         # variable_cadence docstring.
         variable_cadence=True,
+        # a delisted symbol's OWN last real settlement, not the
+        # cross-source composite delisting_ts (see _expected_end_baseline).
+        delisted_end_field="last_funding_ts",
     ),
     "agg_trades_flow_1m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/1m/venue=binance", sym, "flow.parquet"),
@@ -233,11 +248,38 @@ def _symbol_listing_field(im: pd.DataFrame, symbol: str, field: str) -> Optional
 
 def _expected_end_baseline(dataset: str, symbol: str, im: pd.DataFrame, now: pd.Timestamp) -> Optional[pd.Timestamp]:
     """None means "let validate_series apply its own delisting_ts-else-now
-    fallback, unchanged" -- used for every dataset except perp_5m/spot_5m,
-    and even for those two once a symbol is confirmed delisted (delisting_ts
-    is a real, tighter bound than the publication watermark and must take
-    priority, same as validate_series' own internal fallback order)."""
+    fallback, unchanged". Two overrides, both dataset-specific and both
+    symmetric with _expected_start_baseline's own listing_ts_field
+    precedent:
+
+    1. A confirmed-delisted symbol uses THIS dataset's own last proven
+       observation (delisted_end_field) instead of the cross-source
+       composite delisting_ts, which is exactly `max(last_perp_kline_ts,
+       last_funding_ts, last_oi_ts)` (see build_instrument_master.py's
+       reconcile_end) -- misleadingly LATE for a dataset whose own real
+       data stopped earlier than some OTHER source's. Bug found
+       2026-08-14 (external review): EOSUSDT's perp klines genuinely
+       stopped 2025-05-21, but composite delisting_ts is 2026-07-22
+       (driven by funding continuing to report long after) -- an
+       artificial ~14-month "gap" in perp_5m's coverage that no amount of
+       re-backfilling could ever close, the same class of bug as the
+       already-fixed spot listing_ts_field issue but on the end side.
+       Confirmed the same pattern independently affects oi_vision_5m and
+       funding too (checked via each delisted symbol's own COVERAGE
+       failures); agg_trades_flow has no equivalent last_*_ts field in
+       instrument_master, so it has no override here -- a known,
+       documented gap for that one dataset, not silently extended without
+       real supporting data.
+    2. A still-active (non-delisted) symbol uses the dataset's own
+       publication_watermark_fn if it has one (perp_5m/spot_5m), else
+       defers to validate_series' now-fallback, unchanged.
+    """
     if _symbol_listing_field(im, symbol, "delisting_ts") is not None:
+        delisted_end_field = DATASET_SPECS[dataset].get("delisted_end_field")
+        if delisted_end_field is not None:
+            own_end = _symbol_listing_field(im, symbol, delisted_end_field)
+            if own_end is not None:
+                return own_end
         return None
     watermark_fn = DATASET_SPECS[dataset].get("publication_watermark_fn")
     return watermark_fn(now) if watermark_fn is not None else None
