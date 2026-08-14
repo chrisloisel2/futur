@@ -114,11 +114,14 @@ def test_missing_based_proof_still_works_for_multi_period_gaps():
 # reuse by the same generic exclusion machinery ─────────────────────────
 
 
-def test_funding_confirmed_empty_days_expands_the_full_span(tmp_path):
+def test_funding_confirmed_empty_days_expands_the_full_span_inclusive(tmp_path):
     manifest = tmp_path / "AGIXUSDT_manifest.json"
     manifest.write_text('{"confirmed_empty_from": "2025-06-19T08:00:00", "confirmed_as_of": "2025-06-22T00:00:00"}')
     result = _funding_confirmed_empty_days(manifest)
-    assert result == {"2025-06-19", "2025-06-20", "2025-06-21"}  # confirmed_as_of's own day excluded
+    # confirmed_as_of's own day IS included (bug found 2026-08-14: excluding
+    # it broke the trailing-gap check whenever readiness runs same-day as
+    # the backfill, the normal case -- see the function's own docstring)
+    assert result == {"2025-06-19", "2025-06-20", "2025-06-21", "2025-06-22"}
 
 
 def test_funding_confirmed_empty_days_missing_file_returns_empty(tmp_path):
@@ -131,7 +134,7 @@ def test_funding_confirmed_empty_days_malformed_manifest_returns_empty(tmp_path)
     assert _funding_confirmed_empty_days(manifest) == set()
 
 
-def test_funding_confirmed_empty_days_zero_span_returns_empty(tmp_path):
+def test_funding_confirmed_empty_days_same_calendar_day_still_confirms_that_day(tmp_path):
     manifest = tmp_path / "FOOUSDT_manifest.json"
     manifest.write_text('{"confirmed_empty_from": "2025-06-19T08:00:00", "confirmed_as_of": "2025-06-19T09:00:00"}')
-    assert _funding_confirmed_empty_days(manifest) == set()  # same calendar day -- nothing confirmed yet
+    assert _funding_confirmed_empty_days(manifest) == {"2025-06-19"}

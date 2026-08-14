@@ -497,8 +497,16 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         row["notes"] = f"no {spec.get('listing_ts_field', 'listing_ts')} proof -- expected coverage left unknown, not fabricated"
 
     baseline_expected_end = _expected_end_baseline(dataset, symbol, im, now)
+    # the confirmed-unavailable trailing check needs SOMETHING to compare
+    # the manifest's proof against even when there's no explicit baseline
+    # (e.g. funding has no publication_watermark_fn and most symbols
+    # aren't composite-delisted) -- `now` is exactly what validate_series'
+    # own internal fallback would use anyway, so falling back to it here
+    # too means the confirmed-unavailable check isn't silently skipped
+    # just because there was nothing to override in the first place.
     confirmed_unavailable_end = _confirmed_unavailable_expected_end(
-        dataset, symbol, df, spec["timestamp_col"], baseline_expected_end
+        dataset, symbol, df, spec["timestamp_col"],
+        baseline_expected_end if baseline_expected_end is not None else now,
     )
     if confirmed_unavailable_end is not None:
         effective_expected_end = confirmed_unavailable_end

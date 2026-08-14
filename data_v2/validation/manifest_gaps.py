@@ -78,9 +78,14 @@ def _funding_confirmed_empty_days(manifest_path: Path) -> set:
     by day (settlements are 1h/4h/8h, not one-per-day) -- instead this
     records "as of this run, a real fetch from X forward returned
     genuinely empty", which is direct proof no data exists anywhere in
-    that whole span. The confirmed_as_of day itself is excluded -- a
-    check partway through a day can't prove nothing was published later
-    that same day."""
+    that whole span, INCLUDING the confirmed_as_of day itself (bug found
+    2026-08-14: excluding it made the trailing-gap check unable to ever
+    succeed when the readiness check runs the same calendar day as the
+    backfill -- the normal case -- since baseline_expected_end is
+    "today" but the day-set never contained "today". The theoretical
+    imprecision this trades away -- a few hours of the SAME day where a
+    new settlement could in principle still appear after the check ran --
+    is already covered by funding's own 3-day staleness grace)."""
     if not manifest_path.exists():
         return set()
     m = json.loads(manifest_path.read_text())
@@ -89,9 +94,9 @@ def _funding_confirmed_empty_days(manifest_path: Path) -> set:
         return set()
     start = pd.Timestamp(from_ts).normalize()
     end = pd.Timestamp(as_of_ts).normalize()
-    if end <= start:
+    if end < start:
         return set()
-    return {d.date().isoformat() for d in pd.date_range(start, end, freq="1D", inclusive="left")}
+    return {d.date().isoformat() for d in pd.date_range(start, end, freq="1D", inclusive="both")}
 
 
 def _done_months(manifest_path: Path) -> set:
