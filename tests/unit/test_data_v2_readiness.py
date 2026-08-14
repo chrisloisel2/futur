@@ -239,3 +239,59 @@ def test_expected_end_baseline_none_when_delisted_but_dataset_has_no_override_fi
     now = TS("2026-08-14")
     result = readiness_mod._expected_end_baseline("agg_trades_flow_5m", "DEADUSDT", im, now)
     assert result is None
+
+
+# ── _confirmed_unavailable_expected_end: symmetric to the leading-gap
+# exclusion, on the trailing side (found 2026-08-14: AGIXUSDT's spot
+# market genuinely stopped 2024-07 -- confirmed 404 -- while its perp
+# contract, still SETTLING not ABSENT, continued to 2026-06) ────────────
+
+
+def test_confirmed_unavailable_gap_shifts_expected_end(monkeypatch):
+    """A symbol whose market genuinely stopped mid-window: every period
+    between the real last row and the theoretical expected_end is
+    confirmed-404 -- expected_end must move to the real last row, not
+    stay at the theoretical bound forever."""
+    df = pd.DataFrame({"timestamp": pd.date_range("2024-07-01", periods=5, freq="5min", tz="UTC")})
+    all_missing = {f"2024-{m:02d}" for m in range(8, 13)} | {f"2025-{m:02d}" for m in range(1, 13)} | {"2026-01"}
+    fake_spec = {
+        "spot_5m": dict(loader=lambda s: None, ts_col="timestamp",
+                         source_available_from=None, granularity="month",
+                         missing_fn=lambda s: all_missing)
+    }
+    monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
+
+    result = readiness_mod._confirmed_unavailable_expected_end(
+        "spot_5m", "AGIXUSDT", df, "timestamp", TS("2026-01-31"),
+    )
+    assert result == df["timestamp"].max()
+
+
+def test_no_end_adjustment_when_trailing_gap_not_confirmed_unavailable(monkeypatch):
+    df = pd.DataFrame({"timestamp": pd.date_range("2024-07-01", periods=5, freq="5min", tz="UTC")})
+    fake_spec = {
+        "spot_5m": dict(loader=lambda s: None, ts_col="timestamp",
+                         source_available_from=None, granularity="month",
+                         missing_fn=lambda s: set())  # nothing confirmed missing -- may just be unfetched
+    }
+    monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
+
+    result = readiness_mod._confirmed_unavailable_expected_end(
+        "spot_5m", "FOOUSDT", df, "timestamp", TS("2026-01-31"),
+    )
+    assert result is None
+
+
+def test_no_end_adjustment_when_no_trailing_gap_at_all(monkeypatch):
+    df = pd.DataFrame({"timestamp": pd.date_range("2026-01-25", periods=5, freq="5min", tz="UTC")})
+    fake_spec = {
+        "spot_5m": dict(loader=lambda s: None, ts_col="timestamp",
+                         source_available_from=None, granularity="month",
+                         missing_fn=lambda s: {"2020-01"})
+    }
+    monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", fake_spec)
+
+    result = readiness_mod._confirmed_unavailable_expected_end(
+        "spot_5m", "FOOUSDT", df, "timestamp", TS("2026-01-31"),
+    )
+    assert result is None

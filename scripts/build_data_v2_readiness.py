@@ -335,6 +335,70 @@ def _confirmed_unavailable_expected_start(
     return None
 
 
+def _confirmed_unavailable_expected_end(
+    dataset: str, symbol: str, df: pd.DataFrame, timestamp_col: str,
+    baseline_expected_end: Optional[pd.Timestamp],
+) -> Optional[pd.Timestamp]:
+    """Symmetric to _confirmed_unavailable_expected_start, on the trailing
+    side: if the gap between the data's own real LAST row and the
+    theoretical expected_end is CONFIRMED unfillable (the backfiller's own
+    manifest already 404'd every period in that gap), return the data's
+    real last row as an expected_end override. Found 2026-08-14: a symbol
+    whose market genuinely stops mid-window independently of its perp
+    contract (AGIXUSDT's SPOT market -- exchangeinfo_status SETTLING, not
+    ABSENT, so delisted_end_field never applies -- confirmed via its own
+    manifest to have stopped 2024-07 while its perp continued to 2026-06,
+    35/38 of spot's remaining COVERAGE failures showing the identical
+    pattern) should never have that confirmed-unavailable trailing gap
+    permanently count against coverage_pct, the same reasoning that
+    already applies to a confirmed-unavailable LEADING gap. None means
+    "no adjustment".
+
+    NOT implemented by reusing gap_confirmed_unfillable(start, end, ...)
+    directly -- that function's [start, end) semantics INCLUDE start's own
+    period and EXCLUDE end's, the opposite of what this side needs
+    (window_end's own period must be excluded, since it already has real
+    data; baseline_expected_end's own period must be included, since
+    that's the unreached theoretical bound). A dedicated forward walk from
+    the period AFTER window_end through baseline_expected_end (inclusive)
+    is simpler and more obviously correct than forcing an asymmetric fit."""
+    manifest_key = "agg_trades_flow_5m" if dataset == "agg_trades_flow_1m" else dataset
+    manifest_spec = DATASET_MANIFEST_SPECS.get(manifest_key)
+    if manifest_spec is None or baseline_expected_end is None:
+        return None
+
+    window_end = pd.to_datetime(df[timestamp_col], utc=True).max()
+    if pd.isna(window_end) or window_end >= baseline_expected_end:
+        return None  # no gap at all, nothing to adjust
+
+    missing = manifest_spec["missing_fn"](symbol)
+    if not missing:
+        return None
+    granularity = manifest_spec["granularity"]
+
+    if granularity == "month":
+        y, m = (window_end.year + 1, 1) if window_end.month == 12 else (window_end.year, window_end.month + 1)
+        end_y, end_m = baseline_expected_end.year, baseline_expected_end.month
+        if (y, m) > (end_y, end_m):
+            return None  # window_end and baseline_expected_end share a month -- no full later period to confirm
+        while (y, m) <= (end_y, end_m):
+            if f"{y:04d}-{m:02d}" not in missing:
+                return None
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+        return window_end
+    if granularity == "day":
+        d = window_end.date() + pd.Timedelta(days=1)
+        end_d = baseline_expected_end.date()
+        if d > end_d:
+            return None  # window_end and baseline_expected_end share a day -- no full later period to confirm
+        while d <= end_d:
+            if d.isoformat() not in missing:
+                return None
+            d += pd.Timedelta(days=1)
+        return window_end
+    return None
+
+
 FAIL_REASON_CODES = (
     "NO_DATA", "COVERAGE", "STALE", "PIT", "CORRUPTION", "DUPLICATES",
     "FAILED_MANIFEST", "CAUSALITY_VIOLATION", "FAKE_FLOW",
@@ -432,7 +496,15 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         effective_expected_start = pd.NaT
         row["notes"] = f"no {spec.get('listing_ts_field', 'listing_ts')} proof -- expected coverage left unknown, not fabricated"
 
-    effective_expected_end = _expected_end_baseline(dataset, symbol, im, now)
+    baseline_expected_end = _expected_end_baseline(dataset, symbol, im, now)
+    confirmed_unavailable_end = _confirmed_unavailable_expected_end(
+        dataset, symbol, df, spec["timestamp_col"], baseline_expected_end
+    )
+    if confirmed_unavailable_end is not None:
+        effective_expected_end = confirmed_unavailable_end
+        row["confirmed_unavailable_suffix_excluded"] = True
+    else:
+        effective_expected_end = baseline_expected_end
 
     report = validate_series(
         df, symbol=symbol, timestamp_col=spec["timestamp_col"], bar_seconds=spec["bar_seconds"],
