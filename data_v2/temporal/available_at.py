@@ -88,6 +88,45 @@ DEFAULT_PROCESSING_LATENCY = pd.Timedelta(milliseconds=150)
 SourceKind = Literal["live_stream", "binance_vision_daily", "binance_vision_monthly", "binance_rest_snapshot"]
 
 
+def daily_publication_watermark(
+    now: pd.Timestamp,
+    publication_lag: pd.Timedelta,
+    bar_seconds: int = 300,
+) -> pd.Timestamp:
+    """Data V2 Phase 2, section 2: the last bar timestamp a daily-cadence
+    Vision archive (oi_vision_5m, agg_trades_flow_1m/5m) can genuinely be
+    expected to exist, given `now`. Generic sibling of
+    scripts/build_data_v2_readiness.py's _monthly_publication_watermark, at
+    daily granularity: a calendar day must be fully CLOSED (we are not
+    still inside it) AND past its own publication_lag before Binance has
+    actually published that day's archive -- a still-open or
+    just-closed-but-not-yet-lagged day is PENDING_PUBLICATION, not a real
+    gap. Demanding coverage through "now" regardless would silently cap a
+    daily-cadence dataset's pass rate on data the source cannot yet
+    provide -- exactly the bug already found and fixed for perp_5m/spot_5m
+    (monthly cadence) on 2026-08-14.
+
+    publication_lag is the real, source-specific lag (pass
+    BATCH_PUBLICATION_LAG["binance_vision_daily"] for Vision daily
+    archives -- see above). bar_seconds is the dataset's own bar grid (300
+    for 5m, 60 for 1m) so the returned timestamp is itself a valid grid
+    point, not an arbitrary instant.
+
+    Deliberately does NOT apply to funding: funding is acquired from
+    Binance's live /fapi/v1/fundingRate REST endpoint (continuous
+    accretion, not a lagged daily batch archive) -- a different contract,
+    see scripts/backfill_binance_derivatives_free.py."""
+    now = pd.Timestamp(now).tz_convert("UTC")  # a non-UTC tz-aware `now` must key off the UTC calendar day, not its own local date
+    bar = pd.Timedelta(seconds=bar_seconds)
+    day_start = pd.Timestamp(year=now.year, month=now.month, day=now.day, tz="UTC")
+    while True:
+        # day_start is the close of the day being tested (the day before
+        # day_start) -- that day's archive publishes at day_start + lag.
+        if day_start + publication_lag <= now:
+            return day_start - bar  # last bar of the day before day_start
+        day_start -= pd.Timedelta(days=1)
+
+
 def add_temporal_columns(
     df: pd.DataFrame,
     *,

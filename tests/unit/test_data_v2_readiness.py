@@ -299,3 +299,55 @@ def test_no_end_adjustment_when_no_trailing_gap_at_all(monkeypatch):
         "spot_5m", "FOOUSDT", df, "timestamp", TS("2026-01-31"),
     )
     assert result is None
+
+
+# ── daily_publication_watermark wiring (Phase 2 section 2): oi_vision_5m /
+# agg_trades_flow_1m / agg_trades_flow_5m must not demand coverage through
+# "now" for the ~1-2 most recent days a daily Vision archive structurally
+# cannot have published yet -- funding must NOT get this treatment (live
+# REST accretion, a different contract) ───────────────────────────────────
+
+
+def test_oi_vision_5m_is_wired_to_the_daily_watermark():
+    now = TS("2026-08-15 12:00:00")
+    result = readiness_mod.DATASET_SPECS["oi_vision_5m"]["publication_watermark_fn"](now)
+    assert result == TS("2026-08-13 23:55:00")
+
+
+def test_agg_trades_flow_5m_is_wired_to_the_daily_watermark():
+    now = TS("2026-08-15 12:00:00")
+    result = readiness_mod.DATASET_SPECS["agg_trades_flow_5m"]["publication_watermark_fn"](now)
+    assert result == TS("2026-08-13 23:55:00")
+
+
+def test_agg_trades_flow_1m_is_wired_to_the_daily_watermark_on_its_own_grid():
+    now = TS("2026-08-15 12:00:00")
+    result = readiness_mod.DATASET_SPECS["agg_trades_flow_1m"]["publication_watermark_fn"](now)
+    assert result == TS("2026-08-13 23:59:00")  # 1m grid, not 5m
+
+
+def test_funding_has_no_publication_watermark_fn():
+    # funding is acquired from a live REST endpoint (continuous accretion),
+    # not a lagged daily batch archive -- must not silently inherit the
+    # daily watermark treatment.
+    assert readiness_mod.DATASET_SPECS["funding"].get("publication_watermark_fn") is None
+
+
+def test_expected_end_baseline_uses_daily_watermark_for_oi_when_not_delisted():
+    im = _im_row_v2("AGIXUSDT", listing_ts=TS("2023-02-15"), first_perp_kline_ts=TS("2023-02-16"))
+    now = TS("2026-08-15 12:00:00")
+    result = readiness_mod._expected_end_baseline("oi_vision_5m", "AGIXUSDT", im, now)
+    assert result == TS("2026-08-13 23:55:00")
+
+
+def test_expected_end_baseline_prefers_delisted_own_end_over_daily_watermark_for_oi():
+    # symmetric to the monthly-dataset delisted-precedence test above:
+    # a delisted symbol's own last OI observation must win over the
+    # watermark, not the other way around.
+    im = pd.DataFrame([{
+        "symbol": "DEADUSDT", "listing_ts": TS("2023-02-15"), "first_perp_kline_ts": TS("2023-02-16"),
+        "last_oi_ts": TS("2023-06-01"), "delisting_ts": TS("2024-01-01"),
+    }])
+    now = TS("2026-08-15 12:00:00")
+    result = readiness_mod._expected_end_baseline("oi_vision_5m", "DEADUSDT", im, now)
+    assert result == TS("2023-06-01")

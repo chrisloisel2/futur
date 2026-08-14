@@ -40,7 +40,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
-from data_v2.temporal.available_at import BATCH_PUBLICATION_LAG, add_temporal_columns, assert_causal
+from data_v2.temporal.available_at import (
+    BATCH_PUBLICATION_LAG,
+    add_temporal_columns,
+    assert_causal,
+    daily_publication_watermark,
+)
 
 
 def test_kline_market_available_at_equals_close_time_not_open_time():
@@ -155,3 +160,82 @@ def test_assert_causal_defaults_to_research_available_at():
     with pytest.raises(ValueError):
         assert_causal(df, as_of_col="feature_ts")
     assert_causal(df, as_of_col="feature_ts", available_at_col="execution_available_at")  # must not raise
+
+
+# ── daily_publication_watermark (Data V2 Phase 2, section 2): the generic
+# sibling of build_data_v2_readiness.py's _monthly_publication_watermark, at
+# daily granularity, for oi_vision_5m / agg_trades_flow_1m / agg_trades_
+# flow_5m -- deliberately NOT wired to funding (live REST endpoint, no
+# lagged batch archive to wait on) ─────────────────────────────────────────
+
+DAILY_LAG = BATCH_PUBLICATION_LAG["binance_vision_daily"]  # 1 day, 6 hours
+
+
+def test_watermark_mid_day_returns_two_days_back():
+    # Aug 13 publishes at close(Aug13)=Aug14 00:00 + 30h = Aug15 06:00,
+    # already past by noon on Aug 15 -- Aug 13 is the newest published day.
+    now = pd.Timestamp("2026-08-15 12:00:00", tz="UTC")
+    result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    assert result == pd.Timestamp("2026-08-13 23:55:00", tz="UTC")
+
+
+def test_watermark_just_before_publication_instant_falls_back_a_day():
+    now = pd.Timestamp("2026-08-15 05:59:59", tz="UTC")  # 1s before Aug13 publishes
+    result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    assert result == pd.Timestamp("2026-08-12 23:55:00", tz="UTC")
+
+
+def test_watermark_just_after_publication_instant_advances_a_day():
+    now = pd.Timestamp("2026-08-15 06:00:01", tz="UTC")  # 1s after Aug13 publishes
+    result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    assert result == pd.Timestamp("2026-08-13 23:55:00", tz="UTC")
+
+
+def test_watermark_crosses_month_boundary():
+    now = pd.Timestamp("2026-09-01 00:30:00", tz="UTC")
+    result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    assert result == pd.Timestamp("2026-08-29 23:55:00", tz="UTC")
+    assert result.month == 8  # correctly stepped back into the prior month
+
+
+def test_watermark_crosses_year_boundary():
+    now = pd.Timestamp("2027-01-01 00:30:00", tz="UTC")
+    result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    assert result == pd.Timestamp("2026-12-29 23:55:00", tz="UTC")
+    assert result.year == 2026  # correctly stepped back into the prior year
+
+
+def test_watermark_normalizes_non_utc_tz_to_the_utc_calendar_day():
+    # Tokyo local date is Aug 16 while the UTC date is still Aug 15 --
+    # the watermark must key off UTC, not the input's own local date.
+    now_utc = pd.Timestamp("2026-08-15 20:00:00", tz="UTC")
+    now_tokyo = now_utc.tz_convert("Asia/Tokyo")  # +9h -> local date is already Aug 16
+    assert now_tokyo.day != now_utc.day  # sanity: the two calendar dates really differ
+    assert daily_publication_watermark(now_tokyo, DAILY_LAG, bar_seconds=300) == \
+        daily_publication_watermark(now_utc, DAILY_LAG, bar_seconds=300)
+
+
+def test_watermark_never_demands_a_day_that_cannot_yet_be_published():
+    # Structural invariant: whatever day the watermark points at, that
+    # day's own close + publication_lag must already be <= now -- the
+    # function must never claim a still-pending day is available.
+    bar_seconds = 300
+    for now in [
+        pd.Timestamp("2026-08-15 12:00:00", tz="UTC"),
+        pd.Timestamp("2026-08-15 06:00:00", tz="UTC"),  # exact boundary instant
+        pd.Timestamp("2026-01-01 00:00:01", tz="UTC"),
+        pd.Timestamp("2030-03-14 23:59:59", tz="UTC"),
+    ]:
+        result = daily_publication_watermark(now, DAILY_LAG, bar_seconds=bar_seconds)
+        result_day_close = result + pd.Timedelta(seconds=bar_seconds)
+        assert result_day_close + DAILY_LAG <= now
+        # and it must never claim the still-open current UTC day either
+        assert result.date() < now.date()
+
+
+def test_watermark_respects_the_bar_seconds_grid():
+    now = pd.Timestamp("2026-08-15 12:00:00", tz="UTC")
+    result_5m = daily_publication_watermark(now, DAILY_LAG, bar_seconds=300)
+    result_1m = daily_publication_watermark(now, DAILY_LAG, bar_seconds=60)
+    assert result_5m == pd.Timestamp("2026-08-13 23:55:00", tz="UTC")
+    assert result_1m == pd.Timestamp("2026-08-13 23:59:00", tz="UTC")

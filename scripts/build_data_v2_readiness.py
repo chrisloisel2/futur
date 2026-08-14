@@ -50,7 +50,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from data_v2.validation.validator import validate_series  # noqa: E402
-from data_v2.temporal.available_at import add_temporal_columns  # noqa: E402
+from data_v2.temporal.available_at import (  # noqa: E402
+    BATCH_PUBLICATION_LAG,
+    add_temporal_columns,
+    daily_publication_watermark,
+)
 from data_pipeline.taker_flow_guard import looks_like_placeholder_taker_flow  # noqa: E402
 from data_v2.normalized.perp_ohlcv.build_perp_5m import month_range  # noqa: E402
 from data_v2.validation.manifest_gaps import (  # noqa: E402
@@ -89,6 +93,22 @@ def _monthly_publication_watermark(now: pd.Timestamp, lag_days: float = MONTHLY_
         if prev_month_end + pd.Timedelta(days=lag_days) <= now:
             return prev_month_end
         month_start = (month_start - pd.Timedelta(days=1)).replace(day=1)
+
+
+DAILY_PUBLICATION_LAG = BATCH_PUBLICATION_LAG["binance_vision_daily"]
+
+
+def _daily_publication_watermark_5m(now: pd.Timestamp) -> pd.Timestamp:
+    """oi_vision_5m / agg_trades_flow_5m wiring of the generic daily
+    watermark (Phase 2 section 2) -- NOT applied to funding, which is
+    acquired from a live REST endpoint with a different contract (see
+    DATASET_SPECS['funding'] and daily_publication_watermark's docstring)."""
+    return daily_publication_watermark(now, DAILY_PUBLICATION_LAG, bar_seconds=300)
+
+
+def _daily_publication_watermark_1m(now: pd.Timestamp) -> pd.Timestamp:
+    """agg_trades_flow_1m wiring -- same contract, 1-minute bar grid."""
+    return daily_publication_watermark(now, DAILY_PUBLICATION_LAG, bar_seconds=60)
 
 
 def _spot_absence_confirmed(symbol: str, expected_start: Optional[pd.Timestamp], expected_end: Optional[pd.Timestamp]) -> bool:
@@ -132,6 +152,10 @@ DATASET_SPECS = {
         # a delisted symbol's OWN last real OI observation, not the
         # cross-source composite delisting_ts (see _expected_end_baseline).
         delisted_end_field="last_oi_ts",
+        # Phase 2 section 2: daily Vision archive, must not demand coverage
+        # through "now" for the ~1-2 most recent days that structurally
+        # cannot be published yet.
+        publication_watermark_fn=_daily_publication_watermark_5m,
     ),
     "perp_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/perp_ohlcv/venue=binance", sym, "perp_5m.parquet"),
@@ -237,6 +261,9 @@ DATASET_SPECS = {
         required_positive_columns=[],
         source_available_from=None, source_kind="binance_vision_daily",
         check_taker_flow=False,
+        # Phase 2 section 2: same daily-archive reasoning as oi_vision_5m,
+        # 1-minute bar grid.
+        publication_watermark_fn=_daily_publication_watermark_1m,
     ),
     "agg_trades_flow_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/5m/venue=binance", sym, "flow.parquet"),
@@ -244,6 +271,7 @@ DATASET_SPECS = {
         required_positive_columns=[],
         source_available_from=None, source_kind="binance_vision_daily",
         check_taker_flow=False,
+        publication_watermark_fn=_daily_publication_watermark_5m,
     ),
 }
 
