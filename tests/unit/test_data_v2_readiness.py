@@ -169,3 +169,58 @@ def test_expected_start_baseline_spot_fails_closed_when_first_perp_kline_ts_miss
     im = _im_row_v2("FOOUSDT", listing_ts=TS("2023-02-15"), first_perp_kline_ts=pd.NaT)
     result = readiness_mod._expected_start_baseline("spot_5m", "FOOUSDT", im)
     assert result is None  # never falls back to the generic listing_ts
+
+
+# ── _monthly_publication_watermark / _expected_end_baseline: perp/spot's
+# coverage denominator must not demand data through "now" for a source
+# that structurally cannot have the current, still-open month yet ────────
+
+
+def test_monthly_watermark_returns_last_month_end_once_past_its_publication_lag():
+    # now is well past July's close (07-31) + 5d lag (08-05) -- July is published
+    now = TS("2026-08-14")
+    result = readiness_mod._monthly_publication_watermark(now)
+    assert result == TS("2026-07-31 23:55:00")
+
+
+def test_monthly_watermark_falls_back_a_month_when_still_inside_the_lag_window():
+    # now is 08-03: July closed 07-31 but its 5d lag (until 08-05) hasn't
+    # cleared yet -- July's archive isn't genuinely published, fall back to June.
+    now = TS("2026-08-03")
+    result = readiness_mod._monthly_publication_watermark(now)
+    assert result == TS("2026-06-30 23:55:00")
+
+
+def test_monthly_watermark_never_returns_the_still_open_current_month():
+    now = TS("2026-08-14")
+    result = readiness_mod._monthly_publication_watermark(now)
+    assert result.month != 8 or result.year != 2026
+
+
+def test_expected_end_baseline_uses_watermark_for_monthly_datasets():
+    im = _im_row_v2("AGIXUSDT", listing_ts=TS("2023-02-15"), first_perp_kline_ts=TS("2023-02-16"))
+    now = TS("2026-08-14")
+    result = readiness_mod._expected_end_baseline("perp_5m", "AGIXUSDT", im, now)
+    assert result == TS("2026-07-31 23:55:00")
+
+
+def test_expected_end_baseline_none_for_non_monthly_dataset_unchanged_behavior():
+    im = _im_row_v2("AGIXUSDT", listing_ts=TS("2023-02-15"), first_perp_kline_ts=TS("2023-02-16"))
+    now = TS("2026-08-14")
+    result = readiness_mod._expected_end_baseline("funding", "AGIXUSDT", im, now)
+    assert result is None  # validate_series' own now-fallback still applies, untouched
+
+
+def test_expected_end_baseline_none_when_symbol_confirmed_delisted():
+    # delisting_ts is a real, tighter bound than the publication watermark
+    # and must take priority -- validate_series' own internal fallback
+    # (delisting_ts if known, else now) already handles this correctly,
+    # so the override here must step aside (return None) rather than
+    # clobber it with the watermark.
+    im = pd.DataFrame([{
+        "symbol": "DEADUSDT", "listing_ts": TS("2023-02-15"), "first_perp_kline_ts": TS("2023-02-16"),
+        "delisting_ts": TS("2024-01-01"),
+    }])
+    now = TS("2026-08-14")
+    result = readiness_mod._expected_end_baseline("perp_5m", "DEADUSDT", im, now)
+    assert result is None

@@ -65,6 +65,31 @@ from data_v2.validation.manifest_gaps import (  # noqa: E402
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
 OUT_PATH = ROOT / "reports/DATA_V2_READINESS.json"
 
+MONTHLY_PUBLICATION_LAG_DAYS = 5.0  # matches available_at.BATCH_PUBLICATION_LAG["binance_vision_monthly"]
+
+
+def _monthly_publication_watermark(now: pd.Timestamp, lag_days: float = MONTHLY_PUBLICATION_LAG_DAYS) -> pd.Timestamp:
+    """The last instant a month-cadence Vision archive (perp_5m/spot_5m)
+    can genuinely be expected to exist, given `now`. A month must be FULLY
+    CLOSED (we are not still inside it) AND past its own publication lag
+    before Binance has actually published its archive -- a still-open or
+    just-closed-but-not-yet-lagged month is PENDING_PUBLICATION, not a
+    real gap, and demanding coverage through "now" for it silently caps
+    perp/spot's pass rate on data the source cannot yet provide (bug found
+    2026-08-14: build_data_v2_readiness.py never passed an explicit
+    expected_end for these two datasets, so validate_series' own
+    fallback -- delisting_ts if known, else `now` -- meant every
+    non-delisted symbol's coverage denominator implicitly extended to
+    today, even though the current month's archive structurally cannot
+    exist yet; confirmed empirically via a real perp/spot top-up run that
+    returned new_months=0 for all 312 symbols)."""
+    month_start = pd.Timestamp(year=now.year, month=now.month, day=1, tz="UTC")
+    while True:
+        prev_month_end = month_start - pd.Timedelta(minutes=5)  # last 5m bar of the month before month_start
+        if prev_month_end + pd.Timedelta(days=lag_days) <= now:
+            return prev_month_end
+        month_start = (month_start - pd.Timedelta(days=1)).replace(day=1)
+
 
 def _spot_absence_confirmed(symbol: str, expected_start: Optional[pd.Timestamp], expected_end: Optional[pd.Timestamp]) -> bool:
     """True only if the spot builder actually tried every expected month for
@@ -129,6 +154,10 @@ DATASET_SPECS = {
         # days from earlier in that month -- 31 days covers the worst case
         # (listed on the last day of a month).
         listing_alignment_grace_days=31.0,
+        # the coverage denominator must not demand data through "now" for
+        # a source that structurally cannot have the current, still-open
+        # month yet -- see _monthly_publication_watermark's docstring.
+        publication_watermark_fn=_monthly_publication_watermark,
     ),
     "spot_5m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/spot_ohlcv/venue=binance", sym, "spot_5m.parquet"),
@@ -138,6 +167,7 @@ DATASET_SPECS = {
         check_taker_flow=True,
         staleness_gate_days=40.0,  # same monthly-cadence reasoning as perp_5m above
         listing_alignment_grace_days=31.0,  # same monthly-cadence reasoning as perp_5m above
+        publication_watermark_fn=_monthly_publication_watermark,  # same reasoning as perp_5m above
         # spot's expected coverage is bound to first_perp_kline_ts, not the
         # composite instrument_master listing_ts (which can be earlier --
         # see build_spot_5m.py's module docstring, 2026-08-11 fix). NaN ->
@@ -199,6 +229,18 @@ def _symbol_listing_field(im: pd.DataFrame, symbol: str, field: str) -> Optional
     if im_row.empty or pd.isna(im_row.iloc[0][field]):
         return None
     return pd.Timestamp(im_row.iloc[0][field])
+
+
+def _expected_end_baseline(dataset: str, symbol: str, im: pd.DataFrame, now: pd.Timestamp) -> Optional[pd.Timestamp]:
+    """None means "let validate_series apply its own delisting_ts-else-now
+    fallback, unchanged" -- used for every dataset except perp_5m/spot_5m,
+    and even for those two once a symbol is confirmed delisted (delisting_ts
+    is a real, tighter bound than the publication watermark and must take
+    priority, same as validate_series' own internal fallback order)."""
+    if _symbol_listing_field(im, symbol, "delisting_ts") is not None:
+        return None
+    watermark_fn = DATASET_SPECS[dataset].get("publication_watermark_fn")
+    return watermark_fn(now) if watermark_fn is not None else None
 
 
 def _expected_start_baseline(dataset: str, symbol: str, im: pd.DataFrame) -> Optional[pd.Timestamp]:
@@ -348,6 +390,8 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         effective_expected_start = pd.NaT
         row["notes"] = f"no {spec.get('listing_ts_field', 'listing_ts')} proof -- expected coverage left unknown, not fabricated"
 
+    effective_expected_end = _expected_end_baseline(dataset, symbol, im, now)
+
     report = validate_series(
         df, symbol=symbol, timestamp_col=spec["timestamp_col"], bar_seconds=spec["bar_seconds"],
         source=dataset, instrument_master=im, now=now,
@@ -355,6 +399,7 @@ def evaluate_dataset_symbol(dataset: str, symbol: str, im: pd.DataFrame, now: pd
         required_nonnegative_columns=spec.get("required_nonnegative_columns") or None,
         source_available_from=spec["source_available_from"],
         expected_start=effective_expected_start,
+        expected_end=effective_expected_end,
         strict_alpha_readiness=True,
         variable_cadence=spec.get("variable_cadence", False),
         staleness_gate_days=spec.get("staleness_gate_days", 3.0),
