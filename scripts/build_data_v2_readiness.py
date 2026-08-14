@@ -335,9 +335,33 @@ def _expected_start_baseline(dataset: str, symbol: str, im: pd.DataFrame) -> Opt
     BEFORE its first perp kline, so the composite listing_ts silently
     pulled spot's expected coverage window back earlier than perp/basis
     can ever use). None (field NaN) means fail closed -- no fallback to a
-    different field, no invented date."""
+    different field, no invented date.
+
+    Bug found 2026-08-15 (Phase 2 acquisition freeze audit): always capped
+    at the dataset's own source_available_from (e.g. oi_vision_5m's
+    VISION_OI_FLOOR, 2020-09-01) -- an earlier version left this to
+    _confirmed_unavailable_expected_start's repair_target computation
+    alone, but that only applies the cap when the ENTIRE pre-floor gap is
+    already recorded as manifest-confirmed-404 (gap_confirmed_unfillable).
+    A well-behaved backfiller never even QUERIES days before a documented
+    source floor -- those days are absent from the manifest's "missing"
+    set (never attempted, not "attempted and 404'd"), so the confirmed-
+    unavailable check silently failed to fire and the raw, uncapped
+    listing_ts leaked through as expected_start. Concrete real case:
+    BTCUSDT's OI expected_start was 2019-09-08 (its true perp listing)
+    instead of 2020-09-01 (VISION_OI_FLOOR) -- charging ~1 year of
+    structurally-nonexistent archive against its coverage_pct, for every
+    early-listed symbol, not just BTC. The floor is a structural fact
+    about the archive format's own existence, independent of any
+    per-symbol manifest evidence -- it must be applied unconditionally."""
     field = DATASET_SPECS[dataset].get("listing_ts_field", "listing_ts")
-    return _symbol_listing_field(im, symbol, field)
+    baseline = _symbol_listing_field(im, symbol, field)
+    source_floor = DATASET_SPECS[dataset].get("source_available_from")
+    if baseline is None:
+        return source_floor
+    if source_floor is not None:
+        return max(baseline, source_floor)
+    return baseline
 
 
 def _confirmed_unavailable_expected_start(

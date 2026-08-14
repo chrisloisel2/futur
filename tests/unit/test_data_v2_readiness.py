@@ -155,6 +155,34 @@ def _im_row_v2(symbol: str, *, listing_ts, first_perp_kline_ts) -> pd.DataFrame:
     }])
 
 
+# ── _expected_start_baseline: source_available_from must cap the
+# baseline unconditionally (Phase 2 acquisition-freeze audit, 2026-08-15:
+# BTCUSDT's OI expected_start was 2019-09-08, its true listing, instead of
+# 2020-09-01 (VISION_OI_FLOOR) -- the confirmed-unavailable-prefix check
+# alone never fires for a pre-floor gap that was never manifest-attempted
+# in the first place, only ever attempted-and-404'd) ──────────────────────
+
+
+def test_expected_start_baseline_caps_at_source_available_from_when_listing_earlier():
+    im = _im_row("BTCUSDT", listing_ts=TS("2019-09-08"))
+    result = readiness_mod._expected_start_baseline("oi_vision_5m", "BTCUSDT", im)
+    assert result == readiness_mod.VISION_OI_FLOOR
+
+
+def test_expected_start_baseline_uses_listing_when_later_than_source_floor():
+    im = _im_row("SOMEUSDT", listing_ts=TS("2023-01-01"))
+    result = readiness_mod._expected_start_baseline("oi_vision_5m", "SOMEUSDT", im)
+    assert result == TS("2023-01-01")
+
+
+def test_expected_start_baseline_unaffected_for_dataset_without_source_floor():
+    # funding's listing_ts_field is first_perp_kline_ts, not listing_ts --
+    # use the v2 helper so the field it actually reads is populated.
+    im = _im_row_v2("BTCUSDT", listing_ts=TS("2019-09-08"), first_perp_kline_ts=TS("2019-09-08"))
+    result = readiness_mod._expected_start_baseline("funding", "BTCUSDT", im)
+    assert result == TS("2019-09-08")  # funding has no source_available_from
+
+
 def test_expected_start_baseline_spot_uses_first_perp_kline_ts_not_listing_ts():
     # composite listing_ts is EARLIER (e.g. funding observed the symbol
     # first) -- spot's baseline must ignore that and use first_perp_kline_ts.

@@ -102,6 +102,7 @@ from data_v2.temporal.available_at import add_temporal_columns  # noqa: E402
 from data_v2.events.residuals import (  # noqa: E402
     compute_residual_returns, BETA_WINDOW_BARS, BTC_SYMBOL, ETH_SYMBOL,
 )
+from data_v2.events import eligibility  # noqa: E402
 from data_v2.validation.manifest_gaps import load_oi, load_funding, load_year_partitioned  # noqa: E402
 from src.institutional.data.atomic_parquet import atomic_write_parquet  # noqa: E402
 
@@ -343,6 +344,21 @@ def build_symbol_panel(symbol: str, *, btc_close: pd.Series, eth_close: pd.Serie
     # "0 liquidations".
     panel["liq_feed_available"] = False
 
+    # Phase 2 sections 6-11: per-row, source-qualified eligibility masks --
+    # see data_v2/events/eligibility.py for the full contract per family.
+    # eligible_rvd_base is the PER-SYMBOL half of RVD eligibility only; the
+    # real eligible_rvd (cross-sectional minimum population folded in) is
+    # computed in a second pass over every symbol at once, see main().
+    residual_std_30d = eligibility.residual_std_30d(residuals["residual_return_1h"])
+    funding_warmup = eligibility.funding_settlement_warmup(
+        funding_g["funding_is_settlement"], pd.Series(grid, index=grid),
+    )
+    panel["residual_std_30d"] = residual_std_30d.to_numpy()
+    panel["eligible_deleveraging"] = eligibility.eligible_deleveraging(panel, residual_std_30d).to_numpy()
+    panel["eligible_crowding"] = eligibility.eligible_crowding(panel, funding_warmup).to_numpy()
+    panel["eligible_rvd_base"] = eligibility.eligible_rvd_base(panel, residual_std_30d).to_numpy()
+    panel["eligible_ffr"] = eligibility.eligible_ffr(panel).to_numpy()
+
     return panel.reset_index(drop=True)
 
 
@@ -358,10 +374,63 @@ def write_symbol_panel(symbol: str, *, btc_close: pd.Series, eth_close: pd.Serie
     return total
 
 
+def compute_cross_sectional_rvd(*, min_free_gb: float) -> None:
+    """Second pass over every symbol currently on disk (not just this
+    run's --symbols subset -- a prior run may have already built others):
+    RVD's real eligible_rvd = eligible_rvd_base AND a genuinely large
+    enough cross-sectional population at that exact timestamp
+    (eligibility.MIN_CROSS_SECTION_SIZE) -- this can only be known once
+    every symbol's eligible_rvd_base column exists, hence a separate pass
+    rather than something computable inside build_symbol_panel per symbol.
+
+    Pass A: stream just (timestamp, eligible_rvd_base) per symbol/year
+    file and accumulate a single global per-timestamp count -- avoids ever
+    holding a dense (timestamp x symbol) matrix in memory (was up to ~2.5M
+    timestamps x 312 symbols).
+    Pass B: re-read each full file, attach cross_section_size (from the
+    Pass A accumulator) and the final eligible_rvd, atomically rewrite.
+    """
+    files = sorted(OUT_DIR.glob("symbol=*/year=*/event_feature_panel_5m.parquet"))
+    if not files:
+        print("compute_cross_sectional_rvd: no panel files found, nothing to do")
+        return
+
+    print(f"cross-sectional RVD pass A: scanning {len(files)} files for eligible_rvd_base counts...", flush=True)
+    count_acc = pd.Series(dtype="int64")
+    for i, f in enumerate(files, 1):
+        cols = pd.read_parquet(f, columns=["timestamp", "eligible_rvd_base"])
+        per_ts = cols.groupby("timestamp")["eligible_rvd_base"].sum()
+        count_acc = count_acc.add(per_ts, fill_value=0)
+        if i % 50 == 0:
+            print(f"  pass A: {i}/{len(files)} files, {free_gb(ROOT):.1f}GB free", flush=True)
+    count_acc = count_acc.astype("int64")
+    print(f"cross-sectional RVD pass A done: {len(count_acc)} distinct timestamps", flush=True)
+
+    print("cross-sectional RVD pass B: rewriting files with cross_section_size/eligible_rvd...", flush=True)
+    for i, f in enumerate(files, 1):
+        headroom = free_gb(ROOT)
+        if headroom < min_free_gb:
+            print(f"\nSTOP: free space {headroom:.1f}GB < --min-free-gb {min_free_gb}GB "
+                  f"after {i - 1}/{len(files)} files (pass B). Resumable -- re-run to continue "
+                  f"(pass A recomputes cheaply, pass B will re-touch already-done files, idempotent).",
+                  flush=True)
+            sys.exit(1)
+        df = pd.read_parquet(f)
+        css = df["timestamp"].map(count_acc).fillna(0).astype("int64")
+        df["cross_section_size"] = css.to_numpy()
+        df["eligible_rvd"] = (df["eligible_rvd_base"] & (css >= eligibility.MIN_CROSS_SECTION_SIZE)).to_numpy()
+        atomic_write_parquet(df, f)
+        if i % 50 == 0:
+            print(f"  pass B: {i}/{len(files)} files, {headroom:.1f}GB free", flush=True)
+    print(f"cross-sectional RVD pass B done: {len(files)} files rewritten -> {OUT_DIR}", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", default=None, help="comma-separated; default = full PIT universe")
     ap.add_argument("--min-free-gb", type=float, default=15.0)
+    ap.add_argument("--skip-cross-sectional", action="store_true",
+                     help="skip the RVD cross-sectional second pass (e.g. when re-running just a symbol subset)")
     args = ap.parse_args()
 
     im = pd.read_parquet(INSTRUMENT_MASTER)
@@ -395,6 +464,9 @@ def main() -> None:
           f"-> {OUT_DIR}{' [STOPPED on disk floor]' if stopped else ''}", flush=True)
     if stopped:
         sys.exit(1)
+
+    if not args.skip_cross_sectional:
+        compute_cross_sectional_rvd(min_free_gb=args.min_free_gb)
 
 
 if __name__ == "__main__":

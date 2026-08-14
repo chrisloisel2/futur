@@ -425,3 +425,126 @@ def test_no_perp_data_returns_none(env):
     idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC")
     btc, eth = _btc_eth_close(idx)
     assert bep.build_symbol_panel("NOPERPUSDT", btc_close=btc, eth_close=eth, now=NOW) is None
+
+
+# ── Phase 2 sections 6-11: source-qualified eligibility masks ─────────────
+
+
+def test_panel_carries_all_four_eligibility_columns_plus_residual_std(env):
+    idx = pd.date_range("2024-01-01", periods=50, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    btc, eth = _btc_eth_close(idx)
+    panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+    for col in ["residual_std_30d", "eligible_deleveraging", "eligible_crowding", "eligible_rvd_base", "eligible_ffr"]:
+        assert col in panel.columns
+
+
+def test_eligible_deleveraging_false_throughout_when_oi_entirely_missing(env):
+    # env's default load_oi returns None -- oi is NaN for every row, so
+    # DELEVERAGING (which requires oi non-null) must be ineligible
+    # throughout, regardless of how much perp/residual history exists.
+    n = 60 * 288 + 9500  # past the 60d beta warmup AND the 30d residual-std warmup
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    btc, eth = _btc_eth_close(idx)
+    panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+    assert not panel["eligible_deleveraging"].any()
+
+
+def test_eligible_deleveraging_becomes_true_once_oi_and_full_warmup_both_present(env):
+    n = 60 * 288 + 9500
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    _write_flow(env / "flow", "FOOUSDT", pd.DataFrame({
+        "timestamp": idx, "aggressive_buy_usd": 1.0, "aggressive_sell_usd": 1.0,
+        "signed_volume": 1.0, "CVD": 1.0,
+    }))
+    oi_df = pd.DataFrame({"create_time": idx, "sum_open_interest": 1000.0})
+    bep_env_load_oi = lambda sym: oi_df if sym == "FOOUSDT" else None  # noqa: E731
+    import pytest as _pytest  # local monkeypatch without the module fixture's None default
+    mp = _pytest.MonkeyPatch()
+    mp.setattr(bep, "load_oi", bep_env_load_oi)
+    try:
+        btc, eth = _btc_eth_close(idx)
+        panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+    finally:
+        mp.undo()
+    assert panel["eligible_deleveraging"].any()
+    assert not panel["eligible_deleveraging"].iloc[:100].any()  # long before full warmup
+
+
+def test_eligible_ffr_never_requires_oi_delta_pct_1h_history_beyond_pct_change_itself(env):
+    idx = pd.date_range("2024-01-01", periods=50, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    btc, eth = _btc_eth_close(idx)
+    panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+    # no OI in this env -> FFR requires oi non-null too -> ineligible throughout
+    assert not panel["eligible_ffr"].any()
+
+
+def _write_panel_file(out_dir: Path, symbol: str, df: pd.DataFrame) -> None:
+    for y, chunk in df.groupby(df["timestamp"].dt.year):
+        d = out_dir / f"symbol={symbol}" / f"year={y}"
+        d.mkdir(parents=True, exist_ok=True)
+        chunk.reset_index(drop=True).to_parquet(d / "event_feature_panel_5m.parquet", index=False)
+
+
+def test_compute_cross_sectional_rvd_counts_across_symbols_and_gates_on_minimum(tmp_path, monkeypatch):
+    monkeypatch.setattr(bep, "OUT_DIR", tmp_path / "panel")
+    idx = pd.date_range("2024-01-01", periods=5, freq="5min", tz="UTC")
+    base_cols = {
+        "timestamp": idx, "symbol": "X", "open": 1.0, "close": 1.0, "volume": 1.0,
+    }
+    # 3 symbols all eligible_rvd_base at every bar -- below MIN_CROSS_SECTION_SIZE (30)
+    from data_v2.events import eligibility as elig
+    for sym in ["AAAUSDT", "BBBUSDT", "CCCUSDT"]:
+        df = pd.DataFrame({**base_cols, "symbol": sym, "eligible_rvd_base": True})
+        _write_panel_file(tmp_path / "panel", sym, df)
+
+    bep.compute_cross_sectional_rvd(min_free_gb=0.0)
+
+    out = pd.read_parquet(tmp_path / "panel" / "symbol=AAAUSDT" / "year=2024" / "event_feature_panel_5m.parquet")
+    assert (out["cross_section_size"] == 3).all()
+    assert not out["eligible_rvd"].any()  # 3 < MIN_CROSS_SECTION_SIZE (30) -- base True but gated off
+    assert elig.MIN_CROSS_SECTION_SIZE > 3  # sanity: this test's premise still holds
+
+
+def test_compute_cross_sectional_rvd_eligible_once_population_meets_minimum(tmp_path, monkeypatch):
+    monkeypatch.setattr(bep, "OUT_DIR", tmp_path / "panel")
+    from data_v2.events import eligibility as elig
+    idx = pd.date_range("2024-01-01", periods=3, freq="5min", tz="UTC")
+    for i in range(elig.MIN_CROSS_SECTION_SIZE):
+        sym = f"S{i:03d}USDT"
+        df = pd.DataFrame({
+            "timestamp": idx, "symbol": sym, "open": 1.0, "close": 1.0, "volume": 1.0,
+            "eligible_rvd_base": True,
+        })
+        _write_panel_file(tmp_path / "panel", sym, df)
+
+    bep.compute_cross_sectional_rvd(min_free_gb=0.0)
+
+    out = pd.read_parquet(tmp_path / "panel" / "symbol=S000USDT" / "year=2024" / "event_feature_panel_5m.parquet")
+    assert (out["cross_section_size"] == elig.MIN_CROSS_SECTION_SIZE).all()
+    assert out["eligible_rvd"].all()
+
+
+def test_compute_cross_sectional_rvd_respects_eligible_rvd_base_per_row_not_just_symbol(tmp_path, monkeypatch):
+    monkeypatch.setattr(bep, "OUT_DIR", tmp_path / "panel")
+    from data_v2.events import eligibility as elig
+    idx = pd.date_range("2024-01-01", periods=2, freq="5min", tz="UTC")
+    for i in range(elig.MIN_CROSS_SECTION_SIZE):
+        sym = f"S{i:03d}USDT"
+        # row 0 eligible for every symbol, row 1 eligible for NONE
+        df = pd.DataFrame({
+            "timestamp": idx, "symbol": sym, "open": 1.0, "close": 1.0, "volume": 1.0,
+            "eligible_rvd_base": [True, False],
+        })
+        _write_panel_file(tmp_path / "panel", sym, df)
+
+    bep.compute_cross_sectional_rvd(min_free_gb=0.0)
+
+    out = pd.read_parquet(tmp_path / "panel" / "symbol=S000USDT" / "year=2024" / "event_feature_panel_5m.parquet")
+    row0 = out[out["timestamp"] == idx[0]].iloc[0]
+    row1 = out[out["timestamp"] == idx[1]].iloc[0]
+    assert row0["cross_section_size"] == elig.MIN_CROSS_SECTION_SIZE and row0["eligible_rvd"]
+    assert row1["cross_section_size"] == 0 and not row1["eligible_rvd"]

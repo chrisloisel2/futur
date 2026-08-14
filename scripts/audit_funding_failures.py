@@ -102,7 +102,22 @@ def _probe_live(symbol: str, start_ms: int, end_ms: int) -> int:
         if isinstance(data, dict):
             raise RuntimeError(f"Binance API error response for {symbol}: {data}")
         if not data:
-            break
+            if cursor == start_ms:
+                # first call of this window came back empty -- confirmed
+                # server-side flakiness (2026-08-15): the exact same query
+                # re-issued moments later, by hand, returned a real record
+                # for a window this script itself had just called empty.
+                # Re-probe a few times before trusting "confirmed empty".
+                for retry_i in range(4):
+                    time.sleep(1.5 + retry_i)
+                    retry_data = _get(f"{B}/fapi/v1/fundingRate?symbol={symbol}&startTime={cursor}&endTime={end_ms}&limit=1000")
+                    if isinstance(retry_data, dict):
+                        raise RuntimeError(f"Binance API error response for {symbol}: {retry_data}")
+                    if retry_data:
+                        data = retry_data
+                        break
+            if not data:
+                break
         n += len(data)
         last = data[-1]["fundingTime"]
         time.sleep(0.3)
