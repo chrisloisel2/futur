@@ -54,6 +54,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from data_v2.events.schema import REQUIRED_COLUMNS, OPTIONAL_COLUMNS  # noqa: E402
+from data_v2.events.residuals import BTC_SYMBOL, ETH_SYMBOL  # noqa: E402
 
 PANEL_DIR = ROOT / "data_v2/normalized/event_feature_panel/venue=binance"
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
@@ -122,11 +123,20 @@ def _check_symbol(symbol: str, df: pd.DataFrame, im: pd.DataFrame) -> dict:
 
     warmup_bars = WARMUP_DAYS * BARS_PER_DAY
     head = df.iloc[: min(warmup_bars, n)]
-    # the very first bar of the very first day is legitimately NaN too
-    # (nothing to freeze yet, see residuals.py _freeze_daily) -- the
-    # invariant checked here is that warmup rows are never a FABRICATED
-    # non-NaN value, not that literally every one is NaN.
-    invalid_warmup_rows = int((head["residual_return_1h"].notna() & (head.index < warmup_bars * 0.9)).sum()) if n else 0
+    # BTC/ETH are the regression benchmark, not a regressed symbol --
+    # compute_residual_returns gives them residual == raw return at every
+    # bar by design (data_v2/events/residuals.py), no beta warmup applies.
+    # Bug found 2026-08-14: an earlier version of this check applied the
+    # 60-day warmup requirement to them too, flagging 31,080 legitimate
+    # rows across exactly BTCUSDT/ETHUSDT.
+    if symbol in (BTC_SYMBOL, ETH_SYMBOL):
+        invalid_warmup_rows = 0
+    else:
+        # the very first bar of the very first day is legitimately NaN too
+        # (nothing to freeze yet, see residuals.py _freeze_daily) -- the
+        # invariant checked here is that warmup rows are never a FABRICATED
+        # non-NaN value, not that literally every one is NaN.
+        invalid_warmup_rows = int((head["residual_return_1h"].notna() & (head.index < warmup_bars * 0.9)).sum()) if n else 0
 
     return dict(
         rows=n, duplicate_pk=dup, causality_violations=causality_violations,

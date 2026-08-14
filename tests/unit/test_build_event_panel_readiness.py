@@ -124,6 +124,20 @@ def test_gap_row_with_old_carried_forward_funding_is_not_a_causality_violation(e
     assert report["hard_gates"]["causality_violations"] is True
 
 
+def test_btc_and_eth_are_exempt_from_the_warmup_check(env):
+    """Bug found 2026-08-14: BTCUSDT/ETHUSDT are the regression benchmark,
+    not a regressed symbol -- compute_residual_returns gives them
+    residual == raw return at every bar by design, no beta-fitting warmup
+    ever applies to them. An earlier version of this check flagged
+    31,080 such legitimate rows across exactly BTCUSDT/ETHUSDT."""
+    idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC")
+    df = _panel_rows(idx, "BTCUSDT", residual_return_1h=0.001)  # populated from bar 0, by design
+    _write_panel(env / "panel", "BTCUSDT", df)
+    report = bpr.build()
+    assert report["gate_values"]["invalid_warmup_rows"] == 0
+    assert report["hard_gates"]["invalid_warmup_rows"] is True
+
+
 def test_irregular_grid_detected(env):
     idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC").delete(5)  # a missing row means an unexplained gap here
     _write_panel(env / "panel", "FOOUSDT", _panel_rows(idx, "FOOUSDT"))
