@@ -32,6 +32,16 @@ Pre-unblinding fix (2026-08-10, review round 4):
     this column, a detector reading 0 there cannot tell a real quiet bar
     from a bar with no feed at all -- see detectors.py's DELEVERAGING
     liq_confirmed and FORCED_FLOW_REVERSAL's per-bar liq/flow fallback.
+
+Pre-unblinding fix (2026-08-14, external review): `funding_rate_
+percentile_90d` added as required -- CROWDING's funding-extreme check
+must rank |funding_rate| against real settlement observations over the
+trailing 90d, not the panel's causally-forward-filled bar copies (which
+repeat one real settlement ~96x for an 8h-cadence symbol, ~48x for 4h,
+~12x for 1h -- distorting the population for any non-uniform-cadence
+symbol). Precomputed upstream from the settlement history, causally
+forward-filled the same way funding_rate itself is -- see
+build_event_feature_panel.py and detectors.py's detect_crowding.
 """
 from __future__ import annotations
 
@@ -50,6 +60,7 @@ REQUIRED_COLUMNS = (
     "signed_volume",
     "CVD",
     "funding_rate",
+    "funding_rate_percentile_90d",
     "basis",
     "basis_z_1d",
     "basis_z_7d",

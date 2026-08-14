@@ -63,21 +63,19 @@ research_available_at is masked to NaN wherever that source itself is
 null at that row before the max, so an absent source never drags the row
 backward in time or silently gets skipped from the max by accident.
 
-CROWDING percentile note (mission section 11, NOT fixed here): the
-protocol's frozen detect_crowding (data_v2/events/detectors.py) computes
-its trailing-90d funding-rate percentile with a rolling window measured in
-BARS (90d * 288) over this panel's forward-filled funding_rate column,
-not over the smaller population of real settlement observations directly.
-For a constant 8h-cadence symbol this is mathematically identical (every
-real value is repeated the same number of times, which does not change
-relative rank), but for a genuinely variable-cadence symbol (e.g. AIAUSDT,
-which mixes 1h/4h settlements -- see data_v2/validation/validator.py's
-variable_cadence mode) shorter-duration settlements are under-weighted
-relative to longer ones in that bar-based percentile. This is a real,
-bounded, quantifiable effect -- but detect_crowding is methodologically
-frozen (mission section 16) and this doesn't rise to an unambiguous,
-narrowly-scoped software bug the way the labels.py fillna(0) fix did;
-it's flagged here for the next phase to decide, not silently patched.
+CROWDING percentile (mission section 11, fixed 2026-08-14): funding_rate_
+percentile_90d is computed here from the REAL settlement history only --
+for each settlement, its percentile rank of |funding_rate| among the
+settlements in the strictly-prior 90 days (current settlement excluded
+from its own reference population, same discipline as detectors.py's
+_trailing_percentile_rank), then causally forward-filled onto the grid
+exactly like funding_rate itself. detect_crowding (data_v2/events/
+detectors.py) reads this column directly instead of ranking the panel's
+forward-filled bar copies, which would otherwise repeat one real
+settlement ~96x for an 8h-cadence symbol, ~48x for 4h, ~12x for 1h --
+distorting the population for any non-uniform-cadence symbol (e.g.
+AIAUSDT, which mixes 1h/4h settlements). Same P90 threshold, same 90d
+window -- no tuning, just the correct population.
 
 Disk-safety: run in --min-free-gb guarded batches, symbol by symbol, same
 idiom as the P0 backfills. Writes are atomic (tmp-then-replace) per
@@ -146,16 +144,44 @@ def _dense_grid(start: pd.Timestamp, end: pd.Timestamp) -> pd.DatetimeIndex:
     return pd.date_range(start, end, freq=GRID_FREQ, tz="UTC")
 
 
+def _settlement_percentile_rank(abs_rate: pd.Series, lookback_days: int = 90) -> pd.Series:
+    """Percentile rank (0-1) of each REAL settlement's |funding_rate|
+    against the settlements in the STRICTLY PRIOR `lookback_days` --
+    current settlement excluded from its own reference population, same
+    discipline as detectors.py's _trailing_percentile_rank (never judge a
+    value against a window containing itself). `abs_rate` must be indexed
+    by real settlement time, sorted ascending. O(n) via a two-pointer
+    sliding window -- settlements are sparse (at most a few thousand per
+    symbol over the full history), so this is cheap regardless."""
+    times = abs_rate.index
+    values = abs_rate.to_numpy()
+    window = pd.Timedelta(days=lookback_days)
+    out = np.full(len(values), np.nan)
+    start_ptr = 0
+    for i in range(len(values)):
+        window_start = times[i] - window
+        while times[start_ptr] < window_start:
+            start_ptr += 1
+        hist = values[start_ptr:i]  # [start_ptr, i) -- strictly prior, i itself excluded
+        if len(hist) > 0:
+            out[i] = float((hist <= values[i]).mean())
+    return pd.Series(out, index=times)
+
+
 def _build_funding_columns(grid: pd.DatetimeIndex, symbol: str, now: pd.Timestamp) -> pd.DataFrame:
     """Discrete settlement -> causal forward-fill onto the dense grid, per
     mission section 11: a grid bar's funding_rate is only ever the most
     recent settlement AT OR BEFORE that bar (merge_asof direction=
     "backward" -- structurally cannot pick a future settlement), never a
-    fabricated intermediate observation."""
+    fabricated intermediate observation. funding_rate_percentile_90d is
+    computed on the real settlement series (_settlement_percentile_rank)
+    and forward-filled the same way -- see CROWDING percentile note in the
+    module docstring."""
     out = pd.DataFrame(index=grid)
     fund = load_funding(symbol)
     if fund is None or fund.empty or "funding_rate" not in fund.columns:
         out["funding_rate"] = np.nan
+        out["funding_rate_percentile_90d"] = np.nan
         out["funding_is_settlement"] = False
         out["time_since_last_funding"] = pd.NaT
         out["funding_research_available_at"] = pd.NaT
@@ -166,6 +192,7 @@ def _build_funding_columns(grid: pd.DatetimeIndex, symbol: str, now: pd.Timestam
     f = f.sort_values("timestamp").drop_duplicates(subset="timestamp", keep="last")
     if f.empty:
         out["funding_rate"] = np.nan
+        out["funding_rate_percentile_90d"] = np.nan
         out["funding_is_settlement"] = False
         out["time_since_last_funding"] = pd.NaT
         out["funding_research_available_at"] = pd.NaT
@@ -174,6 +201,9 @@ def _build_funding_columns(grid: pd.DatetimeIndex, symbol: str, now: pd.Timestam
     f["settlement_research_available_at"] = _research_available_at(
         f["timestamp"], bar_seconds=0, source_kind="binance_vision_daily", now=now
     )
+    f["percentile_90d"] = _settlement_percentile_rank(
+        pd.Series(f["funding_rate"].abs().to_numpy(), index=f["timestamp"])
+    ).to_numpy()
     # floor ONLY for grid alignment -- floor never moves a timestamp
     # forward, so it cannot create a causality leak. A settlement posted at
     # 16:00:00.003 belongs to the 16:00:00 5m bar that had already started
@@ -193,6 +223,7 @@ def _build_funding_columns(grid: pd.DatetimeIndex, symbol: str, now: pd.Timestam
     time_since = time_since.clip(lower=pd.Timedelta(0))
 
     out["funding_rate"] = merged["funding_rate"].to_numpy()
+    out["funding_rate_percentile_90d"] = merged["percentile_90d"].to_numpy()
     out["funding_is_settlement"] = is_settlement.to_numpy()
     out["time_since_last_funding"] = time_since.to_numpy()
     out["funding_research_available_at"] = merged["settlement_research_available_at"].to_numpy()
@@ -295,6 +326,7 @@ def build_symbol_panel(symbol: str, *, btc_close: pd.Series, eth_close: pd.Serie
     panel["signed_volume"] = flow_g["signed_volume"].to_numpy()
     panel["CVD"] = flow_g["CVD"].to_numpy()
     panel["funding_rate"] = funding_g["funding_rate"].to_numpy()
+    panel["funding_rate_percentile_90d"] = funding_g["funding_rate_percentile_90d"].to_numpy()
     panel["funding_is_settlement"] = funding_g["funding_is_settlement"].to_numpy()
     panel["time_since_last_funding"] = funding_g["time_since_last_funding"].to_numpy()
     panel["basis"] = basis_g["basis"].to_numpy()

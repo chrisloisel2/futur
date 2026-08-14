@@ -224,6 +224,66 @@ def test_funding_settlement_jitter_floors_to_its_own_started_bar(env):
     assert row["time_since_last_funding"] >= pd.Timedelta(0)  # never negative despite the ms jitter
 
 
+# ── funding_rate_percentile_90d: settlement-native, not bar-repeated ──────
+# (mission section 11 / external review 2026-08-14)
+
+
+def test_settlement_percentile_rank_basic_correctness():
+    times = pd.date_range("2024-01-01", periods=5, freq="8h", tz="UTC")
+    abs_rate = pd.Series([0.01, 0.05, 0.03, 0.02, 0.09], index=times)
+    ranks = bep._settlement_percentile_rank(abs_rate)
+    assert pd.isna(ranks.iloc[0])  # nothing prior yet
+    assert ranks.iloc[1] == pytest.approx(1.0)   # 0.05 > only prior value 0.01 -> rank 1.0
+    assert ranks.iloc[2] == pytest.approx(0.5)   # 0.03 vs {0.01, 0.05} -> 1/2 <= it
+    assert ranks.iloc[3] == pytest.approx(1 / 3)  # 0.02 vs {0.01, 0.05, 0.03} -> only 0.01 <= it
+
+
+def test_settlement_percentile_rank_excludes_current_from_its_own_window():
+    times = pd.date_range("2024-01-01", periods=3, freq="8h", tz="UTC")
+    abs_rate = pd.Series([0.01, 0.01, 100.0], index=times)  # a huge outlier last
+    ranks = bep._settlement_percentile_rank(abs_rate)
+    # the outlier's own value must never appear in ITS OWN reference window
+    assert ranks.iloc[2] == pytest.approx(1.0)  # both priors (0.01, 0.01) <= 100.0
+    assert ranks.iloc[1] == pytest.approx(1.0)  # only prior is 0.01 <= 0.01
+
+
+def test_settlement_percentile_rank_respects_the_90_day_window_boundary():
+    times = pd.DatetimeIndex([
+        pd.Timestamp("2024-01-01", tz="UTC"),
+        pd.Timestamp("2024-01-01", tz="UTC") + pd.Timedelta(days=91),  # outside the 90d window
+        pd.Timestamp("2024-01-01", tz="UTC") + pd.Timedelta(days=95),
+    ])
+    abs_rate = pd.Series([0.5, 0.01, 0.02], index=times)
+    ranks = bep._settlement_percentile_rank(abs_rate)
+    # the huge 0.5 from day 0 is > 90d before day 95 -- must be excluded from its window
+    assert ranks.iloc[2] == pytest.approx(1.0)  # only 0.01 (day 91, within 90d of day 95) <= 0.02
+
+
+def test_funding_rate_percentile_90d_forward_filled_like_funding_rate(env):
+    idx = pd.date_range("2024-01-01", periods=30, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    funding_rows = pd.DataFrame({
+        "timestamp": [idx[5], idx[20]], "funding_rate": [0.0001, 0.0002], "mark_price": [100.0, 101.0],
+    })
+    orig = bep.load_funding
+    bep.load_funding = lambda sym: funding_rows
+    try:
+        btc, eth = _btc_eth_close(idx)
+        panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+    finally:
+        bep.load_funding = orig
+
+    before_first = panel[panel["timestamp"] < idx[5]]
+    assert before_first["funding_rate_percentile_90d"].isna().all()
+    at_first = panel[panel["timestamp"] == idx[5]].iloc[0]
+    assert pd.isna(at_first["funding_rate_percentile_90d"])  # nothing prior to rank the first settlement against
+    at_second = panel[panel["timestamp"] == idx[20]].iloc[0]
+    assert at_second["funding_rate_percentile_90d"] == pytest.approx(1.0)  # 0.0002 > the only prior, 0.0001
+    between = panel[(panel["timestamp"] > idx[5]) & (panel["timestamp"] < idx[20])]
+    # forward-filled from the first settlement's own (NaN, nothing prior) rank
+    assert between["funding_rate_percentile_90d"].isna().all()
+
+
 # ── research_available_at (feature_available_at): row-wise max of only
 # the sources that actually contributed ────────────────────────────────
 

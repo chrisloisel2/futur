@@ -59,6 +59,24 @@ Pre-unblinding fix (2026-08-10, review round 4):
      research_available_at. Fixed to the row-wise max of research_
      available_at over exactly the symbols that contributed a non-NaN
      value to that bar's residual/basis_z/flow computation.
+
+Pre-unblinding fix (2026-08-14, external review): CROWDING's funding
+percentile was computed bar-wise, ranking |funding_rate| over a 90d*288-bar
+rolling window on the panel's causally-forward-filled column. Since a
+single real settlement is forward-filled across every 5m bar until the
+next one, a symbol on an 8h cadence had each real observation repeated
+~96x, a 4h-cadence symbol ~48x, a 1h-cadence symbol ~12x -- silently
+distorting the population the percentile is measured against for any
+symbol without a perfectly uniform cadence (protocol section: "|funding_
+rate| at last settlement ranked >= P90, trailing 90d, same symbol" means
+ranked among real settlement observations, not repeated bar copies).
+Same P90 threshold, same 90d window, same family/direction/horizon --
+no tuning. Fixed: funding_extreme now reads funding_rate_percentile_90d,
+precomputed upstream (build_event_feature_panel.py) from the real
+settlement history and causally forward-filled the same way funding_rate
+itself is. detect_crowding no longer takes lookback_days/
+min_periods_override -- both were only ever used for the removed
+bar-wise rank.
 """
 from __future__ import annotations
 
@@ -168,14 +186,20 @@ def detect_deleveraging(
     return EventSet(family="DELEVERAGING", events=events.reset_index(drop=True))
 
 
-def detect_crowding(
-    df: pd.DataFrame, *, symbol: str, lookback_days: int = 90, min_periods_override: Optional[int] = None
-) -> EventSet:
+def detect_crowding(df: pd.DataFrame, *, symbol: str) -> EventSet:
     validate_schema(df)
-    window = lookback_days * BARS_PER_DAY
 
-    funding_rank = _trailing_percentile_rank(df["funding_rate"].abs(), window, min_periods_override=min_periods_override)
-    funding_extreme = funding_rank >= 0.90
+    # funding_rate_percentile_90d is precomputed upstream (build_event_
+    # feature_panel.py) from the REAL settlement history -- a funding
+    # settlement every 8h/4h/1h is causally forward-filled across many 5m
+    # bars, so ranking |funding_rate| bar-wise (the previous approach)
+    # implicitly repeated each real observation as many times as it was
+    # forward-filled, distorting the population for any symbol whose
+    # cadence isn't uniform. Same P90 threshold, same 90d window, same
+    # family/direction/horizon -- only the population the rank is computed
+    # over changed. Bug found 2026-08-14 (mission section 11's own explicit
+    # settlement-native requirement).
+    funding_extreme = df["funding_rate_percentile_90d"] >= 0.90
 
     basis_extreme = df["basis_z_1d"].abs() >= 2.0
     oi_building = df["oi_delta_pct_1h"] >= 0.03
