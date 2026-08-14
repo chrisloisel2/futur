@@ -144,6 +144,28 @@ def backfill_symbol(sym: str, start: date, end: date, workers: int = 8) -> dict:
             "rows_total": rows}
 
 
+def symbol_start_date(symbol: str, im, fallback: date) -> date:
+    """Each symbol's own real listing bound (first_perp_kline_ts), not a
+    single global --start applied to every symbol -- same bug class as
+    the funding top-up's 2026-08-14 fix (74/312 symbols have
+    first_perp_kline_ts before the old 2021-01-01 default). Unlike
+    funding's OLD incremental design, backfill_symbol's day-level manifest
+    check already handles an earlier start correctly by itself (each day
+    is independently checked against done/missing regardless of
+    position) -- this only needs to widen the requested window, not a
+    bidirectional-fill rewrite. min() with fallback: never later than the
+    CLI default, but goes earlier whenever a symbol's own real bound
+    proves an earlier existence. Falls back to `fallback` unchanged when
+    instrument_master or the field itself is unavailable -- fail-safe,
+    not fail-closed (a backfill floor, not a readiness gate)."""
+    if im is None:
+        return fallback
+    row = im.loc[im["symbol"] == symbol]
+    if row.empty or pd.isna(row.iloc[0].get("first_perp_kline_ts")):
+        return fallback
+    return min(fallback, pd.Timestamp(row.iloc[0]["first_perp_kline_ts"]).date())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--symbols", default=None, help="comma-separated; default = full PIT universe")
@@ -153,11 +175,12 @@ def main():
     ap.add_argument("--min-free-gb", type=float, default=15.0)
     args = ap.parse_args()
 
-    start = date.fromisoformat(args.start)
+    fallback_start = date.fromisoformat(args.start)
     end = date.fromisoformat(args.end) if args.end else date.today() - timedelta(days=2)
     syms = [s.strip() for s in args.symbols.split(",") if s.strip()] if args.symbols else default_symbols()
+    im = pd.read_parquet(INSTRUMENT_MASTER, columns=["symbol", "first_perp_kline_ts"]) if INSTRUMENT_MASTER.exists() else None
 
-    print(f"Backfill metrics Vision : {len(syms)} symboles, {start} → {end}", flush=True)
+    print(f"Backfill metrics Vision : {len(syms)} symboles, start<={fallback_start} (earlier per-symbol when proven) → {end}", flush=True)
     t0 = time.time()
     reg = {}
     for i, sym in enumerate(syms, 1):
@@ -166,13 +189,14 @@ def main():
             print(f"\nSTOP: free space {headroom:.1f}GB < --min-free-gb {args.min_free_gb}GB "
                   f"after {i - 1}/{len(syms)} symbols. Resumable -- re-run to continue.", flush=True)
             sys.exit(1)
+        start = symbol_start_date(sym, im, fallback_start)
         r = backfill_symbol(sym, start, end, workers=args.workers)
         reg[sym] = r
         print(f"  [{i:3}/{len(syms)}] {sym:10} new={r.get('new',0):5}  404={r.get('n404',0):4}  "
               f"err={r.get('errors',0):3}  rows={r.get('rows_total','-')}  free={headroom:.1f}GB", flush=True)
 
     (OUT_DIR / "registry.json").write_text(json.dumps(
-        {"generated_at": pd.Timestamp.utcnow().isoformat(), "window": [str(start), str(end)],
+        {"generated_at": pd.Timestamp.utcnow().isoformat(), "window": [str(fallback_start), str(end)],
          "symbols": reg}, indent=2))
     print(f"\nTerminé en {time.time()-t0:.0f}s → {OUT_DIR}", flush=True)
 

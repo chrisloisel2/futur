@@ -43,7 +43,10 @@ def test_default_symbols_falls_back_to_core_12_without_instrument_master(tmp_pat
 
 def test_main_stops_cleanly_at_disk_floor(tmp_path, monkeypatch, capsys):
     im_path = tmp_path / "instrument_master.parquet"
-    pd.DataFrame({"symbol": ["AAAUSDT", "BBBUSDT", "CCCUSDT"]}).to_parquet(im_path, index=False)
+    pd.DataFrame({
+        "symbol": ["AAAUSDT", "BBBUSDT", "CCCUSDT"],
+        "first_perp_kline_ts": [pd.NaT, pd.NaT, pd.NaT],
+    }).to_parquet(im_path, index=False)
     monkeypatch.setattr(bmv, "INSTRUMENT_MASTER", im_path)
     monkeypatch.setattr(bmv, "free_gb", lambda path: 5.0)  # always below any sane floor
     calls = []
@@ -54,3 +57,36 @@ def test_main_stops_cleanly_at_disk_floor(tmp_path, monkeypatch, capsys):
     assert exc.value.code == 1
     assert not calls  # never even attempted the first symbol -- floor checked up front
     assert "STOP" in capsys.readouterr().out
+
+
+# ── symbol_start_date: each symbol's own real listing bound, not a single
+# global --start applied to every symbol (2026-08-14, same bug class as
+# the funding top-up's symbol_start_ms fix) ──────────────────────────────
+
+
+def test_symbol_start_date_uses_first_perp_kline_ts_when_earlier_than_fallback():
+    im = pd.DataFrame([{"symbol": "AAVEUSDT", "first_perp_kline_ts": pd.Timestamp("2020-10-16", tz="UTC")}])
+    from datetime import date
+    fallback = date(2021, 1, 1)
+    result = bmv.symbol_start_date("AAVEUSDT", im, fallback)
+    assert result == date(2020, 10, 16)
+
+
+def test_symbol_start_date_never_later_than_fallback():
+    from datetime import date
+    im = pd.DataFrame([{"symbol": "NEWUSDT", "first_perp_kline_ts": pd.Timestamp("2024-01-01", tz="UTC")}])
+    fallback = date(2021, 1, 1)
+    assert bmv.symbol_start_date("NEWUSDT", im, fallback) == fallback
+
+
+def test_symbol_start_date_falls_back_when_field_missing():
+    from datetime import date
+    im = pd.DataFrame([{"symbol": "FOOUSDT", "first_perp_kline_ts": pd.NaT}])
+    fallback = date(2021, 1, 1)
+    assert bmv.symbol_start_date("FOOUSDT", im, fallback) == fallback
+
+
+def test_symbol_start_date_falls_back_when_im_is_none():
+    from datetime import date
+    fallback = date(2021, 1, 1)
+    assert bmv.symbol_start_date("FOOUSDT", None, fallback) == fallback
