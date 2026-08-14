@@ -217,6 +217,19 @@ DATASET_SPECS = {
         # a delisted symbol's OWN last real settlement, not the
         # cross-source composite delisting_ts (see _expected_end_baseline).
         delisted_end_field="last_funding_ts",
+        # funding's expected coverage is bound to first_perp_kline_ts, not
+        # the composite instrument_master listing_ts -- same reasoning as
+        # spot_5m's 2026-08-11 fix (build_spot_5m.py's module docstring):
+        # funding cannot exist before the perp contract itself does, and
+        # the composite bound can be earlier (e.g. driven by
+        # exchangeinfo_onboard_ts). Bug found 2026-08-14: BTCUSDT's real
+        # funding backfill already correctly uses first_perp_kline_ts
+        # (2020-01-01) as its own fetch floor (scripts/backfill_binance_
+        # derivatives_free.py's symbol_start_ms), but readiness measured
+        # expected_start against the composite listing_ts (2019-09-08,
+        # driven by exchangeinfo_onboard_ts) -- an artificial ~4-month
+        # "gap" the backfill never intended to fill in the first place.
+        listing_ts_field="first_perp_kline_ts",
     ),
     "agg_trades_flow_1m": dict(
         loader=lambda sym: _load_year_partitioned(ROOT / "data_v2/normalized/agg_trades_flow/1m/venue=binance", sym, "flow.parquet"),
