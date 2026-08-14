@@ -84,9 +84,11 @@ def test_top_up_fetches_only_from_last_existing_timestamp_forward(tmp_path, monk
     existing = _rows(["2024-01-01 00:00", "2024-01-01 08:00", "2024-01-01 16:00"])
     existing.to_parquet(symbol_dir / "FOOUSDT.parquet", index=False)
 
-    calls = []
-    def fake_backfill_funding(sym, start_ms):
-        calls.append(start_ms)
+    forward_calls = []
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            return pd.DataFrame()  # backward gap-fill: nothing earlier in this test
+        forward_calls.append(start_ms)
         return _rows(["2024-01-02 00:00"])
     monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
 
@@ -94,7 +96,7 @@ def test_top_up_fetches_only_from_last_existing_timestamp_forward(tmp_path, monk
     result = bf.top_up_funding("FOOUSDT", start_ms_floor)
 
     last_existing_ms = int(existing["timestamp"].max().value // 1_000_000)
-    assert calls == [last_existing_ms + 1]  # fetched from the last on-disk row forward, NOT from 2021
+    assert forward_calls == [last_existing_ms + 1]  # fetched from the last on-disk row forward, NOT from 2021
     assert len(result) == 4  # 3 existing + 1 new
     assert result["timestamp"].is_monotonic_increasing
 
@@ -104,14 +106,16 @@ def test_top_up_first_time_symbol_uses_start_floor(tmp_path, monkeypatch):
     (tmp_path / "funding").mkdir(parents=True)
 
     calls = []
-    def fake_backfill_funding(sym, start_ms):
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
         calls.append(start_ms)
         return _rows(["2021-01-01 00:00"])
     monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
 
     start_ms_floor = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
     result = bf.top_up_funding("NEWUSDT", start_ms_floor)
-    assert calls == [start_ms_floor]  # no existing file -- fetch from the requested floor
+    # no existing file at all -- backward gap-fill has nothing to anchor
+    # against and is skipped entirely; only the forward fetch runs.
+    assert calls == [start_ms_floor]
     assert len(result) == 1
 
 
@@ -123,7 +127,7 @@ def test_top_up_zero_new_rows_still_returns_full_existing_history(tmp_path, monk
     symbol_dir.mkdir(parents=True)
     existing = _rows(["2024-01-01 00:00", "2024-01-01 08:00"])
     existing.to_parquet(symbol_dir / "FOOUSDT.parquet", index=False)
-    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms: pd.DataFrame())
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: pd.DataFrame())
 
     result = bf.top_up_funding("FOOUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000))
     assert len(result) == 2
@@ -175,9 +179,11 @@ def test_top_up_does_not_fetch_past_a_symbol_already_fully_covered_to_delisting(
     existing = _rows(["2024-01-01 00:00", "2024-01-01 08:00"])  # already reaches delisting_ts
     existing.to_parquet(symbol_dir / "DEADUSDT.parquet", index=False)
 
-    calls = []
-    def fake_backfill_funding(sym, start_ms):
-        calls.append(start_ms)
+    forward_calls = []
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            return pd.DataFrame()  # backward gap-fill: nothing earlier in this test
+        forward_calls.append(start_ms)
         return _rows(["2024-06-01 00:00"])  # would-be phantom post-delisting feed
     monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
 
@@ -186,7 +192,7 @@ def test_top_up_does_not_fetch_past_a_symbol_already_fully_covered_to_delisting(
         "DEADUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000),
         delisting_ts=delisting_ts,
     )
-    assert calls == []  # no fetch issued at all -- nothing legitimate left past delisting_ts
+    assert forward_calls == []  # no forward fetch issued -- nothing legitimate left past delisting_ts
     assert len(result) == 2
     assert result["timestamp"].max() == delisting_ts
 
@@ -201,7 +207,9 @@ def test_top_up_strips_a_freshly_fetched_row_past_delisting_ts(tmp_path, monkeyp
     existing = _rows(["2024-01-01 00:00"])
     existing.to_parquet(symbol_dir / "DEADUSDT.parquet", index=False)
 
-    def fake_backfill_funding(sym, start_ms):
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            return pd.DataFrame()  # backward gap-fill: nothing earlier in this test
         # real row up to delisting, then phantom rows the exchange keeps emitting
         return _rows(["2024-01-01 08:00", "2024-06-01 00:00", "2024-12-01 00:00"])
     monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
@@ -228,7 +236,7 @@ def test_top_up_self_heals_existing_contamination_past_delisting_ts(tmp_path, mo
         "2024-01-01 16:00", "2024-01-02 00:00",  # phantom post-delisting feed
     ])
     contaminated.to_parquet(symbol_dir / "DEADUSDT.parquet", index=False)
-    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms: pd.DataFrame())
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: pd.DataFrame())
 
     delisting_ts = pd.Timestamp("2024-01-01 08:00", tz="UTC")
     result = bf.top_up_funding(
@@ -247,7 +255,7 @@ def test_top_up_delisting_ts_none_behaves_exactly_as_before(tmp_path, monkeypatc
     symbol_dir.mkdir(parents=True)
     existing = _rows(["2024-01-01 00:00"])
     existing.to_parquet(symbol_dir / "LIVEUSDT.parquet", index=False)
-    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms: _rows(["2026-08-11 00:00"]))
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: _rows(["2026-08-11 00:00"]))
 
     result = bf.top_up_funding(
         "LIVEUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000),
@@ -255,3 +263,102 @@ def test_top_up_delisting_ts_none_behaves_exactly_as_before(tmp_path, monkeypatc
     )
     assert len(result) == 2
     assert result["timestamp"].max() == pd.Timestamp("2026-08-11", tz="UTC")
+
+
+# ── top_up_funding: genuinely bidirectional -- a too-late start_ms from an
+# earlier run must self-heal on a later run with a corrected start_ms
+# (found 2026-08-14: real Binance funding data exists well before the
+# single global --start default of 2021-01-01 for any symbol listed
+# earlier; AAVEUSDT specifically has real settlements from 2020-10-16) ──
+
+
+def test_top_up_backfills_a_gap_before_the_existing_files_own_first_row(tmp_path, monkeypatch):
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2021-01-01 00:00", "2021-01-01 08:00"])
+    existing.to_parquet(symbol_dir / "AAVEUSDT.parquet", index=False)
+
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            # backward call: real early history the earlier run never fetched
+            return _rows(["2020-10-16 00:00", "2020-10-16 08:00"])
+        return pd.DataFrame()  # forward: nothing new yet
+    monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
+
+    earlier_start_ms = int(pd.Timestamp("2020-10-16", tz="UTC").timestamp() * 1000)
+    result = bf.top_up_funding("AAVEUSDT", earlier_start_ms)
+    assert len(result) == 4  # 2 existing + 2 recovered early rows
+    assert result["timestamp"].min() == pd.Timestamp("2020-10-16 00:00", tz="UTC")
+    assert result["timestamp"].is_monotonic_increasing
+
+
+def test_top_up_backward_fill_is_bounded_by_the_existing_files_own_first_row(tmp_path, monkeypatch):
+    """The backward gap-fill must never keep or duplicate a row at/after
+    the existing file's own first timestamp -- only the genuine gap
+    before it."""
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2021-01-01 00:00"])
+    existing.to_parquet(symbol_dir / "AAVEUSDT.parquet", index=False)
+
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            # includes a row AT the existing boundary -- must be dropped, not duplicated
+            return _rows(["2020-10-16 00:00", "2021-01-01 00:00"])
+        return pd.DataFrame()
+    monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
+
+    earlier_start_ms = int(pd.Timestamp("2020-10-16", tz="UTC").timestamp() * 1000)
+    result = bf.top_up_funding("AAVEUSDT", earlier_start_ms)
+    assert len(result) == 2  # the one genuinely new early row + the one original row, no duplicate
+    assert (result["timestamp"] == pd.Timestamp("2021-01-01 00:00", tz="UTC")).sum() == 1
+
+
+def test_top_up_no_backward_fill_when_start_ms_not_earlier_than_existing(tmp_path, monkeypatch):
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2021-01-01 00:00"])
+    existing.to_parquet(symbol_dir / "AAVEUSDT.parquet", index=False)
+
+    backward_calls = []
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is not None:
+            backward_calls.append((start_ms, end_ms))
+        return pd.DataFrame()
+    monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
+
+    later_start_ms = int(pd.Timestamp("2022-01-01", tz="UTC").timestamp() * 1000)  # later than existing's own start
+    bf.top_up_funding("AAVEUSDT", later_start_ms)
+    assert backward_calls == []  # nothing earlier is being requested -- no backward call at all
+
+
+# ── symbol_start_ms: each symbol's own real listing bound, not a single
+# global --start applied to every symbol regardless of when it listed ───
+
+
+def test_symbol_start_ms_uses_first_perp_kline_ts_when_earlier_than_fallback():
+    im = pd.DataFrame([{"symbol": "AAVEUSDT", "first_perp_kline_ts": pd.Timestamp("2020-10-16", tz="UTC")}])
+    fallback_ms = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
+    result = bf.symbol_start_ms("AAVEUSDT", im, fallback_ms)
+    assert result == int(pd.Timestamp("2020-10-16", tz="UTC").timestamp() * 1000)
+
+
+def test_symbol_start_ms_never_later_than_fallback():
+    im = pd.DataFrame([{"symbol": "NEWUSDT", "first_perp_kline_ts": pd.Timestamp("2024-01-01", tz="UTC")}])
+    fallback_ms = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
+    result = bf.symbol_start_ms("NEWUSDT", im, fallback_ms)
+    assert result == fallback_ms  # symbol's own bound is LATER -- never regress past the CLI floor
+
+
+def test_symbol_start_ms_falls_back_when_field_missing():
+    im = pd.DataFrame([{"symbol": "FOOUSDT", "first_perp_kline_ts": pd.NaT}])
+    fallback_ms = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
+    assert bf.symbol_start_ms("FOOUSDT", im, fallback_ms) == fallback_ms
+
+
+def test_symbol_start_ms_falls_back_when_im_is_none():
+    fallback_ms = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
+    assert bf.symbol_start_ms("FOOUSDT", None, fallback_ms) == fallback_ms
