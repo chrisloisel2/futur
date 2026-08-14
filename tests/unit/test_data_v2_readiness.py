@@ -113,10 +113,14 @@ def test_agg_trades_flow_1m_reuses_5m_manifest_spec(monkeypatch):
     assert result == df["timestamp"].min()
 
 
-def test_funding_has_no_manifest_spec_so_never_adjusted(monkeypatch):
+def test_dataset_with_no_manifest_spec_entry_is_never_adjusted(monkeypatch):
+    """funding gained a real DATASET_MANIFEST_SPECS entry 2026-08-14 (see
+    manifest_gaps.py's _funding_confirmed_empty_days) -- this test exercises
+    the generic fallback for ANY dataset absent from the spec dict, not
+    funding specifically."""
     im = _im_row("FOOUSDT", TS("2020-01-01"))
     df = pd.DataFrame({"timestamp": pd.date_range("2021-01-01", periods=5, freq="8h", tz="UTC")})
-    monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", {})  # funding not in DATASET_MANIFEST_SPECS
+    monkeypatch.setattr(readiness_mod, "DATASET_MANIFEST_SPECS", {})  # empty spec dict -- no entry for any dataset
 
     result = readiness_mod._confirmed_unavailable_expected_start(
         "funding", "FOOUSDT", im, df, "timestamp", _baseline(TS("2020-01-01")),

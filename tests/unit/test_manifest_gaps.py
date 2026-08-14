@@ -25,7 +25,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
-from data_v2.validation.manifest_gaps import gap_confirmed_unfillable
+from data_v2.validation.manifest_gaps import gap_confirmed_unfillable, _funding_confirmed_empty_days
 
 TS = lambda s: pd.Timestamp(s, tz="UTC")  # noqa: E731
 
@@ -106,3 +106,32 @@ def test_missing_based_proof_still_works_for_multi_period_gaps():
         TS("2020-09-01"), TS("2020-11-01"), missing=missing, granularity="day", done=set(),
     )
     assert result is True
+
+
+# ── _funding_confirmed_empty_days: funding gained a manifest 2026-08-14
+# (it never had one before, unlike OI/perp/spot/aggTrades) -- a single
+# confirmed-empty-forward-fetch fact expanded into a day-string set for
+# reuse by the same generic exclusion machinery ─────────────────────────
+
+
+def test_funding_confirmed_empty_days_expands_the_full_span(tmp_path):
+    manifest = tmp_path / "AGIXUSDT_manifest.json"
+    manifest.write_text('{"confirmed_empty_from": "2025-06-19T08:00:00", "confirmed_as_of": "2025-06-22T00:00:00"}')
+    result = _funding_confirmed_empty_days(manifest)
+    assert result == {"2025-06-19", "2025-06-20", "2025-06-21"}  # confirmed_as_of's own day excluded
+
+
+def test_funding_confirmed_empty_days_missing_file_returns_empty(tmp_path):
+    assert _funding_confirmed_empty_days(tmp_path / "does_not_exist.json") == set()
+
+
+def test_funding_confirmed_empty_days_malformed_manifest_returns_empty(tmp_path):
+    manifest = tmp_path / "FOOUSDT_manifest.json"
+    manifest.write_text("{}")  # no confirmed_empty_from/confirmed_as_of keys
+    assert _funding_confirmed_empty_days(manifest) == set()
+
+
+def test_funding_confirmed_empty_days_zero_span_returns_empty(tmp_path):
+    manifest = tmp_path / "FOOUSDT_manifest.json"
+    manifest.write_text('{"confirmed_empty_from": "2025-06-19T08:00:00", "confirmed_as_of": "2025-06-19T09:00:00"}')
+    assert _funding_confirmed_empty_days(manifest) == set()  # same calendar day -- nothing confirmed yet

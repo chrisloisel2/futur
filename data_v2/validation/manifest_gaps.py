@@ -69,6 +69,31 @@ def _missing_months(manifest_path: Path) -> set:
     return set(json.loads(manifest_path.read_text()).get("missing_months", []))
 
 
+def _funding_confirmed_empty_days(manifest_path: Path) -> set:
+    """Expands a funding top-up's single confirmed-empty-forward-fetch
+    fact (scripts/backfill_binance_derivatives_free.py's top_up_funding,
+    2026-08-14) into a day-string set, for reuse by the exact same
+    gap_confirmed_unfillable/scattered-exclusion machinery every other
+    dataset uses. funding has no natural day-level cadence to check day
+    by day (settlements are 1h/4h/8h, not one-per-day) -- instead this
+    records "as of this run, a real fetch from X forward returned
+    genuinely empty", which is direct proof no data exists anywhere in
+    that whole span. The confirmed_as_of day itself is excluded -- a
+    check partway through a day can't prove nothing was published later
+    that same day."""
+    if not manifest_path.exists():
+        return set()
+    m = json.loads(manifest_path.read_text())
+    from_ts, as_of_ts = m.get("confirmed_empty_from"), m.get("confirmed_as_of")
+    if not from_ts or not as_of_ts:
+        return set()
+    start = pd.Timestamp(from_ts).normalize()
+    end = pd.Timestamp(as_of_ts).normalize()
+    if end <= start:
+        return set()
+    return {d.date().isoformat() for d in pd.date_range(start, end, freq="1D", inclusive="left")}
+
+
 def _done_months(manifest_path: Path) -> set:
     if not manifest_path.exists():
         return set()
@@ -131,6 +156,11 @@ DATASET_MANIFEST_SPECS = {
         done_fn=lambda s: _done_days(
             ROOT / f"data_v2/normalized/agg_trades_flow/1m/venue=binance/symbol={s}/manifest.json", key="done_days"
         ),
+    ),
+    "funding": dict(
+        loader=load_funding, ts_col="timestamp", source_available_from=None, granularity="day",
+        missing_fn=lambda s: _funding_confirmed_empty_days(ROOT / f"data/derivatives_backfill/binance/funding/{s}_manifest.json"),
+        done_fn=lambda s: set(),  # no done-day fast-path needed -- missing_fn already covers the full confirmed-empty span explicitly
     ),
 }
 

@@ -18,6 +18,7 @@ Gate:
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -362,3 +363,89 @@ def test_symbol_start_ms_falls_back_when_field_missing():
 def test_symbol_start_ms_falls_back_when_im_is_none():
     fallback_ms = int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000)
     assert bf.symbol_start_ms("FOOUSDT", None, fallback_ms) == fallback_ms
+
+
+# ── top_up_funding: confirmed-unavailable manifest tracking (2026-08-14,
+# user-authorized) -- funding never had a manifest before, unlike OI/perp/
+# spot/aggTrades, so a genuinely-stopped symbol (AGIXUSDT: real empty API
+# response from its stored cursor forward, verified against live Binance,
+# not the 2026-08-11 phantom-feed bug) could never be excluded from
+# staleness/coverage ──────────────────────────────────────────────────
+
+
+def test_top_up_writes_confirmed_empty_manifest_on_genuine_empty_forward_fetch(tmp_path, monkeypatch):
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2025-06-19 08:00"])
+    existing.to_parquet(symbol_dir / "AGIXUSDT.parquet", index=False)
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: pd.DataFrame())
+    fixed_now = pd.Timestamp("2026-08-14", tz="UTC")
+    monkeypatch.setattr(bf.time, "time", lambda: fixed_now.timestamp())
+
+    bf.top_up_funding("AGIXUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000), delisting_ts=None)
+
+    manifest_path = symbol_dir / "AGIXUSDT_manifest.json"
+    assert manifest_path.exists()
+    m = json.loads(manifest_path.read_text())
+    assert pd.Timestamp(m["confirmed_empty_from"]) == pd.Timestamp("2025-06-19 08:00", tz="UTC") + pd.Timedelta(milliseconds=1)
+    assert pd.Timestamp(m["confirmed_as_of"]) == fixed_now
+
+
+def test_top_up_clears_confirmed_empty_manifest_when_new_data_appears(tmp_path, monkeypatch):
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2025-06-19 08:00"])
+    existing.to_parquet(symbol_dir / "AGIXUSDT.parquet", index=False)
+    manifest_path = symbol_dir / "AGIXUSDT_manifest.json"
+    manifest_path.write_text('{"confirmed_empty_from": "2025-06-19T08:00:00", "confirmed_as_of": "2025-07-01T00:00:00"}')
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: _rows(["2025-08-01 00:00"]))
+    monkeypatch.setattr(bf.time, "time", lambda: pd.Timestamp("2026-08-14", tz="UTC").timestamp())
+
+    bf.top_up_funding("AGIXUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000), delisting_ts=None)
+
+    assert not manifest_path.exists()  # stale claim invalidated -- real new data proves it wrong
+
+
+def test_top_up_does_not_write_manifest_for_a_delisted_symbol(tmp_path, monkeypatch):
+    """A delisted symbol's trailing bound is already handled by
+    delisting_ts itself -- no separate manifest claim needed or written."""
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    existing = _rows(["2024-01-01 00:00", "2024-01-01 08:00"])
+    existing.to_parquet(symbol_dir / "DEADUSDT.parquet", index=False)
+    monkeypatch.setattr(bf, "backfill_funding", lambda sym, start_ms, end_ms=None: pd.DataFrame())
+    monkeypatch.setattr(bf.time, "time", lambda: pd.Timestamp("2026-08-14", tz="UTC").timestamp())
+
+    delisting_ts = pd.Timestamp("2024-01-01 08:00", tz="UTC")
+    bf.top_up_funding(
+        "DEADUSDT", int(pd.Timestamp("2021-01-01", tz="UTC").timestamp() * 1000), delisting_ts=delisting_ts,
+    )
+
+    assert not (symbol_dir / "DEADUSDT_manifest.json").exists()
+
+
+def test_top_up_does_not_write_manifest_when_nothing_to_check_yet(tmp_path, monkeypatch):
+    """fetch_from_ms already at/past "now" -- no real forward fetch
+    attempt was made, so there is nothing to confirm either way."""
+    monkeypatch.setattr(bf, "OUT", tmp_path)
+    symbol_dir = tmp_path / "funding"
+    symbol_dir.mkdir(parents=True)
+    now = pd.Timestamp("2026-08-14", tz="UTC")
+    existing = _rows([now.isoformat()])
+    existing.to_parquet(symbol_dir / "FRESHUSDT.parquet", index=False)
+    forward_calls = []
+    def fake_backfill_funding(sym, start_ms, end_ms=None):
+        if end_ms is None:  # forward call only -- backward gap-fill is not this test's concern
+            forward_calls.append(start_ms)
+        return pd.DataFrame()
+    monkeypatch.setattr(bf, "backfill_funding", fake_backfill_funding)
+    monkeypatch.setattr(bf.time, "time", lambda: now.timestamp())
+
+    # start_ms == existing's own first row -- no backward gap to fill either
+    bf.top_up_funding("FRESHUSDT", int(now.timestamp() * 1000), delisting_ts=None)
+
+    assert forward_calls == []  # fetch_from_ms (now+1ms) already >= now_ms -- no attempt made
+    assert not (symbol_dir / "FRESHUSDT_manifest.json").exists()

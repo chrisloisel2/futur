@@ -241,10 +241,32 @@ def top_up_funding(
     if delisting_ts is not None and fetch_from_ms > int(delisting_ts.value // 1_000_000):
         pass  # nothing more to fetch past delisting
     else:
-        forward = backfill_funding(sym, fetch_from_ms)
+        now_ms = int(time.time() * 1000)
+        forward = backfill_funding(sym, fetch_from_ms) if fetch_from_ms < now_ms else pd.DataFrame()
         if delisting_ts is not None and not forward.empty:
             forward = forward[pd.to_datetime(forward["timestamp"], utc=True) <= delisting_ts]
         new_frames.append(forward)
+        # Confirmed-unavailable tracking (2026-08-14, user-authorized):
+        # funding never had a manifest at all, unlike OI/perp/spot/
+        # aggTrades -- a symbol whose funding feed genuinely, provably
+        # stops (verified: AGIXUSDT's stored cursor -> a real empty API
+        # response, not the 2026-08-11 phantom-feed bug, which was the
+        # OPPOSITE failure mode) could never be excluded from staleness/
+        # coverage, capping it below what's actually achievable. A
+        # genuinely-empty forward fetch (delisting_ts is None -- that
+        # case is already handled above) is direct proof: nothing exists
+        # from fetch_from_ms to now_ms as of this run. A non-empty result
+        # clears any earlier such claim, since it proves more data exists.
+        if delisting_ts is None and fetch_from_ms < now_ms:
+            manifest_path = OUT / "funding" / f"{sym}_manifest.json"
+            if forward.empty:
+                manifest_path.parent.mkdir(parents=True, exist_ok=True)
+                manifest_path.write_text(json.dumps({
+                    "confirmed_empty_from": pd.Timestamp(fetch_from_ms, unit="ms", tz="UTC").isoformat(),
+                    "confirmed_as_of": pd.Timestamp(now_ms, unit="ms", tz="UTC").isoformat(),
+                }))
+            elif manifest_path.exists():
+                manifest_path.unlink()
 
     new = pd.concat(new_frames, ignore_index=True) if new_frames else pd.DataFrame()
     return merge_funding(existing, new)
