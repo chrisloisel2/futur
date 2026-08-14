@@ -77,6 +77,7 @@ def _baseline_frame(n: int, seed: int = 0) -> pd.DataFrame:
         "signed_volume": rng.normal(0, 1000, n),
         "CVD": rng.normal(0, 1000, n).cumsum(),
         "funding_rate": rng.normal(0, 0.0001, n),
+        "funding_rate_percentile_90d": rng.uniform(0.1, 0.6, n),  # never accidentally >= 0.90
         "basis": rng.normal(0, 0.0005, n),
         "basis_z_1d": rng.normal(0, 0.5, n),
         "basis_z_7d": rng.normal(0, 0.5, n),
@@ -341,12 +342,13 @@ def test_detect_crowding_fires_when_flow_confirms_crowded_side():
     df = _baseline_frame(2000, seed=4)
     trigger_idx = 1800
     df.loc[trigger_idx, "funding_rate"] = 0.01  # extreme positive (longs pay)
+    df.loc[trigger_idx, "funding_rate_percentile_90d"] = 0.95  # >= P90 among real settlements
     df.loc[trigger_idx, "basis_z_1d"] = 3.0
     df.loc[trigger_idx, "oi_delta_pct_1h"] = 0.05
     df.loc[trigger_idx, "aggressive_buy_usd"] = 1_000_000  # buying INTO the crowded long side
     df.loc[trigger_idx, "aggressive_sell_usd"] = 1000
 
-    result = detect_crowding(df, symbol="FOOUSDT", min_periods_override=20)
+    result = detect_crowding(df, symbol="FOOUSDT")
     assert len(result.events) >= 1
     assert result.events["crowded_side"].iloc[0] == "long"
 
@@ -355,12 +357,33 @@ def test_detect_crowding_silent_when_flow_fades_not_confirms():
     df = _baseline_frame(2000, seed=5)
     trigger_idx = 1800
     df.loc[trigger_idx, "funding_rate"] = 0.01
+    df.loc[trigger_idx, "funding_rate_percentile_90d"] = 0.95
     df.loc[trigger_idx, "basis_z_1d"] = 3.0
     df.loc[trigger_idx, "oi_delta_pct_1h"] = 0.05
     df.loc[trigger_idx, "aggressive_buy_usd"] = 1000  # SELLING into a crowded long -> fading, not confirming
     df.loc[trigger_idx, "aggressive_sell_usd"] = 1_000_000
 
-    result = detect_crowding(df, symbol="FOOUSDT", min_periods_override=20)
+    result = detect_crowding(df, symbol="FOOUSDT")
+    assert len(result.events) == 0
+
+
+def test_detect_crowding_silent_when_funding_extreme_bar_wise_but_not_settlement_wise():
+    """The exact bug from external review: a bar could have an extreme raw
+    funding_rate yet NOT be extreme among real settlements (e.g. it's a
+    forward-filled repeat of an old, unremarkable settlement while a
+    genuinely rare settlement happened long ago) -- CROWDING must follow
+    funding_rate_percentile_90d, never re-derive extremity from the raw
+    rate itself."""
+    df = _baseline_frame(2000, seed=6)
+    trigger_idx = 1800
+    df.loc[trigger_idx, "funding_rate"] = 0.01  # would look extreme if ranked bar-wise
+    df.loc[trigger_idx, "funding_rate_percentile_90d"] = 0.5  # but NOT extreme among real settlements
+    df.loc[trigger_idx, "basis_z_1d"] = 3.0
+    df.loc[trigger_idx, "oi_delta_pct_1h"] = 0.05
+    df.loc[trigger_idx, "aggressive_buy_usd"] = 1_000_000
+    df.loc[trigger_idx, "aggressive_sell_usd"] = 1000
+
+    result = detect_crowding(df, symbol="FOOUSDT")
     assert len(result.events) == 0
 
 
@@ -368,12 +391,13 @@ def test_detect_crowding_captures_short_crowded_side():
     df = _baseline_frame(2000, seed=7)
     trigger_idx = 1800
     df.loc[trigger_idx, "funding_rate"] = -0.01  # extreme negative -> shorts crowded
+    df.loc[trigger_idx, "funding_rate_percentile_90d"] = 0.95
     df.loc[trigger_idx, "basis_z_1d"] = -3.0
     df.loc[trigger_idx, "oi_delta_pct_1h"] = 0.05
     df.loc[trigger_idx, "aggressive_sell_usd"] = 1_000_000  # selling INTO the crowded short side
     df.loc[trigger_idx, "aggressive_buy_usd"] = 1000
 
-    result = detect_crowding(df, symbol="FOOUSDT", min_periods_override=20)
+    result = detect_crowding(df, symbol="FOOUSDT")
     assert len(result.events) >= 1
     assert result.events["crowded_side"].iloc[0] == "short"
 
@@ -542,6 +566,55 @@ def test_label_events_sums_nonoverlapping_5m_increments():
     labelled = label_events(events, frame, family="DELEVERAGING")
     expected_1h = np.expm1(0.001 * 12)
     assert labelled["residual_ret_1h"].iloc[0] == pytest.approx(expected_1h, abs=1e-9)
+
+
+def test_label_events_mfe_is_zero_not_negative_for_an_immediately_losing_trade():
+    """Bug found 2026-08-14: without an entry baseline point, a trade that
+    is consistently unfavorable from bar 1 onward computed a NEGATIVE MFE
+    (the best point reached was still a loss) -- but the trader could
+    always have exited flat at entry, so MFE must be 0 here, never
+    negative (protocol invariant: MFE >= 0 always)."""
+    n = 200
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    log_ret = np.zeros(n)
+    event_idx = 50
+    entry_idx = event_idx + 1
+    log_ret[entry_idx : entry_idx + 12] = -0.001  # consistently against the (long) direction, every bar
+    frame = pd.DataFrame({
+        "timestamp": idx, "research_available_at": _research_available_at_exact_close(idx).to_numpy(),
+        "residual_logret_5m": log_ret, "open": np.full(n, 100.0), "close": np.full(n, 100.0),
+    })
+    events = pd.DataFrame({
+        "timestamp": [idx[event_idx]], "research_available_at": [frame.loc[event_idx, "research_available_at"]],
+        "symbol": ["FOOUSDT"],
+    })
+    labelled = label_events(events, frame, family="DELEVERAGING")  # DELEVERAGING is always direction=+1 (long)
+    assert labelled["MFE_1h"].iloc[0] == pytest.approx(0.0, abs=1e-9)
+    assert labelled["MFE_1h"].iloc[0] >= 0.0
+    assert labelled["time_to_MFE_1h"].iloc[0] == 0  # the best point was AT entry, zero minutes elapsed
+
+
+def test_label_events_mae_is_zero_not_positive_for_an_immediately_winning_trade():
+    """Mirror case: a trade consistently favorable from bar 1 onward must
+    have MAE == 0 (the worst point reached was still at/above entry),
+    never positive (protocol invariant: MAE <= 0 always)."""
+    n = 200
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    log_ret = np.zeros(n)
+    event_idx = 50
+    entry_idx = event_idx + 1
+    log_ret[entry_idx : entry_idx + 12] = 0.001  # consistently favorable, every bar
+    frame = pd.DataFrame({
+        "timestamp": idx, "research_available_at": _research_available_at_exact_close(idx).to_numpy(),
+        "residual_logret_5m": log_ret, "open": np.full(n, 100.0), "close": np.full(n, 100.0),
+    })
+    events = pd.DataFrame({
+        "timestamp": [idx[event_idx]], "research_available_at": [frame.loc[event_idx, "research_available_at"]],
+        "symbol": ["FOOUSDT"],
+    })
+    labelled = label_events(events, frame, family="DELEVERAGING")
+    assert labelled["MAE_1h"].iloc[0] == pytest.approx(0.0, abs=1e-9)
+    assert labelled["MAE_1h"].iloc[0] <= 0.0
 
 
 def test_label_events_nan_increment_inside_horizon_yields_nan_not_zero_fill():

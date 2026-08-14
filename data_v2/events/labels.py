@@ -147,11 +147,19 @@ def label_events(
                 path_complete.append(False)
                 continue
             increments = raw_increments * direction
-            path = np.cumsum(increments)
+            # path includes the entry baseline (0.0, the state before any
+            # bar's move) as its own point -- without it, a trade that is
+            # immediately and consistently unfavorable would compute a
+            # NEGATIVE MFE (the best point reached was still a loss) and a
+            # consistently favorable trade a POSITIVE MAE (the worst point
+            # reached was still a gain), both contradicting the protocol's
+            # MFE >= 0 / MAE <= 0 invariant (the trader could always have
+            # exited flat at entry). Bug found 2026-08-14.
+            path = np.concatenate(([0.0], np.cumsum(increments)))
             final_log_ret = path[-1]
             mfe = float(np.expm1(np.max(path)))
             mae = float(np.expm1(np.min(path)))
-            ttm = int(np.argmax(path) + 1) * BAR_MINUTES
+            ttm = int(np.argmax(path)) * BAR_MINUTES
             rets.append(float(np.expm1(final_log_ret))); mfes.append(mfe); maes.append(mae); ttms.append(ttm)
             path_complete.append(True)
         out[f"residual_ret_{label}"] = rets
