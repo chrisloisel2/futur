@@ -372,17 +372,35 @@ def validate_series(
             expected_rows = len(dedup_ts)
         coverage_pct = (actual_rows / expected_rows) if expected_rows else 0.0
 
-    # staleness -- BLOCKING for a still-active (non-delisted) symbol,
-    # measured against `now`, not just left as an informational note.
-    staleness = (now - window_end) if window_end is not None else None
-    staleness_gate_violated = False
-    if delisting_ts is None and staleness is not None:
-        if staleness.total_seconds() / 86400 > staleness_gate_days:
-            staleness_gate_violated = True
-            notes.append(
-                f"BLOCKING staleness: last row {staleness} ago > gate "
-                f"{staleness_gate_days}d and symbol not delisted"
-            )
+    # staleness -- BLOCKING, measured against eff_end (this dataset's own
+    # theoretical bound: `now` for an active daily-cadence source, the
+    # monthly publication watermark for perp/spot, this dataset's own
+    # delisted_end_field for a delisted symbol, or window_end itself for a
+    # confirmed-unavailable trailing gap), not unconditionally against
+    # `now`. Bug found 2026-08-14 (external review): the previous
+    # `now - window_end` computation ignored the effective_expected_end
+    # already being threaded through from build_data_v2_readiness.py,
+    # so a symbol whose trailing gap was already proven confirmed-
+    # unavailable (e.g. AGIXUSDT's spot market, independently delisted
+    # from its still-active perp contract) still failed staleness against
+    # `now` -- exactly the kind of source-structural mismatch the
+    # publication-watermark and delisted-end-field fixes already exist to
+    # prevent, just not yet applied to this specific gate. The
+    # `delisting_ts is None` special case is no longer needed: eff_end
+    # already resolves to the correct bound in every case, delisted or
+    # not, so this gate now applies uniformly.
+    if eff_end is not None and window_end is not None:
+        staleness = max(pd.Timedelta(0), eff_end - window_end)
+    else:
+        staleness = None
+    staleness_gate_violated = (
+        staleness is not None and staleness.total_seconds() / 86400 > staleness_gate_days
+    )
+    if staleness_gate_violated:
+        notes.append(
+            f"BLOCKING staleness: last row {staleness} behind eff_end "
+            f"({eff_end}) > gate {staleness_gate_days}d"
+        )
 
     return ValidationReport(
         symbol=symbol,

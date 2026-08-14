@@ -196,6 +196,45 @@ def test_validator_delisted_symbol_is_not_penalized_for_staleness():
     assert not report.staleness_gate_violated  # delisted -- no data after delisting is expected, not "stale"
 
 
+def test_validator_staleness_measured_against_explicit_expected_end_not_now():
+    """Bug found 2026-08-14 (external review): staleness used to be
+    `now - window_end` unconditionally for a non-delisted symbol, ignoring
+    any explicit `expected_end` the caller passed in (e.g. a confirmed-
+    unavailable trailing bound, or a monthly publication watermark). A
+    symbol whose data is proven complete up to its own real theoretical
+    bound must never be flagged stale just because `now` has since moved
+    far past that bound -- the exact AGIXUSDT spot case (confirmed
+    stopped 2024-07, `now` in 2026-08)."""
+    df = _make_5m_series(5)
+    window_end = df["create_time"].max()
+    im = pd.DataFrame([{"symbol": "AGIXUSDT", "listing_ts": pd.Timestamp("2023-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    far_future_now = pd.Timestamp("2026-01-01", tz="UTC")  # ~2 years after window_end
+    report = validate_series(
+        df, symbol="AGIXUSDT", timestamp_col="create_time", bar_seconds=300,
+        instrument_master=im, now=far_future_now, staleness_gate_days=3.0,
+        expected_end=window_end,  # e.g. a confirmed-unavailable trailing bound
+    )
+    assert not report.staleness_gate_violated
+    assert report.staleness == pd.Timedelta(0)
+
+
+def test_validator_staleness_still_catches_a_genuine_gap_against_expected_end():
+    """The explicit-expected_end path must still catch a REAL gap: data
+    that falls meaningfully short of even the (non-`now`) theoretical
+    bound the caller passed in."""
+    df = _make_5m_series(5)
+    im = pd.DataFrame([{"symbol": "AGIXUSDT", "listing_ts": pd.Timestamp("2023-01-01", tz="UTC"), "delisting_ts": pd.NaT}])
+    far_future_now = pd.Timestamp("2026-01-01", tz="UTC")
+    genuinely_later_bound = df["create_time"].max() + pd.Timedelta(days=30)
+    report = validate_series(
+        df, symbol="AGIXUSDT", timestamp_col="create_time", bar_seconds=300,
+        instrument_master=im, now=far_future_now, staleness_gate_days=3.0,
+        expected_end=genuinely_later_bound,
+    )
+    assert report.staleness_gate_violated
+    assert report.staleness == pd.Timedelta(days=30)
+
+
 def test_validator_fails_on_short_recent_slice_of_long_expected_history():
     """The literal scenario this fix targets: a registry could show
     status=PASS for e.g. an OI REST file with ~500 rows spanning 2026-07-01
