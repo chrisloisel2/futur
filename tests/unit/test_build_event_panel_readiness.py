@@ -106,6 +106,24 @@ def test_causality_violation_detected(env):
     assert report["EVENT_PANEL_READY"] is False
 
 
+def test_gap_row_with_old_carried_forward_funding_is_not_a_causality_violation(env):
+    """Bug found 2026-08-14: a gap row (no real perp bar, close=NaN) that
+    only carries a funding rate forward from weeks ago legitimately has
+    research_available_at far BEFORE its own label timestamp -- that is
+    the correct, causal representation of 'nothing new happened at this
+    bar', not a leak. An earlier version of the check applied
+    unconditionally and flagged 19,287 such rows across 5 real symbols."""
+    idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC")
+    df = _panel_rows(idx, "FOOUSDT")
+    df.loc[5, "close"] = float("nan")  # no real market event at this bar
+    df.loc[5, "open"] = float("nan")
+    df.loc[5, "research_available_at"] = df.loc[5, "timestamp"] - pd.Timedelta(days=30)  # old carried-forward funding
+    _write_panel(env / "panel", "FOOUSDT", df)
+    report = bpr.build()
+    assert report["gate_values"]["causality_violations"] == 0
+    assert report["hard_gates"]["causality_violations"] is True
+
+
 def test_irregular_grid_detected(env):
     idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC").delete(5)  # a missing row means an unexplained gap here
     _write_panel(env / "panel", "FOOUSDT", _panel_rows(idx, "FOOUSDT"))

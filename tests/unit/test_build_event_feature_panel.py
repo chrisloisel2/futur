@@ -340,6 +340,27 @@ def test_built_panel_conforms_to_the_event_scanner_schema(env):
     validate_schema(panel)  # must not raise
 
 
+def test_residual_return_1h_requires_the_full_60_day_warmup_not_20_bars(env):
+    """Bug found 2026-08-14: compute_residual_returns' own default
+    min_periods (BETA_MIN_PERIODS=20, documented in residuals.py as a
+    test-only shortcut) was silently inherited by this production call
+    site, so residual_return_1h started populating after ~100 minutes
+    instead of a full 60-day warmup -- contradicting the mission's
+    "full warmup required, never a premature value" rule. The panel
+    builder must pass an explicit full-window min_periods."""
+    n = 60 * 288 + 500  # a bit more than 60 days of 5m bars
+    idx = pd.date_range("2024-01-01", periods=n, freq="5min", tz="UTC")
+    _write_perp(env / "perp", "FOOUSDT", _perp_rows(idx))
+    btc, eth = _btc_eth_close(idx)
+    panel = bep.build_symbol_panel("FOOUSDT", btc_close=btc, eth_close=eth, now=NOW)
+
+    warmup_bars = 60 * 288
+    early = panel.iloc[: int(warmup_bars * 0.9)]
+    assert early["residual_return_1h"].isna().all()  # no beta computed yet -- genuinely unavailable, not fabricated
+    later = panel.iloc[warmup_bars:]
+    assert later["residual_return_1h"].notna().any()  # warmup eventually completes and residuals populate
+
+
 def test_no_perp_data_returns_none(env):
     idx = pd.date_range("2024-01-01", periods=10, freq="5min", tz="UTC")
     btc, eth = _btc_eth_close(idx)

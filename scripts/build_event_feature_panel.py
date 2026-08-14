@@ -101,7 +101,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from data_v2.temporal.available_at import add_temporal_columns  # noqa: E402
-from data_v2.events.residuals import compute_residual_returns, BTC_SYMBOL, ETH_SYMBOL  # noqa: E402
+from data_v2.events.residuals import (  # noqa: E402
+    compute_residual_returns, BETA_WINDOW_BARS, BTC_SYMBOL, ETH_SYMBOL,
+)
 from data_v2.validation.manifest_gaps import load_oi, load_funding, load_year_partitioned  # noqa: E402
 from src.institutional.data.atomic_parquet import atomic_write_parquet  # noqa: E402
 
@@ -264,7 +266,18 @@ def build_symbol_panel(symbol: str, *, btc_close: pd.Series, eth_close: pd.Serie
 
     close_reindexed = perp_g["close"]
     close_by_symbol = {BTC_SYMBOL: btc_close.reindex(grid), ETH_SYMBOL: eth_close.reindex(grid), symbol: close_reindexed}
-    residuals = compute_residual_returns(close_by_symbol)[symbol]
+    # min_periods=BETA_WINDOW_BARS (the FULL 60d window), not
+    # compute_residual_returns' own default (BETA_MIN_PERIODS=20 bars,
+    # explicitly documented in residuals.py as a test-only shortcut "small
+    # enough to be testable on short synthetic panels"). Bug found
+    # 2026-08-14: this panel had inherited that default, so
+    # residual_return_1h/_15m started populating after ~100 minutes of
+    # history instead of a full 60-day warmup -- directly contradicting
+    # the mission's "warmup complet requis, jamais une valeur prématurée"
+    # rule (section 12). residuals.py itself is untouched (its own tests
+    # still get the fast default); only this production call site now
+    # requires the real full window.
+    residuals = compute_residual_returns(close_by_symbol, min_periods=BETA_WINDOW_BARS)[symbol]
 
     row_ra = pd.concat([perp_ra, basis_ra, oi_ra, flow_ra, funding_ra], axis=1).max(axis=1, skipna=True)
 

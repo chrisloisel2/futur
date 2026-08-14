@@ -91,7 +91,20 @@ def _load_symbol_panel(symbol: str) -> Optional[pd.DataFrame]:
 def _check_symbol(symbol: str, df: pd.DataFrame, im: pd.DataFrame) -> dict:
     n = len(df)
     dup = int(df.duplicated(subset=["symbol", "timestamp"], keep=False).sum())
-    causality_violations = int((df["research_available_at"] < df["timestamp"]).sum())
+    # research_available_at < timestamp is only a real causality problem
+    # for a row whose OWN market event actually happened at that bar (a
+    # real perp close) -- "can't know this bar before it happens". A gap
+    # row (no perp bar, close is NaN) carries only an OLDER value forward
+    # (e.g. a funding rate from weeks ago, per section 11's causal
+    # forward-fill) -- its research_available_at correctly PREDATES the
+    # row's own label timestamp, and that is expected, not a leak. Bug
+    # found 2026-08-14: an earlier version of this check applied
+    # unconditionally, flagging 19,287 real, correct funding-carry-forward
+    # gap rows across 5 symbols as violations.
+    has_market_event = df["close"].notna()
+    causality_violations = int(
+        (has_market_event & (df["research_available_at"] < df["timestamp"])).sum()
+    )
 
     ts = pd.to_datetime(df["timestamp"], utc=True)
     diffs = ts.diff().dropna()
