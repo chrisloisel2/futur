@@ -1,0 +1,314 @@
+{
+  "generated_at": "2026-08-14 23:24:42.408382+00:00",
+  "source_readiness_generated_at": "2026-08-14 22:22:15.568062+00:00",
+  "n_fails_audited": 5,
+  "gate": ">= 99%",
+  "audits": [
+    {
+      "symbol": "AIAUSDT",
+      "fail_reasons": [
+        "COVERAGE"
+      ],
+      "expected_start": "2025-09-18 00:00:00+00:00",
+      "expected_end": "2026-08-14 22:22:15.568062+00:00",
+      "actual_start": "2025-09-18 08:00:00.002000+00:00",
+      "actual_end": "2026-08-14 16:00:00.001000+00:00",
+      "coverage_pct": 0.8808,
+      "max_gap_minutes": 57300.0,
+      "staleness_days": 0.2654579521064815,
+      "first_perp_kline_ts": "2025-09-18 00:00:00+00:00",
+      "first_funding_ts": "2025-09-18 08:00:00.002000+00:00",
+      "last_funding_ts": "2026-08-14 16:00:00.001000+00:00",
+      "delisting_ts": null,
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": "True",
+      "biggest_gaps_on_disk": [
+        {
+          "gap_start": "2025-12-11 12:00:00+00:00",
+          "gap_end": "2026-01-20 07:00:00+00:00",
+          "gap_days": 39.791666666666664
+        },
+        {
+          "gap_start": "2026-06-24 00:00:00.005000+00:00",
+          "gap_end": "2026-06-24 08:00:00.005000+00:00",
+          "gap_days": 0.3333333333333333
+        },
+        {
+          "gap_start": "2026-02-07 00:00:00.003000+00:00",
+          "gap_end": "2026-02-07 04:00:00.024000+00:00",
+          "gap_days": 0.16666690972222223
+        },
+        {
+          "gap_start": "2025-09-18 00:00:00+00:00",
+          "gap_end": "2025-09-18 08:00:00.002000+00:00",
+          "gap_days": 0.3333333564814815,
+          "kind": "prefix"
+        },
+        {
+          "gap_start": "2026-08-14 16:00:00.001000+00:00",
+          "gap_end": "2026-08-14 22:22:15.568062+00:00",
+          "gap_days": 0.2654579521064815,
+          "kind": "suffix"
+        }
+      ],
+      "live_probe": [
+        {
+          "window": {
+            "gap_start": "2025-12-11 12:00:00+00:00",
+            "gap_end": "2026-01-20 07:00:00+00:00",
+            "gap_days": 39.791666666666664
+          },
+          "n_live_records": 0,
+          "sanity_checked_against_btcusdt": true
+        }
+      ],
+      "classification": "SOURCE_UNAVAILABLE",
+      "notes": [
+        "Live endpoint returns zero records for the gap window(s), while BTCUSDT (known continuously funded) returns real records over the same era -- rules out a retention cutoff. Funding settlements genuinely did not exist for this symbol/window."
+      ]
+    },
+    {
+      "symbol": "BTTUSDT",
+      "fail_reasons": [
+        "COVERAGE"
+      ],
+      "expected_start": "2021-04-06 00:00:00+00:00",
+      "expected_end": "2022-01-28 08:00:00+00:00",
+      "actual_start": "2020-09-14 16:00:00+00:00",
+      "actual_end": "2022-01-28 08:00:00+00:00",
+      "coverage_pct": 0.4888,
+      "max_gap_minutes": 219359.99971666664,
+      "staleness_days": 0.0,
+      "first_perp_kline_ts": "2021-04-06 00:00:00+00:00",
+      "first_funding_ts": "2020-09-14 16:00:00+00:00",
+      "last_funding_ts": "2022-01-28 08:00:00+00:00",
+      "delisting_ts": "2022-01-28 08:00:00+00:00",
+      "listing_ts_source": "first_funding_ts",
+      "metadata_conflict": "True",
+      "biggest_gaps_on_disk": [
+        {
+          "gap_start": "2020-11-05 00:00:00.017000+00:00",
+          "gap_end": "2021-04-06 08:00:00+00:00",
+          "gap_days": 152.33333313657405
+        },
+        {
+          "gap_start": "2021-09-17 00:00:00+00:00",
+          "gap_end": "2021-09-17 08:00:00.047000+00:00",
+          "gap_days": 0.3333338773148148
+        },
+        {
+          "gap_start": "2021-07-26 16:00:00+00:00",
+          "gap_end": "2021-07-27 00:00:00.046000+00:00",
+          "gap_days": 0.3333338657407407
+        }
+      ],
+      "live_probe": [
+        {
+          "window": {
+            "gap_start": "2020-11-05 00:00:00.017000+00:00",
+            "gap_end": "2021-04-06 08:00:00+00:00",
+            "gap_days": 152.33333313657405
+          },
+          "n_live_records": 0,
+          "sanity_checked_against_btcusdt": true
+        }
+      ],
+      "classification": "SOURCE_UNAVAILABLE",
+      "notes": [
+        "Live endpoint returns zero records for the gap window(s), while BTCUSDT (known continuously funded) returns real records over the same era -- rules out a retention cutoff. Funding settlements genuinely did not exist for this symbol/window."
+      ]
+    },
+    {
+      "symbol": "LITUSDT",
+      "fail_reasons": [
+        "COVERAGE"
+      ],
+      "expected_start": "2021-02-18 00:00:00+00:00",
+      "expected_end": "2026-08-14 22:22:15.568062+00:00",
+      "actual_start": "2025-12-23 20:00:00.005000+00:00",
+      "actual_end": "2026-08-14 16:00:00.001000+00:00",
+      "coverage_pct": 0.117,
+      "max_gap_minutes": 480.0,
+      "staleness_days": 0.2654579521064815,
+      "first_perp_kline_ts": "2021-02-18 00:00:00+00:00",
+      "first_funding_ts": "2025-12-23 20:00:00.005000+00:00",
+      "last_funding_ts": "2026-08-14 16:00:00.001000+00:00",
+      "delisting_ts": null,
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": "True",
+      "biggest_gaps_on_disk": [
+        {
+          "gap_start": "2026-06-24 00:00:00.005000+00:00",
+          "gap_end": "2026-06-24 08:00:00.005000+00:00",
+          "gap_days": 0.3333333333333333
+        },
+        {
+          "gap_start": "2026-02-07 00:00:00.003000+00:00",
+          "gap_end": "2026-02-07 04:00:00.024000+00:00",
+          "gap_days": 0.16666690972222223
+        },
+        {
+          "gap_start": "2026-05-20 16:00:00+00:00",
+          "gap_end": "2026-05-20 20:00:00.019000+00:00",
+          "gap_days": 0.16666688657407408
+        },
+        {
+          "gap_start": "2021-02-18 00:00:00+00:00",
+          "gap_end": "2025-12-23 20:00:00.005000+00:00",
+          "gap_days": 1769.8333333912037,
+          "kind": "prefix"
+        },
+        {
+          "gap_start": "2026-08-14 16:00:00.001000+00:00",
+          "gap_end": "2026-08-14 22:22:15.568062+00:00",
+          "gap_days": 0.2654579521064815,
+          "kind": "suffix"
+        }
+      ],
+      "live_probe": [
+        {
+          "window": {
+            "gap_start": "2021-02-18 00:00:00+00:00",
+            "gap_end": "2025-12-23 20:00:00.005000+00:00",
+            "gap_days": 1769.8333333912037,
+            "kind": "prefix"
+          },
+          "n_live_records": 0,
+          "sanity_checked_against_btcusdt": true
+        }
+      ],
+      "classification": "SOURCE_UNAVAILABLE",
+      "notes": [
+        "Live endpoint returns zero records for the gap window(s), while BTCUSDT (known continuously funded) returns real records over the same era -- rules out a retention cutoff. Funding settlements genuinely did not exist for this symbol/window."
+      ]
+    },
+    {
+      "symbol": "PUMPUSDT",
+      "fail_reasons": [
+        "COVERAGE"
+      ],
+      "expected_start": "2025-04-12 00:00:00+00:00",
+      "expected_end": "2026-08-14 22:22:15.568062+00:00",
+      "actual_start": "2025-04-12 16:00:00+00:00",
+      "actual_end": "2026-08-14 16:00:00.001000+00:00",
+      "coverage_pct": 0.9571,
+      "max_gap_minutes": 30239.99995,
+      "staleness_days": 0.2654579521064815,
+      "first_perp_kline_ts": "2025-04-12 00:00:00+00:00",
+      "first_funding_ts": "2025-04-12 16:00:00+00:00",
+      "last_funding_ts": "2026-08-14 16:00:00.001000+00:00",
+      "delisting_ts": null,
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": "True",
+      "biggest_gaps_on_disk": [
+        {
+          "gap_start": "2025-06-19 08:00:00.003000+00:00",
+          "gap_end": "2025-07-10 08:00:00+00:00",
+          "gap_days": 20.999999965277777
+        },
+        {
+          "gap_start": "2026-06-24 00:00:00.005000+00:00",
+          "gap_end": "2026-06-24 08:00:00.005000+00:00",
+          "gap_days": 0.3333333333333333
+        },
+        {
+          "gap_start": "2026-02-07 00:00:00.003000+00:00",
+          "gap_end": "2026-02-07 04:00:00.024000+00:00",
+          "gap_days": 0.16666690972222223
+        },
+        {
+          "gap_start": "2025-04-12 00:00:00+00:00",
+          "gap_end": "2025-04-12 16:00:00+00:00",
+          "gap_days": 0.6666666666666666,
+          "kind": "prefix"
+        },
+        {
+          "gap_start": "2026-08-14 16:00:00.001000+00:00",
+          "gap_end": "2026-08-14 22:22:15.568062+00:00",
+          "gap_days": 0.2654579521064815,
+          "kind": "suffix"
+        }
+      ],
+      "live_probe": [
+        {
+          "window": {
+            "gap_start": "2025-06-19 08:00:00.003000+00:00",
+            "gap_end": "2025-07-10 08:00:00+00:00",
+            "gap_days": 20.999999965277777
+          },
+          "n_live_records": 0,
+          "sanity_checked_against_btcusdt": true
+        }
+      ],
+      "classification": "SOURCE_UNAVAILABLE",
+      "notes": [
+        "Live endpoint returns zero records for the gap window(s), while BTCUSDT (known continuously funded) returns real records over the same era -- rules out a retention cutoff. Funding settlements genuinely did not exist for this symbol/window."
+      ]
+    },
+    {
+      "symbol": "SXPUSDT",
+      "fail_reasons": [
+        "COVERAGE"
+      ],
+      "expected_start": "2020-07-21 00:00:00+00:00",
+      "expected_end": "2026-07-22 00:00:00+00:00",
+      "actual_start": "2020-07-21 08:00:00.001000+00:00",
+      "actual_end": "2026-07-22 00:00:00+00:00",
+      "coverage_pct": 0.9185,
+      "max_gap_minutes": 257760.0,
+      "staleness_days": 0.0,
+      "first_perp_kline_ts": "2020-07-21 00:00:00+00:00",
+      "first_funding_ts": "2020-07-21 08:00:00.001000+00:00",
+      "last_funding_ts": "2026-07-22 00:00:00+00:00",
+      "delisting_ts": "2026-07-22 00:00:00+00:00",
+      "listing_ts_source": "first_perp_kline_ts",
+      "metadata_conflict": "False",
+      "biggest_gaps_on_disk": [
+        {
+          "gap_start": "2025-12-05 08:00:00+00:00",
+          "gap_end": "2026-06-02 08:00:00+00:00",
+          "gap_days": 179.0
+        },
+        {
+          "gap_start": "2021-09-17 00:00:00+00:00",
+          "gap_end": "2021-09-17 08:00:00.047000+00:00",
+          "gap_days": 0.3333338773148148
+        },
+        {
+          "gap_start": "2021-07-26 16:00:00+00:00",
+          "gap_end": "2021-07-27 00:00:00.046000+00:00",
+          "gap_days": 0.3333338657407407
+        },
+        {
+          "gap_start": "2020-07-21 00:00:00+00:00",
+          "gap_end": "2020-07-21 08:00:00.001000+00:00",
+          "gap_days": 0.3333333449074074,
+          "kind": "prefix"
+        }
+      ],
+      "live_probe": [
+        {
+          "window": {
+            "gap_start": "2025-12-05 08:00:00+00:00",
+            "gap_end": "2026-06-02 08:00:00+00:00",
+            "gap_days": 179.0
+          },
+          "n_live_records": 0,
+          "sanity_checked_against_btcusdt": true
+        }
+      ],
+      "classification": "SOURCE_UNAVAILABLE",
+      "notes": [
+        "Live endpoint returns zero records for the gap window(s), while BTCUSDT (known continuously funded) returns real records over the same era -- rules out a retention cutoff. Funding settlements genuinely did not exist for this symbol/window."
+      ]
+    }
+  ],
+  "classification_summary": {
+    "FETCHABLE": 0,
+    "SOURCE_UNAVAILABLE": 5,
+    "NOT_APPLICABLE": 0,
+    "BOUNDARY_BUG": 0,
+    "TRUE_INSUFFICIENT_DATA": 0
+  },
+  "conclusion": "no gate change; no fill; every failure's precise on-disk gap window was probed exclusive-of-boundary against the live Binance fundingRate endpoint and cross-checked against BTCUSDT over the same era to rule out an endpoint retention artifact -- 0 fetchable, 0 boundary bugs found; the shortfall is genuine and is accepted as-is"
+}
