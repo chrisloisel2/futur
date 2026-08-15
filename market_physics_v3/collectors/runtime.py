@@ -32,6 +32,7 @@ class CollectorHealth:
         self.stopped_ns = 0
         self.clean_shutdown = False
         self.connected = False
+        self._active_connections = set()
         self.reconnects = 0
         self.messages = 0
         self.events = 0
@@ -61,6 +62,14 @@ class CollectorHealth:
         self.book_bootstrap_buffer_resets = 0
         self.book_bootstrapped_symbols = set()
         self.last_book_bootstrap_exception = None
+
+    def connection_open(self, name: str) -> None:
+        self._active_connections.add(str(name))
+        self.connected = True
+
+    def connection_close(self, name: str) -> None:
+        self._active_connections.discard(str(name))
+        self.connected = bool(self._active_connections)
 
     def observe_event(self, event) -> None:
         self.events += 1
@@ -103,6 +112,7 @@ class CollectorHealth:
             "stopped_ns": self.stopped_ns,
             "clean_shutdown": self.clean_shutdown,
             "connected": self.connected,
+            "active_connections": sorted(self._active_connections),
             "reconnects": self.reconnects,
             "messages": self.messages,
             "events": self.events,
@@ -193,16 +203,317 @@ def _restart_binance_snapshot(binance_snapshots, symbol, health, error=None):
     )
 
 
-async def run_venue(
-    venue: str,
-    symbols: Iterable[str],
-    root: str = "data/market_physics_v3",
-    health_dir: str = "reports/market_physics_v3/health",
-    max_backoff_s: float = 30.0,
-    fresh_event_max_lag_ms: float = DEFAULT_FRESH_EVENT_MAX_LAG_MS,
-) -> None:
+def _observe_and_write(events, writer, health):
+    for event in events:
+        writer.append(event)
+        health.observe_event(event)
+
+
+async def _run_standard_connection(
+    venue,
+    spec,
+    parser,
+    writer,
+    raw_writer,
+    health,
+    health_path,
+    max_backoff_s,
+):
+    import websockets
+
+    backoff = 1.0
+    while True:
+        state = BookDeltaState()
+        heartbeat_stop = asyncio.Event()
+        connection_name = "main"
+        try:
+            async with websockets.connect(
+                spec["url"],
+                ping_interval=None if venue in {"bybit", "okx", "hyperliquid"} else 20,
+                ping_timeout=20,
+                close_timeout=10,
+                max_queue=8192,
+            ) as ws:
+                connection_id = "%s-%s" % (venue, time.time_ns())
+                health.connection_open(connection_name)
+                health.clean_shutdown = False
+                health.stopped_ns = 0
+                health.last_exception = None
+                _write_health(health_path, health)
+                if "subscribe" in spec:
+                    await ws.send(json.dumps(spec["subscribe"]))
+                else:
+                    for subscription in spec.get("subscribe_many", []):
+                        await ws.send(json.dumps(subscription))
+                hb = asyncio.create_task(_heartbeat(ws, venue, heartbeat_stop))
+                backoff = 1.0
+                try:
+                    async for raw in ws:
+                        receive_ns = time.time_ns()
+                        health.messages += 1
+                        health.last_receive_ns = receive_ns
+                        if raw == "pong":
+                            continue
+                        parsed = None
+                        try:
+                            parsed = json.loads(raw)
+                            raw_writer.append(venue, receive_ns, parsed, connection_id)
+                            control = _control_status(venue, parsed)
+                            if control == "ack":
+                                health.subscription_acks += 1
+                            elif control == "error":
+                                health.subscription_errors += 1
+                            _observe_and_write(parser(parsed, receive_ns, state), writer, health)
+                        except SequenceGap as exc:
+                            health.parse_errors += 1
+                            health.sequence_gaps += 1
+                            health.last_exception = str(exc)
+                            raw_writer.dead_letter(venue, receive_ns, parsed if parsed is not None else raw, exc)
+                            raise
+                        except Exception as exc:
+                            health.parse_errors += 1
+                            health.last_exception = str(exc)
+                            raw_writer.dead_letter(venue, receive_ns, parsed if parsed is not None else raw, exc)
+                        if health.messages % 100 == 0:
+                            _write_health(health_path, health)
+                finally:
+                    heartbeat_stop.set()
+                    hb.cancel()
+                    health.connection_close(connection_name)
+                    _write_health(health_path, health)
+        except asyncio.CancelledError:
+            health.connection_close(connection_name)
+            raise
+        except Exception as exc:
+            health.connection_close(connection_name)
+            health.reconnects += 1
+            health.last_exception = str(exc)
+            _write_health(health_path, health)
+            await asyncio.sleep(backoff + random.random() * min(1.0, backoff * 0.1))
+            backoff = min(max_backoff_s, backoff * 2.0)
+
+
+async def _run_binance_public_connection(
+    spec,
+    symbols,
+    writer,
+    raw_writer,
+    health,
+    health_path,
+    max_backoff_s,
+):
+    import websockets
+
+    parser = PARSERS["binance"]
+    backoff = 1.0
+    connection_name = "public"
+    while True:
+        state = BookDeltaState()
+        heartbeat_stop = asyncio.Event()
+        try:
+            async with websockets.connect(
+                spec["url"], ping_interval=20, ping_timeout=20,
+                close_timeout=10, max_queue=8192,
+            ) as ws:
+                connection_id = "binance-public-%s" % time.time_ns()
+                health.connection_open(connection_name)
+                health.clean_shutdown = False
+                health.stopped_ns = 0
+                health.last_exception = None
+                _write_health(health_path, health)
+                await ws.send(json.dumps(spec["subscribe"]))
+
+                loop = asyncio.get_running_loop()
+                buffers = {symbol: [] for symbol in symbols}
+                snapshots = {symbol: _start_binance_snapshot_future(loop, symbol) for symbol in symbols}
+                ready = set()
+
+                hb = asyncio.create_task(_heartbeat(ws, "binance", heartbeat_stop))
+                backoff = 1.0
+                try:
+                    async for raw in ws:
+                        receive_ns = time.time_ns()
+                        health.messages += 1
+                        health.last_receive_ns = receive_ns
+                        parsed = None
+                        try:
+                            parsed = json.loads(raw)
+                            raw_writer.append("binance", receive_ns, parsed, connection_id)
+                            control = _control_status("binance", parsed)
+                            if control == "ack":
+                                health.subscription_acks += 1
+                            elif control == "error":
+                                health.subscription_errors += 1
+
+                            if parsed.get("e") == "depthUpdate":
+                                symbol = canonical_symbol(parsed["s"])
+                                if symbol not in ready:
+                                    buffer = buffers.setdefault(symbol, [])
+                                    buffer.append(BufferedDepthMessage(receive_ns, parsed))
+                                    if len(buffer) > BINANCE_MAX_BUFFER_MESSAGES:
+                                        health.book_bootstrap_buffer_resets += 1
+                                        buffers[symbol] = []
+                                        _restart_binance_snapshot(snapshots, symbol, health, "bootstrap buffer limit exceeded")
+                                        continue
+                                    future = snapshots.get(symbol)
+                                    if future is not None and future.done():
+                                        try:
+                                            snapshot = future.result()
+                                        except Exception as exc:
+                                            _restart_binance_snapshot(snapshots, symbol, health, exc)
+                                            continue
+                                        try:
+                                            bootstrap_events = normalized_bootstrap_events(snapshot, buffers[symbol], state)
+                                        except BinanceBootstrapError as exc:
+                                            if _buffer_all_below_snapshot(snapshot, buffers[symbol]):
+                                                continue
+                                            health.book_bootstrap_buffer_resets += 1
+                                            buffers[symbol] = []
+                                            _restart_binance_snapshot(snapshots, symbol, health, exc)
+                                            continue
+                                        raw_writer.append(
+                                            "binance", snapshot.receive_ts_ns,
+                                            {"_source":"rest_depth_snapshot","symbol":symbol,"payload":snapshot.raw},
+                                            connection_id,
+                                        )
+                                        _observe_and_write(bootstrap_events, writer, health)
+                                        health.book_bootstrap_successes += 1
+                                        health.book_bootstrapped_symbols.add(symbol)
+                                        health.last_book_bootstrap_exception = None
+                                        ready.add(symbol)
+                                        buffers[symbol] = []
+                                    continue
+
+                            _observe_and_write(parser(parsed, receive_ns, state), writer, health)
+                        except SequenceGap as exc:
+                            health.parse_errors += 1
+                            health.sequence_gaps += 1
+                            health.last_exception = str(exc)
+                            raw_writer.dead_letter("binance", receive_ns, parsed if parsed is not None else raw, exc)
+                            raise
+                        except Exception as exc:
+                            health.parse_errors += 1
+                            health.last_exception = str(exc)
+                            raw_writer.dead_letter("binance", receive_ns, parsed if parsed is not None else raw, exc)
+                        if health.messages % 100 == 0:
+                            _write_health(health_path, health)
+                finally:
+                    heartbeat_stop.set()
+                    hb.cancel()
+                    health.connection_close(connection_name)
+                    _write_health(health_path, health)
+        except asyncio.CancelledError:
+            health.connection_close(connection_name)
+            raise
+        except Exception as exc:
+            health.connection_close(connection_name)
+            health.reconnects += 1
+            health.last_exception = str(exc)
+            _write_health(health_path, health)
+            await asyncio.sleep(backoff + random.random() * min(1.0, backoff * 0.1))
+            backoff = min(max_backoff_s, backoff * 2.0)
+
+
+async def _run_binance_market_connection(
+    spec,
+    writer,
+    raw_writer,
+    health,
+    health_path,
+    max_backoff_s,
+):
+    import websockets
+
+    parser = PARSERS["binance"]
+    backoff = 1.0
+    connection_name = "market"
+    while True:
+        state = BookDeltaState()
+        heartbeat_stop = asyncio.Event()
+        try:
+            async with websockets.connect(
+                spec["url"], ping_interval=20, ping_timeout=20,
+                close_timeout=10, max_queue=8192,
+            ) as ws:
+                connection_id = "binance-market-%s" % time.time_ns()
+                health.connection_open(connection_name)
+                health.clean_shutdown = False
+                health.stopped_ns = 0
+                health.last_exception = None
+                _write_health(health_path, health)
+                await ws.send(json.dumps(spec["subscribe"]))
+                hb = asyncio.create_task(_heartbeat(ws, "binance", heartbeat_stop))
+                backoff = 1.0
+                try:
+                    async for raw in ws:
+                        receive_ns = time.time_ns()
+                        health.messages += 1
+                        health.last_receive_ns = receive_ns
+                        parsed = None
+                        try:
+                            parsed = json.loads(raw)
+                            raw_writer.append("binance", receive_ns, parsed, connection_id)
+                            control = _control_status("binance", parsed)
+                            if control == "ack":
+                                health.subscription_acks += 1
+                            elif control == "error":
+                                health.subscription_errors += 1
+                            _observe_and_write(parser(parsed, receive_ns, state), writer, health)
+                        except Exception as exc:
+                            health.parse_errors += 1
+                            health.last_exception = str(exc)
+                            raw_writer.dead_letter("binance", receive_ns, parsed if parsed is not None else raw, exc)
+                        if health.messages % 100 == 0:
+                            _write_health(health_path, health)
+                finally:
+                    heartbeat_stop.set()
+                    hb.cancel()
+                    health.connection_close(connection_name)
+                    _write_health(health_path, health)
+        except asyncio.CancelledError:
+            health.connection_close(connection_name)
+            raise
+        except Exception as exc:
+            health.connection_close(connection_name)
+            health.reconnects += 1
+            health.last_exception = str(exc)
+            _write_health(health_path, health)
+            await asyncio.sleep(backoff + random.random() * min(1.0, backoff * 0.1))
+            backoff = min(max_backoff_s, backoff * 2.0)
+
+
+async def _run_binance(
+    spec,
+    symbols,
+    writer,
+    raw_writer,
+    health,
+    health_path,
+    max_backoff_s,
+):
+    connections = {x["name"]: x for x in spec.get("connections", [])}
+    if set(connections) != {"public", "market"}:
+        raise RuntimeError("Binance requires public and market routed connections")
+    tasks = [
+        asyncio.create_task(_run_binance_public_connection(
+            connections["public"], symbols, writer, raw_writer, health, health_path, max_backoff_s
+        )),
+        asyncio.create_task(_run_binance_market_connection(
+            connections["market"], writer, raw_writer, health, health_path, max_backoff_s
+        )),
+    ]
     try:
-        import websockets
+        await asyncio.gather(*tasks)
+    finally:
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+
+def _check_websockets_version() -> None:
+    try:
+        import websockets  # noqa: F401
         from importlib.metadata import version as package_version
     except ImportError as exc:
         raise RuntimeError(
@@ -216,6 +527,16 @@ async def run_venue(
     if ws_major < 12 or ws_major >= 14:
         raise RuntimeError("unsupported websockets %s; require >=12,<14" % ws_version)
 
+
+async def run_venue(
+    venue: str,
+    symbols: Iterable[str],
+    root: str = "data/market_physics_v3",
+    health_dir: str = "reports/market_physics_v3/health",
+    max_backoff_s: float = 30.0,
+    fresh_event_max_lag_ms: float = DEFAULT_FRESH_EVENT_MAX_LAG_MS,
+) -> None:
+    _check_websockets_version()
     venue = venue.lower()
     symbols = [str(s).upper() for s in symbols]
     spec = subscriptions(venue, symbols)
@@ -224,172 +545,22 @@ async def run_venue(
     raw_writer = RawMessageWriter(root)
     health = CollectorHealth(venue, fresh_event_max_lag_ms=fresh_event_max_lag_ms)
     health_path = Path(health_dir) / (venue + ".json")
-    backoff = 1.0
 
     try:
-        while True:
-            state = BookDeltaState()
-            heartbeat_stop = asyncio.Event()
-            try:
-                async with websockets.connect(
-                    spec["url"],
-                    ping_interval=20 if venue == "binance" else None,
-                    ping_timeout=20,
-                    close_timeout=10,
-                    max_queue=8192,
-                ) as ws:
-                    connection_id = "%s-%s" % (venue, time.time_ns())
-                    health.connected = True
-                    health.clean_shutdown = False
-                    health.stopped_ns = 0
-                    health.last_exception = None
-                    _write_health(health_path, health)
-                    if "subscribe" in spec:
-                        await ws.send(json.dumps(spec["subscribe"]))
-                    else:
-                        for subscription in spec.get("subscribe_many", []):
-                            await ws.send(json.dumps(subscription))
-
-                    binance_buffers = {}
-                    binance_snapshots = {}
-                    binance_ready = set()
-                    if venue == "binance":
-                        loop = asyncio.get_running_loop()
-                        for symbol in symbols:
-                            binance_buffers[symbol] = []
-                            binance_snapshots[symbol] = _start_binance_snapshot_future(loop, symbol)
-
-                    hb = asyncio.create_task(_heartbeat(ws, venue, heartbeat_stop))
-                    backoff = 1.0
-                    try:
-                        async for raw in ws:
-                            receive_ns = time.time_ns()
-                            health.messages += 1
-                            health.last_receive_ns = receive_ns
-                            if raw == "pong":
-                                continue
-                            parsed = None
-                            try:
-                                parsed = json.loads(raw)
-                                raw_writer.append(venue, receive_ns, parsed, connection_id)
-                                control = _control_status(venue, parsed)
-                                if control == "ack":
-                                    health.subscription_acks += 1
-                                elif control == "error":
-                                    health.subscription_errors += 1
-
-                                if venue == "binance" and parsed.get("e") == "depthUpdate":
-                                    symbol = canonical_symbol(parsed["s"])
-                                    if symbol not in binance_ready:
-                                        buffer = binance_buffers.setdefault(symbol, [])
-                                        buffer.append(BufferedDepthMessage(receive_ns, parsed))
-                                        if len(buffer) > BINANCE_MAX_BUFFER_MESSAGES:
-                                            # Raw wire already contains every message, so
-                                            # resetting the in-memory bootstrap buffer is
-                                            # lossless while preventing unbounded RAM.
-                                            health.book_bootstrap_buffer_resets += 1
-                                            health.last_book_bootstrap_exception = "bootstrap buffer limit exceeded"
-                                            binance_buffers[symbol] = []
-                                            _restart_binance_snapshot(
-                                                binance_snapshots, symbol, health,
-                                                "bootstrap buffer limit exceeded",
-                                            )
-                                            continue
-
-                                        future = binance_snapshots.get(symbol)
-                                        if future is not None and future.done():
-                                            try:
-                                                snapshot = future.result()
-                                            except Exception as exc:
-                                                # Snapshot transport/HTTP failure is not
-                                                # a WebSocket parser error. Keep buffered
-                                                # depth and retry independently.
-                                                _restart_binance_snapshot(
-                                                    binance_snapshots, symbol, health, exc
-                                                )
-                                                continue
-                                            try:
-                                                bootstrap_events = normalized_bootstrap_events(
-                                                    snapshot, binance_buffers[symbol], state
-                                                )
-                                            except BinanceBootstrapError as exc:
-                                                if _buffer_all_below_snapshot(snapshot, binance_buffers[symbol]):
-                                                    continue
-                                                # No valid bridge or broken buffered pu
-                                                # chain: restart the snapshot process. Raw
-                                                # wire remains the canonical lossless source.
-                                                health.book_bootstrap_buffer_resets += 1
-                                                binance_buffers[symbol] = []
-                                                _restart_binance_snapshot(
-                                                    binance_snapshots, symbol, health, exc
-                                                )
-                                                continue
-                                            raw_writer.append(
-                                                venue,
-                                                snapshot.receive_ts_ns,
-                                                {"_source": "rest_depth_snapshot", "symbol": symbol, "payload": snapshot.raw},
-                                                connection_id,
-                                            )
-                                            for event in bootstrap_events:
-                                                writer.append(event)
-                                                health.observe_event(event)
-                                            health.book_bootstrap_successes += 1
-                                            health.book_bootstrapped_symbols.add(symbol)
-                                            health.last_book_bootstrap_exception = None
-                                            binance_ready.add(symbol)
-                                            binance_buffers[symbol] = []
-                                        continue
-
-                                events = parser(parsed, receive_ns, state)
-                                for event in events:
-                                    writer.append(event)
-                                    health.observe_event(event)
-                            except SequenceGap as exc:
-                                health.parse_errors += 1
-                                health.sequence_gaps += 1
-                                health.last_exception = str(exc)
-                                raw_writer.dead_letter(
-                                    venue,
-                                    receive_ns,
-                                    parsed if parsed is not None else raw,
-                                    exc,
-                                )
-                                raise
-                            except Exception as exc:
-                                health.parse_errors += 1
-                                health.last_exception = str(exc)
-                                raw_writer.dead_letter(
-                                    venue,
-                                    receive_ns,
-                                    parsed if parsed is not None else raw,
-                                    exc,
-                                )
-                            if health.messages % 100 == 0:
-                                _write_health(health_path, health)
-                    finally:
-                        heartbeat_stop.set()
-                        hb.cancel()
-                        health.connected = False
-                        _write_health(health_path, health)
-            except asyncio.CancelledError:
-                health.connected = False
-                health.clean_shutdown = health.last_exception in (None, "")
-                health.stopped_ns = time.time_ns()
-                _write_health(health_path, health)
-                raise
-            except Exception as exc:
-                health.connected = False
-                health.clean_shutdown = False
-                health.reconnects += 1
-                health.last_exception = str(exc)
-                _write_health(health_path, health)
-                await asyncio.sleep(
-                    backoff + random.random() * min(1.0, backoff * 0.1)
-                )
-                backoff = min(max_backoff_s, backoff * 2.0)
+        if venue == "binance":
+            await _run_binance(spec, symbols, writer, raw_writer, health, health_path, max_backoff_s)
+        else:
+            await _run_standard_connection(
+                venue, spec, parser, writer, raw_writer, health, health_path, max_backoff_s
+            )
+    except asyncio.CancelledError:
+        health.clean_shutdown = health.last_exception in (None, "")
+        health.stopped_ns = time.time_ns()
+        raise
     finally:
         writer.close()
         raw_writer.close()
+        health._active_connections.clear()
         health.connected = False
         if health.stopped_ns == 0:
             health.stopped_ns = time.time_ns()
