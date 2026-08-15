@@ -9,26 +9,33 @@ def test_binance_depth_trade_liq_mark():
  s=BookDeltaState();
  b=parse_binance({'e':'depthUpdate','E':1000,'s':'BTCUSDT','u':2,'b':[['100','2']],'a':[['101','3']]},R,s)
  assert len(b)==2 and b[0].event_type=='update'
- t=parse_binance({'e':'aggTrade','E':1001,'T':1001,'s':'BTCUSDT','a':9,'p':'100','q':'2','m':True},R,s)[0]; assert t.aggressor=='sell'
+ t=parse_binance({'e':'aggTrade','E':1001,'T':1001,'s':'BTCUSDT','a':9,'p':'100','q':'2','m':True},R,s)[0]; assert t.aggressor=='sell' and t.granularity=='aggregate'
  l=parse_binance({'e':'forceOrder','E':1002,'o':{'T':1002,'s':'BTCUSDT','S':'SELL','q':'2','p':'99','ap':'98'}},R,s)[0]; assert l.side=='long' and l.value==196
  m=parse_binance({'e':'markPriceUpdate','E':1003,'s':'BTCUSDT','p':'100','i':'99','r':'0.0001'},R,s); assert {x.kind for x in m}=={'mark','index','funding'}
 
 def test_bybit_all_streams():
  s=BookDeltaState(); msg={'topic':'orderbook.50.BTCUSDT','type':'snapshot','ts':1000,'data':{'s':'BTCUSDT','b':[['100','1']],'a':[['101','2']],'u':1,'seq':2,'cts':999}}
  assert parse_bybit(msg,R,s)[0].event_type=='snapshot'
- tr=parse_bybit({'topic':'publicTrade.BTCUSDT','data':[{'T':1001,'s':'BTCUSDT','S':'Buy','v':'2','p':'100','i':'x'}]},R,s)[0]; assert tr.aggressor=='buy'
+ tr=parse_bybit({'topic':'publicTrade.BTCUSDT','data':[{'T':1001,'s':'BTCUSDT','S':'Buy','v':'2','p':'100','i':'x'}]},R,s)[0]; assert tr.aggressor=='buy' and tr.granularity=='individual'
  liq=parse_bybit({'topic':'allLiquidation.BTCUSDT','data':[{'T':1002,'s':'BTCUSDT','S':'Buy','v':'2','p':'90'}]},R,s)[0]; assert liq.side=='long'
  tick=parse_bybit({'topic':'tickers.BTCUSDT','ts':1003,'data':{'symbol':'BTCUSDT','openInterest':'10','fundingRate':'0.01','markPrice':'100','indexPrice':'99'}},R,s); assert len(tick)==4
 
 def test_okx_and_hyperliquid():
  s=BookDeltaState(); o=parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':3,'prevSeqId':-1,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},R,s); assert len(o)==2
- tr=parse_okx({'arg':{'channel':'trades','instId':'BTC-USDT-SWAP'},'data':[{'ts':'1001','tradeId':'1','px':'100','sz':'2','side':'sell'}]},R,s)[0]; assert tr.symbol=='BTCUSDT' and tr.aggressor=='sell'
+ tr=parse_okx({'arg':{'channel':'trades','instId':'BTC-USDT-SWAP'},'data':[{'ts':'1001','tradeId':'1','px':'100','sz':'2','side':'sell'}]},R,s)[0]; assert tr.symbol=='BTCUSDT' and tr.aggressor=='sell' and tr.granularity=='individual'
  h=parse_hyperliquid({'channel':'l2Book','data':{'coin':'BTC','time':1002,'levels':[[{'px':'100','sz':'2','n':1}],[{'px':'101','sz':'3','n':1}]]}},R,s); assert len(h)==2 and h[0].symbol=='BTCUSDT'
- ht=parse_hyperliquid({'channel':'trades','data':[{'coin':'BTC','time':1003,'side':'B','px':'100','sz':'1','tid':7}]},R,s)[0]; assert ht.aggressor=='buy'
+ ht=parse_hyperliquid({'channel':'trades','data':[{'coin':'BTC','time':1003,'side':'B','px':'100','sz':'1','tid':7}]},R,s)[0]; assert ht.aggressor=='buy' and ht.granularity=='individual'
  hc=parse_hyperliquid({'channel':'activeAssetCtx','data':{'coin':'BTC','ctx':{'funding':'0.001','openInterest':'10','markPx':'100','oraclePx':'99'}}},R,s); assert {x.kind for x in hc}=={'funding','open_interest','mark','index'}
 
 def test_subscriptions_official_shapes():
- assert 'btcusdt@depth@100ms' in subscriptions('binance',['BTCUSDT'])['subscribe']['params']
+ b=subscriptions('binance',['BTCUSDT']); conns={x['name']:x for x in b['connections']}
+ assert set(conns)=={'public','market'}
+ assert conns['public']['url'].endswith('/public/ws') and conns['market']['url'].endswith('/market/ws')
+ public_params=conns['public']['subscribe']['params']; market_params=conns['market']['subscribe']['params']
+ assert 'btcusdt@depth@100ms' in public_params and 'btcusdt@bookTicker' in public_params
+ assert 'btcusdt@aggTrade' not in public_params and 'btcusdt@markPrice@1s' not in public_params
+ assert 'btcusdt@aggTrade' in market_params and 'btcusdt@markPrice@1s' in market_params and 'btcusdt@forceOrder' in market_params
+ assert 'btcusdt@depth@100ms' not in market_params
  assert 'orderbook.50.BTCUSDT' in subscriptions('bybit',['BTCUSDT'])['subscribe']['args']
  okx_args=subscriptions('okx',['BTCUSDT'])['subscribe']['args']
  assert okx_args[0]['instId']=='BTC-USDT-SWAP'
@@ -88,10 +95,8 @@ def test_sequence_gap_is_fail_closed():
 def test_okx_bbo_does_not_advance_books_sequence_and_resets_are_valid():
  s=BookDeltaState(); r=2_000_000_000_000_000_000
  parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','prevSeqId':-1,'seqId':10,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},r,s)
- # Faster BBO snapshot can have a later seqId, but it is not books.prevSeqId.
  parse_okx({'arg':{'channel':'bbo-tbt','instId':'BTC-USDT-SWAP'},'data':[{'ts':'1001','seqId':23,'bids':[['100','2','0','1']],'asks':[['101','2','0','1']]}]},r,s)
  assert s.sequence[('okx','BTCUSDT','books')] == 10
- # Normal books update, no-update heartbeat, then documented maintenance reset.
  parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1002','prevSeqId':10,'seqId':15,'bids':[['100','2','0','1']],'asks':[]}]},r,s)
  parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1003','prevSeqId':15,'seqId':15,'bids':[],'asks':[]}]},r,s)
  parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1004','prevSeqId':15,'seqId':3,'bids':[['99','1','0','1']],'asks':[]}]},r,s)
