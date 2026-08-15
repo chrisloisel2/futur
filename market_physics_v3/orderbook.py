@@ -38,9 +38,11 @@ class LocalOrderBook:
     - deep deltas are ignored until a genuine deep snapshot has bootstrapped it.
     - events without source_stream provenance cannot make a book ready.
 
-    Normalized events are expected in receive-time order. Sequence continuity is
-    already validated by the live parser; retained sequence metadata remains
-    available for independent replay audits.
+    Price state and depth state are intentionally separate.  An explicit BBO is
+    preferred for price discovery; when a venue does not expose a dedicated BBO
+    (currently Bybit in this collector), the top level of the proven deep book
+    supplies a comparable one-level price snapshot.  Deep-book freshness is
+    therefore never inferred from BBO freshness.
     """
 
     def __init__(self, venue: str, symbol: str) -> None:
@@ -107,7 +109,6 @@ class LocalOrderBook:
             self.last_bbo_event_ns = max(self.last_bbo_event_ns, int(event.event_ts_ns))
             return True
 
-        # Deep-book stream.
         if event.event_type == "snapshot":
             key = (int(event.sequence_id), int(event.event_ts_ns), int(event.receive_ts_ns))
             if self._last_snapshot_key_by_stream.get(stream) != key:
@@ -146,28 +147,55 @@ class LocalOrderBook:
             last_event_ns=int(self.last_event_ns),
         )
 
+    def deep_snapshot(self) -> Optional[BookSnapshot]:
+        if not (self.deep_bootstrapped and self.bids and self.asks):
+            return None
+        bids = tuple(sorted(self.bids.values(), key=lambda x: x.price, reverse=True))
+        asks = tuple(sorted(self.asks.values(), key=lambda x: x.price))
+        return BookSnapshot(
+            int(self.last_deep_event_ns), bids, asks, int(self.last_deep_receive_ns)
+        )
+
+    def bbo_snapshot(self) -> Optional[BookSnapshot]:
+        if self.bbo_bid is None or self.bbo_ask is None:
+            return None
+        return BookSnapshot(
+            int(self.last_bbo_event_ns),
+            (self.bbo_bid,),
+            (self.bbo_ask,),
+            int(self.last_bbo_receive_ns),
+        )
+
+    def price_snapshot(self) -> Optional[BookSnapshot]:
+        """Return a one-level snapshot suitable for cross-venue price state.
+
+        Dedicated BBO is preferred when available.  If a venue has no explicit
+        BBO subscription, derive only the best bid/ask from its proven deep book
+        so price-quality weighting is comparable across venues rather than using
+        full-depth notional for one venue and one-level notional for another.
+        """
+        bbo = self.bbo_snapshot()
+        if bbo is not None:
+            return bbo
+        deep = self.deep_snapshot()
+        if deep is None:
+            return None
+        return BookSnapshot(
+            int(deep.event_ts_ns),
+            (deep.best_bid,),
+            (deep.best_ask,),
+            int(deep.available_ts_ns),
+        )
+
     def snapshot(self, prefer_deep: bool = True) -> Optional[BookSnapshot]:
-        if prefer_deep and self.deep_bootstrapped and self.bids and self.asks:
-            bids = tuple(sorted(self.bids.values(), key=lambda x: x.price, reverse=True))
-            asks = tuple(sorted(self.asks.values(), key=lambda x: x.price))
-            return BookSnapshot(
-                int(self.last_deep_event_ns), bids, asks, int(self.last_deep_receive_ns)
-            )
-        if self.bbo_bid is not None and self.bbo_ask is not None:
-            return BookSnapshot(
-                int(self.last_bbo_event_ns),
-                (self.bbo_bid,),
-                (self.bbo_ask,),
-                int(self.last_bbo_receive_ns),
-            )
-        return None
+        if prefer_deep:
+            deep = self.deep_snapshot()
+            if deep is not None:
+                return deep
+            return self.bbo_snapshot()
+        return self.price_snapshot()
 
     def fragmentation_features(self, levels: int = 10) -> Dict[str, float]:
-        """Features available only when order-count metadata exists.
-
-        Missing order counts are not interpreted as zero. Ratios are emitted as
-        NaN when the venue does not expose enough information.
-        """
         if not self.deep_bootstrapped:
             return {
                 "bid_order_count_l10": float("nan"),
