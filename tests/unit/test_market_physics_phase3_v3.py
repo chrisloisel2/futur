@@ -36,6 +36,16 @@ def test_binance_normalizer_preserves_stream_and_update_range():
     assert {x.source_stream for x in bbo} == {"bookTicker"}
 
 
+def test_binance_aggtrade_is_explicitly_aggregate_not_individual_tick():
+    s = BookDeltaState()
+    event = parse_binance({
+        "e":"aggTrade","E":1000,"T":1000,"s":"BTCUSDT","a":7,
+        "p":"100","q":"2","m":False,
+    }, R, s)[0]
+    assert event.source_stream == "aggTrade"
+    assert event.granularity == "aggregate"
+
+
 def test_local_book_refuses_unbootstrapped_deep_delta_but_keeps_bbo():
     s = BookDeltaState()
     deep = parse_binance({
@@ -92,9 +102,9 @@ def test_synchronized_engine_fails_closed_when_one_deep_book_missing():
     engine = SynchronizedBookEngine()
     receive = 20 * NS
     for venue in ["bybit", "okx", "hyperliquid"]:
-        for row in _snapshot_rows(venue, "BTCUSDT", receive, source_stream="books" if venue == "okx" else ("l2Book" if venue == "hyperliquid" else "orderbook.50")):
+        stream = "books" if venue == "okx" else ("l2Book" if venue == "hyperliquid" else "orderbook.50")
+        for row in _snapshot_rows(venue, "BTCUSDT", receive, source_stream=stream):
             engine.ingest(row)
-    # Binance has only BBO, no deep snapshot.
     for row in [
         BookEvent("binance", "BTCUSDT", receive - 1, receive, 1, "snapshot", "bid", 99, 10, source_stream="bookTicker"),
         BookEvent("binance", "BTCUSDT", receive - 1, receive, 1, "snapshot", "ask", 101, 10, source_stream="bookTicker"),
@@ -109,10 +119,8 @@ def test_synchronized_engine_fails_closed_when_one_deep_book_missing():
 def test_synchronized_engine_rejects_transport_stale_venue():
     engine = SynchronizedBookEngine()
     asof = 30 * NS
-    # fresh venue
     for row in _snapshot_rows("bybit", "BTCUSDT", asof, source_stream="orderbook.50"):
         engine.ingest(row)
-    # event happened 10s before local receipt: transport stale despite fresh receipt
     old_event = asof - 10 * NS
     for side, px in [("bid", 99), ("ask", 101)]:
         engine.ingest(BookEvent("okx", "BTCUSDT", old_event, asof, 1, "snapshot", side, px, 10, source_stream="books"))
@@ -131,7 +139,7 @@ def _write_jsonl(path, rows):
     path.write_text("".join(json.dumps(x) + "\n" for x in rows))
 
 
-def test_modality_matrix_identifies_binance_snapshot_blocker(tmp_path):
+def test_modality_matrix_identifies_binance_snapshot_and_tick_blockers(tmp_path):
     root = tmp_path / "data"
     health = tmp_path / "health"
     health.mkdir()
@@ -143,17 +151,19 @@ def test_modality_matrix_identifies_binance_snapshot_blocker(tmp_path):
     bbo_bid = dict(base); bbo_bid.update({"event_type":"snapshot","source_stream":"bookTicker"})
     bbo_ask = dict(bbo_bid); bbo_ask.update({"side":"ask","price":101})
     _write_jsonl(root / "raw/book_events/venue=binance/symbol=BTCUSDT/date=2026-08-15/events.jsonl", [deep,bbo_bid,bbo_ask])
-    trade = {"venue":"binance","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+1,"trade_id":"1","price":100,"qty":1,"aggressor":"buy","_record_type":"TradeEvent"}
+    trade = {"venue":"binance","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+1,"trade_id":"1","price":100,"qty":1,"aggressor":"buy","source_stream":"aggTrade","granularity":"aggregate","_record_type":"TradeEvent"}
     _write_jsonl(root / "raw/trades/venue=binance/symbol=BTCUSDT/date=2026-08-15/events.jsonl", [trade])
     report = audit_modality_matrix(str(root), str(health), venues=("binance",), symbols=("BTCUSDT",))
     cell = report["cells"]["binance:BTCUSDT"]
     assert not cell["book"]["deep_ready"]
     assert cell["book"]["bbo_ready"]
-    assert cell["trades"]["ready"]
+    assert cell["trades"]["event_stream_ready"]
+    assert not cell["trades"]["tick_ready"]
     assert "binance:BTCUSDT:deep_book" in report["summary"]["blocking_cells"]
+    assert "binance:BTCUSDT:individual_trades" in report["summary"]["tick_trade_blocking_cells"]
 
 
-def test_modality_matrix_accepts_proven_deep_snapshot(tmp_path):
+def test_modality_matrix_accepts_deep_snapshot_and_derives_bbo(tmp_path):
     root = tmp_path / "data"
     health = tmp_path / "health"
     health.mkdir()
@@ -163,13 +173,14 @@ def test_modality_matrix_accepts_proven_deep_snapshot(tmp_path):
     rows = []
     for side, px in [("bid",100),("ask",101)]:
         rows.append({"venue":"bybit","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+1,"sequence_id":1,"event_type":"snapshot","side":side,"price":px,"qty":1,"source_stream":"orderbook.50","_record_type":"BookEvent"})
-        rows.append({"venue":"bybit","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+2,"sequence_id":2,"event_type":"snapshot","side":side,"price":px,"qty":1,"source_stream":"bbo","_record_type":"BookEvent"})
     _write_jsonl(root / "raw/book_events/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl", rows)
-    _write_jsonl(root / "raw/trades/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl", [{"venue":"bybit","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+1,"trade_id":"1","price":100,"qty":1,"aggressor":"buy"}])
+    _write_jsonl(root / "raw/trades/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl", [{"venue":"bybit","symbol":"BTCUSDT","event_ts_ns":start,"receive_ts_ns":start+1,"trade_id":"1","price":100,"qty":1,"aggressor":"buy","source_stream":"publicTrade","granularity":"individual"}])
     report = audit_modality_matrix(str(root), str(health), venues=("bybit",), symbols=("BTCUSDT",))
     cell = report["cells"]["bybit:BTCUSDT"]
     assert cell["book"]["deep_ready"]
     assert cell["book"]["bbo_ready"]
+    assert cell["book"]["bbo_mode"] == "derived_from_deep"
+    assert cell["trades"]["tick_ready"]
     assert report["summary"]["ready_for_synchronized_books"]
 
 
