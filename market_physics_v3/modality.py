@@ -94,6 +94,11 @@ def audit_cell(
 
     trades = 0
     fresh_trades = 0
+    fresh_individual_trades = 0
+    fresh_aggregate_trades = 0
+    trade_provenance_missing = 0
+    trade_stream_counts: Dict[str, int] = {}
+    granularity_counts: Dict[str, int] = {}
     max_trade_lag_ms = 0.0
     for row in _iter_jsonl(_glob(root, "trades", venue, symbol), start_ns, stop_ns):
         trades += 1
@@ -101,8 +106,20 @@ def audit_cell(
         receive_ns = int(row.get("receive_ts_ns", 0) or 0)
         lag_ms = max(0.0, (receive_ns - event_ns) / 1e6) if event_ns and receive_ns else float("inf")
         max_trade_lag_ms = max(max_trade_lag_ms, lag_ms if lag_ms != float("inf") else 0.0)
+        stream = row.get("source_stream")
+        granularity = row.get("granularity")
+        if stream:
+            trade_stream_counts[str(stream)] = trade_stream_counts.get(str(stream), 0) + 1
+        else:
+            trade_provenance_missing += 1
+        if granularity:
+            granularity_counts[str(granularity)] = granularity_counts.get(str(granularity), 0) + 1
         if lag_ms <= float(fresh_max_lag_ms):
             fresh_trades += 1
+            if granularity == "individual":
+                fresh_individual_trades += 1
+            elif granularity == "aggregate":
+                fresh_aggregate_trades += 1
 
     derivative_counts: Dict[str, int] = {}
     fresh_derivative_counts: Dict[str, int] = {}
@@ -126,11 +143,10 @@ def audit_cell(
     explicit_bbo_ready = bool(
         bbo_events > 0 and provenance_missing == 0 and fresh_book_events > 0
     )
-    # A valid reconstructed deep book necessarily has a valid best bid/ask, so
-    # venues such as Bybit do not need a redundant dedicated BBO channel.
     bbo_ready = bool(explicit_bbo_ready or deep_ready)
     bbo_mode = "explicit" if explicit_bbo_ready else ("derived_from_deep" if deep_ready else "missing")
-    trades_ready = bool(trades > 0 and fresh_trades > 0)
+    event_trade_ready = bool(trades > 0 and fresh_trades > 0 and trade_provenance_missing == 0)
+    tick_trade_ready = bool(fresh_individual_trades > 0 and trade_provenance_missing == 0)
 
     return {
         "venue": venue,
@@ -153,7 +169,13 @@ def audit_cell(
         "trades": {
             "events": int(trades),
             "fresh_events": int(fresh_trades),
-            "ready": trades_ready,
+            "fresh_individual_events": int(fresh_individual_trades),
+            "fresh_aggregate_events": int(fresh_aggregate_trades),
+            "source_stream_counts": dict(sorted(trade_stream_counts.items())),
+            "granularity_counts": dict(sorted(granularity_counts.items())),
+            "provenance_missing": int(trade_provenance_missing),
+            "event_stream_ready": event_trade_ready,
+            "tick_ready": tick_trade_ready,
             "max_lag_ms": float(max_trade_lag_ms),
         },
         "derivatives": {
@@ -161,7 +183,10 @@ def audit_cell(
             "fresh_counts": dict(sorted(fresh_derivative_counts.items())),
             "max_lag_ms": float(max_derivative_lag_ms),
         },
-        "synchronized_book_input_ready": bool(deep_ready and bbo_ready and trades_ready),
+        # Cross-venue book synchronization needs a real-time event trade flow,
+        # but it does not require every venue to expose one-row-per-match trades.
+        # The stricter generic tick_trades gate is reported separately.
+        "synchronized_book_input_ready": bool(deep_ready and bbo_ready and event_trade_ready),
     }
 
 
@@ -194,7 +219,8 @@ def audit_modality_matrix(
     cell_values = list(cells.values())
     all_deep = bool(cell_values) and all(x["book"]["deep_ready"] for x in cell_values)
     all_bbo = bool(cell_values) and all(x["book"]["bbo_ready"] for x in cell_values)
-    all_trades = bool(cell_values) and all(x["trades"]["ready"] for x in cell_values)
+    all_event_trades = bool(cell_values) and all(x["trades"]["event_stream_ready"] for x in cell_values)
+    all_tick_trades = bool(cell_values) and all(x["trades"]["tick_ready"] for x in cell_values)
     all_sync_inputs = bool(cell_values) and all(x["synchronized_book_input_ready"] for x in cell_values)
 
     def all_fresh_derivative(kind: str) -> bool:
@@ -203,17 +229,20 @@ def audit_modality_matrix(
         )
 
     blockers = []
+    tick_blockers = []
     for key, cell in cells.items():
         if not cell["book"]["deep_ready"]:
             blockers.append(key + ":deep_book")
         if not cell["book"]["bbo_ready"]:
             blockers.append(key + ":bbo")
-        if not cell["trades"]["ready"]:
-            blockers.append(key + ":trades")
+        if not cell["trades"]["event_stream_ready"]:
+            blockers.append(key + ":event_trades")
+        if not cell["trades"]["tick_ready"]:
+            tick_blockers.append(key + ":individual_trades")
 
     suggestions = {
         "l2_book_events": "EVENT_LEVEL" if all_deep else "BLOCKED",
-        "tick_trades": "EVENT_LEVEL" if all_trades else "BLOCKED",
+        "tick_trades": "EVENT_LEVEL" if all_tick_trades else "BLOCKED",
         "bbo": "EVENT_LEVEL" if all_bbo else "BLOCKED",
         "open_interest": "EVENT_LEVEL" if all_fresh_derivative("open_interest") else "PARTIAL",
         "funding": "EVENT_LEVEL" if all_fresh_derivative("funding") else "PARTIAL",
@@ -230,9 +259,11 @@ def audit_modality_matrix(
         "summary": {
             "all_deep_books_ready": all_deep,
             "all_bbo_ready": all_bbo,
-            "all_tick_trades_ready": all_trades,
+            "all_event_trade_streams_ready": all_event_trades,
+            "all_tick_trades_ready": all_tick_trades,
             "ready_for_synchronized_books": all_sync_inputs,
             "blocking_cells": sorted(blockers),
+            "tick_trade_blocking_cells": sorted(tick_blockers),
             "manifest_status_suggestions": suggestions,
         },
     }
