@@ -10,15 +10,22 @@ from typing import Dict, Iterable, Optional
 from market_physics_v3.collectors.normalize import BookDeltaState, PARSERS, SequenceGap
 from market_physics_v3.collectors.specs import subscriptions
 from market_physics_v3.collectors.writer import AppendOnlyEventWriter, RawMessageWriter
+from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
 
 
 class CollectorHealth:
     def __init__(self, venue: str):
         self.venue = venue
+        self.started_ns = time.time_ns()
+        self.stopped_ns = 0
+        self.clean_shutdown = False
         self.connected = False
         self.reconnects = 0
         self.messages = 0
         self.events = 0
+        self.book_events = 0
+        self.trade_events = 0
+        self.derivative_events = 0
         self.parse_errors = 0
         self.sequence_gaps = 0
         self.subscription_acks = 0
@@ -27,14 +34,30 @@ class CollectorHealth:
         self.last_event_ns = 0
         self.last_exception = None
 
+    def observe_event(self, event) -> None:
+        self.events += 1
+        self.last_event_ns = max(self.last_event_ns, int(event.event_ts_ns))
+        if isinstance(event, BookEvent):
+            self.book_events += 1
+        elif isinstance(event, TradeEvent):
+            self.trade_events += 1
+        elif isinstance(event, DerivativeEvent):
+            self.derivative_events += 1
+
     def as_dict(self) -> Dict[str, object]:
         now = time.time_ns()
         return {
             "venue": self.venue,
+            "started_ns": self.started_ns,
+            "stopped_ns": self.stopped_ns,
+            "clean_shutdown": self.clean_shutdown,
             "connected": self.connected,
             "reconnects": self.reconnects,
             "messages": self.messages,
             "events": self.events,
+            "book_events": self.book_events,
+            "trade_events": self.trade_events,
+            "derivative_events": self.derivative_events,
             "parse_errors": self.parse_errors,
             "sequence_gaps": self.sequence_gaps,
             "subscription_acks": self.subscription_acks,
@@ -134,6 +157,8 @@ async def run_venue(
                 ) as ws:
                     connection_id = "%s-%s" % (venue, time.time_ns())
                     health.connected = True
+                    health.clean_shutdown = False
+                    health.stopped_ns = 0
                     health.last_exception = None
                     _write_health(health_path, health)
                     if "subscribe" in spec:
@@ -162,19 +187,28 @@ async def run_venue(
                                 events = parser(parsed, receive_ns, state)
                                 for event in events:
                                     writer.append(event)
-                                    health.events += 1
-                                    health.last_event_ns = max(health.last_event_ns, event.event_ts_ns)
+                                    health.observe_event(event)
                             except SequenceGap as exc:
                                 health.parse_errors += 1
                                 health.sequence_gaps += 1
                                 health.last_exception = str(exc)
-                                raw_writer.dead_letter(venue, receive_ns, parsed if parsed is not None else raw, exc)
+                                raw_writer.dead_letter(
+                                    venue,
+                                    receive_ns,
+                                    parsed if parsed is not None else raw,
+                                    exc,
+                                )
                                 # Fail closed: force reconnect and reconstruct venue state.
                                 raise
                             except Exception as exc:
                                 health.parse_errors += 1
                                 health.last_exception = str(exc)
-                                raw_writer.dead_letter(venue, receive_ns, parsed if parsed is not None else raw, exc)
+                                raw_writer.dead_letter(
+                                    venue,
+                                    receive_ns,
+                                    parsed if parsed is not None else raw,
+                                    exc,
+                                )
                             if health.messages % 100 == 0:
                                 _write_health(health_path, health)
                     finally:
@@ -184,24 +218,35 @@ async def run_venue(
                         _write_health(health_path, health)
             except asyncio.CancelledError:
                 health.connected = False
+                health.clean_shutdown = health.last_exception in (None, "")
+                health.stopped_ns = time.time_ns()
                 _write_health(health_path, health)
                 raise
             except Exception as exc:
                 health.connected = False
+                health.clean_shutdown = False
                 health.reconnects += 1
                 health.last_exception = str(exc)
                 _write_health(health_path, health)
-                await asyncio.sleep(backoff + random.random() * min(1.0, backoff * 0.1))
+                await asyncio.sleep(
+                    backoff + random.random() * min(1.0, backoff * 0.1)
+                )
                 backoff = min(max_backoff_s, backoff * 2.0)
     finally:
         writer.close()
         raw_writer.close()
         health.connected = False
+        if health.stopped_ns == 0:
+            health.stopped_ns = time.time_ns()
         _write_health(health_path, health)
 
 
-async def run_many(venues: Iterable[str], symbols: Iterable[str], root: str, health_dir: str) -> None:
-    tasks = [asyncio.create_task(run_venue(v, symbols, root, health_dir)) for v in venues]
+async def run_many(
+    venues: Iterable[str], symbols: Iterable[str], root: str, health_dir: str
+) -> None:
+    tasks = [
+        asyncio.create_task(run_venue(v, symbols, root, health_dir)) for v in venues
+    ]
     try:
         await asyncio.gather(*tasks)
     finally:
