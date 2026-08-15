@@ -1,0 +1,49 @@
+version: 3
+mode: event_level
+clock:
+  canonical: exchange_event_time_ns
+  retain_receive_time: true
+  max_negative_latency_ns: 0
+storage:
+  raw_root: market_physics_v3/raw
+  normalized_root: market_physics_v3/normalized
+  features_root: market_physics_v3/features
+  never_overwrite_raw: true
+  partition: event_type/venue/symbol/date
+priority_universe:
+  tier0: [BTCUSDT, ETHUSDT, SOLUSDT]
+  tier1_target_count: 25
+  tier2_target_count: 100
+venues:
+  priority: [binance, bybit, okx, hyperliquid, coinbase]
+feeds:
+  p0:
+    - l2_book_events
+    - tick_trades
+    - bbo
+    - open_interest
+    - funding
+    - mark_index_premium
+    - liquidations
+    - execution_telemetry
+  p1:
+    - option_quotes
+    - option_trades
+    - option_open_interest
+    - dex_swaps
+    - stablecoin_flows
+    - etf_cme
+  p2:
+    - macro_events
+    - news_events
+    - token_unlocks
+feature_windows_ms: [100, 500, 1000, 5000, 30000, 300000, 3600000]
+research_horizons_ms: [100, 500, 1000, 5000, 30000, 300000, 1800000, 3600000, 14400000, 86400000]
+research_rules:
+  point_in_time_only: true
+  event_time_first: true
+  no_future_book_state: true
+  no_forward_fill_unknown_liquidations: true
+  cross_venue_asof_join: true
+  preserve_raw_event_sequence: true
+  model_family_before_hyperparameter_search: true
