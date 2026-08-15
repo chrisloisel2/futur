@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Iterable, Mapping, Optional, Sequence, Tuple
+from typing import Dict, Iterable, Sequence
 
 from .orderbook import BBO_STREAMS
 
@@ -123,7 +123,13 @@ def audit_cell(
         and provenance_missing == 0
         and fresh_book_events > 0
     )
-    bbo_ready = bool(bbo_events > 0 and provenance_missing == 0 and fresh_book_events > 0)
+    explicit_bbo_ready = bool(
+        bbo_events > 0 and provenance_missing == 0 and fresh_book_events > 0
+    )
+    # A valid reconstructed deep book necessarily has a valid best bid/ask, so
+    # venues such as Bybit do not need a redundant dedicated BBO channel.
+    bbo_ready = bool(explicit_bbo_ready or deep_ready)
+    bbo_mode = "explicit" if explicit_bbo_ready else ("derived_from_deep" if deep_ready else "missing")
     trades_ready = bool(trades > 0 and fresh_trades > 0)
 
     return {
@@ -141,6 +147,7 @@ def audit_cell(
             "bbo_events": int(bbo_events),
             "deep_ready": deep_ready,
             "bbo_ready": bbo_ready,
+            "bbo_mode": bbo_mode,
             "max_lag_ms": float(max_book_lag_ms),
         },
         "trades": {
