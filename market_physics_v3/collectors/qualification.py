@@ -16,6 +16,41 @@ def _nonempty_files(paths):
     return out
 
 
+def _files_with_rows_in_window(paths, start_ns, stop_ns):
+    """Return files containing at least one record inside [start_ns, stop_ns].
+
+    Used for new-format health reports so append-only evidence from a previous
+    failed smoke remains auditable without poisoning all future qualifications.
+    """
+    if not start_ns or not stop_ns:
+        return _nonempty_files(paths)
+    out = []
+    lo, hi = int(start_ns), int(stop_ns)
+    for path in paths:
+        try:
+            if not path.is_file() or path.stat().st_size <= 0:
+                continue
+            found = False
+            with path.open("r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    ts = int(row.get("receive_ts_ns", 0) or 0)
+                    if lo <= ts <= hi:
+                        found = True
+                        break
+            if found:
+                out.append(str(path))
+        except FileNotFoundError:
+            pass
+    return out
+
+
 def qualify_venue(
     venue: str,
     root: str = "data/market_physics_v3",
@@ -27,8 +62,8 @@ def qualify_venue(
     """Qualify a live venue as EVENT_LEVEL only from observed evidence.
 
     The gate is intentionally strict. It requires healthy subscription/runtime
-    counters, non-empty raw-wire capture, normalized book/trade/derivative
-    partitions, causal clocks and zero non-empty dead-letter files.
+    counters, raw-wire capture, normalized book/trade/derivative partitions,
+    causal clocks and zero dead letters from the smoke being qualified.
     """
     venue = str(venue).lower().strip()
     root_path = Path(root)
@@ -72,8 +107,6 @@ def qualify_venue(
     elif last_event > last_receive:
         reasons.append("event_clock_after_receive_clock")
 
-    # New health files record clean shutdown explicitly. Older smoke files are
-    # accepted if storage-level evidence below is complete and error-free.
     if "clean_shutdown" in health and not bool(health.get("clean_shutdown")):
         reasons.append("unclean_shutdown")
 
@@ -85,34 +118,45 @@ def qualify_venue(
     has_typed_health = any(
         key in health for key in ("book_events", "trade_events", "derivative_events")
     )
+    start_ns = int(health.get("started_ns", 0) or 0)
+    stop_ns = int(health.get("stopped_ns", 0) or 0)
+    has_run_window = start_ns > 0 and stop_ns >= start_ns
 
-    # canonical_partition() stores normalized records below root/raw/<kind>/...
-    # (raw_wire is a separate pre-parse replay tree). Keep these namespaces
-    # distinct so the qualifier verifies what the writer actually persisted.
     normalized_files = {}
     for kind in ("book_events", "trades", "derivatives"):
-        files = _nonempty_files(
+        candidates = list(
             (root_path / "raw" / kind / ("venue=" + venue)).glob("**/events.jsonl")
+        )
+        files = (
+            _files_with_rows_in_window(candidates, start_ns, stop_ns)
+            if has_run_window else _nonempty_files(candidates)
         )
         normalized_files[kind] = files
         if has_typed_health:
-            # New health telemetry is run-local; stale files from an earlier smoke
-            # must never satisfy a missing event family in the current run.
             if type_counts[kind] <= 0:
                 reasons.append("missing_%s" % kind)
+            if has_run_window and type_counts[kind] > 0 and not files:
+                reasons.append("missing_current_%s_storage" % kind)
         elif not files:
-            # Backward compatibility for the first Bybit smoke, whose health file
-            # predates per-type counters. Storage evidence is required instead.
+            # Legacy Bybit smoke: no typed counters/start-stop window existed yet.
             reasons.append("missing_%s" % kind)
 
-    raw_files = _nonempty_files(
+    raw_candidates = list(
         (root_path / "raw_wire" / ("venue=" + venue)).glob("**/messages.jsonl")
+    )
+    raw_files = (
+        _files_with_rows_in_window(raw_candidates, start_ns, stop_ns)
+        if has_run_window else _nonempty_files(raw_candidates)
     )
     if not raw_files:
         reasons.append("missing_raw_wire")
 
-    dead_files = _nonempty_files(
+    dead_candidates = list(
         (root_path / "dead_letters" / ("venue=" + venue)).glob("**/errors.jsonl")
+    )
+    dead_files = (
+        _files_with_rows_in_window(dead_candidates, start_ns, stop_ns)
+        if has_run_window else _nonempty_files(dead_candidates)
     )
     if dead_files:
         reasons.append("nonempty_dead_letters")
@@ -125,6 +169,7 @@ def qualify_venue(
         "reasons": sorted(set(reasons)),
         "health": health,
         "type_counts": type_counts,
+        "run_window": {"started_ns": start_ns, "stopped_ns": stop_ns},
         "raw_files": raw_files,
         "normalized_files": normalized_files,
         "dead_letter_files": dead_files,
