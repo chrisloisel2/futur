@@ -81,15 +81,14 @@ class MarketPhysicsStateBuilder:
                 window.snapshot_end.notional_to_move_bps("buy", 10.0)
                 + window.snapshot_end.notional_to_move_bps("sell", 10.0)
             )
-            # Quote market timestamp is kept for staleness weighting, but the
-            # snapshot itself was admitted only after receive-time PIT checks.
             quotes.append(
                 VenueQuote(
-                    window.venue,
-                    window.snapshot_end.event_ts_ns,
-                    window.snapshot_end.mid,
-                    window.snapshot_end.spread_bps,
-                    depth_usd,
+                    venue=window.venue,
+                    event_ts_ns=int(window.snapshot_end.event_ts_ns),
+                    mid=float(window.snapshot_end.mid),
+                    spread_bps=float(window.snapshot_end.spread_bps),
+                    depth_10bps_usd=float(depth_usd),
+                    receive_ts_ns=int(window.snapshot_end.available_ts_ns),
                 )
             )
         cv = fair_value(quotes, asof_ns, self.cross_venue_half_life_ms)
