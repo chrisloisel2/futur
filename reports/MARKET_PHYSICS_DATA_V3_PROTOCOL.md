@@ -74,7 +74,7 @@ A venue with freshness telemetry must show:
 - normalized run-local storage,
 - zero dead letters inside the qualification run window.
 
-Hyperliquid requires freshness telemetry explicitly before promotion because startup/reconnect flows may include older trades. Historical delayed records remain on disk and are not silently deleted.
+Hyperliquid requires freshness telemetry explicitly before promotion because its WebSocket API can deliver prior/missed data around connection or reconnection. Historical delayed records remain on disk and are not silently deleted.
 
 ## 5. P0 market data
 
