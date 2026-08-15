@@ -264,25 +264,39 @@ Generic readiness is promoted only if every required cell passes. In particular:
 - `tick_trades = EVENT_LEVEL` requires fresh `granularity=individual` evidence in every cell; Binance `aggTrade` alone intentionally blocks this promotion.
 - `ready_for_synchronized_books` requires reconstructible deep books, BBO and fresh event trade flow for every required cell; it is separate from the stricter true tick-tape gate.
 
-## 14. Qualification evidence before Phase 3
+## 14. Phase 3 live evidence — 2026-08-15
 
-As of 2026-08-15 on qbee:
+The Phase 3 modality matrix was reproduced on qbee across Binance, Bybit, OKX and Hyperliquid for BTCUSDT, ETHUSDT and SOLUSDT.
 
-- 43/43 unit tests passed on Python 3.8.10 after receive-time/freshness hardening.
-- Stablecoin bridge: 3,154 daily rows, 2017-11-29 through 2026-07-18, conservative T+1 availability.
-- Bybit: qualified `EVENT_LEVEL` from 2,244 messages / 7,452 events, with zero parse errors, sequence gaps, subscription errors and dead letters.
-- OKX: qualified `EVENT_LEVEL` from 2,602 messages / 20,444 events (19,686 book, 159 trade, 599 derivative), 22 subscription ACKs, zero parse errors/gaps/reconnects/subscription errors and clean shutdown.
-- Hyperliquid: qualified `EVENT_LEVEL` from 511 messages / 1,881 events. Of these, 1,801 were fresh under the fixed 5 s gate and 80 were stale startup trades. Fresh evidence included 1,300 book events, 153 trades and 348 derivative events; parse errors, gaps, reconnects, subscription errors and dead letters were zero. Maximum observed trade transport lag was about 72.2 s, confirming why receive-time availability is mandatory.
-- The venue-level cross-venue family is therefore qualified across Binance, Bybit, OKX and Hyperliquid, but P0 modality readiness is not yet claimed.
+The matrix reported:
 
-## 15. Phase 3 next gate
+- `all_deep_books_ready = true`;
+- `all_bbo_ready = true`;
+- `all_event_trade_streams_ready = true`;
+- `ready_for_synchronized_books = true`;
+- `all_tick_trades_ready = false` only because Binance BTC/ETH/SOL expose `aggTrade` as aggregate flow rather than a proven individual tape;
+- `l2_book_events`, `bbo`, `funding`, `mark` and `index` are supported by the transverse matrix;
+- open interest remains `PARTIAL` because it is not observed in every P0 cell.
+
+Binance live evidence showed genuine REST deep snapshots plus aligned diff-depth events for BTC/ETH/SOL, explicit `bookTicker`, fresh aggregate event flow and fresh mark/index/funding. Bybit, OKX and Hyperliquid produced reconstructible deep books and individual event trades. Hyperliquid continued to show stale startup trade backfill while preserving fresh live events, confirming the receive-time design.
+
+A historical OKX dead-letter file remains on disk from an earlier failed smoke. Later clean OKX runs are assessed only inside their own run window; the historical evidence is intentionally not deleted.
+
+The generic manifest may lag the matrix until deterministic modality promotion is run. This is a bookkeeping issue, not permission to override blocked modalities manually.
+
+## 15. Phase 4 next gate
+
+Phase 3 smokes were run sequentially, so they prove per-venue reconstruction but do not themselves form a simultaneous cross-venue market interval.
 
 Before any new alpha/model search:
 
-1. validate the expanded Phase 3 unit suite on qbee,
-2. rerun P0 smokes because source-stream/trade-granularity provenance is new,
-3. require Binance public+market routed connections and successful REST deep-book bootstrap for BTC/ETH/SOL,
-4. generate the 4 venues x 3 symbols modality matrix,
-5. inspect every blocking cell rather than manually promoting statuses,
-6. only after reconstructible synchronized books are proven, run synchronized-state replay/forward collection,
-7. only then begin new cross-venue information-decay and alpha research.
+1. deterministically promote only modality statuses supported by the Phase 3 matrix;
+2. run Binance, Bybit, OKX and Hyperliquid concurrently in one collector invocation;
+3. require a common health-window overlap and small start-time skew;
+4. reconstruct causal receive-time synchronized state tapes at preregistered 100/250/500/1000 ms cadences;
+5. inspect ready fraction by symbol and cadence under fixed receive-age, transport-lag and sync-span gates;
+6. treat poor synchronized coverage as an infrastructure problem, not as a reason to loosen gates after viewing returns;
+7. only after usable state tapes exist, run information-decay, reverse-causality, effective-sample-size and block-shuffle audits;
+8. only then promote physical mechanisms to candidate alpha sleeves.
+
+The dedicated Phase 4 protocol is recorded in `reports/MARKET_PHYSICS_PHASE4_PROTOCOL.md`.
