@@ -40,6 +40,16 @@ def audit_feed_status(status_by_feed: Mapping[str,object]) -> Dict[str,object]:
             if not _ok(feed,status): block.append(feed); result["blocking"].append(feed)
         result["families"][family]={"feeds":fm,"ready":not block,"blocking":block}
         family_ready[family]=not block
+
+    # Cross-venue book research does not require a true one-row-per-match tape.
+    # It requires proven deep books + BBO on all P0 venues. This is deliberately
+    # separate from the stricter microstructure/P0 gate, where tick_trades stays
+    # blocked while Binance provides aggTrade rather than an individual tape.
+    result["ready_for_synchronized_book_research"] = bool(
+        _ok("l2_book_events", normalized.get("l2_book_events", "UNKNOWN"))
+        and _ok("bbo", normalized.get("bbo", "UNKNOWN"))
+        and family_ready["cross_venue"]
+    )
     result["ready_for_p0_market_research"] = family_ready["microstructure"] and family_ready["cross_venue"] and family_ready["leverage"]
     result["ready_for_p0_research"] = result["ready_for_p0_market_research"]
     result["ready_for_execution_research"] = family_ready["execution"]
