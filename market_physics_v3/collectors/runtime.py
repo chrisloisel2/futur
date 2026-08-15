@@ -2,12 +2,19 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import random
 import time
 from pathlib import Path
 from typing import Dict, Iterable, Optional
 
-from market_physics_v3.collectors.normalize import BookDeltaState, PARSERS, SequenceGap
+from market_physics_v3.collectors.binance_bootstrap import (
+    BinanceBootstrapError,
+    BufferedDepthMessage,
+    fetch_depth_snapshot,
+    normalized_bootstrap_events,
+)
+from market_physics_v3.collectors.normalize import BookDeltaState, PARSERS, SequenceGap, canonical_symbol
 from market_physics_v3.collectors.specs import subscriptions
 from market_physics_v3.collectors.writer import AppendOnlyEventWriter, RawMessageWriter
 from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
@@ -48,6 +55,9 @@ class CollectorHealth:
         self.last_receive_ns = 0
         self.last_event_ns = 0
         self.last_exception = None
+        self.book_bootstrap_successes = 0
+        self.book_bootstrap_errors = 0
+        self.book_bootstrapped_symbols = set()
 
     def observe_event(self, event) -> None:
         self.events += 1
@@ -115,6 +125,9 @@ class CollectorHealth:
             "last_event_ns": self.last_event_ns,
             "idle_ms": (now - self.last_receive_ns) / 1e6 if self.last_receive_ns else None,
             "last_exception": self.last_exception,
+            "book_bootstrap_successes": int(self.book_bootstrap_successes),
+            "book_bootstrap_errors": int(self.book_bootstrap_errors),
+            "book_bootstrapped_symbols": sorted(self.book_bootstrapped_symbols),
         }
 
 
@@ -153,10 +166,18 @@ async def _heartbeat(ws, venue: str, stop: asyncio.Event) -> None:
         elif venue == "okx":
             await ws.send("ping")
         else:
-            # Binance uses protocol-level ping frames; websockets normally handles
-            # them, but an explicit ping gives us a fast liveness failure too.
             pong = await ws.ping()
             await asyncio.wait_for(pong, timeout=10)
+
+
+def _start_binance_snapshot_future(loop, symbol: str):
+    base_url = os.environ.get("MPV3_BINANCE_REST_URL", "https://fapi.binance.com").strip()
+    return loop.run_in_executor(None, fetch_depth_snapshot, symbol, base_url, 1000, 10.0)
+
+
+def _buffer_all_below_snapshot(snapshot, buffered) -> bool:
+    depths = [x for x in buffered if x.payload.get("e") == "depthUpdate"]
+    return bool(depths) and all(int(x.payload.get("u", -1)) < snapshot.last_update_id for x in depths)
 
 
 async def run_venue(
@@ -183,6 +204,7 @@ async def run_venue(
         raise RuntimeError("unsupported websockets %s; require >=12,<14" % ws_version)
 
     venue = venue.lower()
+    symbols = [str(s).upper() for s in symbols]
     spec = subscriptions(venue, symbols)
     parser = PARSERS[venue]
     writer = AppendOnlyEventWriter(root)
@@ -193,8 +215,6 @@ async def run_venue(
 
     try:
         while True:
-            # Incremental state is connection-local. A reconnect or sequence gap
-            # invalidates it; never carry a stale book across sessions.
             state = BookDeltaState()
             heartbeat_stop = asyncio.Event()
             try:
@@ -216,6 +236,16 @@ async def run_venue(
                     else:
                         for subscription in spec.get("subscribe_many", []):
                             await ws.send(json.dumps(subscription))
+
+                    binance_buffers = {}
+                    binance_snapshots = {}
+                    binance_ready = set()
+                    if venue == "binance":
+                        loop = asyncio.get_running_loop()
+                        for symbol in symbols:
+                            binance_buffers[symbol] = []
+                            binance_snapshots[symbol] = _start_binance_snapshot_future(loop, symbol)
+
                     hb = asyncio.create_task(_heartbeat(ws, venue, heartbeat_stop))
                     backoff = 1.0
                     try:
@@ -234,11 +264,51 @@ async def run_venue(
                                     health.subscription_acks += 1
                                 elif control == "error":
                                     health.subscription_errors += 1
+
+                                # Binance diff-depth is not normalized into a deep
+                                # book until the official REST snapshot alignment has
+                                # succeeded. Raw wire remains lossless while waiting.
+                                if venue == "binance" and parsed.get("e") == "depthUpdate":
+                                    symbol = canonical_symbol(parsed["s"])
+                                    if symbol not in binance_ready:
+                                        binance_buffers.setdefault(symbol, []).append(
+                                            BufferedDepthMessage(receive_ns, parsed)
+                                        )
+                                        future = binance_snapshots.get(symbol)
+                                        if future is not None and future.done():
+                                            snapshot = future.result()
+                                            try:
+                                                bootstrap_events = normalized_bootstrap_events(
+                                                    snapshot, binance_buffers[symbol], state
+                                                )
+                                            except BinanceBootstrapError:
+                                                if _buffer_all_below_snapshot(snapshot, binance_buffers[symbol]):
+                                                    # Snapshot is ahead of our current
+                                                    # buffer; wait for a bridging delta.
+                                                    continue
+                                                health.book_bootstrap_errors += 1
+                                                binance_buffers[symbol] = []
+                                                binance_snapshots[symbol] = _start_binance_snapshot_future(
+                                                    asyncio.get_running_loop(), symbol
+                                                )
+                                                continue
+                                            raw_writer.append(
+                                                venue,
+                                                snapshot.receive_ts_ns,
+                                                {"_source": "rest_depth_snapshot", "symbol": symbol, "payload": snapshot.raw},
+                                                connection_id,
+                                            )
+                                            for event in bootstrap_events:
+                                                writer.append(event)
+                                                health.observe_event(event)
+                                            health.book_bootstrap_successes += 1
+                                            health.book_bootstrapped_symbols.add(symbol)
+                                            binance_ready.add(symbol)
+                                            binance_buffers[symbol] = []
+                                        continue
+
                                 events = parser(parsed, receive_ns, state)
                                 for event in events:
-                                    # Keep delayed/bootstrap/replay events losslessly.
-                                    # Freshness is a qualification/use-time property,
-                                    # never a reason to destroy observed exchange data.
                                     writer.append(event)
                                     health.observe_event(event)
                             except SequenceGap as exc:
@@ -251,7 +321,6 @@ async def run_venue(
                                     parsed if parsed is not None else raw,
                                     exc,
                                 )
-                                # Fail closed: force reconnect and reconstruct venue state.
                                 raise
                             except Exception as exc:
                                 health.parse_errors += 1
