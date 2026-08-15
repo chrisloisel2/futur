@@ -3,11 +3,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from market_physics_v3.coverage import audit_feed_status
 from market_physics_v3.schema import BookEvent
-from market_physics_v3.state_tape import build_state_tape, concurrent_health_window
+from market_physics_v3.state_tape import build_state_tape, concurrent_health_window, state_tape_summary
 
 NS = 1_000_000_000
 VENUES = ("binance", "bybit", "okx", "hyperliquid")
@@ -80,8 +81,6 @@ def test_state_tape_is_receive_time_causal():
     events = []
     for i, venue in enumerate(VENUES):
         events.extend(_snap(venue, "BTCUSDT", start + 100_000_000 + i, 100.0))
-    # Binance changes market-event time early but qbee receives it after the
-    # first 500ms grid point. It must not change the first state.
     events.extend([
         BookEvent("binance", "BTCUSDT", start + 200_000_000, start + 800_000_000, 2, "modify", "bid", 99.0, 100, source_stream="depth"),
         BookEvent("binance", "BTCUSDT", start + 200_000_000, start + 800_000_000, 2, "modify", "ask", 101.0, 1, source_stream="depth"),
@@ -91,6 +90,29 @@ def test_state_tape_is_receive_time_causal():
     second = frame.iloc[1]
     assert abs(float(first["binance__queue_imbalance_l1"])) < 1e-12
     assert float(second["binance__queue_imbalance_l1"]) > 0.9
+
+
+def test_state_tape_summary_exposes_rejection_causes_and_age_quantiles():
+    frame = pd.DataFrame([
+        {
+            "symbol": "BTCUSDT", "ready": False,
+            "reasons": "hyperliquid:receive_stale,required_deep_venues_missing",
+            "venues_missing": "hyperliquid", "sync_span_ms": 1200.0,
+            "binance__receive_age_ms": 100.0, "hyperliquid__receive_age_ms": 1800.0,
+        },
+        {
+            "symbol": "BTCUSDT", "ready": True,
+            "reasons": "", "venues_missing": "", "sync_span_ms": 500.0,
+            "binance__receive_age_ms": 80.0, "hyperliquid__receive_age_ms": 400.0,
+        },
+    ])
+    window = {"started_ns": 1, "stopped_ns": 2, "duration_s": 1.0, "start_skew_ms": 0.0}
+    out = state_tape_summary(frame, window, 100)
+    assert out["rejection_reason_counts"]["hyperliquid:receive_stale"] == 1
+    assert out["rejection_reason_counts"]["required_deep_venues_missing"] == 1
+    assert out["missing_venue_counts"]["hyperliquid"] == 1
+    assert out["receive_age_ms_quantiles"]["hyperliquid"]["max"] == 1800.0
+    assert out["by_symbol"]["BTCUSDT"]["rejection_reason_counts"]["hyperliquid:receive_stale"] == 1
 
 
 def test_coverage_exposes_book_research_without_faking_tick_readiness():
