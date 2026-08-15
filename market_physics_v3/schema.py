@@ -24,10 +24,15 @@ def _validate_clock(event_ts_ns: int, receive_ts_ns: int) -> None:
 class BookLevel:
     price: float
     qty: float
+    # Number of resting orders represented by this level when a venue exposes
+    # it (for example Hyperliquid WsLevel.n). Missing is not fabricated as zero.
+    order_count: Optional[int] = None
 
     def __post_init__(self) -> None:
         _require_positive("price", self.price)
         _require_positive("qty", self.qty, allow_zero=True)
+        if self.order_count is not None and int(self.order_count) < 0:
+            raise ValueError("order_count must be non-negative")
 
 
 @dataclass(frozen=True)
@@ -42,9 +47,14 @@ class BookEvent:
     price: float
     qty: float
     # Some venues expose the number of resting orders represented by a level.
-    # Keep it optional so venues without this information remain lossless rather
-    # than fabricating a value. Hyperliquid WsLevel.n is preserved here.
     order_count: Optional[int] = None
+    # Explicit wire-stream provenance. This prevents a one-level BBO snapshot
+    # from being mistaken for a deep-book snapshot during replay/readiness.
+    source_stream: Optional[str] = None
+    # Optional update-range metadata retained for deterministic replay audits.
+    # Binance diff depth exposes U/u/pu; OKX exposes prevSeqId/seqId.
+    first_sequence_id: Optional[int] = None
+    previous_sequence_id: Optional[int] = None
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -58,6 +68,10 @@ class BookEvent:
             raise ValueError("sequence_id must be non-negative")
         if self.order_count is not None and int(self.order_count) < 0:
             raise ValueError("order_count must be non-negative")
+        if self.first_sequence_id is not None and int(self.first_sequence_id) < 0:
+            raise ValueError("first_sequence_id must be non-negative")
+        if self.previous_sequence_id is not None and int(self.previous_sequence_id) < -1:
+            raise ValueError("previous_sequence_id must be >= -1")
 
 
 @dataclass(frozen=True)
