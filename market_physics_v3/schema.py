@@ -41,6 +41,10 @@ class BookEvent:
     side: str
     price: float
     qty: float
+    # Some venues expose the number of resting orders represented by a level.
+    # Keep it optional so venues without this information remain lossless rather
+    # than fabricating a value. Hyperliquid WsLevel.n is preserved here.
+    order_count: Optional[int] = None
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -52,6 +56,8 @@ class BookEvent:
         _require_positive("qty", self.qty, allow_zero=True)
         if self.sequence_id < 0:
             raise ValueError("sequence_id must be non-negative")
+        if self.order_count is not None and int(self.order_count) < 0:
+            raise ValueError("order_count must be non-negative")
 
 
 @dataclass(frozen=True)
@@ -64,6 +70,11 @@ class TradeEvent:
     price: float
     qty: float
     aggressor: str
+    # Optional provenance exposed by venues such as Hyperliquid. These fields
+    # are intentionally nullable for CEX feeds that do not expose identities.
+    buyer: Optional[str] = None
+    seller: Optional[str] = None
+    tx_hash: Optional[str] = None
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -71,6 +82,8 @@ class TradeEvent:
             raise ValueError("aggressor must be buy/sell")
         _require_positive("price", self.price)
         _require_positive("qty", self.qty)
+        if not str(self.trade_id):
+            raise ValueError("trade_id cannot be empty")
 
 
 @dataclass(frozen=True)
