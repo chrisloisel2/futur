@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-VALID_BOOK_EVENTS = {"snapshot", "add", "modify", "cancel"}
+VALID_BOOK_EVENTS = {"snapshot", "add", "modify", "remove", "cancel"}
 VALID_OPTION_TYPES = {"call", "put"}
 
 

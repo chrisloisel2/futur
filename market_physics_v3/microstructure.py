@@ -106,10 +106,29 @@ def top_of_book_ofi(previous: BookSnapshot, current: BookSnapshot) -> float:
 
 
 def cancellation_imbalance(events: Sequence[BookEvent]) -> float:
+    """True cancellation imbalance only.
+
+    This intentionally ignores generic L2 level removals. A zero-size L2
+    update can result from execution as well as cancellation, so it must not be
+    promoted to a cancellation signal without L3 attribution.
+    """
     bid_cancel = sum(e.price * e.qty for e in events if e.event_type == "cancel" and e.side == "bid")
     ask_cancel = sum(e.price * e.qty for e in events if e.event_type == "cancel" and e.side == "ask")
     denom = bid_cancel + ask_cancel
     return float((ask_cancel - bid_cancel) / denom) if denom > 0 else 0.0
+
+
+def removal_imbalance(events: Sequence[BookEvent]) -> float:
+    """Imbalance of price levels disappearing from an L2 book.
+
+    This is deliberately named *removal*, not cancellation. It is useful as a
+    liquidity-depletion feature but carries weaker economic attribution than
+    true L3 cancellation events.
+    """
+    bid_remove = sum(e.price * e.qty for e in events if e.event_type == "remove" and e.side == "bid")
+    ask_remove = sum(e.price * e.qty for e in events if e.event_type == "remove" and e.side == "ask")
+    denom = bid_remove + ask_remove
+    return float((ask_remove - bid_remove) / denom) if denom > 0 else 0.0
 
 
 def trade_flow_features(trades: Sequence[TradeEvent], start_mid: float, end_mid: float) -> Dict[str, float]:

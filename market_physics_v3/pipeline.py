@@ -5,7 +5,14 @@ from typing import Dict, Mapping, Optional, Sequence
 
 from .cross_venue import VenueQuote, fair_value
 from .derivatives import cascade_pressure, liquidation_flow, option_surface_state
-from .microstructure import BookSnapshot, book_feature_vector, cancellation_imbalance, top_of_book_ofi, trade_flow_features
+from .microstructure import (
+    BookSnapshot,
+    book_feature_vector,
+    cancellation_imbalance,
+    removal_imbalance,
+    top_of_book_ofi,
+    trade_flow_features,
+)
 from .schema import BookEvent, DerivativeEvent, OptionQuote, TradeEvent
 
 
@@ -52,6 +59,8 @@ class MarketPhysicsStateBuilder:
                 result[prefix + k] = float(v)
             result[prefix + "ofi_l1"] = top_of_book_ofi(window.snapshot_start, window.snapshot_end)
             events = self._causal(window.book_events, asof_ns)
+            # L2 disappearance is not automatically a true cancellation.
+            result[prefix + "remove_imbalance"] = removal_imbalance(events)
             result[prefix + "cancel_imbalance"] = cancellation_imbalance(events)
             trades = self._causal(window.trades, asof_ns)
             flow = trade_flow_features(trades, window.snapshot_start.mid, window.snapshot_end.mid)
