@@ -21,7 +21,7 @@ def test_bybit_all_streams():
  tick=parse_bybit({'topic':'tickers.BTCUSDT','ts':1003,'data':{'symbol':'BTCUSDT','openInterest':'10','fundingRate':'0.01','markPrice':'100','indexPrice':'99'}},R,s); assert len(tick)==4
 
 def test_okx_and_hyperliquid():
- s=BookDeltaState(); o=parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':3,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},R,s); assert len(o)==2
+ s=BookDeltaState(); o=parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':3,'prevSeqId':-1,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},R,s); assert len(o)==2
  tr=parse_okx({'arg':{'channel':'trades','instId':'BTC-USDT-SWAP'},'data':[{'ts':'1001','tradeId':'1','px':'100','sz':'2','side':'sell'}]},R,s)[0]; assert tr.symbol=='BTCUSDT' and tr.aggressor=='sell'
  h=parse_hyperliquid({'channel':'l2Book','data':{'coin':'BTC','time':1002,'levels':[[{'px':'100','sz':'2','n':1}],[{'px':'101','sz':'3','n':1}]]}},R,s); assert len(h)==2 and h[0].symbol=='BTCUSDT'
  ht=parse_hyperliquid({'channel':'trades','data':[{'coin':'BTC','time':1003,'side':'B','px':'100','sz':'1','tid':7}]},R,s)[0]; assert ht.aggressor=='buy'
@@ -30,7 +30,9 @@ def test_okx_and_hyperliquid():
 def test_subscriptions_official_shapes():
  assert 'btcusdt@depth@100ms' in subscriptions('binance',['BTCUSDT'])['subscribe']['params']
  assert 'orderbook.50.BTCUSDT' in subscriptions('bybit',['BTCUSDT'])['subscribe']['args']
- assert subscriptions('okx',['BTCUSDT'])['subscribe']['args'][0]['instId']=='BTC-USDT-SWAP'
+ okx_args=subscriptions('okx',['BTCUSDT'])['subscribe']['args']
+ assert okx_args[0]['instId']=='BTC-USDT-SWAP'
+ assert {'channel':'index-tickers','instId':'BTC-USDT'} in okx_args
  assert len(subscriptions('hyperliquid',['BTCUSDT'])['subscribe_many'])==4
 
 def test_append_only_writer(tmp_path):
@@ -79,9 +81,21 @@ def test_sequence_gap_is_fail_closed():
  import pytest
  from market_physics_v3.collectors.normalize import BookDeltaState, parse_okx, SequenceGap
  s=BookDeltaState(); r=2_000_000_000_000_000_000
- parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':10,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},r,s)
+ parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':10,'prevSeqId':-1,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},r,s)
  with pytest.raises(SequenceGap):
   parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1001','prevSeqId':9,'seqId':11,'bids':[['100','2','0','1']],'asks':[]}]},r,s)
+
+def test_okx_bbo_does_not_advance_books_sequence_and_resets_are_valid():
+ s=BookDeltaState(); r=2_000_000_000_000_000_000
+ parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','prevSeqId':-1,'seqId':10,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},r,s)
+ # Faster BBO snapshot can have a later seqId, but it is not books.prevSeqId.
+ parse_okx({'arg':{'channel':'bbo-tbt','instId':'BTC-USDT-SWAP'},'data':[{'ts':'1001','seqId':23,'bids':[['100','2','0','1']],'asks':[['101','2','0','1']]}]},r,s)
+ assert s.sequence[('okx','BTCUSDT','books')] == 10
+ # Normal books update, no-update heartbeat, then documented maintenance reset.
+ parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1002','prevSeqId':10,'seqId':15,'bids':[['100','2','0','1']],'asks':[]}]},r,s)
+ parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1003','prevSeqId':15,'seqId':15,'bids':[],'asks':[]}]},r,s)
+ parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'update','data':[{'ts':'1004','prevSeqId':15,'seqId':3,'bids':[['99','1','0','1']],'asks':[]}]},r,s)
+ assert s.sequence[('okx','BTCUSDT','books')] == 3
 
 def test_buffered_writer_flushes_on_close(tmp_path):
  from market_physics_v3.collectors.writer import AppendOnlyEventWriter
@@ -124,7 +138,7 @@ def _make_qualified_bybit_fixture(tmp_path, dead_letter=False, clean_shutdown=No
  health_dir.mkdir(parents=True)
  root = tmp_path / 'data'
  for kind in ['book_events','trades','derivatives']:
-  p = root / kind / 'venue=bybit' / 'symbol=BTCUSDT' / 'date=2026-08-15'
+  p = root / 'raw' / kind / 'venue=bybit' / 'symbol=BTCUSDT' / 'date=2026-08-15'
   p.mkdir(parents=True)
   (p / 'events.jsonl').write_text('{}\n')
  raw = root / 'raw_wire' / 'venue=bybit' / 'date=2026-08-15'
@@ -175,6 +189,16 @@ def test_venue_qualifier_blocks_dead_letters_and_unclean_shutdown(tmp_path):
  assert not report['qualified']
  assert 'nonempty_dead_letters' in report['reasons']
  assert 'unclean_shutdown' in report['reasons']
+
+
+def test_venue_qualifier_new_health_does_not_reuse_stale_type_files(tmp_path):
+ from market_physics_v3.collectors.qualification import qualify_venue
+ root, health_dir = _make_qualified_bybit_fixture(tmp_path, clean_shutdown=True)
+ hp=health_dir/'bybit.json'; health=json.loads(hp.read_text())
+ health.update({'book_events':100,'trade_events':0,'derivative_events':100})
+ hp.write_text(json.dumps(health))
+ report=qualify_venue('bybit',str(root),str(health_dir))
+ assert not report['qualified'] and 'missing_trades' in report['reasons']
 
 
 def test_cli_scripts_bootstrap_repo_root():
