@@ -349,3 +349,58 @@ this document and against `reports/DATA_V2_READINESS.json` (still
 No detection threshold, cooldown, or classification cutoff number changed
 in this amendment either — items 8-14 are, again, CORRECTNESS fixes to
 match this document's stated intent, not new methodology.
+
+**2026-08-15, Data V2 Phase 2 (source-qualified event research)** — same
+standing as rounds 3-4: made **before** this scanner has ever been run
+against real data (confirmed: no `reports/EVENT_SCANNER_V1_RESULTS.json`
+or equivalent exists anywhere in this repository's history at this
+timestamp), a methodological correction to the DATA READINESS GATE this
+document depends on, not a detection threshold/family/horizon change.
+
+15. **Supersedes the "Order of operations" section's literal
+    `DATA_V2_READY: true` gate.** The four P0 backfills (OI Vision 5m,
+    aggTrades flow 1m/5m) have been exhaustively re-attempted and reached
+    their real ceiling at the Binance Vision source (`reports/
+    DATA_V2_ACQUISITION_FREEZE.json`: `DATA_V2_ACQUISITION_EXHAUSTED:
+    true`, `remaining_fetchable_periods: 0` across all 6 datasets) —
+    funding sits at 307/312 (98.4%, gate >=99%) and OI at 258/312 (82.7%,
+    gate >=95%), both honestly, permanently below their full-312-symbol
+    gates for reasons proven source-side (see FUNDING_FAILURE_AUDIT.json
+    and the acquisition freeze), not backfill incompleteness. A literal
+    reading of this section would block the scanner on millions of clean,
+    causally-exploitable observations indefinitely over a minority of
+    symbols/periods a real, exhausted source cannot provide. Replaced with
+    `reports/EVENT_RESEARCH_READINESS.json`: each family's own
+    `<FAMILY>_DATA_READY` gate (`data_v2/events/eligibility.py` +
+    `reports/EVENT_FEATURE_ELIGIBILITY_REPORT.json`) requires that family's
+    ACTUAL observations (per (symbol, timestamp) `eligible_<family>` mask
+    — existence of every required column, causal availability, and full
+    strict-prior warmup, never a PnL-derived criterion) be exhaustively
+    source-qualified, its universe/mask frozen before any economic result,
+    and its population representative (>=3 calendar years, >=100 symbols
+    where possible). `EVENT_PANEL_READY` (construction-integrity gate:
+    duplicate_pk, causality, grid regularity, PIT bounds, warmup, future-
+    joins, label-leak — all independent of full-universe coverage) is
+    still required for every family, unconditionally. A family whose own
+    `<FAMILY>_DATA_READY` is False is not scanned by this run; a family
+    scanned with `family_data_status: LIMITED` (present but under one of
+    the two diversity thresholds) is scanned and its own report carries
+    that caveat explicitly, per `reports/EVENT_RESEARCH_READINESS.json`.
+16. Detected events are filtered to `eligible_<family>==True` at the
+    triggering (symbol, timestamp) before labelling, for every family
+    uniformly. For DELEVERAGING/CROWDING/FORCED_FLOW_REVERSAL this is
+    provably a no-op given the existing detectors' own NaN-propagating
+    mask logic (verified: every column `eligible_<family>` requires is
+    already a hard AND-term, directly or via an equivalent rolling-stat
+    NaN, inside `detect_deleveraging`/`detect_crowding`/
+    `detect_forced_flow_reversal`) — applied anyway for an explicit,
+    auditable guarantee rather than an implicit equivalence. For
+    RELATIVE_VALUE_DISLOCATION it is NOT a no-op: `detect_relative_value_
+    dislocation` has no cross-sectional population-size floor of its own,
+    so this filter is what actually enforces `eligibility.
+    MIN_CROSS_SECTION_SIZE` (30, pre-registered, structural — see
+    `reports/EVENT_ELIGIBLE_UNIVERSE_V1.json`) before any RVD event may be
+    labelled or counted.
+
+No detection threshold, cooldown, or classification cutoff number changed
+in this amendment either.

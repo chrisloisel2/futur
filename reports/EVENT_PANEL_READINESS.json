@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14 05:10:36.538533+00:00",
+  "generated_at": "2026-08-15 03:14:18.391530+00:00",
   "symbols_materialized": 312,
   "symbols_scanned": 312,
   "row_count": 105450197,
@@ -8,8 +8,8 @@
   "coverage_by_source": {
     "close": 0.9995,
     "oi": 0.8726,
-    "aggressive_buy_usd": 0.8891,
-    "funding_rate": 0.9911,
+    "aggressive_buy_usd": 0.9524,
+    "funding_rate": 0.9971,
     "basis": 0.7659,
     "residual_return_1h": 0.9029
   },
@@ -35,8 +35,8 @@
     "row_count_positive": true
   },
   "EVENT_PANEL_READY": true,
-  "schema_hash": "d88d93c0c2b2cd4193b495aa81e8a8c3ae6cc589d731792ae5d32e25b3ec875f",
-  "provenance_hash": "1a376ec3f32456086883cab23a75c2132d88171e0dc10b9c8cf60ba8b4dfb862",
+  "schema_hash": "052e497e78bea10aeefac1d0e761b1c5408a7f6d5fafe13094c7beb0ca2a74b0",
+  "provenance_hash": "e39bedf169613bf4b3d9b2364c072402cb814d840cfd3de64828d06dde7add0b",
   "per_symbol": {
     "0GUSDT": {
       "rows": 91395,
