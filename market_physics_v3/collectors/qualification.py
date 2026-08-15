@@ -82,13 +82,27 @@ def qualify_venue(
         "trades": int(health.get("trade_events", 0) or 0),
         "derivatives": int(health.get("derivative_events", 0) or 0),
     }
+    has_typed_health = any(
+        key in health for key in ("book_events", "trade_events", "derivative_events")
+    )
+
+    # canonical_partition() stores normalized records below root/raw/<kind>/...
+    # (raw_wire is a separate pre-parse replay tree). Keep these namespaces
+    # distinct so the qualifier verifies what the writer actually persisted.
     normalized_files = {}
     for kind in ("book_events", "trades", "derivatives"):
         files = _nonempty_files(
-            (root_path / kind / ("venue=" + venue)).glob("**/events.jsonl")
+            (root_path / "raw" / kind / ("venue=" + venue)).glob("**/events.jsonl")
         )
         normalized_files[kind] = files
-        if type_counts[kind] <= 0 and not files:
+        if has_typed_health:
+            # New health telemetry is run-local; stale files from an earlier smoke
+            # must never satisfy a missing event family in the current run.
+            if type_counts[kind] <= 0:
+                reasons.append("missing_%s" % kind)
+        elif not files:
+            # Backward compatibility for the first Bybit smoke, whose health file
+            # predates per-type counters. Storage evidence is required instead.
             reasons.append("missing_%s" % kind)
 
     raw_files = _nonempty_files(
