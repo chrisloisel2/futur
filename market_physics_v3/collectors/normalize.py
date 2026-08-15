@@ -10,8 +10,8 @@ def _ns_ms(x): return int(x) * MS
 def _clock(event_ms, receive_ns):
     event_ns = _ns_ms(event_ms)
     # Local receive clock can be microscopically before an exchange timestamp because of
-    # clock skew. Preserve causality by clamping only the recorded receive timestamp;
-    # raw collector metadata should separately monitor NTP skew.
+    # clock skew. Preserve causality by rejecting it; health/NTP telemetry should explain
+    # any violation instead of silently time-travelling the event.
     recv=int(receive_ns)
     if recv < event_ns:
         raise ValueError('negative transport latency; check NTP clock sync')
@@ -76,8 +76,9 @@ def canonical_symbol(symbol):
 
 def _level(row):
     if isinstance(row,dict):
-        return float(row['px']), float(row['sz'])
-    return float(row[0]), float(row[1])
+        n=row.get('n')
+        return float(row['px']), float(row['sz']), (None if n is None else int(n))
+    return float(row[0]), float(row[1]), None
 
 def _book_rows(venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,snapshot=False,reset_state=True):
     symbol=canonical_symbol(symbol)
@@ -86,8 +87,8 @@ def _book_rows(venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,snapsho
     event_ns, recv=_clock(event_ms,receive_ns); out=[]
     for side, rows in [('bid',bids or []),('ask',asks or [])]:
         for row in rows:
-            px,qty=_level(row); typ=state.classify(venue,symbol,side,px,qty,snapshot)
-            out.append(BookEvent(venue,symbol,event_ns,recv,int(sequence),typ,side,px,qty))
+            px,qty,order_count=_level(row); typ=state.classify(venue,symbol,side,px,qty,snapshot)
+            out.append(BookEvent(venue,symbol,event_ns,recv,int(sequence),typ,side,px,qty,order_count))
     return out
 
 
@@ -198,16 +199,32 @@ def parse_hyperliquid(msg, receive_ns, state):
     ch=msg.get('channel'); data=msg.get('data'); out=[]
     if ch=='l2Book' and data:
         sym=data['coin']; event_ms=data['time']; levels=data['levels']; seq=event_ms
+        # Hyperliquid WsLevel is a snapshot level with px/sz/n. Preserve n so
+        # we can model queue fragmentation and average resting order size.
         out += _book_rows('hyperliquid',sym,event_ms,receive_ns,seq,levels[0],levels[1],state,True)
     elif ch=='bbo' and data:
-        sym=data['coin']; event_ms=data['time']; bbo=data.get('bbo') or [None,None]; bids=[] if bbo[0] is None else [[bbo[0]['px'],bbo[0]['sz']]]; asks=[] if bbo[1] is None else [[bbo[1]['px'],bbo[1]['sz']]]
+        sym=data['coin']; event_ms=data['time']; bbo=data.get('bbo') or [None,None]
+        bids=[] if bbo[0] is None else [bbo[0]]; asks=[] if bbo[1] is None else [bbo[1]]
         out += _book_rows('hyperliquid',sym,event_ms,receive_ns,event_ms,bids,asks,state,True,False)
     elif ch=='trades':
         for d in data or []:
             event_ns,recv=_clock(d['time'],receive_ns); side=str(d['side']).upper(); ag='buy' if side in {'B','BUY'} else 'sell'
-            out.append(TradeEvent('hyperliquid',canonical_symbol(d['coin']),event_ns,recv,str(d.get('tid',d.get('hash'))),float(d['px']),float(d['sz']),ag))
+            symbol=canonical_symbol(d['coin'])
+            tid=d.get('tid')
+            # Hyperliquid documents tid as only 50-bit; globally unique identity
+            # requires (block_time, coin, tid). Never dedupe on tid alone.
+            trade_id=(('%s:%s:%s' % (d['time'],symbol,tid)) if tid is not None else str(d.get('hash')))
+            users=d.get('users') or [None,None]
+            buyer=users[0] if len(users)>0 else None; seller=users[1] if len(users)>1 else None
+            out.append(TradeEvent(
+                'hyperliquid',symbol,event_ns,recv,trade_id,float(d['px']),float(d['sz']),ag,
+                buyer=buyer,seller=seller,tx_hash=d.get('hash')
+            ))
     elif ch=='activeAssetCtx' and data:
-        ctx=data['ctx']; sym=canonical_symbol(data['coin']); event_ms=int(ctx.get('time') or msg.get('time') or receive_ns//MS); event_ns,recv=_clock(event_ms,receive_ns)
+        ctx=data['ctx']; sym=canonical_symbol(data['coin'])
+        # WsActiveAssetCtx has no exchange timestamp in the public type. Use the
+        # local receive timestamp as the conservative point-in-time availability.
+        event_ms=int(ctx.get('time') or msg.get('time') or receive_ns//MS); event_ns,recv=_clock(event_ms,receive_ns)
         for kind,key in [('funding','funding'),('open_interest','openInterest'),('mark','markPx'),('index','oraclePx')]:
             if ctx.get(key) not in (None,''):
                 out.append(DerivativeEvent('hyperliquid',sym,event_ns,recv,kind,float(ctx[key])))
