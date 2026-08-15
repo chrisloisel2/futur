@@ -2,7 +2,15 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
+
+# When executed as `python scripts/<name>.py`, Python puts `scripts/` rather
+# than the repository root on sys.path.  Bootstrap the repo explicitly before
+# importing the research package so CLI behaviour matches pytest behaviour.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import pandas as pd
 
