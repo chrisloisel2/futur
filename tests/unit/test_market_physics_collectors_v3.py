@@ -117,3 +117,19 @@ def test_binance_bbo_snapshot_does_not_clear_deeper_delta_state():
  assert ('binance','BTCUSDT','bid',99.0) in s.levels
  parse_binance({'e':'bookTicker','E':1001,'s':'BTCUSDT','u':2,'b':'100','B':'2','a':'101','A':'3'},r,s)
  assert ('binance','BTCUSDT','bid',99.0) in s.levels
+
+
+def test_cli_scripts_bootstrap_repo_root():
+ import subprocess
+ import sys
+ from pathlib import Path
+ root = Path(__file__).resolve().parents[2]
+ for rel in ["scripts/build_market_physics_external_v3.py", "scripts/collect_market_physics_v3.py"]:
+  p = subprocess.run(
+   [sys.executable, str(root / rel), "--help"],
+   cwd=str(root),
+   stdout=subprocess.PIPE,
+   stderr=subprocess.PIPE,
+   text=True,
+  )
+  assert p.returncode == 0, "%s failed: %s" % (rel, p.stderr)
