@@ -14,6 +14,16 @@ FEATURE_GROUPS={"A_CORE":CORE,"B_NORMALIZED":CORE+RAW,"C_STATE":CORE+RAW+STATE}
 class Fold:
     test_year:int; fit_mask:np.ndarray; calib_mask:np.ndarray; test_mask:np.ndarray
 
+def unique_names(names):
+    """Preserve order while removing duplicate requested columns."""
+    return list(dict.fromkeys(names))
+
+def require_unique_columns(d,where="frame"):
+    """Fail closed if an upstream join/selection produced duplicate labels."""
+    dup=d.columns[d.columns.duplicated()].unique().tolist()
+    if dup:
+        raise ValueError(f"{where} contains duplicate column names: {dup}")
+
 def build_forward_target(logret_5m,horizon_bars=H):
     parts=[num(logret_5m).shift(-k) for k in range(1,horizon_bars+1)];m=pd.concat(parts,axis=1);ok=m.notna().all(axis=1);return pd.Series(np.expm1(m.sum(axis=1,min_count=horizon_bars)),index=logret_5m.index).where(ok),ok
 
@@ -32,6 +42,7 @@ def ratioz(s):
     x=num(s); return z(np.log(x.where(x>0)))
 
 def enrich(frame):
+    require_unique_columns(frame,"raw symbol frame")
     d=frame.sort_values("timestamp").reset_index(drop=True).copy()
     need=["open","close","residual_logret_5m","residual_return_15m","residual_return_1h","residual_std_30d","oi_delta_pct_1h","aggressive_buy_usd","aggressive_sell_usd","CVD","funding_rate_percentile_90d","basis_z_1d","basis_z_7d","volume","sum_open_interest_value","count_toptrader_long_short_ratio","sum_toptrader_long_short_ratio","count_long_short_ratio","sum_taker_long_short_vol_ratio","trade_count","large_trade_buy_usd","large_trade_sell_usd","avg_trade_size_usd","p95_trade_size_usd","buy_vwap","sell_vwap"]
     for c in need:
@@ -86,9 +97,12 @@ def select_rolling(cal_ts,cal_edge,test_ts,test_edge,q=.95,days=30,min_hist=200)
 
 def fit_fold(d,features,fold,max_train=600000,max_cal=300000,max_test=600000,q=.95,seed=31):
     from sklearn.ensemble import HistGradientBoostingRegressor
-    cols=list(dict.fromkeys(features+["timestamp","symbol","target_residual_ret_1h","target_standardized_1h","ex_ante_sigma_1h","decision_cost_x1","realized_cost_x1","realized_cost_x2"])); fit,cal,test=[d.loc[m,cols].replace([np.inf,-np.inf],np.nan).dropna(subset=["target_standardized_1h","ex_ante_sigma_1h"]) for m in [fold.fit_mask,fold.calib_mask,fold.test_mask]]
+    require_unique_columns(d,"alpha discovery dataset")
+    features=unique_names(features)
+    cols=unique_names(features+["timestamp","symbol","target_residual_ret_1h","target_standardized_1h","ex_ante_sigma_1h","decision_cost_x1","realized_cost_x1","realized_cost_x2"])
+    fit,cal,test=[d.loc[m,cols].replace([np.inf,-np.inf],np.nan).dropna(subset=["target_standardized_1h","ex_ante_sigma_1h"]) for m in [fold.fit_mask,fold.calib_mask,fold.test_mask]]
     if min(len(fit),len(cal),len(test))<200:return {"test_year":fold.test_year,"status":"INSUFFICIENT_ROWS","n_fit":len(fit),"n_calib":len(cal),"n_test":len(test)}
-    used=[c for c in features if c in fit and fit[c].notna().mean()>=.10]
+    used=[c for c in features if c in fit.columns and fit[c].notna().mean()>=.10]
     if not used:return {"test_year":fold.test_year,"status":"NO_USABLE_FEATURES"}
     fit,cal,test=balanced_cap(fit,max_train,seed+fold.test_year),balanced_cap(cal,max_cal,seed+100+fold.test_year),balanced_cap(test,max_test,seed+200+fold.test_year)
     model=HistGradientBoostingRegressor(learning_rate=.04,max_iter=160,max_leaf_nodes=15,min_samples_leaf=80,l2_regularization=2.,random_state=seed); model.fit(fit[used],fit.target_standardized_1h)
