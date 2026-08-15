@@ -10,9 +10,6 @@ def _ns_ms(x): return int(x) * MS
 
 def _clock(event_ms, receive_ns):
     event_ns = _ns_ms(event_ms)
-    # Local receive clock can be microscopically before an exchange timestamp because of
-    # clock skew. Preserve causality by rejecting it; health/NTP telemetry should explain
-    # any violation instead of silently time-travelling the event.
     recv=int(receive_ns)
     if recv < event_ns:
         raise ValueError('negative transport latency; check NTP clock sync')
@@ -31,9 +28,6 @@ class BookDeltaState:
         self.levels={k:v for k,v in self.levels.items() if k[:2] != prefix}
         self.initialized.add(prefix)
     def validate_sequence(self, venue, symbol, sequence, previous=None, snapshot=False, stream=None):
-        # Sequence continuity belongs to a feed stream, not merely a venue/symbol.
-        # This matters on OKX where bbo-tbt snapshots are interleaved with the
-        # slower incremental books channel and must not advance books.prevSeqId.
         key=(venue,symbol,stream or '__default__')
         seq=int(sequence)
         old=self.sequence.get(key)
@@ -95,8 +89,6 @@ def _book_rows(
     for side, rows in [('bid',bids or []),('ask',asks or [])]:
         for row in rows:
             px,qty,order_count=_level(row)
-            # BBO is an independent one-level view; do not let it mutate the
-            # state used to classify the deeper incremental order book.
             typ='snapshot' if is_bbo and snapshot else state.classify(venue,symbol,side,px,qty,snapshot)
             out.append(BookEvent(
                 venue,symbol,event_ns,recv,int(sequence),typ,side,px,qty,
@@ -118,9 +110,6 @@ def parse_binance(msg, receive_ns, state):
             source_stream='depth',first_sequence_id=d.get('U'),previous_sequence_id=d.get('pu')
         )
     elif typ=='bookTicker':
-        # BBO is a full one-level snapshot. Some USD-M payload variants carry
-        # E/T while others only expose update id; without exchange time we use
-        # receive time as the conservative availability timestamp.
         sym=canonical_symbol(d['s']); event_ms=int(d.get('T') or d.get('E') or receive_ns//MS); seq=int(d.get('u') or event_ms)
         out += _book_rows(
             'binance',sym,event_ms,receive_ns,seq,[[d['b'],d['B']]],[[d['a'],d['A']]],state,True,False,
@@ -128,15 +117,19 @@ def parse_binance(msg, receive_ns, state):
         )
     elif typ in {'aggTrade','trade'}:
         event_ns,recv=_clock(d.get('T',d['E']),receive_ns)
-        # m=True means buyer is maker, therefore aggressor is sell.
-        out.append(TradeEvent('binance',d['s'],event_ns,recv,str(d.get('a',d.get('t'))),float(d['p']),float(d['q']),'sell' if d.get('m') else 'buy'))
+        out.append(TradeEvent(
+            'binance',canonical_symbol(d['s']),event_ns,recv,
+            str(d.get('a',d.get('t'))),float(d['p']),float(d['q']),
+            'sell' if d.get('m') else 'buy',
+            source_stream=typ,
+            granularity=('aggregate' if typ=='aggTrade' else 'individual'),
+        ))
     elif typ=='forceOrder':
         o=d['o']; event_ns,recv=_clock(o.get('T',d['E']),receive_ns); px=float(o.get('ap') or o.get('p'))
-        # SELL liquidation order closes a long; BUY closes a short.
         side='long' if o['S']=='SELL' else 'short'; value=float(o['q'])*px
-        out.append(DerivativeEvent('binance',o['s'],event_ns,recv,'liquidation',value,side,px))
+        out.append(DerivativeEvent('binance',canonical_symbol(o['s']),event_ns,recv,'liquidation',value,side,px))
     elif typ=='markPriceUpdate':
-        event_ns,recv=_clock(d['E'],receive_ns); sym=d['s']
+        event_ns,recv=_clock(d['E'],receive_ns); sym=canonical_symbol(d['s'])
         for k,field in [('mark','p'),('index','i'),('funding','r')]:
             if field in d and d[field] not in (None,''):
                 out.append(DerivativeEvent('binance',sym,event_ns,recv,k,float(d[field])))
@@ -153,17 +146,20 @@ def parse_bybit(msg, receive_ns, state):
     elif topic.startswith('publicTrade.'):
         for d in msg.get('data',[]):
             event_ns,recv=_clock(d['T'],receive_ns)
-            out.append(TradeEvent('bybit',d['s'],event_ns,recv,str(d.get('i',d['T'])),float(d['p']),float(d['v']),'buy' if d['S']=='Buy' else 'sell'))
+            out.append(TradeEvent(
+                'bybit',canonical_symbol(d['s']),event_ns,recv,str(d.get('i',d['T'])),
+                float(d['p']),float(d['v']),'buy' if d['S']=='Buy' else 'sell',
+                source_stream='publicTrade',granularity='individual'
+            ))
     elif topic.startswith('allLiquidation.'):
         for d in msg.get('data',[]):
             event_ns,recv=_clock(d['T'],receive_ns); px=float(d['p']); value=float(d['v'])*px
-            # Bybit documents Buy as a liquidated long position.
             side='long' if d['S']=='Buy' else 'short'
-            out.append(DerivativeEvent('bybit',d['s'],event_ns,recv,'liquidation',value,side,px))
+            out.append(DerivativeEvent('bybit',canonical_symbol(d['s']),event_ns,recv,'liquidation',value,side,px))
     elif topic.startswith('tickers.'):
         rows=msg.get('data',[]); rows=rows if isinstance(rows,list) else [rows]
         for d in rows:
-            event_ns,recv=_clock(msg['ts'],receive_ns); sym=d.get('symbol') or topic.split('.',1)[1]
+            event_ns,recv=_clock(msg['ts'],receive_ns); sym=canonical_symbol(d.get('symbol') or topic.split('.',1)[1])
             for kind,key in [('open_interest','openInterest'),('funding','fundingRate'),('mark','markPrice'),('index','indexPrice')]:
                 if d.get(key) not in (None,''):
                     out.append(DerivativeEvent('bybit',sym,event_ns,recv,kind,float(d[key])))
@@ -191,13 +187,8 @@ def parse_okx(msg, receive_ns, state):
         if channel in {'books','books5','bbo-tbt','books50-l2-tbt','books-l2-tbt'}:
             snapshot=msg.get('action')=='snapshot' or channel in {'books5','bbo-tbt'}
             seq=d.get('seqId',event_ms)
-            # OKX prevSeqId continuity applies to incremental channels. bbo-tbt
-            # and books5 are independent snapshot feeds and must not advance the
-            # sequence cursor used to validate the slower incremental books feed.
             if channel in {'books','books50-l2-tbt','books-l2-tbt'}:
-                state.validate_sequence(
-                    'okx',sym,seq,d.get('prevSeqId'),snapshot,stream=channel
-                )
+                state.validate_sequence('okx',sym,seq,d.get('prevSeqId'),snapshot,stream=channel)
             reset_state = channel not in {'books5','bbo-tbt'}
             out += _book_rows(
                 'okx',sym,event_ms,receive_ns,seq,d.get('bids'),d.get('asks'),
@@ -206,7 +197,10 @@ def parse_okx(msg, receive_ns, state):
             )
         elif channel=='trades':
             event_ns,recv=_clock(event_ms,receive_ns)
-            out.append(TradeEvent('okx',sym,event_ns,recv,str(d.get('tradeId',event_ms)),float(d['px']),float(d['sz']),'buy' if d['side']=='buy' else 'sell'))
+            out.append(TradeEvent(
+                'okx',sym,event_ns,recv,str(d.get('tradeId',event_ms)),float(d['px']),float(d['sz']),
+                'buy' if d['side']=='buy' else 'sell',source_stream='trades',granularity='individual'
+            ))
         elif channel=='open-interest':
             event_ns,recv=_clock(event_ms,receive_ns); out.append(DerivativeEvent('okx',sym,event_ns,recv,'open_interest',float(d.get('oiCcy') or d['oi'])))
         elif channel=='funding-rate':
@@ -222,8 +216,6 @@ def parse_hyperliquid(msg, receive_ns, state):
     ch=msg.get('channel'); data=msg.get('data'); out=[]
     if ch=='l2Book' and data:
         sym=data['coin']; event_ms=data['time']; levels=data['levels']; seq=event_ms
-        # Hyperliquid WsLevel is a snapshot level with px/sz/n. Preserve n so
-        # we can model queue fragmentation and average resting order size.
         out += _book_rows('hyperliquid',sym,event_ms,receive_ns,seq,levels[0],levels[1],state,True,source_stream='l2Book')
     elif ch=='bbo' and data:
         sym=data['coin']; event_ms=data['time']; bbo=data.get('bbo') or [None,None]
@@ -232,21 +224,16 @@ def parse_hyperliquid(msg, receive_ns, state):
     elif ch=='trades':
         for d in data or []:
             event_ns,recv=_clock(d['time'],receive_ns); side=str(d['side']).upper(); ag='buy' if side in {'B','BUY'} else 'sell'
-            symbol=canonical_symbol(d['coin'])
-            tid=d.get('tid')
-            # Hyperliquid documents tid as only 50-bit; globally unique identity
-            # requires (block_time, coin, tid). Never dedupe on tid alone.
+            symbol=canonical_symbol(d['coin']); tid=d.get('tid')
             trade_id=(('%s:%s:%s' % (d['time'],symbol,tid)) if tid is not None else str(d.get('hash')))
             users=d.get('users') or [None,None]
             buyer=users[0] if len(users)>0 else None; seller=users[1] if len(users)>1 else None
             out.append(TradeEvent(
                 'hyperliquid',symbol,event_ns,recv,trade_id,float(d['px']),float(d['sz']),ag,
-                buyer=buyer,seller=seller,tx_hash=d.get('hash')
+                buyer=buyer,seller=seller,tx_hash=d.get('hash'),source_stream='trades',granularity='individual'
             ))
     elif ch=='activeAssetCtx' and data:
         ctx=data['ctx']; sym=canonical_symbol(data['coin'])
-        # WsActiveAssetCtx has no exchange timestamp in the public type. Use the
-        # local receive timestamp as the conservative point-in-time availability.
         event_ms=int(ctx.get('time') or msg.get('time') or receive_ns//MS); event_ns,recv=_clock(event_ms,receive_ns)
         for kind,key in [('funding','funding'),('open_interest','openInterest'),('mark','markPx'),('index','oraclePx')]:
             if ctx.get(key) not in (None,''):
