@@ -50,6 +50,8 @@ class BookDeltaState:
             typ='remove'; self.levels.pop(key,None)
         elif old is None and known:
             typ='add'; self.levels[key]=q
+        elif old is None:
+            typ='update'; self.levels[key]=q
         else:
             typ='modify'; self.levels[key]=q
         return typ
@@ -72,9 +74,9 @@ def _level(row):
         return float(row['px']), float(row['sz'])
     return float(row[0]), float(row[1])
 
-def _book_rows(venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,snapshot=False):
+def _book_rows(venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,snapshot=False,reset_state=True):
     symbol=canonical_symbol(symbol)
-    if snapshot:
+    if snapshot and reset_state:
         state.reset_snapshot(venue,symbol)
     event_ns, recv=_clock(event_ms,receive_ns); out=[]
     for side, rows in [('bid',bids or []),('ask',asks or [])]:
@@ -95,7 +97,7 @@ def parse_binance(msg, receive_ns, state):
         # E/T while others only expose update id; without exchange time we use
         # receive time as the conservative availability timestamp.
         sym=canonical_symbol(d['s']); event_ms=int(d.get('T') or d.get('E') or receive_ns//MS); seq=int(d.get('u') or event_ms)
-        out += _book_rows('binance',sym,event_ms,receive_ns,seq,[[d['b'],d['B']]],[[d['a'],d['A']]],state,True)
+        out += _book_rows('binance',sym,event_ms,receive_ns,seq,[[d['b'],d['B']]],[[d['a'],d['A']]],state,True,False)
     elif typ in {'aggTrade','trade'}:
         event_ns,recv=_clock(d.get('T',d['E']),receive_ns)
         # m=True means buyer is maker, therefore aggressor is sell.
@@ -182,7 +184,7 @@ def parse_hyperliquid(msg, receive_ns, state):
         out += _book_rows('hyperliquid',sym,event_ms,receive_ns,seq,levels[0],levels[1],state,True)
     elif ch=='bbo' and data:
         sym=data['coin']; event_ms=data['time']; bbo=data.get('bbo') or [None,None]; bids=[] if bbo[0] is None else [[bbo[0]['px'],bbo[0]['sz']]]; asks=[] if bbo[1] is None else [[bbo[1]['px'],bbo[1]['sz']]]
-        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,event_ms,bids,asks,state,True)
+        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,event_ms,bids,asks,state,True,False)
     elif ch=='trades':
         for d in data or []:
             event_ns,recv=_clock(d['time'],receive_ns); side=str(d['side']).upper(); ag='buy' if side in {'B','BUY'} else 'sell'

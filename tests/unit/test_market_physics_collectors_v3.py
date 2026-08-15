@@ -8,7 +8,7 @@ R=2_000_000_000_000_000_000
 def test_binance_depth_trade_liq_mark():
  s=BookDeltaState();
  b=parse_binance({'e':'depthUpdate','E':1000,'s':'BTCUSDT','u':2,'b':[['100','2']],'a':[['101','3']]},R,s)
- assert len(b)==2 and b[0].event_type=='modify'
+ assert len(b)==2 and b[0].event_type=='update'
  t=parse_binance({'e':'aggTrade','E':1001,'T':1001,'s':'BTCUSDT','a':9,'p':'100','q':'2','m':True},R,s)[0]; assert t.aggressor=='sell'
  l=parse_binance({'e':'forceOrder','E':1002,'o':{'T':1002,'s':'BTCUSDT','S':'SELL','q':'2','p':'99','ap':'98'}},R,s)[0]; assert l.side=='long' and l.value==196
  m=parse_binance({'e':'markPriceUpdate','E':1003,'s':'BTCUSDT','p':'100','i':'99','r':'0.0001'},R,s); assert {x.kind for x in m}=={'mark','index','funding'}
@@ -109,3 +109,11 @@ def test_okx_liquidation_detail_timestamp_and_position_side():
  out=parse_okx({'arg':{'channel':'liquidation-orders','instType':'SWAP'},'data':[{'instId':'BTC-USDT-SWAP','details':[{'ts':'1005','bkPx':'90','sz':'2','posSide':'long','side':'sell'}]}]},r,s)
  assert len(out)==1
  assert out[0].side=='long' and out[0].value==180.0 and out[0].symbol=='BTCUSDT'
+
+
+def test_binance_bbo_snapshot_does_not_clear_deeper_delta_state():
+ s=BookDeltaState(); r=2_000_000_000_000_000_000
+ parse_binance({'e':'depthUpdate','E':1000,'s':'BTCUSDT','u':1,'b':[['99','3']],'a':[['102','4']]},r,s)
+ assert ('binance','BTCUSDT','bid',99.0) in s.levels
+ parse_binance({'e':'bookTicker','E':1001,'s':'BTCUSDT','u':2,'b':'100','B':'2','a':'101','A':'3'},r,s)
+ assert ('binance','BTCUSDT','bid',99.0) in s.levels

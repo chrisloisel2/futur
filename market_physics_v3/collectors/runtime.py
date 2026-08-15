@@ -96,10 +96,18 @@ async def run_venue(
 ) -> None:
     try:
         import websockets
+        from importlib.metadata import version as package_version
     except ImportError as exc:
         raise RuntimeError(
             "Market Physics live collectors require websockets>=12,<14 in a dedicated research environment"
         ) from exc
+    ws_version = package_version("websockets")
+    try:
+        ws_major = int(ws_version.split(".", 1)[0])
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("cannot parse installed websockets version: %r" % ws_version) from exc
+    if ws_major < 12 or ws_major >= 14:
+        raise RuntimeError("unsupported websockets %s; require >=12,<14" % ws_version)
 
     venue = venue.lower()
     spec = subscriptions(venue, symbols)
