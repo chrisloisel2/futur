@@ -17,8 +17,11 @@ code. This script contains ZERO detection/classification logic of its own;
 it only orchestrates loading, filtering, and reporting.
 
 Preconditions checked before running (refuses to run otherwise):
-  - reports/PREUNBLINDING_FREEZE.json exists (this run's own git_sha must
-    match its frozen git_sha -- no code changed between freeze and this run)
+  - reports/PREUNBLINDING_FREEZE.json exists, and its frozen scanner_
+    source_sha256/protocol_sha256/cost_model_sha256 match a live re-hash
+    right now (not literal git_sha equality -- committing the freeze/
+    receipt themselves, pure data, necessarily advances HEAD past what
+    the freeze could have recorded about itself)
   - reports/EVENT_PANEL_READINESS.json: EVENT_PANEL_READY == true
   - reports/EVENT_RESEARCH_READINESS.json: at least one family *_DATA_READY
 
@@ -52,6 +55,9 @@ from data_v2.events import detectors as det  # noqa: E402
 from data_v2.events import labels as lbl  # noqa: E402
 from data_v2.events import scanner as scn  # noqa: E402
 from data_v2.events.schema import REQUIRED_COLUMNS  # noqa: E402
+from scripts.build_preunblinding_freeze import (  # noqa: E402
+    COST_MODEL_FILE, PROTOCOL_FILE, SCANNER_SOURCE_FILES, _sha256_file, _sha256_files,
+)
 
 PANEL_DIR = ROOT / "data_v2/normalized/event_feature_panel/venue=binance"
 INSTRUMENT_MASTER = ROOT / "data_v2/instruments/instrument_master.parquet"
@@ -123,10 +129,23 @@ def main() -> None:
         print("FATAL: reports/PREUNBLINDING_FREEZE.json does not exist -- freeze before scanning (section 18).")
         sys.exit(1)
     freeze = json.loads(FREEZE_PATH.read_text())
-    if freeze.get("git_sha") != git_sha:
-        print(f"FATAL: PREUNBLINDING_FREEZE git_sha={freeze.get('git_sha')} != current HEAD={git_sha} "
-              f"-- code changed since freeze, refusing to scan.")
-        sys.exit(1)
+    # NOT a literal git_sha equality check: committing the freeze/receipt
+    # JSON files themselves (pure data/report artifacts, zero scanner
+    # logic) necessarily advances HEAD past whatever commit the freeze
+    # could have recorded (it can't hash a commit that includes itself) --
+    # found the hard way, this run's first attempt FATAL'd on exactly that.
+    # What must actually not have changed is the scanning logic itself:
+    # re-hash it now and compare against the frozen values.
+    live_hashes = {
+        "scanner_source_sha256": _sha256_files(SCANNER_SOURCE_FILES),
+        "protocol_sha256": _sha256_file(PROTOCOL_FILE),
+        "cost_model_sha256": _sha256_file(COST_MODEL_FILE),
+    }
+    for key, live in live_hashes.items():
+        frozen = freeze.get(key)
+        if frozen != live:
+            print(f"FATAL: {key} changed since freeze (frozen={frozen}, live={live}) -- refusing to scan.")
+            sys.exit(1)
     if freeze.get("scanner_executed_before_freeze") or freeze.get("economic_results_seen_before_freeze"):
         print("FATAL: freeze record claims economic results were already seen -- refusing a second 'first' run.")
         sys.exit(1)
