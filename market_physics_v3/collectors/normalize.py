@@ -29,17 +29,22 @@ class BookDeltaState:
         prefix=(venue,symbol)
         self.levels={k:v for k,v in self.levels.items() if k[:2] != prefix}
         self.initialized.add(prefix)
-    def validate_sequence(self, venue, symbol, sequence, previous=None, snapshot=False):
-        key=(venue,symbol)
+    def validate_sequence(self, venue, symbol, sequence, previous=None, snapshot=False, stream=None):
+        # Sequence continuity belongs to a feed stream, not merely a venue/symbol.
+        # This matters on OKX where bbo-tbt snapshots are interleaved with the
+        # slower incremental books channel and must not advance books.prevSeqId.
+        key=(venue,symbol,stream or '__default__')
         seq=int(sequence)
         old=self.sequence.get(key)
         if snapshot:
             self.sequence[key]=seq
             return
         if previous is not None and old is not None and int(previous) != old:
-            raise SequenceGap('%s %s sequence gap: prev=%s expected=%s' % (venue,symbol,previous,old))
+            raise SequenceGap('%s %s %s sequence gap: prev=%s expected=%s' % (
+                venue,symbol,stream or 'default',previous,old))
         if previous is None and old is not None and seq <= old:
-            raise SequenceGap('%s %s non-monotonic sequence: %s <= %s' % (venue,symbol,seq,old))
+            raise SequenceGap('%s %s %s non-monotonic sequence: %s <= %s' % (
+                venue,symbol,stream or 'default',seq,old))
         self.sequence[key]=seq
     def classify(self, venue, symbol, side, price, qty, snapshot=False):
         key=(venue,symbol,side,float(price)); old=self.levels.get(key)
@@ -161,8 +166,20 @@ def parse_okx(msg, receive_ns, state):
         if not event_ms: continue
         if channel in {'books','books5','bbo-tbt','books50-l2-tbt','books-l2-tbt'}:
             snapshot=msg.get('action')=='snapshot' or channel in {'books5','bbo-tbt'}
-            seq=d.get('seqId',event_ms); state.validate_sequence('okx',sym,seq,d.get('prevSeqId'),snapshot)
-            out += _book_rows('okx',sym,event_ms,receive_ns,seq,d.get('bids'),d.get('asks'),state,snapshot)
+            seq=d.get('seqId',event_ms)
+            # OKX prevSeqId continuity applies to incremental channels. bbo-tbt
+            # and books5 are independent snapshot feeds and must not advance the
+            # sequence cursor used to validate the slower incremental books feed.
+            if channel in {'books','books50-l2-tbt','books-l2-tbt'}:
+                state.validate_sequence(
+                    'okx',sym,seq,d.get('prevSeqId'),snapshot,stream=channel
+                )
+            # Snapshot-only BBO/books5 must not wipe the deeper books state.
+            reset_state = channel not in {'books5','bbo-tbt'}
+            out += _book_rows(
+                'okx',sym,event_ms,receive_ns,seq,d.get('bids'),d.get('asks'),
+                state,snapshot,reset_state
+            )
         elif channel=='trades':
             event_ns,recv=_clock(event_ms,receive_ns)
             out.append(TradeEvent('okx',sym,event_ns,recv,str(d.get('tradeId',event_ms)),float(d['px']),float(d['sz']),'buy' if d['side']=='buy' else 'sell'))
