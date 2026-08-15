@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Dict, Iterable, List, Mapping, Sequence, Tuple
 
 import pandas as pd
 
@@ -135,8 +134,6 @@ def _grid(start_ns: int, stop_ns: int, cadence_ms: int):
     step_ns = int(cadence_ms) * 1_000_000
     if step_ns <= 0:
         raise ValueError("cadence_ms must be positive")
-    # Start one full cadence into the overlap so every venue has a chance to
-    # ingest its initial snapshot before the first strict synchronized state.
     t = int(start_ns) + step_ns
     while t <= int(stop_ns):
         yield t
@@ -220,21 +217,58 @@ def build_state_tape(
     return pd.DataFrame(rows)
 
 
+def _token_counts(series: pd.Series) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for raw in series.fillna("").astype(str):
+        for token in [x.strip() for x in raw.split(",") if x.strip()]:
+            counts[token] = counts.get(token, 0) + 1
+    return dict(sorted(counts.items(), key=lambda x: (-x[1], x[0])))
+
+
+def _finite_quantiles(series: pd.Series) -> Dict[str, float]:
+    values = pd.to_numeric(series, errors="coerce").dropna()
+    values = values[values.map(lambda x: float(x) != float("inf"))]
+    if values.empty:
+        return {}
+    return {
+        "p50": float(values.quantile(0.50)),
+        "p90": float(values.quantile(0.90)),
+        "p95": float(values.quantile(0.95)),
+        "p99": float(values.quantile(0.99)),
+        "max": float(values.max()),
+    }
+
+
 def state_tape_summary(frame: pd.DataFrame, window: Mapping[str, object], cadence_ms: int) -> Dict[str, object]:
     if frame.empty:
         ready_rows = 0
         total_rows = 0
         by_symbol = {}
+        reason_counts = {}
+        missing_venue_counts = {}
+        receive_age_quantiles = {}
+        sync_span_quantiles = {}
     else:
         total_rows = int(len(frame))
         ready_rows = int(frame["ready"].astype(bool).sum())
+        rejected = frame.loc[~frame["ready"].astype(bool)]
+        reason_counts = _token_counts(rejected["reasons"]) if "reasons" in rejected else {}
+        missing_venue_counts = _token_counts(rejected["venues_missing"]) if "venues_missing" in rejected else {}
+        sync_span_quantiles = _finite_quantiles(frame["sync_span_ms"]) if "sync_span_ms" in frame else {}
+        receive_age_quantiles = {}
+        for col in sorted(x for x in frame.columns if x.endswith("__receive_age_ms")):
+            receive_age_quantiles[col[: -len("__receive_age_ms")]] = _finite_quantiles(frame[col])
+
         by_symbol = {}
         for symbol, group in frame.groupby("symbol"):
+            rejected_symbol = group.loc[~group["ready"].astype(bool)]
             by_symbol[str(symbol)] = {
                 "rows": int(len(group)),
                 "ready_rows": int(group["ready"].astype(bool).sum()),
                 "ready_fraction": float(group["ready"].astype(bool).mean()),
                 "median_sync_span_ms": float(group.loc[group["ready"], "sync_span_ms"].median()) if group["ready"].any() else None,
+                "rejection_reason_counts": _token_counts(rejected_symbol["reasons"]) if "reasons" in rejected_symbol else {},
+                "missing_venue_counts": _token_counts(rejected_symbol["venues_missing"]) if "venues_missing" in rejected_symbol else {},
             }
     return {
         "window": {
@@ -247,5 +281,9 @@ def state_tape_summary(frame: pd.DataFrame, window: Mapping[str, object], cadenc
         "rows": total_rows,
         "ready_rows": ready_rows,
         "ready_fraction": float(ready_rows / total_rows) if total_rows else 0.0,
+        "rejection_reason_counts": reason_counts,
+        "missing_venue_counts": missing_venue_counts,
+        "sync_span_ms_quantiles": sync_span_quantiles,
+        "receive_age_ms_quantiles": receive_age_quantiles,
         "by_symbol": by_symbol,
     }
