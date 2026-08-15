@@ -21,6 +21,7 @@ from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
 
 
 DEFAULT_FRESH_EVENT_MAX_LAG_MS = 5000.0
+BINANCE_MAX_BUFFER_MESSAGES = 20_000
 
 
 class CollectorHealth:
@@ -57,7 +58,9 @@ class CollectorHealth:
         self.last_exception = None
         self.book_bootstrap_successes = 0
         self.book_bootstrap_errors = 0
+        self.book_bootstrap_buffer_resets = 0
         self.book_bootstrapped_symbols = set()
+        self.last_book_bootstrap_exception = None
 
     def observe_event(self, event) -> None:
         self.events += 1
@@ -127,7 +130,9 @@ class CollectorHealth:
             "last_exception": self.last_exception,
             "book_bootstrap_successes": int(self.book_bootstrap_successes),
             "book_bootstrap_errors": int(self.book_bootstrap_errors),
+            "book_bootstrap_buffer_resets": int(self.book_bootstrap_buffer_resets),
             "book_bootstrapped_symbols": sorted(self.book_bootstrapped_symbols),
+            "last_book_bootstrap_exception": self.last_book_bootstrap_exception,
         }
 
 
@@ -178,6 +183,14 @@ def _start_binance_snapshot_future(loop, symbol: str):
 def _buffer_all_below_snapshot(snapshot, buffered) -> bool:
     depths = [x for x in buffered if x.payload.get("e") == "depthUpdate"]
     return bool(depths) and all(int(x.payload.get("u", -1)) < snapshot.last_update_id for x in depths)
+
+
+def _restart_binance_snapshot(binance_snapshots, symbol, health, error=None):
+    health.book_bootstrap_errors += 1
+    health.last_book_bootstrap_exception = None if error is None else str(error)
+    binance_snapshots[symbol] = _start_binance_snapshot_future(
+        asyncio.get_running_loop(), symbol
+    )
 
 
 async def run_venue(
@@ -265,31 +278,50 @@ async def run_venue(
                                 elif control == "error":
                                     health.subscription_errors += 1
 
-                                # Binance diff-depth is not normalized into a deep
-                                # book until the official REST snapshot alignment has
-                                # succeeded. Raw wire remains lossless while waiting.
                                 if venue == "binance" and parsed.get("e") == "depthUpdate":
                                     symbol = canonical_symbol(parsed["s"])
                                     if symbol not in binance_ready:
-                                        binance_buffers.setdefault(symbol, []).append(
-                                            BufferedDepthMessage(receive_ns, parsed)
-                                        )
+                                        buffer = binance_buffers.setdefault(symbol, [])
+                                        buffer.append(BufferedDepthMessage(receive_ns, parsed))
+                                        if len(buffer) > BINANCE_MAX_BUFFER_MESSAGES:
+                                            # Raw wire already contains every message, so
+                                            # resetting the in-memory bootstrap buffer is
+                                            # lossless while preventing unbounded RAM.
+                                            health.book_bootstrap_buffer_resets += 1
+                                            health.last_book_bootstrap_exception = "bootstrap buffer limit exceeded"
+                                            binance_buffers[symbol] = []
+                                            _restart_binance_snapshot(
+                                                binance_snapshots, symbol, health,
+                                                "bootstrap buffer limit exceeded",
+                                            )
+                                            continue
+
                                         future = binance_snapshots.get(symbol)
                                         if future is not None and future.done():
-                                            snapshot = future.result()
+                                            try:
+                                                snapshot = future.result()
+                                            except Exception as exc:
+                                                # Snapshot transport/HTTP failure is not
+                                                # a WebSocket parser error. Keep buffered
+                                                # depth and retry independently.
+                                                _restart_binance_snapshot(
+                                                    binance_snapshots, symbol, health, exc
+                                                )
+                                                continue
                                             try:
                                                 bootstrap_events = normalized_bootstrap_events(
                                                     snapshot, binance_buffers[symbol], state
                                                 )
-                                            except BinanceBootstrapError:
+                                            except BinanceBootstrapError as exc:
                                                 if _buffer_all_below_snapshot(snapshot, binance_buffers[symbol]):
-                                                    # Snapshot is ahead of our current
-                                                    # buffer; wait for a bridging delta.
                                                     continue
-                                                health.book_bootstrap_errors += 1
+                                                # No valid bridge or broken buffered pu
+                                                # chain: restart the snapshot process. Raw
+                                                # wire remains the canonical lossless source.
+                                                health.book_bootstrap_buffer_resets += 1
                                                 binance_buffers[symbol] = []
-                                                binance_snapshots[symbol] = _start_binance_snapshot_future(
-                                                    asyncio.get_running_loop(), symbol
+                                                _restart_binance_snapshot(
+                                                    binance_snapshots, symbol, health, exc
                                                 )
                                                 continue
                                             raw_writer.append(
@@ -303,6 +335,7 @@ async def run_venue(
                                                 health.observe_event(event)
                                             health.book_bootstrap_successes += 1
                                             health.book_bootstrapped_symbols.add(symbol)
+                                            health.last_book_bootstrap_exception = None
                                             binance_ready.add(symbol)
                                             binance_buffers[symbol] = []
                                         continue
