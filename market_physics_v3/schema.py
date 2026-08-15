@@ -46,13 +46,11 @@ class BookEvent:
     side: str
     price: float
     qty: float
-    # Some venues expose the number of resting orders represented by a level.
     order_count: Optional[int] = None
     # Explicit wire-stream provenance. This prevents a one-level BBO snapshot
     # from being mistaken for a deep-book snapshot during replay/readiness.
     source_stream: Optional[str] = None
     # Optional update-range metadata retained for deterministic replay audits.
-    # Binance diff depth exposes U/u/pu; OKX exposes prevSeqId/seqId.
     first_sequence_id: Optional[int] = None
     previous_sequence_id: Optional[int] = None
 
@@ -89,6 +87,11 @@ class TradeEvent:
     buyer: Optional[str] = None
     seller: Optional[str] = None
     tx_hash: Optional[str] = None
+    # Wire stream and physical granularity must survive normalization. In
+    # particular Binance aggTrade is event-level but aggregates fills belonging
+    # to one taker order and therefore is not a true trade-by-trade tape.
+    source_stream: Optional[str] = None
+    granularity: Optional[str] = None  # e.g. "individual" or "aggregate"
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -98,6 +101,8 @@ class TradeEvent:
         _require_positive("qty", self.qty)
         if not str(self.trade_id):
             raise ValueError("trade_id cannot be empty")
+        if self.granularity is not None and self.granularity not in {"individual", "aggregate"}:
+            raise ValueError("trade granularity must be individual/aggregate")
 
 
 @dataclass(frozen=True)
