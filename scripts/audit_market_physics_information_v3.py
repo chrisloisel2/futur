@@ -37,12 +37,24 @@ def main():
         min_duration_hours=args.min_duration_hours,
         allow_short_smoke=args.allow_short_smoke,
         block_shuffle_repeats=args.block_shuffle_repeats,
-        max_block_shortlist=args.max_block_shortlist,
+        max_block_shortlist=(0 if args.allow_short_smoke else args.max_block_shortlist),
     )
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     tests = result.pop("tests")
     mechanisms = result.pop("mechanisms")
+
+    # A short smoke exists only to test the pipeline. It is never allowed to
+    # emit a research candidate, even if a chance correlation looks strong.
+    if result.get("verdict") == "SHORT_SMOKE_ONLY":
+        if "symbol_candidate" in tests:
+            tests["symbol_candidate"] = False
+        if "classification" in mechanisms:
+            mechanisms["classification"] = "NO_CANDIDATE_YET"
+            mechanisms["candidate_symbols"] = 0
+        result["general_candidates"] = 0
+        result["single_symbol_watches"] = 0
+
     tests_path = out / "feature_tests.csv"
     mechanisms_path = out / "mechanisms.csv"
     summary_path = out / "SUMMARY.json"
