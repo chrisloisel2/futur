@@ -32,7 +32,13 @@ def subscriptions(venue, symbols):
     if venue == "okx":
         args = []
         for s in syms:
-            inst = s[:-4] + "-USDT-SWAP" if s.endswith("USDT") else s
+            if s.endswith("USDT"):
+                base = s[:-4]
+                inst = base + "-USDT-SWAP"
+                index_inst = base + "-USDT"
+            else:
+                inst = s
+                index_inst = s
             args += [
                 {"channel": "books", "instId": inst},
                 {"channel": "bbo-tbt", "instId": inst},
@@ -40,6 +46,9 @@ def subscriptions(venue, symbols):
                 {"channel": "open-interest", "instId": inst},
                 {"channel": "funding-rate", "instId": inst},
                 {"channel": "mark-price", "instId": inst},
+                # OKX index-tickers uses the underlying index identifier
+                # (e.g. BTC-USDT), not the SWAP instrument id.
+                {"channel": "index-tickers", "instId": index_inst},
             ]
         # Liquidation orders are subscribed by instrument type, not duplicated per symbol.
         args.append({"channel": "liquidation-orders", "instType": "SWAP"})
