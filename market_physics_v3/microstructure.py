@@ -13,16 +13,36 @@ class BookSnapshot:
     event_ts_ns: int
     bids: Tuple[BookLevel, ...]
     asks: Tuple[BookLevel, ...]
+    receive_ts_ns: int = 0
 
     def __post_init__(self) -> None:
         if not self.bids or not self.asks:
             raise ValueError("snapshot needs both bid and ask")
+        if self.event_ts_ns <= 0:
+            raise ValueError("snapshot event_ts_ns must be positive")
+        if self.receive_ts_ns < 0:
+            raise ValueError("snapshot receive_ts_ns cannot be negative")
+        if self.receive_ts_ns and self.receive_ts_ns < self.event_ts_ns:
+            raise ValueError("snapshot receive_ts_ns cannot precede event_ts_ns")
         bids = tuple(sorted(self.bids, key=lambda x: x.price, reverse=True))
         asks = tuple(sorted(self.asks, key=lambda x: x.price))
         if bids[0].price >= asks[0].price:
             raise ValueError("crossed or locked book")
         object.__setattr__(self, "bids", bids)
         object.__setattr__(self, "asks", asks)
+
+    @property
+    def available_ts_ns(self) -> int:
+        """Earliest point-in-time at which this snapshot may be used.
+
+        Legacy/synthetic snapshots without receive time fall back to market
+        event time. Live reconstructed snapshots must carry receive_ts_ns.
+        """
+        return int(self.receive_ts_ns or self.event_ts_ns)
+
+    @property
+    def transport_lag_ms(self) -> float:
+        return max(0.0, (self.available_ts_ns - int(self.event_ts_ns)) / 1e6)
 
     @property
     def best_bid(self) -> BookLevel:
@@ -195,6 +215,7 @@ def book_feature_vector(snapshot: BookSnapshot, levels: int = 10) -> Dict[str, f
         "sell_notional_10bps": snapshot.notional_to_move_bps("sell", 10.0),
         "bid_weighted_distance_bps": snapshot.weighted_depth_distance_bps("bid", levels),
         "ask_weighted_distance_bps": snapshot.weighted_depth_distance_bps("ask", levels),
+        "snapshot_transport_lag_ms": snapshot.transport_lag_ms,
     }
 
 
