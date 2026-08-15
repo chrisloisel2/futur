@@ -4,7 +4,7 @@ import argparse,json,sys
 from pathlib import Path
 import numpy as np,pandas as pd
 ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT))
-from research.alpha_discovery_v31.pipeline import FEATURE_GROUPS,enrich,context,common_mask,add_costs,cost,fit_fold,summarize,make_year_fold
+from research.alpha_discovery_v31.pipeline import FEATURE_GROUPS,enrich,context,common_mask,add_costs,cost,fit_fold,summarize,make_year_fold,unique_names,require_unique_columns
 from scripts.run_alpha_discovery_v3 import load_symbol_frame
 from data_v2.events.residuals import _causal_2factor_betas,_freeze_daily,BETA_WINDOW_BARS
 
@@ -41,9 +41,10 @@ def main():
         f=load_symbol_frame(s)
         if f is None or f.empty:continue
         e=enrich(f);e=e.merge(ctx,on='timestamp',how='left',validate='many_to_one');e=add_hedged_costs(e,s,ticks,btc0,eth0);m=common_mask(e,a.stress_threshold,a.background_hours)
-        cols=['timestamp','target_residual_ret_1h','target_standardized_1h','ex_ante_sigma_1h','decision_cost_x1','decision_cost_x2','realized_cost_x1','realized_cost_x2','beta_btc','beta_eth','hedge_gross_notional']+feats; cols=[c for c in cols if c in e];x=e.loc[m,cols].copy();x['symbol']=s;parts.append(x);print(f'[{i:3}/{len(syms)}] {s:14} rows={len(e):8,d} candidates={len(x):7,d}',flush=True)
+        base=['timestamp','target_residual_ret_1h','target_standardized_1h','ex_ante_sigma_1h','decision_cost_x1','decision_cost_x2','realized_cost_x1','realized_cost_x2','beta_btc','beta_eth','hedge_gross_notional']
+        cols=unique_names(base+feats); cols=[c for c in cols if c in e.columns];x=e.loc[m,cols].copy();require_unique_columns(x,f'{s} candidate sample');x['symbol']=s;parts.append(x);print(f'[{i:3}/{len(syms)}] {s:14} rows={len(e):8,d} candidates={len(x):7,d}',flush=True)
     if not parts:raise SystemExit('No candidate rows')
-    d=pd.concat(parts,ignore_index=True).sort_values('timestamp').reset_index(drop=True);years=[int(x) for x in a.test_years.split(',')]
+    d=pd.concat(parts,ignore_index=True).sort_values('timestamp').reset_index(drop=True);require_unique_columns(d,'combined candidate dataset');years=[int(x) for x in a.test_years.split(',')]
     result={'protocol':{'version':'3.1','target':'next-bar residual 1h standardized by strict-prior 7d volatility','common_sampling':'A-only fixed cadence + first core stress crossing','selection':'rolling causal predicted gross edge minus decision-time x1 cost','costs':'main leg + abs(beta) BTC/ETH hedge legs; realized at next-open; x2 stress','feature_groups':FEATURE_GROUPS,'test_years':years},'dataset':{'rows':len(d),'symbols':int(d.symbol.nunique()),'start':str(d.timestamp.min()),'end':str(d.timestamp.max())},'groups':{}}
     for g,features in FEATURE_GROUPS.items():
         fs=[]
