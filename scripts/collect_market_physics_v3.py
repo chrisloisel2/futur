@@ -3,6 +3,15 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import sys
+from pathlib import Path
+
+# Direct script execution starts with `scripts/` on sys.path.  Add the repo
+# root before importing market_physics_v3 so the collector works outside
+# pytest and without requiring callers to export PYTHONPATH manually.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from market_physics_v3.collectors.runtime import run_many
 
