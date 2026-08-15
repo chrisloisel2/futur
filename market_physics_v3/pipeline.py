@@ -27,14 +27,19 @@ class VenueWindow:
 
 
 class MarketPhysicsStateBuilder:
-    """Build a causal feature state from events whose event_ts_ns <= asof_ns."""
+    """Build a strict point-in-time state from information already received.
+
+    Market event time describes when an exchange event happened. Research
+    availability is receive time. A delayed event whose event_ts_ns is in the
+    past must not leak into a state built before receive_ts_ns.
+    """
 
     def __init__(self, cross_venue_half_life_ms: float = 500.0) -> None:
         self.cross_venue_half_life_ms = float(cross_venue_half_life_ms)
 
     @staticmethod
-    def _causal(seq, asof_ns):
-        return [x for x in seq if x.event_ts_ns <= asof_ns]
+    def _available(seq, asof_ns):
+        return [x for x in seq if int(x.receive_ts_ns) <= int(asof_ns)]
 
     def build(
         self,
@@ -51,22 +56,24 @@ class MarketPhysicsStateBuilder:
         result = {"asof_ns": float(asof_ns)}
         quotes = []
         for window in venue_windows:
-            if window.snapshot_end.event_ts_ns > asof_ns:
-                raise ValueError("snapshot_end is from the future")
+            if window.snapshot_start.available_ts_ns > asof_ns:
+                raise ValueError("snapshot_start was not yet received")
+            if window.snapshot_end.available_ts_ns > asof_ns:
+                raise ValueError("snapshot_end was not yet received")
             prefix = window.venue.lower() + "__"
             book = book_feature_vector(window.snapshot_end)
             for k, v in book.items():
                 result[prefix + k] = float(v)
             result[prefix + "ofi_l1"] = top_of_book_ofi(window.snapshot_start, window.snapshot_end)
-            events = self._causal(window.book_events, asof_ns)
+            events = self._available(window.book_events, asof_ns)
             # L2 disappearance is not automatically a true cancellation.
             result[prefix + "remove_imbalance"] = removal_imbalance(events)
             result[prefix + "cancel_imbalance"] = cancellation_imbalance(events)
-            trades = self._causal(window.trades, asof_ns)
+            trades = self._available(window.trades, asof_ns)
             flow = trade_flow_features(trades, window.snapshot_start.mid, window.snapshot_end.mid)
             for k, v in flow.items():
                 result[prefix + k] = float(v)
-            deriv = self._causal(window.derivatives, asof_ns)
+            deriv = self._available(window.derivatives, asof_ns)
             liq = liquidation_flow(deriv)
             for k, v in liq.items():
                 result[prefix + k] = float(v)
@@ -74,13 +81,23 @@ class MarketPhysicsStateBuilder:
                 window.snapshot_end.notional_to_move_bps("buy", 10.0)
                 + window.snapshot_end.notional_to_move_bps("sell", 10.0)
             )
-            quotes.append(VenueQuote(window.venue, window.snapshot_end.event_ts_ns, window.snapshot_end.mid, window.snapshot_end.spread_bps, depth_usd))
+            # Quote market timestamp is kept for staleness weighting, but the
+            # snapshot itself was admitted only after receive-time PIT checks.
+            quotes.append(
+                VenueQuote(
+                    window.venue,
+                    window.snapshot_end.event_ts_ns,
+                    window.snapshot_end.mid,
+                    window.snapshot_end.spread_bps,
+                    depth_usd,
+                )
+            )
         cv = fair_value(quotes, asof_ns, self.cross_venue_half_life_ms)
         result["cross__fair_value"] = float(cv["fair_value"])
         result["cross__dispersion_bps"] = float(cv["dispersion_bps"])
         for venue, value in cv["dislocation_bps"].items():
             result["cross__%s_dislocation_bps" % venue.lower()] = float(value)
-        causal_options = [q for q in option_quotes if q.event_ts_ns <= asof_ns]
+        causal_options = [q for q in option_quotes if int(q.receive_ts_ns) <= int(asof_ns)]
         if causal_options and spot_for_options is not None:
             for k, v in option_surface_state(causal_options, spot_for_options).items():
                 result["options__" + k] = float(v)
