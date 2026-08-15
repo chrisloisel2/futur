@@ -119,12 +119,74 @@ def test_binance_bbo_snapshot_does_not_clear_deeper_delta_state():
  assert ('binance','BTCUSDT','bid',99.0) in s.levels
 
 
+def _make_qualified_bybit_fixture(tmp_path, dead_letter=False, clean_shutdown=None):
+ health_dir = tmp_path / 'health'
+ health_dir.mkdir(parents=True)
+ root = tmp_path / 'data'
+ for kind in ['book_events','trades','derivatives']:
+  p = root / kind / 'venue=bybit' / 'symbol=BTCUSDT' / 'date=2026-08-15'
+  p.mkdir(parents=True)
+  (p / 'events.jsonl').write_text('{}\n')
+ raw = root / 'raw_wire' / 'venue=bybit' / 'date=2026-08-15'
+ raw.mkdir(parents=True)
+ (raw / 'messages.jsonl').write_text('{}\n')
+ if dead_letter:
+  dl = root / 'dead_letters' / 'venue=bybit' / 'date=2026-08-15'
+  dl.mkdir(parents=True)
+  (dl / 'errors.jsonl').write_text('{"error":"x"}\n')
+ health = {
+  'connected': False,
+  'events': 7452,
+  'idle_ms': 201.0,
+  'last_event_ns': 1786807575553000000,
+  'last_exception': None,
+  'last_receive_ns': 1786807575641313493,
+  'messages': 2244,
+  'parse_errors': 0,
+  'reconnects': 0,
+  'sequence_gaps': 0,
+  'subscription_acks': 2,
+  'subscription_errors': 0,
+  'venue': 'bybit',
+ }
+ if clean_shutdown is not None:
+  health['clean_shutdown'] = clean_shutdown
+ (health_dir / 'bybit.json').write_text(json.dumps(health))
+ return root, health_dir
+
+
+def test_venue_qualifier_promotes_proven_live_feed(tmp_path):
+ import pandas as pd
+ from market_physics_v3.collectors.qualification import promote_manifest, qualify_venue
+ root, health_dir = _make_qualified_bybit_fixture(tmp_path)
+ report = qualify_venue('bybit', str(root), str(health_dir))
+ assert report['qualified'] and report['reasons'] == []
+ manifest = tmp_path / 'manifest.csv'
+ pd.DataFrame([{'feed':'bybit','status':'UNKNOWN','notes':''}]).to_csv(manifest,index=False)
+ assert promote_manifest(report, str(manifest))
+ row = pd.read_csv(manifest).iloc[0]
+ assert row['status'] == 'EVENT_LEVEL'
+
+
+def test_venue_qualifier_blocks_dead_letters_and_unclean_shutdown(tmp_path):
+ from market_physics_v3.collectors.qualification import qualify_venue
+ root, health_dir = _make_qualified_bybit_fixture(tmp_path, dead_letter=True, clean_shutdown=False)
+ report = qualify_venue('bybit', str(root), str(health_dir))
+ assert not report['qualified']
+ assert 'nonempty_dead_letters' in report['reasons']
+ assert 'unclean_shutdown' in report['reasons']
+
+
 def test_cli_scripts_bootstrap_repo_root():
  import subprocess
  import sys
  from pathlib import Path
  root = Path(__file__).resolve().parents[2]
- for rel in ["scripts/build_market_physics_external_v3.py", "scripts/collect_market_physics_v3.py"]:
+ for rel in [
+  "scripts/build_market_physics_external_v3.py",
+  "scripts/collect_market_physics_v3.py",
+  "scripts/qualify_market_physics_feed_v3.py",
+ ]:
   p = subprocess.run(
    [sys.executable, str(root / rel), "--help"],
    cwd=str(root),
