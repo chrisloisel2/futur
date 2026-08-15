@@ -43,11 +43,7 @@ class SynchronizedState:
 
 
 class SynchronizedBookEngine:
-    """Receive-time synchronized local-book engine for live/replay research.
-
-    Feed events in nondecreasing receive_ts_ns order. The engine never rewinds;
-    for historical replay, call state() as the receive-time cursor advances.
-    """
+    """Receive-time synchronized local-book engine for live/replay research."""
 
     def __init__(self) -> None:
         self.books: Dict[Tuple[str, str], LocalOrderBook] = {}
@@ -78,13 +74,26 @@ class SynchronizedBookEngine:
         asof_ns: int,
         required_venues: Sequence[str] = ("binance", "bybit", "okx", "hyperliquid"),
         require_deep: bool = True,
-        max_receive_age_ms: float = 1500.0,
-        max_transport_lag_ms: float = 5000.0,
-        max_sync_span_ms: float = 1000.0,
+        max_receive_age_ms: Optional[float] = 1500.0,
+        max_transport_lag_ms: Optional[float] = 5000.0,
+        max_sync_span_ms: Optional[float] = 1000.0,
         min_venues: int = 2,
         half_life_ms: float = 500.0,
         transport_half_life_ms: float = 2000.0,
     ) -> SynchronizedState:
+        """Build one cross-venue state.
+
+        `require_deep=True` is the strict legacy/depth gate: all required venues
+        must expose reconstructible deep state and optional receive-age/sync-span
+        limits are enforced.
+
+        `require_deep=False` uses `price_snapshot()`: explicit BBO when present,
+        otherwise a one-level view derived from a proven deep book.  Callers may
+        set receive-age and sync-span limits to None for change-driven quote
+        streams, while still enforcing transport-lag quality.  This does not
+        make deep features fresh; it only answers whether a point-in-time price
+        state is available.
+        """
         symbol = str(symbol).upper()
         asof_ns = int(asof_ns)
         quotes = []
@@ -104,7 +113,7 @@ class SynchronizedBookEngine:
                 missing.append(venue)
                 reasons.append("%s:deep_not_ready" % venue)
                 continue
-            snap = book.snapshot(prefer_deep=require_deep)
+            snap = book.deep_snapshot() if require_deep else book.price_snapshot()
             if snap is None:
                 missing.append(venue)
                 reasons.append("%s:no_snapshot" % venue)
@@ -114,11 +123,11 @@ class SynchronizedBookEngine:
                 reasons.append("%s:not_yet_received" % venue)
                 continue
             receive_age_ms = (asof_ns - snap.available_ts_ns) / 1e6
-            if receive_age_ms > float(max_receive_age_ms):
+            if max_receive_age_ms is not None and receive_age_ms > float(max_receive_age_ms):
                 missing.append(venue)
                 reasons.append("%s:receive_stale" % venue)
                 continue
-            if snap.transport_lag_ms > float(max_transport_lag_ms):
+            if max_transport_lag_ms is not None and snap.transport_lag_ms > float(max_transport_lag_ms):
                 missing.append(venue)
                 reasons.append("%s:transport_stale" % venue)
                 continue
@@ -143,8 +152,11 @@ class SynchronizedBookEngine:
         )
         if len(used) < int(min_venues):
             reasons.append("insufficient_venues")
-        if receive_times and sync_span_ms > float(max_sync_span_ms):
-            reasons.append("sync_span_too_wide")
+        sync_ok = True
+        if receive_times and max_sync_span_ms is not None:
+            sync_ok = sync_span_ms <= float(max_sync_span_ms)
+            if not sync_ok:
+                reasons.append("sync_span_too_wide")
 
         if not quotes:
             return SynchronizedState(
@@ -171,7 +183,7 @@ class SynchronizedBookEngine:
         )
         ready = (
             len(used) >= int(min_venues)
-            and sync_span_ms <= float(max_sync_span_ms)
+            and sync_ok
             and (not require_deep or len(used) == len(required_venues))
         )
         if require_deep and len(used) != len(required_venues):
