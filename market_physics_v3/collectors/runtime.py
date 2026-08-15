@@ -13,9 +13,13 @@ from market_physics_v3.collectors.writer import AppendOnlyEventWriter, RawMessag
 from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
 
 
+DEFAULT_FRESH_EVENT_MAX_LAG_MS = 5000.0
+
+
 class CollectorHealth:
-    def __init__(self, venue: str):
+    def __init__(self, venue: str, fresh_event_max_lag_ms: float = DEFAULT_FRESH_EVENT_MAX_LAG_MS):
         self.venue = venue
+        self.fresh_event_max_lag_ms = float(fresh_event_max_lag_ms)
         self.started_ns = time.time_ns()
         self.stopped_ns = 0
         self.clean_shutdown = False
@@ -26,6 +30,17 @@ class CollectorHealth:
         self.book_events = 0
         self.trade_events = 0
         self.derivative_events = 0
+        self.fresh_events = 0
+        self.stale_events = 0
+        self.fresh_book_events = 0
+        self.fresh_trade_events = 0
+        self.fresh_derivative_events = 0
+        self.stale_book_events = 0
+        self.stale_trade_events = 0
+        self.stale_derivative_events = 0
+        self.max_book_lag_ms = 0.0
+        self.max_trade_lag_ms = 0.0
+        self.max_derivative_lag_ms = 0.0
         self.parse_errors = 0
         self.sequence_gaps = 0
         self.subscription_acks = 0
@@ -37,17 +52,40 @@ class CollectorHealth:
     def observe_event(self, event) -> None:
         self.events += 1
         self.last_event_ns = max(self.last_event_ns, int(event.event_ts_ns))
+        lag_ms = max(0.0, (int(event.receive_ts_ns) - int(event.event_ts_ns)) / 1e6)
+        fresh = lag_ms <= self.fresh_event_max_lag_ms
+        if fresh:
+            self.fresh_events += 1
+        else:
+            self.stale_events += 1
+
         if isinstance(event, BookEvent):
             self.book_events += 1
+            self.max_book_lag_ms = max(self.max_book_lag_ms, lag_ms)
+            if fresh:
+                self.fresh_book_events += 1
+            else:
+                self.stale_book_events += 1
         elif isinstance(event, TradeEvent):
             self.trade_events += 1
+            self.max_trade_lag_ms = max(self.max_trade_lag_ms, lag_ms)
+            if fresh:
+                self.fresh_trade_events += 1
+            else:
+                self.stale_trade_events += 1
         elif isinstance(event, DerivativeEvent):
             self.derivative_events += 1
+            self.max_derivative_lag_ms = max(self.max_derivative_lag_ms, lag_ms)
+            if fresh:
+                self.fresh_derivative_events += 1
+            else:
+                self.stale_derivative_events += 1
 
     def as_dict(self) -> Dict[str, object]:
         now = time.time_ns()
         return {
             "venue": self.venue,
+            "fresh_event_max_lag_ms": self.fresh_event_max_lag_ms,
             "started_ns": self.started_ns,
             "stopped_ns": self.stopped_ns,
             "clean_shutdown": self.clean_shutdown,
@@ -58,6 +96,17 @@ class CollectorHealth:
             "book_events": self.book_events,
             "trade_events": self.trade_events,
             "derivative_events": self.derivative_events,
+            "fresh_events": self.fresh_events,
+            "stale_events": self.stale_events,
+            "fresh_book_events": self.fresh_book_events,
+            "fresh_trade_events": self.fresh_trade_events,
+            "fresh_derivative_events": self.fresh_derivative_events,
+            "stale_book_events": self.stale_book_events,
+            "stale_trade_events": self.stale_trade_events,
+            "stale_derivative_events": self.stale_derivative_events,
+            "max_book_lag_ms": self.max_book_lag_ms,
+            "max_trade_lag_ms": self.max_trade_lag_ms,
+            "max_derivative_lag_ms": self.max_derivative_lag_ms,
             "parse_errors": self.parse_errors,
             "sequence_gaps": self.sequence_gaps,
             "subscription_acks": self.subscription_acks,
@@ -116,6 +165,7 @@ async def run_venue(
     root: str = "data/market_physics_v3",
     health_dir: str = "reports/market_physics_v3/health",
     max_backoff_s: float = 30.0,
+    fresh_event_max_lag_ms: float = DEFAULT_FRESH_EVENT_MAX_LAG_MS,
 ) -> None:
     try:
         import websockets
@@ -137,7 +187,7 @@ async def run_venue(
     parser = PARSERS[venue]
     writer = AppendOnlyEventWriter(root)
     raw_writer = RawMessageWriter(root)
-    health = CollectorHealth(venue)
+    health = CollectorHealth(venue, fresh_event_max_lag_ms=fresh_event_max_lag_ms)
     health_path = Path(health_dir) / (venue + ".json")
     backoff = 1.0
 
@@ -186,6 +236,9 @@ async def run_venue(
                                     health.subscription_errors += 1
                                 events = parser(parsed, receive_ns, state)
                                 for event in events:
+                                    # Keep delayed/bootstrap/replay events losslessly.
+                                    # Freshness is a qualification/use-time property,
+                                    # never a reason to destroy observed exchange data.
                                     writer.append(event)
                                     health.observe_event(event)
                             except SequenceGap as exc:
