@@ -11,15 +11,29 @@ def subscriptions(venue, symbols):
     venue = str(venue).lower()
     syms = [s.upper() for s in symbols]
     if venue == "binance":
-        streams = []
+        public_streams = []
+        market_streams = []
         for s in syms:
             x = s.lower()
-            # USD-M exposes aggregate taker-order trades rather than a guaranteed
-            # one-row-per-match tape. Preserve that granularity explicitly.
-            streams += [x + "@depth@100ms", x + "@aggTrade", x + "@bookTicker", x + "@markPrice@1s", x + "@forceOrder"]
+            # Binance USD-M split its WebSocket routing in 2026. High-frequency
+            # depth/bookTicker belongs on /public; aggregate trades,
+            # mark/funding and forceOrder belong on /market. Keep aggTrade
+            # explicit as aggregate granularity rather than calling it tick data.
+            public_streams += [x + "@depth@100ms", x + "@bookTicker"]
+            market_streams += [x + "@aggTrade", x + "@markPrice@1s", x + "@forceOrder"]
         return {
-            "url": _url("MPV3_BINANCE_WS_URL", "wss://fstream.binance.com/ws"),
-            "subscribe": {"method": "SUBSCRIBE", "params": streams, "id": 1},
+            "connections": [
+                {
+                    "name": "public",
+                    "url": _url("MPV3_BINANCE_PUBLIC_WS_URL", "wss://fstream.binance.com/public/ws"),
+                    "subscribe": {"method": "SUBSCRIBE", "params": public_streams, "id": 1},
+                },
+                {
+                    "name": "market",
+                    "url": _url("MPV3_BINANCE_MARKET_WS_URL", "wss://fstream.binance.com/market/ws"),
+                    "subscribe": {"method": "SUBSCRIBE", "params": market_streams, "id": 2},
+                },
+            ],
         }
     if venue == "bybit":
         args = []
@@ -46,11 +60,8 @@ def subscriptions(venue, symbols):
                 {"channel": "open-interest", "instId": inst},
                 {"channel": "funding-rate", "instId": inst},
                 {"channel": "mark-price", "instId": inst},
-                # OKX index-tickers uses the underlying index identifier
-                # (e.g. BTC-USDT), not the SWAP instrument id.
                 {"channel": "index-tickers", "instId": index_inst},
             ]
-        # Liquidation orders are subscribed by instrument type, not duplicated per symbol.
         args.append({"channel": "liquidation-orders", "instType": "SWAP"})
         return {
             "url": _url("MPV3_OKX_WS_URL", "wss://ws.okx.com:8443/ws/v5/public"),
