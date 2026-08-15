@@ -4,6 +4,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from market_physics_v3.schema import BookEvent, TradeEvent, DerivativeEvent
 
 MS = 1_000_000
+BBO_STREAMS = {'bbo', 'bookTicker', 'bbo-tbt'}
 
 def _ns_ms(x): return int(x) * MS
 
@@ -80,30 +81,51 @@ def _level(row):
         return float(row['px']), float(row['sz']), (None if n is None else int(n))
     return float(row[0]), float(row[1]), None
 
-def _book_rows(venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,snapshot=False,reset_state=True):
+def _book_rows(
+    venue,symbol,event_ms,receive_ns,sequence,bids,asks,state,
+    snapshot=False,reset_state=True,source_stream=None,
+    first_sequence_id=None,previous_sequence_id=None,
+):
     symbol=canonical_symbol(symbol)
-    if snapshot and reset_state:
+    source_stream=None if source_stream is None else str(source_stream)
+    is_bbo=source_stream in BBO_STREAMS
+    if snapshot and reset_state and not is_bbo:
         state.reset_snapshot(venue,symbol)
     event_ns, recv=_clock(event_ms,receive_ns); out=[]
     for side, rows in [('bid',bids or []),('ask',asks or [])]:
         for row in rows:
-            px,qty,order_count=_level(row); typ=state.classify(venue,symbol,side,px,qty,snapshot)
-            out.append(BookEvent(venue,symbol,event_ns,recv,int(sequence),typ,side,px,qty,order_count))
+            px,qty,order_count=_level(row)
+            # BBO is an independent one-level view; do not let it mutate the
+            # state used to classify the deeper incremental order book.
+            typ='snapshot' if is_bbo and snapshot else state.classify(venue,symbol,side,px,qty,snapshot)
+            out.append(BookEvent(
+                venue,symbol,event_ns,recv,int(sequence),typ,side,px,qty,
+                order_count=order_count,
+                source_stream=source_stream,
+                first_sequence_id=(None if first_sequence_id is None else int(first_sequence_id)),
+                previous_sequence_id=(None if previous_sequence_id is None else int(previous_sequence_id)),
+            ))
     return out
 
 
 def parse_binance(msg, receive_ns, state):
     d=msg.get('data',msg); typ=d.get('e'); out=[]
     if typ=='depthUpdate':
-        sym=canonical_symbol(d['s']); state.validate_sequence('binance',sym,d['u'],d.get('pu'),False)
+        sym=canonical_symbol(d['s']); state.validate_sequence('binance',sym,d['u'],d.get('pu'),False,stream='depth')
         event_ms=d['T'] if 'T' in d else d['E']
-        out += _book_rows('binance',sym,event_ms,receive_ns,d['u'],d.get('b'),d.get('a'),state,False)
+        out += _book_rows(
+            'binance',sym,event_ms,receive_ns,d['u'],d.get('b'),d.get('a'),state,False,
+            source_stream='depth',first_sequence_id=d.get('U'),previous_sequence_id=d.get('pu')
+        )
     elif typ=='bookTicker':
         # BBO is a full one-level snapshot. Some USD-M payload variants carry
         # E/T while others only expose update id; without exchange time we use
         # receive time as the conservative availability timestamp.
         sym=canonical_symbol(d['s']); event_ms=int(d.get('T') or d.get('E') or receive_ns//MS); seq=int(d.get('u') or event_ms)
-        out += _book_rows('binance',sym,event_ms,receive_ns,seq,[[d['b'],d['B']]],[[d['a'],d['A']]],state,True,False)
+        out += _book_rows(
+            'binance',sym,event_ms,receive_ns,seq,[[d['b'],d['B']]],[[d['a'],d['A']]],state,True,False,
+            source_stream='bookTicker'
+        )
     elif typ in {'aggTrade','trade'}:
         event_ns,recv=_clock(d.get('T',d['E']),receive_ns)
         # m=True means buyer is maker, therefore aggressor is sell.
@@ -125,8 +147,9 @@ def parse_bybit(msg, receive_ns, state):
     topic=str(msg.get('topic','')); out=[]
     if topic.startswith('orderbook.'):
         d=msg['data']; event_ms=d.get('cts',msg.get('ts')); snapshot=msg.get('type')=='snapshot'; sym=canonical_symbol(d['s']); seq=d.get('seq',d.get('u',0))
-        state.validate_sequence('bybit',sym,seq,None,snapshot)
-        out += _book_rows('bybit',sym,event_ms,receive_ns,seq,d.get('b'),d.get('a'),state,snapshot)
+        stream='.'.join(topic.split('.')[:2])
+        state.validate_sequence('bybit',sym,seq,None,snapshot,stream=stream)
+        out += _book_rows('bybit',sym,event_ms,receive_ns,seq,d.get('b'),d.get('a'),state,snapshot,source_stream=stream)
     elif topic.startswith('publicTrade.'):
         for d in msg.get('data',[]):
             event_ns,recv=_clock(d['T'],receive_ns)
@@ -175,11 +198,11 @@ def parse_okx(msg, receive_ns, state):
                 state.validate_sequence(
                     'okx',sym,seq,d.get('prevSeqId'),snapshot,stream=channel
                 )
-            # Snapshot-only BBO/books5 must not wipe the deeper books state.
             reset_state = channel not in {'books5','bbo-tbt'}
             out += _book_rows(
                 'okx',sym,event_ms,receive_ns,seq,d.get('bids'),d.get('asks'),
-                state,snapshot,reset_state
+                state,snapshot,reset_state,source_stream=channel,
+                previous_sequence_id=d.get('prevSeqId')
             )
         elif channel=='trades':
             event_ns,recv=_clock(event_ms,receive_ns)
@@ -201,11 +224,11 @@ def parse_hyperliquid(msg, receive_ns, state):
         sym=data['coin']; event_ms=data['time']; levels=data['levels']; seq=event_ms
         # Hyperliquid WsLevel is a snapshot level with px/sz/n. Preserve n so
         # we can model queue fragmentation and average resting order size.
-        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,seq,levels[0],levels[1],state,True)
+        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,seq,levels[0],levels[1],state,True,source_stream='l2Book')
     elif ch=='bbo' and data:
         sym=data['coin']; event_ms=data['time']; bbo=data.get('bbo') or [None,None]
         bids=[] if bbo[0] is None else [bbo[0]]; asks=[] if bbo[1] is None else [bbo[1]]
-        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,event_ms,bids,asks,state,True,False)
+        out += _book_rows('hyperliquid',sym,event_ms,receive_ns,event_ms,bids,asks,state,True,False,source_stream='bbo')
     elif ch=='trades':
         for d in data or []:
             event_ns,recv=_clock(d['time'],receive_ns); side=str(d['side']).upper(); ag='buy' if side in {'B','BUY'} else 'sell'
