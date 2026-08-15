@@ -117,3 +117,10 @@ def test_effective_sample_size_detects_autocorrelation():
     for i in range(1, 1000):
         x[i] = .95 * x[i-1] + e[i]
     assert effective_sample_size(pd.Series(x), 50) < 300
+
+
+def test_coverage_does_not_treat_aggregated_as_event_level():
+    from market_physics_v3.coverage import audit_feed_status
+    out = audit_feed_status({"l2_book_events": "MISSING", "tick_trades": "AGGREGATED_ONLY", "binance": "EVENT_LEVEL"})
+    assert "tick_trades" in out["aggregated_only"]
+    assert not out["ready_for_p0_research"]
