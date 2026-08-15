@@ -1,5 +1,5 @@
-import numpy as np,pandas as pd
-from research.alpha_discovery_v31.pipeline import z,enrich,common_mask,context,add_costs,balanced_cap,select_rolling,fit_fold,make_year_fold
+import numpy as np,pandas as pd,pytest
+from research.alpha_discovery_v31.pipeline import z,enrich,common_mask,context,add_costs,balanced_cap,select_rolling,fit_fold,make_year_fold,unique_names
 
 def frame(n=3000,start='2023-01-01'):
     ts=pd.date_range(start,periods=n,freq='5min',tz='UTC');x=100*np.exp(np.cumsum(np.full(n,1e-5)))
@@ -30,6 +30,13 @@ def test_selector_requires_positive_edge():
 
 def test_fold_chronology():
     ts=pd.Series(pd.date_range('2021-01-01','2024-12-31',freq='D',tz='UTC'));f=make_year_fold(ts,2024);assert ts[f.fit_mask].max()<ts[f.calib_mask].min()<ts[f.test_mask].min()
+
+def test_unique_names_removes_runner_collision():
+    cols=unique_names(['timestamp','ex_ante_sigma_1h','ex_ante_sigma_1h','volume']);assert cols==['timestamp','ex_ante_sigma_1h','volume']
+
+def test_fit_fold_rejects_duplicate_input_columns():
+    ts=pd.date_range('2020-01-01','2024-12-31 23:00',freq='h',tz='UTC');n=len(ts);base=pd.DataFrame({'timestamp':ts,'symbol':'A','f':np.arange(n,dtype=float),'target_residual_ret_1h':.001,'target_standardized_1h':.1,'ex_ante_sigma_1h':.01,'decision_cost_x1':.0005,'realized_cost_x1':.0005,'realized_cost_x2':.001});dup=pd.concat([base,base[['f']]],axis=1)
+    with pytest.raises(ValueError,match='duplicate column names'):fit_fold(dup,['f'],make_year_fold(base.timestamp,2024))
 
 def test_netaware_model_recovers_large_signal():
     rng=np.random.default_rng(4);ts=pd.date_range('2020-01-01','2024-12-31 23:00',freq='h',tz='UTC');n=len(ts);sig=rng.normal(size=n);target=.004*sig+rng.normal(scale=.001,size=n);d=pd.DataFrame({'timestamp':ts,'symbol':np.where(np.arange(n)%2,'A','B'),'f':sig,'target_residual_ret_1h':target,'target_standardized_1h':target/.01,'ex_ante_sigma_1h':.01,'decision_cost_x1':.0005,'realized_cost_x1':.0005,'realized_cost_x2':.001});r=fit_fold(d,['f'],make_year_fold(d.timestamp,2024),max_train=20000,max_cal=5000,max_test=9000,q=.8);assert r['status']=='OK' and r['ic_spearman']>.5 and r['net_x2_mean']>0
