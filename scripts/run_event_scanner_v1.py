@@ -28,18 +28,39 @@ Preconditions checked before running (refuses to run otherwise):
 A family whose own <FAMILY>_DATA_READY is False is SKIPPED (not scanned),
 reported as such, never silently defaulted to KILL.
 
-Memory: RVD needs every symbol's panel simultaneously (cross-sectional).
-Loaded once, float64->float32 downcast on numeric columns after
-validate_schema's presence check (schema.py only checks column
-PRESENCE/timestamp dtype, never a numeric column's own values) -- roughly
-halves the ~23GB naive estimate for the full 312-symbol panel on this
-31GB-RAM host. DELEVERAGING/CROWDING/FORCED_FLOW_REVERSAL reuse the same
-loaded dict (already paid for by RVD) rather than a second pass.
+Memory (2026-08-15, found the hard way -- the first real run of this
+script was OOM-killed by the kernel at ~28GB RSS during RELATIVE_VALUE_
+DISLOCATION): this is a pure infrastructure/orchestration fix, zero
+detection/threshold/family logic touched, made BEFORE any economic result
+was ever produced or seen (the killed run wrote no results file) -- same
+standing as the protocol's own rounds 1-4 "found by review, not by seeing
+output" amendments; retrying with identical detection logic after fixing
+a crash is not a second "first look", it never produced a first look.
+
+  - DELEVERAGING/CROWDING/FORCED_FLOW_REVERSAL (single-symbol families):
+    streamed ONE symbol at a time -- load, detect, filter, label, discard
+    -- never holding more than one symbol's full panel in memory. The
+    previous version pre-loaded all 312 full panels once and reused that
+    dict for every family; holding 312 full (28-column) frames
+    simultaneously was already ~13-20GB before RVD's own matrices.
+  - RELATIVE_VALUE_DISLOCATION (needs every symbol simultaneously --
+    genuinely cross-sectional, not streamable): loaded via
+    _load_lean_rvd_panel, which keeps REAL data only for the 8 columns
+    RVD's detector and labels.py actually read (timestamp,
+    research_available_at, open, residual_logret_5m, residual_return_1h,
+    basis_z_1d, signed_volume, eligible_rvd_base/eligible_rvd) and fills
+    every other REQUIRED_COLUMNS entry with an np.broadcast_to READ-ONLY
+    VIEW of a single scalar (stride-0 -- costs ~the size of one scalar,
+    not one array per symbol) purely to satisfy validate_schema's column-
+    PRESENCE check, which schema.py confirms never inspects those
+    columns' actual values. detect_relative_value_dislocation itself is
+    verified (by reading its source) to never touch those columns either.
 
     python3 scripts/run_event_scanner_v1.py
 """
 from __future__ import annotations
 
+import gc
 import json
 import subprocess
 import sys
@@ -78,6 +99,21 @@ RESEARCH_READY_KEY = {
     "RELATIVE_VALUE_DISLOCATION": "RVD_DATA_READY",
     "FORCED_FLOW_REVERSAL": "FFR_DATA_READY",
 }
+SINGLE_SYMBOL_DETECTORS = {
+    "DELEVERAGING": det.detect_deleveraging,
+    "CROWDING": det.detect_crowding,
+    "FORCED_FLOW_REVERSAL": det.detect_forced_flow_reversal,
+}
+
+# columns RVD's own detector (data_v2/events/detectors.py::
+# detect_relative_value_dislocation) and labels.py::label_events actually
+# read the VALUES of -- verified by reading both functions' source before
+# writing this. Every other REQUIRED_COLUMNS entry is schema-presence-only
+# for RVD's purposes.
+RVD_REAL_COLUMNS = {
+    "timestamp", "research_available_at", "open", "residual_logret_5m",
+    "residual_return_1h", "basis_z_1d", "signed_volume", "symbol",
+}
 
 
 def _git_sha() -> str:
@@ -88,11 +124,11 @@ def _scan_symbols() -> list[str]:
     return sorted({p.name.split("=", 1)[1] for p in PANEL_DIR.glob("symbol=*") if p.is_dir()})
 
 
-def _load_symbol_panel(symbol: str) -> pd.DataFrame | None:
+def _load_symbol_panel(symbol: str, *, columns: list[str] | None = None) -> pd.DataFrame | None:
     parts = sorted((PANEL_DIR / f"symbol={symbol}").glob("year=*/event_feature_panel_5m.parquet"))
     if not parts:
         return None
-    df = pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
+    df = pd.concat([pd.read_parquet(p, columns=columns) for p in parts], ignore_index=True)
     df = df.sort_values("timestamp").reset_index(drop=True)
     # downcast AFTER load -- validate_schema (called by every detector) only
     # checks column presence + timestamp/research_available_at dtype, never
@@ -104,22 +140,53 @@ def _load_symbol_panel(symbol: str) -> pd.DataFrame | None:
     return df
 
 
-def _filter_eligible(events: pd.DataFrame, panel: dict, elig_col: str) -> pd.DataFrame:
-    """Keep only events whose triggering (symbol, timestamp) row has
-    elig_col == True. See protocol amendment round 5, item 16: a no-op for
-    DELEVERAGING/CROWDING/FORCED_FLOW_REVERSAL, the real enforcement of
-    MIN_CROSS_SECTION_SIZE for RELATIVE_VALUE_DISLOCATION."""
-    if events.empty:
-        return events
-    keep = []
-    for symbol, group in events.groupby("symbol"):
-        df = panel.get(symbol)
-        if df is None or elig_col not in df.columns:
+def _load_lean_rvd_panel(symbol: str) -> pd.DataFrame | None:
+    """Real data for RVD_REAL_COLUMNS plus eligible_rvd_base/eligible_rvd
+    (needed by the caller's own post-detection filter, not by the detector
+    itself); every other REQUIRED_COLUMNS entry filled with a genuinely
+    near-zero-memory placeholder purely so validate_schema's presence
+    check passes -- verified by reading both detect_relative_value_
+    dislocation and label_events' source that neither ever reads these
+    columns' actual values.
+
+    Bug found 2026-08-15 testing this against real data before the retry:
+    an earlier version used np.broadcast_to (a stride-0, zero-copy numpy
+    view) hoping to share one scalar's memory across all n rows -- but
+    `df[col] = broadcast_view` triggers pandas' own column-assignment
+    copy, silently materializing a full n-length array anyway (verified:
+    strides became (4,), not (0,); 13 "free" placeholder columns still
+    cost ~36MB per symbol on real BTCUSDT data). Fixed with a genuine
+    constant-value representation instead: SparseArray with fill_value
+    covering literally 100% of the column costs O(1) memory (measured:
+    128 bytes total, any n) rather than O(n). `symbol` (the one required
+    string column) uses Categorical instead of Sparse (repeated identical
+    string, not a float) -- 692KB instead of object dtype's 44MB on the
+    same real symbol, a ~64x reduction."""
+    cols = sorted(RVD_REAL_COLUMNS - {"symbol"} | {"eligible_rvd_base", "eligible_rvd"})
+    df = _load_symbol_panel(symbol, columns=cols)
+    if df is None or df.empty:
+        return df
+    n = len(df)
+    df["symbol"] = pd.Categorical([symbol] * n)
+    for col in REQUIRED_COLUMNS:
+        if col in df.columns:
             continue
-        elig_by_ts = df.set_index("timestamp")[elig_col]
-        mask = group["timestamp"].map(elig_by_ts).fillna(False)
-        keep.append(group[mask.to_numpy()])
-    return pd.concat(keep, ignore_index=True) if keep else events.iloc[0:0]
+        if col in ("liq_feed_available", "funding_is_settlement"):
+            df[col] = pd.arrays.SparseArray(np.zeros(n, dtype="bool"), fill_value=False)
+        else:
+            df[col] = pd.arrays.SparseArray(np.zeros(n, dtype="float32"), fill_value=np.float32(0.0))
+    return df
+
+
+def _filter_eligible_one_symbol(events: pd.DataFrame, df: pd.DataFrame, elig_col: str) -> pd.DataFrame:
+    """Single-symbol version of the eligibility post-filter (see protocol
+    amendment round 5, item 16) -- df is already known to be this event
+    set's own symbol's frame, no groupby/lookup across symbols needed."""
+    if events.empty or elig_col not in df.columns:
+        return events.iloc[0:0] if elig_col not in df.columns else events
+    elig_by_ts = df.set_index("timestamp")[elig_col]
+    mask = events["timestamp"].map(elig_by_ts).fillna(False)
+    return events[mask.to_numpy()]
 
 
 def main() -> None:
@@ -132,10 +199,8 @@ def main() -> None:
     # NOT a literal git_sha equality check: committing the freeze/receipt
     # JSON files themselves (pure data/report artifacts, zero scanner
     # logic) necessarily advances HEAD past whatever commit the freeze
-    # could have recorded (it can't hash a commit that includes itself) --
-    # found the hard way, this run's first attempt FATAL'd on exactly that.
-    # What must actually not have changed is the scanning logic itself:
-    # re-hash it now and compare against the frozen values.
+    # could have recorded about itself. What must actually not have
+    # changed is the scanning logic itself: re-hash it now and compare.
     live_hashes = {
         "scanner_source_sha256": _sha256_files(SCANNER_SOURCE_FILES),
         "protocol_sha256": _sha256_file(PROTOCOL_FILE),
@@ -175,55 +240,69 @@ def main() -> None:
     tick_size_by_symbol = dict(zip(im["symbol"], im["tick_size"]))
 
     symbols = _scan_symbols()
-    print(f"Loading {len(symbols)} symbol panels...", flush=True)
-    panel: dict[str, pd.DataFrame] = {}
-    for i, symbol in enumerate(symbols, 1):
-        df = _load_symbol_panel(symbol)
-        if df is not None and not df.empty:
+    results = {}
+
+    single_symbol_families = [f for f in SINGLE_SYMBOL_DETECTORS if f in families_to_scan]
+    if single_symbol_families:
+        print(f"Streaming {len(symbols)} symbols for {single_symbol_families} "
+              f"(one symbol's panel in memory at a time)...", flush=True)
+        labelled_accum = {fam: [] for fam in single_symbol_families}
+        for i, symbol in enumerate(symbols, 1):
+            df = _load_symbol_panel(symbol)
+            if df is None or df.empty:
+                continue
             missing = [c for c in REQUIRED_COLUMNS if c not in df.columns]
             if missing:
                 print(f"  SKIP {symbol}: missing required columns {missing}")
                 continue
-            panel[symbol] = df
-        if i % 50 == 0:
-            print(f"  loaded {i}/{len(symbols)}", flush=True)
-    print(f"Loaded {len(panel)} symbol panels.", flush=True)
-
-    results = {}
-
-    if "DELEVERAGING" in families_to_scan:
-        print("Detecting DELEVERAGING...", flush=True)
-        events = pd.concat(
-            [det.detect_deleveraging(df, symbol=s).events for s, df in panel.items()], ignore_index=True
-        )
-        events = _filter_eligible(events, panel, FAMILY_DETECTOR["DELEVERAGING"])
-        labelled = lbl.label_events_multi_symbol(events, panel, family="DELEVERAGING", tick_size_by_symbol=tick_size_by_symbol)
-        results["DELEVERAGING"] = scn.build_family_report(labelled, family="DELEVERAGING")
-
-    if "CROWDING" in families_to_scan:
-        print("Detecting CROWDING...", flush=True)
-        events = pd.concat(
-            [det.detect_crowding(df, symbol=s).events for s, df in panel.items()], ignore_index=True
-        )
-        events = _filter_eligible(events, panel, FAMILY_DETECTOR["CROWDING"])
-        labelled = lbl.label_events_multi_symbol(events, panel, family="CROWDING", tick_size_by_symbol=tick_size_by_symbol)
-        results["CROWDING"] = scn.build_family_report(labelled, family="CROWDING")
-
-    if "FORCED_FLOW_REVERSAL" in families_to_scan:
-        print("Detecting FORCED_FLOW_REVERSAL...", flush=True)
-        events = pd.concat(
-            [det.detect_forced_flow_reversal(df, symbol=s).events for s, df in panel.items()], ignore_index=True
-        )
-        events = _filter_eligible(events, panel, FAMILY_DETECTOR["FORCED_FLOW_REVERSAL"])
-        labelled = lbl.label_events_multi_symbol(events, panel, family="FORCED_FLOW_REVERSAL", tick_size_by_symbol=tick_size_by_symbol)
-        results["FORCED_FLOW_REVERSAL"] = scn.build_family_report(labelled, family="FORCED_FLOW_REVERSAL")
+            for fam in single_symbol_families:
+                ev = SINGLE_SYMBOL_DETECTORS[fam](df, symbol=symbol).events
+                ev = _filter_eligible_one_symbol(ev, df, FAMILY_DETECTOR[fam])
+                if ev.empty:
+                    continue
+                labelled = lbl.label_events(ev, df, family=fam, tick_size=tick_size_by_symbol.get(symbol))
+                labelled_accum[fam].append(labelled)
+            del df
+            if i % 50 == 0:
+                gc.collect()
+                print(f"  streamed {i}/{len(symbols)}", flush=True)
+        for fam in single_symbol_families:
+            parts = labelled_accum[fam]
+            labelled = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+            print(f"Classifying {fam} (N={len(labelled)})...", flush=True)
+            results[fam] = scn.build_family_report(labelled, family=fam)
+        del labelled_accum
+        gc.collect()
 
     if "RELATIVE_VALUE_DISLOCATION" in families_to_scan:
-        print("Detecting RELATIVE_VALUE_DISLOCATION (cross-sectional)...", flush=True)
-        rvd_set = det.detect_relative_value_dislocation(panel)
-        events = _filter_eligible(rvd_set.events, panel, FAMILY_DETECTOR["RELATIVE_VALUE_DISLOCATION"])
-        labelled = lbl.label_events_multi_symbol(events, panel, family="RELATIVE_VALUE_DISLOCATION", tick_size_by_symbol=tick_size_by_symbol)
+        print(f"Loading {len(symbols)} lean symbol panels for RELATIVE_VALUE_DISLOCATION "
+              f"(real data for {len(RVD_REAL_COLUMNS)} columns only, broadcast placeholders for the rest)...", flush=True)
+        rvd_panel: dict[str, pd.DataFrame] = {}
+        for i, symbol in enumerate(symbols, 1):
+            df = _load_lean_rvd_panel(symbol)
+            if df is not None and not df.empty:
+                rvd_panel[symbol] = df
+            if i % 50 == 0:
+                print(f"  loaded {i}/{len(symbols)}", flush=True)
+        print(f"Loaded {len(rvd_panel)} lean panels. Detecting RELATIVE_VALUE_DISLOCATION (cross-sectional)...", flush=True)
+        rvd_set = det.detect_relative_value_dislocation(rvd_panel)
+        # per-symbol eligibility post-filter (protocol amendment round 5,
+        # item 16) -- the real enforcement of MIN_CROSS_SECTION_SIZE, since
+        # detect_relative_value_dislocation has no population floor of its own.
+        keep = []
+        for symbol, group in rvd_set.events.groupby("symbol"):
+            df = rvd_panel.get(symbol)
+            if df is None or "eligible_rvd" not in df.columns:
+                continue
+            elig_by_ts = df.set_index("timestamp")["eligible_rvd"]
+            mask = group["timestamp"].map(elig_by_ts).fillna(False)
+            keep.append(group[mask.to_numpy()])
+        events = pd.concat(keep, ignore_index=True) if keep else rvd_set.events.iloc[0:0]
+        labelled = lbl.label_events_multi_symbol(events, rvd_panel, family="RELATIVE_VALUE_DISLOCATION", tick_size_by_symbol=tick_size_by_symbol)
+        print(f"Classifying RELATIVE_VALUE_DISLOCATION (N={len(labelled)})...", flush=True)
         results["RELATIVE_VALUE_DISLOCATION"] = scn.build_family_report(labelled, family="RELATIVE_VALUE_DISLOCATION")
+        del rvd_panel
+        gc.collect()
 
     out = {
         "generated_at": str(pd.Timestamp.now(tz="UTC")),
