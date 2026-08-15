@@ -284,20 +284,67 @@ def main() -> None:
                 rvd_panel[symbol] = df
             if i % 50 == 0:
                 print(f"  loaded {i}/{len(symbols)}", flush=True)
-        print(f"Loaded {len(rvd_panel)} lean panels. Detecting RELATIVE_VALUE_DISLOCATION (cross-sectional)...", flush=True)
-        rvd_set = det.detect_relative_value_dislocation(rvd_panel)
+        print(f"Loaded {len(rvd_panel)} lean panels. Detecting RELATIVE_VALUE_DISLOCATION "
+              f"(cross-sectional, chunked by calendar year)...", flush=True)
+        # Bug found 2026-08-15 (second OOM, dmesg-confirmed: killed at
+        # anon-rss=18.3GB, mid-way through detect_relative_value_
+        # dislocation itself, not the lean-panel load which by then was
+        # already down to ~7GB): the detector's OWN internals build ~12-15
+        # SEPARATE full (timestamp x 312-symbol) matrices in the course of
+        # one call (residual/basis_z/flow/ra_by_symbol, plus every derived
+        # rolling-std/cross-sectional-z/sign/mask/contributed intermediate)
+        # -- for the full 2020-2026 span (~692K timestamps) that alone is
+        # ~12GB on top of the panel. detect_relative_value_dislocation
+        # itself is untouched (frozen, "ne modifie aucune family") --
+        # fixed by calling it once PER CALENDAR YEAR instead of once on
+        # the full 7-year span, each call given that year's data plus a
+        # 35-day lookback (>> the family's own 30d rolling-std window and
+        # 12-bar/1h cooldown, so every chunk's target region gets the
+        # exact same warmup a single full-span call would have given it --
+        # provably equivalent results, not an approximation). Events
+        # detected inside the lookback-only prefix are dropped per chunk
+        # (already correctly counted as that prefix's OWN chunk's target
+        # region). Cuts peak detector-internal memory ~6x (692K -> ~115K
+        # timestamps per call).
+        LOOKBACK = pd.Timedelta(days=35)
+        all_timestamps = pd.concat([df["timestamp"] for df in rvd_panel.values()])
+        global_min, global_max = all_timestamps.min(), all_timestamps.max()
+        del all_timestamps
+        chunk_events = []
+        for year in range(global_min.year, global_max.year + 1):
+            chunk_start = max(pd.Timestamp(year=year, month=1, day=1, tz="UTC"), global_min)
+            chunk_end = min(pd.Timestamp(year=year, month=12, day=31, hour=23, minute=55, tz="UTC"), global_max)
+            lookback_start = chunk_start - LOOKBACK
+            sliced = {}
+            for s, df in rvd_panel.items():
+                part = df[(df["timestamp"] >= lookback_start) & (df["timestamp"] <= chunk_end)]
+                if not part.empty:
+                    sliced[s] = part.reset_index(drop=True)
+            if not sliced:
+                continue
+            print(f"  chunk {year}: {len(sliced)} symbols, "
+                  f"{lookback_start.date()}..{chunk_end.date()} ({next(iter(sliced.values())).shape[0]} bars sample)", flush=True)
+            chunk_set = det.detect_relative_value_dislocation(sliced)
+            if not chunk_set.events.empty:
+                chunk_events.append(chunk_set.events[chunk_set.events["timestamp"] >= chunk_start])
+            del sliced
+            gc.collect()
+        rvd_events = pd.concat(chunk_events, ignore_index=True) if chunk_events else pd.DataFrame(
+            columns=["timestamp", "research_available_at", "symbol", "family", "trigger_residual_sign"]
+        )
+        print(f"RELATIVE_VALUE_DISLOCATION raw detections (all chunks): {len(rvd_events)}", flush=True)
         # per-symbol eligibility post-filter (protocol amendment round 5,
         # item 16) -- the real enforcement of MIN_CROSS_SECTION_SIZE, since
         # detect_relative_value_dislocation has no population floor of its own.
         keep = []
-        for symbol, group in rvd_set.events.groupby("symbol"):
+        for symbol, group in rvd_events.groupby("symbol"):
             df = rvd_panel.get(symbol)
             if df is None or "eligible_rvd" not in df.columns:
                 continue
             elig_by_ts = df.set_index("timestamp")["eligible_rvd"]
             mask = group["timestamp"].map(elig_by_ts).fillna(False)
             keep.append(group[mask.to_numpy()])
-        events = pd.concat(keep, ignore_index=True) if keep else rvd_set.events.iloc[0:0]
+        events = pd.concat(keep, ignore_index=True) if keep else rvd_events.iloc[0:0]
         labelled = lbl.label_events_multi_symbol(events, rvd_panel, family="RELATIVE_VALUE_DISLOCATION", tick_size_by_symbol=tick_size_by_symbol)
         print(f"Classifying RELATIVE_VALUE_DISLOCATION (N={len(labelled)})...", flush=True)
         results["RELATIVE_VALUE_DISLOCATION"] = scn.build_family_report(labelled, family="RELATIVE_VALUE_DISLOCATION")
