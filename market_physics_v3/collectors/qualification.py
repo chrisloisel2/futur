@@ -64,6 +64,12 @@ def qualify_venue(
     The gate is intentionally strict. It requires healthy subscription/runtime
     counters, raw-wire capture, normalized book/trade/derivative partitions,
     causal clocks and zero dead letters from the smoke being qualified.
+
+    New health reports additionally distinguish events that were already stale
+    when received. Those events remain persisted for replay/audit, but a venue
+    is considered live only when each required event family has fresh evidence.
+    Hyperliquid requires this telemetry explicitly because its reconnect/startup
+    behavior can deliver older trades before the current streaming flow.
     """
     venue = str(venue).lower().strip()
     root_path = Path(root)
@@ -118,6 +124,29 @@ def qualify_venue(
     has_typed_health = any(
         key in health for key in ("book_events", "trade_events", "derivative_events")
     )
+
+    fresh_keys = {
+        "book_events": "fresh_book_events",
+        "trades": "fresh_trade_events",
+        "derivatives": "fresh_derivative_events",
+    }
+    stale_keys = {
+        "book_events": "stale_book_events",
+        "trades": "stale_trade_events",
+        "derivatives": "stale_derivative_events",
+    }
+    has_freshness_health = "fresh_event_max_lag_ms" in health and all(
+        key in health for key in fresh_keys.values()
+    )
+    if venue == "hyperliquid" and not has_freshness_health:
+        reasons.append("missing_freshness_telemetry")
+    if has_freshness_health:
+        if int(health.get("fresh_events", 0) or 0) < int(min_events):
+            reasons.append("insufficient_fresh_events")
+        for kind, key in fresh_keys.items():
+            if int(health.get(key, 0) or 0) <= 0:
+                reasons.append("missing_fresh_%s" % kind)
+
     start_ns = int(health.get("started_ns", 0) or 0)
     stop_ns = int(health.get("stopped_ns", 0) or 0)
     has_run_window = start_ns > 0 and stop_ns >= start_ns
@@ -162,6 +191,22 @@ def qualify_venue(
         reasons.append("nonempty_dead_letters")
 
     qualified = len(reasons) == 0
+    freshness = {
+        "threshold_ms": health.get("fresh_event_max_lag_ms"),
+        "fresh_events": int(health.get("fresh_events", 0) or 0),
+        "stale_events": int(health.get("stale_events", 0) or 0),
+        "fresh_by_type": {
+            kind: int(health.get(key, 0) or 0) for kind, key in fresh_keys.items()
+        },
+        "stale_by_type": {
+            kind: int(health.get(key, 0) or 0) for kind, key in stale_keys.items()
+        },
+        "max_lag_ms": {
+            "book_events": health.get("max_book_lag_ms"),
+            "trades": health.get("max_trade_lag_ms"),
+            "derivatives": health.get("max_derivative_lag_ms"),
+        },
+    }
     return {
         "venue": venue,
         "qualified": qualified,
@@ -169,6 +214,7 @@ def qualify_venue(
         "reasons": sorted(set(reasons)),
         "health": health,
         "type_counts": type_counts,
+        "freshness": freshness,
         "run_window": {"started_ns": start_ns, "stopped_ns": stop_ns},
         "raw_files": raw_files,
         "normalized_files": normalized_files,
@@ -196,10 +242,17 @@ def promote_manifest(report: Dict[str, object], manifest_path: str) -> bool:
     df.loc[mask, "status"] = "EVENT_LEVEL"
     if "notes" in df.columns:
         health = report.get("health", {})
-        df.loc[mask, "notes"] = (
+        note = (
             "qualified from live smoke messages=%s events=%s "
             "parse_errors=0 sequence_gaps=0 dead_letters=0"
             % (health.get("messages", "?"), health.get("events", "?"))
         )
+        if "fresh_event_max_lag_ms" in health:
+            note += " fresh_events=%s stale_events=%s fresh_lag_ms<=%s" % (
+                health.get("fresh_events", "?"),
+                health.get("stale_events", "?"),
+                health.get("fresh_event_max_lag_ms", "?"),
+            )
+        df.loc[mask, "notes"] = note
     df.to_csv(path, index=False)
     return True
