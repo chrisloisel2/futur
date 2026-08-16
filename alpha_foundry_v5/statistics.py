@@ -128,7 +128,7 @@ def deflated_sharpe_probability(returns: Sequence[float], trial_sharpes: Sequenc
     else:
         n = float(len(trials))
         gamma = 0.5772156649015329
-        benchmark = sigma * ((1.0 - gamma) * _inv_normal_cdf(1.0 - 1.0 / n) + gamma * _inv_normal_cdf(1.0 - 1.0 / (n * math.e)))
+        benchmark = float(np.mean(trials)) + sigma * ((1.0 - gamma) * _inv_normal_cdf(1.0 - 1.0 / n) + gamma * _inv_normal_cdf(1.0 - 1.0 / (n * math.e)))
     return probabilistic_sharpe_ratio(returns, benchmark)
 
 
