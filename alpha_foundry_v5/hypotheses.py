@@ -6,7 +6,7 @@ from .contracts import HypothesisSpec
 from .labs.catalog import LABS
 
 
-def hypothesis_grid(lab_id: str, feature_set_id: str, target_name: str = None, horizons_ms: Sequence[int] = None, confirmation_min_hours: float = 24.0) -> Tuple[HypothesisSpec, ...]:
+def hypothesis_grid(lab_id: str, feature_set_id: str, target_name: str = None, horizons_ms: Sequence[int] = None, confirmation_min_hours: float = 24.0, expected_sign: int = 1) -> Tuple[HypothesisSpec, ...]:
     spec = LABS[lab_id]
     target = target_name or spec.default_target
     horizons = tuple(int(x) for x in (horizons_ms or spec.horizons_ms))
@@ -30,5 +30,6 @@ def hypothesis_grid(lab_id: str, feature_set_id: str, target_name: str = None, h
             max_trials=int(spec.max_trials_per_family),
             max_lookback_ms=max(1000, int(horizon)),
             confirmation_min_hours=float(confirmation_min_hours),
+            expected_sign=int(expected_sign),
         ))
     return tuple(rows)
