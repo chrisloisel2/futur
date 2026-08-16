@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from alpha_foundry_v5.data_planes import build_cross_asset_plane, build_derivatives_plane, build_event_microstructure_plane, merge_planes
+from alpha_foundry_v5.data_planes import build_cross_asset_plane, build_derivatives_plane, build_event_microstructure_plane, build_wallet_plane, merge_planes
 
 
 def main() -> int:
@@ -17,7 +17,7 @@ def main() -> int:
     parser.add_argument("--base-tape", required=True)
     parser.add_argument("--raw-root", required=True)
     parser.add_argument("--out-root", required=True)
-    parser.add_argument("--planes", default="event,derivatives,cross_asset")
+    parser.add_argument("--planes", default="event,derivatives,wallet,cross_asset")
     parser.add_argument("--venues", default="binance,bybit,okx,hyperliquid")
     parser.add_argument("--symbols", default="BTCUSDT,ETHUSDT,SOLUSDT")
     parser.add_argument("--chunk-rows", type=int, default=50000)
@@ -38,6 +38,10 @@ def main() -> int:
     if "derivatives" in planes:
         path = root / "derivatives"
         summaries["derivatives"] = build_derivatives_plane(args.base_tape, args.raw_root, str(path), venues, symbols, chunk_rows=args.chunk_rows)
+        built.append(str(path))
+    if "wallet" in planes:
+        path = root / "wallet"
+        summaries["wallet"] = build_wallet_plane(args.base_tape, args.raw_root, str(path), symbols, chunk_rows=args.chunk_rows)
         built.append(str(path))
     if "cross_asset" in planes:
         path = root / "cross_asset"
