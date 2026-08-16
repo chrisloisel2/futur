@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from market_physics_v3.information_audit import effective_sample_size, spearman_ic
 from market_physics_v3.phase5_audit import add_targets, prepare_features, run_information_audit
 
 
@@ -39,6 +40,43 @@ def _frame(n=120, cadence_ms=100):
         "binance__bid_weighted_distance_bps": 1.5,
     })
     return frame
+
+
+def _legacy_ess(series, max_lag=100):
+    s = pd.Series(series).dropna()
+    n = len(s)
+    if n < 3:
+        return float(n)
+    acfs = []
+    for lag in range(1, min(max_lag, n - 1) + 1):
+        rho = s.autocorr(lag=lag)
+        if not np.isfinite(rho) or rho <= 0:
+            break
+        acfs.append(float(rho))
+    denom = 1.0 + 2.0 * sum(acfs)
+    return float(n / denom) if denom > 0 else float(n)
+
+
+def test_optimized_spearman_matches_pandas_rank_corr_with_ties_and_nans():
+    x = pd.Series([3.0, 1.0, 1.0, np.nan, 5.0, 2.0, 2.0, 9.0, 4.0])
+    y = pd.Series([2.0, 8.0, 8.0, 4.0, np.nan, 6.0, 1.0, 0.0, 3.0])
+    valid = x.notna() & y.notna()
+    expected = float(x[valid].rank().corr(y[valid].rank()))
+    assert spearman_ic(x, y) == pytest.approx(expected, abs=1e-12)
+
+
+def test_fft_effective_sample_size_matches_legacy_autocorr_rule():
+    rng = np.random.default_rng(17)
+    x = np.empty(4000, dtype=float)
+    x[0] = rng.normal()
+    for i in range(1, len(x)):
+        x[i] = 0.82 * x[i - 1] + rng.normal(scale=0.5)
+    x[123] = np.nan
+    x[2500] = np.nan
+    expected = _legacy_ess(pd.Series(x), max_lag=80)
+    assert effective_sample_size(pd.Series(x), max_lag=80) == pytest.approx(
+        expected, rel=1e-8, abs=1e-8
+    )
 
 
 def test_prepare_features_masks_stale_depth_but_not_price():
