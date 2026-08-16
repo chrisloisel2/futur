@@ -11,14 +11,18 @@ NS = 1_000_000_000
 VENUES = ("binance", "bybit", "okx", "hyperliquid")
 
 
-def _write(root: Path, event: BookEvent):
+def _write_date(root: Path, event: BookEvent, date: str):
     path = (
         root / "raw" / "book_events" / ("venue=" + event.venue)
-        / ("symbol=" + event.symbol) / "date=2026-08-15" / "events.jsonl"
+        / ("symbol=" + event.symbol) / ("date=" + date) / "events.jsonl"
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(asdict(event), sort_keys=True) + "\n")
+
+
+def _write(root: Path, event: BookEvent):
+    _write_date(root, event, "2026-08-15")
 
 
 def _snapshot(venue, receive_ns, mid):
@@ -50,8 +54,6 @@ def test_iter_merged_book_events_is_receive_time_ordered(tmp_path):
 def test_iter_merged_book_events_repairs_physical_receive_time_inversion(tmp_path):
     root = tmp_path / "data"
     base = 120 * NS
-    # Simulate an append-only file whose buffered physical flush order is not
-    # identical to receive-time order: later event is physically written first.
     late = BookEvent(
         "binance", "BTCUSDT", base + 290_000_000, base + 300_000_000,
         2, "modify", "bid", 99.0, 12, source_stream="depth",
@@ -69,6 +71,31 @@ def test_iter_merged_book_events_repairs_physical_receive_time_inversion(tmp_pat
     assert [x.receive_ts_ns for x in events] == [
         base + 100_000_000,
         base + 300_000_000,
+    ]
+
+
+def test_iter_merges_event_date_files_by_receive_time(tmp_path):
+    root = tmp_path / "data"
+    base = 130 * NS
+    # Event-date partitioning can differ from receive-time ordering around UTC
+    # midnight. The earlier date file may contain a later-received delayed row.
+    received_later_but_old_event_date = BookEvent(
+        "hyperliquid", "BTCUSDT", base + 10_000_000, base + 400_000_000,
+        2, "modify", "bid", 99.0, 12, source_stream="l2Book",
+    )
+    received_earlier_new_event_date = BookEvent(
+        "hyperliquid", "BTCUSDT", base + 190_000_000, base + 200_000_000,
+        1, "modify", "bid", 98.0, 11, source_stream="l2Book",
+    )
+    _write_date(root, received_later_but_old_event_date, "2026-08-15")
+    _write_date(root, received_earlier_new_event_date, "2026-08-16")
+
+    events = list(iter_merged_book_events(
+        str(root), base, base + NS, ("hyperliquid",), ("BTCUSDT",)
+    ))
+    assert [x.receive_ts_ns for x in events] == [
+        base + 200_000_000,
+        base + 400_000_000,
     ]
 
 
