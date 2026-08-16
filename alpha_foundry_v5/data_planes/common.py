@@ -106,6 +106,7 @@ def _external_sorted_record_iter(path: Path, start_ns: int, stop_ns: int, chunk_
         runs: List[Path] = []
         chunk: List[Tuple[int, str]] = []
         run_id = 0
+        selected_rows = 0
 
         def flush() -> None:
             nonlocal chunk, run_id
@@ -118,9 +119,11 @@ def _external_sorted_record_iter(path: Path, start_ns: int, stop_ns: int, chunk_
                     out.write(line + "\n")
             runs.append(run_path)
             run_id += 1
+            print("[afv5-plane] reorder spill %s runs=%d rows=%d" % (path.name, run_id, selected_rows), flush=True)
             chunk = []
 
         for receive_ns, line in _iter_filtered_lines(path, start_ns, stop_ns):
+            selected_rows += 1
             chunk.append((receive_ns, line))
             if len(chunk) >= chunk_rows:
                 flush()
@@ -131,11 +134,13 @@ def _external_sorted_record_iter(path: Path, start_ns: int, stop_ns: int, chunk_
 
 
 def _ordered_file_iter(path: Path, start_ns: int, stop_ns: int) -> Iterator[Mapping[str, object]]:
+    print("[afv5-plane] validate receive-order %s" % path, flush=True)
     if _is_receive_ordered(path, start_ns, stop_ns):
+        print("[afv5-plane] ordered -> direct replay %s" % path, flush=True)
         for row in _direct_record_iter(path, start_ns, stop_ns):
             yield row
     else:
-        print("[afv5-plane] receive-time inversion -> external reorder: %s" % path, flush=True)
+        print("[afv5-plane] inversion -> external reorder %s" % path, flush=True)
         for row in _external_sorted_record_iter(path, start_ns, stop_ns):
             yield row
 
