@@ -134,8 +134,6 @@ class TradeTapeBuilder:
         row = _trade_row(event)
         self.rows[key].append(row)
         self.cvd[key] += float(row["notional"]) * float(row["side_sign"])
-        while len(self.rows[key]) > self.max_events * 20:
-            self.rows[key].popleft()
 
     def _trim(self, key: Tuple[str, str], asof_ns: int) -> None:
         cutoff = int(asof_ns) - int(self.max_time_ns)
