@@ -145,6 +145,7 @@ def run_information_audit(
     allow_short_smoke: bool = False,
     block_shuffle_repeats: int = 100,
     max_block_shortlist: int = 40,
+    progress: bool = False,
 ) -> Dict[str, object]:
     if frame.empty:
         raise ValueError("empty state tape")
@@ -155,26 +156,53 @@ def run_information_audit(
             % (duration_hours, min_duration_hours)
         )
 
+    if progress:
+        print("[phase5] prepare features/targets rows=%s duration_h=%.4f" % (len(frame), duration_hours), flush=True)
     prepared, registry = prepare_features(frame, venues=venues)
     prepared = add_targets(prepared, cadence_ms, horizons_ms=horizons_ms)
+    features = sorted(registry)
+    if progress:
+        print("[phase5] feature registry=%s horizons=%s" % (len(features), list(horizons_ms)), flush=True)
+
     feature_ess: Dict[Tuple[str, str], float] = {}
     target_ess: Dict[Tuple[str, int], float] = {}
     rows: List[Dict[str, object]] = []
 
     for symbol, group in prepared.groupby("symbol", sort=True):
         group = group.reset_index(drop=True)
-        for feature in sorted(registry):
-            series = pd.to_numeric(group[feature], errors="coerce")
-            feature_ess[(str(symbol), feature)] = effective_sample_size(series, max_lag=200)
-        for horizon in horizons_ms:
-            target = pd.to_numeric(group["target_%sms_bps" % horizon], errors="coerce")
-            target_ess[(str(symbol), int(horizon))] = effective_sample_size(target, max_lag=200)
+        symbol = str(symbol)
+        if progress:
+            print("[phase5] %s rows=%s compute ESS" % (symbol, len(group)), flush=True)
 
-        for feature in sorted(registry):
-            xall = pd.to_numeric(group[feature], errors="coerce")
+        feature_series = {
+            feature: pd.to_numeric(group[feature], errors="coerce") for feature in features
+        }
+        target_series = {
+            int(h): pd.to_numeric(group["target_%sms_bps" % h], errors="coerce")
+            for h in horizons_ms
+        }
+        past_series = {
+            int(h): pd.to_numeric(group["past_%sms_bps" % h], errors="coerce")
+            for h in horizons_ms
+        }
+
+        for i, feature in enumerate(features, 1):
+            feature_ess[(symbol, feature)] = effective_sample_size(feature_series[feature], max_lag=200)
+            if progress and (i == 1 or i % 10 == 0 or i == len(features)):
+                print("[phase5] %s ESS features %s/%s" % (symbol, i, len(features)), flush=True)
+        for horizon in horizons_ms:
+            target_ess[(symbol, int(horizon))] = effective_sample_size(
+                target_series[int(horizon)], max_lag=200
+            )
+
+        if progress:
+            print("[phase5] %s compute IC grid tests=%s" % (symbol, len(features) * len(horizons_ms)), flush=True)
+        for feature_idx, feature in enumerate(features, 1):
+            xall = feature_series[feature]
             for horizon in horizons_ms:
-                yall = pd.to_numeric(group["target_%sms_bps" % horizon], errors="coerce")
-                past = pd.to_numeric(group["past_%sms_bps" % horizon], errors="coerce")
+                horizon = int(horizon)
+                yall = target_series[horizon]
+                past = past_series[horizon]
                 valid = xall.notna() & yall.notna()
                 n = int(valid.sum())
                 if n < 20:
@@ -191,8 +219,8 @@ def run_information_audit(
                     second_ic = spearman_ic(x.iloc[split:], y.iloc[split:]) if len(x) - split >= 3 else float("nan")
                     reverse_ic = spearman_ic(xall, past)
                 ess = min(
-                    float(feature_ess[(str(symbol), feature)]),
-                    float(target_ess[(str(symbol), int(horizon))]),
+                    float(feature_ess[(symbol, feature)]),
+                    float(target_ess[(symbol, horizon)]),
                     float(n),
                 )
                 sign_consistent = bool(
@@ -200,10 +228,10 @@ def run_information_audit(
                     and np.sign(first_ic) == np.sign(second_ic)
                 )
                 rows.append({
-                    "symbol": str(symbol),
+                    "symbol": symbol,
                     "feature": feature,
                     "family": registry[feature],
-                    "horizon_ms": int(horizon),
+                    "horizon_ms": horizon,
                     "n": n,
                     "ess": float(ess),
                     "ic": float(ic),
@@ -214,6 +242,8 @@ def run_information_audit(
                     "ess_p": _ess_pvalue(ic, ess),
                     "block_p": float("nan"),
                 })
+            if progress and (feature_idx == 1 or feature_idx % 5 == 0 or feature_idx == len(features)):
+                print("[phase5] %s IC features %s/%s" % (symbol, feature_idx, len(features)), flush=True)
 
     tests = pd.DataFrame(rows)
     tests["q_bh"] = _bh_qvalues(tests["ess_p"])
@@ -225,8 +255,16 @@ def run_information_audit(
         & (tests["sign_consistent_halves"])
     ].copy()
     shortlist = shortlist.sort_values(["q_bh", "ic"], ascending=[True, False]).head(int(max_block_shortlist))
+    if progress:
+        print("[phase5] block-shuffle shortlist=%s repeats=%s" % (len(shortlist), block_shuffle_repeats), flush=True)
 
-    for idx, row in shortlist.iterrows():
+    for position, (idx, row) in enumerate(shortlist.iterrows(), 1):
+        if progress:
+            print(
+                "[phase5] block %s/%s %s %s h=%sms ic=%.6f"
+                % (position, len(shortlist), row["symbol"], row["feature"], int(row["horizon_ms"]), float(row["ic"])),
+                flush=True,
+            )
         group = prepared[prepared["symbol"] == row["symbol"]].reset_index(drop=True)
         x = pd.to_numeric(group[row["feature"]], errors="coerce")
         y = pd.to_numeric(group["target_%sms_bps" % int(row["horizon_ms"])], errors="coerce")
@@ -278,6 +316,17 @@ def run_information_audit(
     )
 
     verdict = "DEV_PILOT" if duration_hours >= float(min_duration_hours) else "SHORT_SMOKE_ONLY"
+    if progress:
+        print(
+            "[phase5] complete verdict=%s general=%s single=%s tests=%s"
+            % (
+                verdict,
+                int((mechanisms["classification"] == "GENERAL_CANDIDATE").sum()),
+                int((mechanisms["classification"] == "SINGLE_SYMBOL_WATCH").sum()),
+                len(tests),
+            ),
+            flush=True,
+        )
     return {
         "verdict": verdict,
         "duration_hours": duration_hours,
