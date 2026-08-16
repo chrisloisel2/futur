@@ -143,3 +143,37 @@ A Phase 5 information candidate must still pass later stages before paper tradin
 6. paper-live tournament against other independent sleeves.
 
 No Phase 5 statistical candidate alone is deployable or evidence for a monthly return target.
+
+## Reproduced first DEV_PILOT result — 2026-08-16
+
+This section records the result after the preregistered audit was run; it does not alter the gates above.
+
+Input evidence:
+
+- 6.000 h simultaneous causal window;
+- 648,003 state rows at 100 ms across BTC/ETH/SOL;
+- 56 registered features;
+- 7 fixed horizons;
+- 1,176 symbol-level tests;
+- 21 targeted Phase 5/statistical regression tests passed before the audit.
+
+DEV_PILOT verdict:
+
+- `GENERAL_CANDIDATE = 5`;
+- `SINGLE_SYMBOL_WATCH = 29`.
+
+The five discovered general mechanisms are:
+
+1. `okx__queue_imbalance_l5` at 30 s, positive median IC ~0.2805;
+2. `bybit__price_spread_bps` at 100 ms, negative median IC ~-0.0513;
+3. `binance__price_spread_bps` at 100 ms, negative median IC ~-0.0493;
+4. `hyperliquid__price_spread_bps` at 100 ms, negative median IC ~-0.0476, with SOL showing an opposite-sign discovery result;
+5. `okx__price_spread_bps` at 100 ms, negative median IC ~-0.0463.
+
+Important diagnostics observed in the same DEV window:
+
+- several 10-30 s queue/microprice effects have reverse IC larger than forward IC, so momentum/reaction confounding must be dissected before causal interpretation;
+- raw spread is unsigned yet the 100 ms discovery effect is directional, so regime dependence and target-construction effects must be tested;
+- SOL venue-dislocation tests show strong positive forward IC at multiple horizons with negative reverse IC at several horizons, making them scientifically interesting single-symbol watches but not general candidates.
+
+The original Phase 5 discovery classifications remain unchanged. `MARKET_PHYSICS_PHASE5_1_PROTOCOL.md` defines the additive same-window mechanism dissection and the frozen requirements for a future independent confirmation window.
