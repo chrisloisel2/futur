@@ -17,9 +17,16 @@ class OrthogonalityResult:
     conflicting_candidate: str
 
 
+def _spearman_pair(a: pd.Series, b: pd.Series) -> float:
+    pair = pd.DataFrame({"a": pd.to_numeric(a, errors="coerce"), "b": pd.to_numeric(b, errors="coerce")}).dropna()
+    if len(pair) < 3:
+        return float("nan")
+    return float(pair["a"].rank().corr(pair["b"].rank()))
+
+
 def pairwise_correlation_matrix(pnl: pd.DataFrame) -> pd.DataFrame:
     numeric = pnl.apply(pd.to_numeric, errors="coerce")
-    return numeric.corr(method="spearman")
+    return numeric.rank().corr()
 
 
 def check_candidate_orthogonality(candidate: AlphaCandidate, accepted: Sequence[AlphaCandidate], pnl: pd.DataFrame, max_abs_corr: float) -> OrthogonalityResult:
@@ -33,10 +40,7 @@ def check_candidate_orthogonality(candidate: AlphaCandidate, accepted: Sequence[
     for other in accepted:
         if other.pnl_series_name not in pnl:
             continue
-        pair = pnl[[candidate.pnl_series_name, other.pnl_series_name]].apply(pd.to_numeric, errors="coerce").dropna()
-        if len(pair) < 3:
-            continue
-        corr = float(pair.iloc[:, 0].corr(pair.iloc[:, 1], method="spearman"))
+        corr = _spearman_pair(pnl[candidate.pnl_series_name], pnl[other.pnl_series_name])
         if np.isfinite(corr) and abs(corr) > strongest:
             strongest = abs(corr)
             strongest_id = other.candidate_id
