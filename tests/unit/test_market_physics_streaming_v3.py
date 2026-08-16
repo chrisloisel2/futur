@@ -47,6 +47,52 @@ def test_iter_merged_book_events_is_receive_time_ordered(tmp_path):
     assert len(events) == 8
 
 
+def test_iter_merged_book_events_repairs_physical_receive_time_inversion(tmp_path):
+    root = tmp_path / "data"
+    base = 120 * NS
+    # Simulate an append-only file whose buffered physical flush order is not
+    # identical to receive-time order: later event is physically written first.
+    late = BookEvent(
+        "binance", "BTCUSDT", base + 290_000_000, base + 300_000_000,
+        2, "modify", "bid", 99.0, 12, source_stream="depth",
+    )
+    early = BookEvent(
+        "binance", "BTCUSDT", base + 90_000_000, base + 100_000_000,
+        1, "modify", "bid", 98.0, 11, source_stream="depth",
+    )
+    _write(root, late)
+    _write(root, early)
+
+    events = list(iter_merged_book_events(
+        str(root), base, base + NS, ("binance",), ("BTCUSDT",)
+    ))
+    assert [x.receive_ts_ns for x in events] == [
+        base + 100_000_000,
+        base + 300_000_000,
+    ]
+
+
+def test_iter_does_not_stop_at_out_of_window_row_when_partition_is_disordered(tmp_path):
+    root = tmp_path / "data"
+    base = 140 * NS
+    outside = BookEvent(
+        "okx", "BTCUSDT", base + 2 * NS, base + 2 * NS,
+        2, "modify", "bid", 99.0, 12, source_stream="books",
+    )
+    inside = BookEvent(
+        "okx", "BTCUSDT", base + 90_000_000, base + 100_000_000,
+        1, "modify", "bid", 98.0, 11, source_stream="books",
+    )
+    _write(root, outside)
+    _write(root, inside)
+
+    events = list(iter_merged_book_events(
+        str(root), base, base + NS, ("okx",), ("BTCUSDT",)
+    ))
+    assert len(events) == 1
+    assert events[0].receive_ts_ns == base + 100_000_000
+
+
 def test_streaming_builder_emits_chunked_causal_tape(tmp_path):
     root = tmp_path / "data"
     base = 200 * NS
