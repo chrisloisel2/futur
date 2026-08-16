@@ -36,6 +36,20 @@ def test_search_budget_is_hard(tmp_path):
     assert ledger.effective_trials("fam") == 2
 
 
+def test_ledger_hash_chain_and_unreserved_completion_fail(tmp_path):
+    ledger = SearchLedger(str(tmp_path / "chain.jsonl"))
+    ledger.reserve("t1", "fam", "h", "e", {"a": 1}, "DEV", 3)
+    ledger.complete("t1", "fam", "h", "e", {"a": 1}, "DEV", 0.2)
+    assert ledger.verify()["ok"] is True
+    with pytest.raises(ValueError):
+        ledger.complete("never", "fam", "h", "e", {"a": 2}, "DEV", 0.1)
+    path = tmp_path / "chain.jsonl"
+    rows = path.read_text().splitlines()
+    rows[0] = rows[0].replace('"status":"RESERVED"', '"status":"TAMPERED"')
+    path.write_text("\n".join(rows) + "\n")
+    assert ledger.verify()["ok"] is False
+
+
 def test_confirmation_lineage_refuses_overlap(tmp_path):
     registry = ExperimentRegistry(str(tmp_path / "experiments"))
     registry.register(ExperimentSpec("dev", "hyp", ResearchStage.DEV_DISCOVERY, "d", TimeWindow(100, 200), "abc", 1, 10, 10))
