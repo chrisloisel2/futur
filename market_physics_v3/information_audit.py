@@ -6,11 +6,46 @@ import numpy as np
 import pandas as pd
 
 
-def spearman_ic(x: pd.Series, y: pd.Series) -> float:
-    v = x.notna() & y.notna()
-    if v.sum() < 3:
+def _average_ranks(values: np.ndarray) -> np.ndarray:
+    """Return pandas-compatible average ranks for a finite/non-NaN vector."""
+    values = np.asarray(values)
+    n = int(values.size)
+    if n == 0:
+        return np.asarray([], dtype=float)
+    order = np.argsort(values, kind="mergesort")
+    sorted_values = values[order]
+    ranks = np.empty(n, dtype=float)
+    boundaries = np.r_[0, np.flatnonzero(sorted_values[1:] != sorted_values[:-1]) + 1, n]
+    for start, stop in zip(boundaries[:-1], boundaries[1:]):
+        # 1-based ranks start+1 ... stop, averaged exactly like Series.rank().
+        avg = 0.5 * (float(start + 1) + float(stop))
+        ranks[order[start:stop]] = avg
+    return ranks
+
+
+def _pearson(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    if a.size < 3 or b.size != a.size:
         return float("nan")
-    return float(x[v].rank().corr(y[v].rank()))
+    ac = a - float(np.mean(a))
+    bc = b - float(np.mean(b))
+    denom = float(np.sqrt(np.dot(ac, ac) * np.dot(bc, bc)))
+    if not np.isfinite(denom) or denom <= 0.0:
+        return float("nan")
+    return float(np.dot(ac, bc) / denom)
+
+
+def spearman_ic(x: pd.Series, y: pd.Series) -> float:
+    """Exact pairwise Spearman IC with substantially lower pandas overhead."""
+    xs = pd.Series(x)
+    ys = pd.Series(y)
+    v = xs.notna() & ys.notna()
+    if int(v.sum()) < 3:
+        return float("nan")
+    xa = xs[v].to_numpy()
+    ya = ys[v].to_numpy()
+    return _pearson(_average_ranks(xa), _average_ranks(ya))
 
 
 def ic_decay(feature: pd.Series, future_returns: Mapping[str, pd.Series]) -> Dict[str, float]:
@@ -31,17 +66,61 @@ def cross_sectional_rank_ic(frame: pd.DataFrame, feature: str, target: str, time
     return pd.Series(values, dtype=float)
 
 
+def _lagged_corr_from_sums(
+    cross_sum: float,
+    left_sum: float,
+    right_sum: float,
+    left_sq_sum: float,
+    right_sq_sum: float,
+    count: int,
+) -> float:
+    if count < 2:
+        return float("nan")
+    n = float(count)
+    cov = float(cross_sum) - float(left_sum) * float(right_sum) / n
+    var_left = float(left_sq_sum) - float(left_sum) * float(left_sum) / n
+    var_right = float(right_sq_sum) - float(right_sum) * float(right_sum) / n
+    # Round-off can produce tiny negative variances for nearly constant inputs.
+    if var_left <= 0.0 or var_right <= 0.0:
+        return float("nan")
+    return float(cov / np.sqrt(var_left * var_right))
+
+
 def effective_sample_size(x: pd.Series, max_lag: int = 100) -> float:
-    s = pd.Series(x).dropna()
-    n = len(s)
+    """Same positive-autocorrelation ESS rule as before, using FFT cross-products.
+
+    The previous implementation called pandas autocorr separately for every lag.
+    This version computes all lagged cross-products in one FFT, while prefix
+    sums reproduce the per-lag Pearson centering used by Series.autocorr().
+    NaNs are dropped first exactly as in the original implementation.
+    """
+    values = pd.Series(x).dropna().to_numpy(dtype=float)
+    n = int(values.size)
     if n < 3:
         return float(n)
+    limit = min(int(max_lag), n - 1)
+    if limit <= 0:
+        return float(n)
+
+    fft_size = 1 << (2 * n - 1).bit_length()
+    spectrum = np.fft.rfft(values, n=fft_size)
+    cross = np.fft.irfft(spectrum * np.conjugate(spectrum), n=fft_size)[: limit + 1]
+
+    prefix = np.concatenate(([0.0], np.cumsum(values, dtype=float)))
+    prefix_sq = np.concatenate(([0.0], np.cumsum(values * values, dtype=float)))
     acfs = []
-    for lag in range(1, min(max_lag, n - 1) + 1):
-        rho = s.autocorr(lag=lag)
-        if not np.isfinite(rho) or rho <= 0:
+    for lag in range(1, limit + 1):
+        count = n - lag
+        left_sum = prefix[count]
+        right_sum = prefix[n] - prefix[lag]
+        left_sq = prefix_sq[count]
+        right_sq = prefix_sq[n] - prefix_sq[lag]
+        rho = _lagged_corr_from_sums(
+            cross[lag], left_sum, right_sum, left_sq, right_sq, count
+        )
+        if not np.isfinite(rho) or rho <= 0.0:
             break
-        acfs.append(rho)
+        acfs.append(float(rho))
     denom = 1.0 + 2.0 * sum(acfs)
     return float(n / denom) if denom > 0 else float(n)
 
