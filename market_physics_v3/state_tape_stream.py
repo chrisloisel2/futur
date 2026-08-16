@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import heapq
 import json
+import tempfile
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, Mapping, Optional, Sequence, Tuple
 
@@ -13,9 +14,24 @@ from .state_tape import DEFAULT_SYMBOLS, DEFAULT_VENUES, book_event_from_record
 from .synchronized import SynchronizedBookEngine
 
 
-def _record_iter(paths: Iterable[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
-    """Yield one partition in receive-time order without loading it into RAM."""
-    for path in sorted(paths):
+EXTERNAL_SORT_CHUNK_ROWS = 200_000
+
+
+def _paths(root: Path, venue: str, symbol: str):
+    return (root / "raw" / "book_events" / ("venue=" + venue) / ("symbol=" + symbol)).glob(
+        "date=*/events.jsonl"
+    )
+
+
+def _iter_filtered_rows(paths: Sequence[Path], start_ns: int, stop_ns: int):
+    """Yield in-window JSON rows in physical file order.
+
+    Never break merely because one row exceeds stop_ns. Append-only files can
+    contain bounded physical disorder after buffered flushes or interrupted /
+    restarted collectors, so a later row may still belong to the requested
+    receive-time window.
+    """
+    for path in paths:
         if not path.is_file():
             continue
         with path.open("r", encoding="utf-8") as fh:
@@ -28,18 +44,109 @@ def _record_iter(paths: Iterable[Path], start_ns: int, stop_ns: int) -> Iterator
                 except json.JSONDecodeError:
                     continue
                 receive_ns = int(row.get("receive_ts_ns", 0) or 0)
-                if receive_ns < int(start_ns):
+                if receive_ns < int(start_ns) or receive_ns > int(stop_ns):
                     continue
-                if receive_ns > int(stop_ns):
-                    # Files are append-only and receive-time ordered per partition.
-                    break
-                yield book_event_from_record(row)
+                yield receive_ns, line, row
 
 
-def _paths(root: Path, venue: str, symbol: str):
-    return (root / "raw" / "book_events" / ("venue=" + venue) / ("symbol=" + symbol)).glob(
-        "date=*/events.jsonl"
-    )
+def _partition_receive_ordered(paths: Sequence[Path], start_ns: int, stop_ns: int) -> bool:
+    """Check the only ordering invariant required by the causal replay engine."""
+    previous = None
+    for receive_ns, _line, _row in _iter_filtered_rows(paths, start_ns, stop_ns):
+        if previous is not None and int(receive_ns) < int(previous):
+            return False
+        previous = int(receive_ns)
+    return True
+
+
+def _direct_record_iter(paths: Sequence[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
+    for _receive_ns, _line, row in _iter_filtered_rows(paths, start_ns, stop_ns):
+        yield book_event_from_record(row)
+
+
+def _run_record_iter(path: Path) -> Iterator[BookEvent]:
+    with path.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            yield book_event_from_record(row)
+
+
+def _external_sorted_record_iter(
+    paths: Sequence[Path],
+    start_ns: int,
+    stop_ns: int,
+    chunk_rows: int = EXTERNAL_SORT_CHUNK_ROWS,
+) -> Iterator[BookEvent]:
+    """External stable receive-time sort for a physically disordered partition.
+
+    The long-run collector is append-only. Multiple buffered flushes, interrupted
+    sessions, or process restarts can make physical JSONL row order differ from
+    receive-time order even though every row carries a valid receive_ts_ns. The
+    replay must restore receive order before events reach SynchronizedBookEngine;
+    relaxing the engine's monotonicity check would corrupt point-in-time causality.
+
+    Sorting is bounded-memory: only `chunk_rows` raw lines are retained at once,
+    sorted stably by receive_ts_ns, spilled to temporary runs, then merged.
+    """
+    chunk_rows = max(1, int(chunk_rows))
+    with tempfile.TemporaryDirectory(prefix="mpv3-book-sort-") as tmp_name:
+        tmp = Path(tmp_name)
+        runs = []
+        chunk = []
+        run_id = 0
+
+        def flush_chunk() -> None:
+            nonlocal chunk, run_id
+            if not chunk:
+                return
+            # Python sort is stable; equal receive timestamps retain source order.
+            chunk.sort(key=lambda x: int(x[0]))
+            run_path = tmp / ("run-%05d.jsonl" % run_id)
+            with run_path.open("w", encoding="utf-8") as out:
+                for _receive_ns, line in chunk:
+                    out.write(line)
+                    out.write("\n")
+            runs.append(run_path)
+            run_id += 1
+            chunk = []
+
+        for receive_ns, line, _row in _iter_filtered_rows(paths, start_ns, stop_ns):
+            chunk.append((int(receive_ns), line))
+            if len(chunk) >= chunk_rows:
+                flush_chunk()
+        flush_chunk()
+
+        if not runs:
+            return
+
+        streams = [_run_record_iter(path) for path in runs]
+        for event in heapq.merge(*streams, key=lambda x: int(x.receive_ts_ns)):
+            yield event
+
+
+def _record_iter(paths: Iterable[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
+    """Yield one venue/symbol partition in causal receive-time order.
+
+    Fast path: physically ordered partitions are read directly after a validation
+    pass. Slow path: only partitions with a receive-time inversion are externally
+    sorted with bounded memory. This keeps the scientific invariant strict while
+    avoiding unnecessary spill files for healthy partitions.
+    """
+    ordered_paths = tuple(sorted(path for path in paths if path.is_file()))
+    if not ordered_paths:
+        return
+    if _partition_receive_ordered(ordered_paths, start_ns, stop_ns):
+        for event in _direct_record_iter(ordered_paths, start_ns, stop_ns):
+            yield event
+        return
+    for event in _external_sorted_record_iter(ordered_paths, start_ns, stop_ns):
+        yield event
 
 
 def iter_merged_book_events(
@@ -49,7 +156,11 @@ def iter_merged_book_events(
     venues: Sequence[str] = DEFAULT_VENUES,
     symbols: Sequence[str] = DEFAULT_SYMBOLS,
 ) -> Iterator[BookEvent]:
-    """K-way merge venue/symbol append-only partitions by local receive time."""
+    """K-way merge venue/symbol partitions by local receive time.
+
+    Each input stream is first proven receive-ordered (or externally reordered),
+    so the merged iterator can safely feed the fail-closed causal engine.
+    """
     base = Path(root)
     streams = []
     for venue_raw in venues:
@@ -57,10 +168,7 @@ def iter_merged_book_events(
         for symbol_raw in symbols:
             symbol = str(symbol_raw).upper()
             streams.append(_record_iter(_paths(base, venue, symbol), start_ns, stop_ns))
-    key = lambda x: (
-        int(x.receive_ts_ns), int(x.event_ts_ns), int(x.sequence_id), x.venue, x.symbol, x.side
-    )
-    return heapq.merge(*streams, key=key)
+    return heapq.merge(*streams, key=lambda x: int(x.receive_ts_ns))
 
 
 def _grid(start_ns: int, stop_ns: int, cadence_ms: int):
