@@ -52,6 +52,21 @@ def test_purged_walk_forward_has_gap():
         assert ts[fold.train_idx].max() < ts[fold.test_idx].min() - 10_000_000 + 1
 
 
+def test_multisymbol_duplicate_timestamps_never_cross_folds():
+    unique = 1_000_000_000 + np.arange(500, dtype=np.int64) * 1_000_000
+    ts = np.repeat(unique, 3)
+    folds = list(PurgedWalkForwardSplitter(4, purge_ms=5, embargo_ms=2).split(ts))
+    assert len(folds) == 4
+    seen_test = set()
+    for fold in folds:
+        train_times = set(ts[fold.train_idx].tolist())
+        test_times = set(ts[fold.test_idx].tolist())
+        assert not train_times.intersection(test_times)
+        assert not seen_test.intersection(test_times)
+        seen_test.update(test_times)
+        assert max(train_times) < min(test_times) - 7_000_000 + 1
+
+
 def test_statistics_multiple_testing_pbo_and_dsr():
     q = bh_qvalues([0.001, 0.02, 0.5])
     assert q[0] <= q[1] <= q[2]
