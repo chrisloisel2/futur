@@ -111,5 +111,53 @@ def test_availability_timestamps_are_audit_metadata_not_model_features():
     assert "binance__basis_bps__velocity" in features.columns
 
 
+def test_zero_filled_event_columns_do_not_unlock_event_labs():
+    registry = LabRegistry()
+    n = 200
+    frame = pd.DataFrame({
+        "asof_ns": np.arange(n),
+        "symbol": ["BTCUSDT"] * n,
+        "binance__queue_imbalance_l1": np.ones(n),
+        "binance__remove_count_1000ms": np.zeros(n),
+        "binance__trades_per_second_1000ms": np.zeros(n),
+        "binance__signed_notional_1000ms": np.zeros(n),
+        "binance__impact_bps_1000ms": np.zeros(n),
+        "binance__absorption_notional_per_bp_1000ms": np.zeros(n),
+        "binance__depth_bid_5bps": np.ones(n),
+    })
+    assert registry.readiness("A3", frame)["ready"] is False
+    assert "*remove_count*" in registry.readiness("A3", frame)["missing_activity"]
+    assert registry.readiness("A5", frame)["ready"] is False
+
+
+def test_mark_index_basis_does_not_unlock_executable_basis_lab():
+    registry = LabRegistry()
+    n = 200
+    frame = pd.DataFrame({
+        "asof_ns": np.arange(n),
+        "symbol": ["BTCUSDT"] * n,
+        "okx__funding": np.full(n, 0.0001),
+        "okx__basis_bps": np.linspace(1.0, 2.0, n),
+    })
+    status = registry.readiness("A9", frame)
+    assert status["ready"] is False
+    assert ("*perp_spot_basis_bps*",) in status["missing_any_groups"]
+
+
+def test_zero_liquidations_do_not_unlock_cascade_lab():
+    registry = LabRegistry()
+    n = 200
+    frame = pd.DataFrame({
+        "asof_ns": np.arange(n),
+        "symbol": ["BTCUSDT"] * n,
+        "bybit__liquidation_total_usd_60000ms": np.zeros(n),
+        "bybit__open_interest": np.linspace(1000.0, 1100.0, n),
+        "bybit__open_interest_change_pct": np.linspace(0.001, 0.002, n),
+    })
+    status = registry.readiness("A7", frame)
+    assert status["ready"] is False
+    assert "*liquidation_total_usd*" in status["missing_activity"]
+
+
 def test_run_window_parse():
     assert infer_run_window("/x/run=100-200/cadence=100ms") == (100, 200)
