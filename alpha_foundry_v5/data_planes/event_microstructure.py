@@ -124,10 +124,11 @@ class _RollingTradeWindow:
             ts = np.asarray([r.ts_ns for r in self.rows], dtype=np.float64)
             dt = np.diff(ts) / 1e9
             interarrival_cv = float(np.std(dt) / np.mean(dt)) if len(dt) and np.mean(dt) > 0 else float("nan")
+            absorption = abs(self.signed) / max(abs(impact_bps), 0.01)
         else:
             impact_bps = 0.0
             interarrival_cv = float("nan")
-        absorption = abs(self.signed) / (abs(impact_bps) + 1e-9) if count else float("nan")
+            absorption = float("nan")
         modality_total = self.individual + self.aggregate
         seconds = self.window_ns / 1e9
         return {
@@ -150,6 +151,7 @@ class EventMicrostructureState:
         self.symbols = tuple(str(s).upper() for s in symbols)
         self.windows_ms = tuple(sorted({int(x) for x in windows_ms}))
         self.levels: MutableMapping[Tuple[str, str, str, float], float] = {}
+        self.snapshot_batches: Dict[Tuple[str, str, str], Tuple[int, int]] = {}
         self.book_windows = {(v, s, w): _RollingBookWindow(w) for v in self.venues for s in self.symbols for w in self.windows_ms}
         self.trade_windows = {(v, s, w): _RollingTradeWindow(w) for v in self.venues for s in self.symbols for w in self.windows_ms}
         self.cvd: Dict[Tuple[str, str], float] = defaultdict(float)
@@ -159,6 +161,18 @@ class EventMicrostructureState:
         self.previous_acceleration: Dict[Tuple[str, str, int], float] = {}
         self.book_records = 0
         self.trade_records = 0
+
+    def _reset_snapshot_batch(self, venue: str, symbol: str, source_stream: str, receive_ns: int, sequence_id: int) -> None:
+        batch_key = (venue, symbol, source_stream)
+        token = (int(receive_ns), int(sequence_id))
+        if self.snapshot_batches.get(batch_key) == token:
+            return
+        self.levels = {
+            key: value
+            for key, value in self.levels.items()
+            if not (key[0] == venue and key[1] == symbol)
+        }
+        self.snapshot_batches[batch_key] = token
 
     def ingest_book(self, row: Mapping[str, object]) -> None:
         venue = str(row.get("venue", "")).lower()
@@ -175,17 +189,20 @@ class EventMicrostructureState:
         price = float(row.get("price", 0.0) or 0.0)
         qty = float(row.get("qty", 0.0) or 0.0)
         event_type = str(row.get("event_type", ""))
+        sequence_id = int(row.get("sequence_id", 0) or 0)
         if price <= 0 or receive_ns <= 0:
             return
-        key = (venue, symbol, side, price)
-        old = self.levels.get(key)
-        contribution = _BookContribution(receive_ns)
 
         if event_type == "snapshot":
-            self.levels[key] = qty
+            self._reset_snapshot_batch(venue, symbol, source_stream, receive_ns, sequence_id)
+            self.levels[(venue, symbol, side, price)] = qty
             self.latest_book_receive[(venue, symbol)] = max(self.latest_book_receive[(venue, symbol)], receive_ns)
             self.book_records += 1
             return
+
+        key = (venue, symbol, side, price)
+        old = self.levels.get(key)
+        contribution = _BookContribution(receive_ns)
 
         if event_type == "add":
             delta = max(qty, 0.0)
