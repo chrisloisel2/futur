@@ -6,7 +6,7 @@ from typing import Mapping, Sequence, Tuple
 import numpy as np
 
 from .contracts import EconomicEvidence, StatisticalEvidence, TimeWindow
-from .statistics import bh_qvalues, block_permutation_pvalue, cscv_pbo, deflated_sharpe_probability, effective_sample_size, spearman
+from .statistics import bh_qvalues, block_permutation_pvalue, cscv_pbo, deflated_sharpe_probability, effective_sample_size, sharpe_ratio, spearman
 from .validation import max_drawdown, profit_factor
 
 
@@ -23,7 +23,6 @@ class StatisticalInputs:
     discovery_window: TimeWindow
     evaluation_window: TimeWindow
     block_size: int
-    trial_sharpes: Sequence[float]
     expected_sign: int = 1
 
 
@@ -39,8 +38,12 @@ def build_statistical_evidence(inputs: StatisticalInputs) -> StatisticalEvidence
     q = bh_qvalues(inputs.pvalue_family)
     q_value = float(q[int(inputs.own_pvalue_index)])
     block_p = float(block_permutation_pvalue(x, y, block_size=int(inputs.block_size), repeats=200))
-    dsr = float(deflated_sharpe_probability(inputs.net_returns, inputs.trial_sharpes))
-    pbo = float(cscv_pbo(np.asarray(inputs.trial_returns, dtype=float), n_blocks=10))
+    trial_matrix = np.asarray(inputs.trial_returns, dtype=float)
+    if trial_matrix.ndim != 2 or trial_matrix.shape[1] < 2:
+        raise ValueError("trial_returns must be [time, trials] with >=2 trials")
+    trial_sharpes = [sharpe_ratio(trial_matrix[:, j]) for j in range(trial_matrix.shape[1])]
+    dsr = float(deflated_sharpe_probability(inputs.net_returns, trial_sharpes))
+    pbo = float(cscv_pbo(trial_matrix, n_blocks=10))
     half = n // 2
     same_sign_halves = False
     if half >= 3:
