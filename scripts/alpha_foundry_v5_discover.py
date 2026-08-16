@@ -40,6 +40,7 @@ def main() -> int:
     parser.add_argument("--feature-set-id", required=True)
     parser.add_argument("--target")
     parser.add_argument("--horizon-ms", required=True, type=int)
+    parser.add_argument("--expected-sign", type=int, choices=[-1, 1], default=1)
     parser.add_argument("--cadence-ms", required=True, type=int)
     parser.add_argument("--code-commit", required=True)
     parser.add_argument("--experiment-id", required=True)
@@ -54,7 +55,7 @@ def main() -> int:
     if sort_cols:
         frame = frame.sort_values(sort_cols).reset_index(drop=True)
     require_pit_clean(audit_point_in_time(frame))
-    hypothesis = hypothesis_grid(args.lab, args.feature_set_id, target_name=args.target, horizons_ms=[args.horizon_ms])[0]
+    hypothesis = hypothesis_grid(args.lab, args.feature_set_id, target_name=args.target, horizons_ms=[args.horizon_ms], expected_sign=args.expected_sign)[0]
     start_ns = int(pd.to_numeric(frame["asof_ns"]).min())
     stop_ns = int(pd.to_numeric(frame["asof_ns"]).max()) + 1
     experiment = ExperimentSpec(experiment_id=args.experiment_id, hypothesis_digest=hypothesis.digest, stage=ResearchStage.DEV_DISCOVERY, dataset_manifest_digest=args.dataset_manifest_digest, window=TimeWindow(start_ns, stop_ns), code_commit=args.code_commit, seed=17, label_horizon_ms=args.horizon_ms, lookback_ms=hypothesis.max_lookback_ms, search_family_id=hypothesis.family_id)
@@ -66,7 +67,7 @@ def main() -> int:
 
     store = ArtifactStore(args.artifact_root)
     store.write_parquet(args.experiment_id, "predictions.parquet", pd.DataFrame({"asof_ns": result.timestamps_ns, "prediction": result.prediction, "target": result.target}))
-    summary = {"hypothesis_id": result.hypothesis_id, "hypothesis_digest": result.hypothesis_digest, "experiment_digest": result.experiment_digest, "n": result.n, "ess": result.ess, "ic": result.ic, "block_p": result.block_p, "q_value": result.q_value, "fold_ics": list(result.fold_ics), "tried_configs": list(result.tried_configs)}
+    summary = {"hypothesis_id": result.hypothesis_id, "hypothesis_digest": result.hypothesis_digest, "experiment_digest": result.experiment_digest, "expected_sign": args.expected_sign, "n": result.n, "ess": result.ess, "ic": result.ic, "block_p": result.block_p, "q_value": result.q_value, "fold_ics": list(result.fold_ics), "tried_configs": list(result.tried_configs)}
     store.write_json(args.experiment_id, "SUMMARY.json", summary)
     seal = store.seal(args.experiment_id, {"dataset_manifest_digest": args.dataset_manifest_digest, "code_commit": args.code_commit})
     print(json.dumps({"summary": summary, "seal": seal}, indent=2, sort_keys=True))
