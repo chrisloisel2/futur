@@ -24,7 +24,15 @@ class LabRegistry:
 
     def readiness(self, lab_id: str, frame: pd.DataFrame) -> Dict[str, object]:
         spec = self.spec(lab_id)
-        return self.plugins[spec.plugin].readiness(frame, spec)
+        status = dict(self.plugins[spec.plugin].readiness(frame, spec))
+        status.update({
+            "name": spec.name,
+            "economic_source_id": spec.economic_source_id,
+            "domains": tuple(domain.value for domain in spec.domains),
+            "default_target": spec.default_target,
+            "plugin": spec.plugin,
+        })
+        return status
 
     def materialize_features(self, lab_id: str, frame: pd.DataFrame) -> pd.DataFrame:
         spec = self.spec(lab_id)
