@@ -71,4 +71,12 @@ def make_target(frame: pd.DataFrame, name: str, horizon_steps: int, **kwargs) ->
     if name == "loo_fair_value_return":
         fv = leave_one_venue_out_fair_value(frame, kwargs["excluded_venue"], kwargs["venues"])
         return forward_log_return(fv, horizon_steps)
+    if name == "next_mid_move":
+        direction, _time_steps = next_mid_move(frame[kwargs.get("price_col", "price_fair_value")], max_steps=int(horizon_steps))
+        return direction
+    if name == "post_fill_markout":
+        column = kwargs.get("markout_col", "exec__post_fill_markout_bps")
+        if column not in frame:
+            raise KeyError("missing execution markout column: %s" % column)
+        return pd.to_numeric(frame[column], errors="coerce")
     raise KeyError("unknown target: %s" % name)
