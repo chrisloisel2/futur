@@ -28,4 +28,6 @@ def lead_lag_pair(leader_innovation: pd.Series, follower_residual: pd.Series, st
     valid = x.notna() & y.notna()
     if int(valid.sum()) < 3:
         return float("nan"), int(valid.sum())
-    return float(x[valid].corr(y[valid], method="spearman")), int(valid.sum())
+    xr = x[valid].rank()
+    yr = y[valid].rank()
+    return float(xr.corr(yr)), int(valid.sum())
