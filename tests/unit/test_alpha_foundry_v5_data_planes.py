@@ -1,10 +1,12 @@
 import json
 
 import numpy as np
+import pandas as pd
 
 from alpha_foundry_v5.data_planes.common import infer_run_window, iter_causal_records
 from alpha_foundry_v5.data_planes.derivatives import DerivativesPlaneState
 from alpha_foundry_v5.data_planes.event_microstructure import EventMicrostructureState
+from alpha_foundry_v5.labs.registry import LabRegistry
 
 
 def test_event_state_recovers_removed_notional_and_trade_flow():
@@ -56,6 +58,21 @@ def test_generic_reader_repairs_receive_time_inversion(tmp_path):
     (path / "events.jsonl").write_text("\n".join(json.dumps(x) for x in rows) + "\n")
     got = list(iter_causal_records(str(tmp_path), "trades", 1, 400, ["x"], ["BTCUSDT"]))
     assert [x["receive_ts_ns"] for x in got] == [100, 200, 300]
+
+
+def test_cross_asset_lab_stays_blocked_on_three_symbol_universe():
+    registry = LabRegistry()
+    rows = []
+    for symbol in ["BTCUSDT", "ETHUSDT", "SOLUSDT"]:
+        for i in range(10):
+            rows.append({"asof_ns": i + 1, "symbol": symbol, "cross_asset__leader_innovation": 1.0, "cross_asset__residual": 0.1, "cross_asset__beta": 1.0})
+    frame = pd.DataFrame(rows)
+    a12 = registry.readiness("A12", frame)
+    a13 = registry.readiness("A13", frame)
+    assert a12["data_ready"] is True and a12["symbol_ready"] is False and a12["ready"] is False
+    assert a12["symbol_count"] == 3 and a12["min_symbols"] == 8
+    assert a13["data_ready"] is True and a13["symbol_ready"] is False and a13["ready"] is False
+    assert a13["min_symbols"] == 12
 
 
 def test_run_window_parse():
