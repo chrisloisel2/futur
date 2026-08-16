@@ -10,10 +10,14 @@ from .common import ChunkedPlaneWriter, base_part_paths
 
 def _load_core(base_tape: str) -> pd.DataFrame:
     frames = []
+    row_offset = 0
     for path in base_part_paths(base_tape):
         sample = pd.read_parquet(path)
         price_col = "price_fair_value" if "price_fair_value" in sample.columns else "fair_value"
-        frames.append(sample[["asof_ns", "symbol", price_col]].rename(columns={price_col: "_price"}))
+        core = sample[["asof_ns", "symbol", price_col]].rename(columns={price_col: "_price"}).copy()
+        core["_row_id"] = np.arange(row_offset, row_offset + len(core), dtype=np.int64)
+        row_offset += len(core)
+        frames.append(core)
     frame = pd.concat(frames, ignore_index=True)
     frame["asof_ns"] = pd.to_numeric(frame["asof_ns"], errors="raise").astype("int64")
     frame["symbol"] = frame["symbol"].astype(str)
@@ -46,7 +50,7 @@ def build_cross_asset_plane(base_tape: str, out_dir: str, horizons_ms: Sequence[
     leader_beta = _rolling_beta(leader, market, beta_window)
     leader_innovation = leader - leader_beta * market
 
-    output = frame[["asof_ns", "symbol"]].copy()
+    output = frame[["asof_ns", "symbol", "_row_id"]].copy()
     output["cross_asset__available_ts_ns"] = output["asof_ns"].astype("int64")
     output["cross_asset__symbol_count"] = int(len(wide.columns))
 
@@ -70,7 +74,7 @@ def build_cross_asset_plane(base_tape: str, out_dir: str, horizons_ms: Sequence[
     for symbol, group in output.groupby("symbol", sort=False):
         features = feature_by_symbol[str(symbol)].reindex(group["asof_ns"].to_numpy()).reset_index(drop=True)
         pieces.append(pd.concat([group.reset_index(drop=True), features], axis=1))
-    enriched = pd.concat(pieces, ignore_index=True).sort_values(["asof_ns", "symbol"], kind="mergesort")
+    enriched = pd.concat(pieces, ignore_index=True).sort_values("_row_id", kind="mergesort").drop(columns=["_row_id"])
 
     writer = ChunkedPlaneWriter(out_dir, chunk_rows=chunk_rows)
     for row in enriched.to_dict(orient="records"):
