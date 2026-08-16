@@ -24,12 +24,7 @@ def _paths(root: Path, venue: str, symbol: str):
 
 
 def _receive_ns_from_line(line: str) -> Optional[int]:
-    """Extract receive_ts_ns without decoding the full JSON object.
-
-    Normalized writer output is compact sorted-key JSON, but tests and imported
-    historical rows may contain whitespace. Fall back to json.loads only when
-    the lightweight numeric scan cannot recover the field.
-    """
+    """Extract receive_ts_ns without decoding the full JSON object."""
     marker = '"receive_ts_ns"'
     pos = line.find(marker)
     if pos >= 0:
@@ -62,10 +57,8 @@ def _receive_ns_from_line(line: str) -> Optional[int]:
 def _iter_filtered_lines(paths: Sequence[Path], start_ns: int, stop_ns: int):
     """Yield in-window JSON lines in physical file order.
 
-    Never break merely because one row exceeds stop_ns. Append-only files can
-    contain bounded physical disorder after buffered flushes or interrupted /
-    restarted collectors, so a later row may still belong to the requested
-    receive-time window.
+    Never break merely because one row exceeds stop_ns. A file may contain a
+    bounded physical inversion after buffered flushes or interrupted sessions.
     """
     for path in paths:
         if not path.is_file():
@@ -83,8 +76,7 @@ def _iter_filtered_lines(paths: Sequence[Path], start_ns: int, stop_ns: int):
                 yield int(receive_ns), line
 
 
-def _partition_receive_ordered(paths: Sequence[Path], start_ns: int, stop_ns: int) -> bool:
-    """Check the only ordering invariant required by the causal replay engine."""
+def _receive_ordered(paths: Sequence[Path], start_ns: int, stop_ns: int) -> bool:
     previous = None
     for receive_ns, _line in _iter_filtered_lines(paths, start_ns, stop_ns):
         if previous is not None and int(receive_ns) < int(previous):
@@ -115,17 +107,25 @@ def _run_record_iter(path: Path) -> Iterator[BookEvent]:
             yield book_event_from_record(row)
 
 
-def _partition_label(paths: Sequence[Path]) -> str:
-    if not paths:
-        return "unknown"
+def _file_label(path: Path) -> str:
     venue = "?"
     symbol = "?"
-    for part in paths[0].parts:
+    date = "?"
+    for part in path.parts:
         if part.startswith("venue="):
             venue = part.split("=", 1)[1]
         elif part.startswith("symbol="):
             symbol = part.split("=", 1)[1]
-    return "%s/%s" % (venue, symbol)
+        elif part.startswith("date="):
+            date = part.split("=", 1)[1]
+    return "%s/%s/%s" % (venue, symbol, date)
+
+
+def _partition_label(paths: Sequence[Path]) -> str:
+    if not paths:
+        return "unknown"
+    label = _file_label(paths[0]).split("/")
+    return "/".join(label[:2])
 
 
 def _external_sorted_record_iter(
@@ -134,19 +134,9 @@ def _external_sorted_record_iter(
     stop_ns: int,
     chunk_rows: int = EXTERNAL_SORT_CHUNK_ROWS,
 ) -> Iterator[BookEvent]:
-    """External stable receive-time sort for a physically disordered partition.
-
-    The long-run collector is append-only. Multiple buffered flushes, interrupted
-    sessions, or process restarts can make physical JSONL row order differ from
-    receive-time order even though every row carries a valid receive_ts_ns. The
-    replay must restore receive order before events reach SynchronizedBookEngine;
-    relaxing the engine's monotonicity check would corrupt point-in-time causality.
-
-    Sorting is bounded-memory: only `chunk_rows` raw lines are retained at once,
-    sorted stably by receive_ts_ns, spilled to temporary runs, then merged.
-    """
+    """External stable receive-time sort for physically disordered file(s)."""
     chunk_rows = max(1, int(chunk_rows))
-    label = _partition_label(paths)
+    label = _file_label(paths[0]) if len(paths) == 1 else _partition_label(paths)
     with tempfile.TemporaryDirectory(prefix="mpv3-book-sort-") as tmp_name:
         tmp = Path(tmp_name)
         runs = []
@@ -158,7 +148,6 @@ def _external_sorted_record_iter(
             nonlocal chunk, run_id
             if not chunk:
                 return
-            # Python sort is stable; equal receive timestamps retain source order.
             chunk.sort(key=lambda x: int(x[0]))
             run_path = tmp / ("run-%05d.jsonl" % run_id)
             with run_path.open("w", encoding="utf-8") as out:
@@ -194,26 +183,34 @@ def _external_sorted_record_iter(
             yield event
 
 
+def _ordered_file_iter(path: Path, start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
+    """Prove one physical JSONL file ordered, or repair only that file."""
+    label = _file_label(path)
+    print("[state-tape] validate receive-order %s" % label, flush=True)
+    if _receive_ordered((path,), start_ns, stop_ns):
+        print("[state-tape] %s ordered -> direct replay" % label, flush=True)
+        for event in _direct_record_iter((path,), start_ns, stop_ns):
+            yield event
+        return
+    print("[state-tape] %s inversion detected -> external reorder" % label, flush=True)
+    for event in _external_sorted_record_iter((path,), start_ns, stop_ns):
+        yield event
+
+
 def _record_iter(paths: Iterable[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
     """Yield one venue/symbol partition in causal receive-time order.
 
-    Fast path: physically ordered partitions are read directly after a lightweight
-    receive-time validation pass. Slow path: only partitions with an inversion are
-    externally sorted with bounded memory. This keeps the scientific invariant
-    strict while avoiding spill files for healthy partitions.
+    Normalized storage is partitioned by *event date*, while causality is defined
+    by *receive time*. A long run crossing UTC midnight can therefore have valid
+    receive-time overlap across adjacent date files. Each physical date file is
+    validated/repaired independently, then date files are merged by receive time
+    instead of being concatenated lexicographically.
     """
     ordered_paths = tuple(sorted(path for path in paths if path.is_file()))
     if not ordered_paths:
         return
-    label = _partition_label(ordered_paths)
-    print("[state-tape] validate receive-order %s" % label, flush=True)
-    if _partition_receive_ordered(ordered_paths, start_ns, stop_ns):
-        print("[state-tape] %s ordered -> direct replay" % label, flush=True)
-        for event in _direct_record_iter(ordered_paths, start_ns, stop_ns):
-            yield event
-        return
-    print("[state-tape] %s inversion detected -> external reorder" % label, flush=True)
-    for event in _external_sorted_record_iter(ordered_paths, start_ns, stop_ns):
+    streams = [_ordered_file_iter(path, start_ns, stop_ns) for path in ordered_paths]
+    for event in heapq.merge(*streams, key=lambda x: int(x.receive_ts_ns)):
         yield event
 
 
@@ -224,11 +221,7 @@ def iter_merged_book_events(
     venues: Sequence[str] = DEFAULT_VENUES,
     symbols: Sequence[str] = DEFAULT_SYMBOLS,
 ) -> Iterator[BookEvent]:
-    """K-way merge venue/symbol partitions by local receive time.
-
-    Each input stream is first proven receive-ordered (or externally reordered),
-    so the merged iterator can safely feed the fail-closed causal engine.
-    """
+    """K-way merge venue/symbol partitions by local receive time."""
     base = Path(root)
     streams = []
     for venue_raw in venues:
