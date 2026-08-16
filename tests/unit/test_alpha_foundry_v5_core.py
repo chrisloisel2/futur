@@ -8,6 +8,7 @@ from alpha_foundry_v5.execution import FeeSchedule, LatencyModel, MarketSnapshot
 from alpha_foundry_v5.ledger import SearchBudgetExceeded, SearchLedger
 from alpha_foundry_v5.lineage import ExperimentRegistry
 from alpha_foundry_v5.manifest import DatasetManifest, fingerprint_partitions, verify_manifest, write_manifest
+from alpha_foundry_v5.multiplicity import FamilyTestLedger
 from alpha_foundry_v5.portfolio import Sleeve, admit_sleeves
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.splits import PurgedWalkForwardSplitter
@@ -48,6 +49,18 @@ def test_ledger_hash_chain_and_unreserved_completion_fail(tmp_path):
     rows[0] = rows[0].replace('"status":"RESERVED"', '"status":"TAMPERED"')
     path.write_text("\n".join(rows) + "\n")
     assert ledger.verify()["ok"] is False
+
+
+def test_family_multiplicity_ledger_reprices_old_qvalues(tmp_path):
+    ledger = FamilyTestLedger(str(tmp_path / "multiplicity.jsonl"))
+    ledger.record("fam", "h1", "e1", 0.01)
+    assert ledger.qvalues("fam")["e1"] == pytest.approx(0.01)
+    ledger.record("fam", "h2", "e2", 0.04)
+    q = ledger.qvalues("fam")
+    assert q["e1"] == pytest.approx(0.02)
+    assert q["e2"] == pytest.approx(0.04)
+    assert ledger.test_count("fam") == 2
+    assert ledger.verify()["ok"] is True
 
 
 def test_confirmation_lineage_refuses_overlap(tmp_path):
