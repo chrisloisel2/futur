@@ -26,7 +26,7 @@ class LabSpec:
     required_column_patterns: Tuple[str, ...]
     required_any_groups: Tuple[Tuple[str, ...], ...] = tuple()
     min_coverage: float = 0.50
-    min_symbols: int = 2
+    min_symbols: int = 1
 
 
 class LabPlugin(ABC):
