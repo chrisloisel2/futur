@@ -73,6 +73,7 @@ class HypothesisSpec:
     max_trials: int
     max_lookback_ms: int
     confirmation_min_hours: float
+    expected_sign: int = 1
     required_primary_symbols: Tuple[str, ...] = ("BTCUSDT", "ETHUSDT")
     support_symbols: Tuple[str, ...] = ("SOLUSDT",)
     notes: str = ""
@@ -84,6 +85,8 @@ class HypothesisSpec:
             raise ValueError("invalid hypothesis numeric contract")
         if float(self.confirmation_min_hours) <= 0:
             raise ValueError("confirmation_min_hours must be positive")
+        if int(self.expected_sign) not in {-1, 1}:
+            raise ValueError("expected_sign must be -1 or +1")
 
     @property
     def digest(self) -> str:
