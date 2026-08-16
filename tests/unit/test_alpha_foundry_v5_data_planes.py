@@ -6,6 +6,7 @@ import pandas as pd
 from alpha_foundry_v5.data_planes.common import infer_run_window, iter_causal_records
 from alpha_foundry_v5.data_planes.derivatives import DerivativesPlaneState
 from alpha_foundry_v5.data_planes.event_microstructure import EventMicrostructureState
+from alpha_foundry_v5.data_planes.wallet import WalletIntelligenceState
 from alpha_foundry_v5.labs.registry import LabRegistry
 
 
@@ -47,6 +48,22 @@ def test_derivatives_keep_venue_specific_state_and_liquidation_windows():
     assert row["deriv__available_ts_ns"] == 240
 
 
+def test_wallet_score_is_causal_and_current_trade_cannot_score_itself():
+    wallet = "0x" + "1" * 40
+    state = WalletIntelligenceState(["BTCUSDT"], flow_windows_ms=[10000], score_horizons_ms=[1000], prior_trades=1.0, min_scored_trades=1)
+    first = {"venue": "hyperliquid", "symbol": "BTCUSDT", "receive_ts_ns": 100, "price": 100.0, "qty": 1.0, "aggressor": "buy", "buyer": wallet, "seller": "0x" + "2" * 40}
+    state.ingest_trade(first)
+    before = state.row(500, "BTCUSDT")
+    assert np.isnan(before["wallet__score_weighted_flow_bps_10000ms"])
+    state.mature(1_100_000_100, "BTCUSDT", 101.0)
+    second = dict(first)
+    second.update({"receive_ts_ns": 1_100_000_200, "price": 101.0})
+    state.ingest_trade(second)
+    after = state.row(1_100_000_300, "BTCUSDT")
+    assert after["wallet__scored_flow_coverage_10000ms"] > 0
+    assert after["wallet__score_weighted_flow_bps_10000ms"] > 0
+
+
 def test_generic_reader_repairs_receive_time_inversion(tmp_path):
     path = tmp_path / "raw" / "trades" / "venue=x" / "symbol=BTCUSDT" / "date=2026-01-01"
     path.mkdir(parents=True)
@@ -73,6 +90,25 @@ def test_cross_asset_lab_stays_blocked_on_three_symbol_universe():
     assert a12["symbol_count"] == 3 and a12["min_symbols"] == 8
     assert a13["data_ready"] is True and a13["symbol_ready"] is False and a13["ready"] is False
     assert a13["min_symbols"] == 12
+
+
+def test_availability_timestamps_are_audit_metadata_not_model_features():
+    registry = LabRegistry()
+    frame = pd.DataFrame({
+        "asof_ns": [100, 200, 300],
+        "symbol": ["BTCUSDT"] * 3,
+        "binance__open_interest": [1000.0, 1010.0, 1020.0],
+        "binance__open_interest_available_ts_ns": [90, 190, 290],
+        "binance__funding": [0.0001, 0.0001, 0.0002],
+        "binance__funding_available_ts_ns": [80, 180, 280],
+        "binance__basis_bps": [1.0, 2.0, 3.0],
+        "binance__basis_bps_available_ts_ns": [70, 170, 270],
+        "price_fair_value": [100.0, 101.0, 102.0],
+    })
+    features = registry.plugins["leverage"].build_features(frame, registry.spec("A8"))
+    assert not any(c.endswith("_available_ts_ns") for c in features.columns)
+    assert "binance__open_interest__pct_change" in features.columns
+    assert "binance__basis_bps__velocity" in features.columns
 
 
 def test_run_window_parse():
