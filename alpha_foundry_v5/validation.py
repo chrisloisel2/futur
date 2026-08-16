@@ -36,7 +36,9 @@ class ValidationEngine:
     def __init__(self, policy: GatePolicy = DEFAULT_POLICY):
         self.policy = policy
 
-    def statistical_gate(self, stage: ResearchStage, evidence: StatisticalEvidence) -> GateDecision:
+    def statistical_gate(self, stage: ResearchStage, evidence: StatisticalEvidence, expected_sign: int = 1) -> GateDecision:
+        if int(expected_sign) not in {-1, 1}:
+            raise ValueError("expected_sign must be -1 or +1")
         failures = []
         if stage == ResearchStage.DEV_DISCOVERY:
             if abs(float(evidence.ic)) < self.policy.discovery_min_abs_ic:
@@ -52,8 +54,8 @@ class ValidationEngine:
         elif stage == ResearchStage.INDEPENDENT_CONFIRMATION:
             if not evidence.independent_window:
                 failures.append("independent_window")
-            if float(evidence.ic) < self.policy.confirmation_min_ic:
-                failures.append("ic")
+            if int(expected_sign) * float(evidence.ic) < self.policy.confirmation_min_ic:
+                failures.append("locked_sign_ic")
             if float(evidence.dsr_probability) < self.policy.confirmation_min_dsr:
                 failures.append("dsr")
             if float(evidence.pbo) > self.policy.confirmation_max_pbo:
