@@ -6,7 +6,7 @@ from ..contracts import DataDomain, ExecutionStyle
 from .base import LabSpec
 
 
-def _spec(lab_id, name, source, hypothesis, payer, domains, plugin, target, horizons, styles, max_trials, patterns, any_groups=(), min_symbols=2):
+def _spec(lab_id, name, source, hypothesis, payer, domains, plugin, target, horizons, styles, max_trials, patterns, any_groups=(), min_symbols=1):
     return LabSpec(lab_id=lab_id, name=name, economic_source_id=source, hypothesis_template=hypothesis, payer=payer, domains=tuple(domains), plugin=plugin, default_target=target, horizons_ms=tuple(int(x) for x in horizons), execution_styles=tuple(styles), max_trials_per_family=int(max_trials), required_column_patterns=tuple(patterns), required_any_groups=tuple(tuple(g) for g in any_groups), min_symbols=int(min_symbols))
 
 
