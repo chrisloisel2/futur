@@ -16,6 +16,7 @@ from alpha_foundry_v5.contracts import ExperimentSpec, ResearchStage, TimeWindow
 from alpha_foundry_v5.hypotheses import hypothesis_grid
 from alpha_foundry_v5.ledger import SearchLedger
 from alpha_foundry_v5.lineage import ExperimentRegistry
+from alpha_foundry_v5.multiplicity import FamilyTestLedger
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.research_engine import ResearchEngine
 
@@ -45,6 +46,7 @@ def main() -> int:
     parser.add_argument("--code-commit", required=True)
     parser.add_argument("--experiment-id", required=True)
     parser.add_argument("--ledger", default="reports/alpha_foundry_v5/SEARCH_LEDGER.jsonl")
+    parser.add_argument("--multiplicity-ledger", default="reports/alpha_foundry_v5/MULTIPLICITY_LEDGER.jsonl")
     parser.add_argument("--experiment-registry", default="reports/alpha_foundry_v5/experiments")
     parser.add_argument("--artifact-root", default="reports/alpha_foundry_v5/artifacts")
     parser.add_argument("--ridge-alpha", action="append", type=float, default=[])
@@ -63,13 +65,18 @@ def main() -> int:
     registry.register(experiment)
     configs = [{"alpha": x} for x in (args.ridge_alpha or [0.01, 0.1, 1.0, 10.0])]
     engine = ResearchEngine(SearchLedger(args.ledger))
-    result = engine.finalize_family([engine.run_discovery(frame, hypothesis, experiment, args.cadence_ms, configs=configs)])[0]
+    result = engine.run_discovery(frame, hypothesis, experiment, args.cadence_ms, configs=configs)
+
+    multiplicity = FamilyTestLedger(args.multiplicity_ledger)
+    multiplicity.record(hypothesis.family_id, hypothesis.digest, experiment.digest, result.block_p)
+    current_q = multiplicity.qvalues(hypothesis.family_id)[experiment.digest]
+    multiplicity_state = multiplicity.verify()
 
     store = ArtifactStore(args.artifact_root)
     store.write_parquet(args.experiment_id, "predictions.parquet", pd.DataFrame({"asof_ns": result.timestamps_ns, "prediction": result.prediction, "target": result.target}))
-    summary = {"hypothesis_id": result.hypothesis_id, "hypothesis_digest": result.hypothesis_digest, "experiment_digest": result.experiment_digest, "expected_sign": args.expected_sign, "n": result.n, "ess": result.ess, "ic": result.ic, "block_p": result.block_p, "q_value": result.q_value, "fold_ics": list(result.fold_ics), "tried_configs": list(result.tried_configs)}
+    summary = {"hypothesis_id": result.hypothesis_id, "hypothesis_digest": result.hypothesis_digest, "experiment_digest": result.experiment_digest, "expected_sign": args.expected_sign, "n": result.n, "ess": result.ess, "ic": result.ic, "block_p": result.block_p, "q_value_at_run": current_q, "multiplicity_family_id": hypothesis.family_id, "multiplicity_tests_at_run": multiplicity.test_count(hypothesis.family_id), "fold_ics": list(result.fold_ics), "tried_configs": list(result.tried_configs)}
     store.write_json(args.experiment_id, "SUMMARY.json", summary)
-    seal = store.seal(args.experiment_id, {"dataset_manifest_digest": args.dataset_manifest_digest, "code_commit": args.code_commit})
+    seal = store.seal(args.experiment_id, {"dataset_manifest_digest": args.dataset_manifest_digest, "code_commit": args.code_commit, "multiplicity_ledger_head": multiplicity_state.get("head_hash", "")})
     print(json.dumps({"summary": summary, "seal": seal}, indent=2, sort_keys=True))
     return 0
 
