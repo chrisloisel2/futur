@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,7 @@ from market_physics_v3.phase5_confirm import (
 )
 
 
-def _frame(hours=12.1, start_ns=DISCOVERY_STOP_NS + 10_000_000_000, cadence_ms=100):
+def _frame(hours=0.02, start_ns=DISCOVERY_STOP_NS + 10_000_000_000, cadence_ms=100):
     rows = int(hours * 3600 * 1000 / cadence_ms) + 1
     t = np.arange(rows, dtype=np.int64)
     parts = []
@@ -35,20 +36,24 @@ def _frame(hours=12.1, start_ns=DISCOVERY_STOP_NS + 10_000_000_000, cadence_ms=1
 
 
 def test_confirmation_refuses_discovery_overlap():
-    frame = _frame(hours=12.1, start_ns=DISCOVERY_STOP_NS - 1_000_000_000)
+    frame = _frame(start_ns=DISCOVERY_STOP_NS - 1_000_000_000)
     with pytest.raises(ValueError, match="overlaps or predates"):
-        run_locked_confirmation(frame, block_shuffle_repeats=5)
+        run_locked_confirmation(frame, min_duration_hours=0.01, block_shuffle_repeats=5)
 
 
 def test_confirmation_refuses_short_independent_window():
-    frame = _frame(hours=1.0)
+    frame = _frame(hours=0.02)
     with pytest.raises(ValueError, match="preregistered 12.000h minimum"):
         run_locked_confirmation(frame, block_shuffle_repeats=5)
 
 
 def test_confirmation_returns_locked_schema_on_independent_window():
-    frame = _frame(hours=12.01)
-    out = run_locked_confirmation(frame, block_shuffle_repeats=5)
+    frame = _frame(hours=0.02)
+    out = run_locked_confirmation(
+        frame,
+        min_duration_hours=0.01,
+        block_shuffle_repeats=5,
+    )
     assert out["summary"]["feature"] == LOCKED_FEATURE
     assert out["summary"]["horizon_ms"] == 30000
     assert out["summary"]["independent_window"] is True
@@ -58,7 +63,6 @@ def test_confirmation_returns_locked_schema_on_independent_window():
 
 
 def test_phase5_2_cli_bootstraps_repo_root():
-    from pathlib import Path
     root = Path(__file__).resolve().parents[2]
     p = subprocess.run(
         [sys.executable, str(root / "scripts/confirm_market_physics_phase5_v3.py"), "--help"],
