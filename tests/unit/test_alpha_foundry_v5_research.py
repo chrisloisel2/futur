@@ -89,6 +89,6 @@ def test_temporal_features_do_not_cross_symbol_boundary():
 
 def test_v5_clis_bootstrap_repo_root():
     root = Path(__file__).resolve().parents[2]
-    for script in ["alpha_foundry_v5_readiness.py", "alpha_foundry_v5_freeze_dataset.py", "alpha_foundry_v5_discover.py"]:
+    for script in ["alpha_foundry_v5_readiness.py", "alpha_foundry_v5_freeze_dataset.py", "alpha_foundry_v5_discover.py", "build_alpha_foundry_v5_data_planes.py"]:
         p = subprocess.run([sys.executable, str(root / "scripts" / script), "--help"], cwd=str(root), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         assert p.returncode == 0, p.stderr
