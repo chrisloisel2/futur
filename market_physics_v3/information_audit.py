@@ -14,12 +14,12 @@ def _average_ranks(values: np.ndarray) -> np.ndarray:
         return np.asarray([], dtype=float)
     order = np.argsort(values, kind="mergesort")
     sorted_values = values[order]
+    starts = np.r_[0, np.flatnonzero(sorted_values[1:] != sorted_values[:-1]) + 1]
+    stops = np.r_[starts[1:], n]
+    averages = 0.5 * ((starts + 1).astype(float) + stops.astype(float))
+    ranks_sorted = np.repeat(averages, stops - starts)
     ranks = np.empty(n, dtype=float)
-    boundaries = np.r_[0, np.flatnonzero(sorted_values[1:] != sorted_values[:-1]) + 1, n]
-    for start, stop in zip(boundaries[:-1], boundaries[1:]):
-        # 1-based ranks start+1 ... stop, averaged exactly like Series.rank().
-        avg = 0.5 * (float(start + 1) + float(stop))
-        ranks[order[start:stop]] = avg
+    ranks[order] = ranks_sorted
     return ranks
 
 
@@ -80,7 +80,6 @@ def _lagged_corr_from_sums(
     cov = float(cross_sum) - float(left_sum) * float(right_sum) / n
     var_left = float(left_sq_sum) - float(left_sum) * float(left_sum) / n
     var_right = float(right_sq_sum) - float(right_sum) * float(right_sum) / n
-    # Round-off can produce tiny negative variances for nearly constant inputs.
     if var_left <= 0.0 or var_right <= 0.0:
         return float("nan")
     return float(cov / np.sqrt(var_left * var_right))
