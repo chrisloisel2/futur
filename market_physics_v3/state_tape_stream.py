@@ -23,8 +23,44 @@ def _paths(root: Path, venue: str, symbol: str):
     )
 
 
-def _iter_filtered_rows(paths: Sequence[Path], start_ns: int, stop_ns: int):
-    """Yield in-window JSON rows in physical file order.
+def _receive_ns_from_line(line: str) -> Optional[int]:
+    """Extract receive_ts_ns without decoding the full JSON object.
+
+    Normalized writer output is compact sorted-key JSON, but tests and imported
+    historical rows may contain whitespace. Fall back to json.loads only when
+    the lightweight numeric scan cannot recover the field.
+    """
+    marker = '"receive_ts_ns"'
+    pos = line.find(marker)
+    if pos >= 0:
+        colon = line.find(":", pos + len(marker))
+        if colon >= 0:
+            i = colon + 1
+            n = len(line)
+            while i < n and line[i] in " \t":
+                i += 1
+            j = i
+            if j < n and line[j] == "-":
+                j += 1
+            while j < n and line[j].isdigit():
+                j += 1
+            if j > i and not (j == i + 1 and line[i] == "-"):
+                try:
+                    return int(line[i:j])
+                except ValueError:
+                    pass
+    try:
+        row = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    try:
+        return int(row.get("receive_ts_ns", 0) or 0)
+    except (TypeError, ValueError):
+        return None
+
+
+def _iter_filtered_lines(paths: Sequence[Path], start_ns: int, stop_ns: int):
+    """Yield in-window JSON lines in physical file order.
 
     Never break merely because one row exceeds stop_ns. Append-only files can
     contain bounded physical disorder after buffered flushes or interrupted /
@@ -39,20 +75,18 @@ def _iter_filtered_rows(paths: Sequence[Path], start_ns: int, stop_ns: int):
                 line = line.strip()
                 if not line:
                     continue
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError:
+                receive_ns = _receive_ns_from_line(line)
+                if receive_ns is None:
                     continue
-                receive_ns = int(row.get("receive_ts_ns", 0) or 0)
                 if receive_ns < int(start_ns) or receive_ns > int(stop_ns):
                     continue
-                yield receive_ns, line, row
+                yield int(receive_ns), line
 
 
 def _partition_receive_ordered(paths: Sequence[Path], start_ns: int, stop_ns: int) -> bool:
     """Check the only ordering invariant required by the causal replay engine."""
     previous = None
-    for receive_ns, _line, _row in _iter_filtered_rows(paths, start_ns, stop_ns):
+    for receive_ns, _line in _iter_filtered_lines(paths, start_ns, stop_ns):
         if previous is not None and int(receive_ns) < int(previous):
             return False
         previous = int(receive_ns)
@@ -60,7 +94,11 @@ def _partition_receive_ordered(paths: Sequence[Path], start_ns: int, stop_ns: in
 
 
 def _direct_record_iter(paths: Sequence[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
-    for _receive_ns, _line, row in _iter_filtered_rows(paths, start_ns, stop_ns):
+    for _receive_ns, line in _iter_filtered_lines(paths, start_ns, stop_ns):
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
         yield book_event_from_record(row)
 
 
@@ -75,6 +113,19 @@ def _run_record_iter(path: Path) -> Iterator[BookEvent]:
             except json.JSONDecodeError:
                 continue
             yield book_event_from_record(row)
+
+
+def _partition_label(paths: Sequence[Path]) -> str:
+    if not paths:
+        return "unknown"
+    venue = "?"
+    symbol = "?"
+    for part in paths[0].parts:
+        if part.startswith("venue="):
+            venue = part.split("=", 1)[1]
+        elif part.startswith("symbol="):
+            symbol = part.split("=", 1)[1]
+    return "%s/%s" % (venue, symbol)
 
 
 def _external_sorted_record_iter(
@@ -95,11 +146,13 @@ def _external_sorted_record_iter(
     sorted stably by receive_ts_ns, spilled to temporary runs, then merged.
     """
     chunk_rows = max(1, int(chunk_rows))
+    label = _partition_label(paths)
     with tempfile.TemporaryDirectory(prefix="mpv3-book-sort-") as tmp_name:
         tmp = Path(tmp_name)
         runs = []
         chunk = []
         run_id = 0
+        selected_rows = 0
 
         def flush_chunk() -> None:
             nonlocal chunk, run_id
@@ -114,9 +167,16 @@ def _external_sorted_record_iter(
                     out.write("\n")
             runs.append(run_path)
             run_id += 1
+            if run_id == 1 or run_id % 10 == 0:
+                print(
+                    "[state-tape] %s reorder spill runs=%d rows=%d"
+                    % (label, run_id, selected_rows),
+                    flush=True,
+                )
             chunk = []
 
-        for receive_ns, line, _row in _iter_filtered_rows(paths, start_ns, stop_ns):
+        for receive_ns, line in _iter_filtered_lines(paths, start_ns, stop_ns):
+            selected_rows += 1
             chunk.append((int(receive_ns), line))
             if len(chunk) >= chunk_rows:
                 flush_chunk()
@@ -124,7 +184,11 @@ def _external_sorted_record_iter(
 
         if not runs:
             return
-
+        print(
+            "[state-tape] %s external reorder ready runs=%d rows=%d"
+            % (label, len(runs), selected_rows),
+            flush=True,
+        )
         streams = [_run_record_iter(path) for path in runs]
         for event in heapq.merge(*streams, key=lambda x: int(x.receive_ts_ns)):
             yield event
@@ -133,18 +197,22 @@ def _external_sorted_record_iter(
 def _record_iter(paths: Iterable[Path], start_ns: int, stop_ns: int) -> Iterator[BookEvent]:
     """Yield one venue/symbol partition in causal receive-time order.
 
-    Fast path: physically ordered partitions are read directly after a validation
-    pass. Slow path: only partitions with a receive-time inversion are externally
-    sorted with bounded memory. This keeps the scientific invariant strict while
-    avoiding unnecessary spill files for healthy partitions.
+    Fast path: physically ordered partitions are read directly after a lightweight
+    receive-time validation pass. Slow path: only partitions with an inversion are
+    externally sorted with bounded memory. This keeps the scientific invariant
+    strict while avoiding spill files for healthy partitions.
     """
     ordered_paths = tuple(sorted(path for path in paths if path.is_file()))
     if not ordered_paths:
         return
+    label = _partition_label(ordered_paths)
+    print("[state-tape] validate receive-order %s" % label, flush=True)
     if _partition_receive_ordered(ordered_paths, start_ns, stop_ns):
+        print("[state-tape] %s ordered -> direct replay" % label, flush=True)
         for event in _direct_record_iter(ordered_paths, start_ns, stop_ns):
             yield event
         return
+    print("[state-tape] %s inversion detected -> external reorder" % label, flush=True)
     for event in _external_sorted_record_iter(ordered_paths, start_ns, stop_ns):
         yield event
 
@@ -330,7 +398,13 @@ def build_streaming_state_tape(
         if not rows:
             return
         frame = pd.DataFrame(rows)
-        frame.to_parquet(target / ("part-%05d.parquet" % part), index=False)
+        path = target / ("part-%05d.parquet" % part)
+        frame.to_parquet(path, index=False)
+        print(
+            "[state-tape] wrote %s rows_total=%d book_events=%d"
+            % (path.name, total_rows, event_count),
+            flush=True,
+        )
         part += 1
         rows = []
 
