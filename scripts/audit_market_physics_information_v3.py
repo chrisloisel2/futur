@@ -29,7 +29,9 @@ def main():
     ap.add_argument("--out", default="reports/market_physics_v3/phase5_information")
     args = ap.parse_args()
 
+    print("[phase5] loading tape %s" % args.tape, flush=True)
     frame = load_parquet_dataset(args.tape)
+    print("[phase5] loaded rows=%s columns=%s" % (len(frame), len(frame.columns)), flush=True)
     result = run_information_audit(
         frame,
         cadence_ms=args.cadence_ms,
@@ -38,6 +40,7 @@ def main():
         allow_short_smoke=args.allow_short_smoke,
         block_shuffle_repeats=args.block_shuffle_repeats,
         max_block_shortlist=(0 if args.allow_short_smoke else args.max_block_shortlist),
+        progress=True,
     )
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
