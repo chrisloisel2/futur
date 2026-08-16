@@ -26,6 +26,7 @@ class LabSpec:
     required_column_patterns: Tuple[str, ...]
     required_any_groups: Tuple[Tuple[str, ...], ...] = tuple()
     min_coverage: float = 0.50
+    min_symbols: int = 2
 
 
 class LabPlugin(ABC):
@@ -56,7 +57,24 @@ class LabPlugin(ABC):
             coverage_by_requirement["ANY:" + "|".join(group)] = best
             if best < float(spec.min_coverage):
                 missing_groups.append(group)
-        return {"ready": not missing and not missing_groups, "min_coverage": float(spec.min_coverage), "coverage": coverage_by_requirement, "missing_patterns": tuple(missing), "missing_any_groups": tuple(missing_groups)}
+
+        if "symbol" in frame.columns:
+            symbol_count = int(frame["symbol"].dropna().astype(str).nunique())
+        else:
+            symbol_count = 1
+        symbol_ready = symbol_count >= int(spec.min_symbols)
+        data_ready = not missing and not missing_groups
+        return {
+            "ready": bool(data_ready and symbol_ready),
+            "data_ready": bool(data_ready),
+            "symbol_ready": bool(symbol_ready),
+            "symbol_count": int(symbol_count),
+            "min_symbols": int(spec.min_symbols),
+            "min_coverage": float(spec.min_coverage),
+            "coverage": coverage_by_requirement,
+            "missing_patterns": tuple(missing),
+            "missing_any_groups": tuple(missing_groups),
+        }
 
     @abstractmethod
     def build_features(self, frame: pd.DataFrame, spec: LabSpec) -> pd.DataFrame:
