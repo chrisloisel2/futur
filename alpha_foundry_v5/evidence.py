@@ -24,6 +24,7 @@ class StatisticalInputs:
     evaluation_window: TimeWindow
     block_size: int
     trial_sharpes: Sequence[float]
+    expected_sign: int = 1
 
 
 def build_statistical_evidence(inputs: StatisticalInputs) -> StatisticalEvidence:
@@ -46,7 +47,9 @@ def build_statistical_evidence(inputs: StatisticalInputs) -> StatisticalEvidence
         a = spearman(x[:half], y[:half])
         b = spearman(x[half:], y[half:])
         same_sign_halves = bool(np.isfinite(a) and np.isfinite(b) and np.sign(a) == np.sign(ic) and np.sign(b) == np.sign(ic))
-    primary_pass = all(float(inputs.symbol_ics.get(s, float("nan"))) > 0 for s in inputs.primary_symbols)
+    if int(inputs.expected_sign) not in {-1, 1}:
+        raise ValueError("expected_sign must be -1 or +1")
+    primary_pass = all(int(inputs.expected_sign) * float(inputs.symbol_ics.get(s, float("nan"))) > 0 for s in inputs.primary_symbols)
     independent = not inputs.discovery_window.overlaps(inputs.evaluation_window) and int(inputs.evaluation_window.start_ns) > int(inputs.discovery_window.stop_ns)
     return StatisticalEvidence(n, ess, ic, q_value, block_p, dsr, pbo, same_sign_halves, bool(primary_pass), bool(independent), False)
 
@@ -77,17 +80,4 @@ def build_economic_evidence(inputs: EconomicInputs) -> EconomicEvidence:
     trimmed = np.sort(finite_net)[:-k] if k > 0 else finite_net
     recent = np.asarray(inputs.recent_trade_pnl_bps, dtype=float)
     paper = np.asarray(inputs.paper_live_trade_pnl_bps, dtype=float)
-    return EconomicEvidence(
-        float(np.nanmean(gross)) if len(gross) else float("nan"),
-        float(np.nanmean(net)) if len(net) else float("nan"),
-        float(np.nanmean(net_x2)) if len(net_x2) else float("nan"),
-        float(np.nanmean(delayed)) if len(delayed) else float("nan"),
-        float(profit_factor(net)),
-        float(max_drawdown(net / 1e4)),
-        float(inputs.capacity_usd),
-        float(np.nanmean(trimmed)) if len(trimmed) else float("nan"),
-        float(np.nanmean(recent)) if len(recent) else float("nan"),
-        float(np.nanmean(paper)) if len(paper) else float("nan"),
-        float(inputs.fill_rate),
-        float(inputs.realized_slippage_bps),
-    )
+    return EconomicEvidence(float(np.nanmean(gross)) if len(gross) else float("nan"), float(np.nanmean(net)) if len(net) else float("nan"), float(np.nanmean(net_x2)) if len(net_x2) else float("nan"), float(np.nanmean(delayed)) if len(delayed) else float("nan"), float(profit_factor(net)), float(max_drawdown(net / 1e4)), float(inputs.capacity_usd), float(np.nanmean(trimmed)) if len(trimmed) else float("nan"), float(np.nanmean(recent)) if len(recent) else float("nan"), float(np.nanmean(paper)) if len(paper) else float("nan"), float(inputs.fill_rate), float(inputs.realized_slippage_bps))
