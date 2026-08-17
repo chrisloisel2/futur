@@ -15,8 +15,27 @@ class PITAuditResult:
     checked_availability_columns: Tuple[str, ...]
 
     @property
-    def clean(self) -> bool:
+    def structural_clean(self) -> bool:
+        """Structural chronology is clean, independent of availability proof."""
         return self.future_availability_violations == 0 and self.nonmonotonic_asof == 0 and self.duplicate_keys == 0
+
+    @property
+    def availability_proved(self) -> bool:
+        """At least one explicit receive/availability clock was audited."""
+        return len(self.checked_availability_columns) > 0
+
+    @property
+    def clean(self) -> bool:
+        """Full PIT proof requires both structural cleanliness and audited clocks."""
+        return self.structural_clean and self.availability_proved
+
+    @property
+    def proof_level(self) -> str:
+        if not self.structural_clean:
+            return "FAILED"
+        if self.availability_proved:
+            return "FULL_AVAILABILITY"
+        return "STRUCTURAL_ONLY"
 
 
 def audit_point_in_time(frame: pd.DataFrame, asof_col: str = "asof_ns", availability_columns: Sequence[str] = (), key_columns: Sequence[str] = ("asof_ns", "symbol")) -> PITAuditResult:
@@ -43,4 +62,13 @@ def audit_point_in_time(frame: pd.DataFrame, asof_col: str = "asof_ns", availabi
 
 def require_pit_clean(result: PITAuditResult) -> None:
     if not result.clean:
-        raise ValueError("PIT audit failed: future=%d nonmonotonic=%d duplicates=%d" % (result.future_availability_violations, result.nonmonotonic_asof, result.duplicate_keys))
+        raise ValueError(
+            "PIT audit failed: proof_level=%s future=%d nonmonotonic=%d duplicates=%d checked_clocks=%d"
+            % (
+                result.proof_level,
+                result.future_availability_violations,
+                result.nonmonotonic_asof,
+                result.duplicate_keys,
+                len(result.checked_availability_columns),
+            )
+        )
