@@ -36,7 +36,18 @@ def main() -> int:
     registry = LabRegistry()
     pit = audit_point_in_time(frame)
     labs = registry.audit(frame)
-    payload = {"rows": int(len(frame)), "columns": int(len(frame.columns)), "pit_clean": bool(pit.clean), "pit": pit.__dict__, "ready_labs": [k for k, v in labs.items() if v["ready"]], "blocked_labs": [k for k, v in labs.items() if not v["ready"]], "labs": labs}
+    payload = {
+        "rows": int(len(frame)),
+        "columns": int(len(frame.columns)),
+        "pit_clean": bool(pit.clean),
+        "pit_structural_clean": bool(pit.structural_clean),
+        "pit_availability_proved": bool(pit.availability_proved),
+        "pit_proof_level": pit.proof_level,
+        "pit": pit.__dict__,
+        "ready_labs": [k for k, v in labs.items() if v["ready"]],
+        "blocked_labs": [k for k, v in labs.items() if not v["ready"]],
+        "labs": labs,
+    }
     text = json.dumps(payload, indent=2, sort_keys=True, default=list)
     print(text)
     if args.out:
