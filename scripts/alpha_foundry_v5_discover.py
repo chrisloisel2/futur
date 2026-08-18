@@ -25,18 +25,176 @@ from alpha_foundry_v5.multiplicity import FamilyTestLedger
 from alpha_foundry_v5.provenance import audit_feature_provenance, load_feature_provenance_manifest
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.research_engine import ResearchEngine
+from alpha_foundry_v5.labs.registry import LabRegistry
+from alpha_foundry_v5.support_io import parquet_union_schema, support_projection_columns
 
 
-def load_frame(path: str) -> pd.DataFrame:
+def load_frame(path: str, lab: str, target_name: str):
     p = Path(path)
+
     if p.suffix.lower() == ".csv":
-        return pd.read_csv(p)
-    if p.is_dir():
-        parts = sorted(p.glob("part-*.parquet"))
-        if not parts:
-            raise ValueError("no parquet parts")
-        return pd.concat([pd.read_parquet(x) for x in parts], ignore_index=True)
-    return pd.read_parquet(p)
+        frame = pd.read_csv(p)
+        return frame, {
+            "mode": "csv_full",
+            "parts": 1,
+            "logical_columns": len(frame.columns),
+            "loaded_columns": len(frame.columns),
+        }
+
+    if p.is_file():
+        frame = pd.read_parquet(p)
+        return frame, {
+            "mode": "single_parquet_full",
+            "parts": 1,
+            "logical_columns": len(frame.columns),
+            "loaded_columns": len(frame.columns),
+        }
+
+    registry = LabRegistry()
+    parts, all_columns, by_part = parquet_union_schema(str(p))
+
+    selected = set(
+        support_projection_columns(
+            all_columns,
+            [lab],
+            registry,
+        )
+    )
+
+    spec = registry.spec(lab)
+    plugin = spec.plugin
+
+    event_tokens = (
+        "signed_notional",
+        "flow_imbalance",
+        "cvd",
+        "absorption",
+        "interarrival_cv",
+        "trades_per_second",
+        "flow_acceleration",
+        "flow_jerk",
+        "ofi",
+        "queue_imbalance",
+        "cancel",
+        "remove",
+        "queue_pressure",
+        "replenishment",
+        "depletion",
+        "book_event_intensity",
+    )
+
+    for column in all_columns:
+        name = str(column)
+        lower = name.lower()
+
+        if plugin == "cross_venue":
+            if (
+                name.endswith("__price_dislocation_bps")
+                or name.endswith("__dislocation_bps")
+                or name.endswith("__price_mid")
+            ):
+                selected.add(name)
+
+        elif plugin == "event_microstructure":
+            if any(token in lower for token in event_tokens):
+                selected.add(name)
+
+        elif plugin == "shock_propagation":
+            if any(
+                token in lower
+                for token in (
+                    "spread_bps",
+                    "depth_",
+                    "notional_to_move",
+                    "dispersion_bps",
+                )
+            ):
+                selected.add(name)
+
+        elif plugin == "leverage":
+            if any(
+                token in lower
+                for token in (
+                    "open_interest",
+                    "funding",
+                    "basis",
+                    "premium",
+                    "liquidation",
+                )
+            ):
+                selected.add(name)
+
+    if "price_fair_value" in all_columns:
+        selected.add("price_fair_value")
+
+    if target_name == "loo_fair_value_return":
+        for column in all_columns:
+            name = str(column)
+            if (
+                name.endswith("__price_mid")
+                or name.endswith("__price_weight")
+            ):
+                selected.add(name)
+
+    elif target_name == "basis_convergence":
+        if "basis_bps" in all_columns:
+            selected.add("basis_bps")
+
+    elif target_name == "post_fill_markout":
+        if "exec__post_fill_markout_bps" in all_columns:
+            selected.add("exec__post_fill_markout_bps")
+
+    projection = [
+        column
+        for column in all_columns
+        if column in selected
+    ]
+
+    if "asof_ns" not in projection:
+        raise ValueError("asof_ns missing from discovery projection")
+
+    if "symbol" not in projection:
+        raise ValueError("symbol missing from discovery projection")
+
+    chunks = []
+
+    for part in parts:
+        available = set(by_part[str(part)])
+
+        columns = [
+            column
+            for column in projection
+            if column in available
+        ]
+
+        chunks.append(
+            pd.read_parquet(
+                part,
+                columns=columns,
+            )
+        )
+
+    frame = pd.concat(
+        chunks,
+        ignore_index=True,
+        sort=False,
+    )
+
+    frame = frame.reindex(
+        columns=projection
+    )
+
+    report = {
+        "mode": "parquet_discovery_projection",
+        "parts": len(parts),
+        "logical_columns": len(all_columns),
+        "loaded_columns": len(projection),
+        "pruned_columns": len(all_columns) - len(projection),
+        "target_name": target_name,
+        "lab": lab,
+    }
+
+    return frame, report
 
 
 def main() -> int:
@@ -61,7 +219,17 @@ def main() -> int:
     parser.add_argument("--ridge-alpha", action="append", type=float, default=[])
     args = parser.parse_args()
 
-    frame = load_frame(args.data)
+    registry = LabRegistry()
+    target_name = args.target or registry.spec(args.lab).default_target
+    frame, load_report = load_frame(
+        args.data,
+        args.lab,
+        target_name,
+    )
+    print(
+        "[alpha-foundry-v5/discovery] loader="
+        + json.dumps(load_report, sort_keys=True)
+    )
     sort_cols = [c for c in ("asof_ns", "symbol") if c in frame.columns]
     if sort_cols:
         frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
