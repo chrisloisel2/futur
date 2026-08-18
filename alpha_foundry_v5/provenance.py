@@ -13,9 +13,14 @@ MANIFEST_NAME = "FEATURE_PROVENANCE.json"
 META_COLUMNS = {"asof_ns", "symbol"}
 META_SUFFIXES = ("_available_ts_ns",)
 
+# Every feature emitted by EventTradePlane must match this contract unless it
+# is explicit audit metadata. Keep event-count-window statistics here as well
+# as clock-window statistics: both are built only from receive-time-admitted
+# book/trade records and are governed by the same availability plane.
 EVENT_TRADE_TOKENS = (
     "trade_count", "gross_notional", "signed_notional", "flow_imbalance",
     "trades_per_second", "interarrival_cv", "impact_bps", "absorption",
+    "trade_size_entropy", "large_trade_fraction",
     "aggregate_fraction", "individual_fraction", "cvd", "flow_acceleration",
     "flow_jerk", "book_event_count", "_add_count", "_add_intensity",
     "_modify_count", "_modify_intensity", "_update_count", "_update_intensity",
@@ -122,7 +127,11 @@ def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[s
 def write_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[str, object]:
     payload = build_feature_provenance_manifest(tensor_dir, base_tape)
     if payload["unclassified_columns"]:
-        raise ValueError("unclassified tensor columns: %s" % payload["unclassified_columns"][:20])
+        unknown = payload["unclassified_columns"]
+        raise ValueError(
+            "unclassified tensor columns (%d): %s"
+            % (len(unknown), unknown[:20])
+        )
     path = Path(tensor_dir) / MANIFEST_NAME
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     return payload
