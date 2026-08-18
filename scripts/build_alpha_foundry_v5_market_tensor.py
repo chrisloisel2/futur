@@ -15,6 +15,7 @@ from alpha_foundry_v5.planes.tensor import (
     DEFAULT_VENUES,
     build_multimodal_market_tensor,
 )
+from alpha_foundry_v5.provenance import write_feature_provenance_manifest
 
 
 def _csv(value):
@@ -45,8 +46,15 @@ def main() -> int:
         symbols=[x.upper() for x in _csv(args.symbols)],
         chunk_rows=args.chunk_rows,
     )
+    provenance = write_feature_provenance_manifest(args.out, args.base_tape)
+    report = dict(report)
+    report["feature_provenance_manifest"] = str(Path(args.out) / "FEATURE_PROVENANCE.json")
+    report["feature_provenance_digest"] = provenance["manifest_digest"]
+    summary_path = Path(args.out) / "SUMMARY.json"
+    summary_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     print(json.dumps(report, indent=2, sort_keys=True))
-    print(Path(args.out) / "SUMMARY.json")
+    print(summary_path)
+    print(Path(args.out) / "FEATURE_PROVENANCE.json")
     return 0
 
 
