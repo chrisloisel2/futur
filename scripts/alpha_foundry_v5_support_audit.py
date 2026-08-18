@@ -16,6 +16,7 @@ from alpha_foundry_v5.provenance import audit_feature_provenance, load_feature_p
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.support_audit import DEFAULT_LABS, run_mechanism_support_audit
 from alpha_foundry_v5.support_io import load_projected_support_frame
+from alpha_foundry_v5.support_stream import run_streaming_mechanism_support_audit
 
 
 def _digest(payload) -> str:
@@ -31,6 +32,33 @@ def _progress(message: str) -> None:
     print("[alpha-foundry-v5/support] %s" % message, file=sys.stderr, flush=True)
 
 
+def _small_file_audit(data: str, selected, registry, provenance):
+    """Compatibility path for CSV/single-parquet inputs.
+
+    Production multimodal tensor directories must use the streaming path below;
+    this fallback deliberately remains limited to small standalone artifacts.
+    """
+    frame, load_report = load_projected_support_frame(data, selected, registry)
+    _progress(
+        "small-file mode loaded %d rows x %d columns"
+        % (len(frame), len(frame.columns))
+    )
+    sort_cols = [c for c in ("asof_ns", "symbol") if c in frame.columns]
+    if sort_cols:
+        frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
+    pit = audit_point_in_time(frame)
+    require_pit_clean(pit)
+    provenance_audit = audit_feature_provenance(frame, provenance)
+    if not provenance_audit.clean:
+        raise ValueError("feature provenance audit failed: %s" % (provenance_audit,))
+    readiness = {lab_id: registry.readiness(lab_id, frame) for lab_id in selected}
+    audit = run_mechanism_support_audit(frame, readiness, labs=selected)
+    audit["feature_provenance_digest"] = provenance_audit.manifest_digest
+    audit["pit_proof_level"] = "FULL_FEATURE_PROVENANCE"
+    audit["load_report"] = load_report
+    return audit
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Target-free Alpha Foundry V5 mechanism support audit and hypothesis-budget allocation"
@@ -44,44 +72,26 @@ def main() -> int:
 
     selected = _csv(args.labs)
     registry = LabRegistry()
-
     provenance = load_feature_provenance_manifest(args.feature_provenance or args.data)
     if provenance is None:
         raise ValueError("support audit requires FEATURE_PROVENANCE.json")
 
-    _progress("building column-pruned frame for labs=%s" % ",".join(selected))
-    frame, load_report = load_projected_support_frame(args.data, selected, registry)
-    _progress(
-        "loaded %d rows x %d columns from %d logical columns across %d parts"
-        % (
-            len(frame),
-            len(frame.columns),
-            int(load_report.get("logical_columns", len(frame.columns))),
-            int(load_report.get("parts", 1)),
+    data_path = Path(args.data)
+    if data_path.is_dir():
+        _progress(
+            "STREAMING MODE: no full-frame concat; labs=%s"
+            % ",".join(selected)
         )
-    )
-
-    sort_cols = [c for c in ("asof_ns", "symbol") if c in frame.columns]
-    if sort_cols:
-        frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
-
-    _progress("auditing point-in-time clocks")
-    pit = audit_point_in_time(frame)
-    require_pit_clean(pit)
-
-    _progress("auditing projected feature provenance")
-    provenance_audit = audit_feature_provenance(frame, provenance)
-    if not provenance_audit.clean:
-        raise ValueError("feature provenance audit failed: %s" % (provenance_audit,))
-
-    _progress("evaluating readiness only for selected labs")
-    readiness = {lab_id: registry.readiness(lab_id, frame) for lab_id in selected}
-
-    _progress("computing target-free support / ESS / diversity")
-    audit = run_mechanism_support_audit(frame, readiness, labs=selected)
-    audit["feature_provenance_digest"] = provenance_audit.manifest_digest
-    audit["pit_proof_level"] = "FULL_FEATURE_PROVENANCE"
-    audit["load_report"] = load_report
+        audit = run_streaming_mechanism_support_audit(
+            args.data,
+            provenance,
+            registry,
+            labs=selected,
+            progress=_progress,
+        )
+    else:
+        _progress("small standalone input; using compatibility full-frame path")
+        audit = _small_file_audit(args.data, selected, registry, provenance)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -91,7 +101,7 @@ def main() -> int:
         "version": 1,
         "support_audit_digest": audit["audit_digest"],
         "support_policy_digest": audit["policy_digest"],
-        "feature_provenance_digest": provenance_audit.manifest_digest,
+        "feature_provenance_digest": audit["feature_provenance_digest"],
         "target_free": True,
         "labs": {
             lab_id: {
@@ -115,14 +125,8 @@ def main() -> int:
         "adequate_support_labs": audit["adequate_support_labs"],
         "thin_or_blocked_labs": audit["thin_or_blocked_labs"],
         "budgets": {k: v["max_hypothesis_tests"] for k, v in budgets["labs"].items()},
-        "feature_provenance_digest": provenance_audit.manifest_digest,
-        "load_report": {
-            "mode": load_report.get("mode"),
-            "parts": load_report.get("parts"),
-            "logical_columns": load_report.get("logical_columns"),
-            "loaded_columns": load_report.get("loaded_columns"),
-            "pruned_columns": load_report.get("pruned_columns", 0),
-        },
+        "feature_provenance_digest": audit["feature_provenance_digest"],
+        "load_report": audit.get("load_report", {}),
     }, indent=2, sort_keys=True))
     return 0
 
