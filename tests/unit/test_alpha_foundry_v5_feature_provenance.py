@@ -1,8 +1,13 @@
 import pandas as pd
 
 from alpha_foundry_v5.labs.registry import LabRegistry
+from alpha_foundry_v5.planes.derivatives import DerivativesPlane
 from alpha_foundry_v5.planes.event_trade import EventTradePlane
-from alpha_foundry_v5.provenance import _new_feature_origin, audit_feature_provenance
+from alpha_foundry_v5.provenance import (
+    _new_feature_origin,
+    audit_feature_provenance,
+    build_feature_provenance_manifest,
+)
 
 
 def test_feature_provenance_requires_every_feature_declared():
@@ -88,6 +93,79 @@ def test_event_trade_plane_every_emitted_feature_has_a_provenance_class():
         "okx__large_trade_fraction_last250",
     ]:
         assert _new_feature_origin(name)[0] == "event_trade"
+
+
+def test_derivatives_plane_every_emitted_feature_has_a_provenance_class():
+    plane = DerivativesPlane(["okx"], ["BTCUSDT"], liquidation_windows_ms=[1000, 30000])
+    base = {"_source_kind": "derivatives", "venue": "okx", "symbol": "BTCUSDT"}
+    plane.ingest(dict(base, receive_ts_ns=10, event_ts_ns=9, kind="open_interest", value=100.0))
+    plane.ingest(dict(base, receive_ts_ns=20, event_ts_ns=19, kind="open_interest", value=105.0))
+    plane.ingest(dict(base, receive_ts_ns=30, event_ts_ns=29, kind="funding", value=0.0001, next_funding_ts_ns=1_000_000_000))
+    plane.ingest(dict(base, receive_ts_ns=40, event_ts_ns=39, kind="mark", value=101.0))
+    plane.ingest(dict(base, receive_ts_ns=50, event_ts_ns=49, kind="index", value=100.0))
+    plane.ingest(dict(base, receive_ts_ns=60, event_ts_ns=59, kind="premium", value=0.001))
+    plane.ingest(dict(base, receive_ts_ns=70, event_ts_ns=69, kind="liquidation", value=1000.0, side="long"))
+    plane.advance(100)
+    state = plane.state(100, "BTCUSDT")
+
+    feature_names = [name for name in state if not name.endswith("_available_ts_ns")]
+    unclassified = [name for name in feature_names if _new_feature_origin(name) is None]
+    assert unclassified == []
+
+    for name in feature_names:
+        origin = _new_feature_origin(name)
+        assert origin is not None
+        assert origin[0] == "derivatives"
+        assert origin[1] == ("derivatives__available_ts_ns",)
+
+    # Cross-plane liquidation/depth ratios have a stricter dual-clock contract.
+    origin = _new_feature_origin("okx__liquidation_to_depth_30000ms")
+    assert origin[0] == "cross_plane"
+    assert origin[1] == ("book__available_ts_ns", "derivatives__available_ts_ns")
+
+
+def test_provenance_uses_union_of_all_parquet_partition_schemas(tmp_path):
+    base = tmp_path / "base"
+    tensor = tmp_path / "tensor"
+    base.mkdir()
+    tensor.mkdir()
+
+    # A base feature appears only in the second base chunk.
+    pd.DataFrame({
+        "asof_ns": [100],
+        "symbol": ["BTCUSDT"],
+        "price_fair_value": [100.0],
+    }).to_parquet(base / "part-00000.parquet", index=False)
+    pd.DataFrame({
+        "asof_ns": [200],
+        "symbol": ["BTCUSDT"],
+        "okx__mid": [100.1],
+    }).to_parquet(base / "part-00001.parquet", index=False)
+
+    # A derivative feature appears only in the second tensor chunk, exactly
+    # like production liquidation columns that first become material later.
+    pd.DataFrame({
+        "asof_ns": [100],
+        "symbol": ["BTCUSDT"],
+        "price_fair_value": [100.0],
+        "event_trade__available_ts_ns": [90],
+        "okx__signed_notional_100ms": [10.0],
+    }).to_parquet(tensor / "part-00000.parquet", index=False)
+    pd.DataFrame({
+        "asof_ns": [200],
+        "symbol": ["BTCUSDT"],
+        "okx__mid": [100.1],
+        "derivatives__available_ts_ns": [190],
+        "okx__liquidation_count_30000ms": [1.0],
+    }).to_parquet(tensor / "part-00001.parquet", index=False)
+
+    manifest = build_feature_provenance_manifest(str(tensor), str(base))
+    assert manifest["version"] == 2
+    assert manifest["tensor_parts_scanned"] == 2
+    assert manifest["base_parts_scanned"] == 2
+    assert manifest["unclassified_columns"] == []
+    assert manifest["features"]["okx__mid"]["origin"] == "base_state_tape"
+    assert manifest["features"]["okx__liquidation_count_30000ms"]["origin"] == "derivatives"
 
 
 def test_a14_namespace_does_not_match_deriv_columns():
