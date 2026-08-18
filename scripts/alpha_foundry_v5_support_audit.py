@@ -7,8 +7,6 @@ import json
 import sys
 from pathlib import Path
 
-import pandas as pd
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -17,18 +15,7 @@ from alpha_foundry_v5.labs.registry import LabRegistry
 from alpha_foundry_v5.provenance import audit_feature_provenance, load_feature_provenance_manifest
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.support_audit import DEFAULT_LABS, run_mechanism_support_audit
-
-
-def _load_frame(path: str) -> pd.DataFrame:
-    root = Path(path)
-    if root.suffix.lower() == ".csv":
-        return pd.read_csv(root)
-    if root.is_dir():
-        parts = sorted(root.glob("part-*.parquet"))
-        if not parts:
-            raise ValueError("no part-*.parquet under %s" % root)
-        return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
-    return pd.read_parquet(root)
+from alpha_foundry_v5.support_io import load_projected_support_frame
 
 
 def _digest(payload) -> str:
@@ -38,6 +25,10 @@ def _digest(payload) -> str:
 
 def _csv(value: str):
     return [x.strip().upper() for x in str(value).split(",") if x.strip()]
+
+
+def _progress(message: str) -> None:
+    print("[alpha-foundry-v5/support] %s" % message, file=sys.stderr, flush=True)
 
 
 def main() -> int:
@@ -51,26 +42,46 @@ def main() -> int:
     parser.add_argument("--budget-out")
     args = parser.parse_args()
 
-    frame = _load_frame(args.data)
+    selected = _csv(args.labs)
+    registry = LabRegistry()
+
+    provenance = load_feature_provenance_manifest(args.feature_provenance or args.data)
+    if provenance is None:
+        raise ValueError("support audit requires FEATURE_PROVENANCE.json")
+
+    _progress("building column-pruned frame for labs=%s" % ",".join(selected))
+    frame, load_report = load_projected_support_frame(args.data, selected, registry)
+    _progress(
+        "loaded %d rows x %d columns from %d logical columns across %d parts"
+        % (
+            len(frame),
+            len(frame.columns),
+            int(load_report.get("logical_columns", len(frame.columns))),
+            int(load_report.get("parts", 1)),
+        )
+    )
+
     sort_cols = [c for c in ("asof_ns", "symbol") if c in frame.columns]
     if sort_cols:
         frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
 
+    _progress("auditing point-in-time clocks")
     pit = audit_point_in_time(frame)
     require_pit_clean(pit)
-    provenance = load_feature_provenance_manifest(args.feature_provenance or args.data)
-    if provenance is None:
-        raise ValueError("support audit requires FEATURE_PROVENANCE.json")
+
+    _progress("auditing projected feature provenance")
     provenance_audit = audit_feature_provenance(frame, provenance)
     if not provenance_audit.clean:
         raise ValueError("feature provenance audit failed: %s" % (provenance_audit,))
 
-    registry = LabRegistry()
-    readiness = registry.audit(frame)
-    selected = _csv(args.labs)
+    _progress("evaluating readiness only for selected labs")
+    readiness = {lab_id: registry.readiness(lab_id, frame) for lab_id in selected}
+
+    _progress("computing target-free support / ESS / diversity")
     audit = run_mechanism_support_audit(frame, readiness, labs=selected)
     audit["feature_provenance_digest"] = provenance_audit.manifest_digest
     audit["pit_proof_level"] = "FULL_FEATURE_PROVENANCE"
+    audit["load_report"] = load_report
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -93,8 +104,10 @@ def main() -> int:
     }
     budgets["manifest_digest"] = _digest(budgets)
     budget_path = Path(args.budget_out) if args.budget_out else out.with_name("HYPOTHESIS_BUDGETS.json")
+    budget_path.parent.mkdir(parents=True, exist_ok=True)
     budget_path.write_text(json.dumps(budgets, indent=2, sort_keys=True), encoding="utf-8")
 
+    _progress("wrote support audit and hypothesis budget manifest")
     print(json.dumps({
         "support_audit": str(out),
         "hypothesis_budgets": str(budget_path),
@@ -103,6 +116,13 @@ def main() -> int:
         "thin_or_blocked_labs": audit["thin_or_blocked_labs"],
         "budgets": {k: v["max_hypothesis_tests"] for k, v in budgets["labs"].items()},
         "feature_provenance_digest": provenance_audit.manifest_digest,
+        "load_report": {
+            "mode": load_report.get("mode"),
+            "parts": load_report.get("parts"),
+            "logical_columns": load_report.get("logical_columns"),
+            "loaded_columns": load_report.get("loaded_columns"),
+            "pruned_columns": load_report.get("pruned_columns", 0),
+        },
     }, indent=2, sort_keys=True))
     return 0
 
