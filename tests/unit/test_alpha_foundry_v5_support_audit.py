@@ -13,6 +13,7 @@ from alpha_foundry_v5.support_io import (
     parquet_union_schema,
     support_projection_columns,
 )
+from alpha_foundry_v5.support_stream import run_streaming_mechanism_support_audit
 
 
 def test_support_audit_ignores_target_columns_when_matching_features():
@@ -103,7 +104,6 @@ def test_support_projection_prunes_irrelevant_columns_and_keeps_late_sparse_feat
         "bybit__liquidation_available_ts_ns": [290, 390],
         "bybit__open_interest_change_pct": [0.03, 0.04],
         "bybit__buy_notional_10bps": [100000.0, 100000.0],
-        # Sparse feature appears only in a later chunk.
         "bybit__liquidation_notional_30000ms": [1000.0, 2000.0],
         "irrelevant_noise": [3.0, 4.0],
         "target_future_return": [9.0, 9.0],
@@ -129,3 +129,54 @@ def test_support_projection_prunes_irrelevant_columns_and_keeps_late_sparse_feat
     assert "irrelevant_noise" not in frame.columns
     assert "target_future_return" not in frame.columns
     assert frame["bybit__liquidation_notional_30000ms"].notna().sum() == 2
+
+
+def test_streaming_support_audit_never_concatenates_full_tensor(tmp_path):
+    root = tmp_path / "tensor"
+    root.mkdir()
+    rows = []
+    for i in range(140):
+        for symbol in ("BTCUSDT", "ETHUSDT"):
+            asof = 1_000_000_000 + i * 100_000_000
+            rows.append({
+                "asof_ns": asof,
+                "symbol": symbol,
+                "price_fair_value": 100.0 + i * 0.001 + (0.1 if symbol == "ETHUSDT" else 0.0),
+                "event_trade__available_ts_ns": asof - 1,
+                "binance__bid_remove_count_100ms": 1.0,
+                "bybit__ask_remove_count_100ms": 1.0,
+                "binance__trade_count_100ms": 1.0,
+                "bybit__trade_count_100ms": 1.0,
+                "okx__trade_count_100ms": 1.0,
+                "binance__queue_imbalance_l5": np.sin(i / 7.0),
+            })
+    frame = pd.DataFrame(rows).sort_values(["asof_ns", "symbol"], kind="mergesort").reset_index(drop=True)
+    frame.iloc[: len(frame) // 2].to_parquet(root / "part-00000.parquet", index=False)
+    frame.iloc[len(frame) // 2 :].to_parquet(root / "part-00001.parquet", index=False)
+
+    features = {}
+    for column in frame.columns:
+        if column in {"asof_ns", "symbol"} or column.endswith("_available_ts_ns"):
+            continue
+        if column == "price_fair_value":
+            features[column] = {"origin": "base_state_tape", "governing_clocks": []}
+        else:
+            features[column] = {
+                "origin": "event_trade",
+                "governing_clocks": ["event_trade__available_ts_ns"],
+            }
+    provenance = {"manifest_digest": "stream-test", "features": features}
+    result = run_streaming_mechanism_support_audit(
+        str(root),
+        provenance,
+        LabRegistry(),
+        labs=("A3",),
+    )
+
+    assert result["rows"] == len(frame)
+    assert result["target_free"] is True
+    assert result["load_report"]["mode"] == "parquet_partition_streaming"
+    assert result["load_report"]["full_frame_concat"] is False
+    assert result["load_report"]["max_resident_parts"] == 1
+    assert result["load_report"]["parts"] == 2
+    assert "A3" in result["labs"]
