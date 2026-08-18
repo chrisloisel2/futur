@@ -5,14 +5,16 @@ from typing import Dict
 import pandas as pd
 
 from .base import LabSpec
-from .catalog import LABS
+from .strict_catalog import LABS
 from .plugins import PLUGIN_REGISTRY
+from .strict_options import StrictOptionsPlugin
 
 
 class LabRegistry:
     def __init__(self):
         self.specs = dict(LABS)
         self.plugins = dict(PLUGIN_REGISTRY)
+        self.plugins["options"] = StrictOptionsPlugin()
         sources = [s.economic_source_id for s in self.specs.values()]
         if len(sources) != len(set(sources)):
             raise ValueError("economic_source_id must be unique across labs")
