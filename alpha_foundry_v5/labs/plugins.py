@@ -184,10 +184,13 @@ class OptionsPlugin(LabPlugin):
     plugin_name = "options"
 
     def build_features(self, frame: pd.DataFrame, spec: LabSpec) -> pd.DataFrame:
+        # Options research is namespace-strict. Generic tokens such as ``iv_``
+        # previously matched unrelated derivative columns (for example ``deriv__``)
+        # and could silently contaminate A14. Only an explicit Options Plane may
+        # populate model inputs for this lab.
         cols = [
             c for c in frame.columns
-            if _is_model_feature(c)
-            and any(t in c.lower() for t in ("iv_", "skew", "rr25", "butterfly", "term_structure", "option_oi", "gamma"))
+            if _is_model_feature(c) and str(c).startswith("option__")
         ]
         out = _numeric(frame, cols)
         for c in list(out.columns):
