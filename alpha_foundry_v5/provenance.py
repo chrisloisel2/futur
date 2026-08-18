@@ -44,7 +44,15 @@ def _json_digest(payload: Mapping[str, object]) -> str:
     return _sha256_bytes(body)
 
 
-def _parquet_columns(root: Path) -> Tuple[str, ...]:
+def _parquet_schema_union(root: Path) -> Tuple[Tuple[str, ...], int]:
+    """Return first-seen union of every part schema, never only part-00000.
+
+    Multimodal tensor chunks are intentionally sparse: a modality can become
+    observable only in a later chunk (for example the first liquidation). A
+    provenance manifest that inspects only the first Parquet part can therefore
+    silently omit legitimate later features. Reading Arrow schemas is cheap and
+    does not touch column data, so scan every partition and seal their union.
+    """
     parts = sorted(root.glob("part-*.parquet"))
     if not parts:
         raise ValueError("no part-*.parquet under %s" % root)
@@ -52,7 +60,22 @@ def _parquet_columns(root: Path) -> Tuple[str, ...]:
         import pyarrow.parquet as pq
     except ImportError as exc:
         raise RuntimeError("pyarrow is required to inspect parquet schema") from exc
-    return tuple(str(x) for x in pq.ParquetFile(str(parts[0])).schema_arrow.names)
+
+    seen = set()
+    columns = []
+    for part in parts:
+        names = pq.ParquetFile(str(part)).schema_arrow.names
+        for raw_name in names:
+            name = str(raw_name)
+            if name not in seen:
+                seen.add(name)
+                columns.append(name)
+    return tuple(columns), len(parts)
+
+
+def _parquet_columns(root: Path) -> Tuple[str, ...]:
+    columns, _parts = _parquet_schema_union(root)
+    return columns
 
 
 def _is_metadata(column: str) -> bool:
@@ -86,8 +109,9 @@ def _new_feature_origin(column: str) -> Optional[Tuple[str, Tuple[str, ...], str
 def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[str, object]:
     tensor_root = Path(tensor_dir)
     base_root = Path(base_tape)
-    tensor_columns = _parquet_columns(tensor_root)
-    base_columns = set(_parquet_columns(base_root))
+    tensor_columns, tensor_parts = _parquet_schema_union(tensor_root)
+    base_column_tuple, base_parts = _parquet_schema_union(base_root)
+    base_columns = set(base_column_tuple)
     features = {}
     unknown = []
     for column in tensor_columns:
@@ -111,14 +135,17 @@ def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[s
             "proof_method": method,
         }
     payload = {
-        "version": 1,
+        "version": 2,
         "tensor_dir": str(tensor_root),
         "base_tape": str(base_root),
+        "tensor_parts_scanned": int(tensor_parts),
+        "base_parts_scanned": int(base_parts),
         "tensor_columns": len(tensor_columns),
+        "base_columns": len(base_columns),
         "feature_columns": len(features),
         "features": features,
         "unclassified_columns": sorted(unknown),
-        "policy": "every research feature must have an explicit origin; non-base derived features must declare governing availability clocks",
+        "policy": "every research feature across the union of all parquet partition schemas must have an explicit origin; non-base derived features must declare governing availability clocks",
     }
     payload["manifest_digest"] = _json_digest(payload)
     return payload
