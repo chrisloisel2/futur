@@ -19,21 +19,39 @@ capacity, corrélation aux sleeves existants. L'IC est diagnostique, pas la mét
 Kill vite : ~1-2 jours de discovery max par hypothèse simple quand la donnée existe déjà.
 `CLOSED_NO_EDGE` rapide = succès du process, pas un échec.
 
-## Familles (10 mécanismes économiques, pas 10 modèles)
+## Familles (16 mécanismes économiques, catalogue canonique unique)
 
-| # | edge | mécanisme | statut |
-|---|---|---|---|
-| A2 | Venue dislocation convergence | un exchange prend du retard puis converge | `DEV_DISCOVERY` ✅ — voir détail ci-dessous |
-| A3 | Dynamic leader/follower | quel venue découvre le prix maintenant, trader les followers | pas commencé |
-| A4 | Aggressive-flow propagation | flux agressif venue leader → mouvement retardé ailleurs | pas commencé |
-| A5 | Book depletion propagation | disparition de profondeur → mouvement cross-venue | pas commencé |
-| A6 | Hyperliquid informed-wallet flow | wallets HL précédant Binance | pas commencé |
-| A7 | Spot ↔ perp lead/lag | mouvement non simultané spot/perp | pas commencé |
-| A8 | Liquidation residual reversal | cascade + OI drop, rendement résiduel hedgé (pas juste "racheter le rebond" — ça a déjà échoué) | pas commencé |
-| A9 | Funding-settlement microstructure | inefficience d'exécution autour du settlement, pas le carry lui-même | pas commencé |
-| A10 | Cross-sectional shock propagation | BTC/leader bouge → alts réagissent avec retard, 500ms-30s | pas commencé |
-| A11 | Options → perp information | skew/IV/flow options avant déplacement du perp | pas commencé |
-| — | Phase 5.2 — OKX queue imbalance → LOO fair value | `okx__queue_imbalance_l5` @ 30s prédit Binance+Bybit+HL | `CLOSED_NO_EDGE` ❌ à EXECUTION_ECONOMICS (2026-08-28) |
+**`alpha_foundry_v5/labs/catalog.py` est la nomenclature canonique unique pour A1-A16 —
+plus aucune paraphrase divergente ailleurs.** Ce tableau reprend `name`/`hypothesis_template`/
+`payer` du code directement (2026-08-29, correction P0-5 : les libellés précédents de ce
+scoreboard divergeaient du catalogue réel — corrigé, ne pas réintroduire de synonymes).
+
+| # | name (catalogue) | hypothesis_template | payer | statut |
+|---|---|---|---|---|
+| A1 | Cross-venue price discovery | Venue innovations lead peer repricing. | slower venue inventory | pas commencé |
+| A2 | Venue dislocation convergence | Transient venue dislocations converge to a robust anchor. | urgent local flow | `DEV_DISCOVERY` ✅ — voir détail ci-dessous |
+| A3 | Queue depletion hazard | Conditional add/cancel/execution intensity predicts first queue depletion. | adverse selected passive liquidity | pas commencé |
+| A4 | Liquidity resilience | Refill asymmetry after a sweep separates continuation from rejection. | shock extrapolators | pas commencé |
+| A5 | Toxic flow and absorption | Signed flow versus impact identifies informed toxicity or hidden absorption. | late market-order followers | pas commencé |
+| A6 | Liquidity shock propagation | Depth/spread shocks on leaders propagate with measurable impulse response. | slow cross-venue repricing | pas commencé |
+| A7 | Liquidation cascade | Forced liquidations become nonlinear relative to available depth and OI. | leveraged forced flow | pas commencé |
+| A8 | Leverage topology | Joint price/OI/funding/mark-index premium state distinguishes new leverage from deleveraging. | crowded leverage | pas commencé (piste "résiduel hedgé, pas racheter le rebond" — voir A7/A8) |
+| A9 | Funding and executable perp-spot basis convergence | Extreme executable perp-vs-spot basis/funding deviations converge under arbitrage capital. | perp carry payers | pas commencé — déjà proche de ce qui a été épuisé (carry simple), ne pas reprendre sans angle neuf |
+| A10 | Funding settlement event | Funding boundaries create predictable inventory adjustment around settlement. | funding-sensitive inventory | pas commencé |
+| A11 | Informed wallet flow | Persistent public-wallet markout identifies informed flow before broad repricing. | less-informed counterparties | pas commencé (HL wallets = cas d'usage naturel) |
+| A12 | Cross-asset causal propagation | Leader innovations predict follower residual returns. | slow cross-asset repricing | pas commencé |
+| A13 | Residual relative value | Factor-neutral residual divergence mean-reverts independent of market beta. | temporary inventory imbalance | pas commencé |
+| A14 | Options surface shock | IV/skew/term shocks predict hedging pressure and realized-vol repricing. | convexity rehedging | pas commencé |
+| A15 | On-chain exchange flow | Exchange/stablecoin inventory changes shift future supply-demand. | slower settlement-layer responders | pas commencé |
+| A16 | Execution alpha | Queue state and flow predict fill probability and post-fill adverse selection. | immediacy demanders | pas commencé |
+| — | Phase 5.2 — OKX queue imbalance → LOO fair value | `okx__queue_imbalance_l5` @ 30s prédit Binance+Bybit+HL | — | `CLOSED_NO_EDGE` ❌ à EXECUTION_ECONOMICS (2026-08-28). Hors catalogue V5 (héritage `market_physics_v3/phase5_mechanism.py`, pas de LabSpec A-numéroté propre — ne pas lui inventer un numéro). |
+
+Note sur les libellés informels utilisés avant cette correction ("dynamic leader/follower",
+"aggressive-flow propagation", "spot/perp lead-lag", etc.) : ce sont des reformulations, pas
+des labs distincts. Les plus proches équivalents catalogue sont A1 (leadership), A5/A6 (flux
+et chocs de liquidité cross-venue), A9 (pas A7/A8, un lead-lag spot/perp général n'a pas
+d'équivalent exact — nécessiterait un nouveau LabSpec s'il est retenu), A11 (wallets), A12
+(cross-asset), A14 (options). Ne plus utiliser ces reformulations — citer le numéro catalogue.
 
 ## A2 — détail
 
