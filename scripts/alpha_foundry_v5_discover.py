@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 import pandas as pd
@@ -19,13 +20,15 @@ from alpha_foundry_v5.hypothesis_budget import (
     load_hypothesis_budget_manifest,
     require_lab_budget,
 )
+from alpha_foundry_v5.labs.registry import LabRegistry
 from alpha_foundry_v5.ledger import SearchLedger
 from alpha_foundry_v5.lineage import ExperimentRegistry
+from alpha_foundry_v5.manifest import load_manifest, verify_manifest
 from alpha_foundry_v5.multiplicity import FamilyTestLedger
 from alpha_foundry_v5.provenance import audit_feature_provenance, load_feature_provenance_manifest
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
+from alpha_foundry_v5.repro import verify_code_commit
 from alpha_foundry_v5.research_engine import ResearchEngine
-from alpha_foundry_v5.labs.registry import LabRegistry
 from alpha_foundry_v5.support_io import parquet_union_schema, support_projection_columns
 
 
@@ -202,7 +205,8 @@ def main() -> int:
     parser.add_argument("--data", required=True)
     parser.add_argument("--feature-provenance", help="FEATURE_PROVENANCE.json; inferred from --data when it is a tensor directory")
     parser.add_argument("--support-budget-manifest", required=True, help="Target-free HYPOTHESIS_BUDGETS.json emitted by support audit")
-    parser.add_argument("--dataset-manifest-digest", required=True)
+    parser.add_argument("--dataset-manifest", required=True, help="Frozen DatasetManifest JSON written by alpha_foundry_v5_freeze_dataset.py")
+    parser.add_argument("--dataset-manifest-digest", required=True, help="Must equal the loaded --dataset-manifest's own digest -- checked, not trusted")
     parser.add_argument("--lab", required=True)
     parser.add_argument("--feature-set-id", required=True)
     parser.add_argument("--target")
@@ -218,6 +222,18 @@ def main() -> int:
     parser.add_argument("--artifact-root", default="reports/alpha_foundry_v5/artifacts")
     parser.add_argument("--ridge-alpha", action="append", type=float, default=[])
     args = parser.parse_args()
+
+    verify_code_commit(args.code_commit, ROOT)
+
+    dataset_manifest = load_manifest(args.dataset_manifest)
+    if dataset_manifest.digest != args.dataset_manifest_digest:
+        raise ValueError(
+            f"--dataset-manifest-digest {args.dataset_manifest_digest!r} does not match "
+            f"the loaded manifest's own digest {dataset_manifest.digest!r} ({args.dataset_manifest})"
+        )
+    manifest_check = verify_manifest(dataset_manifest)
+    if not manifest_check["ok"]:
+        raise ValueError(f"dataset manifest verification failed: {manifest_check}")
 
     registry = LabRegistry()
     target_name = args.target or registry.spec(args.lab).default_target
@@ -340,6 +356,7 @@ def main() -> int:
         "hypothesis_budget_ledger_head": budget_state.get("head_hash", ""),
         "code_commit": args.code_commit,
         "multiplicity_ledger_head": multiplicity_state.get("head_hash", ""),
+        "hypothesis": asdict(hypothesis),
     })
     print(json.dumps({"summary": summary, "seal": seal}, indent=2, sort_keys=True))
     return 0

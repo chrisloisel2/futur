@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
 
 from .contracts import TimeWindow
 from .hashing import atomic_write_json, sha256_file, sha256_obj
@@ -20,9 +21,9 @@ class DatasetManifest:
     schema_version: str
     dataset_name: str
     window: TimeWindow
-    domains: Tuple[str, ...]
-    sources: Tuple[str, ...]
-    partitions: Tuple[PartitionFingerprint, ...]
+    domains: tuple[str, ...]
+    sources: tuple[str, ...]
+    partitions: tuple[PartitionFingerprint, ...]
     row_count: int
     code_commit: str
     pit_policy: str
@@ -33,14 +34,14 @@ class DatasetManifest:
     def digest(self) -> str:
         return sha256_obj(self)
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
         payload["digest"] = self.digest
         return payload
 
 
-def fingerprint_partitions(paths: Sequence[str]) -> Tuple[PartitionFingerprint, ...]:
-    rows: List[PartitionFingerprint] = []
+def fingerprint_partitions(paths: Sequence[str]) -> tuple[PartitionFingerprint, ...]:
+    rows: list[PartitionFingerprint] = []
     for raw in sorted(set(str(p) for p in paths)):
         path = Path(raw)
         if not path.is_file():
@@ -58,7 +59,17 @@ def write_manifest(manifest: DatasetManifest, path: str) -> None:
     atomic_write_json(str(target), manifest.to_dict())
 
 
-def verify_manifest(manifest: DatasetManifest) -> Dict[str, object]:
+def load_manifest(path: str) -> DatasetManifest:
+    row = json.loads(Path(path).read_text(encoding="utf-8"))
+    row.pop("digest", None)
+    row["window"] = TimeWindow(**row["window"])
+    row["domains"] = tuple(row["domains"])
+    row["sources"] = tuple(row["sources"])
+    row["partitions"] = tuple(PartitionFingerprint(**p) for p in row["partitions"])
+    return DatasetManifest(**row)
+
+
+def verify_manifest(manifest: DatasetManifest) -> dict[str, object]:
     changed = []
     missing = []
     for part in manifest.partitions:
