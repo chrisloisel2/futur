@@ -431,6 +431,18 @@
         "basis_term_v0": "SELECTED_PROVISIONAL",
         "mh_events_exec": "OBSERVING"
       }
+    },
+    {
+      "ts": "2026-08-28T06:20:51.180357+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "SELECTED_PROVISIONAL",
+        "mh_events_exec": "OBSERVING"
+      }
     }
   ],
   "provisional": {
@@ -440,7 +452,7 @@
     }
   },
   "latest": {
-    "ts": "2026-08-27T06:20:51.180681+00:00",
+    "ts": "2026-08-28T06:20:51.180357+00:00",
     "verdict": "NO_SELECTION",
     "statuses": {
       "carry_basis_v12": {
@@ -449,9 +461,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 37.83,
+          "age_days": 38.83,
           "min_days": 30,
-          "n_decisions": 36,
+          "n_decisions": 37,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -463,9 +475,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 37.83,
+          "age_days": 38.83,
           "min_days": 30,
-          "n_decisions": 36,
+          "n_decisions": 37,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -477,9 +489,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 37.83,
+          "age_days": 38.83,
           "min_days": 30,
-          "n_decisions": 36,
+          "n_decisions": 37,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -490,8 +502,8 @@
         "status": "SELECTED_PROVISIONAL",
         "reasons": [],
         "phase": "confirmation",
-        "days_elapsed": 7.0,
-        "new_events": 535,
+        "days_elapsed": 8.0,
+        "new_events": 608,
         "required_days": 14,
         "required_events": 100
       },
@@ -501,7 +513,7 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 37.83,
+          "age_days": 38.83,
           "min_days": 30,
           "n_decisions": 0,
           "min_decisions": 30,
