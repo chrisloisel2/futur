@@ -1,0 +1,127 @@
+{
+  "assumptions": {
+    "delayed_entry_latency_ms": 300,
+    "sizing": "weighted by venue__price_weight at entry, normalized across binance/bybit/hyperliquid",
+    "spread_cost": "half of observed venue__price_spread_bps at entry and exit",
+    "taker_fee_bps": {
+      "binance": 5.0,
+      "bybit": 5.5,
+      "hyperliquid": 3.5
+    },
+    "top_contributor_trim": 0.05
+  },
+  "excluded_venue": "okx",
+  "execution_venues": [
+    "binance",
+    "bybit",
+    "hyperliquid"
+  ],
+  "horizon_ms": 30000,
+  "mechanism": "okx__queue_imbalance_l5",
+  "policy": {
+    "execution_min_capacity_usd": 200000.0,
+    "execution_min_pf": 1.3
+  },
+  "results": {
+    "BTCUSDT": {
+      "capacity_usd": 5054190.496208938,
+      "delayed_entry_net_bps": -9.365973207826716,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "cost_x2",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.7535310756232283,
+      "max_drawdown": -0.576378297337933,
+      "n_trades": 925,
+      "net_edge_bps": -9.291673632521265,
+      "net_edge_cost_x2_bps": -19.336878340665756,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.0038774440807067805,
+      "realized_slippage_bps": 0.032683941821371576,
+      "recent_period_net_bps": -9.326353922982333,
+      "role": "PRIMARY",
+      "top_contributors_removed_net_bps": -9.61954632310152
+    },
+    "COMBINED": {
+      "capacity_usd": 2957601.867600412,
+      "delayed_entry_net_bps": -9.287709316990806,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "cost_x2",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.6378421713520541,
+      "max_drawdown": -0.9162051382297951,
+      "n_trades": 2680,
+      "net_edge_bps": -9.250311599105363,
+      "net_edge_cost_x2_bps": -19.138465369562777,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.005778527787158878,
+      "realized_slippage_bps": 0.20271912561727845,
+      "recent_period_net_bps": -9.17092158035594,
+      "top_contributors_removed_net_bps": -9.667949319364785
+    },
+    "ETHUSDT": {
+      "capacity_usd": 2849943.530835596,
+      "delayed_entry_net_bps": -9.815047600912838,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "cost_x2",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.555869049881847,
+      "max_drawdown": -0.6486998217900759,
+      "n_trades": 1076,
+      "net_edge_bps": -9.726618499522871,
+      "net_edge_cost_x2_bps": -20.00910604892759,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.004979311783391558,
+      "realized_slippage_bps": 0.07410205959138594,
+      "recent_period_net_bps": -9.761248474028541,
+      "role": "PRIMARY",
+      "top_contributors_removed_net_bps": -10.14069905362734
+    },
+    "SOLUSDT": {
+      "capacity_usd": 908320.5243809534,
+      "delayed_entry_net_bps": -8.345426411949095,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "cost_x2",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.6101409080988972,
+      "max_drawdown": -0.43612689407831184,
+      "n_trades": 679,
+      "net_edge_bps": -8.439168586205584,
+      "net_edge_cost_x2_bps": -17.488478080510067,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.010064535774919142,
+      "realized_slippage_bps": 0.6381749548589095,
+      "recent_period_net_bps": -7.815693859214953,
+      "role": "SUPPORT",
+      "top_contributors_removed_net_bps": -8.918208343115218
+    }
+  },
+  "tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786893798852052322-1786936999002614116/cadence=100ms"
+}
