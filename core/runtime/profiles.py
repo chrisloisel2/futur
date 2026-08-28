@@ -45,16 +45,6 @@ TRAINING_PROFILES = {
         default_run_root="runs/research/pipeline_minute",
         aliases=("1m", "minute"),
     ),
-    "local": TrainingProfile(
-        key="local",
-        module_name="legacy.train_local",
-        strategy_slug="legacy_local",
-        zone="legacy",
-        timeframe="1h",
-        horizon_minutes=60,
-        default_run_root="runs/legacy/local",
-        aliases=("local", "legacy"),
-    ),
 }
 
 _PROFILE_ALIASES = {
