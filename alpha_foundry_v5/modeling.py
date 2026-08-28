@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import List, Mapping, Sequence, Tuple
 
 import numpy as np
 
@@ -66,9 +66,14 @@ class NestedFoldResult:
 @dataclass(frozen=True)
 class NestedCVResult:
     predictions: np.ndarray
-    folds: Tuple[NestedFoldResult, ...]
-    tried_config_digests: Tuple[str, ...]
+    folds: tuple[NestedFoldResult, ...]
+    tried_config_digests: tuple[str, ...]
     outer_ic: float
+    # [n_samples, n_configs], NaN outside each outer fold's own test window. Column j is
+    # what every candidate config -- not just the one inner-CV selected -- would have
+    # predicted on each fold's held-out set. This is what DSR/PBO need: a real per-trial
+    # return series, not just the winning trial's. See build_statistical_evidence().
+    predictions_by_config: np.ndarray
 
 
 def nested_purged_walk_forward(x: np.ndarray, y: np.ndarray, timestamps_ns: Sequence[int], adapter: ModelAdapter, configs: Sequence[Mapping[str, object]], outer_splits: int = 5, inner_splits: int = 3, purge_ms: int = 0, embargo_ms: int = 0) -> NestedCVResult:
@@ -81,7 +86,8 @@ def nested_purged_walk_forward(x: np.ndarray, y: np.ndarray, timestamps_ns: Sequ
         raise ValueError("at least one model config is required")
     outer = PurgedWalkForwardSplitter(outer_splits, purge_ms=purge_ms, embargo_ms=embargo_ms)
     predictions = np.full(len(y), np.nan, dtype=float)
-    fold_rows: List[NestedFoldResult] = []
+    predictions_by_config = np.full((len(y), len(configs)), np.nan, dtype=float)
+    fold_rows: list[NestedFoldResult] = []
     tried = tuple(sha256_obj(dict(c)) for c in configs)
     for fold in outer.split(ts):
         train_idx = fold.train_idx
@@ -103,7 +109,10 @@ def nested_purged_walk_forward(x: np.ndarray, y: np.ndarray, timestamps_ns: Sequ
         model = adapter.fit(x[train_idx], y[train_idx], params)
         pred = adapter.predict(model, x[fold.test_idx])
         predictions[fold.test_idx] = pred
-        fold_rows.append(NestedFoldResult(fold.fold_id, sha256_obj(params), params, float(scores[best_i]), float(spearman(pred, y[fold.test_idx])), int(len(fold.test_idx))))
+        fold_rows.append(NestedFoldResult(fold.fold_id, sha256_obj(params), params, float(scores[best_i]), float(spearman(pred, y[fold.test_idx])), len(fold.test_idx)))
+        for j, trial_params in enumerate(configs):
+            trial_model = model if j == best_i else adapter.fit(x[train_idx], y[train_idx], trial_params)
+            predictions_by_config[fold.test_idx, j] = adapter.predict(trial_model, x[fold.test_idx])
     valid = np.isfinite(predictions) & np.isfinite(y)
     overall = spearman(predictions[valid], y[valid]) if int(valid.sum()) >= 3 else float("nan")
-    return NestedCVResult(predictions, tuple(fold_rows), tried, float(overall))
+    return NestedCVResult(predictions, tuple(fold_rows), tried, float(overall), predictions_by_config)

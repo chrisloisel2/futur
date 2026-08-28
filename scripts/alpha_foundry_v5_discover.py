@@ -29,8 +29,9 @@ from alpha_foundry_v5.multiplicity import FamilyTestLedger
 from alpha_foundry_v5.provenance import audit_feature_provenance, load_feature_provenance_manifest
 from alpha_foundry_v5.quality import audit_point_in_time, require_pit_clean
 from alpha_foundry_v5.repro import verify_code_commit
-from alpha_foundry_v5.research_engine import ResearchEngine
+from alpha_foundry_v5.research_engine import ResearchEngine, build_evidence
 from alpha_foundry_v5.support_io import parquet_union_schema, support_projection_columns
+from alpha_foundry_v5.validation import DEFAULT_POLICY, ValidationEngine
 
 
 def load_frame(path: str, lab: str, target_name: str, feature_columns: tuple[str, ...]):
@@ -270,6 +271,24 @@ def main() -> int:
     current_q = multiplicity.qvalues(hypothesis.family_id)[experiment.digest]
     multiplicity_state = multiplicity.verify()
 
+    family_records = [r for r in multiplicity.records() if r.family_id == hypothesis.family_id]
+    pvalue_family = [r.p_value for r in family_records]
+    own_pvalue_index = [r.experiment_digest for r in family_records].index(experiment.digest)
+    evidence = build_evidence(
+        result,
+        stage=ResearchStage.DEV_DISCOVERY,
+        pvalue_family=pvalue_family,
+        own_pvalue_index=own_pvalue_index,
+        primary_symbols=hypothesis.required_primary_symbols,
+        discovery_window=experiment.window,
+        evaluation_window=experiment.window,
+        block_size_rows=3000,
+        expected_sign=hypothesis.expected_sign,
+    )
+    decision = ValidationEngine(DEFAULT_POLICY).statistical_gate(
+        ResearchStage.DEV_DISCOVERY, evidence, expected_sign=hypothesis.expected_sign
+    )
+
     completion = budget_ledger.complete(experiment.digest)
     budget_state = budget_ledger.verify()
     budget_used = budget_ledger.used(hypothesis.lab_id, budget_manifest_digest)
@@ -306,6 +325,10 @@ def main() -> int:
         "hypothesis_budget_completion_hash": completion.record_hash,
         "fold_ics": list(result.fold_ics),
         "tried_configs": list(result.tried_configs),
+        "statistical_evidence": asdict(evidence),
+        "gate_passed": decision.passed,
+        "gate_failures": list(decision.failures),
+        "gate_stage": decision.stage.value,
     }
     store.write_json(args.experiment_id, "SUMMARY.json", summary)
     seal = store.seal(args.experiment_id, {
@@ -320,7 +343,7 @@ def main() -> int:
         "feature_set_columns": list(feature_set.columns),
     })
     print(json.dumps({"summary": summary, "seal": seal}, indent=2, sort_keys=True))
-    return 0
+    return 0 if decision.passed else 1
 
 
 if __name__ == "__main__":
