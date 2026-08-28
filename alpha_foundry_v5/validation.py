@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence, Tuple
 
 import numpy as np
 
@@ -26,7 +26,7 @@ class GatePolicy:
 class GateDecision:
     stage: ResearchStage
     passed: bool
-    failures: Tuple[str, ...]
+    failures: tuple[str, ...]
 
 
 DEFAULT_POLICY = GatePolicy()
@@ -41,24 +41,24 @@ class ValidationEngine:
             raise ValueError("expected_sign must be -1 or +1")
         failures = []
         if stage == ResearchStage.DEV_DISCOVERY:
-            if abs(float(evidence.ic)) < self.policy.discovery_min_abs_ic:
+            if not np.isfinite(evidence.ic) or abs(float(evidence.ic)) < self.policy.discovery_min_abs_ic:
                 failures.append("ic")
-            if float(evidence.q_value) > self.policy.discovery_max_q:
+            if not np.isfinite(evidence.q_value) or float(evidence.q_value) > self.policy.discovery_max_q:
                 failures.append("fdr")
-            if float(evidence.block_p) > self.policy.discovery_max_block_p:
+            if not np.isfinite(evidence.block_p) or float(evidence.block_p) > self.policy.discovery_max_block_p:
                 failures.append("block_shuffle")
-            if float(evidence.ess) < self.policy.discovery_min_ess:
+            if not np.isfinite(evidence.ess) or float(evidence.ess) < self.policy.discovery_min_ess:
                 failures.append("ess")
             if not evidence.same_sign_halves:
                 failures.append("same_sign_halves")
         elif stage == ResearchStage.INDEPENDENT_CONFIRMATION:
             if not evidence.independent_window:
                 failures.append("independent_window")
-            if int(expected_sign) * float(evidence.ic) < self.policy.confirmation_min_ic:
+            if not np.isfinite(evidence.ic) or int(expected_sign) * float(evidence.ic) < self.policy.confirmation_min_ic:
                 failures.append("locked_sign_ic")
-            if float(evidence.dsr_probability) < self.policy.confirmation_min_dsr:
+            if not np.isfinite(evidence.dsr_probability) or float(evidence.dsr_probability) < self.policy.confirmation_min_dsr:
                 failures.append("dsr")
-            if float(evidence.pbo) > self.policy.confirmation_max_pbo:
+            if not np.isfinite(evidence.pbo) or float(evidence.pbo) > self.policy.confirmation_max_pbo:
                 failures.append("pbo")
             if not evidence.all_primary_symbols_pass:
                 failures.append("primary_symbols")
@@ -70,21 +70,22 @@ class ValidationEngine:
 
     def economic_gate(self, evidence: EconomicEvidence, require_paper: bool = False) -> GateDecision:
         failures = []
-        if float(evidence.net_edge_bps) <= 0:
+        if not np.isfinite(evidence.net_edge_bps) or float(evidence.net_edge_bps) <= 0:
             failures.append("net_edge")
-        if float(evidence.net_edge_cost_x2_bps) <= 0:
+        if not np.isfinite(evidence.net_edge_cost_x2_bps) or float(evidence.net_edge_cost_x2_bps) <= 0:
             failures.append("cost_x2")
-        if float(evidence.delayed_entry_net_bps) <= 0:
+        if not np.isfinite(evidence.delayed_entry_net_bps) or float(evidence.delayed_entry_net_bps) <= 0:
             failures.append("delayed_entry")
-        if float(evidence.top_contributors_removed_net_bps) <= 0:
+        if not np.isfinite(evidence.top_contributors_removed_net_bps) or float(evidence.top_contributors_removed_net_bps) <= 0:
             failures.append("contributors")
-        if float(evidence.recent_period_net_bps) <= 0:
+        if not np.isfinite(evidence.recent_period_net_bps) or float(evidence.recent_period_net_bps) <= 0:
             failures.append("recent_period")
-        if float(evidence.profit_factor) < self.policy.execution_min_pf:
+        # profit_factor may legitimately be +inf (zero losing trades); only NaN is a failure mode.
+        if np.isnan(evidence.profit_factor) or float(evidence.profit_factor) < self.policy.execution_min_pf:
             failures.append("profit_factor")
-        if float(evidence.capacity_usd) < self.policy.execution_min_capacity_usd:
+        if not np.isfinite(evidence.capacity_usd) or float(evidence.capacity_usd) < self.policy.execution_min_capacity_usd:
             failures.append("capacity")
-        if require_paper and float(evidence.paper_live_net_bps) <= 0:
+        if require_paper and (not np.isfinite(evidence.paper_live_net_bps) or float(evidence.paper_live_net_bps) <= 0):
             failures.append("paper_live")
         stage = ResearchStage.PAPER_LIVE if require_paper else ResearchStage.EXECUTION_ECONOMICS
         return GateDecision(stage, not failures, tuple(failures))

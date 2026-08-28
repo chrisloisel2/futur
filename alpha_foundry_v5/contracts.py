@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import math
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Mapping, Optional, Tuple
 
 from .hashing import sha256_obj
+
+
+def _require_finite(**fields: float) -> None:
+    bad = [name for name, value in fields.items() if not math.isfinite(float(value))]
+    if bad:
+        raise ValueError(f"non-finite required field(s): {', '.join(sorted(bad))}")
 
 
 class ResearchStage(str, Enum):
@@ -52,7 +59,7 @@ class TimeWindow:
     def duration_s(self) -> float:
         return float((int(self.stop_ns) - int(self.start_ns)) / 1e9)
 
-    def overlaps(self, other: "TimeWindow") -> bool:
+    def overlaps(self, other: TimeWindow) -> bool:
         return max(int(self.start_ns), int(other.start_ns)) < min(int(self.stop_ns), int(other.stop_ns))
 
 
@@ -64,7 +71,7 @@ class HypothesisSpec:
     economic_source_id: str
     mechanism: str
     payer: str
-    domains: Tuple[DataDomain, ...]
+    domains: tuple[DataDomain, ...]
     target_name: str
     horizon_ms: int
     feature_set_id: str
@@ -74,8 +81,8 @@ class HypothesisSpec:
     max_lookback_ms: int
     confirmation_min_hours: float
     expected_sign: int = 1
-    required_primary_symbols: Tuple[str, ...] = ("BTCUSDT", "ETHUSDT")
-    support_symbols: Tuple[str, ...] = ("SOLUSDT",)
+    required_primary_symbols: tuple[str, ...] = ("BTCUSDT", "ETHUSDT")
+    support_symbols: tuple[str, ...] = ("SOLUSDT",)
     notes: str = ""
 
     def __post_init__(self) -> None:
@@ -105,7 +112,7 @@ class ExperimentSpec:
     label_horizon_ms: int
     lookback_ms: int
     model_params: Mapping[str, object] = field(default_factory=dict)
-    parent_experiment_id: Optional[str] = None
+    parent_experiment_id: str | None = None
     search_family_id: str = ""
 
     def __post_init__(self) -> None:
@@ -147,6 +154,18 @@ class StatisticalEvidence:
     independent_window: bool
     reverse_dominant: bool = False
 
+    def __post_init__(self) -> None:
+        if int(self.n) < 0:
+            raise ValueError("n must be non-negative")
+        _require_finite(
+            ess=self.ess,
+            ic=self.ic,
+            q_value=self.q_value,
+            block_p=self.block_p,
+            dsr_probability=self.dsr_probability,
+            pbo=self.pbo,
+        )
+
 
 @dataclass(frozen=True)
 class EconomicEvidence:
@@ -163,6 +182,27 @@ class EconomicEvidence:
     fill_rate: float
     realized_slippage_bps: float
 
+    def __post_init__(self) -> None:
+        # paper_live_net_bps is legitimately NaN before PAPER_LIVE evidence exists --
+        # economic_gate() only checks it when require_paper=True. Every other field
+        # is always computed by build_economic_evidence() and must never be NaN.
+        # profit_factor may legitimately be +inf (zero losing trades) -- reject NaN
+        # only, not infinity, there.
+        if math.isnan(float(self.profit_factor)):
+            raise ValueError("non-finite required field(s): profit_factor")
+        _require_finite(
+            gross_edge_bps=self.gross_edge_bps,
+            net_edge_bps=self.net_edge_bps,
+            net_edge_cost_x2_bps=self.net_edge_cost_x2_bps,
+            delayed_entry_net_bps=self.delayed_entry_net_bps,
+            max_drawdown=self.max_drawdown,
+            capacity_usd=self.capacity_usd,
+            top_contributors_removed_net_bps=self.top_contributors_removed_net_bps,
+            recent_period_net_bps=self.recent_period_net_bps,
+            fill_rate=self.fill_rate,
+            realized_slippage_bps=self.realized_slippage_bps,
+        )
+
 
 @dataclass(frozen=True)
 class CandidateEvidence:
@@ -175,7 +215,7 @@ class CandidateEvidence:
     pnl_artifact: str
     predictions_artifact: str
     metrics_artifact: str
-    metadata: Dict[str, float] = field(default_factory=dict)
+    metadata: dict[str, float] = field(default_factory=dict)
 
     @property
     def digest(self) -> str:
