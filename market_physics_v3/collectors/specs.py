@@ -67,10 +67,30 @@ def subscriptions(venue, symbols):
             "url": _url("MPV3_OKX_WS_URL", "wss://ws.okx.com:8443/ws/v5/public"),
             "subscribe": {"op": "subscribe", "args": args},
         }
+    if venue == "deribit":
+        # Deribit perpetuals are coin-margined; only BTC and ETH exist as of
+        # this writing (verified live: GET /public/get_instruments?currency=SOL
+        # &kind=future returns an empty result, only SOL_USDC/SOL_ETH spot).
+        # Symbols without a mapping are silently skipped, not fabricated.
+        instrument_map = {"BTCUSDT": "BTC-PERPETUAL", "ETHUSDT": "ETH-PERPETUAL"}
+        instruments = [instrument_map[s] for s in syms if s in instrument_map]
+        channels = []
+        for inst in instruments:
+            channels += ["book." + inst + ".100ms", "trades." + inst + ".100ms", "ticker." + inst + ".100ms"]
+        return {
+            "url": _url("MPV3_DERIBIT_WS_URL", "wss://www.deribit.com/ws/api/v2"),
+            "subscribe_many": [
+                {"jsonrpc": "2.0", "id": 3600, "method": "public/subscribe", "params": {"channels": channels}},
+                # Server pushes ~30s test_request pings after this; runtime.py's
+                # _required_reply() answers them with public/test or Deribit
+                # drops the connection.
+                {"jsonrpc": "2.0", "id": 3601, "method": "public/set_heartbeat", "params": {"interval": 30}},
+            ],
+        }
     if venue == "hyperliquid":
         msgs = []
         for s in syms:
-            coin = s[:-4] if s.endswith("USDT") else s
+            coin = s.removesuffix("USDT")
             for typ in ["l2Book", "trades", "bbo", "activeAssetCtx"]:
                 msgs.append({"method": "subscribe", "subscription": {"type": typ, "coin": coin}})
         return {

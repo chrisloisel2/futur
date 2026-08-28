@@ -5,8 +5,8 @@ import json
 import os
 import random
 import time
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, Iterable, Optional
 
 from market_physics_v3.collectors.binance_bootstrap import (
     BinanceBootstrapError,
@@ -14,11 +14,15 @@ from market_physics_v3.collectors.binance_bootstrap import (
     fetch_depth_snapshot,
     normalized_bootstrap_events,
 )
-from market_physics_v3.collectors.normalize import BookDeltaState, PARSERS, SequenceGap, canonical_symbol
+from market_physics_v3.collectors.normalize import (
+    PARSERS,
+    BookDeltaState,
+    SequenceGap,
+    canonical_symbol,
+)
 from market_physics_v3.collectors.specs import subscriptions
 from market_physics_v3.collectors.writer import AppendOnlyEventWriter, RawMessageWriter
 from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
-
 
 DEFAULT_FRESH_EVENT_MAX_LAG_MS = 5000.0
 BINANCE_MAX_BUFFER_MESSAGES = 20_000
@@ -103,7 +107,7 @@ class CollectorHealth:
             else:
                 self.stale_derivative_events += 1
 
-    def as_dict(self) -> Dict[str, object]:
+    def as_dict(self) -> dict[str, object]:
         now = time.time_ns()
         return {
             "venue": self.venue,
@@ -146,7 +150,7 @@ class CollectorHealth:
         }
 
 
-def _write_health(path: Optional[Path], health: CollectorHealth) -> None:
+def _write_health(path: Path | None, health: CollectorHealth) -> None:
     if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -166,6 +170,21 @@ def _control_status(venue: str, msg: object):
         return "ack" if msg.get("event") == "subscribe" else "error"
     if venue == "hyperliquid" and msg.get("channel") == "subscriptionResponse":
         return "ack"
+    if venue == "deribit" and msg.get("id") in {3600, 3601}:
+        return "error" if "error" in msg else "ack"
+    return None
+
+
+def _required_reply(venue: str, msg: object):
+    """Some venues push a server-initiated request that MUST be answered
+    immediately or the connection is dropped -- distinct from _control_status
+    (which only classifies, never replies) and from the periodic client-driven
+    _heartbeat. Returns a payload to send back, or None.
+    """
+    if not isinstance(msg, dict):
+        return None
+    if venue == "deribit" and msg.get("method") == "test_request":
+        return {"jsonrpc": "2.0", "id": msg.get("id", 0), "method": "public/test", "params": {}}
     return None
 
 
@@ -263,6 +282,9 @@ async def _run_standard_connection(
                                 health.subscription_acks += 1
                             elif control == "error":
                                 health.subscription_errors += 1
+                            reply = _required_reply(venue, parsed)
+                            if reply is not None:
+                                await ws.send(json.dumps(reply))
                             _observe_and_write(parser(parsed, receive_ns, state), writer, health)
                         except SequenceGap as exc:
                             health.parse_errors += 1
@@ -513,8 +535,9 @@ async def _run_binance(
 
 def _check_websockets_version() -> None:
     try:
-        import websockets  # noqa: F401
         from importlib.metadata import version as package_version
+
+        import websockets  # noqa: F401
     except ImportError as exc:
         raise RuntimeError(
             "Market Physics live collectors require websockets>=12,<14 in a dedicated research environment"

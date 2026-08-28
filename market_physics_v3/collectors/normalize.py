@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import asdict
-from typing import Dict, Iterable, List, Optional, Tuple
-from market_physics_v3.schema import BookEvent, TradeEvent, DerivativeEvent
+
+from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
 
 MS = 1_000_000
 BBO_STREAMS = {'bbo', 'bookTicker', 'bbo-tbt'}
@@ -63,6 +64,11 @@ def canonical_symbol(symbol):
         return s[:-10]+'USDT'
     if s.endswith('-USD-SWAP'):
         return s[:-9]+'USD'
+    if s.endswith('-PERPETUAL'):
+        # Deribit perpetuals are coin-margined (inverse), not the linear USDT
+        # contract other venues trade -- USD suffix keeps it a distinct symbol
+        # rather than silently conflating two non-fungible instruments.
+        return s[:-10]+'USD'
     if '-' in s:
         return s.replace('-','')
     if not s.endswith(('USDT','USDC','USD')) and '-' not in s:
@@ -240,7 +246,52 @@ def parse_hyperliquid(msg, receive_ns, state):
                 out.append(DerivativeEvent('hyperliquid',sym,event_ns,recv,kind,float(ctx[key])))
     return out
 
-PARSERS={'binance':parse_binance,'bybit':parse_bybit,'okx':parse_okx,'hyperliquid':parse_hyperliquid}
+def _deribit_strip_action(rows):
+    # Deribit book rows are [action, price, amount] where action is
+    # new/change/delete; _level()/state.classify() derive event type from
+    # qty==0 the same way every other venue does, so action is only used
+    # here to force qty=0 on "delete" (some payloads carry a stale amount).
+    out=[]
+    for row in rows or []:
+        action,price,amount=row[0],row[1],row[2]
+        out.append([price, 0.0 if action=='delete' else amount])
+    return out
+
+
+def parse_deribit(msg, receive_ns, state):
+    if msg.get('method')!='subscription':
+        return []
+    params=msg.get('params') or {}; channel=str(params.get('channel','')); d=params.get('data'); out=[]
+    if channel.startswith('book.') and d:
+        sym=canonical_symbol(d['instrument_name']); snapshot=d.get('type')=='snapshot'
+        change_id=d.get('change_id'); prev=d.get('prev_change_id')
+        state.validate_sequence('deribit',sym,change_id,prev,snapshot,stream='book')
+        out += _book_rows(
+            'deribit',sym,d['timestamp'],receive_ns,change_id,
+            _deribit_strip_action(d.get('bids')),_deribit_strip_action(d.get('asks')),
+            state,snapshot,source_stream='book',previous_sequence_id=prev,
+        )
+    elif channel.startswith('trades.') and d:
+        for t in d:
+            sym=canonical_symbol(t['instrument_name']); event_ns,recv=_clock(t['timestamp'],receive_ns)
+            out.append(TradeEvent(
+                'deribit',sym,event_ns,recv,str(t['trade_id']),float(t['price']),float(t['amount']),
+                'buy' if t['direction']=='buy' else 'sell',source_stream='trades',granularity='individual',
+            ))
+            # mark/index ride along on every trade tick -- cheap freshness between ticker beats.
+            if t.get('mark_price') not in (None,''):
+                out.append(DerivativeEvent('deribit',sym,event_ns,recv,'mark',float(t['mark_price'])))
+            if t.get('index_price') not in (None,''):
+                out.append(DerivativeEvent('deribit',sym,event_ns,recv,'index',float(t['index_price'])))
+    elif channel.startswith('ticker.') and d:
+        sym=canonical_symbol(d['instrument_name']); event_ns,recv=_clock(d['timestamp'],receive_ns)
+        for kind,key in [('mark','mark_price'),('index','index_price'),('open_interest','open_interest'),('funding','current_funding')]:
+            if d.get(key) not in (None,''):
+                out.append(DerivativeEvent('deribit',sym,event_ns,recv,kind,float(d[key])))
+    return out
+
+
+PARSERS={'binance':parse_binance,'bybit':parse_bybit,'okx':parse_okx,'hyperliquid':parse_hyperliquid,'deribit':parse_deribit}
 
 def event_record(event):
     d=asdict(event); d['_record_type']=event.__class__.__name__; return d

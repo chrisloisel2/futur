@@ -1,8 +1,20 @@
-import json, time
-from market_physics_v3.collectors.normalize import BookDeltaState, parse_binance, parse_bybit, parse_okx, parse_hyperliquid
+import json
+
+from market_physics_v3.collectors.normalize import (
+ BookDeltaState,
+ SequenceGap,
+ canonical_symbol,
+ parse_binance,
+ parse_bybit,
+ parse_deribit,
+ parse_hyperliquid,
+ parse_okx,
+)
+from market_physics_v3.collectors.runtime import _required_reply
 from market_physics_v3.collectors.specs import subscriptions
 from market_physics_v3.collectors.writer import AppendOnlyEventWriter
-from market_physics_v3.schema import BookEvent, TradeEvent, DerivativeEvent
+from market_physics_v3.schema import BookEvent, DerivativeEvent, TradeEvent
+
 R=2_000_000_000_000_000_000
 
 def test_binance_depth_trade_liq_mark():
@@ -27,6 +39,65 @@ def test_okx_and_hyperliquid():
  ht=parse_hyperliquid({'channel':'trades','data':[{'coin':'BTC','time':1003,'side':'B','px':'100','sz':'1','tid':7}]},R,s)[0]; assert ht.aggressor=='buy' and ht.granularity=='individual'
  hc=parse_hyperliquid({'channel':'activeAssetCtx','data':{'coin':'BTC','ctx':{'funding':'0.001','openInterest':'10','markPx':'100','oraclePx':'99'}}},R,s); assert {x.kind for x in hc}=={'funding','open_interest','mark','index'}
 
+def test_deribit_symbol_is_distinct_from_linear_usdt():
+ assert canonical_symbol('BTC-PERPETUAL')=='BTCUSD'  # coin-margined, not fungible with BTCUSDT
+
+def test_deribit_book_snapshot_then_change():
+ s=BookDeltaState()
+ snap=parse_deribit({'method':'subscription','params':{'channel':'book.BTC-PERPETUAL.100ms','data':{
+   'type':'snapshot','timestamp':1000,'instrument_name':'BTC-PERPETUAL','change_id':100,
+   'bids':[['new',100,2]],'asks':[['new',101,3]]}}},R,s)
+ assert len(snap)==2 and snap[0].event_type=='snapshot' and snap[0].symbol=='BTCUSD'
+ chg=parse_deribit({'method':'subscription','params':{'channel':'book.BTC-PERPETUAL.100ms','data':{
+   'type':'change','timestamp':1001,'instrument_name':'BTC-PERPETUAL','change_id':101,'prev_change_id':100,
+   'bids':[['change',100,5]],'asks':[['delete',101,0]]}}},R,s)
+ assert len(chg)==2
+ removed=[e for e in chg if e.side=='ask'][0]; assert removed.event_type=='remove' and removed.qty==0.0
+
+def test_deribit_sequence_gap_is_fail_closed():
+ s=BookDeltaState()
+ parse_deribit({'method':'subscription','params':{'channel':'book.BTC-PERPETUAL.100ms','data':{
+   'type':'snapshot','timestamp':1000,'instrument_name':'BTC-PERPETUAL','change_id':100,
+   'bids':[['new',100,2]],'asks':[]}}},R,s)
+ try:
+  parse_deribit({'method':'subscription','params':{'channel':'book.BTC-PERPETUAL.100ms','data':{
+    'type':'change','timestamp':1002,'instrument_name':'BTC-PERPETUAL','change_id':102,'prev_change_id':101,
+    'bids':[],'asks':[]}}},R,s)
+  assert False, 'expected SequenceGap'
+ except SequenceGap:
+  pass
+
+def test_deribit_trade_carries_mark_and_index_and_ticker_has_funding():
+ s=BookDeltaState()
+ tr=parse_deribit({'method':'subscription','params':{'channel':'trades.BTC-PERPETUAL.100ms','data':[
+   {'trade_id':'1','timestamp':1000,'price':100,'amount':2,'direction':'sell','mark_price':100.1,'index_price':99.9,'instrument_name':'BTC-PERPETUAL'}]}},R,s)
+ assert {e.__class__.__name__ for e in tr}=={'TradeEvent','DerivativeEvent'}
+ trade=[e for e in tr if isinstance(e,TradeEvent)][0]; assert trade.aggressor=='sell' and trade.granularity=='individual'
+ assert {e.kind for e in tr if isinstance(e,DerivativeEvent)}=={'mark','index'}
+ tick=parse_deribit({'method':'subscription','params':{'channel':'ticker.BTC-PERPETUAL.100ms','data':{
+   'timestamp':1001,'instrument_name':'BTC-PERPETUAL','mark_price':100,'index_price':99,'open_interest':500,'current_funding':0.0001}}},R,s)
+ assert {e.kind for e in tick}=={'mark','index','open_interest','funding'}
+
+def test_deribit_ignores_non_subscription_messages():
+ s=BookDeltaState()
+ assert parse_deribit({'jsonrpc':'2.0','id':3600,'result':['book.BTC-PERPETUAL.100ms']},R,s)==[]
+
+def test_deribit_required_reply_answers_test_request_and_ignores_everything_else():
+ reply=_required_reply('deribit',{'jsonrpc':'2.0','method':'test_request','params':{},'id':7})
+ assert reply=={'jsonrpc':'2.0','id':7,'method':'public/test','params':{}}
+ assert _required_reply('deribit',{'method':'subscription'}) is None
+ assert _required_reply('bybit',{'method':'test_request'}) is None  # venue-scoped, not a generic hook
+
+def test_deribit_subscribe_skips_symbols_without_an_instrument_and_sets_heartbeat():
+ spec=subscriptions('deribit',['BTCUSDT','ETHUSDT','SOLUSDT'])
+ msgs={m['method']:m for m in spec['subscribe_many']}
+ channels=msgs['public/subscribe']['params']['channels']
+ assert any(c.startswith('book.BTC-PERPETUAL') for c in channels)
+ assert any(c.startswith('book.ETH-PERPETUAL') for c in channels)
+ assert not any('SOL' in c for c in channels)  # no Deribit SOL perpetual -- must not fabricate one
+ assert msgs['public/set_heartbeat']['params']['interval']==30
+
+
 def test_subscriptions_official_shapes():
  b=subscriptions('binance',['BTCUSDT']); conns={x['name']:x for x in b['connections']}
  assert set(conns)=={'public','market'}
@@ -50,6 +121,7 @@ def test_append_only_writer(tmp_path):
 
 def test_stablecoin_asof_is_strict_t1():
  import pandas as pd
+
  from market_physics_v3.external import stablecoin_state_asof
  table=pd.DataFrame({
    'date':pd.to_datetime(['2026-01-01','2026-01-02'],utc=True),
@@ -86,7 +158,8 @@ def test_l2_zero_qty_is_remove_not_true_cancel():
 
 def test_sequence_gap_is_fail_closed():
  import pytest
- from market_physics_v3.collectors.normalize import BookDeltaState, parse_okx, SequenceGap
+
+ from market_physics_v3.collectors.normalize import BookDeltaState, SequenceGap, parse_okx
  s=BookDeltaState(); r=2_000_000_000_000_000_000
  parse_okx({'arg':{'channel':'books','instId':'BTC-USDT-SWAP'},'action':'snapshot','data':[{'ts':'1000','seqId':10,'prevSeqId':-1,'bids':[['100','1','0','1']],'asks':[['101','1','0','1']]}]},r,s)
  with pytest.raises(SequenceGap):
@@ -117,7 +190,7 @@ def test_binance_book_ticker_is_bbo_snapshot():
  assert len(x)==2 and all(e.event_type=='snapshot' for e in x)
 
 def test_remove_and_cancel_are_distinct_physical_features():
- from market_physics_v3.microstructure import removal_imbalance,cancellation_imbalance
+ from market_physics_v3.microstructure import cancellation_imbalance, removal_imbalance
  e=BookEvent('x','BTCUSDT',1000,1000,1,'remove','ask',101,5)
  assert removal_imbalance([e])==1.0
  assert cancellation_imbalance([e])==0.0
@@ -176,6 +249,7 @@ def _make_qualified_bybit_fixture(tmp_path, dead_letter=False, clean_shutdown=No
 
 def test_venue_qualifier_promotes_proven_live_feed(tmp_path):
  import pandas as pd
+
  from market_physics_v3.collectors.qualification import promote_manifest, qualify_venue
  root, health_dir = _make_qualified_bybit_fixture(tmp_path)
  report = qualify_venue('bybit', str(root), str(health_dir))
