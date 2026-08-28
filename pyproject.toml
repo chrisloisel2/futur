@@ -29,7 +29,7 @@ dependencies = [
     "scikit-learn",
     "joblib",
     "pymongo",
-    "websockets",
+    "websockets>=12,<14",  # market_physics_v3/collectors/runtime.py hard-guards this range
     # requests: not imported by src/ itself, but transitively required by 2
     # canonical tests (test_derivatives_positioning.py -> data_pipeline/http.py;
     # test_paper_xvenue.py -> scripts/run_paper_xvenue_v0.py, loaded
