@@ -1,8 +1,0 @@
-taker:
-  default_tif: IOC
-  split_count: 3
-  max_order_notional_usd: 8000
-  max_slippage_bps: 8.0
-  limit_to_market_offset_bps: 2.0
-  latency_reduce_threshold_ms: 250
-  latency_reduce_factor: 0.6

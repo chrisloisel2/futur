@@ -1,4 +1,0 @@
-reliability_bins: 10
-stress_thresholds:
-  novelty: 4.0
-  disagreement: 2.0

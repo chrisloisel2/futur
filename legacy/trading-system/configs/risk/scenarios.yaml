@@ -1,5 +1,0 @@
-shocks:
-  flash_crash: 0.05
-  wick: 0.02
-  spread_x10: 0.0
-max_dd: 0.1
