@@ -1,0 +1,18 @@
+{
+  "cadence_ms": 100,
+  "duration_hours": 6.0,
+  "feature_count": 56,
+  "general_candidates": 5,
+  "horizons_ms": [
+    100,
+    500,
+    1000,
+    2000,
+    5000,
+    10000,
+    30000
+  ],
+  "single_symbol_watches": 29,
+  "test_count": 1176,
+  "verdict": "DEV_PILOT"
+}

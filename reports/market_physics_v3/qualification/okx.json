@@ -1,0 +1,58 @@
+{
+  "dead_letter_files": [],
+  "health": {
+    "book_events": 19686,
+    "clean_shutdown": true,
+    "connected": false,
+    "derivative_events": 599,
+    "events": 20444,
+    "idle_ms": 287.071042,
+    "last_event_ns": 1786809107372000000,
+    "last_exception": null,
+    "last_receive_ns": 1786809107485568797,
+    "messages": 2602,
+    "parse_errors": 0,
+    "reconnects": 0,
+    "sequence_gaps": 0,
+    "started_ns": 1786809077515419379,
+    "stopped_ns": 1786809107747378896,
+    "subscription_acks": 22,
+    "subscription_errors": 0,
+    "trade_events": 159,
+    "venue": "okx"
+  },
+  "manifest_promoted": true,
+  "normalized_files": {
+    "book_events": [
+      "data/market_physics_v3/raw/book_events/venue=okx/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/book_events/venue=okx/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/book_events/venue=okx/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ],
+    "derivatives": [
+      "data/market_physics_v3/raw/derivatives/venue=okx/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/derivatives/venue=okx/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/derivatives/venue=okx/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ],
+    "trades": [
+      "data/market_physics_v3/raw/trades/venue=okx/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/trades/venue=okx/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/trades/venue=okx/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ]
+  },
+  "qualified": true,
+  "raw_files": [
+    "data/market_physics_v3/raw_wire/venue=okx/date=2026-08-15/messages.jsonl"
+  ],
+  "reasons": [],
+  "run_window": {
+    "started_ns": 1786809077515419379,
+    "stopped_ns": 1786809107747378896
+  },
+  "status": "EVENT_LEVEL",
+  "type_counts": {
+    "book_events": 19686,
+    "derivatives": 599,
+    "trades": 159
+  },
+  "venue": "okx"
+}

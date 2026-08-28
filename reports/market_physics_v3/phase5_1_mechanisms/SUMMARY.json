@@ -1,0 +1,10 @@
+{
+  "causal_claim": false,
+  "classifications": [
+    "GENERAL_CANDIDATE"
+  ],
+  "economic_claim": false,
+  "mechanisms": 5,
+  "symbol_rows": 15,
+  "verdict": "EXPLORATORY_DEV_DIAGNOSTIC_ONLY"
+}

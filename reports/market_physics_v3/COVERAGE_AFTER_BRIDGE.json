@@ -1,0 +1,131 @@
+{
+  "families": {
+    "microstructure": {
+      "feeds": {
+        "l2_book_events": "MISSING",
+        "tick_trades": "AGGREGATED_ONLY",
+        "bbo": "UNKNOWN"
+      },
+      "ready": false,
+      "blocking": [
+        "l2_book_events",
+        "tick_trades",
+        "bbo"
+      ]
+    },
+    "cross_venue": {
+      "feeds": {
+        "binance": "EVENT_LEVEL",
+        "bybit": "UNKNOWN",
+        "okx": "UNKNOWN",
+        "hyperliquid": "UNKNOWN"
+      },
+      "ready": false,
+      "blocking": [
+        "bybit",
+        "okx",
+        "hyperliquid"
+      ]
+    },
+    "leverage": {
+      "feeds": {
+        "open_interest": "AGGREGATED_ONLY",
+        "funding": "AGGREGATED_ONLY",
+        "mark_index_premium": "UNKNOWN",
+        "liquidations": "UNKNOWN"
+      },
+      "ready": false,
+      "blocking": [
+        "open_interest",
+        "funding",
+        "mark_index_premium",
+        "liquidations"
+      ]
+    },
+    "options": {
+      "feeds": {
+        "option_quotes": "MISSING",
+        "option_trades": "MISSING",
+        "option_open_interest": "MISSING"
+      },
+      "ready": false,
+      "blocking": [
+        "option_quotes",
+        "option_trades",
+        "option_open_interest"
+      ]
+    },
+    "execution": {
+      "feeds": {
+        "decision_send_ack_fill": "MISSING",
+        "future_markouts": "MISSING"
+      },
+      "ready": false,
+      "blocking": [
+        "decision_send_ack_fill",
+        "future_markouts"
+      ]
+    },
+    "external": {
+      "feeds": {
+        "stablecoin_flows": "PIT_AGGREGATED",
+        "etf_cme": "MISSING",
+        "macro_events": "STRANDED",
+        "news_events": "STRANDED"
+      },
+      "ready": false,
+      "blocking": [
+        "etf_cme",
+        "macro_events",
+        "news_events"
+      ]
+    }
+  },
+  "blocking": [
+    "l2_book_events",
+    "tick_trades",
+    "bbo",
+    "bybit",
+    "okx",
+    "hyperliquid",
+    "open_interest",
+    "funding",
+    "mark_index_premium",
+    "liquidations",
+    "option_quotes",
+    "option_trades",
+    "option_open_interest",
+    "decision_send_ack_fill",
+    "future_markouts",
+    "etf_cme",
+    "macro_events",
+    "news_events"
+  ],
+  "stranded": [
+    "macro_events",
+    "news_events"
+  ],
+  "aggregated_only": [
+    "tick_trades",
+    "open_interest",
+    "funding"
+  ],
+  "pit_aggregated": [
+    "stablecoin_flows"
+  ],
+  "unknown": [
+    "bbo",
+    "bybit",
+    "okx",
+    "hyperliquid",
+    "mark_index_premium",
+    "liquidations"
+  ],
+  "ready_for_p0_market_research": false,
+  "ready_for_p0_research": false,
+  "ready_for_execution_research": false,
+  "ready_for_options_research": false,
+  "ready_for_external_context": false,
+  "ready_for_full_market_physics_research": false,
+  "manifest_rows": 20
+}

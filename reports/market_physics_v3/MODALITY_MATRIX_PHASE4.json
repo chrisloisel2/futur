@@ -1,0 +1,719 @@
+{
+  "cells": {
+    "binance:BTCUSDT": {
+      "book": {
+        "bbo_events": 23034,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 148288,
+        "deep_incrementals": 146288,
+        "deep_ready": true,
+        "deep_snapshots": 2000,
+        "events": 171322,
+        "fresh_events": 171322,
+        "max_lag_ms": 459.710638,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bookTicker": 23034,
+          "depth": 146288,
+          "depth_snapshot_rest": 2000
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 299,
+          "index": 299,
+          "liquidation": 1,
+          "mark": 299
+        },
+        "fresh_counts": {
+          "funding": 299,
+          "index": 299,
+          "liquidation": 1,
+          "mark": 299
+        },
+        "max_lag_ms": 1123.939798
+      },
+      "symbol": "BTCUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 402,
+        "fresh_aggregate_events": 402,
+        "fresh_events": 402,
+        "fresh_individual_events": 0,
+        "granularity_counts": {
+          "aggregate": 402
+        },
+        "max_lag_ms": 489.407854,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "aggTrade": 402
+        },
+        "tick_ready": false
+      },
+      "venue": "binance",
+      "window": {
+        "started_ns": 1786813269947234748,
+        "stopped_ns": 1786813578038360069
+      }
+    },
+    "binance:ETHUSDT": {
+      "book": {
+        "bbo_events": 23218,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 93789,
+        "deep_incrementals": 91789,
+        "deep_ready": true,
+        "deep_snapshots": 2000,
+        "events": 117007,
+        "fresh_events": 117007,
+        "max_lag_ms": 469.503377,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bookTicker": 23218,
+          "depth": 91789,
+          "depth_snapshot_rest": 2000
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 299,
+          "index": 299,
+          "mark": 299
+        },
+        "fresh_counts": {
+          "funding": 299,
+          "index": 299,
+          "mark": 299
+        },
+        "max_lag_ms": 502.023299
+      },
+      "symbol": "ETHUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 625,
+        "fresh_aggregate_events": 625,
+        "fresh_events": 625,
+        "fresh_individual_events": 0,
+        "granularity_counts": {
+          "aggregate": 625
+        },
+        "max_lag_ms": 619.640877,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "aggTrade": 625
+        },
+        "tick_ready": false
+      },
+      "venue": "binance",
+      "window": {
+        "started_ns": 1786813269947234748,
+        "stopped_ns": 1786813578038360069
+      }
+    },
+    "binance:SOLUSDT": {
+      "book": {
+        "bbo_events": 24460,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 32903,
+        "deep_incrementals": 30903,
+        "deep_ready": true,
+        "deep_snapshots": 2000,
+        "events": 57363,
+        "fresh_events": 57363,
+        "max_lag_ms": 435.654093,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bookTicker": 24460,
+          "depth": 30903,
+          "depth_snapshot_rest": 2000
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 299,
+          "index": 299,
+          "mark": 299
+        },
+        "fresh_counts": {
+          "funding": 299,
+          "index": 299,
+          "mark": 299
+        },
+        "max_lag_ms": 502.252281
+      },
+      "symbol": "SOLUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 352,
+        "fresh_aggregate_events": 352,
+        "fresh_events": 352,
+        "fresh_individual_events": 0,
+        "granularity_counts": {
+          "aggregate": 352
+        },
+        "max_lag_ms": 540.541025,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "aggTrade": 352
+        },
+        "tick_ready": false
+      },
+      "venue": "binance",
+      "window": {
+        "started_ns": 1786813269947234748,
+        "stopped_ns": 1786813578038360069
+      }
+    },
+    "bybit:BTCUSDT": {
+      "book": {
+        "bbo_events": 0,
+        "bbo_mode": "derived_from_deep",
+        "bbo_ready": true,
+        "deep_events": 13347,
+        "deep_incrementals": 13247,
+        "deep_ready": true,
+        "deep_snapshots": 100,
+        "events": 13347,
+        "fresh_events": 13347,
+        "max_lag_ms": 515.617162,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "orderbook.50": 13347
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 6,
+          "index": 202,
+          "mark": 70,
+          "open_interest": 27
+        },
+        "fresh_counts": {
+          "funding": 6,
+          "index": 202,
+          "mark": 70,
+          "open_interest": 27
+        },
+        "max_lag_ms": 970.320628
+      },
+      "symbol": "BTCUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 248,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 248,
+        "fresh_individual_events": 248,
+        "granularity_counts": {
+          "individual": 248
+        },
+        "max_lag_ms": 449.153365,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "publicTrade": 248
+        },
+        "tick_ready": true
+      },
+      "venue": "bybit",
+      "window": {
+        "started_ns": 1786813269948032022,
+        "stopped_ns": 1786813570107904268
+      }
+    },
+    "bybit:ETHUSDT": {
+      "book": {
+        "bbo_events": 0,
+        "bbo_mode": "derived_from_deep",
+        "bbo_ready": true,
+        "deep_events": 15995,
+        "deep_incrementals": 15895,
+        "deep_ready": true,
+        "deep_snapshots": 100,
+        "events": 15995,
+        "fresh_events": 15995,
+        "max_lag_ms": 499.918353,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "orderbook.50": 15995
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 4,
+          "index": 110,
+          "mark": 75,
+          "open_interest": 30
+        },
+        "fresh_counts": {
+          "funding": 4,
+          "index": 110,
+          "mark": 75,
+          "open_interest": 30
+        },
+        "max_lag_ms": 1587.32514
+      },
+      "symbol": "ETHUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 505,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 505,
+        "fresh_individual_events": 505,
+        "granularity_counts": {
+          "individual": 505
+        },
+        "max_lag_ms": 471.919822,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "publicTrade": 505
+        },
+        "tick_ready": true
+      },
+      "venue": "bybit",
+      "window": {
+        "started_ns": 1786813269948032022,
+        "stopped_ns": 1786813570107904268
+      }
+    },
+    "bybit:SOLUSDT": {
+      "book": {
+        "bbo_events": 0,
+        "bbo_mode": "derived_from_deep",
+        "bbo_ready": true,
+        "deep_events": 14776,
+        "deep_incrementals": 14676,
+        "deep_ready": true,
+        "deep_snapshots": 100,
+        "events": 14776,
+        "fresh_events": 14776,
+        "max_lag_ms": 608.067794,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "orderbook.50": 14776
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 3,
+          "index": 166,
+          "mark": 67,
+          "open_interest": 25
+        },
+        "fresh_counts": {
+          "funding": 3,
+          "index": 166,
+          "mark": 67,
+          "open_interest": 25
+        },
+        "max_lag_ms": 1290.158837
+      },
+      "symbol": "SOLUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 300,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 300,
+        "fresh_individual_events": 300,
+        "granularity_counts": {
+          "individual": 300
+        },
+        "max_lag_ms": 127.110845,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "publicTrade": 300
+        },
+        "tick_ready": true
+      },
+      "venue": "bybit",
+      "window": {
+        "started_ns": 1786813269948032022,
+        "stopped_ns": 1786813570107904268
+      }
+    },
+    "hyperliquid:BTCUSDT": {
+      "book": {
+        "bbo_events": 2202,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 2280,
+        "deep_incrementals": 0,
+        "deep_ready": true,
+        "deep_snapshots": 2280,
+        "events": 4482,
+        "fresh_events": 4482,
+        "max_lag_ms": 808.461093,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo": 2202,
+          "l2Book": 2280
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "fresh_counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "max_lag_ms": 0.990077
+      },
+      "symbol": "BTCUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 203,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 176,
+        "fresh_individual_events": 176,
+        "granularity_counts": {
+          "individual": 203
+        },
+        "max_lag_ms": 27542.288045,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 203
+        },
+        "tick_ready": true
+      },
+      "venue": "hyperliquid",
+      "window": {
+        "started_ns": 1786813269956720178,
+        "stopped_ns": 1786813570212773368
+      }
+    },
+    "hyperliquid:ETHUSDT": {
+      "book": {
+        "bbo_events": 1086,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 2280,
+        "deep_incrementals": 0,
+        "deep_ready": true,
+        "deep_snapshots": 2280,
+        "events": 3366,
+        "fresh_events": 3366,
+        "max_lag_ms": 711.709621,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo": 1086,
+          "l2Book": 2280
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "fresh_counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "max_lag_ms": 0.999691
+      },
+      "symbol": "ETHUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 143,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 115,
+        "fresh_individual_events": 115,
+        "granularity_counts": {
+          "individual": 143
+        },
+        "max_lag_ms": 45960.890501,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 143
+        },
+        "tick_ready": true
+      },
+      "venue": "hyperliquid",
+      "window": {
+        "started_ns": 1786813269956720178,
+        "stopped_ns": 1786813570212773368
+      }
+    },
+    "hyperliquid:SOLUSDT": {
+      "book": {
+        "bbo_events": 1014,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 2280,
+        "deep_incrementals": 0,
+        "deep_ready": true,
+        "deep_snapshots": 2280,
+        "events": 3294,
+        "fresh_events": 3294,
+        "max_lag_ms": 747.219134,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo": 1014,
+          "l2Book": 2280
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "fresh_counts": {
+          "funding": 295,
+          "index": 295,
+          "mark": 295,
+          "open_interest": 295
+        },
+        "max_lag_ms": 0.995498
+      },
+      "symbol": "SOLUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 132,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 104,
+        "fresh_individual_events": 104,
+        "granularity_counts": {
+          "individual": 132
+        },
+        "max_lag_ms": 84868.635697,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 132
+        },
+        "tick_ready": true
+      },
+      "venue": "hyperliquid",
+      "window": {
+        "started_ns": 1786813269956720178,
+        "stopped_ns": 1786813570212773368
+      }
+    },
+    "okx:BTCUSDT": {
+      "book": {
+        "bbo_events": 6046,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 46127,
+        "deep_incrementals": 45327,
+        "deep_ready": true,
+        "deep_snapshots": 800,
+        "events": 52173,
+        "fresh_events": 52173,
+        "max_lag_ms": 617.907154,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo-tbt": 6046,
+          "books": 46127
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 6,
+          "index": 714,
+          "mark": 1491,
+          "open_interest": 41
+        },
+        "fresh_counts": {
+          "funding": 5,
+          "index": 714,
+          "mark": 1491,
+          "open_interest": 40
+        },
+        "max_lag_ms": 50759.272264
+      },
+      "symbol": "BTCUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 292,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 292,
+        "fresh_individual_events": 292,
+        "granularity_counts": {
+          "individual": 292
+        },
+        "max_lag_ms": 612.077215,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 292
+        },
+        "tick_ready": true
+      },
+      "venue": "okx",
+      "window": {
+        "started_ns": 1786813269955786894,
+        "stopped_ns": 1786813570174536088
+      }
+    },
+    "okx:ETHUSDT": {
+      "book": {
+        "bbo_events": 10848,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 45430,
+        "deep_incrementals": 44630,
+        "deep_ready": true,
+        "deep_snapshots": 800,
+        "events": 56278,
+        "fresh_events": 56278,
+        "max_lag_ms": 674.428232,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo-tbt": 10848,
+          "books": 45430
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 6,
+          "index": 489,
+          "mark": 1486,
+          "open_interest": 41
+        },
+        "fresh_counts": {
+          "funding": 5,
+          "index": 489,
+          "mark": 1486,
+          "open_interest": 40
+        },
+        "max_lag_ms": 50467.846327
+      },
+      "symbol": "ETHUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 613,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 613,
+        "fresh_individual_events": 613,
+        "granularity_counts": {
+          "individual": 613
+        },
+        "max_lag_ms": 330.914058,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 613
+        },
+        "tick_ready": true
+      },
+      "venue": "okx",
+      "window": {
+        "started_ns": 1786813269955786894,
+        "stopped_ns": 1786813570174536088
+      }
+    },
+    "okx:SOLUSDT": {
+      "book": {
+        "bbo_events": 6524,
+        "bbo_mode": "explicit",
+        "bbo_ready": true,
+        "deep_events": 25935,
+        "deep_incrementals": 25135,
+        "deep_ready": true,
+        "deep_snapshots": 800,
+        "events": 32459,
+        "fresh_events": 32459,
+        "max_lag_ms": 635.982147,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "bbo-tbt": 6524,
+          "books": 25935
+        }
+      },
+      "derivatives": {
+        "counts": {
+          "funding": 6,
+          "index": 394,
+          "mark": 1486,
+          "open_interest": 41
+        },
+        "fresh_counts": {
+          "funding": 5,
+          "index": 394,
+          "mark": 1486,
+          "open_interest": 40
+        },
+        "max_lag_ms": 49236.064188
+      },
+      "symbol": "SOLUSDT",
+      "synchronized_book_input_ready": true,
+      "trades": {
+        "event_stream_ready": true,
+        "events": 228,
+        "fresh_aggregate_events": 0,
+        "fresh_events": 228,
+        "fresh_individual_events": 228,
+        "granularity_counts": {
+          "individual": 228
+        },
+        "max_lag_ms": 208.962138,
+        "provenance_missing": 0,
+        "source_stream_counts": {
+          "trades": 228
+        },
+        "tick_ready": true
+      },
+      "venue": "okx",
+      "window": {
+        "started_ns": 1786813269955786894,
+        "stopped_ns": 1786813570174536088
+      }
+    }
+  },
+  "fresh_max_lag_ms": 5000.0,
+  "missing_health": [],
+  "summary": {
+    "all_bbo_ready": true,
+    "all_deep_books_ready": true,
+    "all_event_trade_streams_ready": true,
+    "all_tick_trades_ready": false,
+    "blocking_cells": [],
+    "manifest_status_suggestions": {
+      "bbo": "EVENT_LEVEL",
+      "funding": "EVENT_LEVEL",
+      "index": "EVENT_LEVEL",
+      "l2_book_events": "EVENT_LEVEL",
+      "mark": "EVENT_LEVEL",
+      "open_interest": "PARTIAL",
+      "tick_trades": "BLOCKED"
+    },
+    "ready_for_synchronized_books": true,
+    "tick_trade_blocking_cells": [
+      "binance:BTCUSDT:individual_trades",
+      "binance:ETHUSDT:individual_trades",
+      "binance:SOLUSDT:individual_trades"
+    ]
+  },
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ],
+  "venues": [
+    "binance",
+    "bybit",
+    "okx",
+    "hyperliquid"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "discovery_stop_ns": 1786852443241777168,
+  "duration_hours": 12.0,
+  "economic_claim": false,
+  "expected_sign": 1,
+  "feature": "okx__queue_imbalance_l5",
+  "first_asof_ns": 1786893798952052322,
+  "gates": {
+    "max_block_p": 0.05,
+    "min_ess": 400.0,
+    "min_loo_ic": 0.05,
+    "min_loo_partial_ic": 0.03,
+    "min_n": 10000,
+    "min_partial_retention": 0.5,
+    "min_positive_regimes": 2,
+    "min_positive_thirds": 3,
+    "min_top_minus_bottom_bps": 0.0
+  },
+  "horizon_ms": 30000,
+  "independent_window": true,
+  "last_asof_ns": 1786936998952052322,
+  "primary_passes": 2,
+  "primary_required": 2,
+  "primary_symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "support_symbols": [
+    "SOLUSDT"
+  ],
+  "verdict": "CONFIRMED_INFORMATION_CANDIDATE"
+}

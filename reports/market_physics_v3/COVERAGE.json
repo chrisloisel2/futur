@@ -1,0 +1,78 @@
+{
+  "families": {
+    "microstructure": {
+      "l2_book_events": "MISSING",
+      "tick_trades": "AGGREGATED_ONLY",
+      "bbo": "UNKNOWN"
+    },
+    "cross_venue": {
+      "binance": "EVENT_LEVEL",
+      "bybit": "UNKNOWN",
+      "okx": "UNKNOWN",
+      "hyperliquid": "UNKNOWN"
+    },
+    "leverage": {
+      "open_interest": "AGGREGATED_ONLY",
+      "funding": "AGGREGATED_ONLY",
+      "mark_index_premium": "UNKNOWN",
+      "liquidations": "UNKNOWN"
+    },
+    "options": {
+      "option_quotes": "MISSING",
+      "option_trades": "MISSING",
+      "option_open_interest": "MISSING"
+    },
+    "execution": {
+      "decision_send_ack_fill": "MISSING",
+      "future_markouts": "MISSING"
+    },
+    "external": {
+      "stablecoin_flows": "STRANDED",
+      "etf_cme": "MISSING",
+      "macro_events": "STRANDED",
+      "news_events": "STRANDED"
+    }
+  },
+  "blocking": [
+    "l2_book_events",
+    "tick_trades",
+    "bbo",
+    "bybit",
+    "okx",
+    "hyperliquid",
+    "open_interest",
+    "funding",
+    "mark_index_premium",
+    "liquidations",
+    "option_quotes",
+    "option_trades",
+    "option_open_interest",
+    "decision_send_ack_fill",
+    "future_markouts",
+    "stablecoin_flows",
+    "etf_cme",
+    "macro_events",
+    "news_events"
+  ],
+  "stranded": [
+    "stablecoin_flows",
+    "macro_events",
+    "news_events"
+  ],
+  "aggregated_only": [
+    "tick_trades",
+    "open_interest",
+    "funding"
+  ],
+  "unknown": [
+    "bbo",
+    "bybit",
+    "okx",
+    "hyperliquid",
+    "mark_index_premium",
+    "liquidations"
+  ],
+  "ready_for_full_market_physics_research": false,
+  "ready_for_p0_research": false,
+  "manifest_rows": 20
+}

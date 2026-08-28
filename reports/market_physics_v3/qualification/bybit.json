@@ -1,0 +1,52 @@
+{
+  "dead_letter_files": [],
+  "health": {
+    "connected": false,
+    "events": 7452,
+    "idle_ms": 201.334746,
+    "last_event_ns": 1786807575553000000,
+    "last_exception": null,
+    "last_receive_ns": 1786807575641313493,
+    "messages": 2244,
+    "parse_errors": 0,
+    "reconnects": 0,
+    "sequence_gaps": 0,
+    "subscription_acks": 2,
+    "subscription_errors": 0,
+    "venue": "bybit"
+  },
+  "manifest_promoted": true,
+  "normalized_files": {
+    "book_events": [
+      "data/market_physics_v3/raw/book_events/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/book_events/venue=bybit/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/book_events/venue=bybit/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ],
+    "derivatives": [
+      "data/market_physics_v3/raw/derivatives/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/derivatives/venue=bybit/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/derivatives/venue=bybit/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ],
+    "trades": [
+      "data/market_physics_v3/raw/trades/venue=bybit/symbol=BTCUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/trades/venue=bybit/symbol=SOLUSDT/date=2026-08-15/events.jsonl",
+      "data/market_physics_v3/raw/trades/venue=bybit/symbol=ETHUSDT/date=2026-08-15/events.jsonl"
+    ]
+  },
+  "qualified": true,
+  "raw_files": [
+    "data/market_physics_v3/raw_wire/venue=bybit/date=2026-08-15/messages.jsonl"
+  ],
+  "reasons": [],
+  "run_window": {
+    "started_ns": 0,
+    "stopped_ns": 0
+  },
+  "status": "EVENT_LEVEL",
+  "type_counts": {
+    "book_events": 0,
+    "derivatives": 0,
+    "trades": 0
+  },
+  "venue": "bybit"
+}
