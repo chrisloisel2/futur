@@ -1,0 +1,18 @@
+{
+  "code_commit": "87360fa6b46f7fd09e546c6d04e303c3dbbde867",
+  "dataset_manifest_digest": "c6c80e7c8d5cfdbcc6310daaaeb1b25a66351804c3e74afaefc23a4b52c47ec9",
+  "digest": "1466ea406ee6f0385646b62ecde23ab9a548f25cba06a39fa5e21bb515bdbe32",
+  "experiment_id": "20260818T170429Z_A2_250ms",
+  "hypothesis_digest": "c8f7a8f82d6c0c3b7fa0aec0e470b8e503093ed63849d3a3ca41a9381cea5df1",
+  "label_horizon_ms": 250,
+  "lookback_ms": 1000,
+  "model_params": {},
+  "parent_experiment_id": null,
+  "search_family_id": "A2:venue_dislocation_convergence:loo_fair_value_return",
+  "seed": 17,
+  "stage": "DEV_DISCOVERY",
+  "window": {
+    "start_ns": 1786830843194013751,
+    "stop_ns": 1786852443194013752
+  }
+}

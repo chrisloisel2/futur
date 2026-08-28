@@ -1,0 +1,33 @@
+{
+  "block_p": 0.004975124378109453,
+  "ess": 416935.95380601083,
+  "expected_sign": 1,
+  "experiment_digest": "b74dad58ed4bbb94b7f2ba2bbd2d0076080ead433a49c19c2fa468fbb4eb471c",
+  "feature_provenance_digest": "9023f3ad7620e9a03581dd6c9b09804710d270f94887995273f3f8496fece893",
+  "fold_ics": [
+    0.20694390191152037,
+    0.19132252764661128,
+    0.15113579357247392,
+    0.16213728484779077,
+    0.2549627277077694
+  ],
+  "hypothesis_budget_completion_hash": "90171389a1148ba610fc9d9fb64b4ad5fca6b84e022fcdae6ba2b0310cfad9b4",
+  "hypothesis_budget_reservation_hash": "9c7d1b0a5d830357b453fd1dafce8439f02708c978d909fa663b27aefca290b1",
+  "hypothesis_digest": "1610cc5b347be318727e84140744458a89de9f823a318707775d49aece8f0595",
+  "hypothesis_id": "A2:loo_fair_value_return:5000ms",
+  "ic": 0.18766077879860293,
+  "multiplicity_family_id": "A2:venue_dislocation_convergence:loo_fair_value_return",
+  "multiplicity_tests_at_run": 6,
+  "n": 421095,
+  "q_value_at_run": 0.004975124378109453,
+  "support_budget_manifest_digest": "02e142a364ecef5e447798f19a4f7f413904cb4ff12120af98be51c498657342",
+  "support_budget_max_hypothesis_tests": 8,
+  "support_budget_remaining": 2,
+  "support_budget_used": 6,
+  "tried_configs": [
+    "6184c5b0ef1cac805f822e4c4fcf85013edf919213b26fb76a156b31ea8b7937",
+    "af39a185b5a846fc6bbdc703ee4a7bf3e4b7ad9a304563d6cc024a36dc6628ab",
+    "aa2c2c4f06f30aad68230de36f5f37ac04bb3795c349ea02ffd79bb7ae600405",
+    "5374608c053c8abced0ebceaf80ae360ef7e03919c3e37c670ee1e80ab603296"
+  ]
+}

@@ -1,0 +1,555 @@
+{
+  "blocked_labs": [
+    "A10",
+    "A11",
+    "A12",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "A9"
+  ],
+  "columns": 1322,
+  "labs": {
+    "A1": {
+      "activity": {},
+      "coverage": {
+        "*__price_dislocation_bps": 0.9999722223508225,
+        "*__price_mid": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "loo_fair_value_return",
+      "domains": [
+        "book",
+        "trade"
+      ],
+      "economic_source_id": "cross_venue_price_discovery",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Cross-venue price discovery",
+      "plugin": "cross_venue",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A10": {
+      "activity": {},
+      "coverage": {
+        "ANY:*funding*": 0.9999722223508225,
+        "ANY:*time_to_funding*|*funding_clock*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "fair_value_return",
+      "domains": [
+        "derivatives",
+        "event"
+      ],
+      "economic_source_id": "funding_settlement_event",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "*time_to_funding*",
+          "*funding_clock*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Funding settlement event",
+      "plugin": "funding_basis",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A11": {
+      "activity": {
+        "wallet__score_weighted_flow_bps*": {
+          "active_rows": 0,
+          "min_active_rows": 50
+        }
+      },
+      "coverage": {
+        "ANY:wallet__score_weighted_flow_bps*": 0.0,
+        "ANY:wallet__scored_flow_coverage*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "fair_value_return",
+      "domains": [
+        "wallet",
+        "trade"
+      ],
+      "economic_source_id": "wallet_informed_flow",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [
+        "wallet__score_weighted_flow_bps*"
+      ],
+      "missing_any_groups": [
+        [
+          "wallet__score_weighted_flow_bps*"
+        ],
+        [
+          "wallet__scored_flow_coverage*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Informed wallet flow",
+      "plugin": "wallet",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A12": {
+      "activity": {},
+      "coverage": {
+        "ANY:*residual*": 0.0,
+        "ANY:cross_asset__*|*innovation*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "fair_value_return",
+      "domains": [
+        "cross_asset"
+      ],
+      "economic_source_id": "cross_asset_propagation",
+      "min_coverage": 0.5,
+      "min_symbols": 8,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "cross_asset__*",
+          "*innovation*"
+        ],
+        [
+          "*residual*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Cross-asset causal propagation",
+      "plugin": "cross_asset",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": false
+    },
+    "A13": {
+      "activity": {},
+      "coverage": {
+        "ANY:*beta*": 0.0,
+        "ANY:*residual*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "fair_value_return",
+      "domains": [
+        "cross_asset",
+        "spot"
+      ],
+      "economic_source_id": "residual_relative_value",
+      "min_coverage": 0.5,
+      "min_symbols": 12,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "*residual*"
+        ],
+        [
+          "*beta*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Residual relative value",
+      "plugin": "cross_asset",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": false
+    },
+    "A14": {
+      "activity": {},
+      "coverage": {
+        "ANY:*iv_*|*skew*|*rr25*": 0.9999583335262336,
+        "ANY:*option_oi*|*gamma*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "future_realized_vol",
+      "domains": [
+        "options",
+        "derivatives"
+      ],
+      "economic_source_id": "options_surface_shock",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "*option_oi*",
+          "*gamma*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Options surface shock",
+      "plugin": "options",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A15": {
+      "activity": {},
+      "coverage": {
+        "ANY:onchain__*|*exchange_netflow*|*stablecoin*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "fair_value_return",
+      "domains": [
+        "onchain",
+        "spot"
+      ],
+      "economic_source_id": "onchain_exchange_flow",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "onchain__*",
+          "*exchange_netflow*",
+          "*stablecoin*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "On-chain exchange flow",
+      "plugin": "onchain",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A16": {
+      "activity": {},
+      "coverage": {
+        "ANY:*queue_ahead*|*fill_probability*": 0.0,
+        "ANY:exec__post_fill_markout_bps": 0.0
+      },
+      "data_ready": false,
+      "default_target": "post_fill_markout",
+      "domains": [
+        "execution",
+        "book",
+        "trade"
+      ],
+      "economic_source_id": "execution_alpha",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [
+        [
+          "*queue_ahead*",
+          "*fill_probability*"
+        ],
+        [
+          "exec__post_fill_markout_bps"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Execution alpha",
+      "plugin": "execution",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A2": {
+      "activity": {},
+      "coverage": {
+        "*__price_dislocation_bps": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "loo_fair_value_return",
+      "domains": [
+        "book"
+      ],
+      "economic_source_id": "venue_dislocation_convergence",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Venue dislocation convergence",
+      "plugin": "cross_venue",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A3": {
+      "activity": {
+        "*remove_count*": {
+          "active_rows": 642692,
+          "min_active_rows": 100
+        }
+      },
+      "coverage": {
+        "ANY:*cancel*|*remove*": 0.9999722223508225,
+        "ANY:*ofi*|*queue_imbalance*": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "next_mid_move",
+      "domains": [
+        "book",
+        "trade"
+      ],
+      "economic_source_id": "queue_depletion_hazard",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Queue depletion hazard",
+      "plugin": "event_microstructure",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A4": {
+      "activity": {
+        "*trade_count*": {
+          "active_rows": 647978,
+          "min_active_rows": 100
+        }
+      },
+      "coverage": {
+        "ANY:*depth_*|*notional_to_move*": 0.9999722223508225,
+        "ANY:*trades_per_second*|*signed_notional*": 0.9999614199316978
+      },
+      "data_ready": true,
+      "default_target": "fair_value_return",
+      "domains": [
+        "book",
+        "trade"
+      ],
+      "economic_source_id": "liquidity_resilience",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Liquidity resilience",
+      "plugin": "event_microstructure",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A5": {
+      "activity": {
+        "*impact_bps*": {
+          "active_rows": 612618,
+          "min_active_rows": 50
+        },
+        "*signed_notional*": {
+          "active_rows": 647978,
+          "min_active_rows": 100
+        }
+      },
+      "coverage": {
+        "ANY:*absorption*|*impact_bps*": 0.9999614199316978,
+        "ANY:*signed_notional*|*flow_imbalance*": 0.9999614199316978
+      },
+      "data_ready": true,
+      "default_target": "fair_value_return",
+      "domains": [
+        "trade",
+        "book"
+      ],
+      "economic_source_id": "toxic_trade_flow",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Toxic flow and absorption",
+      "plugin": "event_microstructure",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A6": {
+      "activity": {},
+      "coverage": {
+        "ANY:*depth_*|*notional_to_move*": 0.9999722223508225,
+        "ANY:*spread_bps*": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "loo_fair_value_return",
+      "domains": [
+        "book"
+      ],
+      "economic_source_id": "liquidity_shock_propagation",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Liquidity shock propagation",
+      "plugin": "shock_propagation",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A7": {
+      "activity": {
+        "*liquidation_total_usd*": {
+          "active_rows": 302905,
+          "min_active_rows": 5
+        },
+        "*open_interest_change_pct*": {
+          "active_rows": 9905,
+          "min_active_rows": 20
+        }
+      },
+      "coverage": {
+        "ANY:*liquidation*": 0.9328228418695592,
+        "ANY:*open_interest*": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "fair_value_return",
+      "domains": [
+        "derivatives",
+        "book"
+      ],
+      "economic_source_id": "liquidation_cascade",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Liquidation cascade",
+      "plugin": "leverage",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A8": {
+      "activity": {
+        "*open_interest_change_pct*": {
+          "active_rows": 9905,
+          "min_active_rows": 20
+        }
+      },
+      "coverage": {
+        "ANY:*funding*|*basis_bps*|*premium*": 0.9999722223508225,
+        "ANY:*open_interest*": 0.9999722223508225
+      },
+      "data_ready": true,
+      "default_target": "fair_value_return",
+      "domains": [
+        "derivatives"
+      ],
+      "economic_source_id": "leverage_positioning",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [],
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "name": "Leverage topology",
+      "plugin": "leverage",
+      "ready": true,
+      "symbol_count": 3,
+      "symbol_ready": true
+    },
+    "A9": {
+      "activity": {
+        "*perp_spot_basis_bps*": {
+          "active_rows": 0,
+          "min_active_rows": 20
+        }
+      },
+      "coverage": {
+        "ANY:*funding*": 0.9999722223508225,
+        "ANY:*perp_spot_basis_bps*": 0.0
+      },
+      "data_ready": false,
+      "default_target": "basis_convergence",
+      "domains": [
+        "derivatives",
+        "spot"
+      ],
+      "economic_source_id": "funding_basis_convergence",
+      "min_coverage": 0.5,
+      "min_symbols": 1,
+      "missing_activity": [
+        "*perp_spot_basis_bps*"
+      ],
+      "missing_any_groups": [
+        [
+          "*perp_spot_basis_bps*"
+        ]
+      ],
+      "missing_patterns": [],
+      "name": "Funding and executable perp-spot basis convergence",
+      "plugin": "funding_basis",
+      "ready": false,
+      "symbol_count": 3,
+      "symbol_ready": true
+    }
+  },
+  "pit": {
+    "checked_availability_columns": [
+      "bybit__price_available_ts_ns",
+      "bybit__depth_available_ts_ns",
+      "book__available_ts_ns",
+      "bybit__book_event_available_ts_ns",
+      "event_trade__available_ts_ns",
+      "bybit__open_interest_available_ts_ns",
+      "bybit__funding_available_ts_ns",
+      "bybit__mark_available_ts_ns",
+      "bybit__index_available_ts_ns",
+      "bybit__basis_available_ts_ns",
+      "derivatives__available_ts_ns",
+      "hyperliquid__price_available_ts_ns",
+      "hyperliquid__depth_available_ts_ns",
+      "hyperliquid__trade_available_ts_ns",
+      "hyperliquid__book_event_available_ts_ns",
+      "okx__open_interest_available_ts_ns",
+      "okx__funding_available_ts_ns",
+      "okx__mark_available_ts_ns",
+      "okx__index_available_ts_ns",
+      "okx__basis_available_ts_ns",
+      "hyperliquid__open_interest_available_ts_ns",
+      "hyperliquid__funding_available_ts_ns",
+      "hyperliquid__mark_available_ts_ns",
+      "hyperliquid__index_available_ts_ns",
+      "hyperliquid__basis_available_ts_ns",
+      "binance__price_available_ts_ns",
+      "binance__depth_available_ts_ns",
+      "binance__book_event_available_ts_ns",
+      "binance__funding_available_ts_ns",
+      "binance__mark_available_ts_ns",
+      "binance__index_available_ts_ns",
+      "binance__basis_available_ts_ns",
+      "okx__price_available_ts_ns",
+      "okx__depth_available_ts_ns",
+      "okx__book_event_available_ts_ns",
+      "binance__trade_available_ts_ns",
+      "okx__trade_available_ts_ns",
+      "bybit__trade_available_ts_ns",
+      "binance__liquidation_available_ts_ns",
+      "okx__liquidation_available_ts_ns",
+      "bybit__liquidation_available_ts_ns"
+    ],
+    "duplicate_keys": 0,
+    "future_availability_violations": 0,
+    "nonmonotonic_asof": 0,
+    "rows": 648003
+  },
+  "pit_availability_proved": true,
+  "pit_clean": true,
+  "pit_proof_level": "FULL_AVAILABILITY",
+  "pit_structural_clean": true,
+  "ready_labs": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8"
+  ],
+  "rows": 648003
+}

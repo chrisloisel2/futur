@@ -15,6 +15,19 @@ def _clock(event_ms, receive_ns):
         raise ValueError('negative transport latency; check NTP clock sync')
     return event_ns, recv
 
+def _next_future_funding_ns(event_ns, *values):
+    candidates=[]
+    for value in values:
+        if value in (None, ''):
+            continue
+        try:
+            ts=_ns_ms(value)
+        except (TypeError, ValueError):
+            continue
+        if ts >= int(event_ns):
+            candidates.append(ts)
+    return min(candidates) if candidates else None
+
 class SequenceGap(RuntimeError):
     pass
 
@@ -162,7 +175,11 @@ def parse_bybit(msg, receive_ns, state):
             event_ns,recv=_clock(msg['ts'],receive_ns); sym=canonical_symbol(d.get('symbol') or topic.split('.',1)[1])
             for kind,key in [('open_interest','openInterest'),('funding','fundingRate'),('mark','markPrice'),('index','indexPrice')]:
                 if d.get(key) not in (None,''):
-                    out.append(DerivativeEvent('bybit',sym,event_ns,recv,kind,float(d[key])))
+                    next_funding = _next_future_funding_ns(event_ns, d.get('nextFundingTime')) if kind=='funding' else None
+                    out.append(DerivativeEvent(
+                        'bybit',sym,event_ns,recv,kind,float(d[key]),
+                        next_funding_ts_ns=next_funding,
+                    ))
     return out
 
 
@@ -204,7 +221,11 @@ def parse_okx(msg, receive_ns, state):
         elif channel=='open-interest':
             event_ns,recv=_clock(event_ms,receive_ns); out.append(DerivativeEvent('okx',sym,event_ns,recv,'open_interest',float(d.get('oiCcy') or d['oi'])))
         elif channel=='funding-rate':
-            event_ns,recv=_clock(event_ms,receive_ns); out.append(DerivativeEvent('okx',sym,event_ns,recv,'funding',float(d['fundingRate'])))
+            event_ns,recv=_clock(event_ms,receive_ns)
+            next_funding=_next_future_funding_ns(event_ns,d.get('fundingTime'),d.get('nextFundingTime'))
+            out.append(DerivativeEvent('okx',sym,event_ns,recv,'funding',float(d['fundingRate']),next_funding_ts_ns=next_funding))
+            if d.get('premium') not in (None,''):
+                out.append(DerivativeEvent('okx',sym,event_ns,recv,'premium',float(d['premium'])))
         elif channel=='mark-price':
             event_ns,recv=_clock(event_ms,receive_ns); out.append(DerivativeEvent('okx',sym,event_ns,recv,'mark',float(d['markPx'])))
         elif channel=='index-tickers':
@@ -235,7 +256,7 @@ def parse_hyperliquid(msg, receive_ns, state):
     elif ch=='activeAssetCtx' and data:
         ctx=data['ctx']; sym=canonical_symbol(data['coin'])
         event_ms=int(ctx.get('time') or msg.get('time') or receive_ns//MS); event_ns,recv=_clock(event_ms,receive_ns)
-        for kind,key in [('funding','funding'),('open_interest','openInterest'),('mark','markPx'),('index','oraclePx')]:
+        for kind,key in [('funding','funding'),('open_interest','openInterest'),('mark','markPx'),('index','oraclePx'),('premium','premium')]:
             if ctx.get(key) not in (None,''):
                 out.append(DerivativeEvent('hyperliquid',sym,event_ns,recv,kind,float(ctx[key])))
     return out

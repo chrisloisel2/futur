@@ -24,8 +24,6 @@ def _validate_clock(event_ts_ns: int, receive_ts_ns: int) -> None:
 class BookLevel:
     price: float
     qty: float
-    # Number of resting orders represented by this level when a venue exposes
-    # it (for example Hyperliquid WsLevel.n). Missing is not fabricated as zero.
     order_count: Optional[int] = None
 
     def __post_init__(self) -> None:
@@ -47,10 +45,7 @@ class BookEvent:
     price: float
     qty: float
     order_count: Optional[int] = None
-    # Explicit wire-stream provenance. This prevents a one-level BBO snapshot
-    # from being mistaken for a deep-book snapshot during replay/readiness.
     source_stream: Optional[str] = None
-    # Optional update-range metadata retained for deterministic replay audits.
     first_sequence_id: Optional[int] = None
     previous_sequence_id: Optional[int] = None
 
@@ -82,16 +77,11 @@ class TradeEvent:
     price: float
     qty: float
     aggressor: str
-    # Optional provenance exposed by venues such as Hyperliquid. These fields
-    # are intentionally nullable for CEX feeds that do not expose identities.
     buyer: Optional[str] = None
     seller: Optional[str] = None
     tx_hash: Optional[str] = None
-    # Wire stream and physical granularity must survive normalization. In
-    # particular Binance aggTrade is event-level but aggregates fills belonging
-    # to one taker order and therefore is not a true trade-by-trade tape.
     source_stream: Optional[str] = None
-    granularity: Optional[str] = None  # e.g. "individual" or "aggregate"
+    granularity: Optional[str] = None
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -115,6 +105,7 @@ class DerivativeEvent:
     value: float
     side: Optional[str] = None
     price: Optional[float] = None
+    next_funding_ts_ns: Optional[int] = None
 
     def __post_init__(self) -> None:
         _validate_clock(self.event_ts_ns, self.receive_ts_ns)
@@ -124,6 +115,14 @@ class DerivativeEvent:
             raise ValueError("invalid derivative side")
         if self.price is not None:
             _require_positive("price", self.price)
+        if self.next_funding_ts_ns is not None:
+            if self.kind != "funding":
+                raise ValueError("next_funding_ts_ns is only valid for funding events")
+            next_ts = int(self.next_funding_ts_ns)
+            if next_ts <= 0:
+                raise ValueError("next_funding_ts_ns must be positive")
+            if next_ts < int(self.event_ts_ns):
+                raise ValueError("next_funding_ts_ns cannot precede event_ts_ns")
 
 
 @dataclass(frozen=True)

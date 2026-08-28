@@ -1,0 +1,24 @@
+{
+  "experiment_id": "20260818T170429Z_A2_2000ms",
+  "files": [
+    {
+      "name": "SUMMARY.json",
+      "sha256": "dd8f7f774e02f754b386cbe6c3c88c0b1f16ee12ecf0a51f09c18444b69edaca",
+      "size_bytes": 1508
+    },
+    {
+      "name": "predictions.parquet",
+      "sha256": "c719456190bfe2550972d07fd2740de23e10614b390365aff6ad873d7fdb4443",
+      "size_bytes": 11535347
+    }
+  ],
+  "metadata": {
+    "code_commit": "87360fa6b46f7fd09e546c6d04e303c3dbbde867",
+    "dataset_manifest_digest": "c6c80e7c8d5cfdbcc6310daaaeb1b25a66351804c3e74afaefc23a4b52c47ec9",
+    "feature_provenance_digest": "9023f3ad7620e9a03581dd6c9b09804710d270f94887995273f3f8496fece893",
+    "hypothesis_budget_ledger_head": "2c3349ab5e3fc4c4f69ec86b867c5b7196b5c5edc6ff02365dab478bb37df525",
+    "multiplicity_ledger_head": "f43930cb2d45c1d871c9beca7666802b976fad31c0a7236294e9ebb4e28d2d39",
+    "support_budget_manifest_digest": "02e142a364ecef5e447798f19a4f7f413904cb4ff12120af98be51c498657342"
+  },
+  "seal_digest": "ac785fac9ab210749949149b5e5beeef8dc51a50243562037287eb63178c90a3"
+}
