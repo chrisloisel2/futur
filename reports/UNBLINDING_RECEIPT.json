@@ -1,0 +1,38 @@
+{
+  "freeze_git_sha": "89461de4bd862c8c50b62bf1fbb5f6f23628d0bf",
+  "current_git_sha": "89461de4bd862c8c50b62bf1fbb5f6f23628d0bf",
+  "timestamp": "2026-08-15 05:39:04.241493+00:00",
+  "hashes": {
+    "instrument_master_sha256": "3d10415020ef351c38b8762d024097eff2b18016ad9090c11c49a3aad7fb87ee",
+    "acquisition_freeze_sha256": "f5bbebd86b42b81ea964347a887e453cbe35464aa55dda76c4cf846eb2d8feec",
+    "DATA_V2_READINESS_sha256": "3c1ae97a137e01839209fc5115263f84efb485a7b42330fb78e6b611a6fba9eb",
+    "EVENT_RESEARCH_READINESS_sha256": "45778cf7475e36f3e4e269b169c64c43c4e6e5e3abfdc9e84712845d9676c10f",
+    "EVENT_PANEL_READINESS_sha256": "56b90c8d7a721af1e43d4776aaa910a1317351aa70f59ba1982120358a29ad32",
+    "EVENT_FEATURE_ELIGIBILITY_REPORT_sha256": "16c91eeaea38b48dac3b721fdf91ad4828a0374c002c5e9329de2ef63fcbed4f",
+    "basis_manifest_sha256": "7a3d2ce0266e8687ea4fe616ac585d660bc5f07bf3827f39e2d5f067ff98ed8a",
+    "event_panel_manifest_sha256": "93bc9a0a0fa7c3aa120c7ce61e6205714007c897651ec51cd7de054b028d8136",
+    "EVENT_ELIGIBLE_UNIVERSE_V1_sha256": "b1b0c62b0515753a7cee88b108d49155cd05bf130846136995e0837cc1fed68e",
+    "scanner_source_sha256": "8e571bce23ec2ce28d7377ab46f653e6caafc81fe232ff8c0eb275cebf6ebc10",
+    "protocol_sha256": "d2785d486aefc6b5aad721d07197d2beb99e797eb2b41ff3ed998607c1707add",
+    "cost_model_sha256": "495d640b0f7a42f4ad99ddcc5c4143df433bb45f901b8a77af93057ad2cba257"
+  },
+  "row_count": 105450197,
+  "symbol_count": 312,
+  "family_eligible_row_counts": {
+    "eligible_deleveraging": 80796938,
+    "eligible_crowding": 73737440,
+    "eligible_rvd": 82765040,
+    "eligible_ffr": 83334188
+  },
+  "family_eligible_symbol_counts": {
+    "eligible_deleveraging": 309,
+    "eligible_crowding": 252,
+    "eligible_rvd": 253,
+    "eligible_ffr": 310
+  },
+  "exact_scanner_command": "/home/qbee/futur/.venv/bin/python3 scripts/run_event_scanner_v1.py",
+  "primary_horizon": "1h",
+  "cost_model_version_sha256": "495d640b0f7a42f4ad99ddcc5c4143df433bb45f901b8a77af93057ad2cba257",
+  "economic_results_seen_before_run": false,
+  "scanner_executed_before_run": false
+}

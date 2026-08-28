@@ -1,0 +1,84 @@
+{
+  "all_results": [],
+  "by_lab": {
+    "A1": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A2": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A3": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A4": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A5": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A6": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A7": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    },
+    "A8": {
+      "alphas": [],
+      "hypotheses_evaluated": 0,
+      "real_alpha_candidates": 0
+    }
+  },
+  "classification": "REAL_ALPHA_CANDIDATE means the signal survived chronological train/validation/test gates and estimated execution costs. It is not yet production certification.",
+  "policy": {
+    "filter_cost_bps": 2.0,
+    "hedge_cost_bps": 3.0,
+    "hybrid_cost_bps": 3.0,
+    "maker_cost_bps": 1.0,
+    "max_features_per_hypothesis": 64,
+    "min_abs_ic_test": 0.008,
+    "min_abs_ic_train": 0.01,
+    "min_abs_ic_validation": 0.008,
+    "min_gross_edge_bps": 0.2,
+    "min_ic_tstat": 2.0,
+    "min_net_edge_bps": 0.05,
+    "min_positive_block_fraction": 0.6,
+    "min_rows": 10000,
+    "portfolio_quantile": 0.1,
+    "require_same_sign": true,
+    "statistical_blocks": 20,
+    "taker_cost_bps": 4.0,
+    "train_fraction": 0.6,
+    "validation_fraction": 0.2
+  },
+  "real_alpha_candidates": [],
+  "summary": {
+    "hypotheses_evaluated": 0,
+    "labs_requested": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+    ],
+    "real_alpha_candidates": 0,
+    "rejected": 0
+  },
+  "version": 2
+}

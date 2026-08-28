@@ -21,6 +21,8 @@ import numpy as np
 import pandas as pd
 from typing import Optional
 
+from data_pipeline.taker_flow_guard import assert_no_placeholder_taker_flow
+
 
 def compute_flow_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -34,6 +36,7 @@ def compute_flow_features(df: pd.DataFrame) -> pd.DataFrame:
       liq_short_spike_12  — proxy liquidations shorts (buy_spike × vol_spike, rolling 12)
       liq_imbalance       — liq_long - liq_short (positif = plus de longs liquidés = bearish)
     """
+    assert_no_placeholder_taker_flow(df, context="ai.level_0.feature_engineering.compute_flow_features")
     df = df.copy()
 
     # ── Volume delta et imbalance normalisée ─────────────────────────────────

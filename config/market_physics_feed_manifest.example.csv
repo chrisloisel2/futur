@@ -1,0 +1,21 @@
+feed,status,start,end,notes
+l2_book_events,MISSING,,,
+tick_trades,AGGREGATED_ONLY,,,5m aggTrades flow does not qualify as event-level
+bbo,UNKNOWN,,,
+binance,EVENT_LEVEL,,,
+bybit,UNKNOWN,,,
+okx,UNKNOWN,,,
+hyperliquid,UNKNOWN,,,
+open_interest,AGGREGATED_ONLY,,,current historical metrics are not an event-level OI stream
+funding,AGGREGATED_ONLY,,,
+mark_index_premium,UNKNOWN,,,
+liquidations,UNKNOWN,,,unknown must not be treated as zero
+option_quotes,MISSING,,,
+option_trades,MISSING,,,
+option_open_interest,MISSING,,,
+decision_send_ack_fill,MISSING,,,
+future_markouts,MISSING,,,
+stablecoin_flows,STRANDED,,,mark STRANDED only if collected but not joined into research
+etf_cme,MISSING,,,
+macro_events,STRANDED,,,
+news_events,STRANDED,,,

@@ -11,6 +11,7 @@ import pandas as pd
 from pandas.errors import PerformanceWarning
 
 from data_pipeline.normalization import standardize_ohlcv_columns
+from data_pipeline.taker_flow_guard import assert_no_placeholder_taker_flow
 
 
 FEATURE_VERSION = "ohlcv_enriched_v1"
@@ -71,6 +72,9 @@ def compute_enriched_ohlcv_features(
     """
 
     df = df.loc[:, ~pd.Index(df.columns).duplicated(keep="last")].copy()
+    assert_no_placeholder_taker_flow(
+        df, context=f"compute_enriched_ohlcv_features input symbol={symbol}"
+    )
     frame = standardize_ohlcv_columns(df)
     required = ["open", "high", "low", "close", "volume"]
     missing = [col for col in required if col not in frame.columns]
@@ -103,8 +107,20 @@ def compute_enriched_ohlcv_features(
     v = frame["volume"].astype(float).clip(lower=0.0)
     qv = frame.get("quote_asset_volume", c * v).astype(float)
     trades = frame.get("number_of_trades", pd.Series(0.0, index=frame.index)).astype(float)
-    taker_base = frame.get("taker_buy_base_asset_volume", v * 0.5).astype(float)
-    taker_quote = frame.get("taker_buy_quote_asset_volume", qv * 0.5).astype(float)
+    # No fallback to v * 0.5 / qv * 0.5 here: that fabricated the exact
+    # placeholder this module now rejects (see taker_flow_guard). Missing
+    # real taker data means the derived flow features are simply omitted
+    # below, not replaced with a fake flat split.
+    taker_base = (
+        frame["taker_buy_base_asset_volume"].astype(float)
+        if "taker_buy_base_asset_volume" in frame.columns
+        else pd.Series(np.nan, index=frame.index)
+    )
+    taker_quote = (
+        frame["taker_buy_quote_asset_volume"].astype(float)
+        if "taker_buy_quote_asset_volume" in frame.columns
+        else pd.Series(np.nan, index=frame.index)
+    )
 
     features: "OrderedDict[str, object]" = OrderedDict()
     _base_price_features(features, o, h, l, c, v, qv, trades, taker_base, taker_quote)
@@ -223,12 +239,21 @@ def _base_price_features(
     f["dollar_volume"] = c * v
     f["quote_volume_effective"] = qv
     f["trades"] = trades
-    f["taker_buy_base"] = taker_base
-    f["taker_buy_quote"] = taker_quote
-    f["taker_buy_ratio_base"] = _safe_div(taker_base, v)
-    f["taker_buy_ratio_quote"] = _safe_div(taker_quote, qv)
-    f["taker_sell_base"] = (v - taker_base).clip(lower=0.0)
-    f["taker_sell_quote"] = (qv - taker_quote).clip(lower=0.0)
+    # Only emit taker_buy_* / taker_sell_* / taker_buy_ratio_* when real
+    # aggressor data is present. If we always emitted these columns, the
+    # downstream ffill().fillna(0.0) pass would turn "unknown" into a fake
+    # "0 buy volume" / "0 ratio" signal — as fabricated as the 50/50
+    # placeholder it replaces. Absent columns let existing callers (which
+    # already guard with `if "taker_buy_ratio_base" in df.columns`) skip
+    # cleanly instead.
+    if taker_base.notna().any():
+        f["taker_buy_base"] = taker_base
+        f["taker_buy_ratio_base"] = _safe_div(taker_base, v)
+        f["taker_sell_base"] = (v - taker_base).clip(lower=0.0)
+    if taker_quote.notna().any():
+        f["taker_buy_quote"] = taker_quote
+        f["taker_buy_ratio_quote"] = _safe_div(taker_quote, qv)
+        f["taker_sell_quote"] = (qv - taker_quote).clip(lower=0.0)
 
 
 def _single_bar_features(
