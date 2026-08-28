@@ -23,7 +23,7 @@ runners:
     assets: [BTCUSDT, ETHUSDT]
     venue: binance_usdm
     frequency: "8h (rebalance funding), décision sur barre journalière enrichie"
-    features_model: "règles déterministes — gate régime BULL/RECOVERY, ranker corrélation/meme/alt, edge gate causal par actif ; aucun ML"
+    features_model: "gate régime BULL/RECOVERY, ranker corrélation/meme/alt et edge gate causal par actif sont des règles déterministes ; engines_long (TRM_TREND_INST, PULLBACK_LONG, LIQUIDATION_REBOUND) exécutent de l'inférence ML gelée (LightGBM/Logistic, pickles pré-entraînés sous artifacts/institutional/...) — aucun réentraînement live"
     sizing:
       capital_standalone_eur: 200000.0
       carry_fraction: 0.75
