@@ -19,7 +19,12 @@ if str(ROOT) not in sys.path:
 
 from alpha_foundry_v5.contracts import EconomicEvidence
 from alpha_foundry_v5.validation import DEFAULT_POLICY, ValidationEngine
-from market_physics_v3.phase5_2_execution_economics import build_trades, summarize_trades
+from market_physics_v3.phase5_2_execution_economics import (
+    REFERENCE_NOTIONAL_USD,
+    build_trades,
+    freeze_thresholds,
+    summarize_trades,
+)
 from market_physics_v3.phase5_audit import load_parquet_dataset
 
 PRIMARY_SYMBOLS = ("BTCUSDT", "ETHUSDT")
@@ -46,6 +51,7 @@ def _evidence_from_summary(summary: dict) -> EconomicEvidence:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tape", required=True)
+    ap.add_argument("--dev-pilot-tape", required=True, help="DEV_PILOT window tape -- entry thresholds are frozen here, never recomputed on --tape")
     ap.add_argument("--cadence-ms", type=int, default=100)
     ap.add_argument("--out", default="reports/market_physics_v3/phase5_2_execution_economics")
     args = ap.parse_args()
@@ -56,9 +62,13 @@ def main() -> None:
 
     engine = ValidationEngine(DEFAULT_POLICY)
     results: dict[str, dict] = {}
+    thresholds_by_symbol = {}
     all_trades = []
     for symbol in (*PRIMARY_SYMBOLS, *SUPPORT_SYMBOLS):
-        trades = build_trades(frame, symbol, cadence_ms=args.cadence_ms)
+        thresholds = freeze_thresholds(args.dev_pilot_tape, symbol)
+        thresholds_by_symbol[symbol] = {"lo": thresholds.lo, "hi": thresholds.hi}
+        print(f"[exec-econ] {symbol} frozen thresholds (DEV_PILOT): lo={thresholds.lo:.4f} hi={thresholds.hi:.4f}", flush=True)
+        trades = build_trades(frame, symbol, thresholds, cadence_ms=args.cadence_ms)
         all_trades.extend(trades)
         summary = summarize_trades(trades)
         evidence = _evidence_from_summary(summary)
@@ -95,16 +105,24 @@ def main() -> None:
         "excluded_venue": "okx",
         "execution_venues": ["binance", "bybit", "hyperliquid"],
         "tape": str(args.tape),
+        "dev_pilot_tape": str(args.dev_pilot_tape),
+        "entry_thresholds_frozen_from_dev_pilot": thresholds_by_symbol,
         "assumptions": {
             "taker_fee_bps": {"binance": 5.0, "bybit": 5.5, "hyperliquid": 3.5},
-            "spread_cost": "half of observed venue__price_spread_bps at entry and exit",
+            "gross_pnl": "real per-venue price_best_bid/price_best_ask at entry and exit "
+                         "(buy=ask/sell=bid), weighted by FIXED entry-time price_weight "
+                         "throughout the trade -- spread cost is embedded directly via "
+                         "real transacted prices, not a separate half-spread deduction",
             "delayed_entry_latency_ms": 300,
             "top_contributor_trim": 0.05,
-            "sizing": "weighted by venue__price_weight at entry, normalized across binance/bybit/hyperliquid",
+            "sizing": "weighted by venue__price_weight at entry, normalized across binance/bybit/hyperliquid, fixed through exit",
+            "capacity": "min across legs of (leg's real ask/bid_depth_5bps in USD / that leg's entry weight) -- the bottleneck leg, not a weighted sum",
+            "fill_rate": f"min(1.0, capacity_usd / {REFERENCE_NOTIONAL_USD:.0f}) -- computed from real observed depth, not hardcoded to 1.0",
         },
         "policy": {
             "execution_min_pf": DEFAULT_POLICY.execution_min_pf,
             "execution_min_capacity_usd": DEFAULT_POLICY.execution_min_capacity_usd,
+            "reference_notional_usd": REFERENCE_NOTIONAL_USD,
         },
         "results": results,
     }

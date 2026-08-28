@@ -76,10 +76,12 @@ Ne pas retoucher le modèle A2 en attendant — data snooping.
 
 `okx__queue_imbalance_l5` @ 30s, target LOO fair value Binance+Bybit+HL, avait un verdict
 `CONFIRMED_INFORMATION_CANDIDATE` scellé le 2026-08-17 sur `research/market-physics-data-v3`
-(branche mergée dans `main` le 2026-08-28), jamais poussé plus loin. Chiffré le 2026-08-28 :
-gross edge +0.64bps/trade, coût aller-retour réel (frais taker pondérés 3 venues + spread réel)
-~9.9bps → **net -9.25bps, profit factor 0.006**. Écart structurel (~15x), pas un artefact de
-modélisation — fermé, pas à retenter avec des coûts plus favorables. Détail :
+(branche mergée dans `main` le 2026-08-28), jamais poussé plus loin. Chiffré le 2026-08-28,
+méthodologie corrigée le 2026-08-29 (seuils gelés depuis DEV_PILOT, PnL sur prix réels
+bid/ask à poids d'entrée figés, capacité = jambe limitante, fill_rate calculé) : gross edge
++0,38bps/trade, coûts (frais taker uniquement, le spread est déjà dans le PnL réel) → **net
+-4,44bps, profit factor 0,032**. Verdict inchangé malgré la correction — fermé, pas à
+retenter avec des coûts plus favorables. Détail :
 `reports/market_physics_v3/phase5_2_execution_economics/VERDICT.md`.
 
 ## Comment ajouter une piste
