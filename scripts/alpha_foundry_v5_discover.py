@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 
 from alpha_foundry_v5.artifacts import ArtifactStore
 from alpha_foundry_v5.contracts import ExperimentSpec, ResearchStage, TimeWindow
+from alpha_foundry_v5.feature_sets import load_feature_set
 from alpha_foundry_v5.hypotheses import hypothesis_grid
 from alpha_foundry_v5.hypothesis_budget import (
     HypothesisBudgetLedger,
@@ -32,7 +33,7 @@ from alpha_foundry_v5.research_engine import ResearchEngine
 from alpha_foundry_v5.support_io import parquet_union_schema, support_projection_columns
 
 
-def load_frame(path: str, lab: str, target_name: str):
+def load_frame(path: str, lab: str, target_name: str, feature_columns: tuple[str, ...]):
     p = Path(path)
 
     if p.suffix.lower() == ".csv":
@@ -56,6 +57,9 @@ def load_frame(path: str, lab: str, target_name: str):
     registry = LabRegistry()
     parts, all_columns, by_part = parquet_union_schema(str(p))
 
+    # Structural/audit columns (support_projection_columns) plus the frozen, explicit
+    # feature_columns for this hypothesis -- NOT recomputed from a plugin heuristic here.
+    # See alpha_foundry_v5/feature_sets.py and P0-3 in docs/.
     selected = set(
         support_projection_columns(
             all_columns,
@@ -63,69 +67,10 @@ def load_frame(path: str, lab: str, target_name: str):
             registry,
         )
     )
-
-    spec = registry.spec(lab)
-    plugin = spec.plugin
-
-    event_tokens = (
-        "signed_notional",
-        "flow_imbalance",
-        "cvd",
-        "absorption",
-        "interarrival_cv",
-        "trades_per_second",
-        "flow_acceleration",
-        "flow_jerk",
-        "ofi",
-        "queue_imbalance",
-        "cancel",
-        "remove",
-        "queue_pressure",
-        "replenishment",
-        "depletion",
-        "book_event_intensity",
-    )
-
-    for column in all_columns:
-        name = str(column)
-        lower = name.lower()
-
-        if plugin == "cross_venue":
-            if (
-                name.endswith("__price_dislocation_bps")
-                or name.endswith("__dislocation_bps")
-                or name.endswith("__price_mid")
-            ):
-                selected.add(name)
-
-        elif plugin == "event_microstructure":
-            if any(token in lower for token in event_tokens):
-                selected.add(name)
-
-        elif plugin == "shock_propagation":
-            if any(
-                token in lower
-                for token in (
-                    "spread_bps",
-                    "depth_",
-                    "notional_to_move",
-                    "dispersion_bps",
-                )
-            ):
-                selected.add(name)
-
-        elif plugin == "leverage":
-            if any(
-                token in lower
-                for token in (
-                    "open_interest",
-                    "funding",
-                    "basis",
-                    "premium",
-                    "liquidation",
-                )
-            ):
-                selected.add(name)
+    unknown = [c for c in feature_columns if c not in all_columns]
+    if unknown:
+        raise ValueError(f"frozen feature set references columns absent from --data: {unknown}")
+    selected.update(feature_columns)
 
     if "price_fair_value" in all_columns:
         selected.add("price_fair_value")
@@ -208,7 +153,8 @@ def main() -> int:
     parser.add_argument("--dataset-manifest", required=True, help="Frozen DatasetManifest JSON written by alpha_foundry_v5_freeze_dataset.py")
     parser.add_argument("--dataset-manifest-digest", required=True, help="Must equal the loaded --dataset-manifest's own digest -- checked, not trusted")
     parser.add_argument("--lab", required=True)
-    parser.add_argument("--feature-set-id", required=True)
+    parser.add_argument("--feature-set", required=True, help="Frozen FeatureSet JSON written by alpha_foundry_v5_freeze_feature_set.py")
+    parser.add_argument("--feature-set-id", required=True, help="Must equal the loaded --feature-set's own feature_set_id -- checked, not trusted")
     parser.add_argument("--target")
     parser.add_argument("--horizon-ms", required=True, type=int)
     parser.add_argument("--expected-sign", type=int, choices=[-1, 1], default=1)
@@ -235,13 +181,26 @@ def main() -> int:
     if not manifest_check["ok"]:
         raise ValueError(f"dataset manifest verification failed: {manifest_check}")
 
+    feature_set = load_feature_set(args.feature_set)
+    if feature_set.feature_set_id != args.feature_set_id:
+        raise ValueError(
+            f"--feature-set-id {args.feature_set_id!r} does not match "
+            f"the loaded feature set's own feature_set_id {feature_set.feature_set_id!r} ({args.feature_set})"
+        )
+    if feature_set.lab_id != args.lab:
+        raise ValueError(f"feature set was frozen for lab {feature_set.lab_id!r}, not --lab {args.lab!r}")
+
     registry = LabRegistry()
     target_name = args.target or registry.spec(args.lab).default_target
     frame, load_report = load_frame(
         args.data,
         args.lab,
         target_name,
+        feature_set.columns,
     )
+    load_report["feature_set_id"] = feature_set.feature_set_id
+    load_report["feature_set_digest"] = feature_set.digest
+    load_report["n_feature_columns"] = len(feature_set.columns)
     print(
         "[alpha-foundry-v5/discovery] loader="
         + json.dumps(load_report, sort_keys=True)
@@ -357,6 +316,8 @@ def main() -> int:
         "code_commit": args.code_commit,
         "multiplicity_ledger_head": multiplicity_state.get("head_hash", ""),
         "hypothesis": asdict(hypothesis),
+        "feature_set_digest": feature_set.digest,
+        "feature_set_columns": list(feature_set.columns),
     })
     print(json.dumps({"summary": summary, "seal": seal}, indent=2, sort_keys=True))
     return 0
