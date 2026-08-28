@@ -1,0 +1,41 @@
+{
+  "date": "2026-08-11",
+  "equity_eur": 198750.62,
+  "pnl_gross_cum_eur": -134.45,
+  "fees_cum_eur": -1099.8,
+  "borrow_cum_eur": -26.917922,
+  "tax_provision_mtd_eur": 0.0,
+  "pnl_net_cum_eur": -1261.17,
+  "es99_1d": {
+    "value": 0.01623,
+    "n_obs": 351,
+    "method": "empirique 1h \u00d7 sqrt(24)"
+  },
+  "margin_used_proxy": 0.0607,
+  "net_delta_frac": 0.0,
+  "mh_tracking": {
+    "labels": {
+      "n": 2,
+      "pf": 0.0
+    },
+    "errors": {
+      "sampling_error_1h_bps_mean": null,
+      "execution_shortfall_bps_mean": null,
+      "model_tracking": {
+        "reference_pf": 1.435,
+        "realized_pf_labels": null,
+        "n_labels": 0,
+        "gap": null
+      }
+    }
+  },
+  "reconciliation": {
+    "status": "evaluated",
+    "consecutive_ok": 0,
+    "last_gap_fees_usdt": 188.6407,
+    "last_gap_carry_usdt": 0.0
+  },
+  "pnl_gross_1d_eur": -61.43,
+  "fees_1d_eur": -278.49,
+  "pnl_net_1d_eur": -340.52
+}

@@ -1,5 +1,5 @@
 {
-  "date": "2026-08-27",
+  "date": "2026-08-24",
   "runners": [
     {
       "runner_id": "carry_basis_v12",
@@ -7,34 +7,34 @@
       "status": "ACTIVE",
       "config_hash": "9e025f4590c1dd39aec94210",
       "git_commit": "1e3af95",
-      "age_days": 37.82,
-      "n_events": 880,
-      "n_decisions": 36,
+      "age_days": 34.82,
+      "n_events": 799,
+      "n_decisions": 33,
       "n_fills": 0,
       "n_rejects": 0,
       "availability": {
-        "n_cycles": 778,
+        "n_cycles": 706,
         "availability": 1.0
       },
       "exposure": {
-        "gross_usdt": 3.6922462417560484,
+        "gross_usdt": 3.6535964358251998,
         "margin_used_frac": 0.0,
         "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
       },
-      "nav_usdt": 201571.27,
-      "pnl_gross_usdt": 1754.22,
+      "nav_usdt": 201304.49,
+      "pnl_gross_usdt": 1487.13,
       "costs": {
-        "borrow": -2.95,
+        "borrow": -2.64,
         "fee": -180.0
       },
       "tax_provision_usdt": -0.0,
-      "pnl_net_before_tax_usdt": 1571.27,
-      "pnl_net_after_tax_usdt": 1571.27,
-      "return_total": 0.00786,
+      "pnl_net_before_tax_usdt": 1304.49,
+      "pnl_net_after_tax_usdt": 1304.49,
+      "return_total": 0.00652,
       "max_drawdown": 0.0009,
-      "sharpe_ann": 17.496,
+      "sharpe_ann": 15.88,
       "sortino_ann": null,
-      "dsr": 0.9458,
+      "dsr": 0.9185,
       "dsr_n_trials": 5,
       "es95_1d": null,
       "es99_1d": null,
@@ -47,7 +47,7 @@
       "reconciliation": {
         "status": "evaluated",
         "passed": true,
-        "consecutive_ok": 777,
+        "consecutive_ok": 705,
         "eligible": true
       },
       "cuts": {
@@ -57,11 +57,11 @@
           "2026-08-03/2026-08-09": 0.00131,
           "2026-08-10/2026-08-16": 0.00155,
           "2026-08-17/2026-08-23": 0.00235,
-          "2026-08-24/2026-08-30": 0.00187
+          "2026-08-24/2026-08-30": 0.00054
         },
         "by_regime": {
           "BEAR": 0.0028,
-          "BULL": 0.00505
+          "BULL": 0.00372
         },
         "by_asset": {},
         "by_cost_scenario_fee_bp": {}
@@ -73,34 +73,34 @@
       "status": "ACTIVE",
       "config_hash": "e0cc3cdbf3b236b648cf5563",
       "git_commit": "1e3af95",
-      "age_days": 37.82,
-      "n_events": 854,
-      "n_decisions": 36,
+      "age_days": 34.82,
+      "n_events": 773,
+      "n_decisions": 33,
       "n_fills": 0,
       "n_rejects": 0,
       "availability": {
-        "n_cycles": 778,
+        "n_cycles": 706,
         "availability": 1.0
       },
       "exposure": {
-        "gross_usdt": 2.1324020916177115,
+        "gross_usdt": 2.0269128960377083,
         "margin_used_frac": 0.0,
         "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
       },
-      "nav_usdt": 200273.28,
-      "pnl_gross_usdt": 638.27,
+      "nav_usdt": 200118.6,
+      "pnl_gross_usdt": 483.42,
       "costs": {
-        "borrow": -1.03,
+        "borrow": -0.86,
         "fee": -363.96
       },
       "tax_provision_usdt": -0.0,
-      "pnl_net_before_tax_usdt": 273.28,
-      "pnl_net_after_tax_usdt": 273.28,
-      "return_total": 0.00137,
+      "pnl_net_before_tax_usdt": 118.6,
+      "pnl_net_after_tax_usdt": 118.6,
+      "return_total": 0.00059,
       "max_drawdown": 0.00111,
-      "sharpe_ann": 3.314,
-      "sortino_ann": 2.473,
-      "dsr": 0.4368,
+      "sharpe_ann": 1.58,
+      "sortino_ann": 1.175,
+      "dsr": 0.2456,
       "dsr_n_trials": 5,
       "es95_1d": null,
       "es99_1d": null,
@@ -113,7 +113,7 @@
       "reconciliation": {
         "status": "evaluated",
         "passed": true,
-        "consecutive_ok": 777,
+        "consecutive_ok": 705,
         "eligible": true
       },
       "cuts": {
@@ -123,11 +123,11 @@
           "2026-08-03/2026-08-09": 0.00122,
           "2026-08-10/2026-08-16": 9e-05,
           "2026-08-17/2026-08-23": -0.0005,
-          "2026-08-24/2026-08-30": 0.00107
+          "2026-08-24/2026-08-30": 0.0003
         },
         "by_regime": {
           "BEAR": -0.00041,
-          "BULL": 0.00178
+          "BULL": 0.001
         },
         "by_asset": {},
         "by_cost_scenario_fee_bp": {}
@@ -139,34 +139,34 @@
       "status": "ACTIVE",
       "config_hash": "18a5748907bd401ab24eac13",
       "git_commit": "1e3af95",
-      "age_days": 37.82,
-      "n_events": 864,
-      "n_decisions": 36,
+      "age_days": 34.82,
+      "n_events": 784,
+      "n_decisions": 33,
       "n_fills": 0,
       "n_rejects": 0,
       "availability": {
-        "n_cycles": 778,
+        "n_cycles": 706,
         "availability": 1.0
       },
       "exposure": {
-        "gross_usdt": 0.0,
+        "gross_usdt": 2.0241732454956867,
         "margin_used_frac": 0.0,
         "source": "\u00e9tat op\u00e9rationnel (cache), proxy marge IM 10%"
       },
-      "nav_usdt": 200033.07,
-      "pnl_gross_usdt": 758.74,
+      "nav_usdt": 200107.9,
+      "pnl_gross_usdt": 713.87,
       "costs": {
-        "borrow": -1.36,
-        "fee": -724.31
+        "borrow": -1.25,
+        "fee": -604.72
       },
       "tax_provision_usdt": -0.0,
-      "pnl_net_before_tax_usdt": 33.07,
-      "pnl_net_after_tax_usdt": 33.07,
-      "return_total": 0.00017,
-      "max_drawdown": 0.00108,
-      "sharpe_ann": 0.332,
-      "sortino_ann": 0.413,
-      "dsr": 0.1398,
+      "pnl_net_before_tax_usdt": 107.9,
+      "pnl_net_after_tax_usdt": 107.9,
+      "return_total": 0.00054,
+      "max_drawdown": 0.00107,
+      "sharpe_ann": 1.199,
+      "sortino_ann": 1.354,
+      "dsr": 0.208,
       "dsr_n_trials": 5,
       "es95_1d": null,
       "es99_1d": null,
@@ -179,7 +179,7 @@
       "reconciliation": {
         "status": "evaluated",
         "passed": true,
-        "consecutive_ok": 777,
+        "consecutive_ok": 705,
         "eligible": true
       },
       "cuts": {
@@ -189,11 +189,11 @@
           "2026-08-03/2026-08-09": 0.001,
           "2026-08-10/2026-08-16": 0.00033,
           "2026-08-17/2026-08-23": -0.00039,
-          "2026-08-24/2026-08-30": -6e-05
+          "2026-08-24/2026-08-30": 0.00031
         },
         "by_regime": {
           "BEAR": 0.0004,
-          "BULL": -0.00023
+          "BULL": 0.00014
         },
         "by_asset": {},
         "by_cost_scenario_fee_bp": {}
@@ -205,13 +205,13 @@
       "status": "OBSERVE_ONLY",
       "config_hash": "eb754f95bb0af73a9318baf4",
       "git_commit": "1e3af95",
-      "age_days": 37.82,
-      "n_events": 2382,
-      "n_decisions": 1556,
+      "age_days": 34.82,
+      "n_events": 2147,
+      "n_decisions": 1412,
       "n_fills": 0,
-      "n_rejects": 47,
+      "n_rejects": 28,
       "availability": {
-        "n_cycles": 778,
+        "n_cycles": 706,
         "availability": 1.0
       },
       "exposure": {
@@ -242,7 +242,7 @@
       "reconciliation": {
         "status": "evaluated",
         "passed": true,
-        "consecutive_ok": 777,
+        "consecutive_ok": 705,
         "eligible": true
       },
       "cuts": {
@@ -268,14 +268,14 @@
       "status": "ACTIVE",
       "config_hash": "573236e126034c85dcc347d0",
       "git_commit": "1e3af95",
-      "age_days": 37.82,
+      "age_days": 34.82,
       "n_events": 371,
       "n_decisions": 0,
       "n_fills": 0,
       "n_rejects": 0,
       "availability": {
-        "n_cycles": 778,
-        "availability": 0.4756
+        "n_cycles": 706,
+        "availability": 0.5241
       },
       "exposure": {
         "gross_usdt": null,

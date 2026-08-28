@@ -10,8 +10,8 @@
   "runs": {
     "entry3_size25": {
       "stats": {
-        "n_trades": 44,
-        "roi_total": 0.2307,
+        "n_trades": 45,
+        "roi_total": 0.2309,
         "roi_ann": 0.0375,
         "maxdd": -0.0246,
         "by_year": {
@@ -20,16 +20,16 @@
           "2023": 0.0176,
           "2024": 0.0782,
           "2025": 0.0313,
-          "2026": 0.0042
+          "2026": 0.0043
         },
-        "avg_capture_bps": 190.2
+        "avg_capture_bps": 186.1
       },
       "trades": null
     },
     "entry3_size50": {
       "stats": {
-        "n_trades": 44,
-        "roi_total": 0.5097,
+        "n_trades": 45,
+        "roi_total": 0.51,
         "roi_ann": 0.0758,
         "maxdd": -0.049,
         "by_year": {
@@ -38,17 +38,17 @@
           "2023": 0.0356,
           "2024": 0.1616,
           "2025": 0.0635,
-          "2026": 0.0076
+          "2026": 0.0078
         },
-        "avg_capture_bps": 190.2
+        "avg_capture_bps": 186.1
       },
       "trades": null
     },
     "entry5_size25": {
       "stats": {
-        "n_trades": 38,
-        "roi_total": 0.232,
-        "roi_ann": 0.0413,
+        "n_trades": 39,
+        "roi_total": 0.2328,
+        "roi_ann": 0.0378,
         "maxdd": -0.0217,
         "by_year": {
           "2021": 0.0652,
@@ -56,9 +56,9 @@
           "2023": 0.0188,
           "2024": 0.0782,
           "2025": 0.0322,
-          "2026": 0.0019
+          "2026": 0.0025
         },
-        "avg_capture_bps": 221.0
+        "avg_capture_bps": 215.9
       },
       "trades": [
         {
@@ -260,6 +260,16 @@
           "ann_at_entry": 0.0525,
           "days_held": 90,
           "capture_net": 0.01065
+        },
+        {
+          "contract": "BTCUSDT_260925",
+          "symbol": "BTCUSDT",
+          "entry": "2026-08-23",
+          "expiry": "2026-09-25",
+          "basis_entry": 0.00484,
+          "ann_at_entry": 0.0535,
+          "days_held": 33,
+          "capture_net": 0.00254
         },
         {
           "contract": "ETHUSDT_210326",
@@ -445,9 +455,9 @@
     },
     "entry5_size50": {
       "stats": {
-        "n_trades": 38,
-        "roi_total": 0.5139,
-        "roi_ann": 0.0839,
+        "n_trades": 39,
+        "roi_total": 0.5159,
+        "roi_ann": 0.0766,
         "maxdd": -0.0432,
         "by_year": {
           "2021": 0.133,
@@ -455,9 +465,9 @@
           "2023": 0.0379,
           "2024": 0.1616,
           "2025": 0.0654,
-          "2026": 0.0036
+          "2026": 0.0049
         },
-        "avg_capture_bps": 221.0
+        "avg_capture_bps": 215.9
       },
       "trades": [
         {
@@ -659,6 +669,16 @@
           "ann_at_entry": 0.0525,
           "days_held": 90,
           "capture_net": 0.01065
+        },
+        {
+          "contract": "BTCUSDT_260925",
+          "symbol": "BTCUSDT",
+          "entry": "2026-08-23",
+          "expiry": "2026-09-25",
+          "basis_entry": 0.00484,
+          "ann_at_entry": 0.0535,
+          "days_held": 33,
+          "capture_net": 0.00254
         },
         {
           "contract": "ETHUSDT_210326",

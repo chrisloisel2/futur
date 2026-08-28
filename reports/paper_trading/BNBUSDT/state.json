@@ -1,7 +1,7 @@
 {
   "symbol": "BNBUSDT",
   "start_date": "2026-05-24T01:08:03.471798+00:00",
-  "total_signals": 878,
+  "total_signals": 1252,
   "total_trades": 0,
   "total_wins": 0,
   "total_losses": 0,
@@ -13,7 +13,7 @@
   "consecutive_losses": 0,
   "last_trade_time": null,
   "weekly_pnl_pct": 0.0,
-  "weekly_start_time": "2026-08-10T10:44:19.507376+00:00",
+  "weekly_start_time": "2026-08-24T12:00:31.724639+00:00",
   "crash_halt_until": null,
   "drift_alerts": 0,
   "accounting_errors": 0
