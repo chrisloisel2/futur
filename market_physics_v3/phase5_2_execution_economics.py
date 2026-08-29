@@ -16,10 +16,15 @@ TOP_CONTRIBUTOR_TRIM = 0.05  # remove the best 5% of trades by net PnL
 # Public, standard-tier taker fees (bps of notional). Not account-specific --
 # real VIP/maker-rebate tiers can only lower these. Binance matches the
 # constant already used by src/institutional/execution/execution_simulator.py.
+# okx added for a2rv_execution.py, which (unlike this module, where okx is
+# always EXCLUDED_VENUE and never itself traded) treats all four venues
+# symmetrically -- okx's public regular-tier USDT-margined perp taker fee is
+# also 5.0bps, same tier as Binance's.
 TAKER_FEE_BPS: dict[str, float] = {
     "binance": 5.0,
     "bybit": 5.5,
     "hyperliquid": 3.5,
+    "okx": 5.0,
 }
 
 FEATURE_COL = "okx__queue_imbalance_l5"
