@@ -6,9 +6,9 @@ import pytest
 
 from market_physics_v3.phase5_2_execution_economics import (
     Trade,
-    _fee_bps,
     _gross_bps,
     _leg_capacity_usd,
+    _one_way_fee_bps,
     _venue_weights,
     build_trades,
     summarize_trades,
@@ -57,9 +57,22 @@ def test_gross_bps_nan_when_a_leg_price_missing():
     assert np.isnan(gross)
 
 
-def test_fee_bps_is_weighted_average_of_taker_fees():
+def test_one_way_fee_bps_is_weighted_average_of_taker_fees():
     weights = {"binance": 0.5, "bybit": 0.5}
-    assert _fee_bps(weights) == pytest.approx(0.5 * 5.0 + 0.5 * 5.5)
+    assert _one_way_fee_bps(weights) == pytest.approx(0.5 * 5.0 + 0.5 * 5.5)
+
+
+def test_roundtrip_fee_charged_twice():
+    # gross_bps already reflects two real transactions (buy the ask at entry,
+    # sell the bid at exit), so net_bps must charge the fee on both fills, not
+    # once -- a trade with a 5bps one-way fee has a 10bps round-trip fee cost.
+    trade = Trade(
+        symbol="BTCUSDT", entry_idx=0, exit_idx=300, direction=1, entry_asof_ns=0,
+        weights={"binance": 1.0}, gross_bps=20.0, gross_mid_bps=20.0, one_way_fee_bps=5.0,
+        capacity_usd=100_000.0, delayed_gross_bps=20.0, delayed_one_way_fee_bps=5.0,
+    )
+    assert trade.net_bps == pytest.approx(20.0 - 2 * 5.0)
+    assert trade.delayed_net_bps == pytest.approx(20.0 - 2 * 5.0)
 
 
 def test_capacity_is_the_binding_leg_not_a_sum():
@@ -108,9 +121,9 @@ def test_summarize_trades_fill_rate_is_computed_from_capacity_not_hardcoded():
     trades = [
         Trade(
             symbol="BTCUSDT", entry_idx=0, exit_idx=300, direction=1, entry_asof_ns=i,
-            weights={"binance": 1.0}, gross_bps=1.0, gross_mid_bps=1.0, fee_bps=5.0,
+            weights={"binance": 1.0}, gross_bps=1.0, gross_mid_bps=1.0, one_way_fee_bps=5.0,
             capacity_usd=100_000.0,  # below REFERENCE_NOTIONAL_USD -> fill_rate must be < 1
-            delayed_gross_bps=1.0, delayed_fee_bps=5.0,
+            delayed_gross_bps=1.0, delayed_one_way_fee_bps=5.0,
         )
         for i in range(10)
     ]

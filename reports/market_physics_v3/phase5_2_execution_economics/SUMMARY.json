@@ -10,6 +10,7 @@
       "bybit": 5.5,
       "hyperliquid": 3.5
     },
+    "taker_fee_bps_note": "per fill (one-way) -- net_edge_bps correctly charges this twice for the entry+exit round trip",
     "top_contributor_trim": 0.05
   },
   "dev_pilot_tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786830843094013751-1786852443241777168/cadence=100ms",
@@ -43,11 +44,10 @@
   "results": {
     "BTCUSDT": {
       "capacity_usd": 3193501.5425682566,
-      "delayed_entry_net_bps": -4.43551433866231,
+      "delayed_entry_net_bps": -9.429543302523694,
       "fill_rate": 1.0,
       "gate_failures": [
         "net_edge",
-        "cost_x2",
         "delayed_entry",
         "contributors",
         "recent_period",
@@ -55,24 +55,22 @@
       ],
       "gate_passed": false,
       "gross_edge_bps": 0.624144989004751,
-      "max_drawdown": -0.38120887404508264,
+      "max_drawdown": -0.6425476656636355,
       "n_trades": 1098,
-      "net_edge_bps": -4.374759073965926,
-      "net_edge_cost_x2_bps": -9.373663136936601,
+      "net_edge_bps": -9.373663136936601,
       "paper_live_net_bps": NaN,
-      "profit_factor": 0.018729660159925866,
+      "profit_factor": 0.0026199102213177684,
       "realized_slippage_bps": 0.03339303889061698,
-      "recent_period_net_bps": -4.406770148112383,
+      "recent_period_net_bps": -9.408546750496388,
       "role": "PRIMARY",
-      "top_contributors_removed_net_bps": -4.686107928323359
+      "top_contributors_removed_net_bps": -9.686812106185059
     },
     "COMBINED": {
       "capacity_usd": 3133563.1360843377,
-      "delayed_entry_net_bps": -4.493249321887122,
+      "delayed_entry_net_bps": -9.306969511125157,
       "fill_rate": 1.0,
       "gate_failures": [
         "net_edge",
-        "cost_x2",
         "delayed_entry",
         "contributors",
         "recent_period",
@@ -80,23 +78,21 @@
       ],
       "gate_passed": false,
       "gross_edge_bps": 0.3833948224996779,
-      "max_drawdown": -0.7418383829479968,
+      "max_drawdown": -0.9407344737196993,
       "n_trades": 3047,
-      "net_edge_bps": -4.444415870730874,
-      "net_edge_cost_x2_bps": -9.272226563961427,
+      "net_edge_bps": -9.272226563961427,
       "paper_live_net_bps": NaN,
-      "profit_factor": 0.03165096660999156,
+      "profit_factor": 0.004616357278348132,
       "realized_slippage_bps": 0.20560078013300803,
-      "recent_period_net_bps": -4.402026484829592,
-      "top_contributors_removed_net_bps": -4.830478962643391
+      "recent_period_net_bps": -9.219651612416481,
+      "top_contributors_removed_net_bps": -9.67169462327828
     },
     "ETHUSDT": {
       "capacity_usd": 4368926.761605737,
-      "delayed_entry_net_bps": -4.7034479648532574,
+      "delayed_entry_net_bps": -9.801168648085712,
       "fill_rate": 1.0,
       "gate_failures": [
         "net_edge",
-        "cost_x2",
         "delayed_entry",
         "contributors",
         "recent_period",
@@ -104,24 +100,22 @@
       ],
       "gate_passed": false,
       "gross_edge_bps": 0.4913063821922088,
-      "max_drawdown": -0.41119242588492144,
+      "max_drawdown": -0.6724084082968586,
       "n_trades": 1149,
-      "net_edge_bps": -4.612492351169216,
-      "net_edge_cost_x2_bps": -9.71629108453064,
+      "net_edge_bps": -9.71629108453064,
       "paper_live_net_bps": NaN,
-      "profit_factor": 0.031226357364374225,
+      "profit_factor": 0.004557295689042616,
       "realized_slippage_bps": 0.07407343956139222,
-      "recent_period_net_bps": -4.6371182827059,
+      "recent_period_net_bps": -9.736145459704435,
       "role": "PRIMARY",
-      "top_contributors_removed_net_bps": -5.008224928506069
+      "top_contributors_removed_net_bps": -10.112707407739371
     },
     "SOLUSDT": {
       "capacity_usd": 1117811.6153213657,
-      "delayed_entry_net_bps": -4.270592785403063,
+      "delayed_entry_net_bps": -8.42894347197106,
       "fill_rate": 1.0,
       "gate_failures": [
         "net_edge",
-        "cost_x2",
         "delayed_entry",
         "contributors",
         "recent_period",
@@ -129,16 +123,15 @@
       ],
       "gate_passed": false,
       "gross_edge_bps": -0.10202275863693233,
-      "max_drawdown": -0.2905949065584392,
+      "max_drawdown": -0.4927973452466564,
       "n_trades": 800,
-      "net_edge_bps": -4.298619979261199,
-      "net_edge_cost_x2_bps": -8.495217199885467,
+      "net_edge_bps": -8.495217199885467,
       "paper_live_net_bps": NaN,
-      "profit_factor": 0.04977049173111478,
+      "profit_factor": 0.007721070633481341,
       "realized_slippage_bps": 0.630862047884173,
-      "recent_period_net_bps": -3.9230757221186794,
+      "recent_period_net_bps": -8.06191808362656,
       "role": "SUPPORT",
-      "top_contributors_removed_net_bps": -4.747583398771503
+      "top_contributors_removed_net_bps": -8.954046820000865
     }
   },
   "tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786893798852052322-1786936999002614116/cadence=100ms"

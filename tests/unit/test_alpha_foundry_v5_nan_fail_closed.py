@@ -29,7 +29,6 @@ VALID_STAT_KWARGS = {
 VALID_ECON_KWARGS = {
     "gross_edge_bps": 5.0,
     "net_edge_bps": 2.0,
-    "net_edge_cost_x2_bps": 1.0,
     "delayed_entry_net_bps": 1.5,
     "profit_factor": 1.8,
     "max_drawdown": -0.02,
@@ -55,7 +54,6 @@ def test_statistical_evidence_rejects_nan_in_required_field(field):
     [
         "gross_edge_bps",
         "net_edge_bps",
-        "net_edge_cost_x2_bps",
         "delayed_entry_net_bps",
         "max_drawdown",
         "capacity_usd",

@@ -72,8 +72,6 @@ class ValidationEngine:
         failures = []
         if not np.isfinite(evidence.net_edge_bps) or float(evidence.net_edge_bps) <= 0:
             failures.append("net_edge")
-        if not np.isfinite(evidence.net_edge_cost_x2_bps) or float(evidence.net_edge_cost_x2_bps) <= 0:
-            failures.append("cost_x2")
         if not np.isfinite(evidence.delayed_entry_net_bps) or float(evidence.delayed_entry_net_bps) <= 0:
             failures.append("delayed_entry")
         if not np.isfinite(evidence.top_contributors_removed_net_bps) or float(evidence.top_contributors_removed_net_bps) <= 0:

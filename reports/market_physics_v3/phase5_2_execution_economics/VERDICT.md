@@ -24,6 +24,20 @@ mid-to-mid return that never should have included it — the corrected
 version instead uses real bid/ask directly, so the spread cost is paid
 exactly once, where it actually occurs.
 
+## Second revision (2026-08-29, same day): the "corrected" fee count was still wrong
+
+An external audit caught it: `Trade.net_bps` was `gross_bps - fee_bps`, one
+fee deduction, even though `gross_bps` already reflects two real
+transactions (buy the ask at entry, sell the bid at exit) -- a real taker
+fee is charged on every fill, not once per position. This prose already
+said "paid twice for entry+exit" below while the code charged it once; the
+code was wrong, not the prose. The old `net_edge_cost_x2_bps` field (kept
+as a secondary "2x costs" stress-test row) was, it turns out, the actually-
+correct round-trip number all along -- it's now just `net_edge_bps`, the
+separate field is gone, and every number in the table below is the
+corrected one. The qualitative verdict does not change: it fails the gate
+either way, now by a wider margin.
+
 ## Method
 
 Simulated the trade this mechanism implies: enter top/bottom decile of the
@@ -46,27 +60,25 @@ support) Phase 5.2 confirmed on, same 12h confirmation tape.
 
 ## Result
 
-| metric | first pass (buggy) | corrected |
-|---|---|---|
-| gross edge / trade | +0.64 bps | **+0.38 bps** |
-| net edge / trade | -9.25 bps | **-4.44 bps** |
-| net edge at 2x costs | -19.14 bps | -9.27 bps |
-| net edge, entry delayed 300ms | -9.29 bps | -4.49 bps |
-| net edge, top 5% contributors removed | -9.67 bps | -4.83 bps |
-| net edge, recent half only | -9.17 bps | -4.40 bps |
-| profit factor | 0.006 | 0.032 (gate requires ≥1.30) |
-| capacity (bottleneck leg, median) | ~$2.96M (was a weighted sum) | **$3.13M** |
-| fill_rate at $200k reference | 1.0 (hardcoded) | **1.0 (computed: capacity ≫ $200k)** |
-| realized spread cost / trade | ~0.20bps (half-spread proxy) | **~0.21bps (real bid-ask gap)** |
-| n trades | 2,680 | 3,047 |
+| metric | first pass (buggy) | 1st correction (still-wrong single fee) | current (round-trip fee) |
+|---|---|---|---|
+| gross edge / trade | +0.64 bps | +0.38 bps | **+0.38 bps** |
+| net edge / trade | -9.25 bps | -4.44 bps | **-9.27 bps** |
+| net edge, entry delayed 300ms | -9.29 bps | -4.49 bps | **-9.31 bps** |
+| net edge, top 5% contributors removed | -9.67 bps | -4.83 bps | **-9.67 bps** |
+| net edge, recent half only | -9.17 bps | -4.40 bps | **-9.22 bps** |
+| profit factor | 0.006 | 0.032 | **0.005** (gate requires ≥1.30) |
+| capacity (bottleneck leg, median) | ~$2.96M (was a weighted sum) | $3.13M | **$3.13M** |
+| fill_rate at $200k reference | 1.0 (hardcoded) | 1.0 (computed) | **1.0 (computed: capacity ≫ $200k)** |
+| realized spread cost / trade | ~0.20bps (half-spread proxy) | ~0.21bps | **~0.21bps (real bid-ask gap)** |
+| n trades | 2,680 | 3,047 | **3,047** |
 
-All 6 `economic_gate()` checks still fail, for every symbol individually
-and combined. The corrected net edge is smaller in magnitude (the original
-double-counted part of the cost) but the direction and conclusion are
-unchanged: gross edge (~0.4bps) is dominated by taker fees alone
-(~4.5-5.5bps per leg, paid twice for entry+exit across a 3-venue split).
-Closing this gap would require near-zero taker fees, not a data or
-modeling fix.
+All 5 `economic_gate()` checks still fail (the redundant `cost_x2` check is
+gone, folded into the now-correct `net_edge` one), for every symbol
+individually and combined. Gross edge (~0.4bps) is dominated by taker fees
+alone (~4.5-5.5bps *per fill*, and a full round trip is two fills across a
+3-venue split -- ~9-11bps of fees against ~0.4bps of signal). Closing this
+gap would require near-zero taker fees, not a data or modeling fix.
 
 ## Why this doesn't retroactively question the DEV_DISCOVERY/CONFIRMATION verdict
 

@@ -171,7 +171,6 @@ class StatisticalEvidence:
 class EconomicEvidence:
     gross_edge_bps: float
     net_edge_bps: float
-    net_edge_cost_x2_bps: float
     delayed_entry_net_bps: float
     profit_factor: float
     max_drawdown: float
@@ -193,7 +192,6 @@ class EconomicEvidence:
         _require_finite(
             gross_edge_bps=self.gross_edge_bps,
             net_edge_bps=self.net_edge_bps,
-            net_edge_cost_x2_bps=self.net_edge_cost_x2_bps,
             delayed_entry_net_bps=self.delayed_entry_net_bps,
             max_drawdown=self.max_drawdown,
             capacity_usd=self.capacity_usd,

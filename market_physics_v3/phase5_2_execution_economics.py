@@ -65,22 +65,24 @@ class Trade:
     weights: dict[str, float]
     gross_bps: float
     gross_mid_bps: float  # frictionless (mid-to-mid) gross, for the spread-cost diagnostic
-    fee_bps: float
+    one_way_fee_bps: float  # weighted-average taker fee for ONE fill -- a real round trip pays this twice
     capacity_usd: float
     delayed_gross_bps: float
-    delayed_fee_bps: float
+    delayed_one_way_fee_bps: float
 
     @property
     def net_bps(self) -> float:
-        return self.gross_bps - self.fee_bps
-
-    @property
-    def net_cost_x2_bps(self) -> float:
-        return self.gross_bps - 2.0 * self.fee_bps
+        # gross_bps already reflects two real transactions (buy the ask at entry,
+        # sell the bid at exit -- see _gross_bps), so the fee side must match: a
+        # taker fee is charged on every fill, not once per position. This used to
+        # subtract one_way_fee_bps a single time (an earlier bug -- roughly halved
+        # the true round-trip cost; the -4.44bps headline this mechanism was
+        # reported at was actually closer to -9.3bps).
+        return self.gross_bps - 2.0 * self.one_way_fee_bps
 
     @property
     def delayed_net_bps(self) -> float:
-        return self.delayed_gross_bps - self.delayed_fee_bps
+        return self.delayed_gross_bps - 2.0 * self.delayed_one_way_fee_bps
 
     @property
     def spread_cost_bps(self) -> float:
@@ -124,7 +126,10 @@ def _gross_mid_bps(entry_row: pd.Series, exit_row: pd.Series, weights: dict[str,
     return _weighted_log_return(entry_row, exit_row, weights, direction, "price_mid", "price_mid")
 
 
-def _fee_bps(weights: dict[str, float]) -> float:
+def _one_way_fee_bps(weights: dict[str, float]) -> float:
+    """Weighted-average taker fee for a SINGLE fill. A round trip (this
+    mechanism's entry + exit) pays this twice -- callers must not treat it as
+    the full trade's fee cost on its own."""
     return float(sum(w * TAKER_FEE_BPS[v] for v, w in weights.items()))
 
 
@@ -175,18 +180,18 @@ def build_trades(frame: pd.DataFrame, symbol: str, thresholds: FrozenThresholds,
                     gross_bps = _gross_bps(entry_row, exit_row, weights, direction)
                     gross_mid_bps = _gross_mid_bps(entry_row, exit_row, weights, direction)
                     if np.isfinite(gross_bps) and np.isfinite(gross_mid_bps):
-                        fee_bps = _fee_bps(weights)
+                        one_way_fee_bps = _one_way_fee_bps(weights)
                         capacity = _leg_capacity_usd(entry_row, weights, direction)
 
                         delayed_gross = float("nan")
-                        delayed_fee = float("nan")
+                        delayed_one_way_fee = float("nan")
                         d_entry_row = group.iloc[delayed_entry_idx]
                         d_exit_row = group.iloc[delayed_exit_idx]
                         d_weights = _venue_weights(d_entry_row, EXECUTION_VENUES) or weights
                         d_gross = _gross_bps(d_entry_row, d_exit_row, d_weights, direction)
                         if np.isfinite(d_gross):
                             delayed_gross = d_gross
-                            delayed_fee = _fee_bps(d_weights)
+                            delayed_one_way_fee = _one_way_fee_bps(d_weights)
 
                         trades.append(
                             Trade(
@@ -198,10 +203,10 @@ def build_trades(frame: pd.DataFrame, symbol: str, thresholds: FrozenThresholds,
                                 weights=weights,
                                 gross_bps=gross_bps,
                                 gross_mid_bps=gross_mid_bps,
-                                fee_bps=fee_bps,
+                                one_way_fee_bps=one_way_fee_bps,
                                 capacity_usd=capacity,
                                 delayed_gross_bps=delayed_gross,
-                                delayed_fee_bps=delayed_fee,
+                                delayed_one_way_fee_bps=delayed_one_way_fee,
                             )
                         )
                 # non-overlapping: next scan starts only after this trade's hold ends,
@@ -218,7 +223,6 @@ def summarize_trades(trades: Sequence[Trade]) -> dict[str, object]:
 
     gross = np.array([t.gross_bps for t in trades], dtype=float)
     net = np.array([t.net_bps for t in trades], dtype=float)
-    net_x2 = np.array([t.net_cost_x2_bps for t in trades], dtype=float)
     capacity = np.array([t.capacity_usd for t in trades], dtype=float)
     capacity = capacity[np.isfinite(capacity)]
     delayed_net = np.array([t.delayed_net_bps for t in trades], dtype=float)
@@ -242,7 +246,6 @@ def summarize_trades(trades: Sequence[Trade]) -> dict[str, object]:
         "n_trades": len(trades),
         "gross_edge_bps": float(np.mean(gross)),
         "net_edge_bps": float(np.mean(net)),
-        "net_edge_cost_x2_bps": float(np.mean(net_x2)),
         "delayed_entry_net_bps": float(np.mean(delayed_net)) if len(delayed_net) else float("nan"),
         "profit_factor": _profit_factor(net),
         "max_drawdown": _max_drawdown(net / 10_000.0),

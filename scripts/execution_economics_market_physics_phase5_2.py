@@ -35,7 +35,6 @@ def _evidence_from_summary(summary: dict) -> EconomicEvidence:
     return EconomicEvidence(
         gross_edge_bps=summary["gross_edge_bps"],
         net_edge_bps=summary["net_edge_bps"],
-        net_edge_cost_x2_bps=summary["net_edge_cost_x2_bps"],
         delayed_entry_net_bps=summary["delayed_entry_net_bps"],
         profit_factor=summary["profit_factor"],
         max_drawdown=summary["max_drawdown"],
@@ -80,7 +79,6 @@ def main() -> None:
         print(
             f"[exec-econ] {symbol:<9s} n={summary['n_trades']:<4d} "
             f"net_edge_bps={summary['net_edge_bps']:+7.3f} "
-            f"cost_x2={summary['net_edge_cost_x2_bps']:+7.3f} "
             f"delayed={summary['delayed_entry_net_bps']:+7.3f} "
             f"top_removed={summary['top_contributors_removed_net_bps']:+7.3f} "
             f"recent={summary['recent_period_net_bps']:+7.3f} "
@@ -109,6 +107,7 @@ def main() -> None:
         "entry_thresholds_frozen_from_dev_pilot": thresholds_by_symbol,
         "assumptions": {
             "taker_fee_bps": {"binance": 5.0, "bybit": 5.5, "hyperliquid": 3.5},
+            "taker_fee_bps_note": "per fill (one-way) -- net_edge_bps correctly charges this twice for the entry+exit round trip",
             "gross_pnl": "real per-venue price_best_bid/price_best_ask at entry and exit "
                          "(buy=ask/sell=bid), weighted by FIXED entry-time price_weight "
                          "throughout the trade -- spread cost is embedded directly via "
