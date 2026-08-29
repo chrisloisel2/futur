@@ -124,6 +124,29 @@ def test_derivatives_plane_every_emitted_feature_has_a_provenance_class():
     assert origin[1] == ("book__available_ts_ns", "derivatives__available_ts_ns")
 
 
+def test_new_feature_origin_recognizes_the_other_derivatives_plane_clock_name():
+    # alpha_foundry_v5/data_planes/derivatives.py (the newer plane builder,
+    # used by build_alpha_foundry_v5_data_planes.py and standalone historical
+    # panels) emits "deriv__available_ts_ns", not this module's
+    # "derivatives__available_ts_ns" -- both must be recognized depending on
+    # which one is actually present in the tensor being audited, or no tensor
+    # from the newer builder could ever pass this audit.
+    known = frozenset({"asof_ns", "symbol", "binance__open_interest", "deriv__available_ts_ns"})
+    origin = _new_feature_origin("binance__open_interest", known)
+    assert origin[0] == "derivatives"
+    assert origin[1] == ("deriv__available_ts_ns",)
+
+    # With no hint at all (no known_columns passed), the older name remains
+    # the default -- existing callers that don't pass known_columns keep
+    # exactly their previous behavior.
+    assert _new_feature_origin("binance__open_interest")[1] == ("derivatives__available_ts_ns",)
+
+    # If somehow both are present, both are accepted as governing clocks.
+    both = frozenset({"derivatives__available_ts_ns", "deriv__available_ts_ns"})
+    origin_both = _new_feature_origin("binance__open_interest", both)
+    assert set(origin_both[1]) == {"derivatives__available_ts_ns", "deriv__available_ts_ns"}
+
+
 def test_provenance_uses_union_of_all_parquet_partition_schemas(tmp_path):
     base = tmp_path / "base"
     tensor = tmp_path / "tensor"

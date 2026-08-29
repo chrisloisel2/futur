@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Mapping, Optional, Tuple
 
 import pandas as pd
-
 
 MANIFEST_NAME = "FEATURE_PROVENANCE.json"
 META_COLUMNS = {"asof_ns", "symbol"}
@@ -44,7 +43,7 @@ def _json_digest(payload: Mapping[str, object]) -> str:
     return _sha256_bytes(body)
 
 
-def _parquet_schema_union(root: Path) -> Tuple[Tuple[str, ...], int]:
+def _parquet_schema_union(root: Path) -> tuple[tuple[str, ...], int]:
     """Return first-seen union of every part schema, never only part-00000.
 
     Multimodal tensor chunks are intentionally sparse: a modality can become
@@ -73,7 +72,7 @@ def _parquet_schema_union(root: Path) -> Tuple[Tuple[str, ...], int]:
     return tuple(columns), len(parts)
 
 
-def _parquet_columns(root: Path) -> Tuple[str, ...]:
+def _parquet_columns(root: Path) -> tuple[str, ...]:
     columns, _parts = _parquet_schema_union(root)
     return columns
 
@@ -82,13 +81,27 @@ def _is_metadata(column: str) -> bool:
     return column in META_COLUMNS or column.endswith(META_SUFFIXES)
 
 
-def _new_feature_origin(column: str) -> Optional[Tuple[str, Tuple[str, ...], str]]:
+def _derivatives_clock(known_columns: frozenset[str]) -> tuple[str, ...]:
+    # Two derivatives-plane builders exist in this codebase with different
+    # availability-clock column names: alpha_foundry_v5/planes/derivatives.py
+    # (older, used by build_alpha_foundry_v5_market_tensor.py, emits
+    # "derivatives__available_ts_ns") and alpha_foundry_v5/data_planes/
+    # derivatives.py (newer, used by build_alpha_foundry_v5_data_planes.py
+    # and standalone historical-panel builders like build_a8_leverage_panel.py,
+    # emits "deriv__available_ts_ns"). Accept whichever is actually present in
+    # this tensor rather than hardcoding one -- hardcoding the older name meant
+    # no tensor built by the newer pipeline could ever pass this audit.
+    clocks = tuple(c for c in ("derivatives__available_ts_ns", "deriv__available_ts_ns") if c in known_columns)
+    return clocks or ("derivatives__available_ts_ns",)
+
+
+def _new_feature_origin(column: str, known_columns: frozenset[str] = frozenset()) -> tuple[str, tuple[str, ...], str] | None:
     name = str(column)
     lower = name.lower()
     if name.startswith("lev__") or "liquidation_to_depth" in lower:
         return (
             "cross_plane",
-            ("book__available_ts_ns", "derivatives__available_ts_ns"),
+            ("book__available_ts_ns", *_derivatives_clock(known_columns)),
             "derived only after book and derivative planes are advanced to the same asof_ns",
         )
     if name.startswith("event__") or any(token in lower for token in EVENT_TRADE_TOKENS):
@@ -100,18 +113,32 @@ def _new_feature_origin(column: str) -> Optional[Tuple[str, Tuple[str, ...], str
     if name.startswith("deriv__") or any(token in lower for token in DERIVATIVE_TOKENS):
         return (
             "derivatives",
-            ("derivatives__available_ts_ns",),
+            _derivatives_clock(known_columns),
             "receive-time replay admits only derivative records with receive_ts_ns <= asof_ns",
+        )
+    if name == "price_fair_value" and any(c.endswith("__available_ts_ns") for c in known_columns):
+        # Normally price_fair_value is a Phase 4.1 tick-tape column, so it
+        # matches the base_state_tape branch before reaching here at all.
+        # Standalone historical panels with no separate tick base tape (e.g.
+        # build_a8_leverage_panel.py) copy it from one of their own already-
+        # classified columns (there: binance__index) -- same governing clock
+        # as the rest of that plane, since that's genuinely where it came
+        # from, not a fabricated exemption.
+        return (
+            "derivatives",
+            _derivatives_clock(known_columns),
+            "copied from an already-classified column in this same tensor (see the plane's own build script for which one)",
         )
     return None
 
 
-def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[str, object]:
+def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> dict[str, object]:
     tensor_root = Path(tensor_dir)
     base_root = Path(base_tape)
     tensor_columns, tensor_parts = _parquet_schema_union(tensor_root)
     base_column_tuple, base_parts = _parquet_schema_union(base_root)
     base_columns = set(base_column_tuple)
+    known_columns = frozenset(tensor_columns)
     features = {}
     unknown = []
     for column in tensor_columns:
@@ -124,7 +151,7 @@ def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[s
                 "proof_method": "inherited from the separately validated causal Market Physics state tape",
             }
             continue
-        origin = _new_feature_origin(column)
+        origin = _new_feature_origin(column, known_columns)
         if origin is None:
             unknown.append(column)
             continue
@@ -151,7 +178,7 @@ def build_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[s
     return payload
 
 
-def write_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[str, object]:
+def write_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> dict[str, object]:
     payload = build_feature_provenance_manifest(tensor_dir, base_tape)
     if payload["unclassified_columns"]:
         unknown = payload["unclassified_columns"]
@@ -164,7 +191,7 @@ def write_feature_provenance_manifest(tensor_dir: str, base_tape: str) -> Dict[s
     return payload
 
 
-def load_feature_provenance_manifest(path_or_dir: str) -> Optional[Dict[str, object]]:
+def load_feature_provenance_manifest(path_or_dir: str) -> dict[str, object] | None:
     path = Path(path_or_dir)
     if path.is_dir():
         path = path / MANIFEST_NAME
@@ -183,9 +210,9 @@ def load_feature_provenance_manifest(path_or_dir: str) -> Optional[Dict[str, obj
 class FeatureProvenanceAuditResult:
     total_frame_features: int
     declared_features: int
-    undeclared_features: Tuple[str, ...]
-    missing_clock_columns: Tuple[str, ...]
-    empty_clock_columns: Tuple[str, ...]
+    undeclared_features: tuple[str, ...]
+    missing_clock_columns: tuple[str, ...]
+    empty_clock_columns: tuple[str, ...]
     manifest_digest: str
 
     @property
