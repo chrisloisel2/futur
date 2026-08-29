@@ -7,11 +7,16 @@ import pandas as pd
 import pytest
 
 from alpha_foundry_v5.contracts import ExperimentSpec, ResearchStage, TimeWindow
+from alpha_foundry_v5.feature_sets import resolve_feature_columns
 from alpha_foundry_v5.hypotheses import hypothesis_grid
 from alpha_foundry_v5.labs.registry import LabRegistry
 from alpha_foundry_v5.ledger import SearchLedger
 from alpha_foundry_v5.modeling import RidgeAdapter, nested_purged_walk_forward
 from alpha_foundry_v5.research_engine import ResearchEngine, build_evidence
+
+
+def _a1_feature_columns(frame: pd.DataFrame) -> tuple[str, ...]:
+    return resolve_feature_columns(LabRegistry().spec("A1"), tuple(frame.columns))
 
 
 def _frame(n=4000, start_ns=1_000_000_000_000, symbol=None, seed=5):
@@ -69,7 +74,7 @@ def test_research_engine_charges_search_budget_and_fdr(tmp_path):
     window = TimeWindow(int(frame.asof_ns.iloc[0]), int(frame.asof_ns.iloc[-1]) + 1)
     e = ExperimentSpec("exp1", h.digest, ResearchStage.DEV_DISCOVERY, "dataset", window, "commit", 42, 100, 100, search_family_id=h.family_id)
     ledger = SearchLedger(str(tmp_path / "ledger.jsonl"))
-    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
+    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, feature_columns=_a1_feature_columns(frame), configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
     finalized = ResearchEngine(ledger).finalize_family([result])[0]
     assert ledger.effective_trials(h.family_id) == 2
     assert np.isfinite(finalized.ic)
@@ -104,7 +109,7 @@ def test_research_engine_run_discovery_produces_symbol_ics_and_trial_returns(tmp
     window = TimeWindow(int(frame.asof_ns.min()), int(frame.asof_ns.max()) + 1)
     e = ExperimentSpec("exp-sym", h.digest, ResearchStage.DEV_DISCOVERY, "dataset", window, "commit", 42, 100, 100, search_family_id=h.family_id)
     ledger = SearchLedger(str(tmp_path / "ledger.jsonl"))
-    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
+    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, feature_columns=_a1_feature_columns(frame), configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
     assert set(result.symbol_ics) == {"BTCUSDT", "ETHUSDT"}
     assert all(np.isfinite(v) for v in result.symbol_ics.values())
     assert result.trial_returns.shape == (result.n, 2)
@@ -117,7 +122,7 @@ def test_research_engine_run_confirmation_requires_confirmation_stage(tmp_path):
     e = ExperimentSpec("exp-wrong-stage", h.digest, ResearchStage.DEV_DISCOVERY, "dataset", window, "commit", 42, 100, 100, search_family_id=h.family_id)
     ledger = SearchLedger(str(tmp_path / "ledger.jsonl"))
     with pytest.raises(ValueError, match="INDEPENDENT_CONFIRMATION"):
-        ResearchEngine(ledger).run_confirmation(frame, h, e, cadence_ms=100, configs=[{"alpha": 0.1}], outer_splits=3, inner_splits=2, block_size_rows=100)
+        ResearchEngine(ledger).run_confirmation(frame, h, e, cadence_ms=100, feature_columns=_a1_feature_columns(frame), configs=[{"alpha": 0.1}], outer_splits=3, inner_splits=2, block_size_rows=100)
 
 
 def test_research_engine_run_confirmation_on_a_later_window(tmp_path):
@@ -132,7 +137,7 @@ def test_research_engine_run_confirmation_on_a_later_window(tmp_path):
 
     e = ExperimentSpec("exp-confirm", h.digest, ResearchStage.INDEPENDENT_CONFIRMATION, "dataset", confirm_window, "commit", 42, 100, 100, search_family_id=h.family_id)
     ledger = SearchLedger(str(tmp_path / "ledger.jsonl"))
-    result = ResearchEngine(ledger).run_confirmation(confirm_frame, h, e, cadence_ms=100, configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
+    result = ResearchEngine(ledger).run_confirmation(confirm_frame, h, e, cadence_ms=100, feature_columns=_a1_feature_columns(confirm_frame), configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
     assert np.isfinite(result.ic)
     assert result.trial_returns.shape == (result.n, 2)
 
@@ -155,7 +160,7 @@ def test_build_evidence_discovery_window_equals_evaluation_window_is_not_indepen
     window = TimeWindow(int(frame.asof_ns.min()), int(frame.asof_ns.max()) + 1)
     e = ExperimentSpec("exp-disc", h.digest, ResearchStage.DEV_DISCOVERY, "dataset", window, "commit", 42, 100, 100, search_family_id=h.family_id)
     ledger = SearchLedger(str(tmp_path / "ledger.jsonl"))
-    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
+    result = ResearchEngine(ledger).run_discovery(frame, h, e, cadence_ms=100, feature_columns=_a1_feature_columns(frame), configs=[{"alpha": 0.1}, {"alpha": 1.0}], outer_splits=3, inner_splits=2, block_size_rows=100)
     evidence = build_evidence(
         result,
         stage=ResearchStage.DEV_DISCOVERY,
@@ -178,9 +183,70 @@ def test_temporal_features_do_not_cross_symbol_boundary():
     b["asof_ns"] = a["asof_ns"]
     b["binance__price_mid"] = b["binance__price_mid"] + 1000.0
     frame = pd.concat([a, b], ignore_index=True).sort_values(["asof_ns", "symbol"]).reset_index(drop=True)
-    features = registry.materialize_features("A1", frame)
+    features = registry.materialize_features("A1", frame, _a1_feature_columns(frame))
     eth_first = frame.index[frame["symbol"] == "ETHUSDT"][0]
     assert np.isnan(features.loc[eth_first, "binance__price_mid__ret_1"])
+
+
+def test_feature_set_blocks_support_columns():
+    # A column that would MATCH the plugin's own token pattern (so the plugin would
+    # happily pick it up if it ever saw it) but was never part of the frozen
+    # feature_columns list -- e.g. a support/readiness/provenance column that only
+    # happens to look like a feature -- must never reach the plugin.
+    registry = LabRegistry()
+    frame = _frame(2000)
+    frame["symbol"] = "BTCUSDT"
+    frozen = _a1_feature_columns(frame)
+    frame["deribit__price_mid"] = frame["binance__price_mid"] + 1.0  # matches cross_venue's own token rule
+    assert "deribit__price_mid" not in frozen  # confirms this column is genuinely NOT in the frozen set
+    features = registry.materialize_features("A1", frame, frozen)
+    assert "deribit__price_mid" not in features.columns
+    assert "deribit__price_mid__ret_1" not in features.columns
+
+
+def test_adding_100_extra_columns_does_not_change_materialized_features():
+    registry = LabRegistry()
+    frame = _frame(2000)
+    frame["symbol"] = "BTCUSDT"
+    frozen = _a1_feature_columns(frame)
+    baseline = registry.materialize_features("A1", frame, frozen)
+
+    polluted = frame.copy()
+    rng = np.random.RandomState(0)
+    for i in range(100):
+        # deliberately adversarial names: some match cross_venue's own token rule,
+        # so this is a real test of the restriction, not just "unrelated junk".
+        name = f"okx__price_mid_junk_{i}" if i % 2 == 0 else f"junk_column_{i}"
+        polluted[name] = rng.normal(size=len(polluted))
+    polluted_features = registry.materialize_features("A1", polluted, frozen)
+
+    pd.testing.assert_frame_equal(baseline, polluted_features)
+
+
+def test_target_never_enters_features():
+    # A2's target is loo_fair_value_return; its inputs (__price_mid, __price_weight)
+    # legitimately overlap with A1/A2's own cross_venue features, so it's not the
+    # sharpest case. A16's target (exec__post_fill_markout_bps) has no legitimate
+    # overlap with its own features at all -- resolve_feature_columns already keeps
+    # it out of the frozen set (test_A16_markout_target_not_feature,
+    # test_alpha_foundry_v5_feature_sets.py); this checks the deeper property: even
+    # if that column is present in the raw frame passed to materialize_features (as
+    # it must be, since target construction needs it), the plugin never sees it.
+    registry = LabRegistry()
+    spec = registry.spec("A16")
+    n = 600
+    frame = pd.DataFrame({
+        "asof_ns": (1_000_000_000_000 + np.arange(n, dtype=np.int64) * 1_000_000),
+        "symbol": "BTCUSDT",
+        "exec__post_fill_markout_bps": np.random.RandomState(0).normal(size=n),
+        "exec__queue_ahead_usd": np.random.RandomState(1).normal(size=n),
+        "exec__fill_probability": np.random.RandomState(2).uniform(size=n),
+    })
+    frozen = resolve_feature_columns(spec, tuple(frame.columns))
+    assert "exec__post_fill_markout_bps" not in frozen
+    assert registry.readiness("A16", frame)["ready"] is True
+    features = registry.materialize_features("A16", frame, frozen)
+    assert "exec__post_fill_markout_bps" not in features.columns
 
 
 def test_v5_clis_bootstrap_repo_root():

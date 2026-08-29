@@ -264,7 +264,7 @@ def main() -> int:
 
     configs = [{"alpha": x} for x in (args.ridge_alpha or [0.01, 0.1, 1.0, 10.0])]
     engine = ResearchEngine(SearchLedger(args.ledger))
-    result = engine.run_discovery(frame, hypothesis, experiment, args.cadence_ms, configs=configs)
+    result = engine.run_discovery(frame, hypothesis, experiment, args.cadence_ms, feature_set.columns, configs=configs)
 
     multiplicity = FamilyTestLedger(args.multiplicity_ledger)
     multiplicity.record(hypothesis.family_id, hypothesis.digest, experiment.digest, result.block_p)

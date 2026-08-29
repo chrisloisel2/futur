@@ -81,12 +81,12 @@ class ResearchEngine:
             target.loc[ordered.index] = values.to_numpy()
         return target
 
-    def _prepare_xyt(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, cadence_ms: int):
+    def _prepare_xyt(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, cadence_ms: int, feature_columns: Sequence[str]):
         if "asof_ns" not in frame:
             raise ValueError("frame requires asof_ns")
         sort_cols = ["asof_ns"] + (["symbol"] if "symbol" in frame.columns else [])
         frame = frame.sort_values(sort_cols, kind="mergesort").reset_index(drop=True)
-        features = self.labs.materialize_features(hypothesis.lab_id, frame)
+        features = self.labs.materialize_features(hypothesis.lab_id, frame, feature_columns)
         target = self._target(frame, hypothesis, cadence_ms)
         numeric = features.apply(pd.to_numeric, errors="coerce")
         usable_cols = [c for c in numeric.columns if numeric[c].notna().sum() >= max(100, int(0.10 * len(numeric)))]
@@ -135,16 +135,16 @@ class ResearchEngine:
         trial_returns = nested.predictions_by_config[pv] * y[pv, None]
         return nested, pv, ic, ess, block_p, fold_ics, symbol_ics, trial_returns
 
-    def run_discovery(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, experiment: ExperimentSpec, cadence_ms: int, configs: Sequence[Mapping[str, object]], adapter: ModelAdapter | None = None, outer_splits: int = 5, inner_splits: int = 3, block_size_rows: int = 3000) -> DiscoveryResult:
+    def run_discovery(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, experiment: ExperimentSpec, cadence_ms: int, feature_columns: Sequence[str], configs: Sequence[Mapping[str, object]], adapter: ModelAdapter | None = None, outer_splits: int = 5, inner_splits: int = 3, block_size_rows: int = 3000) -> DiscoveryResult:
         if experiment.stage != ResearchStage.DEV_DISCOVERY:
             raise ValueError("run_discovery requires DEV_DISCOVERY experiment")
         if experiment.hypothesis_digest != hypothesis.digest:
             raise ValueError("experiment/hypothesis digest mismatch")
-        x, y, ts, symbols = self._prepare_xyt(frame, hypothesis, cadence_ms)
+        x, y, ts, symbols = self._prepare_xyt(frame, hypothesis, cadence_ms, feature_columns)
         nested, pv, ic, ess, block_p, fold_ics, symbol_ics, trial_returns = self._run_nested(x, y, ts, symbols, hypothesis, experiment, configs, adapter, outer_splits, inner_splits, block_size_rows)
         return DiscoveryResult(hypothesis.hypothesis_id, hypothesis.digest, experiment.digest, int(pv.sum()), ess, ic, block_p, float("nan"), fold_ics, tuple(nested.tried_config_digests), nested.predictions, y, ts, symbol_ics, trial_returns)
 
-    def run_confirmation(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, experiment: ExperimentSpec, cadence_ms: int, configs: Sequence[Mapping[str, object]], adapter: ModelAdapter | None = None, outer_splits: int = 5, inner_splits: int = 3, block_size_rows: int = 3000) -> ConfirmationResult:
+    def run_confirmation(self, frame: pd.DataFrame, hypothesis: HypothesisSpec, experiment: ExperimentSpec, cadence_ms: int, feature_columns: Sequence[str], configs: Sequence[Mapping[str, object]], adapter: ModelAdapter | None = None, outer_splits: int = 5, inner_splits: int = 3, block_size_rows: int = 3000) -> ConfirmationResult:
         """Same nested-CV machinery as run_discovery, on a confirmation-stage experiment.
 
         Independence from discovery is NOT decided here -- registering `experiment` through
@@ -157,7 +157,7 @@ class ResearchEngine:
             raise ValueError("run_confirmation requires INDEPENDENT_CONFIRMATION experiment")
         if experiment.hypothesis_digest != hypothesis.digest:
             raise ValueError("experiment/hypothesis digest mismatch")
-        x, y, ts, symbols = self._prepare_xyt(frame, hypothesis, cadence_ms)
+        x, y, ts, symbols = self._prepare_xyt(frame, hypothesis, cadence_ms, feature_columns)
         nested, pv, ic, ess, block_p, fold_ics, symbol_ics, trial_returns = self._run_nested(x, y, ts, symbols, hypothesis, experiment, configs, adapter, outer_splits, inner_splits, block_size_rows)
         return ConfirmationResult(hypothesis.hypothesis_id, hypothesis.digest, experiment.digest, int(pv.sum()), ess, ic, block_p, fold_ics, tuple(nested.tried_config_digests), nested.predictions, y, ts, symbol_ics, trial_returns)
 
