@@ -1,0 +1,82 @@
+{
+  "clock_policy": "exchange event time + local receive time; receive time defines information availability",
+  "code_commit": "7cd41ac03f38616915bfd82560fc67ec755021ec",
+  "dataset_name": "a8_leverage_panel_v1",
+  "digest": "91d899e98ce4c7d7f52a94f8a30a5d5305ca01a30486cbec569d2c85a6b48866",
+  "domains": [
+    "derivatives"
+  ],
+  "notes": "",
+  "partitions": [
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00000.parquet",
+      "sha256": "a69477de0ef7c1d53561a7408017923e84632448333c8d1ac5f6ac96f8a8a3d7",
+      "size_bytes": 6201551
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00001.parquet",
+      "sha256": "9c3c612a8a1f512761b9f64c46e581ff46812d8c33e890c85a667c9014b9b698",
+      "size_bytes": 6601694
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00002.parquet",
+      "sha256": "3b42c9bdba76b76197e94a97d4e2320ab73b2a073663e59b96a76510c0f9f2fd",
+      "size_bytes": 6671422
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00003.parquet",
+      "sha256": "c36af9da632270e046aabdc4610fab521d8a19b839b73afa33d07621c690cb49",
+      "size_bytes": 6634434
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00004.parquet",
+      "sha256": "e2979d9d5882b6d877c99b2b57f7a342fda472ff8e3a587d413f83a81628fc4c",
+      "size_bytes": 6704409
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00005.parquet",
+      "sha256": "068b7a4cfcb8a15b03ebf0cd7b2d62497222160a4c2d9c1d17ab37a1923f0448",
+      "size_bytes": 6727552
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00006.parquet",
+      "sha256": "1c33dfd8f19b0e2778b7064f642e8524bf23b836e077d347bf7d1f61013f5d44",
+      "size_bytes": 6549618
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00007.parquet",
+      "sha256": "33b845b83d8be7d728cc7547eb71fd316762c6a8b57808d418c4931bfabf71a0",
+      "size_bytes": 6587017
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00008.parquet",
+      "sha256": "6dd5bdbb9324ee43c16cf1208802a12f0581b15eef031a43e48e243b5542c8da",
+      "size_bytes": 6546732
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00009.parquet",
+      "sha256": "ac280da1c58497727c2057c3b3f41998dae9faddc9001bd4c1b2d95808548994",
+      "size_bytes": 6608908
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00010.parquet",
+      "sha256": "7628d940f19aea38b8049ade68774e2c83ec97f4b91765a1b0a749f028dac95d",
+      "size_bytes": 7226183
+    },
+    {
+      "path": "data/alpha_foundry_v5/a8_leverage_panel/part-00011.parquet",
+      "sha256": "a5c3d4ef62e5e501145df7a82b7c69784f23dd9ce8f776afb1488e58d2d0af3c",
+      "size_bytes": 6009189
+    }
+  ],
+  "pit_policy": "availability_ts<=asof_ts; no future fill",
+  "row_count": 592615,
+  "schema_version": "v1",
+  "sources": [
+    "derivatives_raw_binance_oi_bybit_okx_liquidations"
+  ],
+  "window": {
+    "start_ns": 1782660039000000000,
+    "stop_ns": 1787965194456000000
+  }
+}
