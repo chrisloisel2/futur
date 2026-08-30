@@ -34,6 +34,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -43,7 +44,7 @@ from src.institutional.engines.event_production import (
     train_production_model)
 from src.institutional.engines.liq_cascade.dataset import (
     FEATURES_V2, build_event_dataset)
-from src.institutional.engines.liq_cascade.detector import METRICS_DIR, CascadeConfig
+from src.institutional.engines.liq_cascade.detector import CascadeConfig
 
 SHADOW_DIR = ROOT / "reports" / "liq_cascade" / "shadow"
 LEDGER = SHADOW_DIR / "decisions.parquet"
@@ -114,10 +115,17 @@ def _detector(engine):
     return detect_premium_dislocations
 
 
+def load_universe(root: Path) -> list[str]:
+    """Univers de trading FIGÉ (jamais dérivé du contenu d'un dossier de données :
+    un backfill non lié a fait passer ce dossier de 50 à 312 fichiers le
+    2026-08-14 et a contaminé 49 jours de shadow, voir
+    reports/edge_discovery/alpha_hunt_2026-08-29/w1_liq_cascade/REPORT.md §1.3)."""
+    return sorted(yaml.safe_load(
+        (root / "configs/portfolio_v1_1_parallel_50.yaml").read_text())["universe"])
+
+
 def topup_data():
-    import yaml
-    syms = ",".join(yaml.safe_load(
-        (ROOT / "configs/portfolio_v1_1_parallel_50.yaml").read_text())["universe"])
+    syms = ",".join(load_universe(ROOT))
     subprocess.run([sys.executable, str(ROOT / "scripts/backfill_binance_metrics_vision.py"),
                     "--symbols", syms, "--workers", "8"],
                    check=False, capture_output=True, timeout=1800)
@@ -136,8 +144,7 @@ def main():
     print("1) top-up Vision…", flush=True)
     topup_data()
 
-    symbols = sorted(p.stem.replace("_metrics_5m", "")
-                     for p in METRICS_DIR.glob("*_metrics_5m.parquet"))
+    symbols = load_universe(ROOT)
     new_rows, datasets = [], {}
     for eng, spec in SPECS.items():
         print(f"2) dataset {spec['name']}…", flush=True)

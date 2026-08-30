@@ -1,0 +1,96 @@
+{
+  "mechanism": "C - cross-venue liquidation cascade propagation (Bybit leads, OKX lags), majors only",
+  "data_range": "2026-07-04 to 2026-08-29 (57 days, live derivatives_raw force_order feed) -- Binance has NO force_order feed at all (not in derivatives_raw) and its COIN-M liquidation backfill stops 2024-10-14, so Binance could not be included",
+  "reliable_symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "unreliable_symbols_degenerate_threshold": [
+    "SOLUSDT",
+    "BNBUSDT",
+    "XRPUSDT",
+    "DOGEUSDT",
+    "ADAUSDT",
+    "AVAXUSDT",
+    "LINKUSDT",
+    "LTCUSDT",
+    "TRXUSDT",
+    "DOTUSDT"
+  ],
+  "unreliable_reason": "5-minute rolling liquidation notional is zero for >90-95% of windows on these symbols, so a percentile-based cascade threshold collapses to 0 (degenerate: 'cascade'==True on almost every minute), making the conditional test meaningless as designed. Needs a fixed-notional threshold and/or far longer history to fix.",
+  "propagation_confirmation_lift_OOS_test_BTC_ETH": {
+    "BTCUSDT": {
+      "K=5min": 4.11,
+      "K=15min": 2.83,
+      "K=30min": 2.17
+    },
+    "ETHUSDT": {
+      "K=5min": 4.27,
+      "K=15min": 2.91,
+      "K=30min": 2.21
+    }
+  },
+  "directional_follow_trade_pnl_bps_OOS": {
+    "BTCUSDT": {
+      "K=5min": {
+        "mean_bps": 0.83,
+        "t": 1.33
+      },
+      "K=15min": {
+        "mean_bps": -0.82,
+        "t": -0.87
+      },
+      "K=30min": {
+        "mean_bps": -3.71,
+        "t": -2.91
+      }
+    },
+    "ETHUSDT": {
+      "K=5min": {
+        "mean_bps": -0.55,
+        "t": -0.62
+      },
+      "K=15min": {
+        "mean_bps": -3.48,
+        "t": -2.5
+      },
+      "K=30min": {
+        "mean_bps": -5.27,
+        "t": -2.75
+      }
+    }
+  },
+  "directional_fade_trade_pnl_bps_OOS": {
+    "BTCUSDT": {
+      "K=5min": {
+        "mean_bps": -0.83,
+        "t": -1.33
+      },
+      "K=15min": {
+        "mean_bps": 0.82,
+        "t": 0.87
+      },
+      "K=30min": {
+        "mean_bps": 3.71,
+        "t": 2.91
+      }
+    },
+    "ETHUSDT": {
+      "K=5min": {
+        "mean_bps": 0.55,
+        "t": 0.62
+      },
+      "K=15min": {
+        "mean_bps": 3.48,
+        "t": 2.5
+      },
+      "K=30min": {
+        "mean_bps": 5.27,
+        "t": 2.75
+      }
+    }
+  },
+  "interpretation": "The EVENT-level propagation hypothesis is confirmed and strong for BTC/ETH (2-4x lift). But the originally-specced trade direction (follow/momentum-continuation) is wrong sign -- it loses money, significantly at 15-30min. The FADE (mean-reversion/overshoot-correction) direction is the right sign and marginally significant (t=2.5-2.9 at 15-30min) but gross edge (3.5-5.3bps) is close to or below realistic single-leg round-trip taker costs (~10bps) and only clears maker-level round-trip costs (~4bps) with little margin.",
+  "assumed_costs_bps": "taker ~5bps one-way (10bps round trip) per exchange typical schedule; project's own stress config (configs/institutional/execution.yaml) uses taker_fee_bps=5.0, maker_fee_bps=2.0; more conservative scripts/run_parallel_50_*.py use taker_fee_bps=10 + slippage_bps=4",
+  "verdict": "WEAK/PROMISING-BUT-MARGINAL - real propagation signal, but only marginally profitable after realistic costs, only proven for BTC/ETH, only 57 days of single-regime data, and the original directional hypothesis (follow) had to be inverted (fade) after testing"
+}

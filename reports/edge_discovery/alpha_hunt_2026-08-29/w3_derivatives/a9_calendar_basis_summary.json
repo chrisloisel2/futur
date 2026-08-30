@@ -1,0 +1,73 @@
+{
+  "mechanism": "A9 new angle - perp vs quarterly-futures calendar basis, hedged cash-and-carry harvest",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "data_range": "2021-02 to 2026-07 (daily bars), front-quarter contract only, days_to_expiry>=7 filter applied",
+  "train_test_split": "chronological 60/40 per symbol (train ~2021-02 to 2024-05, test ~2024-05 to 2026-07)",
+  "thresholds_fit_on_train": {
+    "BTCUSDT": {
+      "q10_annualized_basis": -0.273,
+      "q90_annualized_basis": 0.52
+    },
+    "ETHUSDT": {
+      "q10_annualized_basis": -0.415,
+      "q90_annualized_basis": 0.665
+    }
+  },
+  "hedged_carry_harvest_pnl_raw_basis_bps_OOS_test": {
+    "BTCUSDT": {
+      "k=1d": {
+        "n": 111,
+        "mean_bps": 403.6,
+        "t": 10.44
+      },
+      "k=3d": {
+        "n": 111,
+        "mean_bps": 432.2,
+        "t": 12.75
+      },
+      "k=7d": {
+        "n": 111,
+        "mean_bps": 364.7,
+        "t": 11.2
+      },
+      "k=14d": {
+        "n": 111,
+        "mean_bps": 426.0,
+        "t": 12.92
+      }
+    },
+    "ETHUSDT": {
+      "k=1d": {
+        "n": 114,
+        "mean_bps": 600.7,
+        "t": 10.9
+      },
+      "k=3d": {
+        "n": 114,
+        "mean_bps": 681.3,
+        "t": 12.93
+      },
+      "k=7d": {
+        "n": 114,
+        "mean_bps": 614.7,
+        "t": 12.93
+      },
+      "k=14d": {
+        "n": 114,
+        "mean_bps": 623.4,
+        "t": 13.14
+      }
+    }
+  },
+  "unhedged_single_leg_perp_fade_pnl_bps_OOS_test": {
+    "note": "trading the perp alone (fade rich basis = short perp) is a LARGE LOSER because rich calendar basis co-occurs with strong ongoing perp momentum, not imminent reversal",
+    "BTCUSDT_k1d_mean_bps": -393.5,
+    "ETHUSDT_k1d_mean_bps": -624.5
+  },
+  "caveat_effective_independent_episodes": "raw n (111-114 per symbol) is inflated by autocorrelation -- extreme-basis periods persist for 1-3 consecutive weeks once triggered, so true independent episode count is roughly 6-8 per symbol over the 2024-2026 test window, not 111+. Treat t-stats as directionally informative, not literally calibrated.",
+  "assumed_costs_bps_round_trip_2_leg_trade": "10-20bps (2 legs x 1-2 fills x 2-5bps maker/taker) -- gross harvest of 360-680bps dominates by 20-50x",
+  "verdict": "PROMISING (fresh angle, large and OOS-stable gross edge, must be traded HEDGED not directional; small independent-sample caveat; capacity limited to BTC/ETH quarterly futures liquidity)"
+}

@@ -1,0 +1,640 @@
+{
+  "n_merged": 1294,
+  "day_min": "2023-01-01 00:00:00+00:00",
+  "day_max": "2026-07-17 00:00:00+00:00",
+  "ic_table": {
+    "abs_d_iv": {
+      "rv_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0835,
+        "p": 0.00267
+      },
+      "rv_fwd3": {
+        "n": 1293,
+        "spearman_ic": 0.2548,
+        "p": 0.0
+      },
+      "abs_ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.073,
+        "p": 0.00861
+      },
+      "ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0734,
+        "p": 0.00824
+      }
+    },
+    "abs_d_skew": {
+      "rv_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0987,
+        "p": 0.00038
+      },
+      "rv_fwd3": {
+        "n": 1293,
+        "spearman_ic": 0.1032,
+        "p": 0.0002
+      },
+      "abs_ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0546,
+        "p": 0.04956
+      },
+      "ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0274,
+        "p": 0.3249
+      }
+    },
+    "abs_d_dvol": {
+      "rv_fwd1": {
+        "n": 1289,
+        "spearman_ic": 0.1282,
+        "p": 0.0
+      },
+      "rv_fwd3": {
+        "n": 1289,
+        "spearman_ic": 0.1477,
+        "p": 0.0
+      },
+      "abs_ret_fwd1": {
+        "n": 1289,
+        "spearman_ic": 0.0632,
+        "p": 0.02316
+      },
+      "ret_fwd1": {
+        "n": 1289,
+        "spearman_ic": -0.0043,
+        "p": 0.87797
+      }
+    },
+    "block_share": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0257,
+        "p": 0.35653
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": -0.1295,
+        "p": 0.0
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0097,
+        "p": 0.72718
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0388,
+        "p": 0.16321
+      }
+    },
+    "top_strike_share": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.1937,
+        "p": 0.0
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": -0.2203,
+        "p": 0.0
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0822,
+        "p": 0.0031
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0149,
+        "p": 0.59273
+      }
+    },
+    "notional_z": {
+      "rv_fwd1": {
+        "n": 1285,
+        "spearman_ic": 0.1091,
+        "p": 9e-05
+      },
+      "rv_fwd3": {
+        "n": 1285,
+        "spearman_ic": -0.0038,
+        "p": 0.89133
+      },
+      "abs_ret_fwd1": {
+        "n": 1285,
+        "spearman_ic": 0.0286,
+        "p": 0.30568
+      },
+      "ret_fwd1": {
+        "n": 1285,
+        "spearman_ic": -0.0081,
+        "p": 0.77055
+      }
+    },
+    "ntrades_z": {
+      "rv_fwd1": {
+        "n": 1285,
+        "spearman_ic": 0.1008,
+        "p": 0.00029
+      },
+      "rv_fwd3": {
+        "n": 1285,
+        "spearman_ic": 0.0038,
+        "p": 0.8905
+      },
+      "abs_ret_fwd1": {
+        "n": 1285,
+        "spearman_ic": 0.0174,
+        "p": 0.53332
+      },
+      "ret_fwd1": {
+        "n": 1285,
+        "spearman_ic": 0.0011,
+        "p": 0.96735
+      }
+    },
+    "skew_25ish": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0834,
+        "p": 0.00269
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": 0.0538,
+        "p": 0.05299
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0635,
+        "p": 0.02229
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0012,
+        "p": 0.96477
+      }
+    },
+    "call_put_imb": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0798,
+        "p": 0.00407
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": -0.0659,
+        "p": 0.0177
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0789,
+        "p": 0.0045
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0193,
+        "p": 0.48891
+      }
+    },
+    "net_call_flow_btc": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.019,
+        "p": 0.49569
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": 0.0184,
+        "p": 0.50875
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0295,
+        "p": 0.28948
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0118,
+        "p": 0.67275
+      }
+    },
+    "net_put_flow_btc": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.1065,
+        "p": 0.00012
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": 0.1132,
+        "p": 4e-05
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0859,
+        "p": 0.00198
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0221,
+        "p": 0.42652
+      }
+    },
+    "pc_volume_ratio": {
+      "rv_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0892,
+        "p": 0.00131
+      },
+      "rv_fwd3": {
+        "n": 1294,
+        "spearman_ic": 0.0682,
+        "p": 0.01407
+      },
+      "abs_ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": 0.0701,
+        "p": 0.0117
+      },
+      "ret_fwd1": {
+        "n": 1294,
+        "spearman_ic": -0.0021,
+        "p": 0.94123
+      }
+    },
+    "d_atm_iv_traded": {
+      "rv_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.3233,
+        "p": 0.0
+      },
+      "rv_fwd3": {
+        "n": 1293,
+        "spearman_ic": 0.2013,
+        "p": 0.0
+      },
+      "abs_ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.183,
+        "p": 0.0
+      },
+      "ret_fwd1": {
+        "n": 1293,
+        "spearman_ic": 0.0335,
+        "p": 0.22919
+      }
+    }
+  },
+  "split_check_rv": {
+    "abs_d_iv->rv_fwd1": {
+      "h1": {
+        "n": 646,
+        "spearman_ic": 0.0585,
+        "p": 0.13742
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.1143,
+        "p": 0.0036
+      }
+    },
+    "abs_d_skew->rv_fwd1": {
+      "h1": {
+        "n": 646,
+        "spearman_ic": 0.0344,
+        "p": 0.38293
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.1687,
+        "p": 2e-05
+      }
+    },
+    "abs_d_dvol->rv_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.1342,
+        "p": 0.00062
+      },
+      "h2": {
+        "n": 642,
+        "spearman_ic": 0.121,
+        "p": 0.00214
+      }
+    },
+    "block_share->rv_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.0675,
+        "p": 0.08608
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.0208,
+        "p": 0.59703
+      }
+    },
+    "top_strike_share->rv_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.215,
+        "p": 0.0
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.171,
+        "p": 1e-05
+      }
+    },
+    "notional_z->rv_fwd1": {
+      "h1": {
+        "n": 638,
+        "spearman_ic": 0.1133,
+        "p": 0.00417
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.1062,
+        "p": 0.00685
+      }
+    },
+    "ntrades_z->rv_fwd1": {
+      "h1": {
+        "n": 638,
+        "spearman_ic": 0.0881,
+        "p": 0.02612
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.1158,
+        "p": 0.00319
+      }
+    },
+    "skew_25ish->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.0383,
+        "p": 0.33058
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.0182,
+        "p": 0.64453
+      }
+    },
+    "call_put_imb->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.036,
+        "p": 0.36069
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0614,
+        "p": 0.11893
+      }
+    },
+    "net_call_flow_btc->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.0367,
+        "p": 0.35098
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.051,
+        "p": 0.1953
+      }
+    },
+    "net_put_flow_btc->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.0012,
+        "p": 0.97659
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.0393,
+        "p": 0.31839
+      }
+    },
+    "pc_volume_ratio->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.0018,
+        "p": 0.96291
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0141,
+        "p": 0.7195
+      }
+    },
+    "d_atm_iv_traded->ret_fwd1": {
+      "h1": {
+        "n": 646,
+        "spearman_ic": 0.0246,
+        "p": 0.533
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0383,
+        "p": 0.33055
+      }
+    }
+  },
+  "split_check_dir": {
+    "skew_25ish->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.0383,
+        "p": 0.33058
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.0182,
+        "p": 0.64453
+      }
+    },
+    "call_put_imb->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.036,
+        "p": 0.36069
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0614,
+        "p": 0.11893
+      }
+    },
+    "net_call_flow_btc->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.0367,
+        "p": 0.35098
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.051,
+        "p": 0.1953
+      }
+    },
+    "net_put_flow_btc->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": 0.0012,
+        "p": 0.97659
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": -0.0393,
+        "p": 0.31839
+      }
+    },
+    "pc_volume_ratio->ret_fwd1": {
+      "h1": {
+        "n": 647,
+        "spearman_ic": -0.0018,
+        "p": 0.96291
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0141,
+        "p": 0.7195
+      }
+    },
+    "d_atm_iv_traded->ret_fwd1": {
+      "h1": {
+        "n": 646,
+        "spearman_ic": 0.0246,
+        "p": 0.533
+      },
+      "h2": {
+        "n": 647,
+        "spearman_ic": 0.0383,
+        "p": 0.33055
+      }
+    }
+  },
+  "quintile_abs_d_iv_vs_rv_fwd1": {
+    "(-0.001, 1.377]": {
+      "mean_rv_fwd1": 0.0205,
+      "n": 259
+    },
+    "(1.377, 2.66]": {
+      "mean_rv_fwd1": 0.02129,
+      "n": 258
+    },
+    "(2.66, 4.651]": {
+      "mean_rv_fwd1": 0.01978,
+      "n": 259
+    },
+    "(4.651, 7.783]": {
+      "mean_rv_fwd1": 0.02132,
+      "n": 258
+    },
+    "(7.783, 32.31]": {
+      "mean_rv_fwd1": 0.02442,
+      "n": 259
+    }
+  },
+  "quintile_notional_z_vs_rv_fwd1": {
+    "(-1.7069999999999999, -0.973]": {
+      "mean_rv_fwd1": 0.01867,
+      "n": 257
+    },
+    "(-0.973, -0.272]": {
+      "mean_rv_fwd1": 0.02224,
+      "n": 257
+    },
+    "(-0.272, 0.151]": {
+      "mean_rv_fwd1": 0.02094,
+      "n": 257
+    },
+    "(0.151, 0.747]": {
+      "mean_rv_fwd1": 0.02037,
+      "n": 257
+    },
+    "(0.747, 4.507]": {
+      "mean_rv_fwd1": 0.02551,
+      "n": 257
+    }
+  },
+  "quintile_block_share_vs_rv_fwd1": {
+    "(-0.001, 0.00739]": {
+      "mean_rv_fwd1": 0.02043,
+      "n": 259
+    },
+    "(0.00739, 0.0127]": {
+      "mean_rv_fwd1": 0.02186,
+      "n": 259
+    },
+    "(0.0127, 0.0167]": {
+      "mean_rv_fwd1": 0.02238,
+      "n": 258
+    },
+    "(0.0167, 0.0219]": {
+      "mean_rv_fwd1": 0.02082,
+      "n": 259
+    },
+    "(0.0219, 0.0732]": {
+      "mean_rv_fwd1": 0.02179,
+      "n": 259
+    }
+  },
+  "quintile_callputimb_vs_retfwd1": {
+    "(-11714.401, -1661.32]": {
+      "mean_ret_fwd1_bps": -23.44,
+      "n": 259
+    },
+    "(-1661.32, -514.62]": {
+      "mean_ret_fwd1_bps": 30.22,
+      "n": 259
+    },
+    "(-514.62, 174.28]": {
+      "mean_ret_fwd1_bps": 8.33,
+      "n": 258
+    },
+    "(174.28, 1117.78]": {
+      "mean_ret_fwd1_bps": 30.14,
+      "n": 259
+    },
+    "(1117.78, 9817.8]": {
+      "mean_ret_fwd1_bps": 7.35,
+      "n": 259
+    }
+  },
+  "n_hourly_merged": 1867,
+  "hourly_date_range": [
+    "2026-05-01 00:00:00+00:00",
+    "2026-07-17 19:00:00+00:00"
+  ],
+  "hourly_ic": {
+    "notional_z->abs_ret_fwd1h": {
+      "n": 1844,
+      "spearman_ic": 0.1952,
+      "p": 0.0
+    },
+    "block_share_hr->abs_ret_fwd1h": {
+      "n": 1867,
+      "spearman_ic": 0.1311,
+      "p": 0.0
+    },
+    "n_block->abs_ret_fwd1h": {
+      "n": 1867,
+      "spearman_ic": 0.204,
+      "p": 0.0
+    },
+    "cp_imbalance->ret_fwd1h": {
+      "n": 1867,
+      "spearman_ic": -0.0136,
+      "p": 0.55692
+    }
+  }
+}

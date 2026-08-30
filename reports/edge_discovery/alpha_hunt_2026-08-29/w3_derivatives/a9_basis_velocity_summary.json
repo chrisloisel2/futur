@@ -1,0 +1,35 @@
+{
+  "mechanism": "A9 new angle - basis-z-1d velocity (rate of change) fade, threshold fit 2023 only, tested OOS 2024-2026",
+  "full_sample_fade_tstat": {
+    "15m": 21.18,
+    "1h": 13.99,
+    "4h": 9.68,
+    "1d": 6.56
+  },
+  "oos_2024_2026_fade_tstat": {
+    "15m": 14.17,
+    "1h": 8.12,
+    "4h": 6.62,
+    "1d": 5.11
+  },
+  "oos_mean_pnl_bps": {
+    "15m": 0.747,
+    "1h": 0.746,
+    "4h": 1.115,
+    "1d": 2.029
+  },
+  "level_fade_benchmark_tstat_oos": {
+    "15m": 19.06,
+    "1h": 13.62,
+    "4h": 9.41,
+    "1d": 13.42
+  },
+  "velocity_orthogonalized_to_level_tstat": {
+    "15m": 3.26,
+    "1h": 0.93,
+    "4h": 1.14,
+    "1d": 2.22
+  },
+  "interpretation": "Velocity signal is mostly a repackaging of the already-exhausted basis LEVEL mean-reversion effect; once restricted to basis-level-near-zero subset, the pure velocity effect collapses to near-noise (t<1 at 1h/4h, marginal t=2.2-3.3 at 15m/1d).",
+  "verdict": "WEAK - not a genuinely new angle, largely redundant with exhausted basis-level effect"
+}

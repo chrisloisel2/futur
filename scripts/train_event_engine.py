@@ -22,13 +22,24 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.institutional.engines.liq_cascade.dataset import (
     FEATURES_V2, build_event_dataset)
-from src.institutional.engines.liq_cascade.detector import METRICS_DIR, CascadeConfig
+from src.institutional.engines.liq_cascade.detector import CascadeConfig
+
+
+def load_universe(root: Path) -> list[str]:
+    """Univers de trading FIGÉ (jamais dérivé du contenu d'un dossier de données :
+    un backfill non lié a fait passer ce dossier de 50 à 312 fichiers le
+    2026-08-14 et a fait basculer le verdict walk-forward de CANDIDATE à
+    NO_EDGE en une semaine, voir
+    reports/edge_discovery/alpha_hunt_2026-08-29/w1_liq_cascade/REPORT.md §1.3)."""
+    return sorted(yaml.safe_load(
+        (root / "configs/portfolio_v1_1_parallel_50.yaml").read_text())["universe"])
 
 OUT_DIR = ROOT / "reports" / "liq_cascade"
 CACHE_DIR = ROOT / "data" / "events"
@@ -195,8 +206,7 @@ def main():
     if cache.exists() and not args.rebuild_cache:
         ev = pd.read_parquet(cache)
     else:
-        symbols = sorted(p.stem.replace("_metrics_5m", "")
-                         for p in METRICS_DIR.glob("*_metrics_5m.parquet"))
+        symbols = load_universe(ROOT)
         ev = build_event_dataset(symbols, CascadeConfig(),
                                  detector_fn=_detector(args.engine))
         if ev.empty:
