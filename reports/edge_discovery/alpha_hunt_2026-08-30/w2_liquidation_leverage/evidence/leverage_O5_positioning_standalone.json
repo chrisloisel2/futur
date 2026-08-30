@@ -1,0 +1,64 @@
+{
+  "n_merged": 16330,
+  "date_range": [
+    "2026-07-16 02:00:00+00:00",
+    "2026-07-31 23:00:00+00:00"
+  ],
+  "n_symbols": 46,
+  "ls_ratio_crowded_long_extreme_fwd4h": {
+    "n": 1604,
+    "gross_bps": -26.66,
+    "net14_bps": -40.66,
+    "hit_rate": 0.428,
+    "pf": 0.525,
+    "t": -9.03
+  },
+  "ls_ratio_crowded_short_extreme_fwd4h": {
+    "n": 1613,
+    "gross_bps": 2.36,
+    "net14_bps": -11.64,
+    "hit_rate": 0.473,
+    "pf": 1.057,
+    "t": 0.79
+  },
+  "baseline_fwd4h": {
+    "n": 16146,
+    "gross_bps": -8.25,
+    "net14_bps": -22.25,
+    "hit_rate": 0.457,
+    "pf": 0.816,
+    "t": -9.12
+  },
+  "ls_ratio_rising_fast_fwd4h": {
+    "n": 1598,
+    "gross_bps": -17.11,
+    "net14_bps": -31.11,
+    "hit_rate": 0.426,
+    "pf": 0.61,
+    "t": -6.69
+  },
+  "ls_ratio_falling_fast_fwd4h": {
+    "n": 1587,
+    "gross_bps": -3.37,
+    "net14_bps": -17.37,
+    "hit_rate": 0.47,
+    "pf": 0.919,
+    "t": -1.2
+  },
+  "taker_buy_extreme_fwd4h": {
+    "n": 1603,
+    "gross_bps": 19.43,
+    "net14_bps": 5.43,
+    "hit_rate": 0.571,
+    "pf": 1.696,
+    "t": 7.08
+  },
+  "taker_sell_extreme_fwd4h": {
+    "n": 1613,
+    "gross_bps": -49.48,
+    "net14_bps": -63.48,
+    "hit_rate": 0.324,
+    "pf": 0.323,
+    "t": -16.31
+  }
+}

@@ -1,0 +1,962 @@
+[
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 2046,
+    "n_wallets_traded_test": 1503,
+    "n_trades_test": 767989,
+    "total_notional_test": 4178262514.1681757,
+    "gross_bps": {
+      "1s": 0.8546774174993493,
+      "5s": 1.1497583485413652,
+      "30s": 1.031923075857435,
+      "60s": 0.7912246206870391,
+      "300s": 1.763119410581189,
+      "900s": 1.2570374053736626,
+      "3600s": 3.6012660219943196
+    },
+    "half1_mo60": -0.0682213712071336,
+    "half1_n": 251522,
+    "half2_mo60": 1.2097799075272302,
+    "half2_n": 516467,
+    "wallet_level_mw_p": 0.003389402417890586,
+    "wallet_level_boot_ci60": [
+      -0.2868384287589349,
+      1.5466989250012813
+    ],
+    "n_wallets_wallet_level_test": 1503
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 2046,
+    "n_wallets_traded_test": 1528,
+    "n_trades_test": 563960,
+    "total_notional_test": 3966294838.1592875,
+    "gross_bps": {
+      "1s": -0.4801917261731242,
+      "5s": -0.6208189659304041,
+      "30s": -0.7530521205310134,
+      "60s": -0.29067295249895525,
+      "300s": -0.3166563362954954,
+      "900s": -0.48082004605021833,
+      "3600s": 1.2203308823377703
+    },
+    "half1_mo60": 0.680474133752091,
+    "half1_n": 178424,
+    "half2_mo60": -0.7401204618231255,
+    "half2_n": 385536,
+    "wallet_level_mw_p": 0.005379532424739536,
+    "wallet_level_boot_ci60": [
+      -2.2697209129248845,
+      -0.11589861802453195
+    ],
+    "n_wallets_wallet_level_test": 1528
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 2,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 819,
+    "n_wallets_traded_test": 586,
+    "n_trades_test": 309231,
+    "total_notional_test": 1535172610.4941094,
+    "gross_bps": {
+      "1s": 1.3500767226185058,
+      "5s": 1.727523187478669,
+      "30s": 2.041694216444282,
+      "60s": 1.5292691583660596,
+      "300s": 3.803476747072296,
+      "900s": 3.385612947397306,
+      "3600s": 6.96660599420943
+    },
+    "half1_mo60": -1.1784960928650987,
+    "half1_n": 108633,
+    "half2_mo60": 2.995647998319571,
+    "half2_n": 200598,
+    "wallet_level_mw_p": 0.021443271887451938,
+    "wallet_level_boot_ci60": [
+      -0.5357245322684825,
+      3.1820729308434617
+    ],
+    "n_wallets_wallet_level_test": 586
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 2,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 819,
+    "n_wallets_traded_test": 601,
+    "n_trades_test": 260069,
+    "total_notional_test": 2007220756.0945096,
+    "gross_bps": {
+      "1s": -0.7140822154675414,
+      "5s": -0.834676750932735,
+      "30s": -1.129770396372501,
+      "60s": -0.18306540113925807,
+      "300s": 0.2029607069495698,
+      "900s": -0.10104387697816374,
+      "3600s": 2.2186655562718305
+    },
+    "half1_mo60": 0.8326846881289075,
+    "half1_n": 82377,
+    "half2_mo60": -0.6539746128634905,
+    "half2_n": 177692,
+    "wallet_level_mw_p": 0.006401789786782087,
+    "wallet_level_boot_ci60": [
+      -3.6524096803934922,
+      -0.2097336940680588
+    ],
+    "n_wallets_wallet_level_test": 601
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 1,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 410,
+    "n_wallets_traded_test": 286,
+    "n_trades_test": 128428,
+    "total_notional_test": 533847027.12096393,
+    "gross_bps": {
+      "1s": 1.7006860932455172,
+      "5s": 1.6076037139795203,
+      "30s": 2.038619117763867,
+      "60s": 1.5847153210388314,
+      "300s": 0.5945681231954699,
+      "900s": 0.6430379043419958,
+      "3600s": 5.382707466920319
+    },
+    "half1_mo60": 0.6108045442718325,
+    "half1_n": 50472,
+    "half2_mo60": 2.2152662051912246,
+    "half2_n": 77956,
+    "wallet_level_mw_p": 0.26329937397169934,
+    "wallet_level_boot_ci60": [
+      -0.9643150855263956,
+      3.3952710773047787
+    ],
+    "n_wallets_wallet_level_test": 286
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 1,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 410,
+    "n_wallets_traded_test": 301,
+    "n_trades_test": 128907,
+    "total_notional_test": 1147533840.242149,
+    "gross_bps": {
+      "1s": -0.7677598656583489,
+      "5s": -1.1654465680720674,
+      "30s": -1.359985624413261,
+      "60s": 0.6876500143950524,
+      "300s": 1.9458483417947017,
+      "900s": 1.9952120738572454,
+      "3600s": 9.123904907814927
+    },
+    "half1_mo60": 3.8710808910519727,
+    "half1_n": 48048,
+    "half2_mo60": -1.2040069039642112,
+    "half2_n": 80859,
+    "wallet_level_mw_p": 0.11941075499638741,
+    "wallet_level_boot_ci60": [
+      -4.285808064057075,
+      0.9023983295025391
+    ],
+    "n_wallets_wallet_level_test": 301
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 0.5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 205,
+    "n_wallets_traded_test": 141,
+    "n_trades_test": 61011,
+    "total_notional_test": 273161444.7465435,
+    "gross_bps": {
+      "1s": 2.5105811595219207,
+      "5s": 2.736103901946251,
+      "30s": 2.3997319790432203,
+      "60s": 2.2450042223621547,
+      "300s": 2.1160922493200123,
+      "900s": 2.6065789550605123,
+      "3600s": 9.220868699152666
+    },
+    "half1_mo60": 1.1696094316039294,
+    "half1_n": 20384,
+    "half2_mo60": 2.7845677494455146,
+    "half2_n": 40627,
+    "wallet_level_mw_p": 0.8314252218058235,
+    "wallet_level_boot_ci60": [
+      -2.212073535139636,
+      5.254085050169222
+    ],
+    "n_wallets_wallet_level_test": 141
+  },
+  {
+    "split": "A",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 0.5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 205,
+    "n_wallets_traded_test": 144,
+    "n_trades_test": 33573,
+    "total_notional_test": 247803659.19773984,
+    "gross_bps": {
+      "1s": -0.6955279876300673,
+      "5s": -1.3053847283108946,
+      "30s": -0.2832154206370351,
+      "60s": 5.337827571346249,
+      "300s": 5.5941930920743586,
+      "900s": 2.770864090151148,
+      "3600s": -0.07251208636574148
+    },
+    "half1_mo60": 18.103632241697422,
+    "half1_n": 12245,
+    "half2_mo60": -1.9913771449164148,
+    "half2_n": 21328,
+    "wallet_level_mw_p": 0.2832297578651003,
+    "wallet_level_boot_ci60": [
+      -8.621930808067425,
+      1.6560281131622436
+    ],
+    "n_wallets_wallet_level_test": 144
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 2047,
+    "n_wallets_traded_test": 1440,
+    "n_trades_test": 541593,
+    "total_notional_test": 4482715728.4967165,
+    "gross_bps": {
+      "1s": -0.22492795059610737,
+      "5s": -0.09777540002219495,
+      "30s": 0.29987905913849616,
+      "60s": -0.1969508618542712,
+      "300s": -0.6923336648075707,
+      "900s": -1.433989080002066,
+      "3600s": -0.22033646201204657
+    },
+    "half1_mo60": -0.13348829872096965,
+    "half1_n": 213452,
+    "half2_mo60": -0.23823417515252515,
+    "half2_n": 328141,
+    "wallet_level_mw_p": 0.00045977518086034113,
+    "wallet_level_boot_ci60": [
+      0.04144936285597001,
+      2.098950375584592
+    ],
+    "n_wallets_wallet_level_test": 1440
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 2046,
+    "n_wallets_traded_test": 1501,
+    "n_trades_test": 413602,
+    "total_notional_test": 3349126510.852158,
+    "gross_bps": {
+      "1s": -0.4087573702129614,
+      "5s": -0.44608782983323764,
+      "30s": -0.7026923985120193,
+      "60s": -1.1069930393953917,
+      "300s": -2.446339235491844,
+      "900s": -2.654981485100493,
+      "3600s": -3.1819730242812154
+    },
+    "half1_mo60": -0.06456559922980992,
+    "half1_n": 129301,
+    "half2_mo60": -1.581104031681018,
+    "half2_n": 284301,
+    "wallet_level_mw_p": 0.00012254945847378585,
+    "wallet_level_boot_ci60": [
+      -1.238410928493445,
+      0.5356510984178096
+    ],
+    "n_wallets_wallet_level_test": 1501
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 2,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 820,
+    "n_wallets_traded_test": 546,
+    "n_trades_test": 191630,
+    "total_notional_test": 1995053898.4425714,
+    "gross_bps": {
+      "1s": -0.6956873400057416,
+      "5s": -0.3285764039827931,
+      "30s": -0.7134384432193747,
+      "60s": -3.082050878397818,
+      "300s": -4.092085517896677,
+      "900s": -4.629571977212168,
+      "3600s": -5.606829354347683
+    },
+    "half1_mo60": -2.013185644057692,
+    "half1_n": 62897,
+    "half2_mo60": -3.604282292598458,
+    "half2_n": 128733,
+    "wallet_level_mw_p": 0.2999558960991535,
+    "wallet_level_boot_ci60": [
+      -0.8286972103102671,
+      3.7539370253269144
+    ],
+    "n_wallets_wallet_level_test": 546
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 2,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 819,
+    "n_wallets_traded_test": 553,
+    "n_trades_test": 190924,
+    "total_notional_test": 1766854859.966456,
+    "gross_bps": {
+      "1s": 0.052248314280615354,
+      "5s": -0.012080772359569003,
+      "30s": -0.7605141227340728,
+      "60s": -0.37513097651102656,
+      "300s": -0.9634175091699498,
+      "900s": -2.3252600917920474,
+      "3600s": -4.956649773219346
+    },
+    "half1_mo60": 1.467809308259197,
+    "half1_n": 51836,
+    "half2_mo60": -1.062001595800141,
+    "half2_n": 139088,
+    "wallet_level_mw_p": 0.03462869590644625,
+    "wallet_level_boot_ci60": [
+      -2.473032037335777,
+      0.7170057797487717
+    ],
+    "n_wallets_wallet_level_test": 553
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 1,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 410,
+    "n_wallets_traded_test": 261,
+    "n_trades_test": 80943,
+    "total_notional_test": 1076094032.6739693,
+    "gross_bps": {
+      "1s": -1.2327425062184016,
+      "5s": -0.5870511706230839,
+      "30s": 0.31903392709059425,
+      "60s": -4.762441126815163,
+      "300s": -7.797468116023755,
+      "900s": -9.262914335643707,
+      "3600s": -11.747571065138843
+    },
+    "half1_mo60": -6.327999422689911,
+    "half1_n": 21225,
+    "half2_mo60": -4.206009651716506,
+    "half2_n": 59718,
+    "wallet_level_mw_p": 0.8717036652223283,
+    "wallet_level_boot_ci60": [
+      -3.4441955834614806,
+      3.963801067813654
+    ],
+    "n_wallets_wallet_level_test": 261
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 1,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 410,
+    "n_wallets_traded_test": 251,
+    "n_trades_test": 103714,
+    "total_notional_test": 1191887880.063908,
+    "gross_bps": {
+      "1s": 0.5221350489656127,
+      "5s": 0.47289075792319396,
+      "30s": 0.018050377764109348,
+      "60s": -0.41077864263773345,
+      "300s": -1.2816478251947494,
+      "900s": -5.136525825367524,
+      "3600s": -4.939138874868486
+    },
+    "half1_mo60": 1.3648341276428368,
+    "half1_n": 27159,
+    "half2_mo60": -1.040711333653879,
+    "half2_n": 76555,
+    "wallet_level_mw_p": 0.8002380170770809,
+    "wallet_level_boot_ci60": [
+      -2.121001798839827,
+      2.741773152188437
+    ],
+    "n_wallets_wallet_level_test": 251
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 0.5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 206,
+    "n_wallets_traded_test": 121,
+    "n_trades_test": 37031,
+    "total_notional_test": 499393951.6977824,
+    "gross_bps": {
+      "1s": -2.4211877524999226,
+      "5s": -2.2635538045593884,
+      "30s": -1.342206640584449,
+      "60s": -12.42371730406002,
+      "300s": -21.258487579823733,
+      "900s": -23.935311520500186,
+      "3600s": -30.022403469761453
+    },
+    "half1_mo60": -29.99109510438081,
+    "half1_n": 8040,
+    "half2_mo60": -7.551801277893997,
+    "half2_n": 28991,
+    "wallet_level_mw_p": 0.13214513362400862,
+    "wallet_level_boot_ci60": [
+      -7.838045409271614,
+      6.920267522800065
+    ],
+    "n_wallets_wallet_level_test": 121
+  },
+  {
+    "split": "A",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 0.5,
+    "n_eligible_wallets": 40911,
+    "n_wallets_cohort": 206,
+    "n_wallets_traded_test": 119,
+    "n_trades_test": 36214,
+    "total_notional_test": 376100435.0853951,
+    "gross_bps": {
+      "1s": 2.4117424696204104,
+      "5s": 2.626568612972435,
+      "30s": 3.0101878146430643,
+      "60s": 2.252718243945458,
+      "300s": -1.4157271187407052,
+      "900s": -7.304946877541689,
+      "3600s": -0.906058673615469
+    },
+    "half1_mo60": 6.238257167398325,
+    "half1_n": 17159,
+    "half2_mo60": -1.3362538047308874,
+    "half2_n": 19055,
+    "wallet_level_mw_p": 0.17746928170583376,
+    "wallet_level_boot_ci60": [
+      -1.6407359607811651,
+      6.9550478691042175
+    ],
+    "n_wallets_wallet_level_test": 119
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 1755,
+    "n_wallets_traded_test": 1359,
+    "n_trades_test": 772821,
+    "total_notional_test": 4898432978.575972,
+    "gross_bps": {
+      "1s": 0.7572086084239946,
+      "5s": 1.0835869853030735,
+      "30s": 0.8914671902565803,
+      "60s": 0.512216556048486,
+      "300s": 1.8537580495404609,
+      "900s": 0.9721053155772266,
+      "3600s": 2.6495749505224437
+    },
+    "half1_mo60": 0.8320626431018483,
+    "half1_n": 124480,
+    "half2_mo60": 0.4508068335160494,
+    "half2_n": 648341,
+    "wallet_level_mw_p": 0.019727569506739703,
+    "wallet_level_boot_ci60": [
+      -0.4008891240091786,
+      1.4760075634920613
+    ],
+    "n_wallets_wallet_level_test": 1359
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 1755,
+    "n_wallets_traded_test": 1377,
+    "n_trades_test": 517449,
+    "total_notional_test": 3511854456.026854,
+    "gross_bps": {
+      "1s": -0.38569528401776937,
+      "5s": -0.4988488941779456,
+      "30s": -0.5568342529506224,
+      "60s": -0.7450871274087475,
+      "300s": -2.085173619071738,
+      "900s": -3.4059365663489505,
+      "3600s": -4.540251130197792
+    },
+    "half1_mo60": -0.2573623323840867,
+    "half1_n": 91771,
+    "half2_mo60": -0.8502356499029757,
+    "half2_n": 425678,
+    "wallet_level_mw_p": 0.029969160791353543,
+    "wallet_level_boot_ci60": [
+      -2.032908216287457,
+      -0.09588862713147858
+    ],
+    "n_wallets_wallet_level_test": 1377
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 2,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 702,
+    "n_wallets_traded_test": 523,
+    "n_trades_test": 265057,
+    "total_notional_test": 1079208282.0441558,
+    "gross_bps": {
+      "1s": 1.116068240410801,
+      "5s": 1.275166708880079,
+      "30s": 0.9035175372511625,
+      "60s": 0.49400261539817153,
+      "300s": 1.8234743579795707,
+      "900s": 1.2092158649857607,
+      "3600s": 3.72720136809956
+    },
+    "half1_mo60": 1.2084367033085757,
+    "half1_n": 46503,
+    "half2_mo60": 0.34198833796514577,
+    "half2_n": 218554,
+    "wallet_level_mw_p": 0.04489650929327006,
+    "wallet_level_boot_ci60": [
+      -0.5244538140530797,
+      3.3017170292822784
+    ],
+    "n_wallets_wallet_level_test": 523
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 2,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 702,
+    "n_wallets_traded_test": 537,
+    "n_trades_test": 197858,
+    "total_notional_test": 1652870393.457513,
+    "gross_bps": {
+      "1s": -0.534367685653656,
+      "5s": -0.7745287807508424,
+      "30s": -0.6479328211757416,
+      "60s": 0.3367819844742021,
+      "300s": -1.3756083124221272,
+      "900s": -4.1459788428695905,
+      "3600s": -8.230172430855538
+    },
+    "half1_mo60": -0.298304458005996,
+    "half1_n": 36188,
+    "half2_mo60": 0.4789388978191233,
+    "half2_n": 161670,
+    "wallet_level_mw_p": 0.22449413026193887,
+    "wallet_level_boot_ci60": [
+      -2.7694353149819695,
+      0.6875756989976165
+    ],
+    "n_wallets_wallet_level_test": 537
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 1,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 351,
+    "n_wallets_traded_test": 258,
+    "n_trades_test": 142928,
+    "total_notional_test": 579473684.1587732,
+    "gross_bps": {
+      "1s": 1.8720315751157468,
+      "5s": 1.881631750166191,
+      "30s": 0.9163641484266508,
+      "60s": 0.2893344550633833,
+      "300s": 1.5555387732387693,
+      "900s": 1.948928781181581,
+      "3600s": 3.719614395393367
+    },
+    "half1_mo60": 1.8426726354105538,
+    "half1_n": 25752,
+    "half2_mo60": -0.05204573217888763,
+    "half2_n": 117176,
+    "wallet_level_mw_p": 0.4072702018174926,
+    "wallet_level_boot_ci60": [
+      -1.6023930420078067,
+      2.5853992930805823
+    ],
+    "n_wallets_wallet_level_test": 258
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 1,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 351,
+    "n_wallets_traded_test": 267,
+    "n_trades_test": 116251,
+    "total_notional_test": 823587426.9222795,
+    "gross_bps": {
+      "1s": -0.501718886633518,
+      "5s": -0.7207059590003585,
+      "30s": -0.37558341748362145,
+      "60s": 1.186530603142659,
+      "300s": -0.8927605139738877,
+      "900s": -4.038363977665676,
+      "3600s": -6.0126294396611994
+    },
+    "half1_mo60": -1.2400334015768184,
+    "half1_n": 19562,
+    "half2_mo60": 1.6774700591337481,
+    "half2_n": 96689,
+    "wallet_level_mw_p": 0.22883162850003314,
+    "wallet_level_boot_ci60": [
+      -2.740153232226177,
+      2.257834715175124
+    ],
+    "n_wallets_wallet_level_test": 267
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "top",
+    "pct": 0.5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 176,
+    "n_wallets_traded_test": 130,
+    "n_trades_test": 74520,
+    "total_notional_test": 283138198.3424593,
+    "gross_bps": {
+      "1s": 2.2083172111915474,
+      "5s": 2.4382032470481687,
+      "30s": 1.4185608362701037,
+      "60s": -0.14052234554200388,
+      "300s": 1.3195747640080875,
+      "900s": 2.1125155283274477,
+      "3600s": 4.7479115995406795
+    },
+    "half1_mo60": 2.5574787598165774,
+    "half1_n": 13592,
+    "half2_mo60": -0.7424004807841559,
+    "half2_n": 60928,
+    "wallet_level_mw_p": 0.9367297567155111,
+    "wallet_level_boot_ci60": [
+      -2.6592727612842024,
+      2.5963207949788756
+    ],
+    "n_wallets_wallet_level_test": 130
+  },
+  {
+    "split": "B",
+    "score": "mean_mo60_train",
+    "side": "bottom",
+    "pct": 0.5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 176,
+    "n_wallets_traded_test": 132,
+    "n_trades_test": 48500,
+    "total_notional_test": 388833781.2835353,
+    "gross_bps": {
+      "1s": -0.22842233353146574,
+      "5s": -0.4781958500495584,
+      "30s": 1.1249180540957096,
+      "60s": 4.900247875451888,
+      "300s": 6.454590874844605,
+      "900s": -1.1427550466032987,
+      "3600s": -6.24373347198869
+    },
+    "half1_mo60": -0.4099892384191639,
+    "half1_n": 8299,
+    "half2_mo60": 5.996480750455392,
+    "half2_n": 40201,
+    "wallet_level_mw_p": 0.7732598220018538,
+    "wallet_level_boot_ci60": [
+      -6.017308288626808,
+      2.275441193888526
+    ],
+    "n_wallets_wallet_level_test": 132
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 1755,
+    "n_wallets_traded_test": 1285,
+    "n_trades_test": 468745,
+    "total_notional_test": 4303008437.35282,
+    "gross_bps": {
+      "1s": -0.09940920936161858,
+      "5s": -0.10486408173456185,
+      "30s": -0.024331425683329442,
+      "60s": -0.9239073839822102,
+      "300s": -0.7510073153948413,
+      "900s": -1.8052449697224706,
+      "3600s": -1.6391118275406624
+    },
+    "half1_mo60": 0.16429934261222778,
+    "half1_n": 99391,
+    "half2_mo60": -1.216737446098629,
+    "half2_n": 369354,
+    "wallet_level_mw_p": 0.010146023344631418,
+    "wallet_level_boot_ci60": [
+      -0.3121884868246916,
+      1.7413973120770483
+    ],
+    "n_wallets_wallet_level_test": 1285
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 1755,
+    "n_wallets_traded_test": 1341,
+    "n_trades_test": 466356,
+    "total_notional_test": 3897183562.8017735,
+    "gross_bps": {
+      "1s": -0.82490572192691,
+      "5s": -0.42420283824752103,
+      "30s": -1.0037799903124125,
+      "60s": -2.376968391137171,
+      "300s": -4.142076255820491,
+      "900s": -4.793843029165077,
+      "3600s": -5.585199715896431
+    },
+    "half1_mo60": -0.39094694439807426,
+    "half1_n": 89429,
+    "half2_mo60": -2.8481756519701587,
+    "half2_n": 376927,
+    "wallet_level_mw_p": 0.0011867307205653019,
+    "wallet_level_boot_ci60": [
+      -1.0060481007081696,
+      0.6707059932504068
+    ],
+    "n_wallets_wallet_level_test": 1341
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 2,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 702,
+    "n_wallets_traded_test": 496,
+    "n_trades_test": 196851,
+    "total_notional_test": 1565868419.6606095,
+    "gross_bps": {
+      "1s": -0.6244858604925672,
+      "5s": -0.6692137929048204,
+      "30s": -1.3768989434706627,
+      "60s": -4.24118159468731,
+      "300s": -4.234014946349197,
+      "900s": -4.662820282250293,
+      "3600s": -6.48859486390319
+    },
+    "half1_mo60": 0.5069651655454842,
+    "half1_n": 36677,
+    "half2_mo60": -5.328422836868052,
+    "half2_n": 160174,
+    "wallet_level_mw_p": 0.12006742035347046,
+    "wallet_level_boot_ci60": [
+      -1.087174681087586,
+      3.655903595682974
+    ],
+    "n_wallets_wallet_level_test": 496
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 2,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 702,
+    "n_wallets_traded_test": 498,
+    "n_trades_test": 199009,
+    "total_notional_test": 2163932251.69504,
+    "gross_bps": {
+      "1s": -1.0466154962131526,
+      "5s": -0.19559848534347932,
+      "30s": -1.319446972053598,
+      "60s": -4.451348332734179,
+      "300s": -6.274210703665391,
+      "900s": -9.008737261209882,
+      "3600s": -10.144223841652112
+    },
+    "half1_mo60": -0.6028667078312555,
+    "half1_n": 28115,
+    "half2_mo60": -5.08451193043645,
+    "half2_n": 170894,
+    "wallet_level_mw_p": 0.020440657480417953,
+    "wallet_level_boot_ci60": [
+      -2.58097762614018,
+      0.2590242312004285
+    ],
+    "n_wallets_wallet_level_test": 498
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 1,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 351,
+    "n_wallets_traded_test": 234,
+    "n_trades_test": 87397,
+    "total_notional_test": 755406102.3407819,
+    "gross_bps": {
+      "1s": -0.6877764946486955,
+      "5s": -0.42210124568408847,
+      "30s": 0.022939385787413506,
+      "60s": -6.45761635351805,
+      "300s": -6.78870276407466,
+      "900s": -7.437202687269207,
+      "3600s": -8.676587356204106
+    },
+    "half1_mo60": 0.588987710478808,
+    "half1_n": 10325,
+    "half2_mo60": -7.401619194507872,
+    "half2_n": 77072,
+    "wallet_level_mw_p": 0.3697140355174594,
+    "wallet_level_boot_ci60": [
+      -3.547553924950444,
+      4.669910001714946
+    ],
+    "n_wallets_wallet_level_test": 234
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 1,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 353,
+    "n_wallets_traded_test": 236,
+    "n_trades_test": 111206,
+    "total_notional_test": 1503372399.9727628,
+    "gross_bps": {
+      "1s": -1.4351505497187933,
+      "5s": 0.005868050832281078,
+      "30s": -1.0771559735278478,
+      "60s": -6.018273692410716,
+      "300s": -8.619736695338489,
+      "900s": -13.383827275374458,
+      "3600s": -17.498546777705123
+    },
+    "half1_mo60": -0.8909531339396242,
+    "half1_n": 17338,
+    "half2_mo60": -6.965321502556579,
+    "half2_n": 93868,
+    "wallet_level_mw_p": 0.22146024182133728,
+    "wallet_level_boot_ci60": [
+      -3.2169922490281215,
+      1.4341172045516601
+    ],
+    "n_wallets_wallet_level_test": 236
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "top",
+    "pct": 0.5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 177,
+    "n_wallets_traded_test": 109,
+    "n_trades_test": 56089,
+    "total_notional_test": 537149051.6945688,
+    "gross_bps": {
+      "1s": -0.8345962340277963,
+      "5s": -0.8017739668731856,
+      "30s": -0.034311719781787445,
+      "60s": -7.748479702562127,
+      "300s": -12.907414167602436,
+      "900s": -13.93671758818649,
+      "3600s": -14.519672733182079
+    },
+    "half1_mo60": 1.612268066251391,
+    "half1_n": 4638,
+    "half2_mo60": -8.59229514155762,
+    "half2_n": 51451,
+    "wallet_level_mw_p": 0.5811320618958924,
+    "wallet_level_boot_ci60": [
+      -8.701035932440472,
+      7.58567562853932
+    ],
+    "n_wallets_wallet_level_test": 109
+  },
+  {
+    "split": "B",
+    "score": "winrate60_train",
+    "side": "bottom",
+    "pct": 0.5,
+    "n_eligible_wallets": 35092,
+    "n_wallets_cohort": 176,
+    "n_wallets_traded_test": 114,
+    "n_trades_test": 62193,
+    "total_notional_test": 662869266.2854273,
+    "gross_bps": {
+      "1s": -2.0267909863694507,
+      "5s": 0.6786625754037429,
+      "30s": -0.3500959217353579,
+      "60s": -9.03623631054708,
+      "300s": -14.261310625569525,
+      "900s": -20.211336832300194,
+      "3600s": -24.52669897115106
+    },
+    "half1_mo60": -1.076471508334247,
+    "half1_n": 12510,
+    "half2_mo60": -11.040476345884773,
+    "half2_n": 49683,
+    "wallet_level_mw_p": 0.5892646262820473,
+    "wallet_level_boot_ci60": [
+      -4.343036575282184,
+      4.729501817261645
+    ],
+    "n_wallets_wallet_level_test": 114
+  }
+]

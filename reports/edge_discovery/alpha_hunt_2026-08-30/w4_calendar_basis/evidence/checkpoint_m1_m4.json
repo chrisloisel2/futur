@@ -1,0 +1,1002 @@
+[
+  {
+    "mechanism": "M1_PERP_VS_NEAR",
+    "symbol": "BTCUSDT",
+    "train_thresholds": {
+      "lo": 2.048,
+      "hi": 21.729
+    },
+    "n_train": 1105,
+    "n_test": 737,
+    "horizons": {
+      "k1d": {
+        "n": 9,
+        "gross_mean_bps": 8.36,
+        "std_bps": 8.83,
+        "t_stat": 2.84,
+        "p_value": 0.0218,
+        "net_base_bps": -5.64,
+        "net_stress_bps": -19.64,
+        "worst_bps": -3.74,
+        "best_bps": 27.22,
+        "win_rate": 0.889,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 27.22
+          },
+          "2026": {
+            "n": 8,
+            "mean_bps": 6.0
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 8,
+        "n_expiry_capped": 0
+      },
+      "k3d": {
+        "n": 8,
+        "gross_mean_bps": 5.73,
+        "std_bps": 15.03,
+        "t_stat": 1.078,
+        "p_value": 0.3167,
+        "net_base_bps": -8.27,
+        "net_stress_bps": -22.27,
+        "worst_bps": -12.06,
+        "best_bps": 34.62,
+        "win_rate": 0.625,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 34.62
+          },
+          "2026": {
+            "n": 7,
+            "mean_bps": 1.6
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 7,
+        "n_expiry_capped": 0
+      },
+      "k7d": {
+        "n": 6,
+        "gross_mean_bps": 7.7,
+        "std_bps": 23.26,
+        "t_stat": 0.811,
+        "p_value": 0.4544,
+        "net_base_bps": -6.3,
+        "net_stress_bps": -20.3,
+        "worst_bps": -16.19,
+        "best_bps": 51.94,
+        "win_rate": 0.667,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 51.94
+          },
+          "2026": {
+            "n": 5,
+            "mean_bps": -1.15
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 5,
+        "n_expiry_capped": 0
+      },
+      "k14d": {
+        "n": 5,
+        "gross_mean_bps": 13.05,
+        "std_bps": 44.96,
+        "t_stat": 0.649,
+        "p_value": 0.5516,
+        "net_base_bps": -0.95,
+        "net_stress_bps": -14.95,
+        "worst_bps": -24.99,
+        "best_bps": 90.53,
+        "win_rate": 0.6,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 90.53
+          },
+          "2026": {
+            "n": 4,
+            "mean_bps": -6.32
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 4,
+        "n_expiry_capped": 0
+      },
+      "k30d": {
+        "n": 4,
+        "gross_mean_bps": 14.75,
+        "std_bps": 67.23,
+        "t_stat": 0.439,
+        "p_value": 0.6906,
+        "net_base_bps": 0.75,
+        "net_stress_bps": -13.25,
+        "worst_bps": -30.88,
+        "best_bps": 114.62,
+        "win_rate": 0.25,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 114.62
+          },
+          "2026": {
+            "n": 3,
+            "mean_bps": -18.55
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 3,
+        "n_expiry_capped": 2
+      }
+    }
+  },
+  {
+    "mechanism": "M1_PERP_VS_NEAR",
+    "symbol": "ETHUSDT",
+    "train_thresholds": {
+      "lo": -0.446,
+      "hi": 22.158
+    },
+    "n_train": 1104,
+    "n_test": 737,
+    "horizons": {
+      "k1d": {
+        "n": 2,
+        "gross_mean_bps": 12.64,
+        "std_bps": 21.85,
+        "t_stat": 0.818,
+        "p_value": 0.5635,
+        "net_base_bps": -1.36,
+        "net_stress_bps": -15.36,
+        "worst_bps": -2.81,
+        "best_bps": 28.08,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2024": {
+            "n": 2,
+            "mean_bps": 12.64
+          }
+        },
+        "n_rich": 2,
+        "n_cheap": 0,
+        "n_expiry_capped": 0
+      },
+      "k3d": {
+        "n": 2,
+        "gross_mean_bps": 22.62,
+        "std_bps": 12.83,
+        "t_stat": 2.495,
+        "p_value": 0.2427,
+        "net_base_bps": 8.62,
+        "net_stress_bps": -5.38,
+        "worst_bps": 13.55,
+        "best_bps": 31.69,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 2,
+            "mean_bps": 22.62
+          }
+        },
+        "n_rich": 2,
+        "n_cheap": 0,
+        "n_expiry_capped": 0
+      },
+      "k7d": {
+        "n": 1,
+        "gross_mean_bps": 37.76,
+        "std_bps": null,
+        "t_stat": null,
+        "p_value": null,
+        "net_base_bps": 23.76,
+        "net_stress_bps": 9.76,
+        "worst_bps": 37.76,
+        "best_bps": 37.76,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 37.76
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 0,
+        "n_expiry_capped": 0
+      },
+      "k14d": {
+        "n": 1,
+        "gross_mean_bps": 97.37,
+        "std_bps": null,
+        "t_stat": null,
+        "p_value": null,
+        "net_base_bps": 83.37,
+        "net_stress_bps": 69.37,
+        "worst_bps": 97.37,
+        "best_bps": 97.37,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 97.37
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 0,
+        "n_expiry_capped": 0
+      },
+      "k30d": {
+        "n": 1,
+        "gross_mean_bps": 161.56,
+        "std_bps": null,
+        "t_stat": null,
+        "p_value": null,
+        "net_base_bps": 147.56,
+        "net_stress_bps": 133.56,
+        "worst_bps": 161.56,
+        "best_bps": 161.56,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 161.56
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 0,
+        "n_expiry_capped": 1
+      }
+    }
+  },
+  {
+    "mechanism": "M2_QQ_SPREAD_MEANREV",
+    "symbol": "BTCUSDT",
+    "train_thresholds": {
+      "lo": 5.825,
+      "hi": 14.808
+    },
+    "n_train": 625,
+    "n_test": 418,
+    "horizons": {
+      "k1d": {
+        "n": 6,
+        "gross_mean_bps": 0.26,
+        "std_bps": 8.55,
+        "t_stat": 0.076,
+        "p_value": 0.9425,
+        "net_base_bps": -13.74,
+        "net_stress_bps": -27.74,
+        "worst_bps": -8.44,
+        "best_bps": 16.28,
+        "win_rate": 0.333,
+        "stability_by_year": {
+          "2025": {
+            "n": 4,
+            "mean_bps": 1.95
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -3.11
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 6
+      },
+      "k3d": {
+        "n": 6,
+        "gross_mean_bps": -5.97,
+        "std_bps": 5.58,
+        "t_stat": -2.623,
+        "p_value": 0.0469,
+        "net_base_bps": -19.97,
+        "net_stress_bps": -33.97,
+        "worst_bps": -13.7,
+        "best_bps": 0.62,
+        "win_rate": 0.167,
+        "stability_by_year": {
+          "2025": {
+            "n": 4,
+            "mean_bps": -3.1
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -11.71
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 6
+      },
+      "k7d": {
+        "n": 5,
+        "gross_mean_bps": -3.7,
+        "std_bps": 3.45,
+        "t_stat": -2.397,
+        "p_value": 0.0746,
+        "net_base_bps": -17.7,
+        "net_stress_bps": -31.7,
+        "worst_bps": -9.17,
+        "best_bps": 0.18,
+        "win_rate": 0.2,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -5.38
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -1.18
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 5
+      },
+      "k14d": {
+        "n": 5,
+        "gross_mean_bps": -10.69,
+        "std_bps": 15.58,
+        "t_stat": -1.535,
+        "p_value": 0.1997,
+        "net_base_bps": -24.69,
+        "net_stress_bps": -38.69,
+        "worst_bps": -26.31,
+        "best_bps": 10.2,
+        "win_rate": 0.2,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -14.07
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -5.62
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 5
+      },
+      "k30d": {
+        "n": 4,
+        "gross_mean_bps": -13.1,
+        "std_bps": 17.77,
+        "t_stat": -1.475,
+        "p_value": 0.2367,
+        "net_base_bps": -27.1,
+        "net_stress_bps": -41.1,
+        "worst_bps": -36.87,
+        "best_bps": 0.85,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2025": {
+            "n": 2,
+            "mean_bps": -7.86
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -18.35
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 4
+      }
+    }
+  },
+  {
+    "mechanism": "M2_QQ_SPREAD_MEANREV",
+    "symbol": "ETHUSDT",
+    "train_thresholds": {
+      "lo": 4.844,
+      "hi": 15.054
+    },
+    "n_train": 625,
+    "n_test": 418,
+    "horizons": {
+      "k1d": {
+        "n": 5,
+        "gross_mean_bps": -2.53,
+        "std_bps": 6.83,
+        "t_stat": -0.829,
+        "p_value": 0.4537,
+        "net_base_bps": -16.53,
+        "net_stress_bps": -30.53,
+        "worst_bps": -10.36,
+        "best_bps": 6.55,
+        "win_rate": 0.4,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": 1.01
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -7.85
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 5
+      },
+      "k3d": {
+        "n": 5,
+        "gross_mean_bps": -4.93,
+        "std_bps": 6.1,
+        "t_stat": -1.808,
+        "p_value": 0.1449,
+        "net_base_bps": -18.93,
+        "net_stress_bps": -32.93,
+        "worst_bps": -10.5,
+        "best_bps": 5.18,
+        "win_rate": 0.2,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -4.67
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -5.32
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 5
+      },
+      "k7d": {
+        "n": 4,
+        "gross_mean_bps": -11.37,
+        "std_bps": 6.59,
+        "t_stat": -3.449,
+        "p_value": 0.041,
+        "net_base_bps": -25.37,
+        "net_stress_bps": -39.37,
+        "worst_bps": -20.02,
+        "best_bps": -3.96,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2025": {
+            "n": 2,
+            "mean_bps": -11.99
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -10.75
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 4
+      },
+      "k14d": {
+        "n": 4,
+        "gross_mean_bps": -18.29,
+        "std_bps": 11.43,
+        "t_stat": -3.202,
+        "p_value": 0.0493,
+        "net_base_bps": -32.29,
+        "net_stress_bps": -46.29,
+        "worst_bps": -35.18,
+        "best_bps": -10.38,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2025": {
+            "n": 2,
+            "mean_bps": -22.78
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -13.8
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 4
+      },
+      "k30d": {
+        "n": 4,
+        "gross_mean_bps": -17.06,
+        "std_bps": 13.69,
+        "t_stat": -2.493,
+        "p_value": 0.0883,
+        "net_base_bps": -31.06,
+        "net_stress_bps": -45.06,
+        "worst_bps": -35.43,
+        "best_bps": -5.69,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2025": {
+            "n": 2,
+            "mean_bps": -6.65
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -27.46
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 4
+      }
+    }
+  },
+  {
+    "mechanism": "M3_CURVE_SLOPE_MOMENTUM",
+    "symbol": "BTCUSDT",
+    "direction_precommitted_on_train": "reversion",
+    "train_thresholds": {
+      "lo": -1.48,
+      "hi": 1.528
+    },
+    "horizons": {
+      "k1d": {
+        "n": 6,
+        "gross_mean_bps": 1.05,
+        "std_bps": 6.94,
+        "t_stat": 0.37,
+        "p_value": 0.7267,
+        "net_base_bps": -12.95,
+        "net_stress_bps": -26.95,
+        "worst_bps": -11.54,
+        "best_bps": 8.44,
+        "win_rate": 0.667,
+        "stability_by_year": {
+          "2025": {
+            "n": 4,
+            "mean_bps": -0.83
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": 4.81
+          }
+        }
+      },
+      "k3d": {
+        "n": 5,
+        "gross_mean_bps": 4.07,
+        "std_bps": 16.98,
+        "t_stat": 0.536,
+        "p_value": 0.6206,
+        "net_base_bps": -9.93,
+        "net_stress_bps": -23.93,
+        "worst_bps": -14.52,
+        "best_bps": 28.48,
+        "win_rate": 0.4,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": 3.48
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": 4.95
+          }
+        }
+      },
+      "k7d": {
+        "n": 4,
+        "gross_mean_bps": 5.23,
+        "std_bps": 11.45,
+        "t_stat": 0.913,
+        "p_value": 0.4284,
+        "net_base_bps": -8.77,
+        "net_stress_bps": -22.77,
+        "worst_bps": -7.93,
+        "best_bps": 17.54,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": 7.03
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": -0.18
+          }
+        }
+      },
+      "k14d": {
+        "n": 4,
+        "gross_mean_bps": -0.25,
+        "std_bps": 11.26,
+        "t_stat": -0.045,
+        "p_value": 0.9672,
+        "net_base_bps": -14.25,
+        "net_stress_bps": -28.25,
+        "worst_bps": -13.25,
+        "best_bps": 11.42,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -2.51
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": 6.52
+          }
+        }
+      },
+      "k30d": {
+        "n": 4,
+        "gross_mean_bps": 1.95,
+        "std_bps": 32.21,
+        "t_stat": 0.121,
+        "p_value": 0.9114,
+        "net_base_bps": -12.05,
+        "net_stress_bps": -26.05,
+        "worst_bps": -31.88,
+        "best_bps": 36.87,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -9.69
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": 36.87
+          }
+        }
+      }
+    }
+  },
+  {
+    "mechanism": "M3_CURVE_SLOPE_MOMENTUM",
+    "symbol": "ETHUSDT",
+    "direction_precommitted_on_train": "momentum",
+    "train_thresholds": {
+      "lo": -1.587,
+      "hi": 1.625
+    },
+    "horizons": {
+      "k1d": {
+        "n": 6,
+        "gross_mean_bps": -6.89,
+        "std_bps": 8.32,
+        "t_stat": -2.028,
+        "p_value": 0.0983,
+        "net_base_bps": -20.89,
+        "net_stress_bps": -34.89,
+        "worst_bps": -21.37,
+        "best_bps": 2.73,
+        "win_rate": 0.167,
+        "stability_by_year": {
+          "2025": {
+            "n": 4,
+            "mean_bps": -6.41
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -7.85
+          }
+        }
+      },
+      "k3d": {
+        "n": 5,
+        "gross_mean_bps": -6.47,
+        "std_bps": 19.95,
+        "t_stat": -0.726,
+        "p_value": 0.5083,
+        "net_base_bps": -20.47,
+        "net_stress_bps": -34.47,
+        "worst_bps": -23.87,
+        "best_bps": 25.28,
+        "win_rate": 0.2,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -7.24
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -5.32
+          }
+        }
+      },
+      "k7d": {
+        "n": 5,
+        "gross_mean_bps": -18.99,
+        "std_bps": 23.54,
+        "t_stat": -1.804,
+        "p_value": 0.1455,
+        "net_base_bps": -32.99,
+        "net_stress_bps": -46.99,
+        "worst_bps": -54.82,
+        "best_bps": 8.14,
+        "win_rate": 0.2,
+        "stability_by_year": {
+          "2025": {
+            "n": 3,
+            "mean_bps": -24.48
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -10.75
+          }
+        }
+      },
+      "k14d": {
+        "n": 4,
+        "gross_mean_bps": -25.62,
+        "std_bps": 24.93,
+        "t_stat": -2.055,
+        "p_value": 0.1321,
+        "net_base_bps": -39.62,
+        "net_stress_bps": -53.62,
+        "worst_bps": -62.97,
+        "best_bps": -11.93,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2025": {
+            "n": 2,
+            "mean_bps": -37.45
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -13.8
+          }
+        }
+      },
+      "k30d": {
+        "n": 3,
+        "gross_mean_bps": -25.37,
+        "std_bps": 8.76,
+        "t_stat": -5.016,
+        "p_value": 0.0375,
+        "net_base_bps": -39.37,
+        "net_stress_bps": -53.37,
+        "worst_bps": -35.43,
+        "best_bps": -19.49,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2025": {
+            "n": 1,
+            "mean_bps": -21.18
+          },
+          "2026": {
+            "n": 2,
+            "mean_bps": -27.46
+          }
+        }
+      }
+    }
+  },
+  {
+    "mechanism": "M4_TTE_NORMALIZED_ZSCORE",
+    "symbol": "BTCUSDT",
+    "train_thresholds": {
+      "lo": -0.77,
+      "hi": 1.28
+    },
+    "horizons": {
+      "k1d": {
+        "n": 2,
+        "gross_mean_bps": -3.29,
+        "std_bps": 6.08,
+        "t_stat": -0.766,
+        "p_value": 0.5838,
+        "net_base_bps": -17.29,
+        "net_stress_bps": -31.29,
+        "worst_bps": -7.59,
+        "best_bps": 1.0,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2026": {
+            "n": 2,
+            "mean_bps": -3.29
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 2
+      },
+      "k3d": {
+        "n": 2,
+        "gross_mean_bps": -3.4,
+        "std_bps": 7.69,
+        "t_stat": -0.626,
+        "p_value": 0.6439,
+        "net_base_bps": -17.4,
+        "net_stress_bps": -31.4,
+        "worst_bps": -8.84,
+        "best_bps": 2.03,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2026": {
+            "n": 2,
+            "mean_bps": -3.4
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 2
+      },
+      "k7d": {
+        "n": 2,
+        "gross_mean_bps": -11.78,
+        "std_bps": 8.15,
+        "t_stat": -2.043,
+        "p_value": 0.2898,
+        "net_base_bps": -25.78,
+        "net_stress_bps": -39.78,
+        "worst_bps": -17.55,
+        "best_bps": -6.01,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2026": {
+            "n": 2,
+            "mean_bps": -11.78
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 2
+      },
+      "k14d": {
+        "n": 1,
+        "gross_mean_bps": -16.58,
+        "std_bps": null,
+        "t_stat": null,
+        "p_value": null,
+        "net_base_bps": -30.58,
+        "net_stress_bps": -44.58,
+        "worst_bps": -16.58,
+        "best_bps": -16.58,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2026": {
+            "n": 1,
+            "mean_bps": -16.58
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 1
+      },
+      "k30d": {
+        "n": 1,
+        "gross_mean_bps": -43.82,
+        "std_bps": null,
+        "t_stat": null,
+        "p_value": null,
+        "net_base_bps": -57.82,
+        "net_stress_bps": -71.82,
+        "worst_bps": -43.82,
+        "best_bps": -43.82,
+        "win_rate": 0.0,
+        "stability_by_year": {
+          "2026": {
+            "n": 1,
+            "mean_bps": -43.82
+          }
+        },
+        "n_rich": 0,
+        "n_cheap": 1
+      }
+    }
+  },
+  {
+    "mechanism": "M4_TTE_NORMALIZED_ZSCORE",
+    "symbol": "ETHUSDT",
+    "train_thresholds": {
+      "lo": -0.788,
+      "hi": 1.248
+    },
+    "horizons": {
+      "k1d": {
+        "n": 4,
+        "gross_mean_bps": 0.92,
+        "std_bps": 5.89,
+        "t_stat": 0.313,
+        "p_value": 0.7751,
+        "net_base_bps": -13.08,
+        "net_stress_bps": -27.08,
+        "worst_bps": -3.28,
+        "best_bps": 9.63,
+        "win_rate": 0.25,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 9.63
+          },
+          "2026": {
+            "n": 3,
+            "mean_bps": -1.98
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 3
+      },
+      "k3d": {
+        "n": 4,
+        "gross_mean_bps": 6.45,
+        "std_bps": 15.06,
+        "t_stat": 0.857,
+        "p_value": 0.4544,
+        "net_base_bps": -7.55,
+        "net_stress_bps": -21.55,
+        "worst_bps": -2.69,
+        "best_bps": 28.97,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 28.97
+          },
+          "2026": {
+            "n": 3,
+            "mean_bps": -1.05
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 3
+      },
+      "k7d": {
+        "n": 2,
+        "gross_mean_bps": 34.81,
+        "std_bps": 58.5,
+        "t_stat": 0.842,
+        "p_value": 0.5547,
+        "net_base_bps": 20.81,
+        "net_stress_bps": 6.81,
+        "worst_bps": -6.56,
+        "best_bps": 76.18,
+        "win_rate": 0.5,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 76.18
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": -6.56
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 1
+      },
+      "k14d": {
+        "n": 2,
+        "gross_mean_bps": 60.06,
+        "std_bps": 84.35,
+        "t_stat": 1.007,
+        "p_value": 0.4978,
+        "net_base_bps": 46.06,
+        "net_stress_bps": 32.06,
+        "worst_bps": 0.41,
+        "best_bps": 119.71,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 119.71
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": 0.41
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 1
+      },
+      "k30d": {
+        "n": 2,
+        "gross_mean_bps": 70.1,
+        "std_bps": 99.08,
+        "t_stat": 1.001,
+        "p_value": 0.4998,
+        "net_base_bps": 56.1,
+        "net_stress_bps": 42.1,
+        "worst_bps": 0.04,
+        "best_bps": 140.16,
+        "win_rate": 1.0,
+        "stability_by_year": {
+          "2024": {
+            "n": 1,
+            "mean_bps": 140.16
+          },
+          "2026": {
+            "n": 1,
+            "mean_bps": 0.04
+          }
+        },
+        "n_rich": 1,
+        "n_cheap": 1
+      }
+    }
+  }
+]

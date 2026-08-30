@@ -1,0 +1,206 @@
+{
+  "L8_BTCUSDT_large_cluster_all_fwd1h": {
+    "n": 106,
+    "gross_bps": 2.04,
+    "net14_bps": -11.96,
+    "hit_rate": 0.547,
+    "pf": 1.185,
+    "t": 0.64
+  },
+  "L8_BTCUSDT_large_cluster_all_fwd4h": {
+    "n": 106,
+    "gross_bps": 1.52,
+    "net14_bps": -12.48,
+    "hit_rate": 0.519,
+    "pf": 1.062,
+    "t": 0.24
+  },
+  "L8_BTCUSDT_large_cluster_long_liq_dominant_fwd4h": {
+    "n": 61,
+    "gross_bps": 6.97,
+    "net14_bps": -7.03,
+    "hit_rate": 0.525,
+    "pf": 1.32,
+    "t": 0.88
+  },
+  "L8_BTCUSDT_large_cluster_short_liq_dominant_fwd4h": {
+    "n": 45,
+    "gross_bps": -5.88,
+    "net14_bps": -19.88,
+    "hit_rate": 0.511,
+    "pf": 0.79,
+    "t": -0.57
+  },
+  "L8_BTCUSDT_baseline_all_hours_fwd4h": {
+    "n": 436,
+    "gross_bps": 6.37,
+    "net14_bps": -7.63,
+    "hit_rate": 0.544,
+    "pf": 1.291,
+    "t": 1.89
+  },
+  "L8_BTCUSDT_large_cluster_first_half_fwd4h": {
+    "n": 106,
+    "gross_bps": 1.52,
+    "net14_bps": -12.48,
+    "hit_rate": 0.519,
+    "pf": 1.062,
+    "t": 0.24
+  },
+  "L8_BTCUSDT_large_cluster_second_half_fwd4h": {
+    "n": 0
+  },
+  "L8_BTCUSDT_n_buckets_total": 3766,
+  "L8_BTCUSDT_p90_threshold_usd": 290192.1345500001,
+  "L8_ETHUSDT_large_cluster_all_fwd1h": {
+    "n": 97,
+    "gross_bps": 2.94,
+    "net14_bps": -11.06,
+    "hit_rate": 0.546,
+    "pf": 1.188,
+    "t": 0.62
+  },
+  "L8_ETHUSDT_large_cluster_all_fwd4h": {
+    "n": 97,
+    "gross_bps": 12.57,
+    "net14_bps": -1.43,
+    "hit_rate": 0.577,
+    "pf": 1.499,
+    "t": 1.3
+  },
+  "L8_ETHUSDT_large_cluster_long_liq_dominant_fwd4h": {
+    "n": 55,
+    "gross_bps": 11.23,
+    "net14_bps": -2.77,
+    "hit_rate": 0.545,
+    "pf": 1.426,
+    "t": 0.75
+  },
+  "L8_ETHUSDT_large_cluster_short_liq_dominant_fwd4h": {
+    "n": 42,
+    "gross_bps": 14.33,
+    "net14_bps": 0.33,
+    "hit_rate": 0.619,
+    "pf": 1.604,
+    "t": 1.32
+  },
+  "L8_ETHUSDT_baseline_all_hours_fwd4h": {
+    "n": 437,
+    "gross_bps": 9.85,
+    "net14_bps": -4.15,
+    "hit_rate": 0.54,
+    "pf": 1.373,
+    "t": 2.26
+  },
+  "L8_ETHUSDT_large_cluster_first_half_fwd4h": {
+    "n": 97,
+    "gross_bps": 12.57,
+    "net14_bps": -1.43,
+    "hit_rate": 0.577,
+    "pf": 1.499,
+    "t": 1.3
+  },
+  "L8_ETHUSDT_large_cluster_second_half_fwd4h": {
+    "n": 0
+  },
+  "L8_ETHUSDT_n_buckets_total": 3560,
+  "L8_ETHUSDT_p90_threshold_usd": 132221.77207,
+  "L9_BTCUSD_PERP_klines_cols": [
+    "open_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "quote_volume",
+    "count",
+    "taker_buy_volume",
+    "taker_buy_quote_volume"
+  ],
+  "L9_BTCUSD_PERP_big_liq_day_fwd1d": {
+    "n": 48,
+    "gross_bps": 33.53,
+    "net14_bps": 19.53,
+    "hit_rate": 0.583,
+    "pf": 1.314,
+    "t": 0.7
+  },
+  "L9_BTCUSD_PERP_big_liq_day_fwd3d": {
+    "n": 48,
+    "gross_bps": 73.03,
+    "net14_bps": 59.03,
+    "hit_rate": 0.562,
+    "pf": 1.476,
+    "t": 1.03
+  },
+  "L9_BTCUSD_PERP_baseline_all_days_fwd1d": {
+    "n": 472,
+    "gross_bps": 20.45,
+    "net14_bps": 6.45,
+    "hit_rate": 0.521,
+    "pf": 1.264,
+    "t": 1.76
+  },
+  "L9_BTCUSD_PERP_n_days_total": 472,
+  "L9_BTCUSD_PERP_date_range": [
+    "2023-06-25 00:00:00+00:00",
+    "2024-10-14 00:00:00+00:00"
+  ],
+  "L9_BTCUSD_PERP_long_liq_dominant_day_fwd1d": {
+    "n": 48,
+    "gross_bps": 7.26,
+    "net14_bps": -6.74,
+    "hit_rate": 0.562,
+    "pf": 1.063,
+    "t": 0.16
+  },
+  "L9_ETHUSD_PERP_klines_cols": [
+    "open_time",
+    "open",
+    "high",
+    "low",
+    "close",
+    "volume",
+    "quote_volume",
+    "count",
+    "taker_buy_volume",
+    "taker_buy_quote_volume"
+  ],
+  "L9_ETHUSD_PERP_big_liq_day_fwd1d": {
+    "n": 48,
+    "gross_bps": -3.49,
+    "net14_bps": -17.49,
+    "hit_rate": 0.521,
+    "pf": 0.978,
+    "t": -0.06
+  },
+  "L9_ETHUSD_PERP_big_liq_day_fwd3d": {
+    "n": 48,
+    "gross_bps": -44.63,
+    "net14_bps": -58.63,
+    "hit_rate": 0.583,
+    "pf": 0.808,
+    "t": -0.53
+  },
+  "L9_ETHUSD_PERP_baseline_all_days_fwd1d": {
+    "n": 474,
+    "gross_bps": 11.43,
+    "net14_bps": -2.57,
+    "hit_rate": 0.511,
+    "pf": 1.12,
+    "t": 0.84
+  },
+  "L9_ETHUSD_PERP_n_days_total": 474,
+  "L9_ETHUSD_PERP_date_range": [
+    "2023-06-25 00:00:00+00:00",
+    "2024-10-14 00:00:00+00:00"
+  ],
+  "L9_ETHUSD_PERP_long_liq_dominant_day_fwd1d": {
+    "n": 48,
+    "gross_bps": 7.84,
+    "net14_bps": -6.16,
+    "hit_rate": 0.583,
+    "pf": 1.048,
+    "t": 0.13
+  }
+}

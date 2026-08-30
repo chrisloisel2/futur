@@ -1,0 +1,737 @@
+{
+  "M1_dvol_meanrev": {
+    "mechanism_id": "M1_dvol_meanrev",
+    "name": "DVOL shock -> own forward change (vol-of-vol mean reversion)",
+    "hypothesis": "A DVOL spike today mean-reverts tomorrow: d_dvol(t) negatively predicts d_dvol(t+1..3), a timing signal for short-variance entries distinct from A14 (which used DVOL shock to forecast underlying RV, not DVOL itself).",
+    "data_source": "features/DVOL_BTC_1d.parquet",
+    "metric": "Spearman IC, d_dvol(t) -> dvol(t+k)-dvol(t)",
+    "result": {
+      "fwd1d": {
+        "n": 1287,
+        "ic": -0.0132,
+        "p": 0.634927
+      },
+      "fwd3d": {
+        "n": 1285,
+        "ic": -0.06,
+        "p": 0.031362
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 643,
+        "ic": 0.0079,
+        "p": 0.841318
+      },
+      "h2": {
+        "n": 644,
+        "ic": -0.0452,
+        "p": 0.251922
+      },
+      "sign_stable": false
+    },
+    "verdict": "DEAD",
+    "notes": "No execution vehicle in this dataset (would need to trade DVOL/variance swaps directly, not present)."
+  },
+  "M2_rv_iv_spread": {
+    "mechanism_id": "M2_rv_iv_spread",
+    "name": "RV-IV spread level -> own mean reversion / forward RV",
+    "hypothesis": "The gap between ATM IV and trailing realized vol (the current variance-risk-premium level) mean-reverts, and/or predicts forward RV directly -- distinct from A14 which used IV SHOCKS, not the level of the RV-IV gap, and did not test the spreads own dynamics.",
+    "data_source": "features/BTC_daily.parquet + Binance perp trailing RV",
+    "metric": "Spearman IC + confound-controlled partial IC",
+    "result": {
+      "spread_to_rv_fwd1d": {
+        "n": 1294,
+        "ic": -0.1622,
+        "p": 0.0
+      },
+      "spread_meanrev_fwd1d": {
+        "n": 1293,
+        "ic": -0.586,
+        "p": 0.0
+      },
+      "spread_meanrev_fwd3d": {
+        "n": 1291,
+        "ic": -0.6426,
+        "p": 0.0
+      },
+      "CONFOUND_baseline_negRVonly_to_spread_fwd_change3d": {
+        "n": 1291,
+        "ic": -0.5681,
+        "p": 0.0
+      },
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1291,
+        "partial_ic": -0.3884,
+        "p": 0.0
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 645,
+        "ic": -0.6723,
+        "p": 0.0
+      },
+      "h2": {
+        "n": 646,
+        "ic": -0.6266,
+        "p": 0.0
+      },
+      "sign_stable": true
+    },
+    "verdict": "PROMISING",
+    "notes": "CONFOUND CHECKED, SURVIVES (partially): raw IC -0.64 is largely mechanical -- spread(t)=atm_iv(t)-sameday_rv(t) is dominated by sameday_rv (IV moves far less day-to-day than realized vol does), so spread(t) is close to -sameday_rv(t) in disguise, and the near-identical baseline \"-sameday_rv(t) alone -> spread_fwd_change3d\" IC (-0.568 vs raw -0.643) confirms most of the raw number is just RV mean-reversion relabeled. BUT after formally partialling out sameday_rv(t) (rank-residualized), a large incremental partial IC of -0.388 (n=1291, p<1e-16) remains -- stronger survival than A14s own confound-passing threshold (+0.224 partial). Sign-stable across both time-split halves (-0.672 / -0.627 raw). This IS the VOL_RISK_PREMIUM mechanism from reports/options/VOL_RISK_PREMIUM.md (that report established the premium EXISTS unconditionally); this test adds that the spreads day-to-day level, even net of same-day RV clustering, still carries real incremental timing information for its own forward change -- a genuinely new, confound-checked result, not just a relabeling of RV clustering."
+  },
+  "M3_block_flow_returns": {
+    "mechanism_id": "M3_block_flow_returns",
+    "name": "Block-trade net flow -> forward perp returns (daily)",
+    "hypothesis": "Deribit block trades (institutional execution channel, is_block=True) carry directional information: net bullish block flow predicts BTC perp appreciation. Distinct from the closed OPTIONS_POSITIONING_4H protocol (NO_EDGE_DEFINITIF) which used ALL flow (not block-restricted) at 4h buckets with z-score normalization; here restricted to the institutional block channel at daily horizon, raw and z-scored.",
+    "data_source": "trades/BTC (is_block=True subset)",
+    "metric": "Spearman IC, net_flow(t) -> ret_fwd(t+k)",
+    "result": {
+      "raw_ret_fwd1d": {
+        "n": 1290,
+        "ic": -0.0166,
+        "p": 0.551307
+      },
+      "raw_ret_fwd3d": {
+        "n": 1290,
+        "ic": -0.0248,
+        "p": 0.373517
+      },
+      "zscore_ret_fwd1d": {
+        "n": 1261,
+        "ic": -0.0166,
+        "p": 0.55639
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 645,
+        "ic": -0.0266,
+        "p": 0.499631
+      },
+      "h2": {
+        "n": 645,
+        "ic": -0.0126,
+        "p": 0.749185
+      },
+      "sign_stable": true
+    },
+    "verdict": "DEAD",
+    "notes": ""
+  },
+  "M4_large_nonblock_flow_returns": {
+    "mechanism_id": "M4_large_nonblock_flow_returns",
+    "name": "Large non-block trade flow -> forward perp returns (daily)",
+    "hypothesis": "Large trades that do NOT clear the official Deribit block threshold (top-5%-by-notional of the days non-block trades) still carry informed directional flow, comparable to but distinct from the official block channel (M3).",
+    "data_source": "trades/BTC (large non-block subset, notional >= days 95th pct)",
+    "metric": "Spearman IC",
+    "result": {
+      "ret_fwd1d": {
+        "n": 1294,
+        "ic": 0.0009,
+        "p": 0.974928
+      },
+      "ret_fwd3d": {
+        "n": 1294,
+        "ic": 0.0033,
+        "p": 0.905766
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 647,
+        "ic": -0.0376,
+        "p": 0.339509
+      },
+      "h2": {
+        "n": 647,
+        "ic": 0.0386,
+        "p": 0.327268
+      },
+      "sign_stable": false
+    },
+    "verdict": "DEAD",
+    "notes": ""
+  },
+  "M5_block_activity_rv": {
+    "mechanism_id": "M5_block_activity_rv",
+    "name": "Block-trade activity level -> forward realized vol",
+    "hypothesis": "Days with unusually high block-trade activity (count/notional, not directional sign) precede higher realized vol -- distinct from A14s block_share (a SHARE-of-total metric already tested with IC -0.13/-0.19 on rv_fwd3) since this uses raw activity level/count, not share-of-volume.",
+    "data_source": "trades/BTC (is_block=True)",
+    "metric": "Spearman IC + confound-controlled partial IC vs sameday_rv",
+    "result": {
+      "block_count_rv_fwd1d": {
+        "n": 1290,
+        "ic": 0.1399,
+        "p": 0.0
+      },
+      "block_notional_rv_fwd1d": {
+        "n": 1290,
+        "ic": 0.0911,
+        "p": 0.00105
+      },
+      "abs_block_flow_rv_fwd1d": {
+        "n": 1290,
+        "ic": 0.0326,
+        "p": 0.242508
+      },
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1290,
+        "partial_ic": -0.1144,
+        "p": 3.8e-05
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 645,
+        "ic": 0.2127,
+        "p": 0.0
+      },
+      "h2": {
+        "n": 645,
+        "ic": 0.0244,
+        "p": 0.536661
+      },
+      "sign_stable": true
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M6_otm_put_tailhedge": {
+    "mechanism_id": "M6_otm_put_tailhedge",
+    "name": "Far-OTM put activity share -> forward RV (crash-hedging demand)",
+    "hypothesis": "The share of daily options notional concentrated in far-OTM puts (strike <= 0.85x spot) is a tail-hedging-demand gauge; rising demand for crash protection should precede realized-vol expansion. Distinct from top_strike_share (ATM concentration) already tested in A14.",
+    "data_source": "trades/BTC (cp=P & log_moneyness <= ln(0.85))",
+    "metric": "Spearman IC + confound-controlled partial IC vs sameday_rv",
+    "result": {
+      "rv_fwd1d": {
+        "n": 1294,
+        "ic": 0.2365,
+        "p": 0.0
+      },
+      "rv_fwd3d": {
+        "n": 1294,
+        "ic": 0.2159,
+        "p": 0.0
+      },
+      "ret_fwd1d": {
+        "n": 1294,
+        "ic": -0.006,
+        "p": 0.830199
+      },
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1294,
+        "partial_ic": 0.1583,
+        "p": 0.0
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 647,
+        "ic": 0.2163,
+        "p": 0.0
+      },
+      "h2": {
+        "n": 647,
+        "ic": 0.2231,
+        "p": 0.0
+      },
+      "sign_stable": true
+    },
+    "verdict": "PROMISING",
+    "notes": ""
+  },
+  "M7_term_structure_level": {
+    "mechanism_id": "M7_term_structure_level",
+    "name": "Term-structure slope (near-30d ATM IV minus far-90/180d ATM IV) -> forward RV/returns",
+    "hypothesis": "Backwardation (near IV > far IV, i.e. term_slope>0) signals near-term stress and should precede higher realized vol; contango (term_slope<0) signals calm. Trade-flow-implied, NOT OI-weighted (explicitly flagged: this is median trade-IV per expiry bucket, not a true OI-weighted surface).",
+    "data_source": "trades/BTC ATM band (|log_moneyness|<=0.05), split by days_to_expiry <=30 vs 60-180",
+    "metric": "Spearman IC + confound-controlled partial IC vs sameday_rv",
+    "result": {
+      "rv_fwd1d": {
+        "n": 1294,
+        "ic": 0.3749,
+        "p": 0.0
+      },
+      "rv_fwd3d": {
+        "n": 1294,
+        "ic": 0.2444,
+        "p": 0.0
+      },
+      "ret_fwd1d": {
+        "n": 1294,
+        "ic": 0.0005,
+        "p": 0.98618
+      },
+      "n_valid_days": 1294,
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1294,
+        "partial_ic": 0.0602,
+        "p": 0.030311
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 647,
+        "ic": 0.1892,
+        "p": 1e-06
+      },
+      "h2": {
+        "n": 647,
+        "ic": 0.336,
+        "p": 0.0
+      },
+      "sign_stable": true
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M8_cross_expiry_relative_change": {
+    "mechanism_id": "M8_cross_expiry_relative_change",
+    "name": "Near-expiry IV move vs far-expiry IV move (divergence) -> forward RV",
+    "hypothesis": "When near-dated IV moves MORE than far-dated IV on the same day (term structure steepening shock), that divergence itself -- not the shock in either leg alone -- predicts forward RV. A term-structure-specific RV trade, distinct from A14s single-IV shock and from M7s level test.",
+    "data_source": "trades/BTC, d(near_atm_iv) - d(far_atm_iv)",
+    "metric": "Spearman IC + confound-controlled partial IC vs sameday_rv",
+    "result": {
+      "rv_fwd1d": {
+        "n": 1293,
+        "ic": 0.3067,
+        "p": 0.0
+      },
+      "rv_fwd3d": {
+        "n": 1293,
+        "ic": 0.1573,
+        "p": 0.0
+      },
+      "slope_meanrev_fwd3d": {
+        "n": 1290,
+        "ic": -0.2483,
+        "p": 0.0
+      },
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1293,
+        "partial_ic": 0.0819,
+        "p": 0.003222
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 646,
+        "ic": 0.1836,
+        "p": 3e-06
+      },
+      "h2": {
+        "n": 647,
+        "ic": 0.1254,
+        "p": 0.001398
+      },
+      "sign_stable": true
+    },
+    "verdict": "PROMISING",
+    "notes": ""
+  },
+  "M9_expiry_proximity": {
+    "mechanism_id": "M9_expiry_proximity",
+    "name": "Monthly-expiry-proximity effect on realized vol / ATM IV (pinning & crush, no OI)",
+    "hypothesis": "As BTC approaches DERIBITS STANDARD MONTHLY expiry (last Friday of month, 08:00 UTC -- pure calendar convention, not data-dependent), does same-day realized vol or ATM IV level/crush differ from non-expiry days? A true pin-risk/max-pain measure would need OI (SKIPPED, absent from this dataset); this tests the calendar-proximity effect only.",
+    "data_source": "trades/BTC ATM band joined to a hardcoded Deribit monthly-expiry calendar (last Friday/month)",
+    "metric": "Kruskal-Wallis across days-to-next-monthly-expiry buckets (same-day RV) + IC(days_to_expiry -> atm_iv level)",
+    "result": {
+      "bucket_table": {
+        "0-1d": {
+          "n": 42,
+          "mean_rv_fwd1d": 21.47,
+          "mean_sameday_rv": 42.163,
+          "mean_d_atm_iv": -2.2969999313,
+          "mean_atm_iv": 44.0629997253
+        },
+        "1-3d": {
+          "n": 84,
+          "mean_rv_fwd1d": 40.956,
+          "mean_sameday_rv": 41.505,
+          "mean_d_atm_iv": -0.5889999866,
+          "mean_atm_iv": 46.4109992981
+        },
+        "3-7d": {
+          "n": 168,
+          "mean_rv_fwd1d": 40.424,
+          "mean_sameday_rv": 35.562,
+          "mean_d_atm_iv": 0.5519999862,
+          "mean_atm_iv": 44.5670013428
+        },
+        "7-14d": {
+          "n": 294,
+          "mean_rv_fwd1d": 41.823,
+          "mean_sameday_rv": 42.28,
+          "mean_d_atm_iv": 0.0329999998,
+          "mean_atm_iv": 46.5390014648
+        },
+        "14-21d": {
+          "n": 301,
+          "mean_rv_fwd1d": 42.672,
+          "mean_sameday_rv": 42.224,
+          "mean_d_atm_iv": -0.1689999998,
+          "mean_atm_iv": 46.4039993286
+        },
+        "21-32d": {
+          "n": 360,
+          "mean_rv_fwd1d": 42.213,
+          "mean_sameday_rv": 42.905,
+          "mean_d_atm_iv": 0.2660000026,
+          "mean_atm_iv": 45.533000946
+        }
+      },
+      "kruskal_stat": 14.068784082471211,
+      "kruskal_p": 0.015178343683246965,
+      "iv_crush_ic_days_to_expiry_vs_atm_iv_level": {
+        "n": 1294,
+        "ic": -0.08,
+        "p": 0.00396
+      }
+    },
+    "time_split_stability": {
+      "note": "cross-sectional bucket test, not a chronological split"
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M10_iv_regime_transition": {
+    "mechanism_id": "M10_iv_regime_transition",
+    "name": "IV regime SWITCH (tercile low/mid/high) -> forward RV/returns",
+    "hypothesis": "A regime TRANSITION (e.g. jumping from the bottom IV tercile straight to the top) carries different forward-RV information than persisting in the same regime or than the magnitude of a single-day shock (A14s construction) -- distinct signal: discreteness of the switch itself.",
+    "data_source": "features/BTC_daily.parquet atm_iv terciles (90-day-lookback-free, whole-sample qcut for discovery purposes -- flagged as in-sample tercile cutoffs, a caveat for live use)",
+    "metric": "Mann-Whitney U, switch cohorts vs no-switch cohort on rv_fwd3d",
+    "result": {
+      "bucket_table": {
+        "high_to_low": {
+          "n": 9,
+          "mean_rv_fwd3d": 42.25,
+          "mean_ret_fwd3d": 0.01
+        },
+        "low_to_high": {
+          "n": 9,
+          "mean_rv_fwd3d": 55.433,
+          "mean_ret_fwd3d": 0.029
+        },
+        "none": {
+          "n": 922,
+          "mean_rv_fwd3d": 42.213,
+          "mean_ret_fwd3d": 0.003
+        },
+        "other_switch": {
+          "n": 354,
+          "mean_rv_fwd3d": 45.29,
+          "mean_ret_fwd3d": 0.004
+        }
+      },
+      "low_to_high_vs_none_p": 0.012440511694343192,
+      "high_to_low_vs_none_p": 0.41348906075581926
+    },
+    "time_split_stability": {
+      "note": "cohort test, not chronological split"
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M11_btc_move_iv_repricing": {
+    "mechanism_id": "M11_btc_move_iv_repricing",
+    "name": "BTC move -> next-day IV repricing (leverage effect + magnitude), and does repricing mean-revert",
+    "hypothesis": "Reverse causality, three sub-tests: (a) leverage effect -- does a signed down-move raise next-day ATM IV more than an up-move of the same size (classic equity-style leverage effect, untested for this crypto options market at daily granularity); (b) magnitude -- does |move| predict |repricing| regardless of sign; (c) conditional on the top-decile biggest-move days specifically, does the resulting IV repricing then reverse the following day (overreaction fade, a short-vol-after-spike timing trade).",
+    "data_source": "trades/BTC ATM band + Binance perp same-day return",
+    "metric": "Spearman IC (3 sub-tests)",
+    "result": {
+      "a_leverage_signedret_to_signed_iv_change_fwd1": {
+        "n": 1293,
+        "ic": -0.0301,
+        "p": 0.279341
+      },
+      "b_magnitude_absret_to_abs_iv_change_fwd1": {
+        "n": 1293,
+        "ic": -0.0519,
+        "p": 0.062015
+      },
+      "c_conditional_meanrev_on_top_decile_moves": {
+        "n": 130,
+        "ic": -0.0916,
+        "p": 0.300154
+      },
+      "n_big_move_days(90th_pctile)": 130
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 646,
+        "ic": 0.075,
+        "p": 0.056745
+      },
+      "h2": {
+        "n": 647,
+        "ic": -0.1442,
+        "p": 0.000232
+      },
+      "sign_stable": false
+    },
+    "verdict": "DEAD",
+    "notes": ""
+  },
+  "M12_cumulative_flow_momentum": {
+    "mechanism_id": "M12_cumulative_flow_momentum",
+    "name": "Rolling 3d/7d cumulative options flow -> forward returns/RV (positioning momentum)",
+    "hypothesis": "Sustained multi-day options positioning buildup (not a single-day flow reading, which is the closed OPTIONS_POSITIONING_4H protocols construction) predicts subsequent perp direction or vol -- a momentum/persistence variant rather than an instantaneous-flow variant.",
+    "data_source": "trades/BTC, 3d/7d rolling sums of net_flow_all and block_flow",
+    "metric": "Spearman IC (6 combos tested)",
+    "result": {
+      "cum_flow_3d__ret_fwd3d": {
+        "n": 1292,
+        "ic": 0.0035,
+        "p": 0.900526
+      },
+      "cum_flow_7d__ret_fwd5d": {
+        "n": 1288,
+        "ic": 0.0033,
+        "p": 0.905661
+      },
+      "cum_block_flow_3d__ret_fwd3d": {
+        "n": 1280,
+        "ic": -0.014,
+        "p": 0.61718
+      },
+      "cum_block_flow_7d__ret_fwd5d": {
+        "n": 1260,
+        "ic": 0.0323,
+        "p": 0.25129
+      },
+      "cum_flow_3d__rv_fwd3d": {
+        "n": 1292,
+        "ic": -0.0764,
+        "p": 0.00602
+      },
+      "cum_flow_7d__rv_fwd5d": {
+        "n": 1288,
+        "ic": -0.147,
+        "p": 0.0
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 644,
+        "ic": -0.0696,
+        "p": 0.077634
+      },
+      "h2": {
+        "n": 644,
+        "ic": 0.0445,
+        "p": 0.259462
+      },
+      "sign_stable": false
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M13_options_flow_basis": {
+    "mechanism_id": "M13_options_flow_basis",
+    "name": "Options net flow -> forward perp basis/premium change (Binance)",
+    "hypothesis": "Aggregate bullish/bearish options flow on Deribit predicts subsequent widening/narrowing of the Binance BTCUSDT perp premium (a basis proxy) the next day -- tests whether options positioning leaks into a DIFFERENT venues funding-adjacent pricing, not perp returns directly.",
+    "data_source": "trades/BTC net_flow + derivatives_backfill/binance_vision_premium/BTCUSDT_premium_5m.parquet",
+    "metric": "Spearman IC",
+    "result": {
+      "net_flow_all": {
+        "n": 1272,
+        "ic": 0.0667,
+        "p": 0.017425
+      },
+      "block_flow": {
+        "n": 1268,
+        "ic": 0.029,
+        "p": 0.301481
+      },
+      "cum_flow_7d": {
+        "n": 1266,
+        "ic": 0.0127,
+        "p": 0.650389
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 636,
+        "ic": 0.0754,
+        "p": 0.057472
+      },
+      "h2": {
+        "n": 636,
+        "ic": 0.0588,
+        "p": 0.138425
+      },
+      "sign_stable": true
+    },
+    "verdict": "WEAK",
+    "notes": "Deribit (options) and Binance (premium) are different venues/clocks; joined on UTC calendar day with same-day mean premium, forward = next calendar days mean, so alignment tolerance is coarse (day-level) by construction -- flagged per hard rule 7."
+  },
+  "M14_dvol_shock_returns": {
+    "mechanism_id": "M14_dvol_shock_returns",
+    "name": "DVOL shock -> forward perp DIRECTIONAL returns",
+    "hypothesis": "A14 used DVOL shocks to forecast realized VOL (IC +0.128/+0.148). Here the same DVOL-shock signal is tested against DIRECTIONAL forward returns instead -- does a vol-index spike itself carry directional information (e.g. vol spikes cluster with down moves)?",
+    "data_source": "features/DVOL_BTC_1d.parquet",
+    "metric": "Spearman IC",
+    "result": {
+      "ret_fwd1d": {
+        "n": 1288,
+        "ic": 0.0452,
+        "p": 0.104578
+      },
+      "ret_fwd3d": {
+        "n": 1288,
+        "ic": 0.087,
+        "p": 0.001777
+      },
+      "abs_d_dvol_vs_ret_fwd1d": {
+        "n": 1288,
+        "ic": 0.0048,
+        "p": 0.862246
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 644,
+        "ic": 0.0446,
+        "p": 0.258023
+      },
+      "h2": {
+        "n": 644,
+        "ic": 0.0449,
+        "p": 0.255208
+      },
+      "sign_stable": true
+    },
+    "verdict": "DEAD",
+    "notes": ""
+  },
+  "M15_pc_ratio_level_rv": {
+    "mechanism_id": "M15_pc_ratio_level_rv",
+    "name": "Put/call volume ratio LEVEL (not day-over-day delta) -> forward RV",
+    "hypothesis": "The absolute LEVEL of put/call volume ratio (a standing positioning-skew gauge) predicts forward RV, distinct from A14 (which used the day-over-day DELTA of related flow fields for RV forecasting) and distinct from the closed positioning protocol (which targeted returns, not RV, and used deltas).",
+    "data_source": "features/BTC_daily.parquet pc_volume_ratio",
+    "metric": "Spearman IC + confound-controlled partial IC vs sameday_rv",
+    "result": {
+      "rv_fwd1d": {
+        "n": 1294,
+        "ic": 0.0892,
+        "p": 0.001311
+      },
+      "rv_fwd3d": {
+        "n": 1294,
+        "ic": 0.0709,
+        "p": 0.010771
+      },
+      "ret_fwd1d": {
+        "n": 1294,
+        "ic": 0.0017,
+        "p": 0.949979
+      },
+      "CONFOUND_partial_ic_controlling_for_sameday_rv": {
+        "n": 1294,
+        "partial_ic": 0.0347,
+        "p": 0.212226
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 647,
+        "ic": 0.0376,
+        "p": 0.339739
+      },
+      "h2": {
+        "n": 647,
+        "ic": 0.1583,
+        "p": 5.2e-05
+      },
+      "sign_stable": true
+    },
+    "verdict": "WEAK",
+    "notes": ""
+  },
+  "M16_hourly_iv_shock": {
+    "mechanism_id": "M16_hourly_iv_shock",
+    "name": "Hourly ATM-IV shock (trade-implied) -> next-hour perp return/RV",
+    "hypothesis": "A14s hourly test used flow variables (notional_z, n_block, block_share_hr, cp_imbalance) to forecast next-hour |return|. This tests the hourly IV-LEVEL SHOCK itself (d_atm_iv within the hour), which A14 did not test at hourly granularity (only daily d_atm_iv_traded).",
+    "data_source": "trades/BTC hourly ATM band (|log_moneyness|<=0.07)",
+    "metric": "Spearman IC",
+    "result": {
+      "ret_fwd1h": {
+        "n": 31047,
+        "ic": -0.0078,
+        "p": 0.170736
+      },
+      "rv_fwd1h": {
+        "n": 31047,
+        "ic": -0.0046,
+        "p": 0.418012
+      },
+      "abs_d_atm_iv_vs_rv_fwd1h": {
+        "n": 31047,
+        "ic": -0.0453,
+        "p": 0.0
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 15523,
+        "ic": 0.0046,
+        "p": 0.567176
+      },
+      "h2": {
+        "n": 15524,
+        "ic": -0.0143,
+        "p": 0.0748
+      },
+      "sign_stable": false
+    },
+    "verdict": "DEAD",
+    "notes": "Very sparse per-hour ATM trade counts (median likely <10) -- flagged as a data-density caveat."
+  },
+  "M17_hourly_block_longer_rv": {
+    "mechanism_id": "M17_hourly_block_longer_rv",
+    "name": "Hourly block-trade count/notional -> forward RV at 4h/24h (longer horizon than A14 hourly)",
+    "hypothesis": "A14s hourly test forecast 1h forward |return| using notional_z/n_block. This tests whether the same hourly block-trade signal has predictive power at LONGER RV horizons (4h, 24h) -- does the block-flow information decay fast (pure microstructure) or persist (genuine information)?",
+    "data_source": "trades/BTC hourly, is_block=True subset",
+    "metric": "Spearman IC + confound-controlled partial IC vs trailing 24h RV",
+    "result": {
+      "block_count_rv_fwd4h": {
+        "n": 31050,
+        "ic": 0.3083,
+        "p": 0.0
+      },
+      "block_count_rv_fwd24h": {
+        "n": 31050,
+        "ic": 0.2209,
+        "p": 0.0
+      },
+      "block_notional_rv_fwd24h": {
+        "n": 21227,
+        "ic": 0.1058,
+        "p": 0.0
+      },
+      "CONFOUND_partial_ic_controlling_for_trail_rv_24h": {
+        "n": 31050,
+        "partial_ic": 0.0996,
+        "p": 0.0
+      }
+    },
+    "time_split_stability": {
+      "h1": {
+        "n": 15525,
+        "ic": 0.2292,
+        "p": 0.0
+      },
+      "h2": {
+        "n": 15525,
+        "ic": 0.217,
+        "p": 0.0
+      },
+      "sign_stable": true
+    },
+    "verdict": "PROMISING",
+    "notes": ""
+  }
+}

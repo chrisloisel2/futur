@@ -1,0 +1,40 @@
+{
+  "baseline_full": {
+    "n": 10334,
+    "gross_bps": 42.12,
+    "net14_bps": 28.12,
+    "hit_rate": 0.531,
+    "pf": 1.378,
+    "t": 7.32
+  },
+  "baseline_2025_26": {
+    "n": 4648,
+    "gross_bps": 62.78,
+    "net14_bps": 48.78,
+    "hit_rate": 0.52,
+    "pf": 1.474,
+    "t": 5.39
+  },
+  "exhaustion_full": {
+    "n": 0
+  },
+  "exhaustion_2025_26": {
+    "n": 0
+  },
+  "onset_full": {
+    "n": 9534,
+    "gross_bps": 48.59,
+    "net14_bps": 34.59,
+    "hit_rate": 0.533,
+    "pf": 1.446,
+    "t": 8.1
+  },
+  "onset_2025_26": {
+    "n": 4339,
+    "gross_bps": 71.71,
+    "net14_bps": 57.71,
+    "hit_rate": 0.521,
+    "pf": 1.555,
+    "t": 5.97
+  }
+}

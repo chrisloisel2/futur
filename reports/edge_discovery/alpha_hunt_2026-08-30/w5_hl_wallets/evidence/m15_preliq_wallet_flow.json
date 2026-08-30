@@ -1,0 +1,11 @@
+{
+  "n_events_total": 16872,
+  "n_events_with_informed_preflow": 4531,
+  "corr_preflow_vs_outcome": 0.008050437965005324,
+  "frac_sign_agreement": 0.5175457956301037,
+  "mean_outcome_when_preflow_positive": 4.409809536164468,
+  "mean_outcome_when_preflow_negative": 3.5525741778613353,
+  "n_preflow_positive": 2285,
+  "n_preflow_negative": 2246,
+  "mean_outcome_all_events_bps": 1.2668616434223476
+}

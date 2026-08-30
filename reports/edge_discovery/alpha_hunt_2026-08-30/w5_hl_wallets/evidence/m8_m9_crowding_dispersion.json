@@ -1,0 +1,81 @@
+{
+  "m8_wallet_crowding": [
+    {
+      "bucket_label": "balanced 50-60%",
+      "n": 89145,
+      "mean_fwd_ret_bps": -0.00025169088633344354,
+      "h1_mean": 0.008730046192457156,
+      "h1_n": 36787,
+      "h2_mean": -0.006562305537723294,
+      "h2_n": 52358
+    },
+    {
+      "bucket_label": "60-75%",
+      "n": 31409,
+      "mean_fwd_ret_bps": 0.041497957148909165,
+      "h1_mean": 0.0450134477819869,
+      "h1_n": 14176,
+      "h2_mean": 0.038606087177661556,
+      "h2_n": 17233
+    },
+    {
+      "bucket_label": "75-90%",
+      "n": 2281,
+      "mean_fwd_ret_bps": 0.13162539915681043,
+      "h1_mean": 0.10481511531568728,
+      "h1_n": 1198,
+      "h2_mean": 0.1612825737105182,
+      "h2_n": 1083
+    },
+    {
+      "bucket_label": "extreme >=90%",
+      "n": 193,
+      "mean_fwd_ret_bps": 0.4168927978357503,
+      "h1_mean": 0.46017978872571674,
+      "h1_n": 112,
+      "h2_mean": 0.35703918080271024,
+      "h2_n": 81
+    }
+  ],
+  "m9_dispersion_vol_expansion": [
+    {
+      "entropy_quintile": 0,
+      "mean_fwd_range_vol_bps": 18.03266716003418,
+      "mean_current_range_vol_bps": 18.55662727355957,
+      "n": 25396.0
+    },
+    {
+      "entropy_quintile": 1,
+      "mean_fwd_range_vol_bps": 19.398189544677734,
+      "mean_current_range_vol_bps": 19.389965057373047,
+      "n": 27020.0
+    },
+    {
+      "entropy_quintile": 2,
+      "mean_fwd_range_vol_bps": 20.231531143188477,
+      "mean_current_range_vol_bps": 20.127153396606445,
+      "n": 22644.0
+    },
+    {
+      "entropy_quintile": 3,
+      "mean_fwd_range_vol_bps": 20.979366302490234,
+      "mean_current_range_vol_bps": 20.683109283447266,
+      "n": 24351.0
+    },
+    {
+      "entropy_quintile": 4,
+      "mean_fwd_range_vol_bps": 21.37190818786621,
+      "mean_current_range_vol_bps": 21.219398498535156,
+      "n": 23617.0
+    }
+  ],
+  "m9_ic": {
+    "ic_full": 0.042603895209755244,
+    "p_full": 1.5551548395530454e-50,
+    "ic_h1": 0.0017380119707536726,
+    "p_h1": 0.6911038485210765,
+    "ic_h2": 0.05592961860224981,
+    "p_h2": 3.9107579078597193e-50,
+    "n": 123028
+  }
+}

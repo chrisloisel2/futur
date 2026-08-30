@@ -1,0 +1,31 @@
+{
+  "note": "Supplementary baselines and stability checks referenced in REPORT.md narrative but computed as ad-hoc queries rather than dedicated scripts.",
+  "test_period_coin_returns_2026_08_13_to_08_29": {
+    "LINK": 32.08, "ETH": 30.07, "LTC": 10.24, "SOL": 38.02, "DOGE": 22.39,
+    "SUI": 9.49, "BNB": 13.36, "ADA": 11.29, "HYPE": 43.86, "XRP": 37.95,
+    "AVAX": 15.73, "BTC": 22.69,
+    "units": "pct return over the 16-day TEST window, all 12 coins positive -- an exceptional broad rally that structurally favors any long-biased (buy-side) fade rule tested in this report"
+  },
+  "baseline_unconditional_test_period_dir_minus1_all_sellers": {
+    "mo60": -0.736, "mo300": -3.418, "mo900": -6.130, "n": 22168101,
+    "note": "ANY wallet selling during the test window shows negative markout on average, purely from the broad rally -- context for interpreting M3/M7/M14's 'fade the sell' gross numbers"
+  },
+  "baseline_eligible_noncohort_sellers_m3_top5pct_timing": {
+    "mo60": -0.617, "mo300": -3.129, "mo900": -5.838, "n": 18040706,
+    "note": "population baseline used for M3's excess-over-baseline calc: same n_train>=30 eligibility filter, excluding the top5% timing cohort"
+  },
+  "m3_top5pct_timing_cohort_excess_over_population_baseline": {
+    "mo60_excess": -4.65, "mo300_excess": -6.42, "mo900_excess": -8.84,
+    "note": "cohort raw minus population baseline (dir=-1 only) -- the better-controlled estimate of genuine wallet-selection alpha net of common market drift; fade edge = negative of these (still positive and economically the most defensible number for M3)"
+  },
+  "m14a_funding_gt0_dir_minus1_half_split_stability": {
+    "mo60_h1": -9.562, "n_h1": 24276, "mo60_h2": 2.843, "n_h2": 31861,
+    "mo300_h1": -21.615, "mo300_h2": -7.410,
+    "note": "NOT stable at 60s (sign flips h1->h2); same-sign but decays ~3x at 300s. Confirms this number is dominated by a transient regime effect, not tested for stability in the original M14 script due to time constraints -- added here before finalizing verdict."
+  },
+  "m14b_oi_rising_dir_minus1_half_split_stability": {
+    "mo60_h1": -15.912, "n_h1": 14280, "mo60_h2": -0.702, "n_h2": 15284,
+    "mo300_h1": -35.872, "mo300_h2": -7.204,
+    "note": "Same-sign both halves but decays ~5-23x from h1 to h2 -- the single largest raw gross number in the whole sweep is also the LEAST stable, consistent with a one-off regime/period effect rather than a persistent mechanism."
+  }
+}

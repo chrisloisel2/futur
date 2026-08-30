@@ -1,0 +1,1141 @@
+{
+  "LONG_CASCADE_exhaustion_by_quarter": [
+    {
+      "quarter": "2021Q1",
+      "n": 1.0,
+      "gross_bps": 789.13,
+      "net14_bps": 775.13,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": NaN
+    },
+    {
+      "quarter": "2021Q3",
+      "n": 1.0,
+      "gross_bps": 37.22,
+      "net14_bps": 23.22,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": NaN
+    },
+    {
+      "quarter": "2021Q4",
+      "n": 21.0,
+      "gross_bps": 127.2,
+      "net14_bps": 113.2,
+      "hit_rate": 0.714,
+      "pf": 3.575,
+      "t": 2.03
+    },
+    {
+      "quarter": "2022Q1",
+      "n": 82.0,
+      "gross_bps": -27.47,
+      "net14_bps": -41.47,
+      "hit_rate": 0.549,
+      "pf": 0.816,
+      "t": -0.62
+    },
+    {
+      "quarter": "2022Q2",
+      "n": 77.0,
+      "gross_bps": 119.23,
+      "net14_bps": 105.23,
+      "hit_rate": 0.597,
+      "pf": 2.453,
+      "t": 2.49
+    },
+    {
+      "quarter": "2022Q3",
+      "n": 32.0,
+      "gross_bps": -98.53,
+      "net14_bps": -112.53,
+      "hit_rate": 0.438,
+      "pf": 0.287,
+      "t": -2.77
+    },
+    {
+      "quarter": "2022Q4",
+      "n": 74.0,
+      "gross_bps": -7.45,
+      "net14_bps": -21.45,
+      "hit_rate": 0.541,
+      "pf": 0.948,
+      "t": -0.15
+    },
+    {
+      "quarter": "2023Q1",
+      "n": 142.0,
+      "gross_bps": 61.09,
+      "net14_bps": 47.09,
+      "hit_rate": 0.585,
+      "pf": 1.981,
+      "t": 2.88
+    },
+    {
+      "quarter": "2023Q2",
+      "n": 79.0,
+      "gross_bps": -6.32,
+      "net14_bps": -20.32,
+      "hit_rate": 0.582,
+      "pf": 0.924,
+      "t": -0.22
+    },
+    {
+      "quarter": "2023Q3",
+      "n": 78.0,
+      "gross_bps": -47.26,
+      "net14_bps": -61.26,
+      "hit_rate": 0.474,
+      "pf": 0.554,
+      "t": -1.69
+    },
+    {
+      "quarter": "2023Q4",
+      "n": 132.0,
+      "gross_bps": 32.57,
+      "net14_bps": 18.57,
+      "hit_rate": 0.553,
+      "pf": 1.444,
+      "t": 1.53
+    },
+    {
+      "quarter": "2024Q1",
+      "n": 109.0,
+      "gross_bps": 95.06,
+      "net14_bps": 81.06,
+      "hit_rate": 0.606,
+      "pf": 2.351,
+      "t": 2.91
+    },
+    {
+      "quarter": "2024Q2",
+      "n": 216.0,
+      "gross_bps": 14.26,
+      "net14_bps": 0.26,
+      "hit_rate": 0.514,
+      "pf": 1.122,
+      "t": 0.47
+    },
+    {
+      "quarter": "2024Q3",
+      "n": 151.0,
+      "gross_bps": -18.39,
+      "net14_bps": -32.39,
+      "hit_rate": 0.503,
+      "pf": 0.874,
+      "t": -0.57
+    },
+    {
+      "quarter": "2024Q4",
+      "n": 178.0,
+      "gross_bps": 107.21,
+      "net14_bps": 93.21,
+      "hit_rate": 0.567,
+      "pf": 2.213,
+      "t": 3.44
+    },
+    {
+      "quarter": "2025Q1",
+      "n": 108.0,
+      "gross_bps": 150.36,
+      "net14_bps": 136.36,
+      "hit_rate": 0.602,
+      "pf": 2.814,
+      "t": 3.3
+    },
+    {
+      "quarter": "2025Q2",
+      "n": 79.0,
+      "gross_bps": 5.03,
+      "net14_bps": -8.97,
+      "hit_rate": 0.544,
+      "pf": 1.06,
+      "t": 0.18
+    },
+    {
+      "quarter": "2025Q3",
+      "n": 113.0,
+      "gross_bps": 17.22,
+      "net14_bps": 3.22,
+      "hit_rate": 0.558,
+      "pf": 1.207,
+      "t": 0.69
+    },
+    {
+      "quarter": "2025Q4",
+      "n": 104.0,
+      "gross_bps": 39.53,
+      "net14_bps": 25.53,
+      "hit_rate": 0.615,
+      "pf": 1.282,
+      "t": 0.86
+    },
+    {
+      "quarter": "2026Q1",
+      "n": 94.0,
+      "gross_bps": 26.66,
+      "net14_bps": 12.66,
+      "hit_rate": 0.553,
+      "pf": 1.42,
+      "t": 1.04
+    },
+    {
+      "quarter": "2026Q2",
+      "n": 115.0,
+      "gross_bps": 93.85,
+      "net14_bps": 79.85,
+      "hit_rate": 0.557,
+      "pf": 2.569,
+      "t": 2.31
+    },
+    {
+      "quarter": "2026Q3",
+      "n": 2.0,
+      "gross_bps": 196.9,
+      "net14_bps": 182.9,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": 1.82
+    }
+  ],
+  "LONG_CASCADE_exhaustion_by_year": [
+    {
+      "year": 2021,
+      "n": 23.0,
+      "gross_bps": 152.07,
+      "net14_bps": 138.07,
+      "hit_rate": 0.739,
+      "pf": 4.372,
+      "t": 2.38
+    },
+    {
+      "year": 2022,
+      "n": 265.0,
+      "gross_bps": 12.17,
+      "net14_bps": -1.83,
+      "hit_rate": 0.547,
+      "pf": 1.096,
+      "t": 0.5
+    },
+    {
+      "year": 2023,
+      "n": 431.0,
+      "gross_bps": 20.39,
+      "net14_bps": 6.39,
+      "hit_rate": 0.555,
+      "pf": 1.263,
+      "t": 1.68
+    },
+    {
+      "year": 2024,
+      "n": 654.0,
+      "gross_bps": 45.49,
+      "net14_bps": 31.49,
+      "hit_rate": 0.541,
+      "pf": 1.42,
+      "t": 2.83
+    },
+    {
+      "year": 2025,
+      "n": 404.0,
+      "gross_bps": 56.17,
+      "net14_bps": 42.17,
+      "hit_rate": 0.582,
+      "pf": 1.574,
+      "t": 2.9
+    },
+    {
+      "year": 2026,
+      "n": 211.0,
+      "gross_bps": 64.89,
+      "net14_bps": 50.89,
+      "hit_rate": 0.559,
+      "pf": 2.066,
+      "t": 2.6
+    }
+  ],
+  "LONG_CASCADE_exhaustion_top_symbols": {
+    "FILUSDT": 86,
+    "SANDUSDT": 66,
+    "APTUSDT": 65,
+    "ETHUSDT": 60,
+    "XRPUSDT": 59,
+    "OPUSDT": 58,
+    "RUNEUSDT": 58,
+    "ARBUSDT": 58,
+    "DOGEUSDT": 55,
+    "LDOUSDT": 55
+  },
+  "LONG_CASCADE_far24hlow_by_quarter": [
+    {
+      "quarter": "2021Q1",
+      "n": 6.0,
+      "gross_bps": -59.83,
+      "net14_bps": -73.83,
+      "hit_rate": 0.167,
+      "pf": 0.473,
+      "t": -0.59
+    },
+    {
+      "quarter": "2021Q2",
+      "n": 5.0,
+      "gross_bps": 497.28,
+      "net14_bps": 483.28,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": 3.85
+    },
+    {
+      "quarter": "2021Q3",
+      "n": 5.0,
+      "gross_bps": -52.91,
+      "net14_bps": -66.91,
+      "hit_rate": 0.6,
+      "pf": 0.257,
+      "t": -0.86
+    },
+    {
+      "quarter": "2021Q4",
+      "n": 82.0,
+      "gross_bps": 25.42,
+      "net14_bps": 11.42,
+      "hit_rate": 0.476,
+      "pf": 1.225,
+      "t": 0.61
+    },
+    {
+      "quarter": "2022Q1",
+      "n": 214.0,
+      "gross_bps": 29.72,
+      "net14_bps": 15.72,
+      "hit_rate": 0.533,
+      "pf": 1.298,
+      "t": 1.35
+    },
+    {
+      "quarter": "2022Q2",
+      "n": 257.0,
+      "gross_bps": -25.66,
+      "net14_bps": -39.66,
+      "hit_rate": 0.424,
+      "pf": 0.804,
+      "t": -1.23
+    },
+    {
+      "quarter": "2022Q3",
+      "n": 214.0,
+      "gross_bps": -2.34,
+      "net14_bps": -16.34,
+      "hit_rate": 0.509,
+      "pf": 0.979,
+      "t": -0.11
+    },
+    {
+      "quarter": "2022Q4",
+      "n": 196.0,
+      "gross_bps": -32.32,
+      "net14_bps": -46.32,
+      "hit_rate": 0.423,
+      "pf": 0.711,
+      "t": -1.55
+    },
+    {
+      "quarter": "2023Q1",
+      "n": 454.0,
+      "gross_bps": 49.51,
+      "net14_bps": 35.51,
+      "hit_rate": 0.555,
+      "pf": 1.654,
+      "t": 3.53
+    },
+    {
+      "quarter": "2023Q2",
+      "n": 229.0,
+      "gross_bps": 27.23,
+      "net14_bps": 13.23,
+      "hit_rate": 0.493,
+      "pf": 1.354,
+      "t": 1.41
+    },
+    {
+      "quarter": "2023Q3",
+      "n": 208.0,
+      "gross_bps": -19.86,
+      "net14_bps": -33.86,
+      "hit_rate": 0.476,
+      "pf": 0.82,
+      "t": -0.86
+    },
+    {
+      "quarter": "2023Q4",
+      "n": 528.0,
+      "gross_bps": 17.85,
+      "net14_bps": 3.85,
+      "hit_rate": 0.494,
+      "pf": 1.17,
+      "t": 1.27
+    },
+    {
+      "quarter": "2024Q1",
+      "n": 618.0,
+      "gross_bps": 22.29,
+      "net14_bps": 8.29,
+      "hit_rate": 0.492,
+      "pf": 1.209,
+      "t": 1.66
+    },
+    {
+      "quarter": "2024Q2",
+      "n": 418.0,
+      "gross_bps": -37.66,
+      "net14_bps": -51.66,
+      "hit_rate": 0.452,
+      "pf": 0.722,
+      "t": -2.16
+    },
+    {
+      "quarter": "2024Q3",
+      "n": 313.0,
+      "gross_bps": -39.42,
+      "net14_bps": -53.42,
+      "hit_rate": 0.393,
+      "pf": 0.626,
+      "t": -3.03
+    },
+    {
+      "quarter": "2024Q4",
+      "n": 735.0,
+      "gross_bps": 50.11,
+      "net14_bps": 36.11,
+      "hit_rate": 0.539,
+      "pf": 1.513,
+      "t": 3.95
+    },
+    {
+      "quarter": "2025Q1",
+      "n": 401.0,
+      "gross_bps": 27.16,
+      "net14_bps": 13.16,
+      "hit_rate": 0.539,
+      "pf": 1.271,
+      "t": 1.61
+    },
+    {
+      "quarter": "2025Q2",
+      "n": 403.0,
+      "gross_bps": 19.92,
+      "net14_bps": 5.92,
+      "hit_rate": 0.529,
+      "pf": 1.274,
+      "t": 1.61
+    },
+    {
+      "quarter": "2025Q3",
+      "n": 360.0,
+      "gross_bps": 36.03,
+      "net14_bps": 22.03,
+      "hit_rate": 0.561,
+      "pf": 1.478,
+      "t": 2.48
+    },
+    {
+      "quarter": "2025Q4",
+      "n": 336.0,
+      "gross_bps": 59.72,
+      "net14_bps": 45.72,
+      "hit_rate": 0.506,
+      "pf": 1.465,
+      "t": 2.05
+    },
+    {
+      "quarter": "2026Q1",
+      "n": 306.0,
+      "gross_bps": 12.85,
+      "net14_bps": -1.15,
+      "hit_rate": 0.526,
+      "pf": 1.143,
+      "t": 0.85
+    },
+    {
+      "quarter": "2026Q2",
+      "n": 401.0,
+      "gross_bps": 36.04,
+      "net14_bps": 22.04,
+      "hit_rate": 0.456,
+      "pf": 1.389,
+      "t": 1.86
+    },
+    {
+      "quarter": "2026Q3",
+      "n": 20.0,
+      "gross_bps": 12.87,
+      "net14_bps": -1.13,
+      "hit_rate": 0.5,
+      "pf": 1.262,
+      "t": 0.39
+    }
+  ],
+  "LONG_CASCADE_far24hlow_by_year": [
+    {
+      "year": 2021,
+      "n": 98.0,
+      "gross_bps": 40.28,
+      "net14_bps": 26.28,
+      "hit_rate": 0.49,
+      "pf": 1.383,
+      "t": 1.07
+    },
+    {
+      "year": 2022,
+      "n": 881.0,
+      "gross_bps": -8.02,
+      "net14_bps": -22.02,
+      "hit_rate": 0.471,
+      "pf": 0.93,
+      "t": -0.75
+    },
+    {
+      "year": 2023,
+      "n": 1419.0,
+      "gross_bps": 23.96,
+      "net14_bps": 9.96,
+      "hit_rate": 0.511,
+      "pf": 1.261,
+      "t": 2.89
+    },
+    {
+      "year": 2024,
+      "n": 2084.0,
+      "gross_bps": 10.81,
+      "net14_bps": -3.19,
+      "hit_rate": 0.486,
+      "pf": 1.099,
+      "t": 1.49
+    },
+    {
+      "year": 2025,
+      "n": 1500.0,
+      "gross_bps": 34.64,
+      "net14_bps": 20.64,
+      "hit_rate": 0.534,
+      "pf": 1.372,
+      "t": 3.74
+    },
+    {
+      "year": 2026,
+      "n": 727.0,
+      "gross_bps": 25.64,
+      "net14_bps": 11.64,
+      "hit_rate": 0.487,
+      "pf": 1.284,
+      "t": 2.05
+    }
+  ],
+  "SHORT_SQUEEZE_exhaustion_by_quarter": [
+    {
+      "quarter": "2021Q1",
+      "n": 4.0,
+      "gross_bps": 83.31,
+      "net14_bps": 69.31,
+      "hit_rate": 0.75,
+      "pf": 3.609,
+      "t": 1.01
+    },
+    {
+      "quarter": "2021Q2",
+      "n": 1.0,
+      "gross_bps": 480.61,
+      "net14_bps": 466.61,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": NaN
+    },
+    {
+      "quarter": "2021Q3",
+      "n": 1.0,
+      "gross_bps": -128.21,
+      "net14_bps": -142.21,
+      "hit_rate": 0.0,
+      "pf": 0.0,
+      "t": NaN
+    },
+    {
+      "quarter": "2021Q4",
+      "n": 11.0,
+      "gross_bps": 32.82,
+      "net14_bps": 18.82,
+      "hit_rate": 0.636,
+      "pf": 1.515,
+      "t": 0.54
+    },
+    {
+      "quarter": "2022Q1",
+      "n": 38.0,
+      "gross_bps": -30.14,
+      "net14_bps": -44.14,
+      "hit_rate": 0.5,
+      "pf": 0.754,
+      "t": -0.66
+    },
+    {
+      "quarter": "2022Q2",
+      "n": 85.0,
+      "gross_bps": -11.11,
+      "net14_bps": -25.11,
+      "hit_rate": 0.506,
+      "pf": 0.937,
+      "t": -0.22
+    },
+    {
+      "quarter": "2022Q3",
+      "n": 29.0,
+      "gross_bps": -23.39,
+      "net14_bps": -37.39,
+      "hit_rate": 0.483,
+      "pf": 0.774,
+      "t": -0.5
+    },
+    {
+      "quarter": "2022Q4",
+      "n": 40.0,
+      "gross_bps": -107.43,
+      "net14_bps": -121.43,
+      "hit_rate": 0.55,
+      "pf": 0.431,
+      "t": -1.46
+    },
+    {
+      "quarter": "2023Q1",
+      "n": 47.0,
+      "gross_bps": 105.22,
+      "net14_bps": 91.22,
+      "hit_rate": 0.574,
+      "pf": 2.166,
+      "t": 1.84
+    },
+    {
+      "quarter": "2023Q2",
+      "n": 29.0,
+      "gross_bps": -34.37,
+      "net14_bps": -48.37,
+      "hit_rate": 0.31,
+      "pf": 0.561,
+      "t": -1.2
+    },
+    {
+      "quarter": "2023Q3",
+      "n": 28.0,
+      "gross_bps": -37.51,
+      "net14_bps": -51.51,
+      "hit_rate": 0.286,
+      "pf": 0.474,
+      "t": -1.37
+    },
+    {
+      "quarter": "2023Q4",
+      "n": 29.0,
+      "gross_bps": -36.54,
+      "net14_bps": -50.54,
+      "hit_rate": 0.379,
+      "pf": 0.623,
+      "t": -1.02
+    },
+    {
+      "quarter": "2024Q1",
+      "n": 37.0,
+      "gross_bps": -23.36,
+      "net14_bps": -37.36,
+      "hit_rate": 0.486,
+      "pf": 0.742,
+      "t": -0.67
+    },
+    {
+      "quarter": "2024Q2",
+      "n": 174.0,
+      "gross_bps": -0.87,
+      "net14_bps": -14.87,
+      "hit_rate": 0.494,
+      "pf": 0.99,
+      "t": -0.05
+    },
+    {
+      "quarter": "2024Q3",
+      "n": 126.0,
+      "gross_bps": 22.69,
+      "net14_bps": 8.69,
+      "hit_rate": 0.524,
+      "pf": 1.148,
+      "t": 0.58
+    },
+    {
+      "quarter": "2024Q4",
+      "n": 111.0,
+      "gross_bps": 170.38,
+      "net14_bps": 156.38,
+      "hit_rate": 0.667,
+      "pf": 3.355,
+      "t": 4.87
+    },
+    {
+      "quarter": "2025Q1",
+      "n": 75.0,
+      "gross_bps": 180.01,
+      "net14_bps": 166.01,
+      "hit_rate": 0.667,
+      "pf": 3.087,
+      "t": 3.57
+    },
+    {
+      "quarter": "2025Q2",
+      "n": 70.0,
+      "gross_bps": 68.63,
+      "net14_bps": 54.63,
+      "hit_rate": 0.586,
+      "pf": 1.947,
+      "t": 2.07
+    },
+    {
+      "quarter": "2025Q3",
+      "n": 36.0,
+      "gross_bps": 79.64,
+      "net14_bps": 65.64,
+      "hit_rate": 0.528,
+      "pf": 2.167,
+      "t": 1.17
+    },
+    {
+      "quarter": "2025Q4",
+      "n": 97.0,
+      "gross_bps": 238.86,
+      "net14_bps": 224.86,
+      "hit_rate": 0.608,
+      "pf": 4.196,
+      "t": 4.33
+    },
+    {
+      "quarter": "2026Q1",
+      "n": 34.0,
+      "gross_bps": -4.65,
+      "net14_bps": -18.65,
+      "hit_rate": 0.5,
+      "pf": 0.945,
+      "t": -0.14
+    },
+    {
+      "quarter": "2026Q2",
+      "n": 37.0,
+      "gross_bps": 21.65,
+      "net14_bps": 7.65,
+      "hit_rate": 0.514,
+      "pf": 1.357,
+      "t": 0.73
+    },
+    {
+      "quarter": "2026Q3",
+      "n": 1.0,
+      "gross_bps": 27.35,
+      "net14_bps": 13.35,
+      "hit_rate": 1.0,
+      "pf": NaN,
+      "t": NaN
+    }
+  ],
+  "SHORT_SQUEEZE_exhaustion_by_year": [
+    {
+      "year": 2021,
+      "n": 17.0,
+      "gross_bps": 61.57,
+      "net14_bps": 47.57,
+      "hit_rate": 0.647,
+      "pf": 2.095,
+      "t": 1.2
+    },
+    {
+      "year": 2022,
+      "n": 192.0,
+      "gross_bps": -36.8,
+      "net14_bps": -50.8,
+      "hit_rate": 0.51,
+      "pf": 0.766,
+      "t": -1.24
+    },
+    {
+      "year": 2023,
+      "n": 133.0,
+      "gross_bps": 13.82,
+      "net14_bps": -0.18,
+      "hit_rate": 0.414,
+      "pf": 1.162,
+      "t": 0.58
+    },
+    {
+      "year": 2024,
+      "n": 448.0,
+      "gross_bps": 46.33,
+      "net14_bps": 32.33,
+      "hit_rate": 0.545,
+      "pf": 1.453,
+      "t": 2.83
+    },
+    {
+      "year": 2025,
+      "n": 278.0,
+      "gross_bps": 159.5,
+      "net14_bps": 145.5,
+      "hit_rate": 0.608,
+      "pf": 3.087,
+      "t": 5.97
+    },
+    {
+      "year": 2026,
+      "n": 72.0,
+      "gross_bps": 9.31,
+      "net14_bps": -4.69,
+      "hit_rate": 0.514,
+      "pf": 1.132,
+      "t": 0.42
+    }
+  ],
+  "SHORT_SQUEEZE_exhaustion_top_symbols": {
+    "SOLUSDT": 50,
+    "ETHUSDT": 47,
+    "BTCUSDT": 43,
+    "DOGEUSDT": 40,
+    "AVAXUSDT": 38,
+    "XRPUSDT": 33,
+    "ADAUSDT": 33,
+    "TAOUSDT": 31,
+    "VETUSDT": 31,
+    "DOTUSDT": 30
+  },
+  "SHORT_SQUEEZE_far24hlow_by_quarter": [
+    {
+      "quarter": "2021Q1",
+      "n": 11.0,
+      "gross_bps": 42.14,
+      "net14_bps": 28.14,
+      "hit_rate": 0.545,
+      "pf": 1.769,
+      "t": 0.72
+    },
+    {
+      "quarter": "2021Q2",
+      "n": 4.0,
+      "gross_bps": 62.27,
+      "net14_bps": 48.27,
+      "hit_rate": 0.5,
+      "pf": 1.773,
+      "t": 0.39
+    },
+    {
+      "quarter": "2021Q3",
+      "n": 4.0,
+      "gross_bps": 6.61,
+      "net14_bps": -7.39,
+      "hit_rate": 0.75,
+      "pf": 1.206,
+      "t": 0.13
+    },
+    {
+      "quarter": "2021Q4",
+      "n": 34.0,
+      "gross_bps": 56.4,
+      "net14_bps": 42.4,
+      "hit_rate": 0.588,
+      "pf": 2.045,
+      "t": 1.63
+    },
+    {
+      "quarter": "2022Q1",
+      "n": 127.0,
+      "gross_bps": -27.86,
+      "net14_bps": -41.86,
+      "hit_rate": 0.457,
+      "pf": 0.785,
+      "t": -1.01
+    },
+    {
+      "quarter": "2022Q2",
+      "n": 237.0,
+      "gross_bps": -58.71,
+      "net14_bps": -72.71,
+      "hit_rate": 0.443,
+      "pf": 0.715,
+      "t": -1.74
+    },
+    {
+      "quarter": "2022Q3",
+      "n": 106.0,
+      "gross_bps": -12.4,
+      "net14_bps": -26.4,
+      "hit_rate": 0.434,
+      "pf": 0.895,
+      "t": -0.41
+    },
+    {
+      "quarter": "2022Q4",
+      "n": 103.0,
+      "gross_bps": -117.59,
+      "net14_bps": -131.59,
+      "hit_rate": 0.485,
+      "pf": 0.555,
+      "t": -1.74
+    },
+    {
+      "quarter": "2023Q1",
+      "n": 175.0,
+      "gross_bps": 92.84,
+      "net14_bps": 78.84,
+      "hit_rate": 0.537,
+      "pf": 1.88,
+      "t": 2.92
+    },
+    {
+      "quarter": "2023Q2",
+      "n": 63.0,
+      "gross_bps": -22.0,
+      "net14_bps": -36.0,
+      "hit_rate": 0.444,
+      "pf": 0.764,
+      "t": -0.74
+    },
+    {
+      "quarter": "2023Q3",
+      "n": 64.0,
+      "gross_bps": -19.64,
+      "net14_bps": -33.64,
+      "hit_rate": 0.391,
+      "pf": 0.823,
+      "t": -0.57
+    },
+    {
+      "quarter": "2023Q4",
+      "n": 86.0,
+      "gross_bps": 13.1,
+      "net14_bps": -0.9,
+      "hit_rate": 0.453,
+      "pf": 1.101,
+      "t": 0.35
+    },
+    {
+      "quarter": "2024Q1",
+      "n": 169.0,
+      "gross_bps": -24.46,
+      "net14_bps": -38.46,
+      "hit_rate": 0.438,
+      "pf": 0.806,
+      "t": -0.99
+    },
+    {
+      "quarter": "2024Q2",
+      "n": 139.0,
+      "gross_bps": -11.04,
+      "net14_bps": -25.04,
+      "hit_rate": 0.432,
+      "pf": 0.912,
+      "t": -0.42
+    },
+    {
+      "quarter": "2024Q3",
+      "n": 189.0,
+      "gross_bps": -8.67,
+      "net14_bps": -22.67,
+      "hit_rate": 0.508,
+      "pf": 0.935,
+      "t": -0.32
+    },
+    {
+      "quarter": "2024Q4",
+      "n": 231.0,
+      "gross_bps": 92.45,
+      "net14_bps": 78.45,
+      "hit_rate": 0.563,
+      "pf": 1.916,
+      "t": 3.62
+    },
+    {
+      "quarter": "2025Q1",
+      "n": 209.0,
+      "gross_bps": 55.84,
+      "net14_bps": 41.84,
+      "hit_rate": 0.483,
+      "pf": 1.494,
+      "t": 2.13
+    },
+    {
+      "quarter": "2025Q2",
+      "n": 294.0,
+      "gross_bps": 35.93,
+      "net14_bps": 21.93,
+      "hit_rate": 0.551,
+      "pf": 1.408,
+      "t": 2.02
+    },
+    {
+      "quarter": "2025Q3",
+      "n": 109.0,
+      "gross_bps": 103.6,
+      "net14_bps": 89.6,
+      "hit_rate": 0.642,
+      "pf": 2.679,
+      "t": 3.38
+    },
+    {
+      "quarter": "2025Q4",
+      "n": 220.0,
+      "gross_bps": 241.19,
+      "net14_bps": 227.19,
+      "hit_rate": 0.645,
+      "pf": 3.892,
+      "t": 6.01
+    },
+    {
+      "quarter": "2026Q1",
+      "n": 168.0,
+      "gross_bps": 42.94,
+      "net14_bps": 28.94,
+      "hit_rate": 0.512,
+      "pf": 1.497,
+      "t": 1.98
+    },
+    {
+      "quarter": "2026Q2",
+      "n": 77.0,
+      "gross_bps": 10.99,
+      "net14_bps": -3.01,
+      "hit_rate": 0.455,
+      "pf": 1.124,
+      "t": 0.33
+    },
+    {
+      "quarter": "2026Q3",
+      "n": 2.0,
+      "gross_bps": -201.55,
+      "net14_bps": -215.55,
+      "hit_rate": 0.0,
+      "pf": 0.0,
+      "t": -1.49
+    }
+  ],
+  "SHORT_SQUEEZE_far24hlow_by_year": [
+    {
+      "year": 2021,
+      "n": 53.0,
+      "gross_bps": 50.12,
+      "net14_bps": 36.12,
+      "hit_rate": 0.585,
+      "pf": 1.92,
+      "t": 1.83
+    },
+    {
+      "year": 2022,
+      "n": 573.0,
+      "gross_bps": -53.89,
+      "net14_bps": -67.89,
+      "hit_rate": 0.452,
+      "pf": 0.706,
+      "t": -2.66
+    },
+    {
+      "year": 2023,
+      "n": 388.0,
+      "gross_bps": 37.97,
+      "net14_bps": 23.97,
+      "hit_rate": 0.479,
+      "pf": 1.346,
+      "t": 2.08
+    },
+    {
+      "year": 2024,
+      "n": 728.0,
+      "gross_bps": 19.3,
+      "net14_bps": 5.3,
+      "hit_rate": 0.495,
+      "pf": 1.161,
+      "t": 1.45
+    },
+    {
+      "year": 2025,
+      "n": 832.0,
+      "gross_bps": 104.07,
+      "net14_bps": 90.07,
+      "hit_rate": 0.571,
+      "pf": 2.161,
+      "t": 7.02
+    },
+    {
+      "year": 2026,
+      "n": 247.0,
+      "gross_bps": 31.0,
+      "net14_bps": 17.0,
+      "hit_rate": 0.49,
+      "pf": 1.352,
+      "t": 1.71
+    }
+  ],
+  "LONG_CASCADE_combo_exhaustion_AND_far24hlow_full": {
+    "n": 805,
+    "gross_bps": 22.99,
+    "net14_bps": 8.99,
+    "hit_rate": 0.494,
+    "pf": 1.196,
+    "t": 1.61
+  },
+  "LONG_CASCADE_combo_exhaustion_AND_far24hlow_2025_26": {
+    "n": 267,
+    "gross_bps": 75.87,
+    "net14_bps": 61.87,
+    "hit_rate": 0.569,
+    "pf": 1.751,
+    "t": 2.75
+  },
+  "LONG_CASCADE_union_exhaustion_OR_far24hlow_full": {
+    "n": 7892,
+    "gross_bps": 23.71,
+    "net14_bps": 9.71,
+    "hit_rate": 0.515,
+    "pf": 1.243,
+    "t": 6.29
+  },
+  "LONG_CASCADE_union_exhaustion_OR_far24hlow_2025_26": {
+    "n": 2575,
+    "gross_bps": 33.68,
+    "net14_bps": 19.68,
+    "hit_rate": 0.527,
+    "pf": 1.376,
+    "t": 4.93
+  },
+  "SHORT_SQUEEZE_combo_exhaustion_AND_far24hlow_full": {
+    "n": 481,
+    "gross_bps": 89.26,
+    "net14_bps": 75.26,
+    "hit_rate": 0.538,
+    "pf": 1.72,
+    "t": 4.27
+  },
+  "SHORT_SQUEEZE_combo_exhaustion_AND_far24hlow_2025_26": {
+    "n": 178,
+    "gross_bps": 233.07,
+    "net14_bps": 219.07,
+    "hit_rate": 0.64,
+    "pf": 4.266,
+    "t": 6.33
+  },
+  "SHORT_SQUEEZE_union_exhaustion_OR_far24hlow_full": {
+    "n": 3480,
+    "gross_bps": 32.6,
+    "net14_bps": 18.6,
+    "hit_rate": 0.514,
+    "pf": 1.291,
+    "t": 4.99
+  },
+  "SHORT_SQUEEZE_union_exhaustion_OR_far24hlow_2025_26": {
+    "n": 1251,
+    "gross_bps": 78.15,
+    "net14_bps": 64.15,
+    "hit_rate": 0.55,
+    "pf": 1.889,
+    "t": 7.17
+  }
+}

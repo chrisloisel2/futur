@@ -1,0 +1,113 @@
+{
+  "first_half_baseline": {
+    "n": 8188,
+    "gross_bps": -3.41,
+    "net14_bps": -17.41,
+    "hit_rate": 0.468,
+    "pf": 0.911,
+    "t": -3.07
+  },
+  "first_half_taker_buy_extreme": {
+    "n": 819,
+    "gross_bps": 11.13,
+    "net14_bps": -2.87,
+    "hit_rate": 0.545,
+    "pf": 1.416,
+    "t": 3.52
+  },
+  "first_half_taker_sell_extreme": {
+    "n": 819,
+    "gross_bps": -30.75,
+    "net14_bps": -44.75,
+    "hit_rate": 0.374,
+    "pf": 0.461,
+    "t": -8.23
+  },
+  "second_half_baseline": {
+    "n": 8005,
+    "gross_bps": -12.88,
+    "net14_bps": -26.88,
+    "hit_rate": 0.448,
+    "pf": 0.747,
+    "t": -9.04
+  },
+  "second_half_taker_buy_extreme": {
+    "n": 789,
+    "gross_bps": 27.0,
+    "net14_bps": 13.0,
+    "hit_rate": 0.598,
+    "pf": 1.916,
+    "t": 6.0
+  },
+  "second_half_taker_sell_extreme": {
+    "n": 800,
+    "gross_bps": -66.53,
+    "net14_bps": -80.53,
+    "hit_rate": 0.284,
+    "pf": 0.242,
+    "t": -14.27
+  },
+  "taker_sell_extreme_by_symbol_top15": {
+    "ENAUSDT": {
+      "count": 67,
+      "mean_bps": -73.94469824896244
+    },
+    "TAOUSDT": {
+      "count": 66,
+      "mean_bps": -48.495004929741306
+    },
+    "AAVEUSDT": {
+      "count": 65,
+      "mean_bps": -22.802697623301697
+    },
+    "ARBUSDT": {
+      "count": 63,
+      "mean_bps": -60.982847627704224
+    },
+    "BTCUSDT": {
+      "count": 63,
+      "mean_bps": -21.32598628264549
+    },
+    "UNIUSDT": {
+      "count": 62,
+      "mean_bps": -55.724967916002896
+    },
+    "BCHUSDT": {
+      "count": 62,
+      "mean_bps": -30.51535242882656
+    },
+    "LTCUSDT": {
+      "count": 61,
+      "mean_bps": -22.617206043782442
+    },
+    "ETHUSDT": {
+      "count": 60,
+      "mean_bps": -33.28653647516326
+    },
+    "INJUSDT": {
+      "count": 58,
+      "mean_bps": -52.45989573076992
+    },
+    "TIAUSDT": {
+      "count": 57,
+      "mean_bps": -80.52580080412758
+    },
+    "DOGEUSDT": {
+      "count": 57,
+      "mean_bps": -62.88943503364229
+    },
+    "AVAXUSDT": {
+      "count": 56,
+      "mean_bps": -53.715063163369074
+    },
+    "SUIUSDT": {
+      "count": 56,
+      "mean_bps": -34.669409937136685
+    },
+    "SOLUSDT": {
+      "count": 56,
+      "mean_bps": -39.217586625474745
+    }
+  },
+  "frac_symbols_negative_mean_in_sell_extreme": 1.0
+}
