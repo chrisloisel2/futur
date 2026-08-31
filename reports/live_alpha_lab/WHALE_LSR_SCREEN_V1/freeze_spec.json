@@ -1,0 +1,60 @@
+{
+  "alpha_id": "WHALE_LSR_SCREEN_V1",
+  "version": "v1.0",
+  "freeze_timestamp": "2026-08-31T00:00:00+00:00",
+  "mechanism": "Top-position ('whale') long/short ratio at an extreme LONG level relative to its OWN trailing 7-day history predicts forward relative (cross-sectionally demeaned) 24h UNDERPERFORMANCE. Short-shaped finding -> NOT deployable as a direct short (SHORT_REJECTED, standing project rule). Only legitimate use: a SCREEN -- avoid/reduce new LONG entries elsewhere in the portfolio when a symbol's whale LSR is at a 7d extreme. Separate, explicitly-unconfirmed mirror: whale extremely SHORT -> forward relative outperformance (marginal, p=0.09, n=39, NEEDS_FULL_VALIDATION).",
+  "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w10_forgotten_and_positioning/REPORT.md (mechanism M3a, rank 1 of 9 positioning mechanisms tested, the only survivor after decluster+market-neutral treatment)",
+  "evidence_csv": [
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w10_forgotten_and_positioning/evidence/positioning_mechanisms_marketneutral_declustered.csv",
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w10_forgotten_and_positioning/evidence/positioning_mechanisms_marketneutral_overlapping.csv",
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w10_forgotten_and_positioning/evidence/positioning_mechanisms_raw_overlapping.csv"
+  ],
+  "frozen_spec": {
+    "module": "src/institutional/engines/whale_lsr_screen/screen.py",
+    "feature": "z_score_7d = causal (strictly past-only, shift(1)-guarded) 7-day rolling z-score of longShortRatio, per symbol, computed from data/positioning/{SYM}_top_position.parquet",
+    "main_screen_threshold": "z_score_7d >= 4.0  -> screen_flag=True (avoid_new_longs)",
+    "mirror_threshold_unconfirmed": "z_score_7d <= -4.0 -> mirror_flag_unconfirmed=True (NEEDS_FULL_VALIDATION, not deployable with same confidence)",
+    "min_periods_bars": 1814,
+    "min_periods_rationale": "0.9 * 7 days * 288 bars/day (5-min cadence) -- tolerates ~10% gaps in the trailing week without invalidating the z-score",
+    "horizon": "fwd_24h (matches the report's tested horizon for M3a)",
+    "universe": "configs/whale_lsr_screen_universe.yaml (47 symbols = all data/positioning/*_top_position.parquet files present at freeze time 2026-08-31, hash-checked at runtime; NOT re-derived from glob() on each run)",
+    "output_shape": "SCREEN ONLY -- boolean flags (screen_flag, mirror_flag_unconfirmed), NEVER a 'direction' field, NEVER the literal value 'SHORT'. See tests/test_whale_lsr_screen.py::test_never_emits_short_direction_field."
+  },
+  "threshold_provenance": {
+    "status": "RECONSTRUCTED -- NOT verbatim from the source report",
+    "explanation": "The source report (REPORT.md) states the M3a mechanism qualitatively ('extremely LONG vs its own 7d history') but records no numeric z-score/percentile constant anywhere in its prose. Its 3 evidence CSVs (positioning_mechanisms_{raw_overlapping,marketneutral_overlapping,marketneutral_declustered}.csv) contain only sample sizes and stats (n, bps, t, p), no threshold parameter column. The report's own preamble states this worker could not use the Write tool during its run and the report was 'transcribed by the orchestrating session from the worker's final findings, verbatim in substance' -- the original generating script (which would have contained the exact constant) was never saved and does not exist elsewhere in the repo (exhaustive grep across reports/edge_discovery/alpha_hunt_2026-08-30/ and the src/scripts trees for z-score/percentile/threshold/sigma/decile/quantile near M3a/topPos_LSR/top_position found nothing).",
+    "reverse_engineering_attempted": "Grid search of symmetric z-score cutoffs and rolling rank-percentile cutoffs on a causal 7-day window, computed directly against data/positioning restricted to the report's original window (2026-07-16..2026-08-30, same 47 symbols), targeting the reported raw bar counts (n=2034-2041 for the fwd_24h HIGH bucket, n=896-958 for LOW). No single symmetric cutoff reproduces both sides exactly (consistent with an intrinsically skewed longShortRatio distribution), but both the pooled z-score approach and the rolling-rank approach converge on a threshold near the 99.6th-99.7th pooled percentile (z-equivalent ~4.0-4.3) to match the HIGH-side raw count -- a much stricter cutoff than a naive '2-sigma' reading, consistent with 87 independent episodes across 47 symbols x 45 days being a genuinely rare event (~1 per symbol per ~24 days).",
+    "operational_choice": "Z_EXTREME_LONG_THRESHOLD = 4.0 (mirror -4.0) -- the nearest round number inside the reverse-engineered range (3.9-4.3). This is a documented reconstruction, not the original constant. Consequence: expected_stats_at_freeze below are qualitative/directional context on the MECHANISM (what the report measured), not a live-reproduction target for this exact operational threshold -- live hit-rate and edge must be evaluated fresh once enough shadow decisions accumulate, not assumed equal to -57.8bps/n=87."
+  },
+  "expected_stats_at_freeze": {
+    "main_screen": {
+      "net_bps": -57.8,
+      "gross_bps": -57.8,
+      "n_independent_episodes": 87,
+      "n_symbols": 47,
+      "t_stat": -2.82,
+      "p_value": 0.006,
+      "stability": "sign-stable across both halves of the ~45-day sample (low-beta and high-beta regime halves)",
+      "note": "net_bps negative = expected RELATIVE underperformance (cross-sectionally demeaned) -- this is the direction of the finding, NOT a tradeable short PnL number. No cost model applies (screen, not a trade)."
+    },
+    "mirror_unconfirmed": {
+      "net_bps": 40.0,
+      "n_independent_episodes": 39,
+      "p_value": 0.09,
+      "status": "NEEDS_FULL_VALIDATION -- directionally consistent with the main screen but not statistically confirmed at conventional significance. Must never be presented with the same confidence as main_screen."
+    }
+  },
+  "sample_and_data_caveats": {
+    "training_window": "2026-07-16 .. 2026-08-30 (45 days, single bull regime: BTC +20.9% over the window, second half averaging +0.84%/day vs first half +0.09%/day)",
+    "regime_caveat": "SINGLE REGIME, NOT YET CONFIRMED ACROSS A SECOND REGIME. The report explicitly tested raw/overlapping vs market-neutral vs declustered-market-neutral treatments because raw numbers on this dataset are inflated by autocorrelation and single-regime beta (see report's own cautionary tale re: mechanism M6, which showed +134bps raw/p<0.0001 and collapsed to non-significant once declustered -- a documented failure mode on this exact dataset). M3a is the only one of 9 mechanisms tested that survived the strict decluster+market-neutral treatment.",
+    "pit_caveat": "No explicit PIT-flag column on data/positioning (unlike e.g. stablecoin_daily.parquet's research_available_at). The archiver (src/institutional/data/positioning_archiver.py, deploy/systemd/futur-positioning.service/.timer) polls Binance's live-only fapi endpoints forward-only with no documented restatement mechanism -- reasonably trustworthy as point-in-time, but NOT provably so. Treat this alpha's live results with that caveat in mind.",
+    "sample_size_caveat": "n=87 independent episodes is thin. Do not treat this as a validated sleeve -- it is a screen derived from a young, single-regime, weak-but-real (p=0.006) finding, pending confirmation in a second regime."
+  },
+  "risk_bucket": "POSITIONING_WALLET_FAMILY",
+  "correlation_family": "POSITIONING_STANDALONE",
+  "mode": "A_SIGNAL_SHADOW",
+  "execution_notes": "Never a trade, never a fill, never a direction field. Output is a per-(timestamp,symbol) boolean screen flag only, consumed elsewhere in the portfolio as a 'do not add new LONG exposure to this symbol right now' input. No execution vehicle exists or is planned for this alpha as a standalone sleeve.",
+  "short_rejected_note": "This mechanism is short-shaped (bearish relative-return finding) but SHORT is institutionally REJECTED (SHORT_REJECTED, standing project rule, see project_short_audit.md). This freeze_spec and its implementation deliberately never expose a tradeable SHORT direction -- only a screen/avoid flag. Any future attempt to turn this into a direct short trade would require a separate, explicit human decision and a new alpha_id.",
+  "promotion_gate_not_yet_defined": true,
+  "do_not_modify_after_this_timestamp": "Any change to threshold/universe/horizon after freeze_timestamp must be a new alpha_id (e.g. _V2), not an edit to this spec."
+}

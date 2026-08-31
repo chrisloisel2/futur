@@ -1,0 +1,352 @@
+[
+  {
+    "canonical": "AAVEUSDT",
+    "exchange_symbol": "AAVEUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ADAUSDT",
+    "exchange_symbol": "ADAUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ALGOUSDT",
+    "exchange_symbol": "ALGOUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "APTUSDT",
+    "exchange_symbol": "APTUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ARBUSDT",
+    "exchange_symbol": "ARBUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ARUSDT",
+    "exchange_symbol": "ARUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ATOMUSDT",
+    "exchange_symbol": "ATOMUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "AVAXUSDT",
+    "exchange_symbol": "AVAXUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "BCHUSDT",
+    "exchange_symbol": "BCHUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "BNBUSDT",
+    "exchange_symbol": "BNBUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "BTCUSDT",
+    "exchange_symbol": "BTCUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "DOGEUSDT",
+    "exchange_symbol": "DOGEUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "DOTUSDT",
+    "exchange_symbol": "DOTUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ENAUSDT",
+    "exchange_symbol": "ENAUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ETCUSDT",
+    "exchange_symbol": "ETCUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ETHUSDT",
+    "exchange_symbol": "ETHUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "FETUSDT",
+    "exchange_symbol": "FETUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "FILUSDT",
+    "exchange_symbol": "FILUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "GRTUSDT",
+    "exchange_symbol": "GRTUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "HBARUSDT",
+    "exchange_symbol": "HBARUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ICPUSDT",
+    "exchange_symbol": "ICPUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "IMXUSDT",
+    "exchange_symbol": "IMXUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "INJUSDT",
+    "exchange_symbol": "INJUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "JUPUSDT",
+    "exchange_symbol": "JUPUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "LDOUSDT",
+    "exchange_symbol": "LDOUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "LINKUSDT",
+    "exchange_symbol": "LINKUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "LTCUSDT",
+    "exchange_symbol": "LTCUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "MANAUSDT",
+    "exchange_symbol": "MANAUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "MKRUSDT",
+    "exchange_symbol": null,
+    "status": "SETTLING",
+    "eligible": false,
+    "reason": "trouv\u00e9 dans exchangeInfo mais status=SETTLING (pas TRADING) \u2014 exclu"
+  },
+  {
+    "canonical": "NEARUSDT",
+    "exchange_symbol": "NEARUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "OPUSDT",
+    "exchange_symbol": "OPUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "ORDIUSDT",
+    "exchange_symbol": "ORDIUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "PENDLEUSDT",
+    "exchange_symbol": "PENDLEUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "PEPEUSDT",
+    "exchange_symbol": "1000PEPEUSDT",
+    "status": "RENAMED",
+    "eligible": true,
+    "reason": "canonique absent d'exchangeInfo ; rename connu et document\u00e9 PEPEUSDT->1000PEPEUSDT confirm\u00e9 TRADING dans exchangeInfo live"
+  },
+  {
+    "canonical": "PYTHUSDT",
+    "exchange_symbol": "PYTHUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "RNDRUSDT",
+    "exchange_symbol": "RENDERUSDT",
+    "status": "RENAMED",
+    "eligible": true,
+    "reason": "canonique absent d'exchangeInfo ; rename connu et document\u00e9 RNDRUSDT->RENDERUSDT confirm\u00e9 TRADING dans exchangeInfo live"
+  },
+  {
+    "canonical": "RUNEUSDT",
+    "exchange_symbol": "RUNEUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "SANDUSDT",
+    "exchange_symbol": "SANDUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "SEIUSDT",
+    "exchange_symbol": "SEIUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "SOLUSDT",
+    "exchange_symbol": "SOLUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "STXUSDT",
+    "exchange_symbol": "STXUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "SUIUSDT",
+    "exchange_symbol": "SUIUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "TAOUSDT",
+    "exchange_symbol": "TAOUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "TIAUSDT",
+    "exchange_symbol": "TIAUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "TRXUSDT",
+    "exchange_symbol": "TRXUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "UNIUSDT",
+    "exchange_symbol": "UNIUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "VETUSDT",
+    "exchange_symbol": "VETUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "WIFUSDT",
+    "exchange_symbol": "WIFUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "WLDUSDT",
+    "exchange_symbol": "WLDUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  },
+  {
+    "canonical": "XRPUSDT",
+    "exchange_symbol": "XRPUSDT",
+    "status": "TRADING",
+    "eligible": true,
+    "reason": "trouv\u00e9 tel quel dans exchangeInfo, status=TRADING"
+  }
+]

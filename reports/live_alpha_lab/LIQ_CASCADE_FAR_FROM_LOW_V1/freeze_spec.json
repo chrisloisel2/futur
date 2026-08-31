@@ -1,0 +1,60 @@
+{
+  "alpha_id": "LIQ_CASCADE_FAR_FROM_LOW_V1",
+  "version": "v1.0",
+  "freeze_timestamp": "2026-08-31T17:09:02+00:00",
+  "mechanism": "LONG_CASCADE liquidation event where price is FAR from its rolling 24h low (dist_low_24h >= frozen threshold) -> LONG, fwd_4h horizon. 'Far from local low' beats 'at the low' (near-low flips negative OOS, far-low stable/improving).",
+  "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-4",
+  "source_evidence": [
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/evidence/liquidation_L1_L7_full.json#L5_preceding_trend_depth (exact per-bucket n/net_bps/PF used below)",
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/evidence/liquidation_L1_L5_deepdive_by_quarter_year.json#LONG_CASCADE_far24hlow_by_quarter/_by_year (by-year stability check, only 24h-lookback variant has this deepdive -- basis for picking dist_low_24h over dist_low_7d)",
+    "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/evidence/liquidation_bucket_overlap_jaccard.json (independent n_b1=6713 for far_24h_low LONG_CASCADE, cross-checks L5's n=6709/6710)"
+  ],
+  "threshold_selection_rationale": "The source report describes the near/far-from-low split only in prose ('near'/'far' the 24h low), with no single published numeric cutoff -- it reports only resulting bucket sizes (far_24h_low n=6709-6713, near_24h_low n=7169, out of a LONG_CASCADE population of ~26.8k at report time). Reproduced here: recomputed the empirical distribution of dist_low_24h for kind==LONG_CASCADE via the UNCHANGED build_event_dataset() pipeline on the frozen 50-symbol universe, as of freeze time (2026-08-31, population n=27927, ~1 extra day vs report's ~26838 due to normal data drift). The 25th percentile of dist_low_24h is exactly 0.0 (many cascades occur literally at the 24h low), and the 75th percentile measured 0.0489 -- i.e. the report's 'far' bucket is the upper quartile, not a median split. Rounded to FAR_FROM_LOW_MIN_DIST_24H=0.05 (5%) as the frozen constant in far_from_low_variant.py. At this exact threshold, re-running the same cost/label convention (net = mean(fwd_4h)*10000 - 14bps, LONG_CASCADE only, label_full==True) on our data pull reproduces the report's far_24h_low bucket closely: full n=6804/net14=+6.7bps (report: n=6709/net14=+4.48bps), OOS(2025+) n=2409/net14=+19.84bps (report: n=2227/net14=+17.7bps). Chose dist_low_24h over dist_low_7d because the report's own deepdive evidence file only carries a by-quarter/by-year stability breakdown for the 24h-lookback variant (LONG_CASCADE_far24hlow_by_quarter/_by_year keys) -- the 7d variant (far_7d_low_full net14=5.74/OOS net14=15.48, evidence L5) is not weaker but was not independently vetted for temporal stability in the available evidence, so 24h was picked as the more conservatively-verified variant, not for higher expected return. SHORT_SQUEEZE variants (far_24h_low_full net14=19.61/OOS net14=73.34, far_7d_low similar) are NOT used despite materially higher reported net_bps -- SHORT_SQUEEZE is hard-blocked at the select_tradeable() level pending the unresolved sign-convention question (same reason as LIQ_CASCADE_REPEAT_V1, detector.py:95); only the LONG_CASCADE sub-range of the report's headline '+15.5 to +73.3bps OOS' range is achievable by this alpha, i.e. +15.48 to +17.7bps OOS depending on 24h/7d choice.",
+  "frozen_spec": {
+    "detector": "src/institutional/engines/liq_cascade/detector.py::detect_cascades (UNCHANGED, oi_drop_z_min=3.0, px_move_min=0.004, min_gap_bars=12)",
+    "dataset_builder": "src/institutional/engines/liq_cascade/dataset.py::build_event_dataset (UNCHANGED)",
+    "distance_feature": "dist_low_24h (existing causal column in build_event_dataset output: px / rolling(288, min_periods=144).min().shift-free-causal - 1.0, strictly past-only)",
+    "far_from_low_threshold": "dist_low_24h >= 0.05 (FAR_FROM_LOW_MIN_DIST_24H, frozen constant, ~75th percentile of dist_low_24h among LONG_CASCADE events measured at freeze time -- see threshold_selection_rationale)",
+    "kind_filter": "LONG_CASCADE only -- SHORT_SQUEEZE explicitly blocked pending sign-convention resolution (detector.py:95), enforced in select_tradeable()",
+    "direction": "LONG only",
+    "horizon": "fwd_4h",
+    "universe": "configs/portfolio_v1_1_parallel_50.yaml (frozen 50-symbol list, hash-checked at runtime)"
+  },
+  "expected_stats_at_freeze": {
+    "note": "Primary numbers below are the source report's own evidence-file figures for the exact LONG_CASCADE far_24h_low bucket (evidence/liquidation_L1_L7_full.json#L5_preceding_trend_depth) -- the basis for edge_retention comparison. reproduction_at_freeze_time is this implementation's own re-run of the same threshold on the frozen pipeline as of 2026-08-31, included for audit/transparency (small n/bps drift vs source_report is expected: ~1 extra day of data + independent re-derivation of the quantile-based threshold).",
+    "source_report_figures": {
+      "net_bps_full_sample": 4.48,
+      "net_bps_oos": 17.7,
+      "n_events_full": 6709,
+      "n_events_oos": 2227,
+      "profit_factor_full": 1.184,
+      "profit_factor_oos": 1.344,
+      "hit_rate_full": 0.5,
+      "hit_rate_oos": 0.519,
+      "t_stat_full": 4.54,
+      "t_stat_oos": 4.25,
+      "cost_model_bps": 14,
+      "oos_definition": "event_time year >= 2025 (report's '2025_26' split)"
+    },
+    "reproduction_at_freeze_time": {
+      "n_events_full": 6804,
+      "net_bps_full_sample": 6.7,
+      "profit_factor_full": 1.209,
+      "n_events_oos": 2409,
+      "net_bps_oos": 19.84,
+      "profit_factor_oos": 1.373,
+      "oos_definition": "event_time >= 2025-01-01 UTC",
+      "population_at_measurement": 27927,
+      "note": "computed by re-running build_event_dataset() on the live frozen universe at freeze time and applying dist_low_24h>=0.05 -- confirms the frozen threshold reproduces the source report's bucket at the same order of magnitude"
+    },
+    "stability": "by-year net14 (LONG_CASCADE far_24h_low, from deepdive evidence): 2021 +26.28, 2022 -22.02, 2023 +9.96, 2024 -3.19, 2025 +20.64, 2026 +11.64 -- report characterizes this as 'stable, both kinds agree, near-low flips negative OOS' (contrast: near_24h_low_2025_26 net14=-21.49, evidence L5)",
+    "distinctness_from_a7_tail_e1": "Jaccard overlap 0.257 (LONG_CASCADE far_24h_low vs a7_tail), higher overlap than LIQ_CASCADE_REPEAT_V1's exhaustion bucket (0.116) but still well below 1.0 -- evidence/liquidation_bucket_overlap_jaccard.json"
+  },
+  "risk_bucket": "LIQUIDATION_FAMILY",
+  "correlation_family": "LIQ_CASCADE_DETECTOR",
+  "correlated_with": ["A7-TAIL-E1 (existing live shadow engine, reports/liq_cascade/shadow/)", "LIQ_CASCADE_REPEAT_V1 (reports/live_alpha_lab/LIQ_CASCADE_REPEAT_V1/) -- SAME underlying detector/event stream (build_event_dataset), NOT independent risk despite different selection logic. Jaccard overlap between far_24h_low and exhaustion buckets (LONG_CASCADE) = 0.102 (evidence/liquidation_bucket_overlap_jaccard.json) -- low direct row-overlap but correlated exposure via shared detector/regime."],
+  "mode": "A_SIGNAL_SHADOW",
+  "execution_notes": "No simulated fills in this V1. Mode B (execution shadow) not yet implemented for this alpha.",
+  "promotion_gate_not_yet_defined": true,
+  "do_not_modify_after_this_timestamp": "Any change to entry/exit/threshold/universe after freeze_timestamp must be a new alpha_id (e.g. _V2), not an edit to this spec."
+}

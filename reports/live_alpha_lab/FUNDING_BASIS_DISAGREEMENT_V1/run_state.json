@@ -1,0 +1,10 @@
+{
+  "alpha_id": "FUNDING_BASIS_DISAGREEMENT_V1",
+  "last_run": "2026-08-31T17:22:40.076905+00:00",
+  "universe_hash": "a2ac4f6320d10608",
+  "universe_size": 2,
+  "n_decisions_total": 1,
+  "n_decisions_new": 1,
+  "mode": "A_SIGNAL_SHADOW",
+  "horizon": "k30d"
+}

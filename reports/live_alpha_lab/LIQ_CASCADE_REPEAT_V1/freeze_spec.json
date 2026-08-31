@@ -1,0 +1,36 @@
+{
+  "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+  "version": "v1.0",
+  "freeze_timestamp": "2026-08-31T00:00:00+00:00",
+  "mechanism": "LONG_CASCADE liquidation event with n_events_sym_24h>=2 (3rd+ same-symbol repeat in trailing 24h) -> LONG, fwd_4h horizon.",
+  "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-1",
+  "corroborating_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w9_cross_dataset_interactions/REPORT.md",
+  "frozen_spec": {
+    "detector": "src/institutional/engines/liq_cascade/detector.py::detect_cascades (UNCHANGED, oi_drop_z_min=3.0, px_move_min=0.004, min_gap_bars=12)",
+    "dataset_builder": "src/institutional/engines/liq_cascade/dataset.py::build_event_dataset (UNCHANGED)",
+    "repeat_feature": "n_events_sym_24h (existing causal column in build_event_dataset output)",
+    "exhaustion_threshold": "n_events_sym_24h >= 2",
+    "kind_filter": "LONG_CASCADE only -- SHORT_SQUEEZE explicitly blocked pending sign-convention resolution (detector.py:95)",
+    "direction": "LONG only",
+    "horizon": "fwd_4h",
+    "universe": "configs/portfolio_v1_1_parallel_50.yaml (frozen 50-symbol list, hash-checked at runtime)"
+  },
+  "expected_stats_at_freeze": {
+    "net_bps_full_sample": 27.1,
+    "net_bps_oos": 45.2,
+    "n_events_full": 1988,
+    "n_events_oos": 615,
+    "profit_factor_full": 1.43,
+    "profit_factor_oos": 1.69,
+    "cost_model_bps": 14,
+    "stability": "improving 2023->2026, only 2022 weak",
+    "distinctness_from_a7_tail_e1": "Jaccard overlap 0.116 (low) on LONG bucket"
+  },
+  "risk_bucket": "LIQUIDATION_FAMILY",
+  "correlation_family": "LIQ_CASCADE_DETECTOR",
+  "correlated_with": ["A7-TAIL-E1 (existing live shadow engine, reports/liq_cascade/shadow/)", "LIQ_CASCADE_FAR_FROM_LOW_V1 (not yet implemented)"],
+  "mode": "A_SIGNAL_SHADOW",
+  "execution_notes": "No simulated fills in this V1. Mode B (execution shadow) not yet implemented for this alpha.",
+  "promotion_gate_not_yet_defined": true,
+  "do_not_modify_after_this_timestamp": "Any change to entry/exit/threshold/universe after freeze_timestamp must be a new alpha_id (e.g. _V2), not an edit to this spec."
+}

@@ -1,0 +1,104 @@
+{
+  "alpha_id": "FUNDING_BASIS_DISAGREEMENT_V2",
+  "supersedes": "FUNDING_BASIS_DISAGREEMENT_V1",
+  "why_v2_not_v1": "The perp-price leg substitution documented below (perp_price_leg_deviation: live mark_price replacing the stale um_klines_1d close used by the source report) changes the economic expression of the signal, per explicit user instruction 2026-08-31: 'la substitution de la jambe stale par une vraie jambe live change l'expression economique... Freeze FUNDING_BASIS_DISAGREEMENT_V2 aujourd'hui et commence son track record a zero.' V1 is retained in the registry as REJECTED/superseded -- it was never actually run under its original stale-leg definition, so it has no track record to preserve; this V2 spec (identical code, corrected identity) starts its forward clock at freeze_timestamp below with zero decisions credited as forward.",
+  "spec_hash": "f86b3d7f4391b6b9",
+  "spec_hash_method": "sha256(json.dumps(frozen_spec, sort_keys=True))[:16], computed from the 'frozen_spec' block in this file",
+  "version": "v2.0",
+  "freeze_timestamp": "2026-08-31T18:08:39+00:00",
+  "execution_definition": "Mode A SIGNAL SHADOW only (see execution_notes/execution_blocked_reason below) -- 2-leg relative-value mechanism (long/short quarterly future vs opposite perp leg), NO simulated fills, NO multi-leg mismatch handling implemented. entry_direction (RICH->LONG_QUARTERLY_SHORT_PERP, CHEAP->SHORT_QUARTERLY_LONG_PERP) is descriptive of the real-world trade shape only, never executed or simulated by this code.",
+  "mechanism": "Perp funding rate and quarterly-futures basis are two independent market estimates of annualized cost-of-carry. disagreement = funding_ann_pct - basis_near_ann. When disagreement is extreme (>= frozen q90 or <= frozen q10, per-symbol), fade the disagreement: bet basis converges toward funding. RICH (funding >> basis) -> LONG quarterly / SHORT perp. CHEAP (funding << basis, deeply negative funding = bear/de-risking regime) -> SHORT quarterly / LONG perp.",
+  "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w4_calendar_basis/REPORT.md (mechanism M7, rank 1 in the ranked table, the report's own headline/PROMISING finding)",
+  "not_a_repackaging_of_basis_level_check": "Source report verified corr(disagreement, basis_ann) = 0.49-0.52 only (moderate, not redundant); CHEAP-disagreement entries have basis_near_ann at entry statistically indistinguishable from whole-sample median (only 16-23% would qualify under M1's own top-quintile basis-extremity test), while funding_ann_pct is genuinely distinct (median -2.2%/-2.4% vs whole-sample +4.9%/+5.5%). Reused here without re-deriving -- this is read-only evidence from the source report, not re-verified independently in this implementation.",
+
+  "frozen_horizon_choice": {
+    "chosen": "k30d",
+    "alternatives_tested_in_source_report": ["k1d", "k3d", "k7d", "k14d", "k30d"],
+    "why_k30d_not_k14d": "k30d is the ONLY horizon in the source report where BOTH BTC and ETH clear BOTH cost tiers simultaneously: BTC net_base(14bps)=+33.2bps/net_stress(28bps)=+19.2bps; ETH net_base=+30.3bps/net_stress=+16.3bps. At k14d, BTC fails the stress-cost tier (net_stress=-6.3bps) -- only ETH clears both tiers at k14d (net_base=+15.3/net_stress=+1.3, barely). k30d is also the horizon the registry's pre-existing worst_episode_bps values (-111.8 BTC / -106.6 ETH) were already recorded against, so freezing k30d keeps this implementation consistent with those numbers rather than silently redefining them.",
+    "tradeoff_honestly_flagged": "k30d has a thinner true-independent-N than k14d after decluster: BTC n=18 (k30d) vs n=24 (k14d); ETH n=15 (k30d) vs n=25 (k14d). Also: the source report's explicit year-by-year stability breakdown ('positive every year 2024-26') is shown at k7d in the report's prose, not independently broken out at k30d -- the ranked-table row states 'positive every year 2024-26 (both symbols)' for the M7 mechanism as a whole (across the 15-24 N range spanning k14d-k30d), but this is not a k30d-specific year-by-year confirmation. Treated as inferred, not independently verified at k30d specifically."
+  },
+
+  "frozen_spec": {
+    "signal": "disagreement = funding_ann_pct - basis_near_ann",
+    "funding_ann_pct": "funding_rate_daily_mean * 3 * 365 * 100.0 (8h funding periods -> 3/day -> annualized, as percent; identical formula to source report's build_panel.py)",
+    "basis_near_pct": "(near_quarterly_close / perp_price - 1.0) * 100.0",
+    "basis_near_ann": "basis_near_pct * (365.0 / near_dte)",
+    "near_contract_selection": "smallest positive dte among quarterly contracts trading on that date (causal, no lookahead)",
+    "eligibility_filter": "near_dte >= 7 (MIN_DTE floor, identical to source report's pitfall #4 guard against annualized-basis blowup near expiry)",
+    "frozen_thresholds": {
+      "BTCUSDT": {"lo_q10": -6.7, "hi_q90": 12.3},
+      "ETHUSDT": {"lo_q10": -5.8, "hi_q90": 15.6}
+    },
+    "thresholds_are_frozen_not_refit": "These are the exact train-fit (first 60% chronological split) decile thresholds reported in the source report's M7 section. This implementation NEVER recomputes them from live/incoming data -- doing so on the live feed's short (~2 month) history window would be severe data-snooping on a tiny sample. Any threshold change requires a new alpha_id (_V2), per the registry's own no-retroactive-edit rule.",
+    "entry_direction": {
+      "RICH (disagreement >= hi_q90)": "LONG_QUARTERLY_SHORT_PERP",
+      "CHEAP (disagreement <= lo_q10)": "SHORT_QUARTERLY_LONG_PERP",
+      "NEUTRAL": "no signal"
+    },
+    "decluster_pass_1_episode_contiguity": "An entry only fires on the FIRST day of a contiguous RICH or CHEAP run (regime label change vs previous eligible day, or a calendar gap, starts a new episode) -- replicates source report's build_episodes()/episode_entries().",
+    "decluster_pass_2_nonoverlap": "An episode-start candidate is only kept if it starts >= FROZEN_HORIZON_DAYS (30) after the previously KEPT entry for the SAME symbol -- replicates source report's nonoverlap_filter() (the fix for the Aug-Sep 2024 9-overlapping-episodes bug documented in the source report's 'Two new pitfalls' section). Recomputed deterministically from full history on every run (no external state needed for correctness; idempotency is handled separately by the runner's ledger dedup on (date, symbol))."
+  },
+
+  "expected_stats_at_freeze": {
+    "note": "All figures below are for k30d specifically (the frozen horizon), taken verbatim from the source report's M7 section and ranked table. These are RESEARCH backtest figures (with simulated PnL/decluster on the full 2021-2026 discovery panel) -- this V1 Mode A implementation does NOT compute PnL or simulate fills; it only logs the entry decision (regime/direction/signal value). These numbers exist here purely for future edge_retention comparison once enough live episodes accumulate.",
+    "BTCUSDT_k30d": {
+      "n_independent_episodes": 18,
+      "gross_bps": 47.2,
+      "net_bps_base_14": 33.2,
+      "net_bps_stress_28": 19.2,
+      "worst_episode_bps": -111.8,
+      "win_rate": 0.89
+    },
+    "ETHUSDT_k30d": {
+      "n_independent_episodes": 15,
+      "gross_bps": 44.3,
+      "net_bps_base_14": 30.3,
+      "net_bps_stress_28": 16.3,
+      "worst_episode_bps": -106.6,
+      "win_rate": 0.87
+    },
+    "stability": "Positive in every calendar year 2024/2025/2026(partial) for both symbols per the source report's ranked-table verdict row (aggregate statement across the M7 mechanism's k14d-k30d range, not an independently-confirmed k30d-only year breakdown -- see frozen_horizon_choice.tradeoff_honestly_flagged above)",
+    "cost_model_bps": {"base": 14, "stress": 28, "legs": "2-leg round-trip (perp vs quarterly)"}
+  },
+
+  "data_freshness_investigation": {
+    "investigated_at": "2026-08-31",
+    "quarterly_futures_leg": {
+      "path_checked": "data/derivatives_backfill/binance_vision_quarterly/",
+      "finding": "LIVE, continuously updated. Verified: BTCUSDT_260925_1d.parquet, BTCUSDT_261225_1d.parquet, ETHUSDT_260925_1d.parquet, ETHUSDT_261225_1d.parquet all have max_date=2026-08-29 (2-day lag, inherent to Binance Vision's daily-file publish cadence -- normal, not stale) with file mtime 2026-08-31T07:15:5x UTC (this morning, at the time of investigation).",
+      "mechanism": "systemd timer futur-basis.timer (daily 09:15 CEST / 07:15 UTC) runs 'scripts/backfill_binance_quarterly_vision.py && scripts/backtest_basis_term.py' (systemd unit ~/.config/systemd/user/futur-basis.service, Type=oneshot, description 'BASIS_TERM - top-up quarterly Vision (incremental)'). This is a pre-existing, already-approved, already-running job -- nothing was newly triggered or run by this implementation task.",
+      "conclusion": "data_live: true for this leg. No backfill script needed to be (or was) run as part of this task."
+    },
+    "funding_rate_leg": {
+      "static_backfill_checked": "data/derivatives_backfill/binance/funding/{BTC,ETH}USDT.parquet -- CONFIRMED STALE, max timestamp 2026-08-14T16:00 UTC (mtime 2026-08-14). NOT used by this implementation.",
+      "live_source_checked": "data/derivatives_raw/exchange=binance/market=usdm/stream=open_interest/symbol={BTC,ETH}USDT/date=*/part-*.parquet",
+      "finding": "LIVE and current to within minutes. Verified rows with funding_rate and mark_price timestamped 2026-08-31T16:58 UTC at time of investigation (~16:5x-17:0x local investigation time). Field comes from Binance premiumIndex REST endpoint (lastFundingRate), polled every ~5min alongside mark_price/index_price/open_interest.",
+      "mechanism": "scripts/run_derivatives_collector.py (src/institutional/data/derivatives_collector/collector.py::DerivativesCollector), a running process (confirmed via ps, started 2026-08-29T13:34, --symbols includes BTCUSDT,ETHUSDT among 50). This process was already running before this task started -- not started by this implementation.",
+      "history_limitation": "The live stream only has data since 2026-06-28 (~2 months, the collector's actual start of continuous operation for this partition), far shorter than the quarterly futures' multi-year history. This means the live panel can only classify regime for roughly the last ~2 months -- consistent with, and does not change, the frozen (pre-fit, non-refit) thresholds, but does mean very few or zero fresh entries are expected on early runs, matching the ~15-18/year/symbol base rate at k30d.",
+      "conclusion": "data_live: true for this leg."
+    },
+    "perp_price_leg_deviation": {
+      "issue": "The source report's basis calculation used data/derivatives_backfill/um_klines_1d/{BTC,ETH}USDT_1d.parquet (daily perp kline close) for the perp price. CONFIRMED STALE: max_date=2026-06-30, mtime 2026-07-17 -- not updated since.",
+      "resolution": "This implementation substitutes the live mark_price field from the SAME derivatives_raw open_interest stream used for funding_rate (both come from the same Binance premiumIndex REST poll) -- daily-aggregated as the LAST observed mark_price within the calendar day, as a causal proxy for a daily perp close.",
+      "caveat_honestly_flagged": "mark_price is not bit-identical to the perp kline close used in the original discovery panel (mark price is an index-weighted fair-value estimate, not the literal last traded price) -- in practice these are typically within a few bps of each other, but this substitution has NOT been separately backtested or re-validated against the original discovery methodology. This is a live-data-availability necessitated deviation, not a re-derivation of the mechanism."
+    },
+    "both_legs_summary": "Both legs (funding AND quarterly basis) are genuinely live as of 2026-08-31 -- data_live: true in the registry. The perp price sub-leg required a substitution (documented above) because its original discovery-time source is stale."
+  },
+
+  "risk_bucket": "RELATIVE_VALUE_FAMILY",
+  "correlation_family": "CALENDAR_BASIS_CURVE",
+  "correlated_with": ["No other implemented alpha in this registry shares this risk_bucket as of freeze_timestamp."],
+  "mode": "A_SIGNAL_SHADOW",
+  "execution_notes": "No simulated fills in this V1. This is signal generation ONLY: the runner logs (date, symbol, regime, direction, disagreement, basis_near_ann, funding_ann_pct, near_dte) per decluster-selected entry. No PnL is computed, no forward return is measured, no order of any kind (real or simulated) is ever sent.",
+  "execution_blocked_reason": "No multi-leg mismatch safety simulator exists yet -- Mode A signal only, do not build Mode B for this alpha without that simulator. This mechanism is inherently 2-leg (perp + quarterly future), and the registry's own status vocabulary reserves EXECUTION_SHADOW (Mode B, simulated fills) for alphas that have passed that safety gate; this alpha has not, and building it was explicitly out of scope for this task.",
+  "promotion_gate_not_yet_defined": true,
+
+  "known_risks_do_not_overclaim": {
+    "n_is_thin": "15-18 independent episodes/year/symbol at the frozen k30d horizon -- among the thinnest samples in the registry. SHADOW_LIVE status here means ONLY that Mode A signal-only forward tracking is genuinely running (both data legs verified live); it does NOT mean this alpha is validated or ready for capital. This remains DISCOVERY-stage forward tracking, not a promotion candidate.",
+    "worst_episode_bps": "BTC -111.8bps, ETH -106.6bps at k30d -- both worse than the base-cost edge (33.2/30.3bps), i.e. a single bad episode can wipe out several good ones. Must be respected in any future sizing discussion; not sized away by this implementation.",
+    "capacity": "Quarterly-futures book depth is the structural capacity ceiling for this mechanism (same constraint noted for every calendar-basis mechanism in the source report) -- thin relative to perp.",
+    "only_btc_eth": "Only BTC and ETH have Binance quarterly futures at all -- universe cannot be expanded to other symbols under this mechanism."
+  },
+
+  "do_not_modify_after_this_timestamp": "Any change to entry/exit/threshold/universe/horizon after freeze_timestamp must be a new alpha_id (e.g. _V2), not an edit to this spec."
+}

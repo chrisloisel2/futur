@@ -1,0 +1,762 @@
+# configs/live_alpha_registry.yaml — LIVE ALPHA LAB registry.
+#
+# Catalogue de TOUS les candidats crédibles issus de alpha_hunt_2026-08-29 et
+# alpha_hunt_2026-08-30 (reports/edge_discovery/), avant toute promotion vers
+# le tournoi alpha20 (configs/alpha20_runners.yaml, réservé aux mécanismes
+# DÉJÀ validés). Ce fichier suit la même discipline : pas de clone
+# opportuniste, chaque entrée correspond à un mécanisme réellement mesuré
+# dans un REPORT.md, avec les chiffres attendus figés AU MOMENT DU FREEZE
+# (champ expected_*) pour pouvoir calculer edge_retention en live plus tard.
+#
+# ⚠ CORRECTION DE DISCIPLINE (2026-08-31, instruction utilisateur explicite) :
+# le seul champ `status` d'origine mélangeait deux questions différentes —
+# "le programme tourne" et "l'alpha est confirmé" — et SHADOW_LIVE donnait une
+# fausse impression de validation. Remplacé par DEUX champs orthogonaux :
+#
+#   scientific_status (où en est la PREUVE) :
+#     DISCOVERY            -> mesuré en backtest, spec pas encore figée ici
+#     RECONSTRUCTED         -> spec figée MAIS un seuil/paramètre a dû être
+#                              reconstruit (grid-search, reverse-engineering,
+#                              données de substitution) faute de constante
+#                              publiée dans le rapport source — sa confirmation
+#                              ne peut PAS s'appuyer sur les données qui ont
+#                              servi à la reconstruction ; le compteur forward
+#                              repart à zéro à la date de reconstruction
+#     FROZEN                -> spec figée AVANT toute observation utilisée
+#                              pour la juger (aucune reconstruction)
+#     FORWARD_CONFIRMATION  -> assez d'épisodes forward (post-freeze) pour
+#                              juger, verdict pas encore rendu
+#     CONFIRMED / REJECTED  -> verdict forward rendu
+#
+#   operational_status (où en est le CODE) :
+#     CODE_MISSING | DATA_BLOCKED | SIGNAL_SHADOW | EXECUTION_SHADOW | READY
+#     MERGED_INTO_<alpha_id> -> ce candidat n'a PAS de code séparé sous son
+#                               propre alpha_id ; son signal est calculé à
+#                               l'intérieur d'un layer partagé -- voir
+#                               l'alpha_id cité pour le code/ledger réel.
+#                               Ajouté 2026-08-31 pour les 3 candidats
+#                               OPTIONS_*_V1 -- voir VOL_FORECAST_LAYER_V1.
+#
+#   Ne jamais lire operational_status=SIGNAL_SHADOW comme une validation —
+#   ça dit juste "le signal tourne". Le scoreboard (scripts/
+#   compute_live_alpha_lab_scoreboard.py) sépare explicitement
+#   replay_decisions (event_time <= freeze_timestamp, backfill historique)
+#   de forward_decisions (event_time > freeze_timestamp, jamais vu au
+#   moment du freeze) — SEULES ces dernières comptent comme preuve forward.
+#
+# Toute modification rétroactive d'une entrée FROZEN+/RECONSTRUCTED+ pour
+# "sauver" son PnL est interdite — un changement de spec (seuil, univers,
+# feature, sizing) devient une NOUVELLE entrée (alpha_id avec suffixe _V2,
+# nouvelle freeze_timestamp, track record à zéro). Aucune décision passée
+# n'est jamais réécrite ou supprimée — seule l'addition de nouvelles colonnes
+# (ex. `provenance`) ou de nouvelles lignes est permise sur un ledger existant.
+
+built_at: "2026-08-31T00:00:00+00:00"
+schema_version: 1
+
+alphas:
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : liquidation cascade (risk_bucket: LIQUIDATION_FAMILY)
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: LIQ_CASCADE_REPEAT_V1
+    family: liquidation
+    mechanism: >
+      Cascade de liquidation LONG_CASCADE (prix down + OI down violent) sur un
+      symbole ayant déjà eu >=2 cascades same-symbol dans les 24h précédentes
+      ("exhaustion") -> LONG. Première occurrence ("onset") = pas de trade
+      (edge net négatif mesuré). N'est PAS une nouvelle donnée : réutilise
+      exactement le détecteur figé src/institutional/engines/liq_cascade/
+      detector.py::detect_cascades (inchangé), ajoute seulement un comptage
+      causal de répétitions same-symbol en fenêtre glissante 24h.
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: FROZEN            # spec figée avant toute observation jugée
+    operational_status: SIGNAL_SHADOW    # Mode A tourne ; ne PAS lire comme "confirmé"
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-1
+    corroborating_report: reports/edge_discovery/alpha_hunt_2026-08-30/w9_cross_dataset_interactions/REPORT.md
+    signal_definition: src/institutional/engines/liq_cascade/repeat_variant.py::classify_repeat_bucket
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: [oi_drop_z, px_ret_30m, n_prior_same_symbol_24h]
+    model_family: RULE_STATE_MACHINE
+    model_hash: null           # pas de modèle ML, règle pure -> pas d'artefact à hasher
+    training_window: "2021-01-01 .. 2026-08-30 (fenêtre de découverte, W2/W9)"
+    freeze_timestamp: "2026-08-31T00:00:00+00:00"
+    entry: "kind==LONG_CASCADE AND n_prior_same_symbol_24h>=2 (3e occurrence ou plus)"
+    exit: "fwd_4h (horizon fixe, pas de stop/TP dynamique dans ce V1)"
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: "round-trip taker ~14bps (COST_RT existant), stress 28bps"
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: "~360 events/an marché entier (49 symboles), petite taille/event"
+    correlation_family: LIQ_CASCADE_DETECTOR   # même flux d'events que A7-TAIL-E1, LIQ_CASCADE_FAR_FROM_LOW_V1
+    live_start_timestamp: "2026-08-31T00:00:00+00:00"
+    expected_net_bps: 27.1        # full-sample ; 45.2 en OOS (voir source_report)
+    expected_n_independent_episodes: 1988   # 615 en OOS
+    expected_profit_factor: 1.43   # 1.69 OOS
+    data_live: true               # data/derivatives_backfill/binance_vision_metrics, backfillé via topup_data() existant
+    notes: >
+      Corroboré indépendamment par W9 (conditionnement de A7-TAIL-E1 sur son
+      propre repeat-count : +42.5bps repeat>=1, +86.6bps repeat>=2, vs -6.2bps
+      1ere occurrence). Distinct de A7-TAIL-E1 (Jaccard overlap=0.116) mais
+      RISQUE CORRÉLÉ : même détecteur/flux d'events -> même risk_bucket.
+
+  - alpha_id: LIQ_CASCADE_FAR_FROM_LOW_V1
+    family: liquidation
+    mechanism: >
+      Parmi les cascades LONG_CASCADE, celles où le prix au moment de l'event
+      est loin de son plus bas récent battent celles proches du plus bas
+      ("far from local low beats at the low").
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: RECONSTRUCTED     # seuil reverse-engineered, PAS publié par le rapport source
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-4
+    signal_definition: src/institutional/engines/liq_cascade/far_from_low_variant.py::select_tradeable
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: [oi_drop_z, px_ret_30m, dist_low_24h]
+    model_family: RULE_STATE_MACHINE
+    model_hash: null
+    training_window: "2021-01-01 .. 2026-08-30"
+    freeze_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ 2026-08-31 (voir notes) -- était 2026-08-31T17:09:02
+    entry: "kind==LONG_CASCADE AND dist_low_24h >= 0.05 (FAR_FROM_LOW_MIN_DIST_24H, ~75th pct of dist_low_24h at freeze time, reproduces source_report's far_24h_low bucket)"
+    exit: fwd_4h
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: "round-trip taker ~14bps, stress 28bps"
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: "~similar order of magnitude to LIQ_CASCADE_REPEAT_V1, same detector"
+    correlation_family: LIQ_CASCADE_DETECTOR
+    live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
+    expected_net_bps: 4.48        # full-sample (far_24h_low_full, evidence L5) ; 17.7 en OOS 2025-26 -- contexte historique, PAS une cible de confirmation forward (seuil reconstruit sur ces mêmes données)
+    expected_n_independent_episodes: 6709   # full-sample ; 2227 en OOS 2025-26
+    expected_profit_factor: 1.184  # full ; 1.344 OOS 2025-26
+    data_live: true
+    notes: >
+      Implémenté (contrairement au moment du gel initial). Même famille de
+      risque que LIQ_CASCADE_REPEAT_V1 (même flux d'events, même détecteur) —
+      NE PAS sizer les deux comme si elles étaient indépendantes en portefeuille.
+      Seuil dist_low_24h>=0.05 dérivé empiriquement (75e centile mesuré =
+      0.0489, arrondi à 0.05) car le rapport source ne publie pas de valeur
+      numérique unique pour son bucket "far_24h_low" (buckets décrits en
+      prose) ; voir freeze_spec.json pour la reproduction complète.
+      ⚠ CORRECTION 2026-08-31 : ce seuil a été RECONSTRUIT en regardant les
+      données historiques (percentile mesuré sur le passé) — ça constitue du
+      data snooping vis-à-vis des observations utilisées pour le construire.
+      freeze_timestamp/live_start_timestamp RÉINITIALISÉS à 2026-08-31T18:08:39Z :
+      les 6805 décisions déjà écrites (2020-10..2026-08-29) sont toutes
+      REPLAY par construction (event_time <= nouveau freeze) ; la vraie
+      confirmation forward commence à zéro décision à partir de maintenant.
+
+  - alpha_id: LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION_V1
+    family: liquidation
+    mechanism: "Symétrique de LIQ_CASCADE_REPEAT_V1 pour SHORT_SQUEEZE (prix up + OI down)."
+    version: v1.0
+    status: BUG_FOUND   # utilisé ici comme "bloqué / ne pas lancer" (pas de statut dédié dans le schéma)
+    scientific_status: DISCOVERY         # forensics de signe pas encore menées, voir notes
+    operational_status: CODE_MISSING
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-3
+    signal_definition: NOT_IMPLEMENTED_BLOCKED
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: [oi_drop_z, px_ret_30m, n_prior_same_symbol_24h]
+    model_family: RULE_STATE_MACHINE
+    model_hash: null
+    training_window: null
+    freeze_timestamp: null
+    entry: null
+    exit: null
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: null
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: null
+    correlation_family: LIQ_CASCADE_DETECTOR
+    live_start_timestamp: null
+    expected_net_bps: null
+    expected_n_independent_episodes: null
+    expected_profit_factor: null
+    data_live: true
+    notes: >
+      BLOQUÉ EXPLICITEMENT (instruction utilisateur) : la convention de signe
+      historique de SHORT_SQUEEZE dans liq_cascade/detector.py n'est pas
+      résolue (liq_cascade/detector.py:95 ne flip jamais le PnL — voir
+      reports/edge_discovery/alpha_hunt_2026-08-29/SCOREBOARD.md "Also
+      unresolved"). NE PAS lancer avant réponse humaine.
+
+  - alpha_id: SHORT_COVERING_CONTINUATION_V1
+    family: liquidation
+    mechanism: >
+      price up + OI down (short covering, top/bottom TAIL DECILE de
+      price_ret_1h / oi_delta_pct_1h, percentile causal trailing 30j
+      par symbole) -> LONG, vs baseline non conditionné.
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: RECONSTRUCTED     # decile/fenetre reconstruits, script d'analyse original perdu
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-2
+    signal_definition: src/institutional/engines/short_covering_continuation/state.py::classify_state
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: [px_ret, oi_delta]
+    model_family: RULE_STATE_MACHINE
+    model_hash: null           # pas de modèle ML, règle pure -> pas d'artefact à hasher
+    training_window: "2020 .. 2026 (event_feature_panel, data_v2, mesure ORIGINALE non live) ; reconstruction live sur data/derivatives_raw depuis 2026-06-28"
+    freeze_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ 2026-08-31 (voir notes) -- était 2026-08-31T17:30:00
+    entry: "price_ret_1h_pctile>=0.90 AND oi_delta_pct_1h_pctile<=0.10 (percentile causal trailing 720h/symbole) -> A_TRADE ; score>=0.75 -> B_SHADOW"
+    exit: "fwd_4h (horizon fixe, pas de stop/TP dynamique dans ce V1)"
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: "round-trip taker ~14bps (COST_RT existant)"
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: "23422 events full sample (meilleure couverture majors de ce round) ; live sanity-check 2026-08-31 : 0.82% des barres classées SHORT_COVERING (28/3431 sur 72h, 47 symboles) vs 1.14% dans la mesure originale -- même ordre de grandeur"
+    correlation_family: OI_STATE_FAMILY
+    live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
+    expected_net_bps: 9.2        # excess vs baseline, full ; 19.0 OOS -- contexte historique, PAS une cible de confirmation forward (seuil reconstruit sur ces mêmes données)
+    expected_n_independent_episodes: 23422
+    expected_profit_factor: 1.11  # 1.18 OOS
+    data_live: true               # data/derivatives_raw, collecteur confirmé actif (process live), fichiers réels à mtime récent vérifiés
+    data_segment_boundaries:
+      post_symbol_resolution_fix: "2026-08-31T18:18:02+00:00"   # bug symboles CORRIGÉ (voir notes) -- décisions forward avant cette date restent sur l'univers dégradé (47/50). Horodatage VÉRIFIÉ par log (pas juste "commande lancée") : un 2e unit systemd pré-existant (futur-derivatives.service, non détecté au premier passage) respawnait le process avec l'ancienne liste à chaque kill -- corrigé en éditant CE unit-là au lieu d'en garder un doublon.
+    notes: >
+      RECONSTRUCTION, pas une réplication byte-for-byte : la mesure
+      originale utilise data_v2/normalized/event_feature_panel (worktree
+      futur-data-v2, backfill ponctuel PAS mis à jour en continu) ; ce
+      moteur live lit data/derivatives_raw (collecteur live REST ~5min/
+      symbole, confirmé actif et à jour au freeze). Le script d'analyse
+      original (evidence/leverage_oi_O1_O9_full.json ->
+      O1_price_oi_quadrant_tail_deciles) était éphémère (subagent, jamais
+      persisté) -- seuil de décile (10/90) et fenêtre de percentile (30j)
+      sont une reconstruction documentée, non vérifiée identique.
+      Détail complet : reports/live_alpha_lab/
+      SHORT_COVERING_CONTINUATION_V1/freeze_spec.json
+      (data_reconstruction_notes).
+      ⚠ CORRECTION 2026-08-31 : (1) freeze_timestamp/live_start_timestamp
+      RÉINITIALISÉS à 2026-08-31T18:08:39Z (seuil reconstruit = data
+      snooping vis-à-vis des observations utilisées pour le construire, la
+      confirmation forward repart à zéro). (2) Le gap "3/50 symboles sans
+      donnée live" (MKRUSDT délisté ; PEPEUSDT/RNDRUSDT renommés côté
+      Binance en 1000PEPEUSDT/RENDERUSDT) était noté "hors périmètre" —
+      CORRIGÉ le même jour : scripts/launch_derivatives_collector_resolved.py
+      + src/institutional/data/derivatives_collector/symbol_resolver.py
+      résolvent maintenant l'univers contre exchangeInfo live avant chaque
+      lancement (49/50 éligibles, MKRUSDT explicitement exclu avec raison
+      tracée dans data/derivatives_raw/_symbol_resolution.json, jamais
+      silencieux). Collecteur relancé sous systemd
+      (futur-derivatives-collector.service, Restart=always) à
+      2026-08-31T18:05:07Z — voir data_segment_boundaries.
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : positioning / wallet (risk_bucket: POSITIONING_WALLET_FAMILY)
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: WHALE_LSR_SCREEN_V1
+    family: positioning
+    mechanism: >
+      Top-position ("whale") long/short ratio en extrême haut (z-score causal
+      7j >= seuil figé, RECONSTRUIT -- voir freeze_spec.json.threshold_provenance,
+      le rapport source ne conserve pas la constante numérique exacte) ->
+      sous-performance relative attendue -> SCREEN (éviter les nouveaux LONGS
+      ailleurs dans le portefeuille), PAS un short direct (SHORT_REJECTED).
+      Mirror long (whale extreme short -> outperform) marginal, pas encore
+      confirmé (p=0.09), colonne séparée mirror_flag_unconfirmed, jamais
+      mélangée au screen principal.
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: RECONSTRUCTED     # z>=4.0 choisi par GRID-SEARCH, pas une constante publiée -- statut le plus faible des 3 candidats reconstruits
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w10_forgotten_and_positioning/REPORT.md
+    signal_definition: src/institutional/engines/whale_lsr_screen/screen.py::classify_screen
+    universe: "configs/whale_lsr_screen_universe.yaml (47 symboles data/positioning, frozen list = fichiers présents au freeze 2026-08-31, hash-checked au runtime)"
+    features: [top_position_lsr, top_position_lsr_z7d]
+    model_family: RULE_STATE_MACHINE
+    model_hash: null
+    training_window: "2026-07-16 .. 2026-08-30 (45 jours, un seul régime haussier — PRUDENCE)"
+    freeze_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ 2026-08-31 (voir notes) -- était 2026-08-31T00:00:00
+    entry: "z_score_7d >= 4.0 -> screen_flag=True (avoid_new_longs). Seuil RECONSTRUIT par grid-search (pas verbatim du rapport source, voir freeze_spec.json)."
+    exit: fwd_24h
+    horizon: fwd_24h
+    execution_style: NONE_SCREEN_ONLY
+    cost_model: "pas de coût direct (screen, pas un trade)"
+    risk_bucket: POSITIONING_WALLET_FAMILY
+    expected_capacity: "n=87 episodes independants sur 45 jours -> a confirmer sur regime different"
+    correlation_family: POSITIONING_STANDALONE
+    live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
+    expected_net_bps: -57.8      # negatif = underperformance relative attendue -- contexte historique (grid-search sur ces memes donnees), PAS une cible de confirmation forward
+    expected_n_independent_episodes: 87
+    expected_profit_factor: null
+    data_live: true              # futur-positioning.timer/.service actifs, verifie 2026-08-31 (dernier run reussi 18:21 CEST, tous les 47 fichiers top_position mis a jour)
+    notes: >
+      Échantillon jeune (45j, un seul régime) — SIGNAL_SHADOW = observation
+      seulement, PAS une sleeve validée, en attente d'un 2e régime pour
+      confirmer le signe. Seuil opérationnel z>=4.0 RECONSTRUIT par
+      GRID-SEARCH (le script générateur original du rapport source n'a pas
+      été sauvegardé) -- c'est la reconstruction la plus faible des 3
+      (grid-search direct, pas juste un reverse-engineering de bucket
+      publié), voir freeze_spec.json.threshold_provenance pour le détail
+      complet. Pas de colonne "direction"/"SHORT" nulle part dans ce module
+      (SHORT_REJECTED respecté par construction, voir
+      tests/test_whale_lsr_screen.py::test_never_emits_short_direction_field).
+      ⚠ CORRECTION 2026-08-31 : freeze_timestamp/live_start_timestamp
+      RÉINITIALISÉS à 2026-08-31T18:08:39Z — le seuil grid-searché constitue
+      du data snooping vis-à-vis des 3091 décisions déjà écrites (toutes
+      REPLAY par construction désormais), la confirmation forward repart à
+      zéro décision à partir de maintenant.
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : relative value / calendar (risk_bucket: RELATIVE_VALUE_FAMILY)
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: FUNDING_BASIS_DISAGREEMENT_V1
+    family: relative_value
+    mechanism: >
+      Funding perp et basis trimestrielle sont deux estimations indépendantes
+      du même cost-of-carry annualisé ; quand elles divergent fortement
+      (disagreement = funding_ann_pct - basis_near_ann hors [-6.7%,+12.3%]
+      BTC / [-5.8%,+15.6%] ETH, seuils train-fit FIGÉS), on parie que la basis
+      trimestrielle converge vers le funding ("fade du désaccord") : RICH
+      (funding>>basis) -> LONG quarterly/SHORT perp ; CHEAP (funding<<basis,
+      régime bear/de-risking) -> SHORT quarterly/LONG perp. Vérifié dans le
+      rapport source : pas une simple relabellisation de basis extrême
+      (corr(disagreement, basis_ann)=0.49-0.52 seulement).
+    version: v1.0
+    status: REJECTED   # legacy field ; superseded_by: FUNDING_BASIS_DISAGREEMENT_V2, voir notes
+    scientific_status: REJECTED          # jamais réellement lancé sous cette identité exacte (jambe stale)
+    operational_status: DATA_BLOCKED     # tel que spécifié à l'origine (um_klines_1d stale), pas remplaçable sans changer la spec
+    superseded_by: FUNDING_BASIS_DISAGREEMENT_V2
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w4_calendar_basis/REPORT.md#rank-1-m7
+    signal_definition: NOT_IMPLEMENTED_UNDER_THIS_EXACT_IDENTITY   # voir FUNDING_BASIS_DISAGREEMENT_V2
+    universe: [BTCUSDT, ETHUSDT]
+    features: [funding_rate, quarterly_basis_annualized]
+    model_family: RULE_RELATIVE_VALUE
+    model_hash: null           # pas de modèle ML, seuils de quantile figés -> pas d'artefact à hasher
+    training_window: "2021 .. 2026 (BTC/ETH), N thin (15-24 episodes/an, k30d)"
+    freeze_timestamp: null   # jamais réellement figé/lancé sous CETTE identité (jambe perp = um_klines_1d stale, telle que spécifiée à l'origine)
+    entry: "disagreement (funding_ann_pct - basis_near_ann) franchit le seuil figé q10/q90 (train-fit du rapport source), 1ere occurrence de l'episode (decluster contiguite de regime) ET >=30j depuis la derniere entree retenue meme symbole (decluster non-chevauchement) ; near_dte>=7 (floor anti-blowup pres expiry)"
+    exit: null
+    horizon: k30d
+    execution_style: MULTI_LEG_HEDGED
+    cost_model: "2 legs (perp/quarterly x entry/exit), ~14bps base/28bps stress round-trip"
+    risk_bucket: RELATIVE_VALUE_FAMILY
+    expected_capacity: "thin, 15-18 episodes/an/actif a k30d (post-decluster, rapport source)"
+    correlation_family: CALENDAR_BASIS_CURVE
+    live_start_timestamp: null
+    expected_net_bps: 30.3        # ETH k30d net@14bps (conservateur) ; BTC k30d=+33.2 ; net@stress(28bps) : ETH=+16.3, BTC=+19.2
+    expected_n_independent_episodes: 15   # ETH k30d (plus mince des 2) ; BTC k30d=18
+    expected_profit_factor: null
+    worst_episode_bps: -111.8    # BTC k30d (pire des 2) ; ETH k30d=-106.6
+    data_live: false              # FAUX pour la jambe perp telle que spécifiée ICI (um_klines_1d stale depuis 2026-06-30) -- voir FUNDING_BASIS_DISAGREEMENT_V2 pour la version live
+    notes: >
+      ⚠ CORRECTION 2026-08-31 (instruction utilisateur) : l'implémentation
+      construite le 2026-08-31 substituait déjà la jambe perp stale
+      (um_klines_1d) par une jambe live (mark_price) — ce n'est PAS la même
+      spécification économique que celle décrite ici (basée sur le rapport
+      source original, jambe perp = kline close statique). Une substitution
+      de donnée qui change ce qu'un signal mesure réellement doit être une
+      nouvelle spec, pas une modification silencieuse. Cette entrée V1 est
+      conservée comme trace historique du mécanisme TEL QUE MESURÉ dans le
+      rapport source — elle n'a JAMAIS tourné en Mode A sous cette identité
+      exacte (freeze_timestamp=null, aucun ledger propre à V1). Voir
+      FUNDING_BASIS_DISAGREEMENT_V2 pour l'implémentation réelle, gelée à
+      zéro décision forward à partir de sa propre freeze_timestamp.
+
+  - alpha_id: FUNDING_BASIS_DISAGREEMENT_V2
+    family: relative_value
+    mechanism: >
+      IDENTIQUE à FUNDING_BASIS_DISAGREEMENT_V1 (fade du désaccord
+      funding/basis trimestriel, mêmes seuils train-fit q10/q90 gelés,
+      même decluster 2 passes) SAUF la jambe prix perp : substitue le
+      mark_price LIVE (flux premiumIndex, data/derivatives_raw) au close
+      quotidien STALE (um_klines_1d, arrêté 2026-06-30) utilisé dans la
+      découverte originale. Cette substitution change l'expression
+      économique du signal (mark_price = juste valeur pondérée par index,
+      pas le dernier prix tradé) — d'où le nouvel alpha_id, par instruction
+      utilisateur explicite du 2026-08-31.
+    version: v2.0
+    status: SHADOW_LIVE   # legacy field
+    scientific_status: FROZEN            # spec figée AVANT toute observation forward
+    operational_status: SIGNAL_SHADOW
+    supersedes: FUNDING_BASIS_DISAGREEMENT_V1
+    spec_hash: f86b3d7f4391b6b9   # sha256(frozen_spec, sort_keys=True)[:16], voir freeze_spec.json
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w4_calendar_basis/REPORT.md#rank-1-m7
+    signal_definition: src/institutional/engines/funding_basis_disagreement/disagreement.py::select_tradeable
+    universe: [BTCUSDT, ETHUSDT]
+    features: [funding_rate, quarterly_basis_annualized, mark_price_live]
+    model_family: RULE_RELATIVE_VALUE
+    model_hash: null
+    training_window: "2021 .. 2026 (BTC/ETH), N thin (15-24 episodes/an, k30d) -- seuils gelés, jamais refit sur le live"
+    freeze_timestamp: "2026-08-31T18:08:39+00:00"
+    entry: "disagreement (funding_ann_pct - basis_near_ann, jambe perp = mark_price live) franchit le seuil figé q10/q90 (train-fit du rapport source), 1ere occurrence de l'episode (decluster contiguite de regime) ET >=30j depuis la derniere entree retenue meme symbole (decluster non-chevauchement) ; near_dte>=7 (floor anti-blowup pres expiry)"
+    exit: "Mode A SIGNAL SHADOW pur : AUCUN exit simule, AUCUN fill. k30d sert uniquement de fenetre de non-chevauchement pour le decluster (voir horizon)."
+    horizon: k30d
+    execution_style: MULTI_LEG_HEDGED   # descriptif du mecanisme reel (2-leg perp x quarterly) -- PAS simule en Mode A
+    cost_model: "2 legs (perp/quarterly x entry/exit), ~14bps base/28bps stress round-trip -- non applique en Mode A (aucun fill simule)"
+    risk_bucket: RELATIVE_VALUE_FAMILY
+    expected_capacity: "thin, 15-18 episodes/an/actif a k30d (post-decluster, rapport source -- contexte historique V1, PAS une cible de confirmation V2)"
+    correlation_family: CALENDAR_BASIS_CURVE
+    live_start_timestamp: "2026-08-31T18:08:39+00:00"
+    expected_net_bps: null        # AUCUNE cible chiffrée pour V2 tant que la substitution mark_price n'a pas été revalidée -- voir freeze_spec.json.perp_price_leg_deviation ; les chiffres V1 (30.3/33.2bps) sont un CONTEXTE historique, pas une expected_net_bps V2
+    expected_n_independent_episodes: null
+    expected_profit_factor: null
+    worst_episode_bps: -111.8    # contexte historique V1 (BTC k30d), tail risk à respecter dans tout sizing futur
+    data_live: true               # les 2 legs (funding+quarterly) verifies live 2026-08-31, voir freeze_spec.json::data_freshness_investigation
+    data_segment_boundaries:
+      post_symbol_resolution_fix: "2026-08-31T18:18:02+00:00"   # jambe funding/mark_price depend de data/derivatives_raw, desormais univers resolu (horodatage vérifié par log, voir SHORT_COVERING_CONTINUATION_V1)
+    notes: >
+      Investigation de fraicheur 2026-08-31 : jambe trimestrielle
+      (data/derivatives_backfill/binance_vision_quarterly/) tenue a jour en
+      continu par le timer systemd existant futur-basis.timer (quotidien
+      09:15 CEST, backfill_binance_quarterly_vision.py incremental) --
+      max_date=2026-08-29 au moment du run, aucune action requise. Jambe
+      funding+prix perp : le backfill statique
+      data/derivatives_backfill/binance/funding/ et um_klines_1d/ sont
+      STALES (arretes 2026-08-14 / 2026-06-30) et NE SONT PAS utilises par ce
+      runner -- remplaces par le flux LIVE
+      data/derivatives_raw/.../stream=open_interest/symbol={BTC,ETH}USDT/
+      (collecteur scripts/run_derivatives_collector.py, univers desormais
+      resolu contre exchangeInfo live, funding_rate+mark_price rafraichis
+      ~5min via premiumIndex), verifie a jour a la minute pres. Limite : cet
+      historique live ne remonte qu'a 2026-06-28 (~2 mois), donc tres peu
+      voire aucune entree fraiche attendue au premier run. N indépendant
+      tres mince (15-18/an a k30d historiquement sous V1), pire episode
+      historique -111.8bps (BTC) -- SIGNAL_SHADOW ICI SIGNIFIE UNIQUEMENT
+      "Mode A signal-only tourne reellement", PAS que l'alpha est valide
+      pour du capital : stade DISCOVERY en suivi forward, track record
+      remis a zero decision forward depuis freeze_timestamp. Deux legs
+      minimum, safety multi-leg (section 11 de la mission) NON encore
+      implémentée -- Ne pas lancer Mode B avant d'avoir un simulateur de
+      mismatch de jambe. mark_price vs kline close : substitution non
+      re-backtestée séparément, voir freeze_spec.json.perp_price_leg_deviation.
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : options / volatility overlay (risk_bucket: VOLATILITY_FAMILY)
+  # DÉBLOQUÉ 2026-08-31 : scripts/refresh_deribit_options_live.py +
+  # deploy/systemd/futur-deribit-options.timer (quotidien 03:20, systemd
+  # --user, enabled+actif) — trades BTC/DVOL/features à jour au 2026-08-31.
+  # Reprise d'une collecte déjà approuvée, pas une nouvelle donnée. Aucun
+  # de ces 3 candidats n'a de véhicule d'exécution de toute façon (à router
+  # vers l'overlay VRP existant, pas un nouveau sleeve tradable) — signal
+  # code pas encore écrit malgré data_live=true.
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: OPTIONS_RV_IV_SPREAD_V1
+    family: options_vol_overlay
+    mechanism: "RV/IV spread mean-reversion -> VOL_FORECAST_LAYER (pas de trade direct)."
+    version: v1.0
+    status: DISCOVERY
+    scientific_status: DISCOVERY
+    operational_status: MERGED_INTO_VOL_FORECAST_LAYER_V1   # 2026-08-31 : code écrit, mais fusionné dans le layer, pas sous cet alpha_id séparé -- voir implemented_within
+    implemented_within: VOL_FORECAST_LAYER_V1
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md
+    signal_definition: "src/institutional/engines/vol_forecast_layer/panel.py (rv_iv_spread = atm_iv_traded - sameday_rv) -- réutilisé DANS VOL_FORECAST_LAYER_V1, pas de module/ledger séparé sous ce alpha_id"
+    universe: [BTCUSDT]
+    features: [rv_iv_spread]
+    model_family: linear
+    model_hash: null
+    training_window: "2023-2026, n=1291 jours"
+    freeze_timestamp: null
+    entry: null
+    exit: null
+    horizon: 1d
+    execution_style: RISK_OVERLAY_ONLY
+    cost_model: null
+    risk_bucket: VOLATILITY_FAMILY
+    expected_capacity: null
+    correlation_family: OPTIONS_DERIBIT_BTC
+    live_start_timestamp: null
+    expected_net_bps: null
+    expected_ic: -0.39
+    data_live: true
+    notes: >
+      Pas de véhicule d'exécution — alimente VOL_FORECAST_LAYER_V1 (voir cet
+      alpha_id pour le code réel, le ledger de décisions et le freeze_spec.json
+      complet). CORRECTION 2026-08-31 : ce mécanisme n'a PAS de code/ledger
+      séparé sous SON PROPRE alpha_id (pas de "fausse stratégie" pour un
+      signal sans véhicule d'exécution, instruction utilisateur explicite) --
+      sa logique est calculée à l'intérieur du layer partagé
+      VOL_FORECAST_LAYER_V1 (reports/live_alpha_lab/VOL_FORECAST_LAYER_V1/).
+      La partial IC -0.39 (forward change du spread lui-même, PAS la RV
+      forward directement) n'est PAS utilisée telle quelle dans la
+      combinaison du layer -- voir freeze_spec.json.mechanism_sources
+      pour la nuance (IC -0.1622 brut réellement utilisé, cible différente).
+
+  - alpha_id: OPTIONS_FAR_OTM_PUT_SHARE_V1
+    family: options_vol_overlay
+    mechanism: "Part des puts far-OTM (proxy demande de couverture crash) -> RV forward."
+    version: v1.0
+    status: DISCOVERY
+    scientific_status: DISCOVERY
+    operational_status: MERGED_INTO_VOL_FORECAST_LAYER_V1   # 2026-08-31 : code écrit, fusionné dans le layer -- voir implemented_within
+    implemented_within: VOL_FORECAST_LAYER_V1
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md
+    signal_definition: "src/institutional/engines/vol_forecast_layer/options_signals.py::compute_daily_options_flow_signals (far_otm_put_share) -- réutilisé DANS VOL_FORECAST_LAYER_V1, pas de module/ledger séparé sous ce alpha_id"
+    universe: [BTCUSDT]
+    features: [far_otm_put_share]
+    model_family: linear
+    model_hash: null
+    training_window: "2023-2026"
+    freeze_timestamp: null
+    entry: null
+    exit: null
+    horizon: 1d
+    execution_style: RISK_OVERLAY_ONLY
+    cost_model: null
+    risk_bucket: VOLATILITY_FAMILY
+    expected_capacity: null
+    correlation_family: OPTIONS_DERIBIT_BTC
+    live_start_timestamp: null
+    expected_net_bps: null
+    expected_ic: 0.16
+    data_live: true
+    notes: >
+      Idem OPTIONS_RV_IV_SPREAD_V1 — pas de véhicule d'exécution, alimente
+      VOL_FORECAST_LAYER_V1 (voir cet alpha_id pour le code réel/ledger/
+      freeze_spec.json). Le partial IC +0.158 (confound-checked vs
+      sameday_rv) EST utilisé tel quel dans la combinaison du layer (cible
+      cohérente : rv_fwd1d).
+
+  - alpha_id: OPTIONS_BLOCK_FLOW_TO_RV_V1
+    family: options_vol_overlay
+    mechanism: "Comptage horaire de block trades -> RV forward 4h/24h."
+    version: v1.0
+    status: DISCOVERY
+    scientific_status: DISCOVERY
+    operational_status: MERGED_INTO_VOL_FORECAST_LAYER_V1   # 2026-08-31 : code écrit (cadence quotidienne, pas horaire -- voir notes), fusionné dans le layer
+    implemented_within: VOL_FORECAST_LAYER_V1
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md
+    signal_definition: "src/institutional/engines/vol_forecast_layer/options_signals.py::compute_daily_options_flow_signals (block_count_24h) -- réutilisé DANS VOL_FORECAST_LAYER_V1, pas de module/ledger séparé sous ce alpha_id"
+    universe: [BTCUSDT]
+    features: [block_trade_count_1h]
+    model_family: linear
+    model_hash: null
+    training_window: "2023-2026, n=31050 heures"
+    freeze_timestamp: null
+    entry: null
+    exit: null
+    horizon: 4h/24h
+    execution_style: RISK_OVERLAY_ONLY
+    cost_model: null
+    risk_bucket: VOLATILITY_FAMILY
+    expected_capacity: null
+    correlation_family: OPTIONS_DERIBIT_BTC
+    live_start_timestamp: null
+    expected_net_bps: null
+    expected_ic: 0.10
+    data_live: true
+    notes: >
+      Idem — le plus faible des 3 signaux options (IC modeste), alimente
+      VOL_FORECAST_LAYER_V1. ⚠ SIMPLIFICATION : le layer agrège ce signal en
+      cadence QUOTIDIENNE (block_count_24h par jour calendaire), pas horaire
+      comme testé dans le rapport source -- adaptation documentée, pas une
+      re-vérification de l'IC horaire spécifique. Voir freeze_spec.json de
+      VOL_FORECAST_LAYER_V1, mechanism_sources.M17_block_count_24h.
+
+  - alpha_id: VOL_FORECAST_LAYER_V1
+    family: options_vol_overlay
+    mechanism: >
+      Combine les 3 signaux options DISCOVERY-stage ci-dessus
+      (OPTIONS_RV_IV_SPREAD_V1 / OPTIONS_FAR_OTM_PUT_SHARE_V1 /
+      OPTIONS_BLOCK_FLOW_TO_RV_V1, mécanismes M2/M6/M17 du rapport source)
+      en UN SEUL forecast quotidien de volatilité réalisée forward (RV,
+      pas direction). Z-score causal glissant 180j par signal, orienté par
+      le signe rapporté dans le rapport source, moyenne à POIDS ÉGAUX (pas
+      de pondération par IC rigoureusement justifiable -- voir
+      freeze_spec.json.combination_method), + heuristique de confiance
+      basée sur l'accord entre signaux et leurs |IC| de référence figés.
+      N'est PAS une stratégie de trading : Mode A pur, journalise
+      uniquement (forecast, RV courante, état IV, confiance, état funding,
+      actual_realized_rv backfillé une fois l'horizon 24h écoulé). Aucun
+      ordre, aucun fill simulé, aucune décision de sizing/portefeuille.
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: FROZEN            # spec figée avant toute observation forward jugée ; aucun paramètre de CE layer (fenêtre z-score, poids égaux, seuils) n'a été data-snoopé -- ce sont des défauts d'ingénierie déclarés, pas des reconstructions
+    operational_status: SIGNAL_SHADOW    # Mode A tourne réellement ; ne PAS lire comme "confirmé" -- voir known_risks dans freeze_spec.json
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md
+    signal_definition: src/institutional/engines/vol_forecast_layer/panel.py::build_daily_panel
+    universe: [BTCUSDT]
+    features: [rv_iv_spread, far_otm_put_share, block_count_24h, combined_forecast_z, atm_iv_traded, funding_ann_pct]
+    model_family: RULE_STATE_MACHINE   # combinaison déterministe fixe (pas de ML, pas de fit) -- voir freeze_spec.json.combination_method
+    model_hash: null
+    training_window: "2023-01-01 .. 2026-08-31 (features/BTC_daily.parquet + trades/BTC/*.parquet + BTCUSDT_1h_enriched), n=1325 jours dans le panel construit"
+    freeze_timestamp: "2026-08-31T22:05:00+00:00"
+    entry: null   # pas de notion d'entrée/sortie -- un forecast est émis chaque jour calendaire, pas une décision de trade
+    exit: null
+    horizon: 24h
+    execution_style: RISK_OVERLAY_ONLY
+    cost_model: null   # pas de trade -> pas de coût
+    risk_bucket: VOLATILITY_FAMILY
+    expected_capacity: null   # n/a -- pas un sleeve tradable
+    correlation_family: OPTIONS_DERIBIT_BTC
+    live_start_timestamp: "2026-08-31T22:05:00+00:00"
+    expected_net_bps: null    # n/a -- pas de PnL, layer de forecast pur
+    expected_n_independent_episodes: null
+    expected_profit_factor: null
+    data_live: true   # options Deribit (futur-deribit-options.timer, 03:20) + BTCUSDT_1h_enriched + funding live derivatives_raw, tous vérifiés à jour au freeze
+    notes: >
+      Remplace le besoin de construire 3 fausses "stratégies" séparées
+      autour de signaux qui prédisent la VOLATILITÉ (pas la direction) et
+      n'ont AUCUN véhicule d'exécution dans ce dataset (pas de variance
+      swap, pas de capacité d'exécution sur greeks options ici) -- voir
+      OPTIONS_RV_IV_SPREAD_V1 / OPTIONS_FAR_OTM_PUT_SHARE_V1 /
+      OPTIONS_BLOCK_FLOW_TO_RV_V1 ci-dessus (operational_status
+      MERGED_INTO_VOL_FORECAST_LAYER_V1, logique réutilisée ici, entrées
+      conservées telles quelles sinon).
+      PARTIE 2 (comparaison BASE_PORTFOLIO vs BASE_PORTFOLIO_WITH_VOL_OVERLAY) :
+      DESIGN PROPOSAL UNIQUEMENT, PAS implémentée, PAS lancée -- ce repo n'a
+      AUCUNE couche de construction de portefeuille multi-alpha aujourd'hui
+      (chaque alpha du registre écrit son propre ledger Mode A indépendant,
+      aucun netting/sizing partagé). Fabriquer un "BASE_PORTFOLIO" à partir
+      de rien est explicitement interdit par l'instruction utilisateur. Voir
+      reports/live_alpha_lab/VOL_FORECAST_LAYER_V1/freeze_spec.json
+      section "part2_design_proposal_NOT_IMPLEMENTED" pour la proposition
+      concrète (overlay défensif de sizing : réduire l'exposition quand
+      combined_forecast_z indique une RV forward élevée) et le plan de
+      mesure du PnL marginal RÉEL une fois qu'une vraie couche de
+      portefeuille existera.
+      Les 3 signaux sous-jacents restent DISCOVERY-stage (aucun n'est
+      forward-confirmé) -- ce layer hérite de cette incertitude, son propre
+      track record forward (forecast vs actual_realized_rv backfillé) part
+      à zéro décision depuis freeze_timestamp.
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : cross-sectional (risk_bucket: CROSS_SECTIONAL_FAMILY)
+  # DATA_BLOCKED — le panel PIT 312-symboles (data_v2/normalized) n'existe
+  # que dans le worktree futur-data-v2, backfill ponctuel, PAS de mise à
+  # jour continue confirmée.
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: CROSS_SECTIONAL_MOMENTUM_PIT_V1
+    family: cross_sectional
+    mechanism: "Momentum 7j->7j, long-only, ranking sur univers PIT 312 symboles, noms liquides."
+    version: v1.0
+    status: DATA_BLOCKED
+    scientific_status: DISCOVERY
+    operational_status: DATA_BLOCKED     # vrai panel PIT 312-symboles pas live -- voir CROSS_SECTIONAL_MOMENTUM_LIVE_V1 pour le chemin léger
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w1_cross_sectional/REPORT.md
+    signal_definition: NOT_YET_IMPLEMENTED
+    universe: "data_v2/instruments/instrument_master.parquet (PIT, 312 symboles), filtre liquidite >=1M$"
+    features: [return_7d, liquidity_usd]
+    model_family: RULE_RANKING   # existe deja un cousin heuristique proche : CROSS_SECTIONAL_LONG (AlphaEngine, univers 8 symboles enriched, PAS le meme univers PIT)
+    model_hash: null
+    training_window: "2020-2026, 312 symboles"
+    freeze_timestamp: null
+    entry: TBD
+    exit: fwd_7d
+    horizon: 7d
+    execution_style: TAKER
+    cost_model: "conservative full-turnover cost floor (voir source_report)"
+    risk_bucket: CROSS_SECTIONAL_FAMILY
+    expected_capacity: null
+    correlation_family: CROSS_SECTIONAL_XSMOM
+    live_start_timestamp: null
+    expected_net_bps: 89.0
+    expected_n_independent_episodes: null
+    data_live: false
+    notes: >
+      NB : src/institutional/engines/cross_sectional_long/infer.py existe deja
+      (AlphaEngine CROSS_SECTIONAL_LONG) mais tourne sur data/enriched
+      (8 symboles, momentum_score heuristique, PAS l'univers PIT 312
+      symboles ni la construction W1) — mécanisme voisin, pas identique,
+      ne pas confondre les deux dans le reporting.
+
+  # NB : l'entrée CROSS_SECTIONAL_MOMENTUM_PIT_V1 ci-dessus reste
+  # DATA_BLOCKED (spec originale, univers PIT 312 symboles indisponible en
+  # continu) — voir CROSS_SECTIONAL_MOMENTUM_LIVE_V1 juste en dessous pour le
+  # chemin live léger (données différentes, alpha_id différent, spec
+  # RECONSTRUCTED, PAS une modification de l'entrée ci-dessus).
+
+  - alpha_id: CROSS_SECTIONAL_MOMENTUM_LIVE_V1
+    family: cross_sectional
+    mechanism: >
+      Momentum 7j->7j, long-only, ranking cross-sectionnel sur un univers
+      figé (frozen-50) avec éligibilité de listing résolue en LIVE contre
+      exchangeInfo (au lieu de l'univers PIT 312 symboles, DATA_BLOCKED).
+      Sélection top-quintile (top_fraction=0.20, le bucket recommandé
+      verbatim par le rapport source, pas un seuil inventé), rebalance
+      hebdomadaire non-chevauchant (ancre lundi), filtre de liquidité
+      identique au rapport source (médiane trailing 30j du quote-volume
+      journalier >= 1M$). RECONSTRUCTION LÉGÈRE de CROSS_SECTIONAL_MOMENTUM_PIT_V1
+      (alpha_id différent, PAS une modification de cette entrée) : univers
+      ~49 symboles au lieu de 312 (biais majors/large-alts), donnée =
+      klines quotidiennes REST Binance USDM (prix+volume réels, poll à la
+      demande, pas de nouveau collecteur) au lieu du panel PIT data_v2.
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: RECONSTRUCTED     # univers/donnée different du rapport source, seuil top_fraction toutefois verbatim (pas grid-searché)
+    operational_status: SIGNAL_SHADOW    # Mode A tourne réellement ; ne PAS lire comme "confirmé"
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w1_cross_sectional/REPORT.md#1-cross-sectional-momentum-m1m2m13
+    signal_definition: src/institutional/engines/cross_sectional_momentum_live/signal.py::build_weekly_decisions
+    universe: "configs/portfolio_v1_1_parallel_50.yaml (frozen 50-symbol list, hash-checked au runtime) ; éligibilité de listing résolue en live via src/institutional/data/derivatives_collector/symbol_resolver.py (exchangeInfo status=TRADING), 49/50 éligibles au premier run (MKRUSDT status=SETTLING, pas TRADING, exclu -- voir _symbol_resolution.json)"
+    features: [tret_7d, liquidity_usd_30d]
+    model_family: RULE_RANKING
+    model_hash: null           # pas de modèle ML, règle de ranking pure -> pas d'artefact à hasher
+    training_window: "N/A (signal live pur, pas de fit) -- historique de backfill limité par la profondeur réelle des klines Binance USDM par symbole (majors depuis ~2019-2020, alts plus récents depuis leur listing)"
+    freeze_timestamp: "2026-08-31T18:30:44+00:00"
+    entry: "top ceil(0.20 * n_eligible) symboles par tret_7d parmi le cohort liquide (liquidity_usd_30d>=1e6) à chaque rebalance lundi -> LONG"
+    exit: "Mode A SIGNAL SHADOW pur : AUCUN exit simulé, AUCUN fill. fwd_7d sert uniquement de fenêtre de non-chevauchement pour le rebalance hebdomadaire (voir horizon)."
+    horizon: fwd_7d
+    execution_style: TAKER
+    cost_model: "non appliqué en Mode A (aucun fill simulé) ; le floor 20bps du rapport source est un spread long-short 4-legs 100% turnover, PAS directement applicable à cette reconstruction long-only 2-legs -- voir freeze_spec.json.expected_stats_at_freeze.cost_model_note"
+    risk_bucket: CROSS_SECTIONAL_FAMILY
+    expected_capacity: "inconnu sur cet univers réduit -- le rapport source mesure capacité/edge sur 312 symboles, pas 49 ; voir freeze_spec.json.universe.deviation_from_source"
+    correlation_family: CROSS_SECTIONAL_XSMOM   # même famille économique que CROSS_SECTIONAL_MOMENTUM_PIT_V1, données différentes
+    live_start_timestamp: "2026-08-31T18:30:44+00:00"
+    expected_net_bps: 89.1        # PIT 312-symboles, full-sample -- CONTEXTE HISTORIQUE UNIQUEMENT, PAS une cible de confirmation forward pour cette reconstruction (univers/données différents, voir freeze_spec.json)
+    expected_n_independent_episodes: 335   # PIT 312-symboles -- contexte historique, cette reconstruction aura probablement moins de rebalances tradables (univers plus petit, historique par symbole plus court)
+    expected_profit_factor: null
+    data_live: true                # klines Binance USDM REST vérifiées accessibles au moment du build (futur-derivatives.service interroge déjà fapi.binance.com en continu)
+    notes: >
+      RECONSTRUCTION délibérée, pas une réplication : voir freeze_spec.json
+      pour l'investigation complète des 3 sources de données rejetées
+      (data/enriched -- seulement 10/50 fichiers à jour, les 40 autres
+      stales depuis 2026-06-29 ; data_v2/instrument_master -- DATA_BLOCKED,
+      inchangé ; data/derivatives_raw -- mark_price live mais pas de vrai
+      volume tradé) avant de choisir les klines quotidiennes REST Binance
+      USDM (poll à la demande dans le runner, PAS un nouveau démon/service
+      systemd, cache local minimal : date/close/quote_volume seulement,
+      quelques milliers de lignes/symbole). CAVEAT HONNÊTE le plus
+      important : le rapport source trouve que l'effet est un phénomène de
+      "largeur altcoin" qui vit dans le cross-section large liquide, PAS
+      dans les seuls majors (majors-only insignifiant, t=0.72 dans le
+      rapport source) -- l'univers frozen-50 de cette reconstruction est
+      plus proche des "majors" que du cross-section large 312-symboles
+      mesuré, donc l'effet mesuré ici pourrait être matériellement plus
+      faible, voire absent. freeze_timestamp fixé au moment du premier
+      lancement -- 0 décision forward attendue au freeze (comportement
+      voulu, pas un bug, même discipline que les autres entrées).
+
+  # ══════════════════════════════════════════════════════════════════════
+  # FAMILLE : microstructure (risk_bucket: MICROSTRUCTURE_FAMILY)
+  # DATA_BLOCKED — market_physics_v3/raw (tick L2) n'a plus de collecteur
+  # actif detecte (aucun process en cours au 2026-08-31). Tous les
+  # candidats de cette famille sont NEEDS_FULL_VALIDATION, pas encore
+  # PROMISING, et sub-cost taker de toute facon — priorite basse.
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: MICROSTRUCTURE_OFI_CLUSTER_V1
+    family: microstructure
+    mechanism: "Depth-imbalance / microprice-offset / OFI, cluster de 3 features apparentees."
+    version: v1.0
+    status: DATA_BLOCKED
+    scientific_status: DISCOVERY
+    operational_status: DATA_BLOCKED
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w7_microstructure/REPORT.md
+    signal_definition: NOT_YET_IMPLEMENTED
+    universe: [BTCUSDT, ETHUSDT]
+    features: [depth_imbalance_l1, microprice_offset, ofi_tob]
+    model_family: logistic
+    model_hash: null
+    training_window: "fenetre confirmation A2 28h + Phase 5.2 12h (marche_physics_v3)"
+    freeze_timestamp: null
+    entry: TBD
+    exit: 5s
+    horizon: 5s
+    execution_style: MAKER
+    cost_model: "maker ~1.5bps round-trip"
+    risk_bucket: MICROSTRUCTURE_FAMILY
+    expected_capacity: null
+    correlation_family: MICROSTRUCTURE_TOB
+    live_start_timestamp: null
+    expected_net_bps: null
+    expected_gross_bps: 1.63
+    data_live: false
+    notes: "NEEDS_FULL_VALIDATION, pas encore PROMISING. Nécessite un collecteur L2 tick relancé."

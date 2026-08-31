@@ -1,0 +1,15 @@
+[Unit]
+Description=Futur derivatives collector (Binance USDM: forceOrder/OI/funding/taker)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python3 scripts/launch_derivatives_collector_resolved.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/qbee/futur/reports/derivatives_collector.log
+StandardError=append:/home/qbee/futur/reports/derivatives_collector.log
+
+[Install]
+WantedBy=default.target

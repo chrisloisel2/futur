@@ -1,0 +1,71 @@
+{
+  "alpha_id": "SHORT_COVERING_CONTINUATION_V1",
+  "version": "v1.0",
+  "freeze_timestamp": "2026-08-31T17:30:00+00:00",
+  "mechanism": "price up + OI down (short covering, top/bottom TAIL DECILE of trailing 1h price return / OI %-change) -> LONG, fwd_4h horizon, vs baseline non-conditionné.",
+  "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-2",
+  "source_evidence": "reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/evidence/leverage_oi_O1_O9_full.json -> O1_price_oi_quadrant_tail_deciles -> \"price_up_oi_down (short covering)\"",
+  "frozen_spec": {
+    "engine_class": "src/institutional/engines/short_covering_continuation/infer.py::ShortCoveringContinuationEngine (AlphaEngine subclass, NOT registered in engines/registry.py's ENGINE_FACTORIES per mission instruction)",
+    "classification": "src/institutional/engines/short_covering_continuation/state.py::classify_state (price_ret_pctile>=0.90 AND oi_delta_pctile<=0.10, both causal trailing per-symbol percentiles over a 720h/30d window, current bar excluded from its own reference population)",
+    "score": "src/institutional/engines/short_covering_continuation/state.py::score_short_covering -- min(price_pctile, 1-oi_pctile), an AND-combinator (not average) so one extreme dimension can never compensate for a weak other one",
+    "zones": "classify_zone(score, tau_a=0.90, tau_b=0.75) -- tau_a is exactly the classify_state boundary (A_TRADE == SHORT_COVERING state); tau_b=0.75 is a judgment-call near-miss band, not measured",
+    "direction": "LONG only (A_TRADE and B_SHADOW rows) -- CASH otherwise. Never SHORT_HEDGE/SHORT: runner script asserts this at write time and raises if violated.",
+    "horizon": "fwd_4h",
+    "universe": "configs/portfolio_v1_1_parallel_50.yaml (frozen 50-symbol list, hash-checked at runtime, same convention as LIQ_CASCADE_REPEAT_V1)"
+  },
+  "expected_stats_at_freeze": {
+    "net_bps_full_sample": -2.72,
+    "net_bps_oos_2025_26": 2.3,
+    "excess_vs_baseline_full_bps": 9.2,
+    "excess_vs_baseline_oos_bps": 19.0,
+    "n_events_full": 23422,
+    "n_events_oos": 7217,
+    "baseline_population_full": 2055173,
+    "tail_fraction_of_all_bars_original": 0.0114,
+    "gross_bps": 11.28,
+    "hit_rate": 0.49,
+    "profit_factor_full": 1.113,
+    "profit_factor_oos": 1.176,
+    "t_stat_full": 5.48,
+    "t_stat_oos": 4.7,
+    "cost_model_bps": 14,
+    "stability": "strengthens OOS (net14 full -2.72bps but OOS +2.3bps; excess vs baseline strengthens 9.2->19.0bps)",
+    "note_on_hit_rate": "hit_rate=0.49 is BELOW 50% -- this is a low-hit-rate/asymmetric-payoff edge (PF>1 despite hit_rate<0.5), not a high-conviction directional call. Sizing/expected_return in infer.py is intentionally conservative (expected_move=0.006) to reflect this."
+  },
+  "risk_bucket": "LIQUIDATION_FAMILY",
+  "correlation_family": "OI_STATE_FAMILY",
+  "correlated_with": ["LIQ_CASCADE_REPEAT_V1 (different detector, same broad OI-state economic driver -- not independently risk-budgeted without a correlation check)"],
+  "mode": "A_SIGNAL_SHADOW",
+  "execution_notes": "No simulated fills in this V1. Mode B (execution shadow) not yet implemented for this alpha.",
+  "promotion_gate_not_yet_defined": true,
+  "do_not_modify_after_this_timestamp": "Any change to entry/exit/threshold/universe/lookback-window after freeze_timestamp must be a new alpha_id (e.g. _V2), not an edit to this spec.",
+
+  "data_reconstruction_notes": {
+    "summary": "This alpha's ORIGINAL discovery measurement (expected_stats_at_freeze above) was computed on data_v2/normalized/event_feature_panel, a STATIC one-shot backfill that exists only in the separate futur-data-v2 worktree (branch research/market-physics-data-v3) and is NOT continuously updated. The LIVE implementation below reads a genuinely different, continuously-updating source instead: data/derivatives_raw/ (this repo's own live derivatives collector). It is a documented RECONSTRUCTION of the same economic state on different plumbing, NOT a byte-for-byte replication -- treat expected_stats_at_freeze as directional context for edge_retention tracking, not as a guarantee this exact live rule will reproduce those numbers.",
+
+    "live_data_source_verified": {
+      "process": "scripts/run_derivatives_collector.py, PID confirmed running (ps aux), launched 2026-08-29, REST-polling openInterest+premiumIndex every ~300s/symbol for all 50 frozen-universe symbols (see its --symbols launch arg).",
+      "storage": "data/derivatives_raw/exchange=binance/market=usdm/stream=open_interest/symbol=<SYM>/date=<YYYY-MM-DD>/part-*.parquet -- inspected real files, real mtimes: latest write at investigation time (2026-08-31 ~16:58 UTC) was seconds old, confirming this store is actively, currently updating (not stale).",
+      "columns_verified": "timestamp (ms epoch), recv_time, latency_ms, symbol, open_interest, mark_price, index_price, funding_rate, next_funding_time -- read directly from a real parquet part, not assumed from code.",
+      "history_depth": "continuous daily partitions from 2026-06-28 to 2026-08-31 (today) for BTCUSDT, ~240 files/day (~1 file per REST poll cycle, matching the 300s configured interval), with a handful of missing individual dates (restarts) -- ~64 days of real trailing history available as of freeze, sufficient for the 720h/30d percentile lookback used below.",
+      "universe_coverage": "47/50 frozen symbols have live open_interest data. 3/50 do NOT: MKRUSDT (confirmed via live Binance fapi call: code -4108 'Symbol is on delivering or delivered or settling or closed or pre-trading' -- genuinely delisted, no live equivalent exists), PEPEUSDT (confirmed: fapi rejects 'PEPEUSDT' with code -1121 'Invalid symbol' -- Binance now lists this contract as '1000PEPEUSDT', which DOES have live data; the collector was launched requesting the old/wrong symbol name), RNDRUSDT (confirmed: same -4108 delisted status; Binance renamed this contract to 'RENDERUSDT', which DOES have live data under the new name). PEPEUSDT/RNDRUSDT are in principle recoverable by fixing the collector's symbol list, but that file (scripts/run_derivatives_collector.py / its systemd unit) is shared live infrastructure outside this mission's stated deliverables -- NOT modified here per the additive-only hard rule. The engine returns [] for these 3 symbols (logged WARNING, never a crash, never a fabricated value) and the runner counts/reports them per run."
+    },
+
+    "reconstruction_methodology": {
+      "what_is_structurally_equivalent": "Same economic content as the original: causal trailing price return (1h) and OI %-change (1h) per symbol, hourly cadence, evaluated across the frozen-50 universe, forward horizon 4h. The live source's native cadence (~5-6min REST poll) is FINER than the original panel's (5min grid resampled to top-of-hour), so resampling live data DOWN to top-of-hour bars via causal merge_asof(direction='backward', tolerance=2h) is a faithful match, not a degradation.",
+      "what_is_NOT_verified_or_is_a_judgment_call": [
+        "The original W2 REPORT.md worker's analysis script that produced evidence/leverage_oi_O1_O9_full.json was EPHEMERAL (a subagent run, per the report's own header note about a harness constraint preventing it from writing files) -- only REPORT.md and the evidence JSON survive, the code does not. The exact decile boundary (this module assumes symmetric top/bottom 10%, i.e. PRICE_PCTILE_HI=0.90 / OI_PCTILE_LO=0.10) and the population used for the percentile (this module assumes a per-symbol TIME-SERIES trailing window, matching this codebase's dominant convention elsewhere e.g. data_v2's funding_rate_percentile_90d -- NOT a cross-sectional-across-symbols percentile, which was also plausible) were inferred, not recovered.",
+        "The percentile lookback window (this module uses 720h/30 days trailing) was NOT specified anywhere in the source materials -- chosen as a reasonable middle ground against other window conventions already used in this repo (funding uses 90d, positioning LSR uses 7d). A different window would flag a different, though presumably similar-order-of-magnitude, set of bars.",
+        "Whether the original evidence's 'quadrant_tail_deciles' used the SAME grid points to build both percentiles or resampled differently is unknown; this module builds both price_ret_1h and oi_delta_pct_1h percentiles off the identical causal hourly grid, which is the simplest self-consistent choice."
+      ],
+      "sanity_check_performed": {
+        "method": "Ran ShortCoveringContinuationEngine.generate() live across all 47 available frozen-universe symbols over a real trailing 72h window (2026-08-28 17:00 UTC -> 2026-08-31 17:00 UTC, current wall-clock at freeze time) with the full 720h percentile lookback populated from real collected history.",
+        "result": "3,431 symbol-hours evaluated; 28 classified strict SHORT_COVERING (A_TRADE, score>=0.90) = 0.82% of all bars; 153 additional near-miss B_SHADOW rows (score in [0.75, 0.90)) = 4.46%. Zero SHORT/SHORT_HEDGE rows emitted (asserted).",
+        "comparison": "0.82% (live reconstruction, A_TRADE only) vs 1.14% (original discovery's tail-decile population, 23422/2055173) -- same order of magnitude, both far below the ~25% a naive sign(price_ret)>0 AND sign(oi_delta)<0 split would produce with no tail conditioning. This is consistent with -- not proof of -- a structurally similar rule; the live sample (3,431 bars over 3 days) is far too small to statistically confirm the 0.82% vs 1.14% gap is sampling noise vs a genuinely looser/tighter live threshold. Re-check this ratio periodically as more live history accumulates."
+      }
+    },
+
+    "honest_verdict": "Data IS genuinely live and currently updating (verified against real files, real mtimes, a real running process) for 47/50 frozen symbols. The classification RULE is a documented, defensible, but UNVERIFIED reconstruction of the original tail-decile mechanism -- not a byte-for-byte replica, because the original analysis code was never persisted. status=SHADOW_LIVE / data_live=true reflects confidence in the DATA being real-time; it does NOT claim the live rule is proven identical to what earned the +9.2/+19.0bps excess numbers. Edge retention should be tracked from live_start_timestamp forward as an independent measurement of THIS rule, not assumed equal to expected_stats_at_freeze."
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "alpha_id": "VOL_FORECAST_LAYER_V1",
+  "kind": "RISK_OVERLAY_LAYER, NOT a trading signal -- see execution_definition",
+  "why_this_exists": "reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md found 3 DISCOVERY-stage options-vol mechanisms (M2/M6/M17) that all forecast VOLATILITY, not direction, and NONE has a monetizable execution vehicle in this dataset (no variance swaps, no options greeks execution capability here). Building 3 separate fake 'strategies' around a non-existent execution vehicle would misrepresent them as tradeable. Instead, per explicit user instruction (2026-08-31): 'Implemente les trois signaux... Mais ne cree pas de fausse strategie options. Construis : VOL_FORECAST_LAYER.' This alpha_id replaces the need for OPTIONS_RV_IV_SPREAD_V1 / OPTIONS_FAR_OTM_PUT_SHARE_V1 / OPTIONS_BLOCK_FLOW_TO_RV_V1 to each have their own standalone signal code -- their logic is merged here. Those 3 registry entries are updated (operational_status, notes) to cross-reference this alpha_id; not deleted.",
+  "freeze_timestamp": "2026-08-31T22:05:00+00:00",
+  "version": "v1.0",
+
+  "execution_definition": "Mode A SIGNAL SHADOW only. This module NEVER sends an order, NEVER simulates a fill, and NEVER makes a position-sizing or portfolio decision. It logs, once per calendar day: a combined forward-RV forecast, the 3 underlying signal readings, current realized vol, IV state, a confidence heuristic, funding state, and a `actual_realized_rv` field that starts NULL and is backfilled by scripts/backfill_vol_forecast_layer_rv.py once the forecast horizon (24h) has elapsed. execution_style in the registry is RISK_OVERLAY_ONLY: the intended real-world use (if ever promoted) is as a conditioning input to an existing position-sizing layer -- see part2_design_proposal_NOT_IMPLEMENTED below for what that would look like. Nothing described there is built or running.",
+
+  "mechanism_sources": {
+    "M2_rv_iv_spread": {
+      "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md mechanism M2 (rank 1)",
+      "registry_alpha_id": "OPTIONS_RV_IV_SPREAD_V1",
+      "definition": "rv_iv_spread(day) = atm_iv_traded(day) - sameday_rv(day)",
+      "reported_ic_used_here": "spread_to_rv_fwd1d IC = -0.1622 (RAW, n=1291, p<1e-16) -- direct link to forecasting forward RV, the target this layer actually needs.",
+      "reported_ic_NOT_used_here": "CONFOUND_partial_ic_controlling_for_sameday_rv = -0.3884 -- this is the source report's headline PROMISING number, but it targets the SPREAD'S OWN forward change (spread(t+3)-spread(t)), not forward realized vol directly. Using it as this layer's combination weight would silently substitute a different outcome variable. Documented here explicitly rather than borrowed silently -- see combine.py module docstring.",
+      "orientation": "spread HIGH (IV rich vs realized) -> historically LOWER forward RV -> oriented_z = -z(spread)"
+    },
+    "M6_far_otm_put_share": {
+      "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md mechanism M6 (rank 2)",
+      "registry_alpha_id": "OPTIONS_FAR_OTM_PUT_SHARE_V1",
+      "definition": "far_otm_put_share(day) = notional(cp=='P' AND strike <= 0.85*index_price) / notional(all trades), computed from data/options_backfill/deribit/trades/BTC/*.parquet (`amount` field, verified to sum exactly to features/BTC_daily.parquet's notional_btc for a spot-checked day, 2026-08-30: 9984.2 both sides)",
+      "reported_ic_used_here": "CONFOUND_partial_ic_controlling_for_sameday_rv = +0.1583 (n=1294, p<1e-16) -- confound-checked, on the correct target (rv_fwd1d).",
+      "orientation": "share HIGH (more crash-hedging demand) -> historically HIGHER forward RV -> oriented_z = +z(share)"
+    },
+    "M17_block_count_24h": {
+      "source_report": "reports/edge_discovery/alpha_hunt_2026-08-30/w6_options/REPORT.md mechanism M17 (rank 3)",
+      "registry_alpha_id": "OPTIONS_BLOCK_FLOW_TO_RV_V1",
+      "definition": "block_count_24h(day) = count(is_block==True trades) within calendar day `day`, computed from the same trades files as M6",
+      "deliberate_simplification": "The source report tested M17 at HOURLY granularity (block_count -> rv_fwd4h/rv_fwd24h). This layer emits ONE forecast per calendar day (to combine cleanly with M2/M6, both daily-native), so block-trade count is aggregated to a DAILY bucket instead. This is an adaptation of the same underlying signal (raw block-trade activity), NOT an independent re-verification of M17's specific hourly-granularity IC. Flagged, not hidden.",
+      "reported_ic_used_here": "CONFOUND_partial_ic_controlling_for_trail_rv_24h = +0.0996 (n=31050, p<1e-16, hourly construction) -- reused here as the best available confound-checked reference for the underlying mechanism, at the daily-adapted granularity.",
+      "orientation": "count HIGH -> historically HIGHER forward RV -> oriented_z = +z(count)"
+    }
+  },
+
+  "realized_vol_formula": {
+    "definition": "sameday_rv(day) = std(hourly log-returns of BTCUSDT whose timestamp falls within calendar day `day`, UTC) * sqrt(24*365) * 100",
+    "source_data": "data/enriched/BTCUSDT_1h_enriched.parquet, columns datetime+log_return_1 ONLY (pyarrow column projection -- this file has 4050 columns / ~1.7GB, reading it whole is the exact pitfall in memory/project_incident_scheduler_freeze.md; projection avoids it, verified: full-history panel build takes ~17s).",
+    "why_this_file_this_formula": "IDENTICAL choice to the source report ('perp price: data/enriched/BTCUSDT_1h_enriched.parquet ... chosen ... because it's the project's canonical enriched panel') and IDENTICAL annualization convention already established in this codebase (src/institutional/features/volatility.py::realized_vol, ANNUALIZATION_FACTOR=sqrt(24*365)) -- not a new formula invented for this layer.",
+    "sanity_check_not_a_fit": "2026-08-30: atm_iv_traded=34.42 vs computed sameday_rv=30.93 -- same order of magnitude as IV/DVOL, confirming the scale is sane. This is a sanity check of an EXISTING project convention, not a search for a scaling constant.",
+    "min_coverage": "day dropped if fewer than 12 (of 24 expected) hourly bars are present -- tolerates gaps, never computed on <50% coverage."
+  },
+
+  "combination_method": {
+    "step_1_causal_zscore": "Each of the 3 raw signals is converted to a causal rolling z-score, window=180 calendar days, min_periods=90, using data up to and including day t only (never t+1..future). 180 days is an ENGINEERING DEFAULT (~6 months), not grid-searched against this dataset.",
+    "step_2_orientation": "Each z-score is sign-flipped per mechanism_sources[*].orientation above so positive always means 'points toward higher forward RV'.",
+    "step_3_combination": "combined_forecast_z = EQUAL-WEIGHT mean of the oriented z-scores available that day (a signal can be null during the 90-day warmup or on a data gap; all 3 currently warm up together, first ~89 days of the panel have n_signals_available=0).",
+    "why_equal_weight_not_ic_weight": "An IC-magnitude weighting was considered and rejected: M2's strongest confound-checked number (-0.388) targets a DIFFERENT outcome (the spread's own forward change) than M6/M17's numbers (both scored directly against forward RV). Mixing a weight fit on one target with weights fit on another target would misrepresent the combination as more rigorous than it is. Per explicit instruction ('if you can't rigorously justify a weighting, say so and use the simplest defensible approach'), this uses plain equal-weight averaging of the 3 oriented z-scores. Not ML, not fit, not refit live -- a fixed formula.",
+    "step_4_confidence_heuristic": "confidence = agreement_fraction * min(avg_reference_abs_ic / 0.20, 1.0), where agreement_fraction = fraction of available oriented signals whose sign matches combined_forecast_z's sign, and avg_reference_abs_ic is the mean of fixed reference |IC| constants (copied verbatim from the source report: M2=0.1622 raw, M6=0.1583 confound-checked partial, M17=0.0996 confound-checked partial) over the signals available that day. This is a HEURISTIC for confidence only -- it is NEVER used to weight direction, and it is not a calibrated probability.",
+    "step_5_direction_label": "forecast_direction = RV_UP if combined_forecast_z > 0.5, RV_DOWN if < -0.5, else NEUTRAL. Threshold 0.5 is an engineering default, not fit.",
+    "no_ml": "Every constant in this pipeline (180d window, equal weights, 0.20 IC anchor, 0.5 direction threshold, 3.0 funding near-zero band, 1.0 IV regime z-threshold) is a fixed, declared value written before any observation was used to tune it. No model is trained, no parameter is fit against outcomes in this repo."
+  },
+
+  "funding_state": {
+    "definition": "Reuses src/institutional/engines/funding_basis_disagreement/panel.py::load_live_perp_funding_daily('BTCUSDT') VERBATIM (not reimplemented) -- same live source (data/derivatives_raw/exchange=binance/market=usdm/stream=open_interest/symbol=BTCUSDT/, Binance premiumIndex poll, ~5min cadence) and same funding_ann_pct formula (funding_rate_mean * 3 * 365 * 100) already frozen for FUNDING_BASIS_DISAGREEMENT_V2.",
+    "regime_labels": "NEAR_ZERO if |funding_ann_pct| < 3.0 (arbitrary declared threshold, not fit), else POSITIVE/NEGATIVE by sign.",
+    "history_limitation": "Live funding/mark_price stream only goes back to ~2026-06-28 (same limitation already documented for FUNDING_BASIS_DISAGREEMENT_V2) -- funding_state fields are NULL for all rows before that date. Not fabricated, left null."
+  },
+
+  "decision_cadence_and_backfill_design": {
+    "cadence": "ONE forecast per calendar day, issued at the close of day D using D's fully-observed data (atm_iv_traded(D), sameday_rv(D), far_otm_put_share(D), block_count_24h(D), funding(D)).",
+    "target_window": "The forecast pertains to realized vol over the NEXT calendar day: target_period_start = D+1 00:00 UTC, target_period_end = D+2 00:00 UTC, target_realized_at = target_period_end (the moment the outcome becomes observable).",
+    "actual_realized_rv": "Computed with the EXACT SAME formula as current_realized_vol (realized_vol.py::compute_daily_realized_vol), applied to target_period_start (day D+1) instead of day D -- apples-to-apples forecast-vs-outcome comparison. Starts NULL at write time.",
+    "backfill_mechanism": "scripts/backfill_vol_forecast_layer_rv.py (calling src/institutional/engines/vol_forecast_layer/backfill.py::backfill_actual_realized_rv) scans the ledger for rows where actual_realized_rv IS NULL AND target_realized_at <= now, and fills them from the enriched BTC hourly panel. Only ever writes NULL -> value; never touches an already-filled cell or a not-yet-elapsed row (verified idempotent: running it twice with the same `now` changes 0 rows on the 2nd pass; a row whose target day's hourly data isn't fully published yet stays NULL and is retried on the next run)."
+  },
+
+  "part2_design_proposal_NOT_IMPLEMENTED": {
+    "status": "DESIGN PROPOSAL ONLY -- NOT built, NOT running, NOT claimed as evidence of anything. Per explicit user instruction: 'ne cree pas de fausse strategie options ... teste en shadow deux choses : BASE_PORTFOLIO versus BASE_PORTFOLIO_WITH_VOL_OVERLAY. Mesure le PnL marginal reel de l'overlay' -- followed by an explicit correction that this comparison requires a portfolio-construction layer that DOES NOT EXIST YET in this repo (only ~5-6 single-alpha Mode A signal generators exist, none share a portfolio/sizing layer), and that fabricating a 'BASE_PORTFOLIO' out of nothing is forbidden. This section documents WHAT the comparison would look like once a real portfolio layer exists -- nothing more.",
+    "why_no_base_portfolio_exists_today": "Every alpha in configs/live_alpha_registry.yaml (LIQ_CASCADE_REPEAT_V1, LIQ_CASCADE_FAR_FROM_LOW_V1, SHORT_COVERING_CONTINUATION_V1, WHALE_LSR_SCREEN_V1, FUNDING_BASIS_DISAGREEMENT_V2) writes its own independent decisions.parquet ledger, in Mode A (signal-only, no simulated fills). There is no shared position-sizing, capital-allocation, or cross-alpha netting layer anywhere in this codebase -- so there is no 'BASE_PORTFOLIO' to attach an overlay to. Building that layer is a separate, larger project explicitly out of scope here.",
+    "proposed_comparison_once_a_portfolio_layer_exists": {
+      "BASE_PORTFOLIO": "Whatever future portfolio-construction layer combines the Mode A/B alphas' position signals into sized positions with some fixed, vol-agnostic sizing rule (e.g. fixed fractional risk budget per alpha, or equal risk-parity across active alphas) -- NOT a real thing today, a placeholder name for the future baseline.",
+      "BASE_PORTFOLIO_WITH_VOL_OVERLAY": "The SAME portfolio construction, with ONE additional rule: scale down position sizing (or risk budget) when VOL_FORECAST_LAYER_V1's combined_forecast_z / forecast_direction indicates elevated forward RV is likely, and scale up (toward the baseline, never above it) when it indicates below-average forward RV. Concretely proposed (not implemented): size_multiplier = clip(1.0 - k * max(combined_forecast_z, 0), floor, 1.0) for some risk-aversion constant k and a floor (e.g. 0.5) to avoid fully zeroing out exposure on a single noisy day; RV_DOWN days get no boost above 1.0 (this is a defensive-only overlay, not a leverage-up signal, consistent with the 3 underlying mechanisms all being DISCOVERY-stage with modest ICs).",
+      "measurement_plan": "Run BOTH portfolio configurations in shadow (Mode A/B, no real capital either way) over the same forward period, on the same underlying alpha signals, differing ONLY in the sizing multiplier described above. Compare realized PnL (or a risk-adjusted metric: Sharpe, max drawdown, worst-episode-bps) of BASE_PORTFOLIO_WITH_VOL_OVERLAY MINUS BASE_PORTFOLIO -- that difference is the overlay's marginal contribution. Must be measured over enough forward (FORWARD_LIVE-provenance) episodes to be statistically meaningful, not backtested on the same history VOL_FORECAST_LAYER_V1's own signals were selected from (the M2/M6/M17 ICs are themselves DISCOVERY-stage, not yet forward-confirmed -- see this alpha's own scientific_status).",
+      "preconditions_before_this_can_be_built": [
+        "A real portfolio-construction/sizing layer must exist first (not present today).",
+        "VOL_FORECAST_LAYER_V1 itself should accumulate enough forward (post-freeze) decisions to sanity-check its own forecast quality (forecast vs actual_realized_rv, once backfilled) before being trusted as an input to anything with capital implications.",
+        "The k/floor constants above are illustrative placeholders, not tuned or validated in any way."
+      ]
+    },
+    "explicit_non_claim": "No code in this task computes, simulates, or displays a 'BASE_PORTFOLIO' PnL, a 'WITH_VOL_OVERLAY' PnL, or any difference between them. VOL_FORECAST_LAYER_V1 itself is Mode A signal-logging ONLY."
+  },
+
+  "risk_bucket": "VOLATILITY_FAMILY",
+  "correlation_family": "OPTIONS_DERIBIT_BTC",
+  "correlated_with": ["OPTIONS_RV_IV_SPREAD_V1", "OPTIONS_FAR_OTM_PUT_SHARE_V1", "OPTIONS_BLOCK_FLOW_TO_RV_V1 (same risk_bucket/correlation_family -- this alpha_id merges their signal logic, they are not independent of it)"],
+  "mode": "A_SIGNAL_SHADOW",
+
+  "known_risks_do_not_overclaim": {
+    "all_3_underlying_mechanisms_are_discovery_stage": "None of M2/M6/M17 has been forward-confirmed. scientific_status of this alpha and the 3 underlying OPTIONS_*_V1 entries is FROZEN (spec fixed before forward observation), NOT CONFIRMED. This layer's own forward track record (forecast vs actual_realized_rv, once backfilled) starts at 0 rows as of freeze_timestamp.",
+    "no_execution_vehicle": "Even if the forecast proves accurate forward, there is still no variance-swap/options-execution capability in this project to monetize it directly -- the only proposed use is the defensive sizing-overlay in part2_design_proposal_NOT_IMPLEMENTED, itself unbuilt.",
+    "daily_simplification_of_M17": "block_count_24h is a daily-cadence adaptation of an hourly-tested mechanism -- see mechanism_sources.M17_block_count_24h.deliberate_simplification.",
+    "equal_weight_combination_is_a_simplicity_choice_not_a_optimum": "The equal-weight combination was chosen because a rigorous cross-target IC weighting wasn't available, not because it was shown to be better than alternatives.",
+    "short_funding_history": "funding_state is NULL before ~2026-06-28 (live collector start)."
+  },
+
+  "do_not_modify_after_this_timestamp": "Any change to the signal formulas, combination method, z-score window, thresholds, universe, or horizon after freeze_timestamp must be a new alpha_id (e.g. VOL_FORECAST_LAYER_V2), not an edit to this spec, per the registry's no-retroactive-edit rule."
+}

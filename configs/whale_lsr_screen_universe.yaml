@@ -1,0 +1,78 @@
+# configs/whale_lsr_screen_universe.yaml — WHALE_LSR_SCREEN_V1 frozen universe.
+#
+# Univers FIGE pour le Live Alpha Lab WHALE_LSR_SCREEN_V1 (Mode A, voir
+# configs/live_alpha_registry.yaml). Contrairement a LIQ_CASCADE_REPEAT_V1
+# (configs/portfolio_v1_1_parallel_50.yaml, deja un fichier de config figee
+# preexistant), il n'existe AUCUN fichier de config figee preexistant pour
+# data/positioning -- ce fichier EST la premiere config figee pour ce
+# dataset, cree deliberement pour eviter de deriver l'univers d'un glob() a
+# CHAQUE run (le bug corrige le 2026-08-30, voir
+# tests/test_universe_drift_guard.py).
+#
+# Provenance : sorted(set(p.stem.replace("_top_position","") for p in
+# Path("data/positioning").glob("*_top_position.parquet"))), execute UNE
+# SEULE FOIS au moment du freeze (2026-08-31), jamais re-derive a
+# l'execution. 47 symboles = tous ceux ayant un fichier
+# {SYM}_top_position.parquet present a cette date. Le script
+# scripts/run_whale_lsr_screen_shadow.py charge CETTE liste (pas un glob())
+# et calcule un hash pour detecter toute derive silencieuse, exactement
+# comme scripts/run_liq_cascade_repeat_shadow.py::universe_hash().
+#
+# Si un symbole disparait plus tard (fichier supprime/renomme), le run
+# logue un warning et le saute (fail-open sur DONNEES manquantes, comme les
+# autres runners Mode A) mais le hash de l'univers DECLARE ne change
+# jamais silencieusement -- toute modification de cette liste doit etre un
+# changement explicite ici, jamais un artefact du glob() runtime.
+
+universe:
+  - AAVEUSDT
+  - ADAUSDT
+  - ALGOUSDT
+  - APTUSDT
+  - ARBUSDT
+  - ARUSDT
+  - ATOMUSDT
+  - AVAXUSDT
+  - BCHUSDT
+  - BNBUSDT
+  - BTCUSDT
+  - DOGEUSDT
+  - DOTUSDT
+  - ENAUSDT
+  - ETCUSDT
+  - ETHUSDT
+  - FETUSDT
+  - FILUSDT
+  - GRTUSDT
+  - HBARUSDT
+  - ICPUSDT
+  - IMXUSDT
+  - INJUSDT
+  - JUPUSDT
+  - LDOUSDT
+  - LINKUSDT
+  - LTCUSDT
+  - MANAUSDT
+  - NEARUSDT
+  - OPUSDT
+  - ORDIUSDT
+  - PENDLEUSDT
+  - PYTHUSDT
+  - RUNEUSDT
+  - SANDUSDT
+  - SEIUSDT
+  - SOLUSDT
+  - STXUSDT
+  - SUIUSDT
+  - TAOUSDT
+  - TIAUSDT
+  - TRXUSDT
+  - UNIUSDT
+  - VETUSDT
+  - WIFUSDT
+  - WLDUSDT
+  - XRPUSDT
+
+frozen_at: "2026-08-31T00:00:00+00:00"
+source: "data/positioning/*_top_position.parquet (one-time glob at freeze, documented exception -- see header)"
+n_symbols: 47

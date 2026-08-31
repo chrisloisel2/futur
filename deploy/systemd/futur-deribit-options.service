@@ -1,0 +1,10 @@
+[Unit]
+Description=Futur Deribit options refresh (trades BTC + DVOL BTC/ETH + features quotidiennes, Live Alpha Lab OPTIONS_*_V1)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python3 scripts/refresh_deribit_options_live.py
+StandardOutput=append:/home/qbee/futur/reports/deribit_options_refresh.log
+StandardError=append:/home/qbee/futur/reports/deribit_options_refresh.log
+TimeoutStartSec=1800

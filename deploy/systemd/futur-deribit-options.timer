@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer quotidien refresh Deribit options (Live Alpha Lab)
+
+[Timer]
+OnCalendar=*-*-* 03:20:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
