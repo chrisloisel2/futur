@@ -30,10 +30,12 @@ import pandas as pd
 import pytest
 
 
-def _write_oi_file(base, date_str: str, seq: int, ts_ms: int, mark_price: float) -> None:
+def _write_oi_file(base, date_str: str, seq: int, ts_ms: int, mark_price: float,
+                   open_interest: float = 1_000_000.0) -> None:
     d = base / f"date={date_str}"
     d.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame({"timestamp": [ts_ms], "mark_price": [mark_price]})
+    df = pd.DataFrame({"timestamp": [ts_ms], "mark_price": [mark_price],
+                       "open_interest": [open_interest]})
     df.to_parquet(d / f"part-{seq:06d}.parquet")
 
 

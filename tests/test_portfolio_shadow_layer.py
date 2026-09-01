@@ -536,3 +536,211 @@ def test_two_portfolios_identical_config_and_intents_produce_byte_identical_equi
         for field in ("n_positions", "gross_exposure", "net_exposure", "realized_pnl",
                       "unrealized_pnl", "fees", "funding", "equity", "drawdown", "status"):
             assert row_a[field] == row_b[field], f"{field}: {row_a[field]} != {row_b[field]}"
+
+
+# ── P0.2 (phase CLOSE THE EXECUTION LOOP) : ShadowExecutionAdapter, ordres,
+# fills partiels réels ──────────────────────────────────────────────────
+
+def _capped_mark(price, liquidity_notional, ts=None, source="TEST_MOCK"):
+    from src.institutional.live_alpha_lab.marks import MarkQuote
+
+    def fn(instrument, as_of=None):
+        return MarkQuote(instrument=instrument, price=price, mark_source=source,
+                         mark_timestamp=ts or (as_of or _ts("2026-09-01T00:00:00Z")),
+                         mark_age_ms=0.0, liquidity_notional=liquidity_notional)
+    return fn
+
+
+def test_submit_order_full_fill_when_no_liquidity_cap():
+    from src.institutional.live_alpha_lab.execution_adapter import ShadowExecutionAdapter
+    from src.institutional.live_alpha_lab.marks import MarkQuote
+    adapter = ShadowExecutionAdapter()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    mark = MarkQuote(instrument="BTCUSDT", price=100.0, mark_source="TEST",
+                     mark_timestamp=ts0, mark_age_ms=0.0, liquidity_notional=None)
+    order, fill = adapter.submit_order(
+        portfolio_id="T", alpha_id="A1", intent_id="I1", signal_id="S1",
+        symbol="BTCUSDT", delta_quantity=10.0, as_of=ts0,
+        timestamp_decision=ts0.isoformat(), mark=mark,
+    )
+    assert order.status == "FILLED"
+    assert order.filled_quantity == pytest.approx(10.0)
+    assert order.remaining_quantity == pytest.approx(0.0)
+    assert fill is not None and fill.quantity == pytest.approx(10.0)
+
+
+def test_submit_order_partial_fill_when_liquidity_capped():
+    from src.institutional.live_alpha_lab.execution_adapter import ShadowExecutionAdapter
+    from src.institutional.live_alpha_lab.marks import MarkQuote
+    adapter = ShadowExecutionAdapter()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    # liquidity_notional=10_000 -> plafond = 0.002 * 10_000 / 100 = 0.2 unité,
+    # bien en-dessous des 10 unités demandées.
+    mark = MarkQuote(instrument="TIAUSDT", price=100.0, mark_source="TEST",
+                     mark_timestamp=ts0, mark_age_ms=0.0, liquidity_notional=10_000.0)
+    order, fill = adapter.submit_order(
+        portfolio_id="T", alpha_id="A1", intent_id="I1", signal_id="S1",
+        symbol="TIAUSDT", delta_quantity=10.0, as_of=ts0,
+        timestamp_decision=ts0.isoformat(), mark=mark,
+    )
+    assert order.status == "PARTIALLY_FILLED"
+    assert 0 < order.filled_quantity < 10.0
+    assert order.remaining_quantity == pytest.approx(10.0 - order.filled_quantity)
+    assert order.requested_quantity == pytest.approx(10.0)
+    assert fill is not None
+    assert fill.quantity == pytest.approx(order.filled_quantity)
+
+
+def test_step_position_reflects_partial_fill_not_full_requested_delta(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _capped_mark(100.0, liquidity_notional=10_000.0, ts=ts0))
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)   # target notional = 100_000
+    state = step("T", config, agg, ts0)
+
+    pos = list(state.positions.values())[0]
+    assert 0 < pos["quantity"] < 1000.0   # 1000 = target_notional/price si fill complet
+    assert len(state.orders) == 1
+    assert state.orders[0]["status"] == "PARTIALLY_FILLED"
+    assert len(state.fills) == 1
+
+
+def test_multiple_partial_fills_across_steps_converge_to_target_no_double_count(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    # plafond = 0.002 * 5_000_000 / 100 = 100 unités/step ; target = 1000 unités -> ~10 steps
+    mark_fn = _capped_mark(100.0, liquidity_notional=5_000_000.0, ts=ts0)
+    monkeypatch.setattr(portfolio_mod, "get_mark", mark_fn)
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)   # target = 1000 unités
+
+    state = None
+    for _ in range(40):   # largement assez de steps pour converger au plafond
+        state = step("T", config, agg, ts0)
+        pos = list(state.positions.values())[0]
+        if pos["quantity"] >= 1000.0 - 1e-6:
+            break
+
+    pos = list(state.positions.values())[0]
+    assert pos["quantity"] == pytest.approx(1000.0, abs=1e-6)   # jamais dépassé -- no double count
+    assert sum(1 for o in state.orders if o["status"] in ("FILLED", "PARTIALLY_FILLED")) >= 2
+    # frais cohérents avec le notional RÉELLEMENT exécuté, pas le notional demandé à chaque step
+    total_fee_from_orders = sum(o["fee_amount"] for o in state.orders)
+    assert state.cumulative_fees_usd == pytest.approx(total_fee_from_orders)
+
+
+def test_partial_fill_on_close_reduces_position_and_realizes_proportional_pnl(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    # ouverture complète, non plafonnée
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    agg_open = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
+    state = step("T", config, agg_open, ts0)
+    pos = list(state.positions.values())[0]
+    opened_qty = pos["quantity"]
+    assert opened_qty == pytest.approx(1000.0)
+
+    # clôture visée (target=0) mais plafonnée par la liquidité -> partielle
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _capped_mark(110.0, liquidity_notional=10_000.0, ts=ts1))
+    agg_close = aggregate([_intent(frac=0.0, ts=ts0, direction="LONG")], config, set(), as_of=ts1)
+    state = step("T", config, agg_close, ts1)
+
+    pos = list(state.positions.values())[0]
+    assert 0 < pos["quantity"] < opened_qty   # partiellement clôturée, pas totalement
+    assert state.cumulative_realized_pnl > 0   # prix monté (100->110) sur la portion clôturée -> gain
+    assert state.orders[-1]["status"] == "PARTIALLY_FILLED"
+
+
+def test_restart_between_partial_fills_no_double_fill_no_loss(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    mark_fn = _capped_mark(100.0, liquidity_notional=10_000.0, ts=ts0)
+    monkeypatch.setattr(portfolio_mod, "get_mark", mark_fn)
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)   # target = 1000 unités
+
+    state1 = step("T", config, agg, ts0)
+    qty_after_1 = list(state1.positions.values())[0]["quantity"]
+    n_orders_after_1 = len(state1.orders)
+
+    # "restart" : recharge l'état depuis disque (comme le ferait un nouveau process)
+    reloaded = load_state("T", config.capital_eur)
+    assert reloaded.positions == state1.positions
+    assert len(reloaded.orders) == n_orders_after_1
+
+    state2 = step("T", config, agg, ts0)   # même target, même as_of, après "restart"
+    qty_after_2 = list(state2.positions.values())[0]["quantity"]
+    assert qty_after_2 > qty_after_1   # a progressé, pas rejoué le même fill
+    assert len(state2.orders) == n_orders_after_1 + 1   # un seul nouvel ordre, pas de duplication
+
+
+def test_orders_and_fills_have_full_schema_and_are_persisted(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    agg = aggregate([_intent(alpha_id="A1", frac=1.0, ts=ts0)], config, set(), as_of=ts0)
+    state = step("T", config, agg, ts0)
+
+    assert len(state.orders) == 1
+    o = state.orders[0]
+    for field in ("order_id", "intent_id", "signal_id", "alpha_id", "portfolio_id",
+                 "timestamp_decision", "timestamp_submit", "timestamp_fill", "symbol", "side",
+                 "requested_quantity", "filled_quantity", "remaining_quantity",
+                 "requested_notional", "fill_price", "mark_price_at_decision",
+                 "spread_bps", "slippage_bps", "fee_bps", "fee_amount", "status"):
+        assert field in o, f"champ manquant dans ShadowOrder : {field}"
+    assert o["status"] in ("SUBMITTED", "PARTIALLY_FILLED", "FILLED", "REJECTED", "CANCELLED", "EXPIRED")
+    assert o["alpha_id"] == "A1"
+    assert o["portfolio_id"] == "T"
+
+    assert len(state.fills) == 1
+    f = state.fills[0]
+    for field in ("fill_id", "order_id", "timestamp", "symbol", "quantity",
+                 "fill_price", "fee_usd", "mark_source", "mark_stale"):
+        assert field in f, f"champ manquant dans ShadowFill : {field}"
+    assert f["order_id"] == o["order_id"]
+
+    # persisté sur disque, relisible après "restart"
+    reloaded = load_state("T", config.capital_eur)
+    assert reloaded.orders == state.orders
+    assert reloaded.fills == state.fills
+
+
+def test_step_execution_is_the_sole_path_no_bypass(tmp_path, monkeypatch):
+    """P0.2 : step() ne doit JAMAIS mettre à jour une position sans passer
+    par execution_adapter.submit_order() -- vérifié en fournissant un
+    adapter custom qui refuse tout fill (retourne toujours filled_quantity=0)
+    et en s'assurant qu'aucune position n'apparaît malgré un delta demandé
+    non-nul."""
+    from src.institutional.live_alpha_lab.execution_adapter import ExecutionAdapter
+    from src.institutional.live_alpha_lab.orders import ShadowOrder
+
+    class RefuseAllAdapter(ExecutionAdapter):
+        def submit_order(self, **kwargs):
+            order = ShadowOrder(
+                order_id="refused", intent_id="i", signal_id="s",
+                alpha_id=kwargs["alpha_id"], portfolio_id=kwargs["portfolio_id"],
+                timestamp_decision=kwargs["timestamp_decision"],
+                timestamp_submit=kwargs["as_of"].isoformat(), timestamp_fill=None,
+                symbol=kwargs["symbol"], side="BUY", requested_quantity=abs(kwargs["delta_quantity"]),
+                filled_quantity=0.0, remaining_quantity=abs(kwargs["delta_quantity"]),
+                requested_notional=0.0, fill_price=None, mark_price_at_decision=0.0,
+                spread_bps=0.0, slippage_bps=0.0, fee_bps=0.0, fee_amount=0.0, status="SUBMITTED",
+            )
+            return order, None
+
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
+    state = step("T", config, agg, ts0, execution_adapter=RefuseAllAdapter())
+
+    assert state.positions == {} or all(abs(p["quantity"]) < 1e-9 for p in state.positions.values())
+    assert state.cumulative_fees_usd == 0.0
+    assert len(state.orders) == 1
+    assert state.orders[0]["status"] == "SUBMITTED"

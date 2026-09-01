@@ -121,6 +121,10 @@ class AggregationResult:
     # item 6 : ledger des intents individuels par instrument, AVANT dedup/cap,
     # pour mesurer overlap/compétition de capital/contribution marginale.
     raw_intents_by_instrument: Dict[str, List[dict]]
+    # item P0.2/P0.3 : timestamp ISO de l'intent GAGNANT (celui qui a fixé
+    # target/owner) par instrument -- sert à construire intent_id/signal_id
+    # de l'ordre shadow correspondant, pour la reconstruction de trace.
+    owner_intent_ts: Dict[str, str] = field(default_factory=dict)
 
 
 def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
@@ -159,6 +163,7 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
 
     target: Dict[str, float] = defaultdict(float)
     owner: Dict[str, str] = {}
+    owner_intent_ts: Dict[str, str] = {}
     for it in deduped:
         frac = apply_screen(it.target_position_fraction, it.instrument, it.direction, screened_symbols)
         if config.apply_vol_overlay:
@@ -175,9 +180,12 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
             target[it.leg_instrument_b] += -sign * notional
             owner[it.instrument] = it.alpha_id
             owner[it.leg_instrument_b] = it.alpha_id
+            owner_intent_ts[it.instrument] = it.timestamp.isoformat()
+            owner_intent_ts[it.leg_instrument_b] = it.timestamp.isoformat()
         else:
             target[it.instrument] += sign * notional
             owner[it.instrument] = it.alpha_id
+            owner_intent_ts[it.instrument] = it.timestamp.isoformat()
 
     cap_asset = config.capital_eur * config.max_per_asset_fraction
     for instr, notional in list(target.items()):
@@ -190,7 +198,7 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
         scale = cap_gross / gross
         target = {k: v * scale for k, v in target.items()}
 
-    return AggregationResult(dict(target), owner, dict(raw_by_instrument))
+    return AggregationResult(dict(target), owner, dict(raw_by_instrument), owner_intent_ts)
 
 
 @dataclass
@@ -238,6 +246,11 @@ class PortfolioState:
     equity_curve: List[dict] = field(default_factory=list)
     last_step_ts: Optional[str] = None
     initialized: bool = False
+    # item P0.2 : ledger d'ordres/fills shadow, append-only, persisté au même
+    # titre que positions/equity_curve (durabilité restart -- l'adapter lui-
+    # même n'est PAS persisté, seul son résultat via step() l'est ici).
+    orders: List[dict] = field(default_factory=list)
+    fills: List[dict] = field(default_factory=list)
 
 
 def state_path(portfolio_name: str) -> Path:
@@ -302,13 +315,27 @@ def _append_intent_ledger(portfolio_name: str, as_of: pd.Timestamp,
 
 
 def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
-        as_of: pd.Timestamp) -> PortfolioState:
+        as_of: pd.Timestamp, execution_adapter=None) -> PortfolioState:
     """Un pas d'agrégation -> mark -> exécution shadow -> MTM -> équity.
 
     Idempotent au sens où rejouer le MÊME target sur un état déjà à jour ne
     produit aucun delta_quantity (donc aucun nouveau fill/coût) -- MAIS
     l'unrealized_pnl et donc l'équity SONT recalculés à chaque appel (le
-    marché a bougé même sans nouveau trade -- c'est le point du MTM)."""
+    marché a bougé même sans nouveau trade -- c'est le point du MTM).
+
+    item P0.2 (phase CLOSE THE EXECUTION LOOP) : `execution_adapter` est
+    désormais le SEUL chemin qui transforme un delta demandé en changement
+    de position -- plus d'appel direct à shadow_execute() ici. Un
+    ShadowExecutionAdapter frais est construit par défaut si aucun n'est
+    fourni (le bookkeeping durable est PortfolioState, pas l'adapter --
+    voir execution_adapter.py). Le delta réellement appliqué à la position
+    est `order.filled_quantity` (signé par `order.side`), PAS le delta
+    demandé : un plafond de liquidité peut avoir partiellement rempli
+    l'ordre (voir orders.py)."""
+    if execution_adapter is None:
+        from src.institutional.live_alpha_lab.execution_adapter import ShadowExecutionAdapter
+        execution_adapter = ShadowExecutionAdapter()
+
     state = load_state(portfolio_name, config.capital_eur)
     target = agg.target_notional
     owner = agg.owner
@@ -336,42 +363,58 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
         delta_quantity = target_quantity - pos.quantity
 
         if abs(delta_quantity * mark.price) >= 1e-6:
-            fill = shadow_execute(delta_quantity, instr, mark)
-            executed_delta[instr] = delta_quantity * mark.price
-            state.cumulative_fees_usd += fill.fee_usd
-            state.cumulative_turnover_usd += abs(fill.delta_notional_at_fill)
-            pos.fees_paid += fill.fee_usd
-
-            same_sign_or_flat = (pos.quantity == 0) or (
-                (pos.quantity > 0) == (delta_quantity > 0))
-            if same_sign_or_flat:
-                # ouverture ou renforcement -> moyenne pondérée du prix d'entrée
-                new_qty = pos.quantity + delta_quantity
-                if new_qty != 0:
-                    pos.entry_price = (
-                        (pos.quantity * pos.entry_price + delta_quantity * fill.fill_price) / new_qty
-                    )
-                pos.quantity = new_qty
-            else:
-                closing_qty = min(abs(delta_quantity), abs(pos.quantity))
-                sign_closed = 1.0 if pos.quantity > 0 else -1.0
-                just_realized = closing_qty * sign_closed * (fill.fill_price - pos.entry_price)
-                pos.realized_pnl += just_realized
-                state.cumulative_realized_pnl += just_realized
-                # item 5 : PnL réalisé crédité à l'owner qui détenait la
-                # position AU MOMENT de la clôture (pas au nouvel owner
-                # éventuel si l'instrument change de mains le même step).
-                state.cumulative_pnl_by_alpha[pos.owner_alpha] = (
-                    state.cumulative_pnl_by_alpha.get(pos.owner_alpha, 0.0) + just_realized)
-                pos.quantity += delta_quantity
-                if (pos.quantity > 0) != (sign_closed > 0) and pos.quantity != 0:
-                    # on a traversé zéro -> nouvelle position ouverte au fill_price
-                    pos.entry_price = fill.fill_price
-
+            decision_ts_iso = agg.owner_intent_ts.get(instr, as_of.isoformat())
             current_owner = owner.get(instr, pos.owner_alpha)
-            pos.owner_alpha = current_owner
-            state.cumulative_cost_by_alpha[current_owner] = (
-                state.cumulative_cost_by_alpha.get(current_owner, 0.0) + fill.fee_usd)
+            intent_id = signal_id = f"{current_owner}:{instr}:{decision_ts_iso}"
+            order, fill_record = execution_adapter.submit_order(
+                portfolio_id=portfolio_name, alpha_id=current_owner,
+                intent_id=intent_id, signal_id=signal_id, symbol=instr,
+                delta_quantity=delta_quantity, as_of=as_of,
+                timestamp_decision=decision_ts_iso, mark=mark,
+            )
+            state.orders.append(asdict(order))
+            if fill_record is not None:
+                state.fills.append(asdict(fill_record))
+
+            # exécuté RÉEL (post-plafond de liquidité) -- peut être < delta
+            # demandé (fill partiel), jamais halluciné au-delà.
+            executed_qty = order.filled_quantity if order.side == "BUY" else -order.filled_quantity
+            executed_delta[instr] = executed_qty * (order.fill_price or 0.0)
+
+            if abs(executed_qty) > 1e-12:
+                state.cumulative_fees_usd += order.fee_amount
+                state.cumulative_turnover_usd += abs(executed_qty * order.fill_price)
+                pos.fees_paid += order.fee_amount
+
+                same_sign_or_flat = (pos.quantity == 0) or (
+                    (pos.quantity > 0) == (executed_qty > 0))
+                if same_sign_or_flat:
+                    # ouverture ou renforcement -> moyenne pondérée du prix d'entrée
+                    new_qty = pos.quantity + executed_qty
+                    if new_qty != 0:
+                        pos.entry_price = (
+                            (pos.quantity * pos.entry_price + executed_qty * order.fill_price) / new_qty
+                        )
+                    pos.quantity = new_qty
+                else:
+                    closing_qty = min(abs(executed_qty), abs(pos.quantity))
+                    sign_closed = 1.0 if pos.quantity > 0 else -1.0
+                    just_realized = closing_qty * sign_closed * (order.fill_price - pos.entry_price)
+                    pos.realized_pnl += just_realized
+                    state.cumulative_realized_pnl += just_realized
+                    # item 5 : PnL réalisé crédité à l'owner qui détenait la
+                    # position AU MOMENT de la clôture (pas au nouvel owner
+                    # éventuel si l'instrument change de mains le même step).
+                    state.cumulative_pnl_by_alpha[pos.owner_alpha] = (
+                        state.cumulative_pnl_by_alpha.get(pos.owner_alpha, 0.0) + just_realized)
+                    pos.quantity += executed_qty
+                    if (pos.quantity > 0) != (sign_closed > 0) and pos.quantity != 0:
+                        # on a traversé zéro -> nouvelle position ouverte au fill_price
+                        pos.entry_price = order.fill_price
+
+                pos.owner_alpha = current_owner
+                state.cumulative_cost_by_alpha[current_owner] = (
+                    state.cumulative_cost_by_alpha.get(current_owner, 0.0) + order.fee_amount)
 
         # funding (perp uniquement, pas les contrats _QUARTERLY) : accrual
         # proportionnel au temps écoulé depuis le dernier step, APPROXIMATION

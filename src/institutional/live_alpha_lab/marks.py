@@ -53,6 +53,12 @@ class MarkQuote:
     mark_source: str
     mark_timestamp: pd.Timestamp
     mark_age_ms: float
+    # Proxy de liquidité (item P0.2, plafond de fill partiel) : notional de
+    # l'open interest courant (open_interest * mark_price), disponible
+    # UNIQUEMENT pour DERIVATIVES_RAW_MARK (la seule source qui porte
+    # open_interest). None pour REST_BOOKTICKER_MID/QUARTERLY_DAILY_CLOSE
+    # -- fail-open (pas de plafond appliqué) plutôt qu'une valeur inventée.
+    liquidity_notional: Optional[float] = None
 
     def is_stale(self) -> bool:
         threshold = STALE_MS_BY_SOURCE.get(self.mark_source, 15 * 60 * 1000)
@@ -100,7 +106,7 @@ def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuot
     frames = []
     for f in files:
         try:
-            frames.append(pd.read_parquet(f, columns=["timestamp", "mark_price"]))
+            frames.append(pd.read_parquet(f, columns=["timestamp", "mark_price", "open_interest"]))
         except Exception:
             continue
     if not frames:
@@ -116,9 +122,13 @@ def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuot
         return None
     last = df.iloc[-1]
     ts = pd.Timestamp(last["timestamp"])
+    price = float(last["mark_price"])
+    oi = last.get("open_interest")
+    liquidity_notional = float(oi) * price if pd.notna(oi) and oi > 0 else None
     return MarkQuote(
-        instrument=symbol, price=float(last["mark_price"]), mark_source="DERIVATIVES_RAW_MARK",
+        instrument=symbol, price=price, mark_source="DERIVATIVES_RAW_MARK",
         mark_timestamp=ts, mark_age_ms=(as_of - ts).total_seconds() * 1000,
+        liquidity_notional=liquidity_notional,
     )
 
 
