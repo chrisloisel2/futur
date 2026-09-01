@@ -73,7 +73,7 @@ def main() -> int:
 
     summary = {}
     for name, config in ALL_PORTFOLIOS.items():
-        agg = aggregate(all_intents, config, screened, vol_overlay_multiplier=overlay_mult)
+        agg = aggregate(all_intents, config, screened, vol_overlay_multiplier=overlay_mult, as_of=as_of)
         state = step(name, config, agg, as_of)
         last = state.equity_curve[-1] if state.equity_curve else {}
         print(f"[portfolio] {name}: {last.get('n_positions', 0)} positions "
@@ -94,6 +94,7 @@ def main() -> int:
             "cumulative_funding_usd": state.cumulative_funding_usd,
             "cumulative_turnover_usd": state.cumulative_turnover_usd,
             "cumulative_cost_by_alpha": state.cumulative_cost_by_alpha,
+            "pnl_by_alpha": last.get("pnl_by_alpha", {}),
             "equity": last.get("equity", config.capital_eur),
             "drawdown": last.get("drawdown", 0),
             "n_equity_points": len(state.equity_curve),

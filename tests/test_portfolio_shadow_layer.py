@@ -136,6 +136,32 @@ def test_aggregate_screen_zeroes_out_target():
     assert "BTCUSDT" not in agg.target_notional or agg.target_notional["BTCUSDT"] == 0
 
 
+def test_aggregate_excludes_expired_intents():
+    """Régression : PortfolioIntent.expiry existait mais n'était jamais
+    vérifié -- une vieille décision 4h-horizon continuait à peser sur la
+    position indéfiniment. Un intent dont expiry <= as_of ne doit produire
+    AUCUN target."""
+    ts_old = _ts("2026-09-01T00:00:00Z")   # horizon 4h -> expire à 04:00Z
+    intent_expired = _intent(instrument="BTCUSDT", frac=1.0, ts=ts_old)
+    config = PortfolioConfig(name="TEST", capital_eur=100_000,
+                             family_budget_fraction={"LIQUIDATION_FAMILY": 1.0})
+    as_of_after_expiry = ts_old + pd.Timedelta(hours=5)   # 1h après l'expiry
+    agg = aggregate([intent_expired], config, screened_symbols=set(), as_of=as_of_after_expiry)
+    assert "BTCUSDT" not in agg.target_notional or agg.target_notional["BTCUSDT"] == 0
+    # mais reste tracé pour la traçabilité (item 6) même expiré
+    assert len(agg.raw_intents_by_instrument["BTCUSDT"]) == 1
+
+
+def test_aggregate_keeps_not_yet_expired_intents():
+    ts = _ts("2026-09-01T00:00:00Z")
+    intent = _intent(instrument="BTCUSDT", frac=1.0, ts=ts)   # expiry = ts+4h
+    config = PortfolioConfig(name="TEST", capital_eur=100_000,
+                             family_budget_fraction={"LIQUIDATION_FAMILY": 1.0})
+    as_of_before_expiry = ts + pd.Timedelta(hours=1)
+    agg = aggregate([intent], config, screened_symbols=set(), as_of=as_of_before_expiry)
+    assert agg.target_notional["BTCUSDT"] != 0
+
+
 def test_aggregate_multi_leg_produces_two_opposite_instruments():
     agg = aggregate(
         [_intent(instrument="BTCUSDT_QUARTERLY", direction="LONG", frac=1.0, multi_leg=True,

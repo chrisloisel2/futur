@@ -124,7 +124,21 @@ class AggregationResult:
 
 
 def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
-             screened_symbols: set, vol_overlay_multiplier: float = 1.0) -> AggregationResult:
+             screened_symbols: set, vol_overlay_multiplier: float = 1.0,
+             as_of: Optional[pd.Timestamp] = None) -> AggregationResult:
+    """⚠ Bug réel trouvé 2026-09-01 (phase ECONOMIC TRUTH) : `PortfolioIntent.
+    expiry` existait comme champ mais n'était JAMAIS vérifié -- une décision
+    restait indéfiniment "active" (contribuait au dedup MAX pour toujours),
+    au lieu d'expirer après son horizon (ex. fwd_4h pour liq_cascade). Une
+    vieille décision à forte conviction pouvait masquer indéfiniment des
+    décisions plus récentes du même instrument/correlation_family. Filtré
+    ici : un intent expiré (`expiry <= as_of`) est exclu de l'agrégation
+    (mais reste dans `raw_intents_by_instrument`/l'intent_ledger pour la
+    traçabilité -- on ne perd pas la trace qu'il a existé, juste son effet
+    sur la position courante)."""
+    as_of = as_of if as_of is not None else pd.Timestamp.now(tz="UTC")
+    live_intents = [it for it in intents if it.expiry > as_of]
+
     raw_by_instrument: Dict[str, List[dict]] = defaultdict(list)
     for it in intents:
         raw_by_instrument[it.instrument].append({
@@ -137,7 +151,7 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
                 "target_position_fraction": it.target_position_fraction, "confidence": it.confidence,
             })
 
-    deduped = _dedup_correlated(intents, config.max_dominant_per_correlation_family)
+    deduped = _dedup_correlated(live_intents, config.max_dominant_per_correlation_family)
 
     n_alphas_per_bucket: Dict[str, set] = defaultdict(set)
     for it in deduped:
