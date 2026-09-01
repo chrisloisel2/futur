@@ -125,6 +125,13 @@ class AggregationResult:
     # target/owner) par instrument -- sert à construire intent_id/signal_id
     # de l'ordre shadow correspondant, pour la reconstruction de trace.
     owner_intent_ts: Dict[str, str] = field(default_factory=dict)
+    # item P0.4 : instruments où TOUS les intents qui les visaient (y compris
+    # la jambe B en multi-leg) sont désormais expirés -- signal utilisé par
+    # step() pour marquer EXIT_REASON=ALPHA_HORIZON_EXPIRY. Si un AUTRE
+    # intent vivant vise encore le même instrument, il n'apparaît PAS ici :
+    # la réduction/clôture éventuelle vient d'ailleurs (screen/cap/dedup),
+    # pas de l'expiration.
+    expired_driven_instruments: set = field(default_factory=set)
 
 
 def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
@@ -142,6 +149,16 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
     sur la position courante)."""
     as_of = as_of if as_of is not None else pd.Timestamp.now(tz="UTC")
     live_intents = [it for it in intents if it.expiry > as_of]
+
+    def _targeted_instruments(its: List[PortfolioIntent]) -> set:
+        out: set = set()
+        for it in its:
+            out.add(it.instrument)
+            if it.multi_leg and it.leg_instrument_b:
+                out.add(it.leg_instrument_b)
+        return out
+
+    expired_driven_instruments = _targeted_instruments(intents) - _targeted_instruments(live_intents)
 
     raw_by_instrument: Dict[str, List[dict]] = defaultdict(list)
     for it in intents:
@@ -198,7 +215,8 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
         scale = cap_gross / gross
         target = {k: v * scale for k, v in target.items()}
 
-    return AggregationResult(dict(target), owner, dict(raw_by_instrument), owner_intent_ts)
+    return AggregationResult(dict(target), owner, dict(raw_by_instrument), owner_intent_ts,
+                             expired_driven_instruments)
 
 
 @dataclass
@@ -372,7 +390,6 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
                 delta_quantity=delta_quantity, as_of=as_of,
                 timestamp_decision=decision_ts_iso, mark=mark,
             )
-            state.orders.append(asdict(order))
             if fill_record is not None:
                 state.fills.append(asdict(fill_record))
 
@@ -397,6 +414,16 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
                         )
                     pos.quantity = new_qty
                 else:
+                    # item P0.4 : c'est une réduction/clôture -- déterminer
+                    # EXIT_REASON avant de persister l'ordre. ALPHA_HORIZON_
+                    # EXPIRY seulement si PLUS AUCUN intent vivant ne visait
+                    # cet instrument (tous ceux qui le visaient ont expiré) ;
+                    # sinon TARGET_CHANGE (screen/cap/dedup/signal inversé --
+                    # catch-all honnête, pas une fausse précision).
+                    order.exit_reason = (
+                        "ALPHA_HORIZON_EXPIRY" if instr in agg.expired_driven_instruments
+                        else "TARGET_CHANGE"
+                    )
                     closing_qty = min(abs(executed_qty), abs(pos.quantity))
                     sign_closed = 1.0 if pos.quantity > 0 else -1.0
                     just_realized = closing_qty * sign_closed * (order.fill_price - pos.entry_price)
@@ -415,6 +442,9 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
                 pos.owner_alpha = current_owner
                 state.cumulative_cost_by_alpha[current_owner] = (
                     state.cumulative_cost_by_alpha.get(current_owner, 0.0) + order.fee_amount)
+
+            # persisté APRES la détermination d'exit_reason ci-dessus (item P0.4)
+            state.orders.append(asdict(order))
 
         # funding (perp uniquement, pas les contrats _QUARTERLY) : accrual
         # proportionnel au temps écoulé depuis le dernier step, APPROXIMATION

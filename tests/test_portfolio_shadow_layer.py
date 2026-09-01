@@ -744,3 +744,77 @@ def test_step_execution_is_the_sole_path_no_bypass(tmp_path, monkeypatch):
     assert state.cumulative_fees_usd == 0.0
     assert len(state.orders) == 1
     assert state.orders[0]["status"] == "SUBMITTED"
+
+
+# ── P0.4 (phase CLOSE THE EXECUTION LOOP) : audit expiry -> exécution,
+# EXIT_REASON ────────────────────────────────────────────────────────────
+
+def test_expiry_close_sets_exit_reason_alpha_horizon_expiry(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    intent = _intent(alpha_id="A1", correlation_family="FAM1", frac=1.0, ts=ts0)
+    agg_open = aggregate([intent], config, set(), as_of=ts0)
+    step("T", config, agg_open, ts0)
+
+    ts1 = intent.expiry + pd.Timedelta(seconds=1)   # après l'horizon -- plus aucun intent vivant
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts1))
+    agg_expired = aggregate([intent], config, set(), as_of=ts1)   # même intent, mais expiré à ts1
+    state = step("T", config, agg_expired, ts1)
+
+    assert list(state.positions.values()) == [] or all(
+        abs(p["quantity"]) < 1e-9 for p in state.positions.values()
+    )
+    closing_orders = [o for o in state.orders if o["status"] == "FILLED" and o["side"] == "SELL"]
+    assert len(closing_orders) == 1
+    assert closing_orders[0]["exit_reason"] == "ALPHA_HORIZON_EXPIRY"
+
+
+def test_expiry_with_another_alpha_still_wanting_exposure_does_not_blind_close(tmp_path, monkeypatch):
+    """Item P0.4 : l'expiration d'UN intent alpha n'implique pas forcément la
+    clôture physique -- si un AUTRE alpha (famille de corrélation différente)
+    vise toujours le même instrument, le portefeuille recalcule la target
+    agrégée (réduction vers ce que B veut seul) au lieu de fermer à zéro, et
+    exit_reason doit refléter TARGET_CHANGE, pas ALPHA_HORIZON_EXPIRY."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    # deux risk_bucket DISTINCTS et indépendants -- le budget de B ne doit
+    # PAS "absorber" automatiquement la part libérée par le départ de A (ce
+    # qui arriverait s'ils partageaient le même bucket, où le budget se
+    # répartit entre alphas vivants du bucket) : on veut isoler l'effet de
+    # l'expiration de A sur la target agrégée de l'instrument commun.
+    config = PortfolioConfig(name="TEST_MTM", capital_eur=100_000,
+                             family_budget_fraction={"BUCKET_A": 0.7, "BUCKET_B": 0.3},
+                             max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0)
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+
+    intent_a = PortfolioIntent(
+        alpha_id="A1", family="liquidation", risk_bucket="BUCKET_A",
+        correlation_family="FAM_A", timestamp=ts0, instrument="BTCUSDT", direction="LONG",
+        target_position_fraction=1.0, confidence=1.0, horizon_hours=4.0,
+        expiry=ts0 + pd.Timedelta(hours=4), multi_leg=False, leg_instrument_b=None,
+    )
+    intent_b = PortfolioIntent(
+        alpha_id="A2", family="liquidation", risk_bucket="BUCKET_B",
+        correlation_family="FAM_B", timestamp=ts0, instrument="BTCUSDT", direction="LONG",
+        target_position_fraction=1.0, confidence=1.0, horizon_hours=100.0,
+        expiry=ts0 + pd.Timedelta(hours=100), multi_leg=False, leg_instrument_b=None,
+    )
+    agg_open = aggregate([intent_a, intent_b], config, set(), as_of=ts0)
+    state = step("T", config, agg_open, ts0)
+    qty_both_active = list(state.positions.values())[0]["quantity"]
+    assert qty_both_active > 0
+
+    ts1 = intent_a.expiry + pd.Timedelta(seconds=1)   # A expiré, B toujours vivant (expiry dans 100h)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts1))
+    agg_after_a_expires = aggregate([intent_a, intent_b], config, set(), as_of=ts1)
+    assert "BTCUSDT" not in agg_after_a_expires.expired_driven_instruments   # B vivant -> pas "tout expiré"
+    state = step("T", config, agg_after_a_expires, ts1)
+
+    qty_after = list(state.positions.values())[0]["quantity"]
+    assert qty_after > 0   # PAS fermé à zéro -- B veut toujours l'exposition
+    assert qty_after < qty_both_active   # mais réduit (recalcul vers la target de B seul)
+    last_order = state.orders[-1]
+    assert last_order["side"] == "SELL"
+    assert last_order["exit_reason"] == "TARGET_CHANGE"   # PAS ALPHA_HORIZON_EXPIRY

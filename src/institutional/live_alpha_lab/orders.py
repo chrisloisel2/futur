@@ -65,6 +65,14 @@ class ShadowOrder:
     fee_bps: float
     fee_amount: float
     status: str
+    # item P0.4 : renseigné par portfolio.step() (pas par l'adapter -- le
+    # concept "horizon d'alpha expiré" appartient à la couche portfolio, pas
+    # à l'exécution) uniquement pour un ordre qui RÉDUIT une position.
+    # "ALPHA_HORIZON_EXPIRY" si PLUS AUCUN intent actif ne visait cet
+    # instrument (tous ceux qui le visaient ont expiré) ; "TARGET_CHANGE"
+    # pour toute autre réduction (signal inversé, screen, cap de risque,
+    # arbitrage de dedup -- catch-all honnête, pas une fausse précision).
+    exit_reason: Optional[str] = None
 
 
 @dataclass
