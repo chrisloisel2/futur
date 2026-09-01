@@ -67,13 +67,30 @@ def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuot
     base = DERIVATIVES_RAW / "exchange=binance" / "market=usdm" / "stream=open_interest" / f"symbol={symbol}"
     if not base.exists():
         return None
-    files = sorted(base.glob("date=*/part-*.parquet"))
+    # Le collecteur écrit UN fichier par poll (~450-500 fichiers/jour/symbole),
+    # pas un fichier par jour : prendre "les 4 derniers fichiers" du glob trié
+    # ne couvre en pratique que les ~20 dernières minutes, quel que soit
+    # as_of. Pour un as_of historique (pas "maintenant"), ça retournait
+    # silencieusement None -> fallback REST live (prix "maintenant", pas au
+    # bon as_of -- root cause de la divergence P1_EQUAL_RISK vs P1_CONTROL,
+    # cf compare_portfolios.py). Fix : ne garder que les partitions date=
+    # <= as_of.date(), lire TOUS les fichiers de ces partitions.
+    date_dirs = sorted(d for d in base.glob("date=*") if d.is_dir())
+    as_of_date_str = as_of.strftime("%Y-%m-%d")
+    eligible_dirs = [d for d in date_dirs if d.name.split("=", 1)[1] <= as_of_date_str]
+    if not eligible_dirs:
+        return None
+    # 2 dernières partitions éligibles : couvre le cas où as_of tombe tôt
+    # dans sa journée et où le dernier mark <= as_of est encore dans la
+    # partition de la veille.
+    recent_dirs = eligible_dirs[-2:]
+    files = []
+    for d in recent_dirs:
+        files.extend(sorted(d.glob("part-*.parquet")))
     if not files:
         return None
-    # les 2 derniers jours suffisent pour trouver le dernier mark connu <= as_of
-    recent = files[-4:]
     frames = []
-    for f in recent:
+    for f in files:
         try:
             frames.append(pd.read_parquet(f, columns=["timestamp", "mark_price"]))
         except Exception:

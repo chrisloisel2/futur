@@ -453,3 +453,56 @@ def test_mtm_no_future_price_used_between_steps(tmp_path, monkeypatch):
     # à ts0, seul le prix ts0 (100) doit avoir été utilisé -> entry_price == 100-ish (+slippage)
     pos = list(state0.positions.values())[0]
     assert pos["entry_price"] < 105   # pas 200 (le prix futur ts1)
+
+
+def test_two_portfolios_identical_config_and_intents_produce_byte_identical_equity(tmp_path, monkeypatch):
+    """Régression directe du bug P1_EQUAL_RISK vs P1_CONTROL (phase CLOSE THE
+    EXECUTION LOOP, P0.1) : root-cause était get_mark() non-pur en (instrument,
+    as_of) pour la source REST (elle ignorait as_of et retournait le prix
+    "maintenant" -- deux portefeuilles traités séquentiellement dans le même
+    run pouvaient donc recevoir deux prix différents pour le "même" as_of,
+    faisant diverger executed_delta puis entry_price/unrealized_pnl/
+    realized_pnl malgré une config et des intents strictement identiques).
+
+    Ici get_mark est un mock strictement pur en (instrument, as_of) -- comme
+    il doit toujours l'être après le fix de marks.py::_from_derivatives_raw.
+    Deux portefeuilles à la config identique (mêmes intents, mêmes as_of,
+    traités l'un après l'autre comme dans run_portfolio_shadow.py) DOIVENT
+    produire des equity_curve strictement identiques."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config_a = _config()
+    config_b = PortfolioConfig(**{**config_a.__dict__, "name": "TEST_MTM_B"})
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    ts2 = ts1 + pd.Timedelta(minutes=5)
+
+    prices_by_ts_instrument = {
+        (ts0, "BTCUSDT"): 100.0, (ts0, "ETHUSDT"): 50.0,
+        (ts1, "BTCUSDT"): 103.0, (ts1, "ETHUSDT"): 48.0,
+        (ts2, "BTCUSDT"): 97.0, (ts2, "ETHUSDT"): 52.0,
+    }
+
+    def pure_mark_fn(instrument, as_of=None):
+        return MarkQuote(instrument=instrument, price=prices_by_ts_instrument[(as_of, instrument)],
+                         mark_source="TEST_PURE", mark_timestamp=as_of, mark_age_ms=0.0)
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", pure_mark_fn)
+
+    intents_by_ts = {
+        ts0: [_intent(instrument="BTCUSDT", frac=0.6, ts=ts0), _intent(instrument="ETHUSDT", frac=0.4, ts=ts0)],
+        ts1: [_intent(instrument="BTCUSDT", frac=0.3, ts=ts1), _intent(instrument="ETHUSDT", frac=0.7, ts=ts1)],
+        ts2: [_intent(instrument="BTCUSDT", frac=0.0, ts=ts2, direction="SHORT")],
+    }
+
+    curves = {}
+    for name, config in (("T1", config_a), ("T2", config_b)):
+        for ts in (ts0, ts1, ts2):
+            agg = aggregate(intents_by_ts[ts], config, set(), as_of=ts)
+            state = step(name, config, agg, ts)
+        curves[name] = state.equity_curve
+
+    assert len(curves["T1"]) == len(curves["T2"]) == 3
+    for row_a, row_b in zip(curves["T1"], curves["T2"]):
+        for field in ("n_positions", "gross_exposure", "net_exposure", "realized_pnl",
+                      "unrealized_pnl", "fees", "funding", "equity", "drawdown", "status"):
+            assert row_a[field] == row_b[field], f"{field}: {row_a[field]} != {row_b[field]}"
