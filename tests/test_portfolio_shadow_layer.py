@@ -818,3 +818,64 @@ def test_expiry_with_another_alpha_still_wanting_exposure_does_not_blind_close(t
     last_order = state.orders[-1]
     assert last_order["side"] == "SELL"
     assert last_order["exit_reason"] == "TARGET_CHANGE"   # PAS ALPHA_HORIZON_EXPIRY
+
+
+# ── P1.1 (phase CLOSE THE EXECUTION LOOP) : replay déterministe ──────────
+
+def test_deterministic_replay_identical_hash_across_two_independent_runs(tmp_path, monkeypatch):
+    """Rejouer EXACTEMENT la même séquence (intents, config, as_of) dans deux
+    portefeuilles indépendants doit produire un état final identique au bit
+    près (hash SHA256 du JSON canonique) -- y compris order_id/fill_id, dont
+    le suffixe dépendait auparavant de l'ordre d'itération d'un `set`
+    (non garanti stable entre deux PROCESSUS séparés, à cause du hash-seed
+    randomisé par défaut de Python) : fixé en triant explicitement les
+    instruments avant itération (portfolio.py::step, item P1.1)."""
+    import hashlib
+    import json
+    from dataclasses import asdict as _asdict
+
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    ts2 = ts1 + pd.Timedelta(minutes=5)
+    prices = {(ts0, "BTCUSDT"): 100.0, (ts0, "ETHUSDT"): 50.0, (ts0, "SOLUSDT"): 20.0,
+             (ts1, "BTCUSDT"): 103.0, (ts1, "ETHUSDT"): 48.0, (ts1, "SOLUSDT"): 22.0,
+             (ts2, "BTCUSDT"): 97.0, (ts2, "ETHUSDT"): 52.0, (ts2, "SOLUSDT"): 19.0}
+
+    def pure_mark(instrument, as_of=None):
+        return MarkQuote(instrument=instrument, price=prices[(as_of, instrument)],
+                         mark_source="TEST", mark_timestamp=as_of, mark_age_ms=0.0)
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", pure_mark)
+
+    intents_by_ts = {
+        ts0: [_intent(instrument="BTCUSDT", frac=0.5, ts=ts0),
+             _intent(instrument="ETHUSDT", frac=0.3, ts=ts0),
+             _intent(instrument="SOLUSDT", frac=0.2, ts=ts0)],
+        ts1: [_intent(instrument="BTCUSDT", frac=0.2, ts=ts1),
+             _intent(instrument="ETHUSDT", frac=0.5, ts=ts1),
+             _intent(instrument="SOLUSDT", frac=0.3, ts=ts1)],
+        ts2: [_intent(instrument="BTCUSDT", frac=0.0, ts=ts2, direction="SHORT")],
+    }
+
+    def run(name):
+        state = None
+        for ts in (ts0, ts1, ts2):
+            agg = aggregate(intents_by_ts[ts], config, set(), as_of=ts)
+            state = step(name, config, agg, ts)
+        return state
+
+    state_a = run("RUN_A")
+    state_b = run("RUN_B")
+
+    def canonical_hash(state):
+        # portfolio_id apparaît dans order_id/intent_id/etc -- normalisé
+        # avant hash puisque RUN_A/RUN_B sont volontairement deux noms
+        # différents (seule façon d'avoir deux répertoires d'état isolés ici).
+        blob = json.dumps(_asdict(state), sort_keys=True, default=str)
+        blob = blob.replace("RUN_A", "PORTFOLIO").replace("RUN_B", "PORTFOLIO")
+        return hashlib.sha256(blob.encode()).hexdigest()
+
+    assert canonical_hash(state_a) == canonical_hash(state_b)
+    assert len(state_a.orders) == len(state_b.orders) > 0

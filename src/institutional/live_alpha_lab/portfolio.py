@@ -361,7 +361,15 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
     any_stale_used = False
     skipped_no_mark = []
 
-    all_instruments = set(state.positions) | set(target)
+    # item P1.1 (déterminisme replay) : `set` a un ordre d'itération
+    # dépendant du hash-seed du PROCESSUS (randomisé par défaut en Python
+    # depuis 3.3) -- deux runs SÉPARÉS (deux process) sur des entrées
+    # identiques pourraient itérer les instruments dans un ordre différent,
+    # ce qui change la séquence des order_id/fill_id (leur suffixe dépend de
+    # l'ordre de soumission) ET l'ordre de sommation flottante (gross/net/
+    # unrealized_pnl, pas garanti bit-identique si l'ordre change). Trié
+    # explicitement : même ordre garanti quel que soit le hash-seed.
+    all_instruments = sorted(set(state.positions) | set(target))
     for instr in all_instruments:
         pos_d = state.positions.get(instr, asdict(Position(instrument=instr)))
         pos = Position(**pos_d)
