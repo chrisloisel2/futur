@@ -1196,3 +1196,107 @@ def test_family_budget_shrinks_as_more_correlated_alphas_join_grows_back_as_they
     total_three = sum(abs(v) for v in agg3.target_notional.values())
     assert total_three == pytest.approx(family_budget)
     assert agg3.target_notional["BTCUSDT"] == pytest.approx(family_budget / 3)
+
+
+# ── P1 (phase OPERATIONAL HARDENING) : invariant d'attribution ───────────
+
+def test_attribution_invariant_sum_pnl_by_alpha_equals_physical_portfolio_pnl(tmp_path, monkeypatch):
+    """sum(alpha_attributed_pnl) doit rester EXACTEMENT égal au PnL physique
+    du portefeuille (realized+unrealized) à CHAQUE step, à travers
+    ouvertures/renforcements/clôtures partielles/changements de prix -- pas
+    seulement à la fin. Aucun double comptage, aucune fuite."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_ATTRIBUTION", capital_eur=100_000,
+        family_budget_fraction={"BUCKET_X": 0.20, "BUCKET_Y": 0.15},
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    ts2 = ts1 + pd.Timedelta(minutes=5)
+    prices = {(ts0, "BTCUSDT"): 100.0, (ts0, "ETHUSDT"): 50.0,
+             (ts1, "BTCUSDT"): 110.0, (ts1, "ETHUSDT"): 45.0,
+             (ts2, "BTCUSDT"): 105.0, (ts2, "ETHUSDT"): 55.0}
+
+    def pure_mark(instrument, as_of=None):
+        return MarkQuote(instrument=instrument, price=prices[(as_of, instrument)],
+                         mark_source="TEST", mark_timestamp=as_of, mark_age_ms=0.0)
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", pure_mark)
+
+    def _check_invariant(state):
+        physical_total = state.equity_curve[-1]["realized_pnl"] + state.equity_curve[-1]["unrealized_pnl"]
+        attributed_total = sum(state.equity_curve[-1]["pnl_by_alpha"].values())
+        assert attributed_total == pytest.approx(physical_total, abs=1e-6), (
+            f"attribué={attributed_total} != physique={physical_total}"
+        )
+
+    # step 0 : deux alphas ouvrent chacun leur position
+    intents0 = [_bucket_intent("X1", "BUCKET_X", "FAM_X", "BTCUSDT", "LONG", ts0),
+               _bucket_intent("Y1", "BUCKET_Y", "FAM_Y", "ETHUSDT", "SHORT", ts0)]
+    agg0 = aggregate(intents0, config, set(), as_of=ts0)
+    state = step("T", config, agg0, ts0)
+    _check_invariant(state)
+
+    # step 1 : prix bougent (unrealized change), pas de nouveau trade
+    agg1 = aggregate(intents0, config, set(), as_of=ts1)
+    state = step("T", config, agg1, ts1)
+    _check_invariant(state)
+
+    # step 2 : X réduit sa position (clôture partielle -> du realized apparaît),
+    # Y renforce la sienne
+    intents2 = [_bucket_intent("X1", "BUCKET_X", "FAM_X", "BTCUSDT", "LONG", ts0, frac=0.5),
+               _bucket_intent("Y1", "BUCKET_Y", "FAM_Y", "ETHUSDT", "SHORT", ts0, frac=1.0)]
+    agg2 = aggregate(intents2, config, set(), as_of=ts2)
+    state = step("T", config, agg2, ts2)
+    _check_invariant(state)
+
+    # invariant famille aussi (regroupement par risk_bucket plutôt que alpha_id)
+    # -- dérivé ici de pnl_by_alpha puisqu'un seul alpha par bucket dans ce test
+    assert state.cumulative_pnl_by_alpha.keys() <= {"X1", "Y1"}
+
+
+def test_attribution_handoff_realized_pnl_stays_with_owner_at_time_of_close_not_retroactive(tmp_path, monkeypatch):
+    """Deux alphas corrélés (même correlation_family) se disputent le même
+    instrument via dedup : quand le gagnant change d'un step à l'autre
+    (owner_alpha change de mains), le PnL DÉJÀ réalisé sous l'ancien owner
+    reste crédité à l'ancien owner -- jamais réattribué rétroactivement au
+    nouveau. L'invariant global (somme == PnL physique) doit rester vrai
+    même à travers ce changement de mains."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    prices = {(ts0, "BTCUSDT"): 100.0, (ts1, "BTCUSDT"): 120.0}
+
+    def pure_mark(instrument, as_of=None):
+        return MarkQuote(instrument=instrument, price=prices[(as_of, instrument)],
+                         mark_source="TEST", mark_timestamp=as_of, mark_age_ms=0.0)
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", pure_mark)
+
+    # step 0 : X gagne le dedup (frac plus haut), ouvre la position
+    intents0 = [_bucket_intent("X", "LIQUIDATION_FAMILY", "FAM_SHARED", "BTCUSDT", "LONG", ts0, frac=1.0),
+               _bucket_intent("Y", "LIQUIDATION_FAMILY", "FAM_SHARED", "BTCUSDT", "LONG", ts0, frac=0.3)]
+    agg0 = aggregate(intents0, config, set(), as_of=ts0)
+    assert agg0.owner["BTCUSDT"] == "X"
+    state = step("T", config, agg0, ts0)
+    assert state.positions["BTCUSDT"]["owner_alpha"] == "X"
+
+    # step 1 : Y prend le dessus (frac plus haut cette fois) -> réduit la
+    # position vers la target de Y (plus petite) -> réalise du PnL
+    intents1 = [_bucket_intent("X", "LIQUIDATION_FAMILY", "FAM_SHARED", "BTCUSDT", "LONG", ts0, frac=0.2),
+               _bucket_intent("Y", "LIQUIDATION_FAMILY", "FAM_SHARED", "BTCUSDT", "LONG", ts0, frac=1.0)]
+    agg1 = aggregate(intents1, config, set(), as_of=ts1)
+    assert agg1.owner["BTCUSDT"] == "Y"   # Y a maintenant le plus haut frac -> nouveau gagnant du dedup
+    state = step("T", config, agg1, ts1)
+
+    # le PnL réalisé par CETTE clôture partielle doit être crédité à X
+    # (l'ancien owner, qui détenait la position au moment de la clôture),
+    # pas à Y (le nouveau gagnant du dedup pour CE step)
+    assert state.cumulative_pnl_by_alpha.get("X", 0.0) != 0.0
+    assert state.positions["BTCUSDT"]["owner_alpha"] == "Y"   # ownership a bien basculé pour la suite
+
+    physical_total = state.equity_curve[-1]["realized_pnl"] + state.equity_curve[-1]["unrealized_pnl"]
+    attributed_total = sum(state.equity_curve[-1]["pnl_by_alpha"].values())
+    assert attributed_total == pytest.approx(physical_total, abs=1e-6)
