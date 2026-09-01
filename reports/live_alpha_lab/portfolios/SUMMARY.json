@@ -1,118 +1,118 @@
 {
-  "generated_at": "2026-09-01T00:56:10.780382+00:00",
-  "n_forward_intents_total": 16,
+  "generated_at": "2026-09-01T10:40:17.488912+00:00",
+  "n_forward_intents_total": 44,
   "screened_symbols": [],
   "vol_overlay_multiplier": 1.0,
   "portfolios": {
     "P1_EQUAL_RISK": {
       "status": "OK",
-      "n_positions": 10,
-      "gross_exposure": 92650.46296296295,
-      "net_exposure": 92650.46296296295,
-      "realized_pnl": 210.25951545145088,
-      "unrealized_pnl": 142.43791624187645,
-      "total_pnl": 352.6974316933273,
-      "cumulative_fees_usd": 73.78425039601335,
-      "cumulative_funding_usd": -0.23681949660633395,
-      "cumulative_turnover_usd": 147568.50079202672,
+      "n_positions": 6,
+      "gross_exposure": 65694.44444444444,
+      "net_exposure": 65694.44444444444,
+      "realized_pnl": -388.33863321593105,
+      "unrealized_pnl": 242.76680974248507,
+      "total_pnl": -145.571823473446,
+      "cumulative_fees_usd": 145.33808928100223,
+      "cumulative_funding_usd": -2.3800688021618894,
+      "cumulative_turnover_usd": 290676.1785620045,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 73.78425039601335
+        "SHORT_COVERING_CONTINUATION_V1": 145.33808928100223
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 351.2310974451133
+        "SHORT_COVERING_CONTINUATION_V1": -147.03815772166013
       },
-      "equity": 200278.6763618007,
-      "drawdown": 0.0,
-      "n_equity_points": 4
+      "equity": 199706.7100184434,
+      "drawdown": -0.0028558524239696717,
+      "n_equity_points": 5
     },
     "P1_CONTROL": {
       "status": "OK",
-      "n_positions": 10,
-      "gross_exposure": 92650.46296296295,
-      "net_exposure": 92650.46296296295,
-      "realized_pnl": 210.25951545145088,
-      "unrealized_pnl": 142.43932389738137,
-      "total_pnl": 352.6988393488323,
-      "cumulative_fees_usd": 73.7842496921856,
-      "cumulative_funding_usd": -0.23727787210579226,
-      "cumulative_turnover_usd": 147568.49938437119,
+      "n_positions": 6,
+      "gross_exposure": 65694.44444444444,
+      "net_exposure": 65694.44444444444,
+      "realized_pnl": -308.2642555938006,
+      "unrealized_pnl": 242.76680974248507,
+      "total_pnl": -65.49744585131555,
+      "cumulative_fees_usd": 145.3781250621578,
+      "cumulative_funding_usd": -2.3805271776613477,
+      "cumulative_turnover_usd": 290756.2501243156,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 73.7842496921856
+        "SHORT_COVERING_CONTINUATION_V1": 145.3781250621578
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 351.23250510061814
+        "SHORT_COVERING_CONTINUATION_V1": -66.96378009952969
       },
-      "equity": 200278.67731178453,
-      "drawdown": 0.0,
-      "n_equity_points": 4
+      "equity": 199786.7439019089,
+      "drawdown": -0.002456244551235068,
+      "n_equity_points": 5
     },
     "P1_VOL_OVERLAY": {
       "status": "OK",
-      "n_positions": 10,
-      "gross_exposure": 92650.46296296295,
-      "net_exposure": 92650.46296296295,
-      "realized_pnl": 210.25951545145088,
-      "unrealized_pnl": 142.43932389738137,
-      "total_pnl": 352.6988393488323,
-      "cumulative_fees_usd": 73.7842496921856,
-      "cumulative_funding_usd": -0.23727787210579226,
-      "cumulative_turnover_usd": 147568.49938437119,
+      "n_positions": 6,
+      "gross_exposure": 65694.44444444444,
+      "net_exposure": 65694.44444444444,
+      "realized_pnl": -308.2642555938006,
+      "unrealized_pnl": 242.76680974248507,
+      "total_pnl": -65.49744585131555,
+      "cumulative_fees_usd": 145.3781250621578,
+      "cumulative_funding_usd": -2.3805271776613477,
+      "cumulative_turnover_usd": 290756.2501243156,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 73.7842496921856
+        "SHORT_COVERING_CONTINUATION_V1": 145.3781250621578
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 351.23250510061814
+        "SHORT_COVERING_CONTINUATION_V1": -66.96378009952969
       },
-      "equity": 200278.67731178453,
-      "drawdown": 0.0,
-      "n_equity_points": 4
+      "equity": 199786.7439019089,
+      "drawdown": -0.002456244551235068,
+      "n_equity_points": 5
     },
     "P2_DIVERSIFIED": {
       "status": "OK",
-      "n_positions": 10,
-      "gross_exposure": 92650.46296296295,
-      "net_exposure": 92650.46296296295,
-      "realized_pnl": 210.25951545145088,
-      "unrealized_pnl": 142.43932389738137,
-      "total_pnl": 352.6988393488323,
-      "cumulative_fees_usd": 73.7842496921856,
-      "cumulative_funding_usd": -0.23727787210579226,
-      "cumulative_turnover_usd": 147568.49938437119,
+      "n_positions": 6,
+      "gross_exposure": 65694.44444444444,
+      "net_exposure": 65694.44444444444,
+      "realized_pnl": -308.2642555938006,
+      "unrealized_pnl": 242.76680974248507,
+      "total_pnl": -65.49744585131555,
+      "cumulative_fees_usd": 145.3781250621578,
+      "cumulative_funding_usd": -2.3805271776613477,
+      "cumulative_turnover_usd": 290756.2501243156,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 73.7842496921856
+        "SHORT_COVERING_CONTINUATION_V1": 145.3781250621578
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 351.23250510061814
+        "SHORT_COVERING_CONTINUATION_V1": -66.96378009952969
       },
-      "equity": 200278.67731178453,
-      "drawdown": 0.0,
-      "n_equity_points": 4
+      "equity": 199786.7439019089,
+      "drawdown": -0.002456244551235068,
+      "n_equity_points": 5
     },
     "P3_ALL_CANDIDATES": {
       "status": "OK",
-      "n_positions": 10,
-      "gross_exposure": 28295.138888888887,
-      "net_exposure": 28295.138888888887,
-      "realized_pnl": 63.07785463543527,
-      "unrealized_pnl": 41.188835689965764,
-      "total_pnl": 104.26669032540104,
-      "cumulative_fees_usd": 22.38604638839531,
-      "cumulative_funding_usd": -0.07213716726855124,
-      "cumulative_turnover_usd": 44772.0927767906,
+      "n_positions": 6,
+      "gross_exposure": 19847.222222222223,
+      "net_exposure": 19847.222222222223,
+      "realized_pnl": -107.35652069353938,
+      "unrealized_pnl": 72.8022651449672,
+      "total_pnl": -34.554255548572186,
+      "cumulative_fees_usd": 44.17700019145224,
+      "cumulative_funding_usd": -0.7172814033796623,
+      "cumulative_turnover_usd": 88354.00038290444,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 22.38604638839531
+        "SHORT_COVERING_CONTINUATION_V1": 44.17700019145224
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 0.43990027446421975,
-        "SHORT_COVERING_CONTINUATION_V1": 103.82679005093682
+        "SHORT_COVERING_CONTINUATION_V1": -34.994155823036394
       },
-      "equity": 200081.80850676974,
-      "drawdown": 0.0,
-      "n_equity_points": 4
+      "equity": 199920.55146285662,
+      "drawdown": -0.0008059555494654932,
+      "n_equity_points": 5
     }
   }
 }

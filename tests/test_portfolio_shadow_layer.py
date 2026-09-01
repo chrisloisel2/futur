@@ -324,6 +324,113 @@ def test_mtm_restart_reproduces_same_state(tmp_path, monkeypatch):
     assert reloaded.peak_equity == fresh.peak_equity
 
 
+def test_expiry_closes_exactly_once_with_correct_pnl_fee_and_no_double_close_on_restart(tmp_path, monkeypatch):
+    """Item 3 du mandat "PHASE FORWARD TRUTH V2" -- audit expiry/close bout en
+    bout : expiry -> target recalculé à 0 -> delta généré -> exécution shadow
+    à un prix réel -> frais de sortie -> realized PnL -> position fermée,
+    EXACTEMENT une fois, jamais une deuxième fois après un "restart" (relire
+    l'état persistée et rejouer le même step ne doit produire aucun nouveau
+    delta -- l'idempotence déjà garantie pour l'ouverture doit aussi tenir à
+    la fermeture)."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts_signal = _ts("2026-09-01T00:00:00Z")   # horizon 4h -> expiry 04:00Z
+
+    # 1) ouverture : le signal est encore valide
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts_signal))
+    agg_open = aggregate([_intent(frac=1.0, ts=ts_signal)], config, set(), as_of=ts_signal)
+    step("T", config, agg_open, ts_signal)
+    fees_after_open = load_state("T", config.capital_eur).cumulative_fees_usd
+    assert fees_after_open > 0
+
+    # 2) le signal EXPIRE (5h plus tard, > horizon 4h) ET le prix a bougé --
+    # aggregate() avec le MÊME as_of que le step doit exclure l'intent expiré,
+    # target retombe à 0 -> step() doit fermer la position à CE prix, pas au
+    # prix figé à l'ouverture (no-future-price mais aussi no-stale-price).
+    ts_after_expiry = ts_signal + pd.Timedelta(hours=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(115.0, ts=ts_after_expiry))
+    agg_expired = aggregate([_intent(frac=1.0, ts=ts_signal)], config, set(), as_of=ts_after_expiry)
+    assert "BTCUSDT" not in agg_expired.target_notional or agg_expired.target_notional["BTCUSDT"] == 0
+    state_after_close = step("T", config, agg_expired, ts_after_expiry)
+
+    assert all(abs(p["quantity"]) < 1e-9 for p in state_after_close.positions.values())   # fermée
+    realized_after_close = state_after_close.cumulative_realized_pnl
+    assert realized_after_close > 0   # acheté 100, fermé ~115 -> gain réalisé positif
+    fees_after_close = state_after_close.cumulative_fees_usd
+    assert fees_after_close > fees_after_open   # frais de sortie facturés UNE fois, en plus des frais d'entrée
+
+    # 3) "restart" : recharger l'état (simule un redémarrage du process) et
+    # REJOUER le même step (même intents expirés, même as_of, même marché) --
+    # ne doit produire NI un deuxième close, NI un deuxième frais, NI un
+    # deuxième PnL réalisé.
+    reloaded = load_state("T", config.capital_eur)
+    assert reloaded.cumulative_realized_pnl == realized_after_close
+    assert reloaded.cumulative_fees_usd == fees_after_close
+
+    agg_replay = aggregate([_intent(frac=1.0, ts=ts_signal)], config, set(), as_of=ts_after_expiry)
+    state_replayed = step("T", config, agg_replay, ts_after_expiry)
+    assert state_replayed.cumulative_realized_pnl == realized_after_close   # inchangé -- pas de double comptage
+    assert state_replayed.cumulative_fees_usd == fees_after_close           # inchangé -- pas de deuxième frais
+
+
+def test_drawdown_peak_current_and_persistence_after_restart(tmp_path, monkeypatch):
+    """Item 5 du mandat : equity monte -> baisse -> remonte. Vérifie
+    peak_equity, drawdown courant à chaque étape, ET que peak_equity/drawdown
+    survivent à un restart (relecture de l'état) sans être recalculés depuis
+    zéro à partir du marché courant."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
+    s1 = step("T", config, agg, ts0)
+    peak_after_open = s1.peak_equity
+    dd_after_open = s1.equity_curve[-1]["drawdown"]
+    # le pic reste le capital de départ (jamais mis à jour tant que l'équity
+    # ne le dépasse pas) -- ET l'ouverture coûte déjà frais+slippage, donc le
+    # DD au tout premier snapshot est LÉGÈREMENT négatif, pas nul. C'est le
+    # comportement correct (le "pic" avant tout trade = le capital pristine),
+    # pas une erreur d'arrondi à masquer avec pytest.approx(0.0).
+    assert peak_after_open == pytest.approx(config.capital_eur)
+    assert dd_after_open < 0
+    assert dd_after_open > -0.01   # petit -- juste frais+slippage d'une seule ouverture, pas un vrai DD
+
+    # monte : nouveau pic, DD toujours 0
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(120.0, ts=ts1))
+    s2 = step("T", config, agg, ts1)
+    assert s2.peak_equity > peak_after_open
+    assert s2.equity_curve[-1]["drawdown"] == pytest.approx(0.0)
+    peak_at_top = s2.peak_equity
+
+    # baisse : le pic ne redescend JAMAIS, le DD devient négatif
+    ts2 = ts1 + pd.Timedelta(minutes=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(90.0, ts=ts2))
+    s3 = step("T", config, agg, ts2)
+    assert s3.peak_equity == peak_at_top   # inchangé -- le pic ne redescend jamais
+    assert s3.equity_curve[-1]["drawdown"] < 0
+    dd_at_bottom = s3.equity_curve[-1]["drawdown"]
+
+    # remonte partiellement, mais pas au-dessus du pic précédent -> toujours en drawdown, DD moins négatif
+    ts3 = ts2 + pd.Timedelta(minutes=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(105.0, ts=ts3))
+    s4 = step("T", config, agg, ts3)
+    assert s4.peak_equity == peak_at_top
+    assert s4.equity_curve[-1]["drawdown"] < 0
+    assert s4.equity_curve[-1]["drawdown"] > dd_at_bottom   # moins négatif, pas encore récupéré
+
+    # maxDD sur toute la courbe = le pire drawdown observé, pas le dernier
+    max_dd_observed = min(pt["drawdown"] for pt in s4.equity_curve)
+    assert max_dd_observed == pytest.approx(dd_at_bottom)
+
+    # restart : peak_equity et l'historique de la courbe survivent tels quels
+    reloaded = load_state("T", config.capital_eur)
+    assert reloaded.peak_equity == peak_at_top
+    assert len(reloaded.equity_curve) == len(s4.equity_curve)
+    assert reloaded.equity_curve[-1]["drawdown"] == s4.equity_curve[-1]["drawdown"]
+
+
 def test_mtm_no_future_price_used_between_steps(tmp_path, monkeypatch):
     """Le prix utilisé au step ts0 ne doit JAMAIS être celui fourni pour ts1
     -- vérifié en donnant des mocks strictement différents par timestamp et

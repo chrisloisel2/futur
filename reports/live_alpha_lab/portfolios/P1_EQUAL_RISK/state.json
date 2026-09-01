@@ -1,108 +1,72 @@
 {
   "positions": {
-    "HBARUSDT": {
-      "instrument": "HBARUSDT",
-      "quantity": 99063.03920388425,
-      "entry_price": 0.07373474399999999,
-      "realized_pnl": 0.01021768111297048,
-      "fees_paid": 3.6640889688381493,
-      "funding_paid": -0.00753554732214265,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "TIAUSDT": {
-      "instrument": "TIAUSDT",
-      "quantity": 21825.007093127304,
-      "entry_price": 0.33736746,
-      "realized_pnl": 0.20476248376714126,
-      "fees_paid": 3.7274676663856003,
-      "funding_paid": -0.013785035144146088,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "APTUSDT": {
-      "instrument": "APTUSDT",
-      "quantity": 13073.727913702607,
-      "entry_price": 0.5344488683999999,
-      "realized_pnl": 0.4199078670017421,
-      "fees_paid": 3.556611242642907,
-      "funding_paid": -0.005416306037366501,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "JUPUSDT": {
-      "instrument": "JUPUSDT",
-      "quantity": 133481.64627363737,
-      "entry_price": 0.22544357173060786,
-      "realized_pnl": 0.0,
-      "fees_paid": 15.046289548205198,
-      "funding_paid": -0.056769962709354166,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "TAOUSDT": {
-      "instrument": "TAOUSDT",
-      "quantity": 27.317566511295507,
-      "entry_price": 231.83636319571337,
-      "realized_pnl": 0.016764612833147386,
-      "fees_paid": 3.1831286083844743,
-      "funding_paid": -0.012279382442134917,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "SUIUSDT": {
-      "instrument": "SUIUSDT",
-      "quantity": 9344.64177292046,
-      "entry_price": 0.7303011959249667,
-      "realized_pnl": 0.029224172163660425,
-      "fees_paid": 3.430145255019087,
-      "funding_paid": -0.0021226179997633943,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "RUNEUSDT": {
-      "instrument": "RUNEUSDT",
-      "quantity": 14808.753457399667,
-      "entry_price": 0.47939586,
-      "realized_pnl": 0.09664070511181821,
-      "fees_paid": 3.5814763262890668,
-      "funding_paid": -0.027859594954668207,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "ETHUSDT": {
-      "instrument": "ETHUSDT",
-      "quantity": 2.6820996471265697,
-      "entry_price": 2471.3641608845874,
-      "realized_pnl": 0.0017405743519594908,
-      "fees_paid": 3.319532457755541,
-      "funding_paid": -0.016172533313174697,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
-    "DOTUSDT": {
-      "instrument": "DOTUSDT",
-      "quantity": 8033.383961383017,
-      "entry_price": 0.840088074018,
-      "realized_pnl": 0.5118984131004609,
-      "fees_paid": 3.44437397477943,
-      "funding_paid": -0.026638476344642167,
-      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
-    },
     "ENAUSDT": {
       "instrument": "ENAUSDT",
-      "quantity": 46949.77610682379,
-      "entry_price": 0.15179440611545528,
+      "quantity": 47632.17941862358,
+      "entry_price": 0.15187249461970512,
       "realized_pnl": 0.0,
-      "fees_paid": 3.563356690694455,
-      "funding_paid": -0.013251272566129554,
+      "fees_paid": 3.6170089562398697,
+      "funding_paid": -0.38767256886242585,
+      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
+    },
+    "FILUSDT": {
+      "instrument": "FILUSDT",
+      "quantity": 10201.011121976555,
+      "entry_price": 0.709267245084,
+      "realized_pnl": 0.0,
+      "fees_paid": 3.6176215277777772,
+      "funding_paid": -0.29427083333333326,
+      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
+    },
+    "BCHUSDT": {
+      "instrument": "BCHUSDT",
+      "quantity": 29.481837319315115,
+      "entry_price": 247.769544,
+      "realized_pnl": 0.0,
+      "fees_paid": 3.6523506944444444,
+      "funding_paid": -0.7303240740740741,
+      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
+    },
+    "SEIUSDT": {
+      "instrument": "SEIUSDT",
+      "quantity": 664405.914807216,
+      "entry_price": 0.045162150623999996,
+      "realized_pnl": 0.0,
+      "fees_paid": 15.003,
+      "funding_paid": -0.46859999999999996,
+      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
+    },
+    "AAVEUSDT": {
+      "instrument": "AAVEUSDT",
+      "quantity": 49.12025799192035,
+      "entry_price": 127.73554200000001,
+      "realized_pnl": 0.0,
+      "fees_paid": 3.1372013888888888,
+      "funding_paid": -0.10212685185185183,
+      "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
+    },
+    "STXUSDT": {
+      "instrument": "STXUSDT",
+      "quantity": 29313.647773814235,
+      "entry_price": 0.25235046,
+      "realized_pnl": 0.0,
+      "fees_paid": 3.698656249999999,
+      "funding_paid": -0.17350624999999997,
       "owner_alpha": "SHORT_COVERING_CONTINUATION_V1"
     }
   },
   "cash": 200000.0,
   "peak_equity": 200278.6763618007,
-  "cumulative_fees_usd": 73.78425039601335,
-  "cumulative_turnover_usd": 147568.50079202672,
-  "cumulative_funding_usd": -0.23681949660633395,
-  "cumulative_realized_pnl": 210.25951545145088,
+  "cumulative_fees_usd": 145.33808928100223,
+  "cumulative_turnover_usd": 290676.1785620045,
+  "cumulative_funding_usd": -2.3800688021618894,
+  "cumulative_realized_pnl": -388.33863321593105,
   "cumulative_cost_by_alpha": {
-    "SHORT_COVERING_CONTINUATION_V1": 73.78425039601335
+    "SHORT_COVERING_CONTINUATION_V1": 145.33808928100223
   },
   "cumulative_pnl_by_alpha": {
     "UNATTRIBUTED": 1.4663342482140727,
-    "SHORT_COVERING_CONTINUATION_V1": 208.7931812032368
+    "SHORT_COVERING_CONTINUATION_V1": -389.8049674641452
   },
   "equity_curve": [
     {
@@ -176,8 +140,27 @@
       "net_exposure": 92650.46296296295,
       "n_positions": 10,
       "skipped_no_mark": []
+    },
+    {
+      "ts": "2026-09-01T10:40:17.488912+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": -388.33863321593105,
+      "unrealized_pnl": 242.76680974248507,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 1.4663342482140727,
+        "SHORT_COVERING_CONTINUATION_V1": -147.03815772166013
+      },
+      "fees": 145.33808928100223,
+      "funding": -2.3800688021618894,
+      "equity": 199706.7100184434,
+      "drawdown": -0.0028558524239696717,
+      "gross_exposure": 65694.44444444444,
+      "net_exposure": 65694.44444444444,
+      "n_positions": 6,
+      "skipped_no_mark": []
     }
   ],
-  "last_step_ts": "2026-09-01T00:56:10.780382+00:00",
+  "last_step_ts": "2026-09-01T10:40:17.488912+00:00",
   "initialized": true
 }
