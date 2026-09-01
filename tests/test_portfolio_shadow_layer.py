@@ -879,3 +879,49 @@ def test_deterministic_replay_identical_hash_across_two_independent_runs(tmp_pat
 
     assert canonical_hash(state_a) == canonical_hash(state_b)
     assert len(state_a.orders) == len(state_b.orders) > 0
+
+
+# ── P1.3 (phase CLOSE THE EXECUTION LOOP) : CONTROL vs VOL_OVERLAY,
+# identité bit-à-bit quand multiplier=1 -- débloqué par le root-cause P0.1
+# (get_mark() est maintenant réellement pur en (instrument, as_of)) ──────
+
+def test_control_vs_vol_overlay_bit_identical_when_multiplier_is_one(tmp_path, monkeypatch):
+    """P1_VOL_OVERLAY ne diffère de P1_CONTROL QUE par apply_vol_overlay
+    (True vs False) -- `frac *= vol_overlay_multiplier` dans aggregate() est
+    un no-op quand vol_overlay_multiplier=1.0, donc les deux DOIVENT
+    produire des trades et une équity identiques au bit près dans ce cas.
+    Utilise les VRAIES configs de production (portfolio_config.py), pas des
+    configs de test simplifiées -- c'est exactement le scénario qui avait
+    divergé de ~80€ avant le fix P0.1 (get_mark() non-pur pour les as_of
+    historiques -- cf marks.py::eligible_files_for_as_of)."""
+    from src.institutional.live_alpha_lab.portfolio_config import P1_CONTROL, P1_VOL_OVERLAY
+
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    ts1 = ts0 + pd.Timedelta(minutes=5)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+
+    intents = [_intent(instrument="BTCUSDT", frac=0.6, ts=ts0),
+              _intent(instrument="ETHUSDT", frac=0.4, ts=ts0)]
+
+    agg_control = aggregate(intents, P1_CONTROL, set(), vol_overlay_multiplier=1.0, as_of=ts0)
+    state_control = step("P1_CONTROL", P1_CONTROL, agg_control, ts0)
+    agg_overlay = aggregate(intents, P1_VOL_OVERLAY, set(), vol_overlay_multiplier=1.0, as_of=ts0)
+    state_overlay = step("P1_VOL_OVERLAY", P1_VOL_OVERLAY, agg_overlay, ts0)
+
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(103.0, ts=ts1))
+    agg_control2 = aggregate(intents, P1_CONTROL, set(), vol_overlay_multiplier=1.0, as_of=ts1)
+    state_control = step("P1_CONTROL", P1_CONTROL, agg_control2, ts1)
+    agg_overlay2 = aggregate(intents, P1_VOL_OVERLAY, set(), vol_overlay_multiplier=1.0, as_of=ts1)
+    state_overlay = step("P1_VOL_OVERLAY", P1_VOL_OVERLAY, agg_overlay2, ts1)
+
+    for field in ("n_positions", "gross_exposure", "net_exposure", "realized_pnl",
+                  "unrealized_pnl", "fees", "funding", "equity", "drawdown", "status"):
+        assert state_control.equity_curve[-1][field] == state_overlay.equity_curve[-1][field], (
+            f"{field}: CONTROL={state_control.equity_curve[-1][field]} "
+            f"VOL_OVERLAY={state_overlay.equity_curve[-1][field]}"
+        )
+    assert state_control.positions.keys() == state_overlay.positions.keys()
+    for instr in state_control.positions:
+        assert state_control.positions[instr]["quantity"] == state_overlay.positions[instr]["quantity"]
+        assert state_control.positions[instr]["entry_price"] == state_overlay.positions[instr]["entry_price"]
