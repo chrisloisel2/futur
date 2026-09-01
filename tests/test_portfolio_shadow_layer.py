@@ -925,3 +925,64 @@ def test_control_vs_vol_overlay_bit_identical_when_multiplier_is_one(tmp_path, m
     for instr in state_control.positions:
         assert state_control.positions[instr]["quantity"] == state_overlay.positions[instr]["quantity"]
         assert state_control.positions[instr]["entry_price"] == state_overlay.positions[instr]["entry_price"]
+
+
+# ── P0.3 (phase OPERATIONAL HARDENING) : écriture atomique de state.json --
+# un crash pendant l'écriture ne doit JAMAIS laisser un fichier tronqué ──
+
+def test_save_state_is_atomic_crash_during_write_leaves_old_state_intact(tmp_path, monkeypatch):
+    """Simule un crash PENDANT l'écriture (exception levée après le write du
+    .tmp mais avant le rename) -- l'ancien state.json doit rester intact et
+    lisible, jamais tronqué. Avant le fix (écriture directe sur state.json),
+    ce même scénario aurait corrompu le fichier officiel."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    state0 = portfolio_mod.PortfolioState(cash=100_000.0, peak_equity=100_000.0, initialized=True)
+    portfolio_mod.save_state("T", state0)
+    original_bytes = portfolio_mod.state_path("T").read_bytes()
+
+    real_replace = Path.replace
+
+    def crash_before_replace(self, target):
+        raise OSError("simulated crash before atomic rename")
+
+    monkeypatch.setattr(Path, "replace", crash_before_replace)
+    state1 = portfolio_mod.PortfolioState(cash=999_999.0, peak_equity=999_999.0, initialized=True)
+    with pytest.raises(OSError):
+        portfolio_mod.save_state("T", state1)
+    monkeypatch.setattr(Path, "replace", real_replace)
+
+    # l'ancien fichier officiel est INTACT (le .tmp a été écrit et a "crashé"
+    # avant de remplacer state.json -- jamais un state.json à moitié écrit)
+    assert portfolio_mod.state_path("T").read_bytes() == original_bytes
+    reloaded = portfolio_mod.load_state("T", 100_000.0)
+    assert reloaded.cash == 100_000.0   # pas 999_999.0 -- le crash n'a jamais atteint le fichier officiel
+
+
+def test_save_state_no_tmp_file_left_behind_after_normal_completion(tmp_path, monkeypatch):
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    state = portfolio_mod.PortfolioState(cash=100_000.0, peak_equity=100_000.0, initialized=True)
+    portfolio_mod.save_state("T", state)
+    p = portfolio_mod.state_path("T")
+    assert p.exists()
+    assert not p.with_suffix(p.suffix + ".tmp").exists()
+
+
+def test_load_state_recovers_from_pre_existing_corrupt_file_without_crashing(tmp_path, monkeypatch, capsys):
+    """Si un ANCIEN fichier corrompu existe déjà (ex: laissé par un run avant
+    le fix d'atomicité, ou une panne disque), load_state() ne doit JAMAIS
+    lever une exception non gérée ni bloquer le pipeline en permanence --
+    il archive (ne supprime jamais) et repart proprement, en loguant
+    bruyamment (pas un reset silencieux d'un historique économique réel)."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    p = portfolio_mod.state_path("T")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text('{"positions": {"BTCUSDT": {"quantity": 1.0')   # JSON tronqué délibérément
+
+    state = portfolio_mod.load_state("T", 100_000.0)
+    assert state.cash == 100_000.0
+    assert state.positions == {}
+    assert not p.exists()   # le fichier corrompu a été déplacé, pas laissé en place ni supprimé
+    archives = list(p.parent.glob("state_corrupt_archive_*.json"))
+    assert len(archives) == 1
+    assert archives[0].read_text().startswith('{"positions"')   # contenu corrompu préservé tel quel
+    assert "ALERTE" in capsys.readouterr().out   # jamais un reset silencieux

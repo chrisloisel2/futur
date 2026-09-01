@@ -292,7 +292,22 @@ def load_state(portfolio_name: str, initial_cash: float) -> PortfolioState:
     p = state_path(portfolio_name)
     if not p.exists():
         return PortfolioState(cash=initial_cash, peak_equity=initial_cash, initialized=True)
-    d = json.loads(p.read_text())
+    try:
+        d = json.loads(p.read_text())
+    except json.JSONDecodeError as e:
+        # item P0.3 (phase OPERATIONAL HARDENING) : fichier corrompu -- ne
+        # devrait plus jamais arriver après le passage à une écriture
+        # atomique (save_state ci-dessous), mais un ANCIEN fichier pré-fix
+        # ou une panne disque pourrait encore en laisser un. Ne JAMAIS
+        # planter silencieusement le pipeline dessus : archiver (jamais
+        # supprimer) et repartir propre, en loguant BRUYAMMENT -- perdre
+        # l'historique d'un portefeuille est un événement économique
+        # sérieux, pas un détail à masquer.
+        print(f"[portfolio] ALERTE state.json corrompu pour {portfolio_name} ({e}) "
+             f"-- archivé, redémarrage propre à partir de maintenant", flush=True)
+        archive = p.parent / f"state_corrupt_archive_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}.json"
+        p.rename(archive)
+        return PortfolioState(cash=initial_cash, peak_equity=initial_cash, initialized=True)
     try:
         return PortfolioState(**d)
     except TypeError:
@@ -305,16 +320,29 @@ def load_state(portfolio_name: str, initial_cash: float) -> PortfolioState:
 
 
 def save_state(portfolio_name: str, state: PortfolioState) -> None:
+    """item P0.3 (phase OPERATIONAL HARDENING) : écrit dans un fichier .tmp
+    PUIS renomme (os.replace, atomique sur POSIX) plutôt que d'écrire
+    directement sur state.json. Un kill -9 (ou crash machine) pendant
+    l'écriture directe aurait pu laisser un state.json tronqué -- JSON
+    invalide, jamais rechargeable par load_state() au redémarrage. Avec le
+    fichier temporaire, un crash pendant l'écriture laisse SOIT l'ancien
+    state.json intact (si le crash arrive avant le rename), SOIT le nouveau
+    complet (si après) -- jamais un état hybride/tronqué."""
     p = state_path(portfolio_name)
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(asdict(state), indent=2, default=str))
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(json.dumps(asdict(state), indent=2, default=str))
+    tmp.replace(p)
 
 
 def _append_intent_ledger(portfolio_name: str, as_of: pd.Timestamp,
                           raw_by_instrument: Dict[str, List[dict]],
                           target: Dict[str, float], executed_delta: Dict[str, float]) -> None:
     rows = []
-    for instr in set(raw_by_instrument) | set(target) | set(executed_delta):
+    # item P1.1 : même correctif que step() -- itérer un `set` directement
+    # dépend du hash-seed du processus, trié explicitement pour un ordre de
+    # lignes reproductible entre deux runs séparés.
+    for instr in sorted(set(raw_by_instrument) | set(target) | set(executed_delta)):
         rows.append({
             "ts": as_of.isoformat(), "instrument": instr,
             "alpha_intents": json.dumps(raw_by_instrument.get(instr, [])),
@@ -329,7 +357,12 @@ def _append_intent_ledger(portfolio_name: str, as_of: pd.Timestamp,
     if p.exists():
         old = pd.read_parquet(p)
         df = pd.concat([old, df], ignore_index=True)
-    df.to_parquet(p, index=False)
+    # item P0.3 (atomicité restart) : même raisonnement que save_state() --
+    # écrire dans un .tmp puis renommer, jamais un parquet tronqué illisible
+    # si le processus est tué pendant l'écriture.
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    df.to_parquet(tmp, index=False)
+    tmp.replace(p)
 
 
 def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
