@@ -1,0 +1,56 @@
+{
+  "positions": {
+    "VETUSDT": 7048.61111111111,
+    "APTUSDT": 7048.61111111111,
+    "TIAUSDT": 7407.407407407406,
+    "JUPUSDT": 30000.0,
+    "PYTHUSDT": 7442.129629629629,
+    "DOTUSDT": 6817.129629629629,
+    "ETHUSDT": 6631.944444444444,
+    "TAOUSDT": 6342.592592592591,
+    "FETUSDT": 6331.018518518517,
+    "SUIUSDT": 6840.2777777777765,
+    "AAVEUSDT": 6331.018518518517,
+    "RUNEUSDT": 7129.629629629629,
+    "HBARUSDT": 7314.814814814814
+  },
+  "cumulative_fees_usd": 56.34259259259259,
+  "cumulative_slippage_usd": 22.537037037037035,
+  "cumulative_turnover_usd": 112685.18518518518,
+  "cumulative_cost_by_alpha": {
+    "SHORT_COVERING_CONTINUATION_V1": 78.87962962962963
+  },
+  "equity_curve": [
+    {
+      "ts": "2026-08-31T22:53:50.871718+00:00",
+      "equity": 199921.12037037036,
+      "gross_exposure": 112685.18518518518,
+      "net_exposure": 112685.18518518518,
+      "n_positions": 13,
+      "cumulative_fees_usd": 56.34259259259259,
+      "cumulative_slippage_usd": 22.537037037037035,
+      "cumulative_turnover_usd": 112685.18518518518
+    },
+    {
+      "ts": "2026-08-31T23:37:17.722623+00:00",
+      "equity": 199921.12037037036,
+      "gross_exposure": 112685.18518518518,
+      "net_exposure": 112685.18518518518,
+      "n_positions": 13,
+      "cumulative_fees_usd": 56.34259259259259,
+      "cumulative_slippage_usd": 22.537037037037035,
+      "cumulative_turnover_usd": 112685.18518518518
+    },
+    {
+      "ts": "2026-08-31T23:42:06.872869+00:00",
+      "equity": 199921.12037037036,
+      "gross_exposure": 112685.18518518518,
+      "net_exposure": 112685.18518518518,
+      "n_positions": 13,
+      "cumulative_fees_usd": 56.34259259259259,
+      "cumulative_slippage_usd": 22.537037037037035,
+      "cumulative_turnover_usd": 112685.18518518518
+    }
+  ],
+  "last_processed_intent_key": null
+}

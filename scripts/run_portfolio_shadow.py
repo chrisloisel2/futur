@@ -3,16 +3,17 @@
 scripts/run_portfolio_shadow.py
 ─────────────────────────────────────────────────────────────────────────────
 PORTFOLIO_SHADOW_LAYER runner — agrège les intents FORWARD_LIVE (jamais
-REPLAY, section 1/2 de la mission "PHASE PORTFOLIO FORWARD") de tous les
-alphas position-generating, applique le gate WHALE_LSR_SCREEN_V1, calcule
-5 portefeuilles (P1_EQUAL_RISK, P1_CONTROL, P1_VOL_OVERLAY, P2_DIVERSIFIED,
-P3_ALL_CANDIDATES), et persiste l'état (positions, équity, coûts) de chacun.
+REPLAY) de tous les alphas position-generating, applique le gate
+WHALE_LSR_SCREEN_V1, calcule 5 portefeuilles (P1_EQUAL_RISK, P1_CONTROL,
+P1_VOL_OVERLAY, P2_DIVERSIFIED, P3_ALL_CANDIDATES) avec un vrai
+mark-to-market (positions, PnL réalisé/non-réalisé, funding), et persiste
+l'état + l'intent_ledger (item 6, traçabilité collision d'alphas) de chacun.
 
-AUCUN ordre réel. AUCUN fill simulé au-delà du modèle de coût notional
-(voir portfolio.py::shadow_execute).
+AUCUN ordre réel.
 """
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,7 @@ from src.institutional.live_alpha_lab.intents import build_intents
 from src.institutional.live_alpha_lab.overlay import vol_overlay_multiplier
 from src.institutional.live_alpha_lab.portfolio import aggregate, step
 from src.institutional.live_alpha_lab.portfolio_config import ALL_PORTFOLIOS
+from src.institutional.live_alpha_lab.provenance import spec_provenance
 
 REGISTRY = ROOT / "configs" / "live_alpha_registry.yaml"
 LAB_DIR = ROOT / "reports" / "live_alpha_lab"
@@ -39,8 +41,7 @@ def load_forward_only(alpha_id: str) -> pd.DataFrame:
         return pd.DataFrame()
     df = pd.read_parquet(p)
     if "provenance" not in df.columns:
-        # jamais traiter un ledger non-tagué comme forward -- fail closed
-        return pd.DataFrame()
+        return pd.DataFrame()   # jamais traiter un ledger non-tagué comme forward -- fail closed
     return df[df["provenance"] == "FORWARD_LIVE"].copy()
 
 
@@ -72,26 +73,32 @@ def main() -> int:
 
     summary = {}
     for name, config in ALL_PORTFOLIOS.items():
-        target, owner = aggregate(all_intents, config, screened,
-                                  vol_overlay_multiplier=overlay_mult)
-        state = step(name, config, target, as_of, owner_by_instrument=owner)
-        gross = sum(abs(v) for v in state.positions.values())
-        net = sum(state.positions.values())
-        print(f"[portfolio] {name}: {len(state.positions)} positions, "
-              f"gross={gross:,.2f} net={net:,.2f} "
-              f"cum_fees={state.cumulative_fees_usd:,.2f} "
-              f"cum_turnover={state.cumulative_turnover_usd:,.2f}", flush=True)
+        agg = aggregate(all_intents, config, screened, vol_overlay_multiplier=overlay_mult)
+        state = step(name, config, agg, as_of)
+        last = state.equity_curve[-1] if state.equity_curve else {}
+        print(f"[portfolio] {name}: {last.get('n_positions', 0)} positions "
+              f"status={last.get('status')} "
+              f"gross={last.get('gross_exposure', 0):,.2f} net={last.get('net_exposure', 0):,.2f} "
+              f"realized={last.get('realized_pnl', 0):,.2f} unrealized={last.get('unrealized_pnl', 0):,.2f} "
+              f"fees={last.get('fees', 0):,.2f} funding={last.get('funding', 0):,.2f} "
+              f"equity={last.get('equity', config.capital_eur):,.2f} "
+              f"dd={last.get('drawdown', 0):.4%}", flush=True)
+        if last.get("skipped_no_mark"):
+            print(f"[portfolio] {name}: AUCUN mark dispo pour {last['skipped_no_mark']} -- non tradé ce step", flush=True)
         summary[name] = {
-            "n_positions": len(state.positions), "gross_exposure": gross, "net_exposure": net,
+            "status": last.get("status"), "n_positions": last.get("n_positions", 0),
+            "gross_exposure": last.get("gross_exposure", 0), "net_exposure": last.get("net_exposure", 0),
+            "realized_pnl": last.get("realized_pnl", 0), "unrealized_pnl": last.get("unrealized_pnl", 0),
+            "total_pnl": last.get("realized_pnl", 0) + last.get("unrealized_pnl", 0),
             "cumulative_fees_usd": state.cumulative_fees_usd,
-            "cumulative_slippage_usd": state.cumulative_slippage_usd,
+            "cumulative_funding_usd": state.cumulative_funding_usd,
             "cumulative_turnover_usd": state.cumulative_turnover_usd,
             "cumulative_cost_by_alpha": state.cumulative_cost_by_alpha,
-            "equity": state.equity_curve[-1]["equity"] if state.equity_curve else config.capital_eur,
+            "equity": last.get("equity", config.capital_eur),
+            "drawdown": last.get("drawdown", 0),
             "n_equity_points": len(state.equity_curve),
         }
 
-    import json
     (LAB_DIR / "portfolios" / "SUMMARY.json").write_text(json.dumps({
         "generated_at": as_of.isoformat(), "n_forward_intents_total": len(all_intents),
         "screened_symbols": sorted(screened), "vol_overlay_multiplier": overlay_mult,

@@ -39,7 +39,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.institutional.live_alpha_lab.provenance import git_head_sha
+from src.institutional.live_alpha_lab.provenance import spec_provenance
 
 from src.institutional.engines.whale_lsr_screen.screen import (
     classify_screen, compute_rolling_zscore,
@@ -144,7 +144,8 @@ def main() -> int:
     dec["universe_hash"] = uhash
     dec["decided_at"] = now
 
-    dec["code_commit_sha"] = git_head_sha()
+    for _k, _v in spec_provenance(ALPHA_ID).items():
+        dec[_k] = _v
     dec["tier"] = "shadow"   # Mode A pur — pas de fill simulé, jamais "book"
 
     # idempotence : ne pas dupliquer une clé (timestamp, symbol) déjà décidée.

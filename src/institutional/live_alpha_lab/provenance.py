@@ -20,10 +20,13 @@ Ne réécrit JAMAIS une ligne existante autrement qu'en lui ajoutant la colonne
 """
 from __future__ import annotations
 
+import hashlib
 import subprocess
 from pathlib import Path
+from typing import Dict
 
 import pandas as pd
+import yaml
 
 REPLAY = "REPLAY"
 FORWARD_LIVE = "FORWARD_LIVE"
@@ -36,33 +39,37 @@ PRE_COMMIT_DISCIPLINE = "PRE_COMMIT_DISCIPLINE_2026-08-31"
 _ROOT = Path(__file__).resolve().parents[3]
 
 
-def git_head_sha(dirty_suffix: bool = True) -> str:
+def git_head_sha() -> str:
     """SHA du commit HEAD au moment de l'écriture d'une décision -- pour que
     le code ayant produit un signal live soit toujours reconstructible
     (instruction utilisateur, correction de discipline 2026-08-31 point 10).
 
-    Si l'arbre de travail est sale (modifications non commitées), suffixe
-    '-dirty' : un SHA seul ne suffirait pas à reconstruire exactement le code
-    qui a tourné dans ce cas -- le dire explicitement plutôt que mentir par
-    omission."""
+    ⚠ Correction 2026-08-31 (phase ECONOMIC TRUTH) : ne suffixe PLUS
+    '-dirty' au SHA (c'était une provenance SILENCIEUSE -- un consommateur
+    lisant juste `code_commit_sha` ne verrait rien d'anormal). L'état de
+    l'arbre de travail est maintenant un champ EXPLICITE séparé, voir
+    `working_tree_dirty()`. Toujours enregistrer LES DEUX."""
     try:
-        sha = subprocess.run(
+        return subprocess.run(
             ["git", "rev-parse", "HEAD"], cwd=_ROOT, capture_output=True,
             text=True, timeout=5, check=True,
         ).stdout.strip()
     except Exception:
         return "UNKNOWN_GIT_SHA"
-    if dirty_suffix:
-        try:
-            dirty = subprocess.run(
-                ["git", "status", "--porcelain"], cwd=_ROOT, capture_output=True,
-                text=True, timeout=5, check=True,
-            ).stdout.strip()
-            if dirty:
-                sha += "-dirty"
-        except Exception:
-            pass
-    return sha
+
+
+def working_tree_dirty() -> bool:
+    """True si l'arbre de travail a des modifications non commitées (n'importe
+    où dans le repo, pas seulement dans les fichiers Live Alpha Lab) --
+    champ explicite, jamais encodé en silence dans code_commit_sha."""
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=_ROOT, capture_output=True,
+            text=True, timeout=5, check=True,
+        ).stdout.strip()
+        return bool(out)
+    except Exception:
+        return True   # fail closed : incapable de vérifier -> traiter comme sale
 
 
 def tag_provenance(df: pd.DataFrame, time_col: str, freeze_timestamp) -> pd.DataFrame:
@@ -80,6 +87,48 @@ def tag_provenance(df: pd.DataFrame, time_col: str, freeze_timestamp) -> pd.Data
     out["provenance"] = pd.Series(REPLAY, index=out.index, dtype="object")
     out.loc[t > freeze, "provenance"] = FORWARD_LIVE
     return out
+
+
+_REGISTRY_PATH = _ROOT / "configs" / "live_alpha_registry.yaml"
+
+
+def config_hash(registry_path: Path = _REGISTRY_PATH) -> str:
+    """sha256 du FICHIER REGISTRE ENTIER -- détecte tout changement, même à
+    un AUTRE alpha (utile pour repérer un run pris pendant une édition
+    concurrente du fichier, comme observé plusieurs fois aujourd'hui avec
+    les workers parallèles)."""
+    if not registry_path.exists():
+        return "REGISTRY_NOT_FOUND"
+    return hashlib.sha256(registry_path.read_bytes()).hexdigest()[:16]
+
+
+def alpha_spec_hash(alpha_id: str, registry_path: Path = _REGISTRY_PATH) -> str:
+    """sha256 de l'entrée d'UN alpha spécifique dans le registre (dict trié,
+    donc stable même si l'ordre des clés YAML change) -- détecte un
+    changement de SA propre spec sans être sensible aux autres entrées."""
+    if not registry_path.exists():
+        return "REGISTRY_NOT_FOUND"
+    reg = yaml.safe_load(registry_path.read_text())
+    entries = [a for a in reg.get("alphas", []) if a.get("alpha_id") == alpha_id]
+    if not entries:
+        return "ALPHA_NOT_IN_REGISTRY"
+    import json
+    canonical = json.dumps(entries[0], sort_keys=True, default=str)
+    return hashlib.sha256(canonical.encode()).hexdigest()[:16]
+
+
+def spec_provenance(alpha_id: str) -> Dict[str, object]:
+    """Bundle des 4 champs de provenance exigés sur CHAQUE décision
+    FORWARD_LIVE (instruction utilisateur, phase ECONOMIC TRUTH) :
+    code_commit_sha, working_tree_dirty, config_hash, alpha_spec_hash.
+    universe_hash reste calculé séparément par chaque runner (dépend de sa
+    propre notion d'univers, pas générique)."""
+    return {
+        "code_commit_sha": git_head_sha(),
+        "working_tree_dirty": working_tree_dirty(),
+        "config_hash": config_hash(),
+        "alpha_spec_hash": alpha_spec_hash(alpha_id),
+    }
 
 
 def provenance_counts(df: pd.DataFrame) -> dict:
