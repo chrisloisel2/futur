@@ -1131,3 +1131,68 @@ def test_multi_alpha_partial_fill_applies_to_aggregated_target_not_per_alpha(tmp
     assert len(state.orders) == 1
     assert state.orders[0]["status"] == "PARTIALLY_FILLED"
     assert list(state.positions.values())[0]["quantity"] == pytest.approx(10_000.0)
+
+
+# ── P1 (phase OPERATIONAL HARDENING) : family risk budgets ───────────────
+
+def test_three_correlated_liquidation_alphas_do_not_multiply_family_leverage(tmp_path, monkeypatch):
+    """3 alphas de la MÊME famille de risque (LIQUIDATION_FAMILY), actifs
+    simultanément sur 3 instruments DIFFÉRENTS (donc pas de dedup entre eux
+    -- ils ne se font pas concurrence sur le même instrument) : le budget
+    total consommé par la famille doit rester celui du bucket, PAS 3x."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_FAMILY_BUDGET", capital_eur=100_000,
+        family_budget_fraction={"LIQUIDATION_FAMILY": 0.30},   # 30% du capital pour TOUTE la famille
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts0))
+
+    intents = [
+        _bucket_intent("LIQ_A7", "LIQUIDATION_FAMILY", "FAM_LIQ_A7", "BTCUSDT", "LONG", ts0),
+        _bucket_intent("LIQ_REPEAT", "LIQUIDATION_FAMILY", "FAM_LIQ_REPEAT", "ETHUSDT", "LONG", ts0),
+        _bucket_intent("LIQ_FAR_LOW", "LIQUIDATION_FAMILY", "FAM_LIQ_FAR_LOW", "SOLUSDT", "LONG", ts0),
+    ]
+    agg = aggregate(intents, config, set(), as_of=ts0)
+    total_gross = sum(abs(v) for v in agg.target_notional.values())
+    expected_family_budget = config.capital_eur * 0.30   # 30_000, PAS 90_000 (3x)
+    assert total_gross == pytest.approx(expected_family_budget)
+    # chaque instrument reçoit sa part ÉGALE du budget partagé (3 alphas actifs)
+    for instr in ("BTCUSDT", "ETHUSDT", "SOLUSDT"):
+        assert agg.target_notional[instr] == pytest.approx(expected_family_budget / 3)
+
+
+def test_family_budget_shrinks_as_more_correlated_alphas_join_grows_back_as_they_leave(tmp_path, monkeypatch):
+    """Le budget par-alpha diminue mécaniquement quand plus d'alphas
+    corrélés sont actifs simultanément (partage, pas addition) -- et
+    remonte quand l'un d'eux expire, sans jamais dépasser le budget total
+    de la famille à aucun moment."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_FAMILY_SHRINK", capital_eur=100_000,
+        family_budget_fraction={"LIQUIDATION_FAMILY": 0.30},
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts0))
+    family_budget = config.capital_eur * 0.30
+
+    # 1 seul alpha actif -> reçoit tout le budget famille
+    one = [_bucket_intent("LIQ_A", "LIQUIDATION_FAMILY", "FAM_A", "BTCUSDT", "LONG", ts0)]
+    agg1 = aggregate(one, config, set(), as_of=ts0)
+    assert agg1.target_notional["BTCUSDT"] == pytest.approx(family_budget)
+
+    # 2 alphas actifs -> chacun la moitié, total = budget famille (pas 2x)
+    two = one + [_bucket_intent("LIQ_B", "LIQUIDATION_FAMILY", "FAM_B", "ETHUSDT", "LONG", ts0)]
+    agg2 = aggregate(two, config, set(), as_of=ts0)
+    total_two = sum(abs(v) for v in agg2.target_notional.values())
+    assert total_two == pytest.approx(family_budget)
+    assert agg2.target_notional["BTCUSDT"] == pytest.approx(family_budget / 2)
+
+    # 3 alphas actifs -> chacun un tiers, total TOUJOURS = budget famille (pas 3x)
+    three = two + [_bucket_intent("LIQ_C", "LIQUIDATION_FAMILY", "FAM_C", "SOLUSDT", "LONG", ts0)]
+    agg3 = aggregate(three, config, set(), as_of=ts0)
+    total_three = sum(abs(v) for v in agg3.target_notional.values())
+    assert total_three == pytest.approx(family_budget)
+    assert agg3.target_notional["BTCUSDT"] == pytest.approx(family_budget / 3)
