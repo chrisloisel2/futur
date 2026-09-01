@@ -801,8 +801,8 @@ alphas:
     model_family: RULE_RANKING
     model_hash: null           # pas de modèle ML, règle de ranking pure -> pas d'artefact à hasher
     training_window: "N/A (signal live pur, pas de fit) -- historique de backfill limité par la profondeur réelle des klines Binance USDM par symbole (majors depuis ~2019-2020, alts plus récents depuis leur listing, une bonne partie du candidat 2026 très récemment listée)"
-    freeze_timestamp: "2026-08-31T23:08:55+00:00"
-    entry: "top ceil(0.20 * n_eligible) symboles par tret_7d parmi le cohort liquide (liquidity_usd_30d>=2e6, SEUIL PROPRE À V2, voir freeze_spec.json) à chaque rebalance lundi -> LONG"
+    freeze_timestamp: "2026-09-01T10:24:15+00:00"   # RÉINITIALISÉ 2026-09-01 après correctif PIT (voir notes) -- était 2026-08-31T23:08:55Z (version pré-correctif, biais de survivance)
+    entry: "top ceil(0.20 * n_eligible) symboles par tret_7d parmi le cohort PIT-éligible ce jour-là (existait, âge>=30j, historique de prix réel disponible, liquidity_usd_30d>=2e6 -- toutes causales, voir universe.py::build_pit_eligibility_log) -> LONG"
     exit: "Mode A SIGNAL SHADOW pur : AUCUN exit simulé, AUCUN fill. fwd_7d sert uniquement de fenêtre de non-chevauchement pour le rebalance hebdomadaire (voir horizon)."
     horizon: fwd_7d
     execution_style: TAKER
@@ -810,7 +810,7 @@ alphas:
     risk_bucket: CROSS_SECTIONAL_FAMILY
     expected_capacity: "inconnu sur cet univers dynamique -- univers candidat ~10x plus large que V1 (523 vs 49) mais seuil de liquidité 2x plus strict ($2M vs $1M) ; nombre réel de noms éligibles/semaine dépend de la donnée live récupérée, voir run_state.json pour le run réel"
     correlation_family: CROSS_SECTIONAL_XSMOM   # MÊME famille économique que CROSS_SECTIONAL_MOMENTUM_LIVE_V1 et CROSS_SECTIONAL_MOMENTUM_PIT_V1 -- CORRÉLÉ par construction (même mécanisme, univers qui se recouvre partiellement), voir notes ci-dessous pour l'implication portfolio/dedup
-    live_start_timestamp: "2026-08-31T23:08:55+00:00"
+    live_start_timestamp: "2026-09-01T10:24:15+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
     expected_net_bps: 89.1        # PIT 312-symboles, full-sample -- CONTEXTE HISTORIQUE UNIQUEMENT (même chiffre que V1, même rapport source), PAS une cible de confirmation forward pour cette reconstruction (univers/seuil différents encore une fois, voir freeze_spec.json)
     expected_n_independent_episodes: 335   # PIT 312-symboles -- contexte historique uniquement, idem V1
     expected_profit_factor: null
@@ -833,6 +833,43 @@ alphas:
       sleeves indépendantes en portefeuille, même discipline que les paires
       LIQ_CASCADE_REPEAT_V1/LIQ_CASCADE_FAR_FROM_LOW_V1 (même risk_bucket,
       même correlation_family, corrélation de risque assumée et documentée).
+      ⚠ CORRECTIF PIT 2026-09-01 (instruction utilisateur "PHASE FORWARD
+      TRUTH V2", item 2) : la version initiale (freeze 2026-08-31T23:08:55Z,
+      voir _universe_resolution_buggy_pre_pit_fix_2026-09-01.json et
+      run_state_buggy_pre_pit_fix_2026-09-01.json, archivés PAS supprimés)
+      résolvait l'univers via /fapi/v1/exchangeInfo LIVE une seule fois par
+      run et appliquait ce statut TRADING actuel RÉTROACTIVEMENT à tous les
+      rebalances historiques depuis 2020 -- biais de survivance classique
+      (un symbole délisté depuis serait exclu même des rebalances passés où
+      il tradait légitimement ; aucune protection contre un symbole "pas
+      encore inventé" en 2020 sauf par absence fortuite de klines). Corrigé
+      dans universe.py::build_pit_eligibility_log() : éligibilité calculée
+      SÉPARÉMENT pour CHAQUE rebalance à partir de (1) data/listings_backfill/
+      binance/listings_calendar.parquet (onboard_ts réel, déjà utilisé par
+      ListingAgeGate ailleurs dans ce repo) avec réinclusion historique des
+      symboles délistés, (2) présence réelle de données de prix strictement
+      avant la date de rebalance, (3) âge de listing >=30j (même seuil que
+      ListingAgeGate), (4) liquidité trailing causale. Un rename (ex.
+      PEPEUSDT->1000PEPEUSDT, RNDRUSDT->RENDERUSDT) n'est PAS aliasé --
+      chaque nom garde sa propre identité/historique dans le calendrier,
+      correct pour un ranking PIT (contrairement au collecteur live où
+      fusionner fait sens pour une position continue). Preuve que le
+      correctif change réellement la composition (pas cosmétique) :
+      eligible_universe_size croît de 0 (2020-01) à 45 (2020-10) à 411 (pic,
+      2025-11) puis redescend à 283 (2026-08, dominé par
+      insufficient_liquidity_$2m_30d=235/283 rejets -- reflète un vrai
+      déclin de liquidité alt 2026, pas un artefact). Détail complet
+      interrogeable : reports/live_alpha_lab/CROSS_SECTIONAL_MOMENTUM_LIVE_V2/
+      pit_universe_log.parquet (une ligne par symbole×rebalance, colonne
+      `reason` explicite) + pit_universe_summary.json. 2 tests ciblés
+      ajoutés (delisted-exclusion vérifié sur RNDRUSDT réel + reproduit en
+      synthétique ; rename non-aliasé vérifié sur RNDRUSDT/RENDERUSDT réels
+      + reproduit en synthétique), 63 tests au total sur ce fichier, tous
+      verts. freeze_timestamp RÉINITIALISÉ au moment du correctif (le
+      premier freeze datait d'avant que le biais de survivance soit corrigé
+      -- même discipline que les autres resets de cette session) ; le
+      premier run post-correctif reste 100% REPLAY comme toujours (event_time
+      <= freeze_timestamp par construction), jamais présenté comme forward.
       ⚠ SEUIL DE LIQUIDITÉ $2M NON REPRODUIT DU RAPPORT SOURCE : c'est une
       décision d'ingénierie documentée (2x le plancher $1M verbatim du
       rapport source), pas un chiffre publié ni grid-searché sur historique

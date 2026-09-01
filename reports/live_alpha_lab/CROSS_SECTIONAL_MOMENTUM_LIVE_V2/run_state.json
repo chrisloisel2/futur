@@ -1,0 +1,17 @@
+{
+  "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V2",
+  "last_run": "2026-09-01T01:06:03.098596+00:00",
+  "universe_hash": "3bfc34e66f737b9b",
+  "n_candidates_live_today": 519,
+  "n_historical_reinclusion": 27,
+  "n_historical_reinclusion_no_data": 2,
+  "n_fetch_universe_total": 546,
+  "n_symbols_with_data": 546,
+  "min_listing_age_days": 30,
+  "n_decisions_total": 11217,
+  "n_decisions_new": 11217,
+  "n_rebalances_this_run": 344,
+  "pit_universe_log": "pit_universe_log.parquet",
+  "pit_universe_summary": "pit_universe_summary.json",
+  "mode": "A_SIGNAL_SHADOW"
+}

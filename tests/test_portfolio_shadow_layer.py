@@ -112,7 +112,7 @@ def test_aggregate_dedups_correlated_intents_same_instrument():
     config = PortfolioConfig(name="TEST", capital_eur=100_000,
                              family_budget_fraction={"LIQUIDATION_FAMILY": 1.0},
                              max_gross_exposure_fraction=1.0, max_per_asset_fraction=1.0)
-    agg = aggregate(intents, config, screened_symbols=set())
+    agg = aggregate(intents, config, screened_symbols=set(), as_of=_ts("2026-09-01T00:00:00Z"))
     assert len(agg.target_notional) == 1
     assert agg.owner["BTCUSDT"] == "A2"
     # item 6 : le ledger brut garde les DEUX intents, même si un seul "gagne"
@@ -124,7 +124,7 @@ def test_aggregate_respects_per_asset_cap():
                     PortfolioConfig(name="TEST", capital_eur=100_000,
                                     family_budget_fraction={"LIQUIDATION_FAMILY": 1.0},
                                     max_gross_exposure_fraction=1.0, max_per_asset_fraction=0.05),
-                    screened_symbols=set())
+                    screened_symbols=set(), as_of=_ts("2026-09-01T00:00:00Z"))
     assert abs(agg.target_notional["BTCUSDT"]) <= 100_000 * 0.05 + 1e-6
 
 
@@ -132,7 +132,7 @@ def test_aggregate_screen_zeroes_out_target():
     agg = aggregate([_intent(instrument="BTCUSDT", frac=1.0)],
                     PortfolioConfig(name="TEST", capital_eur=100_000,
                                     family_budget_fraction={"LIQUIDATION_FAMILY": 1.0}),
-                    screened_symbols={"BTCUSDT"})
+                    screened_symbols={"BTCUSDT"}, as_of=_ts("2026-09-01T00:00:00Z"))
     assert "BTCUSDT" not in agg.target_notional or agg.target_notional["BTCUSDT"] == 0
 
 
@@ -170,7 +170,7 @@ def test_aggregate_multi_leg_produces_two_opposite_instruments():
         PortfolioConfig(name="TEST", capital_eur=100_000,
                         family_budget_fraction={"RELATIVE_VALUE_FAMILY": 1.0},
                         max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0),
-        screened_symbols=set())
+        screened_symbols=set(), as_of=_ts("2026-09-01T00:00:00Z"))
     assert agg.target_notional["BTCUSDT_QUARTERLY"] > 0
     assert agg.target_notional["BTCUSDT_PERP"] < 0
 
@@ -189,12 +189,12 @@ def test_mtm_long_price_up_gives_positive_unrealized(tmp_path, monkeypatch):
     ts0 = _ts("2026-09-01T00:00:00Z")
 
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     step("T", config, agg, ts0)
 
     ts1 = ts0 + pd.Timedelta(minutes=5)
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(110.0, ts=ts1))   # +10%
-    agg2 = aggregate([_intent(frac=1.0, ts=ts0)], config, set())   # même intent -> pas de nouveau trade
+    agg2 = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts1)   # même intent -> pas de nouveau trade
     state = step("T", config, agg2, ts1)
     assert state.equity_curve[-1]["unrealized_pnl"] > 0
 
@@ -204,7 +204,7 @@ def test_mtm_long_price_down_gives_negative_unrealized(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     step("T", config, agg, ts0)
 
     ts1 = ts0 + pd.Timedelta(minutes=5)
@@ -218,7 +218,7 @@ def test_mtm_short_price_down_gives_positive_unrealized(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, direction="SHORT", ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, direction="SHORT", ts=ts0)], config, set(), as_of=ts0)
     step("T", config, agg, ts0)
 
     ts1 = ts0 + pd.Timedelta(minutes=5)
@@ -232,7 +232,7 @@ def test_mtm_fees_charged_once_per_delta_not_per_step(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     s1 = step("T", config, agg, ts0)
     fees_after_open = s1.cumulative_fees_usd
     assert fees_after_open > 0
@@ -247,12 +247,12 @@ def test_mtm_position_close_realizes_pnl(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg_open = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg_open = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     step("T", config, agg_open, ts0)
 
     ts1 = ts0 + pd.Timedelta(minutes=5)
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(120.0, ts=ts1))
-    agg_close = aggregate([], config, set())   # plus aucun intent -> target=0 -> ferme la position
+    agg_close = aggregate([], config, set(), as_of=ts1)   # plus aucun intent -> target=0 -> ferme la position
     state = step("T", config, agg_close, ts1)
     pos = list(state.positions.values())
     assert all(abs(p["quantity"]) < 1e-9 for p in pos)   # bien fermé
@@ -265,7 +265,7 @@ def test_mtm_realized_plus_unrealized_equity_invariant(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     state = step("T", config, agg, ts0)
     snap = state.equity_curve[-1]
     expected_equity = (config.capital_eur + snap["realized_pnl"] + snap["unrealized_pnl"]
@@ -282,7 +282,7 @@ def test_mtm_multiple_alphas_same_asset_no_double_count(tmp_path, monkeypatch):
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
     intents = [_intent(alpha_id="A1", correlation_family="FAM1", frac=0.5, ts=ts0),
               _intent(alpha_id="A2", correlation_family="FAM1", frac=1.0, ts=ts0)]
-    agg = aggregate(intents, config, set())
+    agg = aggregate(intents, config, set(), as_of=ts0)
     state = step("T", config, agg, ts0)
     assert len(state.positions) == 1
     assert state.equity_curve[-1]["n_positions"] == 1
@@ -293,7 +293,7 @@ def test_mtm_stale_mark_sets_degraded_status(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, age_ms=999_999_999, ts=ts0))  # très vieux
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     state = step("T", config, agg, ts0)
     assert state.equity_curve[-1]["status"] == "DEGRADED"
 
@@ -303,7 +303,7 @@ def test_mtm_no_mark_available_skips_trade_not_hallucinate_price(tmp_path, monke
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", lambda instrument, as_of=None: None)
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     state = step("T", config, agg, ts0)
     assert state.cumulative_fees_usd == 0   # rien tradé, aucun prix halluciné
     assert "BTCUSDT" in state.equity_curve[-1]["skipped_no_mark"]
@@ -314,7 +314,7 @@ def test_mtm_restart_reproduces_same_state(tmp_path, monkeypatch):
     config = _config()
     ts0 = _ts("2026-09-01T00:00:00Z")
     monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     step("T", config, agg, ts0)
 
     reloaded = load_state("T", config.capital_eur)   # simule un "restart" -- relit juste le fichier
@@ -341,7 +341,7 @@ def test_mtm_no_future_price_used_between_steps(tmp_path, monkeypatch):
                          mark_timestamp=as_of, mark_age_ms=0.0)
 
     monkeypatch.setattr(portfolio_mod, "get_mark", mark_fn)
-    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set())
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
     state0 = step("T", config, agg, ts0)
     # à ts0, seul le prix ts0 (100) doit avoir été utilisé -> entry_price == 100-ish (+slippage)
     pos = list(state0.positions.values())[0]
