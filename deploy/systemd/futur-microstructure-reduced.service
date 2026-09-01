@@ -1,0 +1,17 @@
+[Unit]
+Description=Futur microstructure reduced collector (BBO/top-of-book + trades only: binance/okx/hyperliquid, BTC/ETH/SOL — no full depth, see reports/live_alpha_lab/MICROSTRUCTURE_REDUCED_COLLECTOR_DESIGN.md)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python3 scripts/collect_microstructure_reduced.py --disk-budget-gb 12 --min-free-disk-gb 20
+Restart=always
+RestartSec=10
+KillSignal=SIGTERM
+TimeoutStopSec=60
+StandardOutput=append:/home/qbee/futur/reports/microstructure_collector.log
+StandardError=append:/home/qbee/futur/reports/microstructure_collector.log
+
+[Install]
+WantedBy=default.target

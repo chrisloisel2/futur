@@ -50,6 +50,16 @@
 # nouvelle freeze_timestamp, track record à zéro). Aucune décision passée
 # n'est jamais réécrite ou supprimée — seule l'addition de nouvelles colonnes
 # (ex. `provenance`) ou de nouvelles lignes est permise sur un ledger existant.
+#
+# ⚠ BUG POLICY (2026-08-31, instruction utilisateur, phase PORTFOLIO FORWARD) :
+# tout bug pouvant modifier signal/feature/univers/instrument mapping/position/
+# exécution/frais/PnL est TOUJOURS in-scope, jamais "known bug but continue".
+# Deux issues seulement : FIX + test de regression + nouveau segment forward
+# si nécessaire (voir `data_segment_boundaries` sur les entrées concernées),
+# OU bloquer la stratégie (scientific_status reste DISCOVERY/operational_status
+# CODE_MISSING tant que non résolu). Exemple déjà appliqué : le bug de
+# résolution de symboles (MKR/PEPE/RNDR) a été corrigé le jour même de sa
+# découverte plutôt que documenté et laissé tel quel.
 
 built_at: "2026-08-31T00:00:00+00:00"
 schema_version: 1
@@ -183,6 +193,28 @@ alphas:
       résolue (liq_cascade/detector.py:95 ne flip jamais le PnL — voir
       reports/edge_discovery/alpha_hunt_2026-08-29/SCOREBOARD.md "Also
       unresolved"). NE PAS lancer avant réponse humaine.
+      FORENSICS MENÉES 2026-08-31 (investigation git history/docs/tests, PAS
+      un choix basé sur le PnL, instruction utilisateur explicite) : preuve
+      CONTRADICTOIRE trouvée -- un module prédécesseur (ai/alphas/
+      liquidation_cascade.py, commit 71b73ca, 2026-05-26, archivé sous
+      legacy/experiments/) traitait explicitement l'événement équivalent
+      comme mean-reversion/SHORT ("Edge: mean-reversion rapide dans les 2-4
+      barres") ; le pipeline liq_cascade/detector.py actuel (commit 04e345e,
+      2026-07-13, ajouté complet sans historique évolutif) le traite de
+      façon uniforme en continuation/LONG-only sans jamais déclarer
+      d'intention explicite. Aucune déclaration d'intention originale
+      univoque trouvée -> AMBIGUÏTÉ RÉELLE, pas juste un manque de recherche.
+      **Verdict : reste BLOQUÉ, ne plus investir de temps dessus (instruction
+      utilisateur 2026-08-31).** Deux hypothèses nommées pour plus tard
+      SEULEMENT, chacune avec sa propre freeze_timestamp neuve le jour où
+      elle sera codée, testée uniquement sur données postérieures à CE
+      freeze (jamais sur le passé qui a servi à motiver le débat) :
+        - SHORT_SQUEEZE_CONTINUATION_V2 : SHORT_SQUEEZE (prix↑, OI↓) noté
+          comme continuation -- acheter le spike, sortie à horizon.
+        - SHORT_SQUEEZE_EXHAUSTION_V2 : SHORT_SQUEEZE noté comme
+          mean-reversion -- fade/short le spike. Hérite SHORT_REJECTED tant
+          que l'exposition short directionnelle n'est pas séparément
+          rouverte par l'utilisateur.
 
   - alpha_id: SHORT_COVERING_CONTINUATION_V1
     family: liquidation
@@ -724,6 +756,105 @@ alphas:
       lancement -- 0 décision forward attendue au freeze (comportement
       voulu, pas un bug, même discipline que les autres entrées).
 
+  # NB : CROSS_SECTIONAL_MOMENTUM_LIVE_V1 ci-dessus reste STRICTEMENT figé
+  # sur son univers frozen-50 (aucune modification, instruction utilisateur
+  # explicite 2026-08-31) -- voir CROSS_SECTIONAL_MOMENTUM_LIVE_V2
+  # juste en dessous : CHALLENGER en parallèle, alpha_id différent, univers
+  # différent (PIT dynamique liquid-alt au lieu du frozen-50), freeze_timestamp
+  # différent, track record séparé. PAS une modification de V1.
+
+  - alpha_id: CROSS_SECTIONAL_MOMENTUM_LIVE_V2
+    family: cross_sectional
+    mechanism: >
+      IDENTIQUE à CROSS_SECTIONAL_MOMENTUM_LIVE_V1 (momentum 7j->7j,
+      long-only, ranking cross-sectionnel, top-quintile, rebalance hebdo
+      non-chevauchant, top_fraction=0.20 verbatim source) SAUF l'univers :
+      au lieu du frozen-50 (majors-biaisé), CHALLENGER avec un univers
+      candidat PIT DYNAMIQUE résolu fraîchement à chaque run contre
+      /fapi/v1/exchangeInfo LIVE (status=TRADING, contractType=PERPETUAL,
+      quoteAsset=USDT, underlyingType=COIN -- exclut aussi les produits
+      tokenisés equity/commodity/index co-listés sur le même endpoint,
+      cf. universe.py), soit ~523 symboles candidats au moment du build
+      (vs ~49 pour V1), puis filtré par le même mécanisme causal de liquidité
+      trailing-30j que V1 (signal.py), avec un SEUIL PROPRE à V2
+      (min_liquidity_usd=$2M, 2x le plancher $1M verbatim du rapport source,
+      voir freeze_spec.json pour la justification complète -- choix
+      documenté, PAS un seuil grid-searché sur historique). Tentative directe
+      de répondre à la mise en garde honnête du rapport source lui-même : sur
+      son propre univers PIT 312 symboles, l'effet fonctionne dans les
+      terciles "mid/liquid" mais PAS dans le tercile illiquide (t=0.19), et
+      "majors-only" seul est insignifiant (t=0.72) -- c'est un effet de
+      largeur altcoin, pas un phénomène majors/BTC/ETH. Le frozen-50 de V1
+      est plus proche de "majors" que du large cross-section liquide mesuré
+      par le rapport source ; V2 construit cette largeur causalement, sans
+      dépendre du panel DATA_BLOCKED data_v2/instrument_master.parquet
+      (CROSS_SECTIONAL_MOMENTUM_PIT_V1, toujours inchangé, toujours
+      DATA_BLOCKED).
+    version: v1.0
+    status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: RECONSTRUCTED     # univers plus large/plus lâche que la spec exacte du rapport source (tercile liquide non reproductible faute de seuils publiés) -- une reconstruction, pas une réplication, comme V1
+    operational_status: SIGNAL_SHADOW    # Mode A tourne réellement ; ne PAS lire comme "confirmé"
+    source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w1_cross_sectional/REPORT.md#1-cross-sectional-momentum-m1m2m13
+    signal_definition: src/institutional/engines/cross_sectional_momentum_live_v2/signal.py::build_weekly_decisions
+    universe: "PIT DYNAMIQUE -- résolue en live à chaque run contre /fapi/v1/exchangeInfo (status=TRADING, contractType=PERPETUAL, quoteAsset=USDT, underlyingType=COIN), PAS une liste figée ; voir src/institutional/engines/cross_sectional_momentum_live_v2/universe.py et reports/live_alpha_lab/CROSS_SECTIONAL_MOMENTUM_LIVE_V2/_universe_resolution.json (trace écrite à chaque run) ; ~523 candidats au 2026-09-01, filtrés ensuite par liquidity_usd_30d>=$2M (voir features/entry)"
+    features: [tret_7d, liquidity_usd_30d]
+    model_family: RULE_RANKING
+    model_hash: null           # pas de modèle ML, règle de ranking pure -> pas d'artefact à hasher
+    training_window: "N/A (signal live pur, pas de fit) -- historique de backfill limité par la profondeur réelle des klines Binance USDM par symbole (majors depuis ~2019-2020, alts plus récents depuis leur listing, une bonne partie du candidat 2026 très récemment listée)"
+    freeze_timestamp: "2026-08-31T23:08:55+00:00"
+    entry: "top ceil(0.20 * n_eligible) symboles par tret_7d parmi le cohort liquide (liquidity_usd_30d>=2e6, SEUIL PROPRE À V2, voir freeze_spec.json) à chaque rebalance lundi -> LONG"
+    exit: "Mode A SIGNAL SHADOW pur : AUCUN exit simulé, AUCUN fill. fwd_7d sert uniquement de fenêtre de non-chevauchement pour le rebalance hebdomadaire (voir horizon)."
+    horizon: fwd_7d
+    execution_style: TAKER
+    cost_model: "non appliqué en Mode A (aucun fill simulé) ; même caveat que V1 sur le floor 20bps du rapport source (spread long-short 4-legs), pas directement applicable à cette reconstruction long-only -- voir freeze_spec.json"
+    risk_bucket: CROSS_SECTIONAL_FAMILY
+    expected_capacity: "inconnu sur cet univers dynamique -- univers candidat ~10x plus large que V1 (523 vs 49) mais seuil de liquidité 2x plus strict ($2M vs $1M) ; nombre réel de noms éligibles/semaine dépend de la donnée live récupérée, voir run_state.json pour le run réel"
+    correlation_family: CROSS_SECTIONAL_XSMOM   # MÊME famille économique que CROSS_SECTIONAL_MOMENTUM_LIVE_V1 et CROSS_SECTIONAL_MOMENTUM_PIT_V1 -- CORRÉLÉ par construction (même mécanisme, univers qui se recouvre partiellement), voir notes ci-dessous pour l'implication portfolio/dedup
+    live_start_timestamp: "2026-08-31T23:08:55+00:00"
+    expected_net_bps: 89.1        # PIT 312-symboles, full-sample -- CONTEXTE HISTORIQUE UNIQUEMENT (même chiffre que V1, même rapport source), PAS une cible de confirmation forward pour cette reconstruction (univers/seuil différents encore une fois, voir freeze_spec.json)
+    expected_n_independent_episodes: 335   # PIT 312-symboles -- contexte historique uniquement, idem V1
+    expected_profit_factor: null
+    data_live: true                # klines Binance USDM REST + exchangeInfo vérifiés accessibles au moment du build (2026-09-01, appel réel effectué)
+    notes: >
+      CHALLENGER de CROSS_SECTIONAL_MOMENTUM_LIVE_V1, PAS un remplacement --
+      les deux tournent en parallèle avec des ledgers/track-records
+      complètement séparés (reports/live_alpha_lab/CROSS_SECTIONAL_MOMENTUM_LIVE_V1/
+      vs reports/live_alpha_lab/CROSS_SECTIONAL_MOMENTUM_LIVE_V2/), des
+      alpha_id différents, des freeze_timestamp différents (V1=2026-08-31T18:30:44Z,
+      V2=2026-08-31T23:08:55Z, donc STRICTEMENT postérieur). V1 reste
+      inchangé sur son univers frozen-50 par instruction utilisateur
+      explicite -- voir git diff au moment du build de V2, seule cette
+      entrée a été ajoutée, aucune ligne de V1/PIT_V1 modifiée.
+      ⚠ CORRÉLATION EXPLICITE (pour la couche portfolio/dedup, voir
+      correlation_family ci-dessus) : V2 partage le même mécanisme
+      économique et un recouvrement d'univers significatif avec V1 (le
+      frozen-50 de V1 est presque entièrement un sous-ensemble de l'univers
+      candidat ~523 symboles de V2) -- NE PAS sizer les deux comme des
+      sleeves indépendantes en portefeuille, même discipline que les paires
+      LIQ_CASCADE_REPEAT_V1/LIQ_CASCADE_FAR_FROM_LOW_V1 (même risk_bucket,
+      même correlation_family, corrélation de risque assumée et documentée).
+      ⚠ SEUIL DE LIQUIDITÉ $2M NON REPRODUIT DU RAPPORT SOURCE : c'est une
+      décision d'ingénierie documentée (2x le plancher $1M verbatim du
+      rapport source), pas un chiffre publié ni grid-searché sur historique
+      -- voir signal.py et freeze_spec.json pour la justification complète
+      (le rapport source distingue des terciles "mid/liquide" (fonctionne)
+      vs "illiquide" (t=0.19, ne fonctionne pas) mais ne publie pas les
+      seuils numériques de ces terciles).
+      ⚠ PREMIER RUN = REPLAY, PAS FORWARD : comme toute autre entrée de ce
+      registre, les décisions du premier run (backfill historique depuis la
+      date de listing de chaque symbole jusqu'à aujourd'hui) ont un
+      event_time <= freeze_timestamp par construction -- 100% REPLAY, 0
+      forward attendu au freeze (comportement voulu, jamais présenté comme
+      preuve forward, voir scripts/apply_provenance_tags.py /
+      scripts/compute_live_alpha_lab_scoreboard.py).
+      Limite honnête supplémentaire (au-delà de celle déjà documentée pour
+      V1) : univers candidat dynamique = pas de reconstruction historique de
+      l'éligibilité exchangeInfo passée (Binance n'expose pas ce flux) --
+      seule l'éligibilité D'AUJOURD'HUI est connue, donc léger biais de
+      survivance sur le backfill (un symbole délisté hier n'apparaît jamais,
+      même dans le passé où il tradait) ; voir freeze_spec.json.universe
+      pour l'accounting complet.
+
   # ══════════════════════════════════════════════════════════════════════
   # FAMILLE : microstructure (risk_bucket: MICROSTRUCTURE_FAMILY)
   # DATA_BLOCKED — market_physics_v3/raw (tick L2) n'a plus de collecteur
@@ -738,7 +869,15 @@ alphas:
     version: v1.0
     status: DATA_BLOCKED
     scientific_status: DISCOVERY
-    operational_status: DATA_BLOCKED
+    operational_status: CODE_MISSING   # etait DATA_BLOCKED. 2026-09-01 : collecteur reduit
+      # relance (voir data_live/notes ci-dessous) -> DATA_BLOCKED n'est plus exact, la
+      # donnee existe desormais. Mais signal_definition reste NOT_YET_IMPLEMENTED : le
+      # code OFI/microprice/depth-imbalance lui-meme n'est pas ecrit. Par la progression
+      # propre de ce registre (CODE_MISSING | DATA_BLOCKED | SIGNAL_SHADOW |
+      # EXECUTION_SHADOW | READY), lever le blocage data ne saute pas l'etape
+      # CODE_MISSING -> SIGNAL_SHADOW nécessite le calcul de signal tournant, pas encore
+      # le cas. CODE_MISSING est donc le label le plus honnete disponible dans le
+      # vocabulaire existant, pas une nouvelle etiquette inventee.
     source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w7_microstructure/REPORT.md
     signal_definition: NOT_YET_IMPLEMENTED
     universe: [BTCUSDT, ETHUSDT]
@@ -758,5 +897,30 @@ alphas:
     live_start_timestamp: null
     expected_net_bps: null
     expected_gross_bps: 1.63
-    data_live: false
-    notes: "NEEDS_FULL_VALIDATION, pas encore PROMISING. Nécessite un collecteur L2 tick relancé."
+    data_live: true   # etait false. Collecteur reduit lance 2026-09-01T01:10:34+02:00,
+      # confirme actif et ecrivant des donnees reelles (voir notes). data_live=true
+      # reflete UNIQUEMENT que le collecteur tourne -- ce n'est pas une confirmation du
+      # signal, qui reste NEEDS_FULL_VALIDATION cote source_report.
+    notes: >
+      NEEDS_FULL_VALIDATION, pas encore PROMISING. Collecteur L2 tick reduit relance
+      2026-09-01 (design : reports/live_alpha_lab/MICROSTRUCTURE_REDUCED_COLLECTOR_DESIGN.md) --
+      scope volontairement restreint a BBO/top-of-book + trades uniquement (JAMAIS de
+      full order-book depth, sur binance/okx/hyperliquid, BTC/ETH/SOL ; bybit exclu, pas
+      de stream BBO dedie sur cette venue). Unite systemd :
+      futur-microstructure-reduced.service (deploy/systemd/futur-microstructure-reduced.service,
+      Type=simple/Restart=always, miroir dans ~/.config/systemd/user/), verifiee active et
+      confirmee ecrivant des fichiers reels (gzip JSONL, 18 partitions venue x symbol x
+      {bbo,trades}, rotation horaire) dans les minutes suivant le lancement, 0 erreur de
+      parsing, 0 reconnexion. Garde-fous disque implementes dans le collecteur lui-meme
+      (scripts/collect_microstructure_reduced.py), non-negociables : MIN_FREE_DISK_GB=20
+      (plancher espace libre machine entiere, verifie via shutil.disk_usage("/")) et
+      DISK_BUDGET_GB=12 (plafond propre a ce collecteur, mesure sur son repertoire de
+      sortie data/microstructure_reduced/) -- soit ~20GB de marge conservee sur ~32GB
+      libres au lancement. Sur breach de l'un ou l'autre seuil : arret PROPRE (flush +
+      fermeture de tous les handles gzip ouverts, aucune corruption), ALERTE loggee dans
+      reports/live_alpha_lab/microstructure_collector_alerts.log ET stdout/journal,
+      AUCUNE suppression de donnee existante (regle repo-wide absolue). Logique de
+      check testee en regression (tests/test_microstructure_reduced_collector.py,
+      espace libre mocke sous le seuil). Code OFI/microprice/depth-imbalance
+      lui-meme HORS SCOPE de ce lancement -- toujours a ecrire (voir
+      operational_status ci-dessus).

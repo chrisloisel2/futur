@@ -1,0 +1,11 @@
+{
+  "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V2",
+  "last_run": "2026-08-31T23:22:03.493167+00:00",
+  "universe_hash": "d992db03f00a5089",
+  "n_candidates_this_run": 523,
+  "n_symbols_with_data": 519,
+  "n_decisions_total": 11205,
+  "n_decisions_new": 11205,
+  "n_rebalances_this_run": 343,
+  "mode": "A_SIGNAL_SHADOW"
+}

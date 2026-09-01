@@ -35,14 +35,39 @@ def load_decisions(alpha_id: str):
     return pd.read_parquet(p)
 
 
+# event_time / timestamp / date -- même mapping que apply_provenance_tags.py
+# (dupliqué ici volontairement : ce script doit pouvoir tourner seul sans
+# dépendre de l'exécution préalable de l'autre pour connaître le nom de colonne).
+_TIME_COL = {
+    "LIQ_CASCADE_REPEAT_V1": "event_time", "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
+    "SHORT_COVERING_CONTINUATION_V1": "timestamp", "WHALE_LSR_SCREEN_V1": "timestamp",
+    "FUNDING_BASIS_DISAGREEMENT_V1": "date", "FUNDING_BASIS_DISAGREEMENT_V2": "date",
+    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
+    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time", "VOL_FORECAST_LAYER_V1": "event_time",
+}
+
+
 def row_for(entry: dict) -> dict:
     alpha_id = entry["alpha_id"]
     df = load_decisions(alpha_id)
     replay = forward = 0
+    forward_age_hours = time_since_last_trigger_hours = actual_freq_per_day = None
     if df is not None and "provenance" in df.columns:
         vc = df["provenance"].value_counts()
         replay = int(vc.get("REPLAY", 0))
         forward = int(vc.get("FORWARD_LIVE", 0))
+        freeze = entry.get("freeze_timestamp")
+        time_col = _TIME_COL.get(alpha_id)
+        if freeze and time_col and time_col in df.columns:
+            now = pd.Timestamp.now(tz="UTC")
+            freeze_ts = pd.Timestamp(freeze)
+            forward_age_hours = round((now - freeze_ts).total_seconds() / 3600, 1)
+            fwd_df = df[df["provenance"] == "FORWARD_LIVE"]
+            if not fwd_df.empty:
+                last_trigger = pd.to_datetime(fwd_df[time_col], utc=True).max()
+                time_since_last_trigger_hours = round((now - last_trigger).total_seconds() / 3600, 1)
+                if forward_age_hours and forward_age_hours > 0:
+                    actual_freq_per_day = round(forward / (forward_age_hours / 24), 3)
     elif df is not None:
         replay = len(df)   # pas encore tagué -- traité comme tout-replay par prudence (fail closed)
     return {
@@ -53,9 +78,18 @@ def row_for(entry: dict) -> dict:
         "freeze_timestamp": entry.get("freeze_timestamp"),
         "replay_decisions": replay,
         "forward_decisions": forward,
+        "forward_age_hours": forward_age_hours,
+        "time_since_last_trigger_hours": time_since_last_trigger_hours,
+        "actual_freq_per_day": actual_freq_per_day,
+        "expected_capacity": entry.get("expected_capacity"),
         # Mode A pur partout à ce stade -> pas de fills simulés -> pas de "trades" réels.
         "forward_trades": 0,
         "forward_independent_episodes": None,   # nécessite un decluster par famille, pas encore calculé ici
+        # ⚠ PF / net_bps / maxDD / edge_retention nécessitent un LABEL de résultat
+        # forward par décision (comme le backfill actual_realized_rv de
+        # VOL_FORECAST_LAYER_V1) -- PAS ENCORE CONSTRUIT pour les alphas de
+        # position. Champ explicite "PENDING" plutôt qu'un chiffre inventé.
+        "pf_net_bps_maxdd_edge_retention": "PENDING_outcome_labeling_not_built",
         "risk_bucket": entry.get("risk_bucket"),
         "correlation_family": entry.get("correlation_family"),
     }
@@ -75,14 +109,16 @@ def main() -> int:
         "`forward_decisions` (event_time > freeze_timestamp) compte comme preuve jamais-vue ;",
         "`replay_decisions` est du backfill historique, pas une preuve forward.",
         "",
-        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | risk_bucket |",
-        "|---|---|---|---|---|---|---|---|",
+        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | forward_age_h | last_trigger_h_ago | actual_freq/day | risk_bucket |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in sorted(rows, key=lambda r: (r["scientific_status"], r["alpha_id"])):
         lines.append(
             f"| {r['alpha_id']} | {r['family']} | {r['scientific_status']} | "
             f"{r['operational_status']} | {r['freeze_timestamp']} | "
-            f"{r['replay_decisions']} | **{r['forward_decisions']}** | {r['risk_bucket']} |"
+            f"{r['replay_decisions']} | **{r['forward_decisions']}** | "
+            f"{r['forward_age_hours']} | {r['time_since_last_trigger_hours']} | "
+            f"{r['actual_freq_per_day']} | {r['risk_bucket']} |"
         )
 
     total_forward = sum(r["forward_decisions"] for r in rows)
@@ -91,6 +127,17 @@ def main() -> int:
         f"**Total forward_decisions toutes familles : {total_forward}**"
         + (" — attendu à ce stade, le correctif de discipline vient d'être appliqué "
            "(tous les freeze_timestamp sont à J0 ou récents)." if total_forward == 0 else "."),
+        "",
+        "⚠ **PF / net_bps / maxDD / edge_retention ne sont PAS encore calculés** pour les alphas",
+        "de position (nécessite un label de résultat forward par décision, comme le backfill",
+        "`actual_realized_rv` de VOL_FORECAST_LAYER_V1 mais pour chaque alpha directionnel —",
+        "pas encore construit, prochaine étape logique une fois plus de forward accumulé).",
+        "",
+        "**0 signal pendant quelques heures n'est PAS un problème** — les cascades de liquidation,",
+        "le funding-basis (~15-18/an/actif) et le screen positioning sont des mécanismes rares par",
+        "construction. `actual_freq_per_day` est là pour comparer objectivement à",
+        "`expected_capacity` (texte libre du registre) le moment venu, pas pour juger après",
+        "quelques heures.",
     ]
 
     OUT_MD.write_text("\n".join(lines) + "\n")
