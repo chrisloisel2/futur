@@ -43,6 +43,20 @@ STALE_MS_BY_SOURCE = {
     "QUARTERLY_DAILY_CLOSE": 36 * 60 * 60 * 1000,  # cadence quotidienne + lag Vision ~2j -- 36h de marge
 }
 
+# item P1 (phase OPERATIONAL HARDENING) : REST_BOOKTICKER_MID n'a PAS de
+# source historique -- l'API ne répond qu'avec le prix "maintenant". Root
+# cause de la divergence P1_EQUAL_RISK/P1_CONTROL (cf marks.py::
+# eligible_files_for_as_of, commit ed17708) : ce chemin ignorait as_of et
+# répondait silencieusement avec un prix live à une question historique.
+# Le fix DERIVATIVES_RAW_MARK a résolu ça pour le frozen-50, mais
+# REST_BOOKTICKER_MID reste structurellement incapable de répondre pour un
+# as_of ancien -- donc on refuse explicitement (None) plutôt que de
+# continuer à halluciner "maintenant" pour "hier". Tolérance généreuse
+# (couvre le temps réel d'exécution d'un run multi-portefeuille), pas un
+# seuil de fraîcheur (is_stale()) -- une question de CAUSALITÉ, pas de
+# fraîcheur.
+REST_CAUSALITY_TOLERANCE_MS = 60_000
+
 _rest_cache: Dict[str, "MarkQuote"] = {}
 
 
@@ -133,6 +147,11 @@ def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuot
 
 
 def _from_rest_bookticker(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuote]:
+    # jamais répondre "maintenant" à une question historique -- voir la
+    # note sur REST_CAUSALITY_TOLERANCE_MS ci-dessus.
+    age_vs_now_ms = abs((_now() - as_of).total_seconds()) * 1000
+    if age_vs_now_ms > REST_CAUSALITY_TOLERANCE_MS:
+        return None
     cached = _rest_cache.get(symbol)
     if cached is not None and (as_of - cached.mark_timestamp).total_seconds() * 1000 < 30_000:
         return cached   # cache 30s intra-run -- pas re-frapper l'API pour chaque instrument du même run

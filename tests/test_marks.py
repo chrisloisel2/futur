@@ -138,3 +138,51 @@ def test_get_mark_falls_back_to_rest_only_when_genuinely_no_historical_data(mark
     q = marks_module.get_mark("NEWLISTEDUSDT", as_of)
     assert calls.get("hit") == ("NEWLISTEDUSDT", as_of)
     assert q.mark_source == "REST_BOOKTICKER_MID"
+
+
+# ── P1 (phase OPERATIONAL HARDENING) : REST_BOOKTICKER_MID ne doit JAMAIS
+# répondre "maintenant" à une question historique -- régression directe du
+# bug root-cause P1_EQUAL_RISK/P1_CONTROL (commit ed17708) ─────────────────
+
+def test_rest_bookticker_refuses_historical_as_of_never_answers_with_live_price(marks_module, monkeypatch):
+    """Un as_of largement dans le passé ne doit JAMAIS déclencher un appel
+    REST réel (qui répondrait avec le prix ACTUEL, pas historique)."""
+    called = {"n": 0}
+
+    def fake_urlopen(*a, **k):
+        called["n"] += 1
+        raise AssertionError("REST ne doit jamais être appelé pour un as_of historique")
+
+    monkeypatch.setattr(marks_module.urllib.request, "urlopen", fake_urlopen)
+    old_as_of = pd.Timestamp("2026-01-01T00:00:00+00:00")   # bien avant "maintenant"
+    q = marks_module._from_rest_bookticker("SOMESYMBOLUSDT", old_as_of)
+    assert q is None
+    assert called["n"] == 0
+
+
+def test_rest_bookticker_answers_for_as_of_close_to_now(marks_module, monkeypatch):
+    """as_of proche de maintenant (dans la tolérance de causalité) doit
+    toujours pouvoir répondre -- le refus est spécifique à l'historique,
+    pas un refus général."""
+    def fake_urlopen(req, timeout=5):
+        class _Resp:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self): return b'{"bidPrice": "100.0", "askPrice": "100.2"}'
+        return _Resp()
+
+    monkeypatch.setattr(marks_module.urllib.request, "urlopen", fake_urlopen)
+    near_now = pd.Timestamp.now(tz="UTC") - pd.Timedelta(seconds=5)
+    q = marks_module._from_rest_bookticker("SOMESYMBOLUSDT", near_now)
+    assert q is not None
+    assert q.mark_source == "REST_BOOKTICKER_MID"
+    assert q.price == pytest.approx(100.1)
+
+
+def test_get_mark_returns_none_not_a_hallucinated_live_price_for_old_as_of_non_frozen50_symbol(marks_module):
+    """Bout-en-bout : un symbole hors frozen-50 (pas de derivatives_raw)
+    interrogé à un as_of ancien doit retourner None -- jamais silencieusement
+    le prix REST courant maquillé en réponse historique."""
+    old_as_of = pd.Timestamp("2026-01-01T00:00:00+00:00")
+    q = marks_module.get_mark("SOMESYMBOLNOTINFROZEN50USDT", old_as_of)
+    assert q is None
