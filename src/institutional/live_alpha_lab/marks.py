@@ -63,30 +63,38 @@ def _now() -> pd.Timestamp:
     return pd.Timestamp(datetime.now(timezone.utc))
 
 
-def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuote]:
-    base = DERIVATIVES_RAW / "exchange=binance" / "market=usdm" / "stream=open_interest" / f"symbol={symbol}"
+def _oi_base(symbol: str) -> Path:
+    return DERIVATIVES_RAW / "exchange=binance" / "market=usdm" / "stream=open_interest" / f"symbol={symbol}"
+
+
+def eligible_files_for_as_of(base: Path, as_of: pd.Timestamp) -> list:
+    """Le collecteur écrit UN fichier par poll (~450-500 fichiers/jour/
+    symbole), pas un fichier par jour : prendre "les N derniers fichiers" du
+    glob trié ne couvre en pratique que les ~20 dernières minutes, quel que
+    soit as_of. Pour un as_of historique (pas "maintenant"), ça retournait
+    silencieusement None/vide (root cause de la divergence P1_EQUAL_RISK vs
+    P1_CONTROL sur les marks, cf compare_portfolios.py, et sous-comptage
+    silencieux du funding pour tout as_of historique). Fix partagé : ne
+    garder que les partitions date= <= as_of.date() (les 2 dernières, pour
+    couvrir le cas où as_of tombe tôt dans sa journée), lire TOUS les
+    fichiers de ces partitions."""
     if not base.exists():
-        return None
-    # Le collecteur écrit UN fichier par poll (~450-500 fichiers/jour/symbole),
-    # pas un fichier par jour : prendre "les 4 derniers fichiers" du glob trié
-    # ne couvre en pratique que les ~20 dernières minutes, quel que soit
-    # as_of. Pour un as_of historique (pas "maintenant"), ça retournait
-    # silencieusement None -> fallback REST live (prix "maintenant", pas au
-    # bon as_of -- root cause de la divergence P1_EQUAL_RISK vs P1_CONTROL,
-    # cf compare_portfolios.py). Fix : ne garder que les partitions date=
-    # <= as_of.date(), lire TOUS les fichiers de ces partitions.
+        return []
     date_dirs = sorted(d for d in base.glob("date=*") if d.is_dir())
     as_of_date_str = as_of.strftime("%Y-%m-%d")
     eligible_dirs = [d for d in date_dirs if d.name.split("=", 1)[1] <= as_of_date_str]
     if not eligible_dirs:
-        return None
-    # 2 dernières partitions éligibles : couvre le cas où as_of tombe tôt
-    # dans sa journée et où le dernier mark <= as_of est encore dans la
-    # partition de la veille.
+        return []
     recent_dirs = eligible_dirs[-2:]
     files = []
     for d in recent_dirs:
         files.extend(sorted(d.glob("part-*.parquet")))
+    return files
+
+
+def _from_derivatives_raw(symbol: str, as_of: pd.Timestamp) -> Optional[MarkQuote]:
+    base = _oi_base(symbol)
+    files = eligible_files_for_as_of(base, as_of)
     if not files:
         return None
     frames = []

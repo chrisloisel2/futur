@@ -442,11 +442,8 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
 
 
 def _latest_funding_rate(symbol: str, as_of: pd.Timestamp) -> Optional[float]:
-    from src.institutional.live_alpha_lab.marks import DERIVATIVES_RAW
-    base = DERIVATIVES_RAW / "exchange=binance" / "market=usdm" / "stream=open_interest" / f"symbol={symbol}"
-    if not base.exists():
-        return None
-    files = sorted(base.glob("date=*/part-*.parquet"))[-4:]
+    from src.institutional.live_alpha_lab.marks import _oi_base, eligible_files_for_as_of
+    files = eligible_files_for_as_of(_oi_base(symbol), as_of)
     if not files:
         return None
     frames = []

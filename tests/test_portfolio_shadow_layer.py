@@ -455,6 +455,36 @@ def test_mtm_no_future_price_used_between_steps(tmp_path, monkeypatch):
     assert pos["entry_price"] < 105   # pas 200 (le prix futur ts1)
 
 
+def test_latest_funding_rate_finds_historical_rate_despite_hundreds_of_newer_files(tmp_path, monkeypatch):
+    """Même bug/même fix que marks.py::_from_derivatives_raw (P0.1) : cette
+    fonction avait sa PROPRE copie du heuristique cassé "derniers 4 fichiers"
+    -- corrigée pour partager marks.eligible_files_for_as_of. Sans le fix,
+    un as_of historique avec beaucoup de fichiers plus récents que lui
+    retournait silencieusement None -> funding jamais accru pour ce step
+    (sous-comptage silencieux des coûts, pas une exception)."""
+    import src.institutional.live_alpha_lab.marks as marks_mod
+    monkeypatch.setattr(marks_mod, "DERIVATIVES_RAW", tmp_path / "derivatives_raw")
+    base = (marks_mod.DERIVATIVES_RAW / "exchange=binance" / "market=usdm" /
+           "stream=open_interest" / "symbol=BTCUSDT")
+    old_as_of = pd.Timestamp("2026-09-01T00:10:00+00:00")
+
+    def write(date_str, seq, ts, funding_rate):
+        d = base / f"date={date_str}"
+        d.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame({"timestamp": [int(pd.Timestamp(ts).value // 1_000_000)],
+                     "funding_rate": [funding_rate]}).to_parquet(d / f"part-{seq:06d}.parquet")
+
+    write("2026-09-01", 0, "2026-09-01T00:05:00", 0.0001)
+    for i in range(1, 200):
+        ts = pd.Timestamp("2026-09-01T00:05:00") + pd.Timedelta(minutes=i)
+        write("2026-09-01", i, ts.isoformat(), 0.0001 + i * 1e-7)
+
+    rate = portfolio_mod._latest_funding_rate("BTCUSDT", old_as_of)
+    # doit trouver le DERNIER rate <= as_of (00:10:00, i=5), pas le premier
+    # fichier du jour ni un fichier postérieur à as_of.
+    assert rate == pytest.approx(0.0001 + 5 * 1e-7)
+
+
 def test_two_portfolios_identical_config_and_intents_produce_byte_identical_equity(tmp_path, monkeypatch):
     """Régression directe du bug P1_EQUAL_RISK vs P1_CONTROL (phase CLOSE THE
     EXECUTION LOOP, P0.1) : root-cause était get_mark() non-pur en (instrument,
