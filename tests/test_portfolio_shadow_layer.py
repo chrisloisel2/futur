@@ -986,3 +986,148 @@ def test_load_state_recovers_from_pre_existing_corrupt_file_without_crashing(tmp
     assert len(archives) == 1
     assert archives[0].read_text().startswith('{"positions"')   # contenu corrompu préservé tel quel
     assert "ALERTE" in capsys.readouterr().out   # jamais un reset silencieux
+
+
+# ── P1 (phase OPERATIONAL HARDENING) : collision multi-alpha ─────────────
+
+def _bucket_intent(alpha_id, risk_bucket, correlation_family, instrument, direction, ts, frac=1.0):
+    return PortfolioIntent(
+        alpha_id=alpha_id, family="test", risk_bucket=risk_bucket,
+        correlation_family=correlation_family, timestamp=ts, instrument=instrument,
+        direction=direction, target_position_fraction=frac, confidence=1.0, horizon_hours=4.0,
+        expiry=ts + pd.Timedelta(hours=4), multi_leg=False, leg_instrument_b=None,
+    )
+
+
+def test_multi_alpha_collision_exact_scenario_A10k_B20k_Cminus5k_then_A_expires(tmp_path, monkeypatch):
+    """Scénario exact demandé : A +10k, B +20k, C -5k -> net +25k physique.
+    Puis A expire -> nouvelle cible +15k -> delta physique exécuté -10k.
+    Aucun over-close, aucun double PnL."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_COLLISION", capital_eur=100_000,
+        family_budget_fraction={"BUCKET_A": 0.10, "BUCKET_B": 0.20, "BUCKET_C": 0.05},
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts0))   # prix=1 -> notional==quantity, lisible
+
+    intent_a = _bucket_intent("A", "BUCKET_A", "FAM_A", "BTCUSDT", "LONG", ts0)
+    # B et C survivent bien au-delà de l'expiry de A -- sinon les 3 expirent
+    # ensemble au même moment (horizon_hours par défaut identique) et le
+    # scénario "A expire, B/C restent vivants" ne serait pas testé.
+    intent_b = PortfolioIntent(
+        alpha_id="B", family="test", risk_bucket="BUCKET_B", correlation_family="FAM_B",
+        timestamp=ts0, instrument="BTCUSDT", direction="LONG", target_position_fraction=1.0,
+        confidence=1.0, horizon_hours=100.0, expiry=ts0 + pd.Timedelta(hours=100),
+        multi_leg=False, leg_instrument_b=None,
+    )
+    intent_c = PortfolioIntent(
+        alpha_id="C", family="test", risk_bucket="BUCKET_C", correlation_family="FAM_C",
+        timestamp=ts0, instrument="BTCUSDT", direction="SHORT", target_position_fraction=1.0,
+        confidence=1.0, horizon_hours=100.0, expiry=ts0 + pd.Timedelta(hours=100),
+        multi_leg=False, leg_instrument_b=None,
+    )
+
+    agg1 = aggregate([intent_a, intent_b, intent_c], config, set(), as_of=ts0)
+    assert agg1.target_notional["BTCUSDT"] == pytest.approx(25_000.0)   # +10k+20k-5k
+    state = step("T", config, agg1, ts0)
+    assert list(state.positions.values())[0]["quantity"] == pytest.approx(25_000.0)
+
+    # A expire -- B et C restent vivants
+    ts1 = intent_a.expiry + pd.Timedelta(seconds=1)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts1))
+    agg2 = aggregate([intent_a, intent_b, intent_c], config, set(), as_of=ts1)
+    assert agg2.target_notional["BTCUSDT"] == pytest.approx(15_000.0)   # B+C seuls : +20k-5k
+    assert "BTCUSDT" not in agg2.expired_driven_instruments   # B/C vivants -> pas "tout expiré"
+
+    qty_before = list(state.positions.values())[0]["quantity"]
+    state = step("T", config, agg2, ts1)
+    qty_after = list(state.positions.values())[0]["quantity"]
+    assert qty_after == pytest.approx(15_000.0)
+    executed_delta_physical = qty_after - qty_before
+    assert executed_delta_physical == pytest.approx(-10_000.0)   # delta physique exact demandé
+
+    # aucun double PnL : le realized_pnl de cette clôture partielle doit
+    # correspondre EXACTEMENT à closing_qty * (fill_price - entry_price),
+    # pas plus, pas moins -- ici le prix ne bouge pas (mark constant à 1.0)
+    # mais le slippage (2bps, adverse aux deux legs) crée un coût de
+    # roundtrip réel : entry_price=1.0002 (achat), fill_price=0.9998 (vente)
+    # -> 10_000 * (0.9998 - 1.0002) = -4.0, pas 0 -- le slippage EST un coût
+    # économique réel, pas une erreur de calcul.
+    assert state.cumulative_realized_pnl == pytest.approx(-4.0, abs=1e-6)
+
+
+def test_multi_alpha_opposite_signals_different_families_net_not_cancel_and_lose_track(tmp_path, monkeypatch):
+    """Deux alphas de familles DIFFÉRENTES, signes opposés sur le même
+    instrument -> la target NETTE est la somme signée (pas une annulation
+    qui ferait disparaître la trace des deux intents individuels)."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_OPP", capital_eur=100_000,
+        family_budget_fraction={"BUCKET_LONG": 0.30, "BUCKET_SHORT": 0.10},
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts0))
+
+    intent_long = _bucket_intent("LONG_A", "BUCKET_LONG", "FAM_LONG", "ETHUSDT", "LONG", ts0)
+    intent_short = _bucket_intent("SHORT_A", "BUCKET_SHORT", "FAM_SHORT", "ETHUSDT", "SHORT", ts0)
+
+    agg = aggregate([intent_long, intent_short], config, set(), as_of=ts0)
+    assert agg.target_notional["ETHUSDT"] == pytest.approx(20_000.0)   # +30k-10k, net LONG
+    # traçabilité : les DEUX intents individuels restent visibles (pas juste le net)
+    raw = agg.raw_intents_by_instrument["ETHUSDT"]
+    assert len(raw) == 2
+    assert {r["alpha_id"] for r in raw} == {"LONG_A", "SHORT_A"}
+
+
+def test_multi_alpha_same_family_dedup_keeps_max_not_sum(tmp_path, monkeypatch):
+    """Deux alphas de la MÊME correlation_family sur le même instrument :
+    dedup garde le max target_position_fraction (le "gagnant"), ne somme
+    JAMAIS deux intents corrélés -- sinon le risque serait multiplié
+    artificiellement (voir item 'family risk budgets')."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(1.0, ts=ts0))
+
+    i1 = _bucket_intent("V1", "LIQUIDATION_FAMILY", "LIQ_FAM", "SOLUSDT", "LONG", ts0, frac=0.5)
+    i2 = _bucket_intent("V2", "LIQUIDATION_FAMILY", "LIQ_FAM", "SOLUSDT", "LONG", ts0, frac=1.0)
+
+    agg = aggregate([i1, i2], config, set(), as_of=ts0)
+    # n_alphas_per_bucket est compté APRÈS dedup : seul le gagnant (V2) est
+    # actif dans ce bucket pour cet instrument -> il reçoit le budget ENTIER
+    # du bucket (pas une part divisée avec V1, qui a été éliminé du dedup,
+    # pas juste "réduit"). C'est justement la preuve qu'aucune somme
+    # artificielle n'a lieu : le perdant du dedup ne consomme AUCUN budget.
+    expected = config.capital_eur * 1.0 / 1 * 1.0
+    assert agg.target_notional["SOLUSDT"] == pytest.approx(expected)
+    assert agg.owner["SOLUSDT"] == "V2"   # le gagnant du dedup (plus haut frac)
+
+
+def test_multi_alpha_partial_fill_applies_to_aggregated_target_not_per_alpha(tmp_path, monkeypatch):
+    """Le plafond de liquidité s'applique au DELTA AGRÉGÉ du portefeuille,
+    pas alpha par alpha -- 3 alphas visant le même instrument produisent UN
+    seul ordre sur la target nette, capé une seule fois."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = PortfolioConfig(
+        name="TEST_PARTIAL_COLLISION", capital_eur=100_000,
+        family_budget_fraction={"BUCKET_A": 0.10, "BUCKET_B": 0.20, "BUCKET_C": 0.05},
+        max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+    )
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _capped_mark(1.0, liquidity_notional=5_000_000.0, ts=ts0))
+
+    intent_a = _bucket_intent("A", "BUCKET_A", "FAM_A", "BTCUSDT", "LONG", ts0)
+    intent_b = _bucket_intent("B", "BUCKET_B", "FAM_B", "BTCUSDT", "LONG", ts0)
+    intent_c = _bucket_intent("C", "BUCKET_C", "FAM_C", "BTCUSDT", "SHORT", ts0)
+
+    agg = aggregate([intent_a, intent_b, intent_c], config, set(), as_of=ts0)
+    assert agg.target_notional["BTCUSDT"] == pytest.approx(25_000.0)   # cible agrégée = 25k
+    state = step("T", config, agg, ts0)
+    # plafond = 0.002 * 5_000_000 / 1.0 = 10_000 unités -- moins que les 25k
+    # visés -> UN SEUL ordre, PARTIALLY_FILLED sur la cible nette
+    assert len(state.orders) == 1
+    assert state.orders[0]["status"] == "PARTIALLY_FILLED"
+    assert list(state.positions.values())[0]["quantity"] == pytest.approx(10_000.0)
