@@ -1,19 +1,10 @@
 {
-  "resolved_at": "2026-09-01T01:02:23.573455+00:00",
-  "n_candidates_live_today": 519,
-  "n_historical_reinclusion": 27,
-  "n_historical_reinclusion_no_data": 2,
-  "n_fetch_universe_total": 546,
-  "universe_hash": "3bfc34e66f737b9b",
-  "universe_hash_scope": "fetch_universe (live TRADING today UNION historical DELISTED reinclusion) -- NOT just today's live candidates, see module docstring.",
+  "resolved_at": "2026-08-31T23:30:13.471518+00:00",
+  "n_candidates": 519,
+  "universe_hash": "a1e254816610596b",
   "filter": "contractType=PERPETUAL, quoteAsset=USDT, status=TRADING, underlyingType=COIN",
-  "historical_reinclusion_source": "src.institutional.engines.cross_sectional_momentum_live_v2.universe.load_listing_calendar() -- data/listings_backfill/binance/listings_calendar.parquet",
-  "historical_reinclusion_no_data_symbols": [
-    "BDXNUSDT",
-    "SXPUSDT"
-  ],
-  "note": "audit trail only -- NOT a frozen-hash drift gate (see runner docstring); a changing candidate set run-to-run is expected and correct for this alpha. PER-REBALANCE PIT eligibility (existed/listing-age/history/liquidity, with rejection reasons) is in pit_universe_log.parquet / pit_universe_summary.json, not here -- this file only records what was FETCHED this run, never what was eligible on any given past date.",
-  "candidates_live_today": [
+  "note": "audit trail only -- NOT a frozen-hash drift gate (see runner docstring); a changing candidate set run-to-run is expected and correct for this alpha.",
+  "candidates": [
     "0GUSDT",
     "1000000BOBUSDT",
     "1000000MOGUSDT",
@@ -533,34 +524,5 @@
     "ZORAUSDT",
     "ZROUSDT",
     "ZRXUSDT"
-  ],
-  "candidates_historical_reinclusion": [
-    "1000BTTCUSDT",
-    "AKROUSDT",
-    "ANCUSDT",
-    "ANTUSDT",
-    "AUDIOUSDT",
-    "BLUEBIRDUSDT",
-    "BTSUSDT",
-    "BTTUSDT",
-    "BZRXUSDT",
-    "COCOSUSDT",
-    "DODOUSDT",
-    "DOTECOUSDT",
-    "EOSUSDT",
-    "FOOTBALLUSDT",
-    "FRONTUSDT",
-    "GALUSDT",
-    "HNTUSDT",
-    "KEEPUSDT",
-    "LENDUSDT",
-    "LUNAUSDT",
-    "MATICUSDT",
-    "MBLUSDT",
-    "NUUSDT",
-    "RNDRUSDT",
-    "SRMUSDT",
-    "TOMOUSDT",
-    "YFIIUSDT"
   ]
 }

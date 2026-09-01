@@ -45,6 +45,21 @@ correct, not an error to guard against. What IS still fail-closed here:
 Idempotent: reads the existing ledger, only appends decisions whose
 (event_time, symbol) key doesn't already exist.
 
+⚠ PIT BUG FIX (2026-09-01, same-day discipline as the earlier symbol_resolver.py
+MKR/PEPE/RNDR fix -- see live_alpha_registry.yaml "BUG POLICY"): the original
+build of this script fetched only TODAY's live-TRADING candidates and fed
+their raw panel straight to signal.py, with no listing-age gate other than
+the incidental side effect of LIQUIDITY_WINDOW_DAYS's rolling window. This
+both survivorship-biased the backfill (delisted symbols never appeared, even
+for the historical weeks they genuinely traded) and left the "how old must a
+listing be before it counts" gate undocumented/coincidental. Fixed here by
+also fetching known-DELISTED symbols from listings_calendar.parquet (see
+universe.py) and explicitly masking every (date, symbol) cell before its
+real onboard_ts + MIN_LISTING_AGE_DAYS -- see universe.py's module docstring
+for the full accounting, and pit_universe_log.parquet/pit_universe_summary.json
+(written by this run) for the per-rebalance audit trail. signal.py itself
+(the frozen mechanism/thresholds) is completely untouched by this fix.
+
 API load note (documented per the mission's explicit request — see
 freeze_spec.json for the fuller accounting): resolving ~500 candidate
 symbols' daily klines is up to ~500-1000 REST calls to
@@ -86,10 +101,13 @@ from src.institutional.data.derivatives_collector.symbol_resolver import fetch_e
 from src.institutional.engines.cross_sectional_momentum_live.klines_source import (
     refresh_symbol_cache)
 from src.institutional.engines.cross_sectional_momentum_live_v2.universe import (
-    resolve_dynamic_liquid_universe)
+    MIN_LISTING_AGE_DAYS, build_pit_eligibility_log,
+    historical_reinclusion_candidates, load_listing_calendar,
+    mask_pre_eligibility, resolve_dynamic_liquid_universe, resolve_onboard_dates,
+    summarize_pit_log, write_pit_universe_log)
 from src.institutional.engines.cross_sectional_momentum_live_v2.signal import (
     LIQUIDITY_WINDOW_DAYS, LOOKBACK_DAYS, MIN_LIQUIDITY_USD, REBALANCE_WEEKDAY,
-    TOP_FRACTION, build_weekly_decisions)
+    TOP_FRACTION, build_weekly_decisions, weekly_rebalance_dates)
 
 ALPHA_ID = "CROSS_SECTIONAL_MOMENTUM_LIVE_V2"
 OUT_DIR = ROOT / "reports" / "live_alpha_lab" / ALPHA_ID
@@ -134,32 +152,65 @@ def main() -> int:
 
     check_registry_freeze(ALPHA_ID)
 
-    # -- dynamic PIT candidate universe: resolved fresh from LIVE
-    #    exchangeInfo every run, NOT a fixed list (see universe.py).
+    # -- "today" candidate universe: resolved fresh from LIVE exchangeInfo
+    #    every run (see universe.py). Used to know what to fetch fresh going
+    #    forward -- NOT, since the 2026-09-01 PIT fix, used on its own to
+    #    gate which symbols were eligible at a PAST rebalance (see below).
     exchange_info = fetch_exchange_info()
     candidate_universe = resolve_dynamic_liquid_universe(exchange_info)
-    uhash = universe_hash(candidate_universe)
+
+    # -- (A) survivorship fix: reincluding known-DELISTED symbols from the
+    #    established data/listings_backfill/binance/listings_calendar.parquet
+    #    (already used by ListingAgeGate) so they can appear in the
+    #    historical rebalance windows they genuinely traded in, instead of
+    #    being 100% invisible just because they are not TRADING today. See
+    #    universe.py module docstring for the full accounting.
+    listing_calendar = load_listing_calendar()
+    reinclusion_candidates, reinclusion_no_data = historical_reinclusion_candidates(
+        listing_calendar, exclude=set(candidate_universe))
+    fetch_universe = sorted(set(candidate_universe) | set(reinclusion_candidates))
+    uhash = universe_hash(fetch_universe)
     (OUT_DIR / "_universe_resolution.json").write_text(json.dumps({
         "resolved_at": datetime.now(timezone.utc).isoformat(),
-        "n_candidates": len(candidate_universe),
+        "n_candidates_live_today": len(candidate_universe),
+        "n_historical_reinclusion": len(reinclusion_candidates),
+        "n_historical_reinclusion_no_data": len(reinclusion_no_data),
+        "n_fetch_universe_total": len(fetch_universe),
         "universe_hash": uhash,
+        "universe_hash_scope": "fetch_universe (live TRADING today UNION historical DELISTED reinclusion) "
+                                "-- NOT just today's live candidates, see module docstring.",
         "filter": "contractType=PERPETUAL, quoteAsset=USDT, status=TRADING, underlyingType=COIN",
+        "historical_reinclusion_source": str(load_listing_calendar.__module__) + ".load_listing_calendar() "
+                                          "-- data/listings_backfill/binance/listings_calendar.parquet",
+        "historical_reinclusion_no_data_symbols": reinclusion_no_data,
         "note": "audit trail only -- NOT a frozen-hash drift gate (see runner docstring); a changing "
-                "candidate set run-to-run is expected and correct for this alpha.",
-        "candidates": candidate_universe,
+                "candidate set run-to-run is expected and correct for this alpha. PER-REBALANCE PIT "
+                "eligibility (existed/listing-age/history/liquidity, with rejection reasons) is in "
+                "pit_universe_log.parquet / pit_universe_summary.json, not here -- this file only "
+                "records what was FETCHED this run, never what was eligible on any given past date.",
+        "candidates_live_today": candidate_universe,
+        "candidates_historical_reinclusion": reinclusion_candidates,
     }, indent=2))
     print(f"[{ALPHA_ID}] univers candidat DYNAMIQUE (live exchangeInfo) : "
-          f"{len(candidate_universe)} symboles, hash={uhash} (audit seulement, PAS un frozen-hash gate)",
+          f"{len(candidate_universe)} symboles live aujourd'hui + "
+          f"{len(reinclusion_candidates)} symboles délistés réintégrés (survivance) = "
+          f"{len(fetch_universe)} à télécharger, hash={uhash} (audit seulement, PAS un frozen-hash gate)",
           flush=True)
+    if reinclusion_no_data:
+        print(f"[{ALPHA_ID}] {len(reinclusion_no_data)} symboles délistés SANS donnée "
+              f"reconstructible dans ce worktree (lacune honnête, jamais silencieuse) : "
+              f"{reinclusion_no_data}", flush=True)
 
     # -- data: incremental REST top-up of a small local daily-bar cache per
     #    symbol (date/close/quote_volume only), same generic loader as V1
     #    (klines_source.py, reused read-only). Small inter-symbol sleep to
     #    stay clear of the weight-based rate limit on a large first backfill
-    #    (see module docstring's "API load note").
+    #    (see module docstring's "API load note"). Delisted symbols use the
+    #    SAME client/cache dir -- Binance's public klines endpoint still
+    #    serves their historical bars up to their last trading day.
     close_cols, vol_cols = {}, {}
-    n = len(candidate_universe)
-    for i, sym in enumerate(candidate_universe):
+    n = len(fetch_universe)
+    for i, sym in enumerate(fetch_universe):
         cpath = cache_path_for_symbol(sym)
         panel = refresh_symbol_cache(sym, cpath)
         if not panel.empty:
@@ -189,16 +240,64 @@ def main() -> int:
     panel_close = panel_close[panel_close.index < today_utc]
     panel_vol = panel_vol[panel_vol.index < today_utc]
 
+    # -- (B) explicit PIT eligibility gate: onboard_ts (real listing date,
+    #    from listings_calendar.parquet, honest first-price-data fallback
+    #    for the 2 symbols absent from it) + MIN_LISTING_AGE_DAYS, computed
+    #    and logged BEFORE any return/liquidity math runs -- see
+    #    universe.py module docstring. mask_pre_eligibility() NaNs out every
+    #    (date, symbol) cell before a symbol's onboard_ts + age gate is
+    #    satisfied, so signal.py's OWN (untouched, frozen) causal math can
+    #    never rank a symbol before it genuinely existed and cleared the
+    #    same listing-age discipline ListingAgeGate already enforces
+    #    elsewhere in this repo.
+    rebal_dates = weekly_rebalance_dates(panel_close.index, REBALANCE_WEEKDAY)
+    onboard_df = resolve_onboard_dates(fetch_universe, listing_calendar, panel_close)
+    n_fallback = int((onboard_df["onboard_source"] == "first_price_data_fallback").sum())
+    n_unknown = int((onboard_df["onboard_source"] == "unknown").sum())
+    if n_fallback or n_unknown:
+        print(f"[{ALPHA_ID}] onboard_ts : {n_fallback} symboles via fallback "
+              f"'first_price_data_fallback' (absents du calendrier), {n_unknown} 'unknown' "
+              f"(ni calendrier ni donnée -- exclus de tout rebalance).", flush=True)
+
+    pit_log = build_pit_eligibility_log(
+        rebal_dates, fetch_universe, onboard_df, panel_close, panel_vol,
+        min_listing_age_days=MIN_LISTING_AGE_DAYS, min_liquidity_usd=MIN_LIQUIDITY_USD,
+        liquidity_window=LIQUIDITY_WINDOW_DAYS, lookback=LOOKBACK_DAYS,
+    )
+    write_pit_universe_log(pit_log, OUT_DIR / "pit_universe_log.parquet")
+    pit_summary = summarize_pit_log(pit_log)
+    (OUT_DIR / "pit_universe_summary.json").write_text(json.dumps({
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "min_listing_age_days": MIN_LISTING_AGE_DAYS,
+        "min_liquidity_usd": MIN_LIQUIDITY_USD,
+        "note": "One entry per rebalance date. eligible_universe_size/selected_universe = symbols "
+                "passing ALL PIT gates that date (existed, listing age, real history, liquidity) -- "
+                "the pool the top-quintile ranking runs over, NOT only the symbols actually picked "
+                "LONG that week (see decisions.parquet for the actual picks). Full per-symbol detail, "
+                "including every rejection reason, is in pit_universe_log.parquet (queryable).",
+        "n_rebalance_dates": len(pit_summary),
+        "rebalances": pit_summary,
+    }, indent=2))
+    if pit_summary:
+        first_n, last_n = pit_summary[0]["eligible_universe_size"], pit_summary[-1]["eligible_universe_size"]
+        print(f"[{ALPHA_ID}] univers PIT éligible : {first_n} symboles au premier rebalance "
+              f"({pit_summary[0]['rebalance_date'][:10]}) -> {last_n} au dernier "
+              f"({pit_summary[-1]['rebalance_date'][:10]}) -- {len(pit_summary)} rebalances audités "
+              f"-> pit_universe_log.parquet / pit_universe_summary.json", flush=True)
+
+    masked_close, masked_vol = mask_pre_eligibility(
+        panel_close, panel_vol, onboard_df, min_listing_age_days=MIN_LISTING_AGE_DAYS)
+
     dec = build_weekly_decisions(
-        panel_close, panel_vol,
+        masked_close, masked_vol,
         min_liquidity_usd=MIN_LIQUIDITY_USD, top_fraction=TOP_FRACTION,
         lookback=LOOKBACK_DAYS, liquidity_window=LIQUIDITY_WINDOW_DAYS,
         rebalance_weekday=REBALANCE_WEEKDAY,
     )
     n_rebalances = dec["event_time"].nunique() if not dec.empty else 0
     print(f"[{ALPHA_ID}] {len(dec)} décisions LONG (top-quintile, {LOOKBACK_DAYS}j->fwd_7d) "
-          f"sur {panel_close.shape[1]} symboles avec donnée live, {n_rebalances} rebalances hebdo",
-          flush=True)
+          f"sur {masked_close.shape[1]} symboles avec donnée live (univers PIT masqué), "
+          f"{n_rebalances} rebalances hebdo", flush=True)
 
     if dec.empty:
         print(f"[{ALPHA_ID}] rien de tradeable sur cette fenêtre.")
@@ -206,11 +305,13 @@ def main() -> int:
 
     # internal-consistency sanity check (NOT a frozen-drift gate — see
     # module docstring): every emitted symbol must belong to THIS run's
-    # resolved candidate set.
+    # resolved fetch universe (live TRADING today UNION historical
+    # reinclusion) -- a decision naming a symbol never fetched at all would
+    # indicate a bug in this script, not expected drift.
     runtime_symbols = set(dec["symbol"].unique())
-    if not runtime_symbols.issubset(set(candidate_universe)):
-        extra = runtime_symbols - set(candidate_universe)
-        raise RuntimeError(f"INCOHÉRENCE INTERNE : symboles hors univers candidat résolu ce run: {extra}")
+    if not runtime_symbols.issubset(set(fetch_universe)):
+        extra = runtime_symbols - set(fetch_universe)
+        raise RuntimeError(f"INCOHÉRENCE INTERNE : symboles hors univers résolu ce run: {extra}")
     if (dec["direction"] != "LONG").any():
         raise RuntimeError(
             "Direction != LONG émise par CROSS_SECTIONAL_MOMENTUM_LIVE_V2 — interdit "
@@ -248,10 +349,16 @@ def main() -> int:
     out.to_parquet(LEDGER, index=False)
     meta = {
         "alpha_id": ALPHA_ID, "last_run": now, "universe_hash": uhash,
-        "n_candidates_this_run": len(candidate_universe),
+        "n_candidates_live_today": len(candidate_universe),
+        "n_historical_reinclusion": len(reinclusion_candidates),
+        "n_historical_reinclusion_no_data": len(reinclusion_no_data),
+        "n_fetch_universe_total": len(fetch_universe),
         "n_symbols_with_data": len(close_cols),
+        "min_listing_age_days": MIN_LISTING_AGE_DAYS,
         "n_decisions_total": len(out), "n_decisions_new": n_new,
         "n_rebalances_this_run": n_rebalances,
+        "pit_universe_log": "pit_universe_log.parquet",
+        "pit_universe_summary": "pit_universe_summary.json",
         "mode": "A_SIGNAL_SHADOW",
     }
     (OUT_DIR / "run_state.json").write_text(json.dumps(meta, indent=2))
