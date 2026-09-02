@@ -1,0 +1,279 @@
+# configs/validation_registry.yaml — VALIDATION_REGISTRY (mission ALPHA
+# VALIDATION FACTORY, 2026-09-02).
+#
+# Inventaire de TOUS les candidats Alpha Hunt (rounds 1-3) suffisamment
+# sérieux (PROMISING / NEEDS_FULL_VALIDATION ou mieux) pour entrer dans le
+# pipeline de validation indépendante. Ce fichier est SÉPARÉ de
+# configs/live_alpha_registry.yaml : celui-ci reste le registre des alphas
+# qui ont DÉJÀ un alpha_id/code/freeze -- ce fichier-ci suit des candidats
+# EN AMONT de ce statut, avant toute réimplémentation indépendante.
+#
+# Deux concepts stricts (jamais confondus) :
+#   VALIDATED_FOR_FORWARD = validation historique/robustesse suffisante pour
+#                            figer une spec (via réimplémentation
+#                            indépendante, PAS une simple relecture du code
+#                            discovery).
+#   FORWARD_CONFIRMED     = preuve obtenue APRÈS freeze, sur données
+#                            réellement jamais vues au moment du freeze.
+# Une réimplémentation historique n'est JAMAIS une "confirmation forward
+# indépendante", même si elle est menée par un worker différent.
+#
+# current_status ici suit un pipeline propre à ce fichier :
+#   CANDIDATE            -> inventorié, réimplémentation pas encore lancée
+#   VALIDATING           -> réimplémentation indépendante en cours
+#   VALIDATED_FOR_FORWARD -> gate de validation passé (voir section 5 de la
+#                            mission), prêt pour freeze automatique
+#   REJECTED / DATA_BLOCKED / IMPLEMENTATION_BLOCKED / NEEDS_MORE_RESEARCH
+#                         -> n'a pas passé le gate, raison documentée
+#
+# overlap_family regroupe les variantes corrélées (même risque économique)
+# sous un même groupe -- ne JAMAIS les compter comme familles indépendantes
+# dans un total (instruction explicite, section 1).
+
+candidates:
+
+  # ══════════════════════════ PRIORITÉ 1-8 (section 23) ═══════════════════
+
+  - candidate_id: AMIHUD_ILLIQUIDITY_PREMIUM
+    family: cross_sectional
+    overlap_family: CROSS_SECTIONAL_XSMOM   # distinct du momentum -- facteur de liquidité, pas de tendance -- mais même famille opérationnelle (univers/rebalance cross-sectional)
+    economic_mechanism: >
+      Rang cross-sectionnel sur l'illiquidité de type Amihud (|return|/volume
+      moyen sur une fenêtre) -- les noms les moins liquides portent une prime
+      de rendement attendue (compensation du risque d'exécution/slippage),
+      logique distincte du momentum de prix.
+    source_round: round3
+    source_worker: W2 (cross_sectional)
+    discovery_result: "+99.3bps net, t=2.92, PF 1.86, positif 7/7 années, stabilité d'ancrage la plus fine du round"
+    current_status: CANDIDATE
+    existing_live_alpha: null   # aucun alpha_id existant sur ce mécanisme
+    data_available: "data_v2/normalized (worktree futur-data-v2, 312 symboles PIT)"
+    execution_available: true   # perp liquide, exécution shadow standard
+
+  - candidate_id: LIQ_REPEAT_VOL_GATE
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR   # même flux d'events que LIQ_CASCADE_REPEAT_V1 -- ceci est un META-SIGNAL (gate), pas un nouveau détecteur
+    economic_mechanism: >
+      Meta-signal ENABLE/DISABLE sur LIQ_CASCADE_REPEAT_V1 (et transférable à
+      SHORT_SQUEEZE_EXHAUSTION) : n'activer le signal que lorsque la vol
+      réalisée BTC 24h est élevée -- les cascades marquent une vraie
+      capitulation quand le marché est déjà sous stress, du bruit sinon.
+    source_round: round3
+    source_worker: W5 (meta_signals), test T1.1
+    discovery_result: "OOS delta +17.87bps sur N=949 trades gatés (sur 2330), PF 1.03->1.17, drawdown -26848->-22840bps cumulés ; corroboré par transfert non-refit sur SHORT_SQUEEZE_EXHAUSTION (+9.71bps, T1.11)"
+    current_status: CANDIDATE
+    existing_live_alpha: LIQ_CASCADE_REPEAT_V1   # meta-signal appliqué SUR cet alpha existant -- ne modifie pas sa spec frozen, nouvelle variante
+    data_available: "liq_cascade_dataset + data/derivatives_raw (vol réalisée BTC)"
+    execution_available: true
+
+  - candidate_id: LIQ_REPEAT_DENSITY
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR   # meta-signal sur le même détecteur
+    economic_mechanism: >
+      Régime de densité de cascades (systémique = plusieurs symboles
+      touchés simultanément, vs isolé = un seul nom) comme conditionneur du
+      signal repeat-cascade -- généralisation directe du headline round2.
+    source_round: round3
+    source_worker: W4 (regime_conditional), test A6
+    discovery_result: "+39.5bps net déclusterisé (t=5.68) en régime systémique vs breakeven -1.2bps (t=2.43) en régime isolé, stable 5/6 années"
+    current_status: CANDIDATE
+    existing_live_alpha: LIQ_CASCADE_REPEAT_V1
+    data_available: "liq_cascade_dataset (densité cross-symbole calculable directement)"
+    execution_available: true
+
+  - candidate_id: LIQ_REPEAT_SKEW_OVERLAY
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR   # meta-signal/filtre sur le même détecteur, source de régime différente (options)
+    economic_mechanism: >
+      Le skew 25-delta BTC (put-heavy = protection déjà pricée) prédit la
+      probabilité qu'une cascade fraîche soit suivie d'une autre cascade
+      same-symbol sous 24h -- le marché d'options informe la dynamique de
+      deleveraging forcé avant qu'elle ne se répète.
+    source_round: round3
+    source_worker: W8 (cross_asset_interactions)
+    discovery_result: "43.8% vs 51.0% probabilité de repeat (skew put-heavy vs complaisant), z=-6.14 p<0.0001 raw, survit à la collapse jour-par-jour (t=-3.76, p=0.0002) -- le SEUL des 6 variables de régime testées à survivre au déclustering"
+    current_status: CANDIDATE
+    existing_live_alpha: LIQ_CASCADE_REPEAT_V1
+    data_available: "data/options_backfill/deribit (skew 25-delta BTC) + liq_cascade_dataset"
+    execution_available: true   # pas de véhicule d'exécution DIRECT (c'est un filtre/sizing), mais applicable via la couche overlay existante (cf VOL_FORECAST_LAYER_V1)
+
+  - candidate_id: CROSS_SECTIONAL_MOMENTUM_CVD
+    family: cross_sectional
+    overlap_family: CROSS_SECTIONAL_XSMOM
+    economic_mechanism: >
+      Filtre du momentum cross-sectionnel par la confirmation CVD
+      (cumulative volume delta) -- le momentum porté par un flux taker
+      confirmé (achat agressif) se comporte différemment du momentum sans
+      confirmation de flux.
+    source_round: round3
+    source_worker: W2 (cross_sectional)
+    discovery_result: "split CVD-confirmé +49.8bps (6/7 années positives) vs CVD-divergent -150.9bps (t=-2.39, négatif chaque année) -- un filtre fort, pas juste un facteur additif"
+    current_status: CANDIDATE
+    existing_live_alpha: null
+    data_available: "data_v2/normalized + data/derivatives_raw (taker_buy volumes pour CVD)"
+    execution_available: true
+
+  - candidate_id: BTC_ETH_CURVE_STEEPNESS
+    family: relative_value
+    overlap_family: CALENDAR_BASIS_CURVE   # même famille opérationnelle que FUNDING_BASIS_DISAGREEMENT_V2, construction économique DIFFÉRENTE (cross-asset, pas single-asset level)
+    economic_mechanism: >
+      Pair trade sur l'écart de pentification (steepness) de la courbe
+      trimestrielle BTC vs ETH -- distinct du niveau de base
+      single-asset (déjà FUNDING_BASIS_DISAGREEMENT_V2) ; chaque variante
+      single-asset testée séparément était DEAD, l'edge n'existe que dans
+      la comparaison cross-asset.
+    source_round: round3
+    source_worker: W3 (relative_value)
+    discovery_result: "+77.8bps net, t=1.94, PF=1.58 -- distinct de l'alpha live existant et du finding round2 W4"
+    current_status: CANDIDATE
+    existing_live_alpha: null
+    data_available: "data/derivatives_backfill/binance_vision_quarterly (BTC + ETH)"
+    execution_available: true   # 2 legs perp/quarterly, même style d'exécution que FUNDING_BASIS_DISAGREEMENT_V2
+
+  - candidate_id: POSITIONING_TAKER_FLOW
+    family: positioning
+    overlap_family: POSITIONING_STANDALONE   # même famille que WHALE_LSR_SCREEN_V1, construction différente (flux taker vs LSR de position)
+    economic_mechanism: >
+      Le ratio long/short des VOLUMES TAKER (flux, pas stock de position)
+      prédit la continuation de prix -- distinct du LSR de compte (stock).
+    source_round: round3
+    source_worker: W3 (relative_value)
+    discovery_result: "+51.9bps net, t=2.16 -- le t-stat le plus fort du batch W3, récompense le MOMENTUM"
+    current_status: CANDIDATE
+    existing_live_alpha: null
+    data_available: "data/positioning (Binance fapi taker long/short ratio)"
+    execution_available: true
+
+  - candidate_id: GLOBAL_ACCOUNT_LSR_FADE
+    family: positioning
+    overlap_family: POSITIONING_STANDALONE
+    economic_mechanism: >
+      Le LSR au niveau compte global (retail, stock de position) prédit un
+      FADE -- comportement opposé au flux taker ci-dessus (POSITIONING_TAKER_FLOW) :
+      la foule retail sur-positionnée tend à se faire rincer.
+    source_round: round3
+    source_worker: W3 (relative_value)
+    discovery_result: "+51.5bps net, t=2.05 -- complémentaire de POSITIONING_TAKER_FLOW (flux vs stock, momentum vs fade)"
+    current_status: CANDIDATE
+    existing_live_alpha: null
+    data_available: "data/positioning (Binance fapi global account long/short ratio)"
+    execution_available: true
+
+  - candidate_id: OI_CVD_MEMORY_OVERLAP
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR   # W7 lui-même flague ceci comme PLAUSIBLEMENT le même mécanisme sous-jacent -- pas encore crédité comme indépendant
+    economic_mechanism: >
+      Généralisation de "la répétition compte" (headline round2) aux chocs
+      d'OI-down (deleveraging forcé) et de CVD-down (vente agressive
+      épuisée) -- shape identique (1ère occurrence faible/négative, 3e+
+      répétition nettement positive), mais W7 n'a PAS eu le temps de
+      vérifier le chevauchement d'événements avec liq_cascade_dataset --
+      pourrait être une CORROBORATION du même risque, pas une découverte
+      indépendante. Flag explicite à vérifier EN PREMIER dans la validation.
+    source_round: round3
+    source_worker: W7 (event_memory_generalization)
+    discovery_result: "OI-down / CVD-down : quasi-nul/négatif au 1er hit, PF 1.2-1.3 net-positif au 3e+ hit ou bucket haute-intensité cumulative ; asymétrique (deleveraging/vente uniquement)"
+    current_status: CANDIDATE
+    existing_live_alpha: LIQ_CASCADE_REPEAT_V1   # chevauchement suspecté -- PAS confirmé comme le même flux d'events
+    data_available: "data/derivatives_raw (OI, funding) + microstructure trades pour CVD"
+    execution_available: true
+
+  # ══════════════════════════ AUTRES CANDIDATS SÉRIEUX (round 1-2) ════════
+
+  - candidate_id: SHORT_COVERING_CONTINUATION
+    family: liquidation
+    overlap_family: OI_STATE_FAMILY
+    economic_mechanism: "prix en hausse + OI en baisse (short covering) vs baseline -> continuation"
+    source_round: round2
+    source_worker: W2
+    discovery_result: "excess +9.2bps full / +19.0bps OOS, t=5.5/4.7 -- meilleure couverture capacité/majors de tout round2"
+    current_status: ALREADY_LIVE   # déjà SHORT_COVERING_CONTINUATION_V1, RECONSTRUCTED/SIGNAL_SHADOW -- pas de nouvelle validation requise, hors scope de cette mission
+    existing_live_alpha: SHORT_COVERING_CONTINUATION_V1
+    data_available: "event_feature_panel (frozen-50)"
+    execution_available: true
+
+  - candidate_id: FUNDING_BASIS_DISAGREEMENT
+    family: relative_value
+    overlap_family: CALENDAR_BASIS_CURVE
+    economic_mechanism: "désaccord funding perp vs base trimestrielle BTC/ETH"
+    source_round: round2
+    source_worker: W4
+    discovery_result: "+7.7 to +33.2bps @14bps, positif chaque année 2024-2026"
+    current_status: ALREADY_LIVE
+    existing_live_alpha: FUNDING_BASIS_DISAGREEMENT_V2
+    data_available: "data/derivatives_backfill/binance_vision_quarterly"
+    execution_available: true
+
+  - candidate_id: OPTIONS_RV_IV_SPREAD
+    family: options_vol_overlay
+    overlap_family: OPTIONS_DERIBIT_BTC
+    economic_mechanism: "spread RV réalisée vs IV -- prime de risque de variance"
+    source_round: round2
+    source_worker: W6
+    discovery_result: "partial IC -0.39, survie plus forte que le facteur A14 existant"
+    current_status: ALREADY_LIVE   # fusionné dans VOL_FORECAST_LAYER_V1
+    existing_live_alpha: VOL_FORECAST_LAYER_V1
+    data_available: "data/options_backfill/deribit"
+    execution_available: false   # overlay de risque, pas de véhicule d'exécution direct
+
+  - candidate_id: OPTIONS_FAR_OTM_PUT_SHARE
+    family: options_vol_overlay
+    overlap_family: OPTIONS_DERIBIT_BTC
+    economic_mechanism: "part des puts far-OTM -- proxy demande de couverture crash"
+    source_round: round2
+    source_worker: W6
+    discovery_result: "partial IC +0.16, signe stable across splits"
+    current_status: ALREADY_LIVE
+    existing_live_alpha: VOL_FORECAST_LAYER_V1
+    data_available: "data/options_backfill/deribit"
+    execution_available: false
+
+  - candidate_id: OPTIONS_BLOCK_FLOW
+    family: options_vol_overlay
+    overlap_family: OPTIONS_DERIBIT_BTC
+    economic_mechanism: "compte de block trades horaire -> RV"
+    source_round: round2
+    source_worker: W6
+    discovery_result: "partial IC +0.10, étend le signal block horaire de A14"
+    current_status: ALREADY_LIVE
+    existing_live_alpha: VOL_FORECAST_LAYER_V1
+    data_available: "data/options_backfill/deribit"
+    execution_available: false
+
+  - candidate_id: WHALE_LSR
+    family: positioning
+    overlap_family: POSITIONING_STANDALONE
+    economic_mechanism: "LSR top-traders extrême-long -> sous-performance (screen SHORT-only)"
+    source_round: round2
+    source_worker: W10
+    discovery_result: "-57.8bps, n=87, p=0.006 -- signe stable 2 moitiés mais N mince"
+    current_status: ALREADY_LIVE
+    existing_live_alpha: WHALE_LSR_SCREEN_V1
+    data_available: "data/positioning"
+    execution_available: true   # utilisé comme screen (gate), pas position directe
+
+  # ══════════════════════════ BLOQUÉS / EXPLICITEMENT HORS SCOPE ══════════
+
+  - candidate_id: LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR
+    economic_mechanism: "ambigu -- deux hypothèses de signe non résolues (voir notes registre existant)"
+    source_round: round1_round2
+    source_worker: "W2 (round2), forensics session ECONOMIC TRUTH"
+    discovery_result: "instable par année (2022 -50.8bps, 2025 +145.5bps outlier) -- signe non résolu, PAS de choix basé sur le PnL"
+    current_status: BLOCKED   # reste explicitement bloqué (instruction section 24), toute variante future = nouvelle hypothèse séparée
+    existing_live_alpha: LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION_V1   # CODE_MISSING dans le registre live
+    data_available: "liq_cascade_dataset"
+    execution_available: true
+
+  - candidate_id: MICROSTRUCTURE_ALL_ROUND3
+    family: microstructure
+    overlap_family: MICROSTRUCTURE_FAMILY
+    economic_mechanism: "OFI/microprice/BBO-imbalance/absorption/cross-venue lead-lag -- aucun standalone convaincant"
+    source_round: round3
+    source_worker: W6
+    discovery_result: "0 PROMISING sur 31 mécanismes testés -- L1 depth-imbalance de round2 ne généralise pas plus profond dans le book, tous les reframings execution-filter sub-cost ou sign-unstable"
+    current_status: DATA_ACCUMULATION   # instruction section 25 : ne pas forcer une validation, continuer la collecte
+    existing_live_alpha: null
+    data_available: "market_physics_v3/raw + data/microstructure_reduced (1 jour seulement au 2026-09-02)"
+    execution_available: true
