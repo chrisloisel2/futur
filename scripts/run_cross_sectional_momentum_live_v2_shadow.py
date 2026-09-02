@@ -90,7 +90,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.institutional.live_alpha_lab.provenance import spec_provenance
+from src.institutional.live_alpha_lab.provenance import spec_provenance, stamp_event_ids
 
 from src.institutional.data.derivatives_collector.symbol_resolver import fetch_exchange_info
 # Generic Binance daily-klines REST client + local parquet cache, reused
@@ -323,6 +323,7 @@ def main() -> int:
     dec["engine"] = ALPHA_ID
     dec["horizon"] = HORIZON
     dec["universe_hash"] = uhash
+    dec = stamp_event_ids(dec, ALPHA_ID, "event_time", "symbol")
     dec["decided_at"] = now
 
     for _k, _v in spec_provenance(ALPHA_ID).items():

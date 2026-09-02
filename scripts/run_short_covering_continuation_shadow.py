@@ -48,7 +48,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.institutional.live_alpha_lab.provenance import spec_provenance
+from src.institutional.live_alpha_lab.provenance import spec_provenance, stamp_event_ids
 
 from src.institutional.engines.short_covering_continuation.infer import (
     ShortCoveringContinuationEngine)
@@ -123,6 +123,7 @@ def main() -> int:
     dec["timestamp"] = pd.to_datetime(dec["timestamp"])
     now = datetime.now(timezone.utc).isoformat()
     dec["universe_hash"] = uhash
+    dec = stamp_event_ids(dec, ALPHA_ID, "timestamp", "asset")
     dec["decided_at"] = now
 
     for _k, _v in spec_provenance(ALPHA_ID).items():

@@ -37,7 +37,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.institutional.live_alpha_lab.provenance import spec_provenance
+from src.institutional.live_alpha_lab.provenance import spec_provenance, stamp_event_ids
 
 from src.institutional.engines.vol_forecast_layer.panel import (
     PANEL_COLUMNS, build_daily_panel,
@@ -112,6 +112,10 @@ def main() -> int:
     dec = panel[PANEL_COLUMNS].copy()
     dec["engine"] = ALPHA_ID
     dec["universe_hash"] = uhash
+    # symbol_col=None : ce panel est market-wide (un seul symbole BTCUSDT
+    # fixé par build_daily_panel(), pas une colonne par ligne) -- sentinel
+    # "MARKET_WIDE" explicite dans raw_event_id, cf provenance.py.
+    dec = stamp_event_ids(dec, ALPHA_ID, "event_time", symbol_col=None)
     dec["decided_at"] = now
 
     for _k, _v in spec_provenance(ALPHA_ID).items():

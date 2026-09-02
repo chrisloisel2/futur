@@ -14,12 +14,15 @@ chaîne RÉELLEMENT traçable dans le pipeline actuel :
     -> fill (ShadowFill, state.fills)
     -> position (Position, state.positions -- ou déjà clôturée si absente)
 
-⚠ raw_event_id / feature_snapshot_id : ces identifiants n'existent PAS
-dans le pipeline actuel -- chaque moteur d'alpha recalcule ses features à
-la volée à partir des données brutes sans stamper d'ID par événement/
-snapshot. Ils sont retournés explicitement "NOT_AVAILABLE" avec la raison
-plutôt que fabriqués -- discipline anti-fabrication du projet (cf
-marks.py : jamais un prix inventé ; même principe pour un ID inventé).
+⚠ raw_event_id / feature_snapshot_id (item P1, phase OPERATIONAL
+HARDENING) : les 8 runners stampent désormais ces deux IDs (cf
+provenance.py::stamp_event_ids) sur chaque NOUVELLE décision écrite --
+raw_event_id dérivé de (alpha_id, symbol, event_time), feature_snapshot_id
+du contenu complet de la ligne au moment de la décision. Les décisions
+écrites AVANT ce déploiement (2026-09-02) n'ont pas ces colonnes (NaN) --
+jamais backfillées avec un ID inventé, retournées "NOT_AVAILABLE" avec la
+raison plutôt que fabriquées, même discipline anti-fabrication que
+marks.py (jamais un prix inventé).
 """
 from __future__ import annotations
 
@@ -110,21 +113,28 @@ def reconstruct(portfolio_name: str, instrument: str) -> Dict[str, Any]:
         ledger_row = next(
             (r for r in ledger_rows if r.get("ts") == order.get("timestamp_decision")), None
         )
+        raw_event_id = decision.get("raw_event_id") if decision else None
+        feature_snapshot_id = decision.get("feature_snapshot_id") if decision else None
+        # item P1 : les décisions écrites APRÈS le déploiement de
+        # stamp_event_ids() portent un raw_event_id/feature_snapshot_id réel
+        # (pandas NaN redevient None au passage par to_json/json.loads) --
+        # les anciennes lignes (avant ce déploiement) restent NOT_AVAILABLE,
+        # jamais backfillées avec un ID inventé.
         steps.append({
             "order": order,
             "fills": order_fills,
             "intent_ledger_row": ledger_row,
             "decision": decision,
             "decision_found": decision is not None,
-            "raw_event_id": "NOT_AVAILABLE",
-            "raw_event_id_reason": (
-                "le pipeline actuel ne stampe pas d'identifiant par événement brut "
-                "-- les features sont recalculées à la volée par chaque moteur d'alpha"
+            "raw_event_id": raw_event_id if raw_event_id else "NOT_AVAILABLE",
+            "raw_event_id_reason": None if raw_event_id else (
+                "décision antérieure au déploiement de stamp_event_ids() (ou alpha sans décision "
+                "retrouvée) -- jamais backfillé avec un ID inventé, cf provenance.py"
             ),
-            "feature_snapshot_id": "NOT_AVAILABLE",
-            "feature_snapshot_id_reason": (
-                "idem raw_event_id -- pas de snapshot de features persisté avec un ID propre, "
-                "seules les valeurs finales (score_raw, expected_return, etc.) sont dans decisions.parquet"
+            "feature_snapshot_id": feature_snapshot_id if feature_snapshot_id else "NOT_AVAILABLE",
+            "feature_snapshot_id_reason": None if feature_snapshot_id else (
+                "idem raw_event_id -- décision antérieure au déploiement de stamp_event_ids(), "
+                "ou alpha sans décision retrouvée"
             ),
         })
 

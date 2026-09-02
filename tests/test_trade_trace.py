@@ -131,3 +131,40 @@ def test_narrate_produces_readable_text_without_crashing(lab):
 
 def test_find_decision_row_unknown_alpha_returns_none_not_crash(lab):
     assert trace_mod.find_decision_row("UNKNOWN_ALPHA_X", "BTCUSDT", "2026-09-01T00:00:00+00:00") is None
+
+
+# ── P1 (phase OPERATIONAL HARDENING) : raw_event_id/feature_snapshot_id ──
+
+def test_reconstruct_uses_real_ids_when_decision_has_been_stamped(lab):
+    """Une décision écrite APRÈS le déploiement de stamp_event_ids() porte
+    de vrais raw_event_id/feature_snapshot_id -- trade_trace doit les
+    reprendre tels quels, pas les écraser par NOT_AVAILABLE."""
+    _write_state(lab, "P1_EQUAL_RISK", orders=[_order()])
+    _write_decisions(lab, "SHORT_COVERING_CONTINUATION_V1", [
+        {"timestamp": pd.Timestamp("2026-09-01T00:00:00+00:00"), "asset": "JUPUSDT",
+        "direction": "LONG", "score_net": 0.02, "reason": "ACCEPT_SHADOW",
+        "raw_event_id": "c9b865d9177eacea", "feature_snapshot_id": "190be779f54786dd"},
+    ])
+    result = trace_mod.reconstruct("P1_EQUAL_RISK", "JUPUSDT")
+    step = result["steps"][0]
+    assert step["raw_event_id"] == "c9b865d9177eacea"
+    assert step["feature_snapshot_id"] == "190be779f54786dd"
+    assert step["raw_event_id_reason"] is None
+    assert step["feature_snapshot_id_reason"] is None
+
+
+def test_reconstruct_old_row_without_id_columns_stays_not_available_with_reason(lab):
+    """Colonnes absentes (décisions écrites avant le déploiement) : jamais
+    un crash, jamais un ID inventé -- NOT_AVAILABLE avec la raison,
+    exactement comme avant ce changement."""
+    _write_state(lab, "P1_EQUAL_RISK", orders=[_order()])
+    _write_decisions(lab, "SHORT_COVERING_CONTINUATION_V1", [
+        {"timestamp": pd.Timestamp("2026-09-01T00:00:00+00:00"), "asset": "JUPUSDT",
+        "direction": "LONG", "score_net": 0.02, "reason": "ACCEPT_SHADOW"},
+    ])
+    result = trace_mod.reconstruct("P1_EQUAL_RISK", "JUPUSDT")
+    step = result["steps"][0]
+    assert step["raw_event_id"] == "NOT_AVAILABLE"
+    assert step["feature_snapshot_id"] == "NOT_AVAILABLE"
+    assert step["raw_event_id_reason"] is not None
+    assert step["feature_snapshot_id_reason"] is not None

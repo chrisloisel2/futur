@@ -21,9 +21,10 @@ Ne réécrit JAMAIS une ligne existante autrement qu'en lui ajoutant la colonne
 from __future__ import annotations
 
 import hashlib
+import json
 import subprocess
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import pandas as pd
 import yaml
@@ -157,6 +158,46 @@ def spec_provenance(alpha_id: str) -> Dict[str, object]:
         "config_hash": config_hash(),
         "alpha_spec_hash": alpha_spec_hash(alpha_id),
     }
+
+
+def stamp_event_ids(df: pd.DataFrame, alpha_id: str, time_col: str, symbol_col: Optional[str] = None) -> pd.DataFrame:
+    """item P1 (phase OPERATIONAL HARDENING) : raw_event_id/feature_snapshot_id
+    pour trade_trace.py -- "corriger progressivement" la lacune, jamais
+    backfiller un faux ID sur d'anciennes lignes (celles-ci restent
+    NOT_AVAILABLE, cf trade_trace.py). Pour une NOUVELLE ligne, les deux ID
+    sont dérivés DÉTERMINISTIQUEMENT du contenu réel de la ligne -- jamais
+    un UUID aléatoire opaque qui serait, lui, un ID fabriqué.
+
+    À appeler AVANT d'ajouter les colonnes de provenance/exécution
+    (decided_at, code_commit_sha, tier…) : feature_snapshot_id doit
+    refléter le contenu ÉCONOMIQUE de la décision (les features qui l'ont
+    produite), pas le moment où le script a tourné.
+
+    raw_event_id : hash de (alpha_id, symbol, event_time) -- identifiant
+    canonique de l'événement marché source, reconstructible par quiconque
+    connaît ce triplet. `symbol_col=None` (alpha market-wide, ex.
+    VOL_FORECAST_LAYER_V1 -- pas de colonne symbole par ligne) : le
+    sentinel explicite "MARKET_WIDE" est utilisé à la place, jamais un
+    symbole inventé.
+    feature_snapshot_id : hash du contenu COMPLET de la ligne au moment de
+    l'appel -- une empreinte vérifiable, pas un compteur arbitraire :
+    recalculer les mêmes features à partir des mêmes données brutes doit
+    reproduire le même hash.
+    """
+    out = df.copy()
+
+    def _raw_event_id(row) -> str:
+        symbol = row[symbol_col] if symbol_col is not None else "MARKET_WIDE"
+        key = f"{alpha_id}|{symbol}|{pd.Timestamp(row[time_col]).isoformat()}"
+        return hashlib.sha256(key.encode()).hexdigest()[:16]
+
+    def _feature_snapshot_id(row) -> str:
+        payload = json.dumps({k: str(v) for k, v in row.items()}, sort_keys=True)
+        return hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+    out["raw_event_id"] = out.apply(_raw_event_id, axis=1)
+    out["feature_snapshot_id"] = out.apply(_feature_snapshot_id, axis=1)
+    return out
 
 
 def provenance_counts(df: pd.DataFrame) -> dict:

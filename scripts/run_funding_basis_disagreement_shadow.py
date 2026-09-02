@@ -35,7 +35,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.institutional.live_alpha_lab.provenance import spec_provenance
+from src.institutional.live_alpha_lab.provenance import spec_provenance, stamp_event_ids
 
 from src.institutional.engines.funding_basis_disagreement.panel import build_panel
 from src.institutional.engines.funding_basis_disagreement.disagreement import (
@@ -131,6 +131,7 @@ def main() -> int:
     dec["engine"] = ALPHA_ID
     dec["horizon"] = HORIZON
     dec["universe_hash"] = uhash
+    dec = stamp_event_ids(dec, ALPHA_ID, "date", "symbol")
     dec["decided_at"] = now
 
     for _k, _v in spec_provenance(ALPHA_ID).items():
