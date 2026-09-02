@@ -17,6 +17,8 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
+from src.institutional.live_alpha_lab.provenance import execution_truth_fix_segment
+
 ROOT = Path(__file__).resolve().parents[3]
 PORTFOLIOS_DIR = ROOT / "reports" / "live_alpha_lab" / "portfolios"
 
@@ -41,6 +43,11 @@ class Divergence:
             "stage": self.stage, "timestamp": self.timestamp, "field": self.field,
             "value_a": self.value_a, "value_b": self.value_b,
             "causal_instrument": self.causal_instrument,
+            # item P1 : distingue immédiatement un artefact connu pré-fix
+            # (get_mark() non-déterministe, commit ed17708) d'une VRAIE
+            # nouvelle divergence -- ne jamais rouvrir une enquête sur un
+            # segment déjà expliqué.
+            "segment": execution_truth_fix_segment(self.timestamp) if self.timestamp != "n/a" else "n/a",
         }
 
 

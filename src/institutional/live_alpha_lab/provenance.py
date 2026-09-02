@@ -36,6 +36,34 @@ FORWARD_LIVE = "FORWARD_LIVE"
 # explicite, jamais un SHA inventé.
 PRE_COMMIT_DISCIPLINE = "PRE_COMMIT_DISCIPLINE_2026-08-31"
 
+# item P1 (phase OPERATIONAL HARDENING) : P1_EQUAL_RISK et P1_CONTROL ont un
+# historique divergent d'AVANT le fix root-cause de get_mark() (commit
+# ed17708, root cause = _from_derivatives_raw utilisait un heuristique
+# "derniers 4 fichiers" incompatible avec le vrai pattern d'écriture du
+# collecteur -- cf marks.py::eligible_files_for_as_of). Cet historique n'est
+# PAS réécrit (principe du projet : jamais recalculer le passé), mais ne
+# doit pas non plus être mélangé silencieusement avec les données post-fix
+# dans une comparaison scientifique -- les deux segments ne sont pas
+# économiquement comparables (le pré-fix contient un artefact de
+# non-déterminisme connu, pas une vraie différence de stratégie).
+PRE_EXECUTION_TRUTH_FIX = "PRE_EXECUTION_TRUTH_FIX"
+POST_EXECUTION_TRUTH_FIX = "POST_EXECUTION_TRUTH_FIX"
+# Horodatage du commit ed17708 lui-même (git log -1 --format=%cI ed17708),
+# pas une estimation -- la frontière est le moment où le code a changé,
+# pas un round number arbitraire.
+EXECUTION_TRUTH_FIX_DEPLOYED_AT = pd.Timestamp("2026-09-01T11:13:00+00:00")
+
+
+def execution_truth_fix_segment(ts) -> str:
+    """PRE_EXECUTION_TRUTH_FIX si ts est strictement avant le déploiement du
+    fix (commit ed17708), POST_EXECUTION_TRUTH_FIX sinon. À utiliser pour
+    filtrer toute comparaison scientifique entre portefeuilles/segments
+    d'historique au seul segment POST -- jamais mélanger les deux."""
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return PRE_EXECUTION_TRUTH_FIX if t < EXECUTION_TRUTH_FIX_DEPLOYED_AT else POST_EXECUTION_TRUTH_FIX
+
 _ROOT = Path(__file__).resolve().parents[3]
 
 
