@@ -961,3 +961,66 @@ alphas:
       espace libre mocke sous le seuil). Code OFI/microprice/depth-imbalance
       lui-meme HORS SCOPE de ce lancement -- toujours a ecrire (voir
       operational_status ci-dessus).
+
+  - alpha_id: AMIHUD_ILLIQUIDITY_PREMIUM_V1
+    family: cross_sectional
+    mechanism: >
+      Amihud (2002) illiquidity premium : rang cross-sectionnel sur
+      l'illiquidite (moyenne causale |return|/volume-dollar, fenetre 30j),
+      LONG le quintile le plus illiquide (sous plancher de liquidite $1M
+      pour rester tradable), SHORT le quintile le plus liquide.
+      Rebalance hebdomadaire non-chevauchant (mercredi), horizon 7j
+      calendaires. PREMIER candidat gele via le pipeline Alpha Validation
+      Factory (reimplementation independante, PAS une copie du code
+      discovery -- voir source_report/validation_report).
+    version: v1.0
+    status: SIGNAL_SHADOW   # legacy, voir scientific_status/operational_status ci-dessous
+    scientific_status: FROZEN            # spec figee AVANT toute observation forward jugee (aucun parametre choisi apres inspection des resultats live)
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-09-01_round3/w2_cross_sectional/REPORT.md#XSEC_AMIHUD_ILLIQ_7D
+    validation_report: reports/edge_discovery/validation_2026-09/AMIHUD_ILLIQUIDITY_PREMIUM/REPORT.md   # VALIDATED_FOR_FORWARD=true, reimplementation independante
+    signal_definition: src/institutional/engines/amihud_illiquidity_live/signal.py::build_weekly_decisions
+    universe: "dynamique, live Binance USDM exchangeInfo (PERPETUAL/USDT/TRADING/COIN) + reintegration historique des symboles delistes -- voir src/institutional/engines/cross_sectional_momentum_live_v2/universe.py (reutilise en lecture seule, meme infra que CROSS_SECTIONAL_MOMENTUM_LIVE_V2)"
+    features: [illiq_avg_30d, liquidity_usd_30d]
+    model_family: RULE_RANKING
+    model_hash: null           # pas de modele ML, ranking pur -> pas d'artefact a hasher
+    training_window: "2020-03-18 .. 2026-07-22 (fenetre de validation independante, voir validation_report)"
+    freeze_timestamp: "2026-09-02T11:20:10+00:00"
+    entry: "quintile le plus illiquide (LONG) / quintile le plus liquide (SHORT) parmi le cohort eligible (liquidite causale 30j >= $1M, listing age >= 30j, illiq_avg calculable sur >=20 jours valides)"
+    exit: "fwd_7d (horizon fixe, non-chevauchant avec le rebalance suivant)"
+    horizon: fwd_7d
+    execution_style: TAKER
+    cost_model: "round-trip 28bps (7bps one-way x 4 legs, long-short 2 cotes) -- meme convention que le reste du projet"
+    risk_bucket: CROSS_SECTIONAL_FAMILY
+    expected_capacity: "book shadow $300k : pire cas 0.38%% ADV (leg long, 5e percentile), median 0.08%% ADV -- voir validation_report section 5"
+    correlation_family: CROSS_SECTIONAL_XSMOM   # meme famille operationnelle (univers/rebalance cross-sectional) que le momentum -- facteur economique DIFFERENT (illiquidite, pas tendance)
+    live_start_timestamp: "2026-09-02T11:20:10+00:00"
+    expected_net_bps: 105.7        # primary spec, reimplementation independante (validation_report section 3) ; discovery original : 99.3
+    expected_n_independent_episodes: 332   # rebalances hebdomadaires non-chevauchants, 2020-03-18..2026-07-22
+    expected_profit_factor: 1.67
+    data_live: true   # Binance USDM klines REST live + cache local incremental (klines_source.py), meme infra que CROSS_SECTIONAL_MOMENTUM_LIVE_V2
+    notes: >
+      ⚠ JAMBE SHORT (decision explicite, documentee) : ce projet a un audit
+      standing (project_short_audit.md, 2026-05-22/23) qui a REJETE le short
+      DIRECTIONNEL standalone (SHORT_ENABLED=False "jusqu'a nouvel ordre",
+      AUC 0.51-0.59 sur toutes les approches testees). La jambe SHORT de cet
+      alpha est economiquement DIFFERENTE : c'est la jambe de couverture
+      beta-marche d'un facteur relative-value long-short (isoler la prime
+      d'illiquidite), pas un pari directionnel standalone que les noms
+      liquides vont baisser -- l'edge valide (+105.7bps reimplementation
+      independante) est celui du SPREAD long-short complet, jamais separement
+      valide en long-only. SHADOW UNIQUEMENT (ShadowExecutionAdapter, zero
+      capital reel) -- voir src/institutional/engines/amihud_illiquidity_live/
+      __init__.py pour l'accounting complet. Flagge explicitement a
+      l'utilisateur (rapport de session) plutot que decide silencieusement
+      dans un sens ou dans l'autre.
+      CAVEATS reportes du validation_report (non-disqualifiants mais a
+      surveiller) : (1) concentration 2021 -- exclure 2021 fait tomber le
+      t-stat a 1.72 (marginal), la direction survit (+50.9bps) ; (2) ETA
+      statistique de reconfirmation forward a 80%% power ~17 ans (N_required
+      ~900 episodes hebdomadaires independants, signal/bruit intrinsequement
+      faible pour ce type de facteur) -- le monitoring forward doit juger sur
+      la survie du signe/cout/mecanisme sur le plancher calendaire de 6 mois,
+      PAS sur l'atteinte d'une significativite fraiche (pas realiste a cette
+      frequence). 2025 quasi-plat (-0.2bps) est le point a surveiller en
+      priorite pour un signal de decroissance.

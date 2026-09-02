@@ -42,6 +42,7 @@ TIME_COL_BY_ALPHA = {
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time",
     "VOL_FORECAST_LAYER_V1": "event_time",
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "event_time",
 }
 
 

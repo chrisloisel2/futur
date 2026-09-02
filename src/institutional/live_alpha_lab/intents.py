@@ -143,6 +143,30 @@ def _funding_basis_intents(alpha_id: str, family: str, risk_bucket: str,
     return out
 
 
+def _amihud_illiquidity_intents(alpha_id: str, family: str, risk_bucket: str,
+                                correlation_family: str, df: pd.DataFrame) -> List[PortfolioIntent]:
+    """AMIHUD_ILLIQUIDITY_PREMIUM_V1 : contrairement aux alphas cross-sectional
+    long-only existants, ce ledger porte une colonne `direction` réelle
+    (LONG=quintile illiquide, SHORT=quintile liquide -- voir signal.py). Le
+    poids égal est calculé SÉPARÉMENT par jambe (event_time, direction) --
+    PAS par event_time seul -- pour que long et short restent chacun
+    équipondérés en interne même si leurs tailles de panier diffèrent d'un
+    rebalance à l'autre (rare, borné par construction dans signal.py, mais
+    jamais supposé identique ici)."""
+    out = []
+    leg_size = df.groupby(["event_time", "direction"])["symbol"].transform("count")
+    for (_, r), size in zip(df.iterrows(), leg_size):
+        ts = pd.Timestamp(r["event_time"])
+        out.append(PortfolioIntent(
+            alpha_id=alpha_id, family=family, risk_bucket=risk_bucket,
+            correlation_family=correlation_family, timestamp=ts,
+            instrument=r["symbol"], direction=r["direction"],
+            target_position_fraction=1.0 / max(int(size), 1),
+            confidence=1.0, horizon_hours=168.0, expiry=_expiry(ts, 168.0),
+        ))
+    return out
+
+
 # alpha_id -> (family, risk_bucket, correlation_family, adapter_fn)
 ADAPTERS: Dict[str, Callable] = {
     "LIQ_CASCADE_REPEAT_V1": _liq_cascade_intents,
@@ -150,6 +174,7 @@ ADAPTERS: Dict[str, Callable] = {
     "SHORT_COVERING_CONTINUATION_V1": _short_covering_intents,
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": _cross_sectional_intents,
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": _cross_sectional_intents,
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": _amihud_illiquidity_intents,
     "FUNDING_BASIS_DISAGREEMENT_V2": _funding_basis_intents,
 }
 

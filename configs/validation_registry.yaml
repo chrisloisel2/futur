@@ -45,10 +45,34 @@ candidates:
     source_round: round3
     source_worker: W2 (cross_sectional)
     discovery_result: "+99.3bps net, t=2.92, PF 1.86, positif 7/7 années, stabilité d'ancrage la plus fine du round"
-    current_status: CANDIDATE
+    current_status: VALIDATED_FOR_FORWARD
     existing_live_alpha: null   # aucun alpha_id existant sur ce mécanisme
     data_available: "data_v2/normalized (worktree futur-data-v2, 312 symboles PIT)"
     execution_available: true   # perp liquide, exécution shadow standard
+    # ── résultats validation indépendante (reports/edge_discovery/validation_2026-09/AMIHUD_ILLIQUIDITY_PREMIUM/REPORT.md) ──
+    validated_for_forward: true
+    validation_report: reports/edge_discovery/validation_2026-09/AMIHUD_ILLIQUIDITY_PREMIUM/REPORT.md
+    discovery_net_bps: 99.3
+    validation_net_bps: 105.7
+    n_validation_independent: 332
+    scientific_status: FROZEN
+    operational_status: SIGNAL_SHADOW
+    frozen_alpha_id: AMIHUD_ILLIQUIDITY_PREMIUM_V1
+    freeze_timestamp: "2026-09-02T11:20:10+00:00"
+    historical_event_rate: "1.007/week (last 2y)"
+    recent_event_rate: "1.033/week (last 6m)"
+    conservative_event_rate: "1.007/week (min of last-2y/1y/6m -- conservative)"
+    n_required_statistical: 900   # block-bootstrap, one-sided alpha=5%, power=80%, target=50%-haircut edge
+    minimum_calendar_days: 182   # weekly cross-sectional floor
+    eta_p50: "6198 days (~17.0 years)"
+    eta_conservative: "6257 days (~17.1 years)"
+    validation_caveats: >
+      (1) magnitude partiellement concentrée en 2021 (ex-2021: t=1.72
+      marginal, direction survit +50.9bps) ; (2) ETA de reconfirmation
+      forward à 80%% power ~17 ans (signal/bruit intrinsèquement faible pour
+      ce type de facteur hebdomadaire ~300 noms) -- monitoring forward doit
+      juger sur survie signe/coût/mécanisme sur le plancher 6 mois, PAS sur
+      significativité fraîche. 2025 quasi-plat (-0.2bps) à surveiller.
 
   - candidate_id: LIQ_REPEAT_VOL_GATE
     family: liquidation
@@ -61,10 +85,22 @@ candidates:
     source_round: round3
     source_worker: W5 (meta_signals), test T1.1
     discovery_result: "OOS delta +17.87bps sur N=949 trades gatés (sur 2330), PF 1.03->1.17, drawdown -26848->-22840bps cumulés ; corroboré par transfert non-refit sur SHORT_SQUEEZE_EXHAUSTION (+9.71bps, T1.11)"
-    current_status: CANDIDATE
+    current_status: NEEDS_MORE_RESEARCH
     existing_live_alpha: LIQ_CASCADE_REPEAT_V1   # meta-signal appliqué SUR cet alpha existant -- ne modifie pas sa spec frozen, nouvelle variante
     data_available: "liq_cascade_dataset + data/derivatives_raw (vol réalisée BTC)"
     execution_available: true
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_REPEAT_VOL_GATE/REPORT.md
+    validation_result: >
+      Mécanisme survit (delta +11.88bps, PF 1.196->1.287, robuste sur toutes
+      les perturbations préenregistrées) MAIS le déclustering à 3 niveaux
+      (obligatoire) révèle que les "949 trades gatés" ne sont que 268
+      épisodes de régime de vol VRAIMENT indépendants (vol BTC élevée est un
+      état macro lent qui se clusterise sur des semaines) -- surestimation
+      ~10x de la preuve indépendante. N_required=2197-5893 (bootstrap, deux
+      unités de déclustering testées) -> ETA_P50=28.0 ans, ETA_CONSERVATIVE=
+      38.5 ans. REJETÉ comme confirmable fréquentiste forward à cet horizon ;
+      recommandé comme lead bayésien/qualitatif seulement.
 
   - candidate_id: LIQ_REPEAT_DENSITY
     family: liquidation
@@ -76,10 +112,32 @@ candidates:
     source_round: round3
     source_worker: W4 (regime_conditional), test A6
     discovery_result: "+39.5bps net déclusterisé (t=5.68) en régime systémique vs breakeven -1.2bps (t=2.43) en régime isolé, stable 5/6 années"
-    current_status: CANDIDATE
+    current_status: VALIDATED_FOR_FORWARD
     existing_live_alpha: LIQ_CASCADE_REPEAT_V1
     data_available: "liq_cascade_dataset (densité cross-symbole calculable directement)"
     execution_available: true
+    validated_for_forward: true
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_REPEAT_DENSITY/REPORT.md
+    discovery_net_bps: 39.5
+    validation_net_bps: 22.1   # ~moitié du claim -- déclustering cross-symbole corrigé (voir caveat)
+    n_validation_independent: 1165   # épisodes systémiques indépendants (vs 1322 isolés, breakeven -13.4bps)
+    n_required_statistical: 2654
+    conservative_event_rate: "~0.775 épisode/jour (stable)"
+    minimum_calendar_days: 60
+    eta_p50: "~3423 jours (~9.4 ans)"
+    eta_conservative: "~3423 jours (~9.4 ans, dominé par variance inter-épisode pas rareté)"
+    validation_caveats: >
+      Effet réel MAIS ~moitié du claim original : le N_indep=2047 de la
+      découverte n'était déclusterisé QUE par symbole, pas au niveau
+      "épisode cross-symbole" (un jour de crash produisant plusieurs
+      symboles n'était pas collapsé en une seule observation) -- corrigé ici
+      (3 couches : brut -> par-symbole >=4h -> épisode cross-symbole
+      chaîné >=4h). RECOMMANDATION EXPLICITE DU VALIDATEUR : ne PAS lancer
+      comme alpha standalone avec son propre N_required -- l'intégrer comme
+      couche de sizing/filtre sur le flux de décisions déjà shadow-live de
+      LIQ_CASCADE_REPEAT_V1 (comme VOL_FORECAST_LAYER_V1 le fait pour le
+      sizing global). Nécessite un mécanisme d'overlay -- PAS encore câblé
+      dans le pipeline live à ce stade (voir notes de session).
 
   - candidate_id: LIQ_REPEAT_SKEW_OVERLAY
     family: liquidation
@@ -92,10 +150,35 @@ candidates:
     source_round: round3
     source_worker: W8 (cross_asset_interactions)
     discovery_result: "43.8% vs 51.0% probabilité de repeat (skew put-heavy vs complaisant), z=-6.14 p<0.0001 raw, survit à la collapse jour-par-jour (t=-3.76, p=0.0002) -- le SEUL des 6 variables de régime testées à survivre au déclustering"
-    current_status: CANDIDATE
+    current_status: VALIDATED_FOR_FORWARD
     existing_live_alpha: LIQ_CASCADE_REPEAT_V1
     data_available: "data/options_backfill/deribit (skew 25-delta BTC) + liq_cascade_dataset"
     execution_available: true   # pas de véhicule d'exécution DIRECT (c'est un filtre/sizing), mais applicable via la couche overlay existante (cf VOL_FORECAST_LAYER_V1)
+    validated_for_forward: true
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_REPEAT_SKEW_OVERLAY/REPORT.md
+    n_validation_independent: 579   # jours qualifiants ; ~187 épisodes multi-jours après correction de clustering résiduel
+    n_required_statistical: 3069   # par groupe, pour reconfirmer l'effet haircut (~3.15pp)
+    minimum_calendar_days: 60
+    eta_p50: "~11.4 ans (effet plein)"
+    eta_conservative: "~46 ans (effet haircut 50%%)"
+    validation_caveats: >
+      ⚠ CORRECTION DE SIGNE OBLIGATOIRE : le mécanisme statistique se
+      reproduit presque exactement (43.1%%/51.5%% vs 43.8%%/51.0%% du
+      rapport source) MAIS la direction du rapport original est INVERSÉE --
+      c'est le skew COMPLAISANT (pas put-heavy) qui prédit le taux de
+      repeat le plus élevé, confirmé par sanity-check sur des vrais jours de
+      panique (SVB mars 2023, flash crash août 2024). Un bug de labellisation
+      dans le rapport de découverte, pas un calcul différent. 8/8
+      perturbations préenregistrées confirment la direction CORRIGÉE.
+      Clustering résiduel : 579 "jours indépendants" collapsent à 187
+      épisodes multi-jours (moyenne 3.1j) -- reste significatif après
+      correction grossière (t≈-2.6 à -2.7). Pas de véhicule d'exécution
+      direct -- filtre sur les décisions "onset" (1ère occurrence) de
+      LIQ_CASCADE_REPEAT_V1, une étape en amont de son trade "exhaustion"
+      (n>=2) réel. PAS encore câblé dans le pipeline live (nécessite le même
+      mécanisme d'overlay que LIQ_REPEAT_DENSITY -- LA DIRECTION DOIT ÊTRE
+      CORRIGÉE avant tout câblage, ne jamais utiliser le signe du rapport
+      de découverte original.
 
   - candidate_id: CROSS_SECTIONAL_MOMENTUM_CVD
     family: cross_sectional
@@ -108,10 +191,21 @@ candidates:
     source_round: round3
     source_worker: W2 (cross_sectional)
     discovery_result: "split CVD-confirmé +49.8bps (6/7 années positives) vs CVD-divergent -150.9bps (t=-2.39, négatif chaque année) -- un filtre fort, pas juste un facteur additif"
-    current_status: CANDIDATE
+    current_status: REJECTED
     existing_live_alpha: null
     data_available: "data_v2/normalized + data/derivatives_raw (taker_buy volumes pour CVD)"
     execution_available: true
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/CROSS_SECTIONAL_MOMENTUM_CVD/REPORT.md
+    validation_result: >
+      Côté CONFIRMED (tradeable) : +4.5bps (t=0.22) vs +49.8bps réclamé --
+      fragile, s'inverse sur 3-4/9 perturbations, dépend entièrement d'une
+      seule date sur 333 (la retirer inverse le signe). N_required≈34623
+      rebalances (~659 ans) -- infalsifiable. Côté DIVERGENT (à éviter) :
+      robuste (-61.4bps, négatif sur les 9 perturbations) mais c'est un
+      filtre, pas une position standalone, et N_required≈785 (~15 ans)
+      dépasse encore les 330 épisodes disponibles. REJETÉ pour déploiement
+      forward.
 
   - candidate_id: BTC_ETH_CURVE_STEEPNESS
     family: relative_value
@@ -125,10 +219,23 @@ candidates:
     source_round: round3
     source_worker: W3 (relative_value)
     discovery_result: "+77.8bps net, t=1.94, PF=1.58 -- distinct de l'alpha live existant et du finding round2 W4"
-    current_status: CANDIDATE
+    current_status: REJECTED
     existing_live_alpha: null
     data_available: "data/derivatives_backfill/binance_vision_quarterly (BTC + ETH)"
     execution_available: true   # 2 legs perp/quarterly, même style d'exécution que FUNDING_BASIS_DISAGREEMENT_V2
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/BTC_ETH_CURVE_STEEPNESS/REPORT.md
+    validation_result: >
+      PRIMARY_SPEC réimplémenté (fenêtre restreinte 2023-08-18+, seule
+      période avec chevauchement continu réel near/far) : +17.1bps, t=0.28
+      (non significatif), PF=1.10, 1/4 années positives. La réclamation
+      CENTRALE de la découverte s'INVERSE : le momentum single-asset ETH
+      (l'un des "8 variantes single-asset DEAD" du rapport source) est en
+      fait le résultat le PLUS fort de toute la batterie réimplémentée
+      (+259.6bps, t=2.35, PF=2.26, 4/4 années positives) -- contredit
+      directement la thèse "seul le cross-asset marche". Une seule année
+      (2024, +3833bps) explique la totalité du chiffre. N_required≈2800-3000
+      épisodes -> ETA 140-220 ans. REJETÉ.
 
   - candidate_id: POSITIONING_TAKER_FLOW
     family: positioning
@@ -139,10 +246,21 @@ candidates:
     source_round: round3
     source_worker: W3 (relative_value)
     discovery_result: "+51.9bps net, t=2.16 -- le t-stat le plus fort du batch W3, récompense le MOMENTUM"
-    current_status: CANDIDATE
+    current_status: REJECTED
     existing_live_alpha: null
     data_available: "data/positioning (Binance fapi taker long/short ratio)"
     execution_available: true
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/POSITIONING_TAKER_FLOW/REPORT.md
+    validation_result: >
+      PRIMARY_SPEC net = -18.1bps (t=-1.49 naïf, -0.97 déclusterisé par
+      jour), signe OPPOSÉ à la réclamation (+51.9bps). Gross ~0 sur les 7
+      perturbations, net toujours négatif. N_indep=978 réclamé collapse à 49
+      clusters cross-symbole vraiment indépendants (~20x surestimation --
+      "long/short taker" est un état macro corrélé cross-symbole). Donnée
+      data/positioning limitée à ~45j (rétention API 30j Binance), un seul
+      régime -- caveat additionnel sur tout re-test futur. REJETÉ,
+      N_required/ETA non applicables (edge négatif).
 
   - candidate_id: GLOBAL_ACCOUNT_LSR_FADE
     family: positioning
@@ -154,10 +272,22 @@ candidates:
     source_round: round3
     source_worker: W3 (relative_value)
     discovery_result: "+51.5bps net, t=2.05 -- complémentaire de POSITIONING_TAKER_FLOW (flux vs stock, momentum vs fade)"
-    current_status: CANDIDATE
+    current_status: REJECTED
     existing_live_alpha: null
     data_available: "data/positioning (Binance fapi global account long/short ratio)"
     execution_available: true
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/GLOBAL_ACCOUNT_LSR_FADE/REPORT.md
+    validation_result: >
+      PRIMARY_SPEC net = -47.6bps (t=-2.68 naïf, -1.54 déclusterisé), signe
+      OPPOSÉ et plus décisif que POSITIONING_TAKER_FLOW -- négatif (pas
+      juste dominé par les coûts) sur toutes les perturbations. N_indep=685
+      collapse à 63 clusters systémiques (~11x surestimation). Corrélation
+      croisée avec POSITIONING_TAKER_FLOW quasi-nulle (r=-0.035, overlap
+      d'épisodes 21%%, accord de direction 51.7%% -- pile ou face) : les
+      deux signaux sont bien des sources d'information distinctes, mais NI
+      L'UNE NI L'AUTRE ne montre d'edge validé sur cet échantillon. REJETÉ,
+      N_required/ETA non applicables.
 
   - candidate_id: OI_CVD_MEMORY_OVERLAP
     family: liquidation
@@ -173,10 +303,25 @@ candidates:
     source_round: round3
     source_worker: W7 (event_memory_generalization)
     discovery_result: "OI-down / CVD-down : quasi-nul/négatif au 1er hit, PF 1.2-1.3 net-positif au 3e+ hit ou bucket haute-intensité cumulative ; asymétrique (deleveraging/vente uniquement)"
-    current_status: CANDIDATE
-    existing_live_alpha: LIQ_CASCADE_REPEAT_V1   # chevauchement suspecté -- PAS confirmé comme le même flux d'events
+    current_status: REJECTED
+    existing_live_alpha: LIQ_CASCADE_REPEAT_V1   # chevauchement CONFIRMÉ élevé pour OI_DOWN_SHOCK -- pas indépendant
     data_available: "data/derivatives_raw (OI, funding) + microstructure trades pour CVD"
     execution_available: true
+    validated_for_forward: false
+    validation_report: reports/edge_discovery/validation_2026-09/OI_CVD_MEMORY_OVERLAP/REPORT.md
+    validation_result: >
+      Question de chevauchement (tâche primaire) résolue : OI_DOWN_SHOCK a
+      79%% d'overlap avec les événements cascade de LIQ_CASCADE_REPEAT_V1
+      (mécaniquement attendu, le détecteur cascade utilise lui-même un
+      z-score de chute d'OI) -- confirme le finding round2 W2 ("corrobore
+      A7, pas indépendant"). CVD_DOWN_SHOCK a un overlap brut faible (~4%%)
+      mais teste sur le résidu NON-chevauchant (N=5024, 3530 épisodes
+      indépendants, 63j, largement au-dessus des planchers de preuve) montre
+      que l'effet "répétition renforce" est ABSENT et INVERSÉ (onset
+      meilleur +7.5bps, exhaustion pire -16.5bps net, IC bootstrap 90%%
+      entièrement sous zéro). REJETÉ comme candidat indépendant sur ses deux
+      composantes -- OI-down reste une preuve corroborante valable pour la
+      robustesse de l'alpha EXISTANT, pas un nouvel alpha_id.
 
   # ══════════════════════════ AUTRES CANDIDATS SÉRIEUX (round 1-2) ════════
 

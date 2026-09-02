@@ -90,6 +90,25 @@ def test_build_intents_cross_sectional_v2_uses_same_adapter():
     assert len(out) == 1 and out[0].target_position_fraction == 1.0
 
 
+def test_build_intents_amihud_long_short_legs_weighted_independently():
+    """AMIHUD_ILLIQUIDITY_PREMIUM_V1 (Alpha Validation Factory freeze) : LONG
+    (illiquide) et SHORT (liquide) sont deux jambes distinctes, chacune
+    équipondérée EN INTERNE -- pas mélangées dans un seul dénominateur."""
+    df = pd.DataFrame([
+        {"event_time": _ts("2026-09-01T00:00:00Z"), "symbol": "BTCUSDT", "direction": "LONG"},
+        {"event_time": _ts("2026-09-01T00:00:00Z"), "symbol": "ETHUSDT", "direction": "LONG"},
+        {"event_time": _ts("2026-09-01T00:00:00Z"), "symbol": "SOLUSDT", "direction": "SHORT"},
+    ])
+    entry = {"family": "cross_sectional", "risk_bucket": "CROSS_SECTIONAL_FAMILY",
+            "correlation_family": "CROSS_SECTIONAL_XSMOM"}
+    out = build_intents("AMIHUD_ILLIQUIDITY_PREMIUM_V1", entry, df)
+    longs = [i for i in out if i.direction == "LONG"]
+    shorts = [i for i in out if i.direction == "SHORT"]
+    assert len(longs) == 2 and len(shorts) == 1
+    assert all(i.target_position_fraction == pytest.approx(0.5) for i in longs)   # 1/2 (jambe LONG seule)
+    assert shorts[0].target_position_fraction == pytest.approx(1.0)   # 1/1 (jambe SHORT seule)
+
+
 # ── gate (inchangé) ─────────────────────────────────────────────────────
 
 def test_screen_blocks_long_on_screened_symbol():
