@@ -1,0 +1,139 @@
+{
+  "candidate_id": "XSEC_MOMENTUM_HORIZON_EXTENSION",
+  "family": "cross_sectional",
+  "verdict": "REJECTED",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "UNCONFIRMABLE_IN_HORIZON"
+  ],
+  "discovery_net_bps": 199.3,
+  "validation_net_bps": 51.78,
+  "validation_net_bps_stress28": 37.78,
+  "pf": 1.275,
+  "n_raw": 4836,
+  "n_independent_L1": 4836,
+  "n_independent_L2": 167,
+  "n_independent_L3": 77,
+  "n_validation_independent": 77,
+  "l3_definition": "mois calendaire de la date de rebalancement",
+  "t_stat_declustered": 0.85,
+  "bootstrap_ci95": [
+    -69.97,
+    167.59
+  ],
+  "bootstrap_p05": -48.76,
+  "year_by_year": {
+    "2020": 282.73,
+    "2021": 96.4,
+    "2022": -157.74,
+    "2023": 19.92,
+    "2024": 12.77,
+    "2025": 90.65,
+    "2026": 83.7
+  },
+  "ex_best_year_net_bps": 18.56,
+  "worst_episode_bps": -4107.25,
+  "max_drawdown_bps_cumule": -5823.26,
+  "historical_event_rate": "0.230/week",
+  "recent_event_rate": "0.231/week",
+  "conservative_event_rate": "0.230/week",
+  "n_required_statistical": 2587.3,
+  "minimum_calendar_days": 182,
+  "eta_p50": "78698 days (~215.5 years)",
+  "eta_conservative": "78698 days (~215.5 years)",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Excess +51.78 net14, t_L3=0.85, p05=-48.76 -> \u00e9chec du crit\u00e8re 1. Le raw vs z\u00e9ro (+254.53) d\u00e9passe m\u00eame la r\u00e9clamation (+199.3), ce qui confirme que le chiffre publi\u00e9 mesurait surtout la d\u00e9rive inconditionnelle du panier alt, pas le m\u00e9canisme. P1 (30D_LO) est N\u00c9GATIF (-66.73) alors que la d\u00e9couverte r\u00e9clamait +462.8 : la variante 30 jours ne se reproduit pas du tout. Direction stable (14/14 ancrages positifs, pooled +60.07) mais magnitude non significative.",
+  "recommended_next_step": "REJECT",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/XSEC_MOMENTUM_HORIZON_EXTENSION/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "anchors": {
+    "per_anchor": [
+      {
+        "anchor": 0,
+        "n": 167,
+        "gross_excess": 65.78
+      },
+      {
+        "anchor": 1,
+        "n": 167,
+        "gross_excess": 71.74
+      },
+      {
+        "anchor": 2,
+        "n": 167,
+        "gross_excess": 85.95
+      },
+      {
+        "anchor": 3,
+        "n": 167,
+        "gross_excess": 90.1
+      },
+      {
+        "anchor": 4,
+        "n": 167,
+        "gross_excess": 63.16
+      },
+      {
+        "anchor": 5,
+        "n": 167,
+        "gross_excess": 63.21
+      },
+      {
+        "anchor": 6,
+        "n": 166,
+        "gross_excess": 50.56
+      },
+      {
+        "anchor": 7,
+        "n": 166,
+        "gross_excess": 52.76
+      },
+      {
+        "anchor": 8,
+        "n": 166,
+        "gross_excess": 34.5
+      },
+      {
+        "anchor": 9,
+        "n": 166,
+        "gross_excess": 55.49
+      },
+      {
+        "anchor": 10,
+        "n": 166,
+        "gross_excess": 51.33
+      },
+      {
+        "anchor": 11,
+        "n": 166,
+        "gross_excess": 50.96
+      },
+      {
+        "anchor": 12,
+        "n": 166,
+        "gross_excess": 53.01
+      },
+      {
+        "anchor": 13,
+        "n": 166,
+        "gross_excess": 52.39
+      }
+    ],
+    "pooled_mean_gross_excess": 60.07,
+    "std": 14.26,
+    "min": 34.5,
+    "max": 90.1,
+    "n_positive": 14,
+    "n_anchors": 14
+  },
+  "capacity": {
+    "long_leg_trailing_30d_median_dv_usd": {
+      "p05": 7805349.0,
+      "median": 41223761.0
+    },
+    "implied_participation_300k_book_pct_of_adv": 0.1922,
+    "note": "participation = (book/nb noms) / dollar-volume m\u00e9dian 30j du 5e centile des jambes"
+  }
+}

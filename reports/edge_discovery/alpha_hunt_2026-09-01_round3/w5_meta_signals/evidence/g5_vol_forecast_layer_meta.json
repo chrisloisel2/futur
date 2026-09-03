@@ -1,0 +1,76 @@
+{
+  "T4_1": {
+    "test_id": "T4.1",
+    "desc": "ENABLE/DISABLE xsmom weekly basket by VOL_FORECAST_LAYER_V1 combined_forecast_z (forward-RV forecast, cross-strategy gate)",
+    "feature": "combined_forecast_z",
+    "direction": "<=",
+    "threshold": 0.238891,
+    "n_train": 31,
+    "n_test": 32,
+    "without": {
+      "n": 32,
+      "mean_bps": -253.44,
+      "pf": 0.404,
+      "t_stat": -1.82,
+      "win_rate": 0.469
+    },
+    "with_": {
+      "n": 16,
+      "mean_bps": -435.75,
+      "pf": 0.254,
+      "t_stat": -1.85,
+      "win_rate": 0.5
+    },
+    "delta_net_bps": -182.31
+  },
+  "T4_1b": {
+    "test_id": "T4.1b",
+    "desc": "ENABLE/DISABLE xsmom weekly basket by VOL_FORECAST_LAYER_V1 iv_regime categorical (train-picked best category)",
+    "train_cat_means": {
+      "HIGH": 628.56,
+      "MID": 560.69
+    },
+    "best_cat": "HIGH",
+    "n_train": 31,
+    "n_test": 32,
+    "without": {
+      "n": 32,
+      "mean_bps": -253.44,
+      "pf": 0.404,
+      "t_stat": -1.82,
+      "win_rate": 0.469
+    },
+    "with_": {
+      "n": 13,
+      "mean_bps": -123.73,
+      "pf": 0.641,
+      "t_stat": -0.62,
+      "win_rate": 0.462
+    },
+    "delta_net_bps": 129.71
+  },
+  "T4_2": {
+    "test_id": "T4.2",
+    "desc": "ENABLE/DISABLE liq-cascade-repeat-exhaustion (N_independent) by VOL_FORECAST_LAYER_V1 combined_forecast_z",
+    "feature": "combined_forecast_z",
+    "direction": "<=",
+    "threshold": 0.226042,
+    "n_train": 1835,
+    "n_test": 1836,
+    "without": {
+      "n": 1836,
+      "mean_bps": 14.7,
+      "pf": 1.141,
+      "t_stat": 1.38,
+      "win_rate": 0.5
+    },
+    "with_": {
+      "n": 917,
+      "mean_bps": -11.67,
+      "pf": 0.89,
+      "t_stat": -1.03,
+      "win_rate": 0.467
+    },
+    "delta_net_bps": -26.37
+  }
+}

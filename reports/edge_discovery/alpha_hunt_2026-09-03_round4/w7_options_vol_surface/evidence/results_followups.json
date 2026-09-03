@@ -1,0 +1,719 @@
+{
+ "results": {
+  "F1_M7_hold1h": {
+   "mechanism": "M7-corrected \u2014 block delta flow, signal held 1h, settled on 1h bars",
+   "vehicle": "PERP",
+   "notes": "Non-overlapping accounting. Preregistered sign (customer net-long delta => dealer buys perp). Turnover falls as 1/H, so this is the mechanism's best legitimate shot at clearing the 14bps cost.",
+   "n_raw": 3845,
+   "n_independent_L1": 3845,
+   "n_independent_L2": 3845,
+   "n_independent_L3": 3086,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.25,
+   "gross_bps_per_episode": 2.7,
+   "net_bps": -5.14,
+   "net_bps_stress28": -12.97,
+   "t_stat_declustered": -3.96,
+   "bootstrap_ci95": [
+    -7.77,
+    -2.53
+   ],
+   "sharpe_annual_net": -0.749,
+   "sharpe_annual_stress28": -1.635,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 981,
+     "net_bps": -0.62,
+     "total_bps": -611.4,
+     "t": -0.25
+    },
+    "2024": {
+     "n_ep": 827,
+     "net_bps": -4.67,
+     "total_bps": -3861.0,
+     "t": -1.81
+    },
+    "2025": {
+     "n_ep": 941,
+     "net_bps": -8.44,
+     "total_bps": -7939.8,
+     "t": -4.19
+    },
+    "2026": {
+     "n_ep": 337,
+     "net_bps": -10.2,
+     "total_bps": -3438.7,
+     "t": -2.45
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 2105,
+    "net_bps": -7.24,
+    "t": -4.8
+   },
+   "n_required": 6168.4,
+   "event_rate_per_week_last6m": 11.385,
+   "eta_forward_confirmation_days": 3792.7,
+   "eta_forward_confirmation_years": 10.38,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 3845,
+   "calendar_span_days": 2037
+  },
+  "F1_M7_hold4h": {
+   "mechanism": "M7-corrected \u2014 block delta flow, signal held 4h, settled on 1h bars",
+   "vehicle": "PERP",
+   "notes": "Non-overlapping accounting. Preregistered sign (customer net-long delta => dealer buys perp). Turnover falls as 1/H, so this is the mechanism's best legitimate shot at clearing the 14bps cost.",
+   "n_raw": 9675,
+   "n_independent_L1": 9675,
+   "n_independent_L2": 9675,
+   "n_independent_L3": 2315,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 4.18,
+   "gross_bps_per_episode": 2.55,
+   "net_bps": -0.88,
+   "net_bps_stress28": -4.31,
+   "t_stat_declustered": -0.95,
+   "bootstrap_ci95": [
+    -2.73,
+    0.95
+   ],
+   "sharpe_annual_net": -0.238,
+   "sharpe_annual_stress28": -0.71,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 691,
+     "net_bps": 0.51,
+     "total_bps": 349.4,
+     "t": 0.28
+    },
+    "2024": {
+     "n_ep": 639,
+     "net_bps": -1.22,
+     "total_bps": -778.4,
+     "t": -0.65
+    },
+    "2025": {
+     "n_ep": 708,
+     "net_bps": -1.21,
+     "total_bps": -853.5,
+     "t": -0.88
+    },
+    "2026": {
+     "n_ep": 277,
+     "net_bps": -2.72,
+     "total_bps": -752.9,
+     "t": -0.97
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 1624,
+    "net_bps": -1.47,
+    "t": -1.38
+   },
+   "n_required": 79947.1,
+   "event_rate_per_week_last6m": 9.346,
+   "eta_forward_confirmation_days": 59878.1,
+   "eta_forward_confirmation_years": 163.94,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 9675,
+   "calendar_span_days": 2037
+  },
+  "F1_M7_hold12h": {
+   "mechanism": "M7-corrected \u2014 block delta flow, signal held 12h, settled on 1h bars",
+   "vehicle": "PERP",
+   "notes": "Non-overlapping accounting. Preregistered sign (customer net-long delta => dealer buys perp). Turnover falls as 1/H, so this is the mechanism's best legitimate shot at clearing the 14bps cost.",
+   "n_raw": 16593,
+   "n_independent_L1": 16593,
+   "n_independent_L2": 16593,
+   "n_independent_L3": 1676,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 9.9,
+   "gross_bps_per_episode": 1.13,
+   "net_bps": -0.73,
+   "net_bps_stress28": -2.58,
+   "t_stat_declustered": -0.98,
+   "bootstrap_ci95": [
+    -2.12,
+    0.73
+   ],
+   "sharpe_annual_net": -0.151,
+   "sharpe_annual_stress28": -0.432,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 492,
+     "net_bps": 0.48,
+     "total_bps": 235.4,
+     "t": 0.29
+    },
+    "2024": {
+     "n_ep": 454,
+     "net_bps": -0.8,
+     "total_bps": -362.7,
+     "t": -0.52
+    },
+    "2025": {
+     "n_ep": 512,
+     "net_bps": -1.93,
+     "total_bps": -986.2,
+     "t": -1.89
+    },
+    "2026": {
+     "n_ep": 218,
+     "net_bps": -0.47,
+     "total_bps": -102.3,
+     "t": -0.31
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 1184,
+    "net_bps": -1.23,
+    "t": -1.57
+   },
+   "n_required": 54349.7,
+   "event_rate_per_week_last6m": 7.385,
+   "eta_forward_confirmation_days": 51519.0,
+   "eta_forward_confirmation_years": 141.05,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 16593,
+   "calendar_span_days": 2037
+  },
+  "F1_M7_hold24h": {
+   "mechanism": "M7-corrected \u2014 block delta flow, signal held 24h, settled on 1h bars",
+   "vehicle": "PERP",
+   "notes": "Non-overlapping accounting. Preregistered sign (customer net-long delta => dealer buys perp). Turnover falls as 1/H, so this is the mechanism's best legitimate shot at clearing the 14bps cost.",
+   "n_raw": 20858,
+   "n_independent_L1": 20858,
+   "n_independent_L2": 20858,
+   "n_independent_L3": 1241,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 16.81,
+   "gross_bps_per_episode": 0.54,
+   "net_bps": -0.8,
+   "net_bps_stress28": -2.13,
+   "t_stat_declustered": -1.18,
+   "bootstrap_ci95": [
+    -2.09,
+    0.58
+   ],
+   "sharpe_annual_net": -0.142,
+   "sharpe_annual_stress28": -0.354,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 360,
+     "net_bps": 0.35,
+     "total_bps": 125.2,
+     "t": 0.21
+    },
+    "2024": {
+     "n_ep": 346,
+     "net_bps": -1.99,
+     "total_bps": -688.5,
+     "t": -1.73
+    },
+    "2025": {
+     "n_ep": 377,
+     "net_bps": -1.51,
+     "total_bps": -568.1,
+     "t": -1.59
+    },
+    "2026": {
+     "n_ep": 158,
+     "net_bps": 0.92,
+     "total_bps": 144.6,
+     "t": 0.57
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "n_ep": 1083,
+    "net_bps": -1.04,
+    "t": -1.43
+   },
+   "n_required": 27749.5,
+   "event_rate_per_week_last6m": 5.385,
+   "eta_forward_confirmation_days": 36074.4,
+   "eta_forward_confirmation_years": 98.77,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 20858,
+   "calendar_span_days": 2037
+  },
+  "F1_M7_hold72h": {
+   "mechanism": "M7-corrected \u2014 block delta flow, signal held 72h, settled on 1h bars",
+   "vehicle": "PERP",
+   "notes": "Non-overlapping accounting. Preregistered sign (customer net-long delta => dealer buys perp). Turnover falls as 1/H, so this is the mechanism's best legitimate shot at clearing the 14bps cost.",
+   "n_raw": 27022,
+   "n_independent_L1": 27022,
+   "n_independent_L2": 27022,
+   "n_independent_L3": 779,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 34.69,
+   "gross_bps_per_episode": 0.37,
+   "net_bps": -0.42,
+   "net_bps_stress28": -1.21,
+   "t_stat_declustered": -0.58,
+   "bootstrap_ci95": [
+    -1.8,
+    1.05
+   ],
+   "sharpe_annual_net": -0.073,
+   "sharpe_annual_stress28": -0.197,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 224,
+     "net_bps": 1.24,
+     "total_bps": 277.7,
+     "t": 0.68
+    },
+    "2024": {
+     "n_ep": 228,
+     "net_bps": -1.78,
+     "total_bps": -406.4,
+     "t": -1.42
+    },
+    "2025": {
+     "n_ep": 232,
+     "net_bps": -1.41,
+     "total_bps": -327.1,
+     "t": -1.66
+    },
+    "2026": {
+     "n_ep": 95,
+     "net_bps": 1.32,
+     "total_bps": 125.7,
+     "t": 0.69
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 555,
+    "net_bps": -1.1,
+    "t": -1.55
+   },
+   "n_required": 72133.7,
+   "event_rate_per_week_last6m": 3.115,
+   "eta_forward_confirmation_days": 162078.2,
+   "eta_forward_confirmation_years": 443.75,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 27022,
+   "calendar_span_days": 2037
+  },
+  "F2_M5_high_vrp_long": {
+   "mechanism": "M5 risk-on \u2014 equal-weight alt basket, high_vrp_long (VRP = DVOL_BTC - trailing RV30)",
+   "vehicle": "PERP",
+   "notes": "Directional beta bet: sigma is NOT reduced, so the ETA frontier is unforgiving here.",
+   "n_raw": 12958,
+   "n_independent_L1": 12958,
+   "n_independent_L2": 342,
+   "n_independent_L3": 2496,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 5.19,
+   "gross_bps_per_episode": 3.12,
+   "net_bps": 2.95,
+   "net_bps_stress28": 2.77,
+   "t_stat_declustered": 4.49,
+   "bootstrap_ci95": [
+    1.65,
+    4.25
+   ],
+   "sharpe_annual_net": 0.41,
+   "sharpe_annual_stress28": 0.36,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 273,
+     "net_bps": 10.64,
+     "total_bps": 2905.6,
+     "t": 3.33
+    },
+    "2022": {
+     "n_ep": 511,
+     "net_bps": 1.83,
+     "total_bps": 936.5,
+     "t": 1.27
+    },
+    "2023": {
+     "n_ep": 400,
+     "net_bps": 5.31,
+     "total_bps": 2122.4,
+     "t": 3.22
+    },
+    "2024": {
+     "n_ep": 410,
+     "net_bps": 8.74,
+     "total_bps": 3584.0,
+     "t": 5.24
+    },
+    "2025": {
+     "n_ep": 615,
+     "net_bps": -2.4,
+     "total_bps": -1474.9,
+     "t": -3.39
+    },
+    "2026": {
+     "n_ep": 287,
+     "net_bps": -2.52,
+     "total_bps": -721.9,
+     "t": -1.48
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2024,
+    "n_ep": 2086,
+    "net_bps": 1.81,
+    "t": 2.54
+   },
+   "n_required": 3893.4,
+   "event_rate_per_week_last6m": 9.462,
+   "eta_forward_confirmation_days": 2880.5,
+   "eta_forward_confirmation_years": 7.89,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 342,
+   "calendar_span_days": 1955
+  },
+  "F2_M5_low_vrp_short": {
+   "mechanism": "M5 risk-on \u2014 equal-weight alt basket, low_vrp_short (VRP = DVOL_BTC - trailing RV30)",
+   "vehicle": "PERP",
+   "notes": "Directional beta bet: sigma is NOT reduced, so the ETA frontier is unforgiving here.",
+   "n_raw": 14092,
+   "n_independent_L1": 14092,
+   "n_independent_L2": 370,
+   "n_independent_L3": 2019,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 6.98,
+   "gross_bps_per_episode": 2.07,
+   "net_bps": 1.9,
+   "net_bps_stress28": 1.72,
+   "t_stat_declustered": 3.11,
+   "bootstrap_ci95": [
+    0.69,
+    3.07
+   ],
+   "sharpe_annual_net": 0.246,
+   "sharpe_annual_stress28": 0.197,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 62,
+     "net_bps": -4.96,
+     "total_bps": -307.8,
+     "t": -2.75
+    },
+    "2022": {
+     "n_ep": 392,
+     "net_bps": 5.05,
+     "total_bps": 1978.5,
+     "t": 3.0
+    },
+    "2023": {
+     "n_ep": 458,
+     "net_bps": -4.5,
+     "total_bps": -2060.4,
+     "t": -4.1
+    },
+    "2024": {
+     "n_ep": 328,
+     "net_bps": -0.77,
+     "total_bps": -251.8,
+     "t": -0.34
+    },
+    "2025": {
+     "n_ep": 328,
+     "net_bps": 9.49,
+     "total_bps": 3111.7,
+     "t": 8.98
+    },
+    "2026": {
+     "n_ep": 451,
+     "net_bps": 3.01,
+     "total_bps": 1356.1,
+     "t": 4.49
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2025,
+    "n_ep": 1691,
+    "net_bps": 0.42,
+    "t": 0.61
+   },
+   "n_required": 6559.5,
+   "event_rate_per_week_last6m": 17.346,
+   "eta_forward_confirmation_days": 2647.1,
+   "eta_forward_confirmation_years": 7.25,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 370,
+   "calendar_span_days": 1955
+  },
+  "F3_M6_pair_hold1d": {
+   "mechanism": "M6 \u2014 DVOL_ETH/DVOL_BTC ratio -> BTC/ETH dollar-neutral pair, signal held 1d",
+   "vehicle": "PERP",
+   "notes": "Sign learned on first half (sign=-1); gate OOS from 2023-12-26.",
+   "n_raw": 1068,
+   "n_independent_L1": 1068,
+   "n_independent_L2": 534,
+   "n_independent_L3": 136,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 7.85,
+   "gross_bps_per_episode": 42.17,
+   "net_bps": 38.67,
+   "net_bps_stress28": 35.17,
+   "t_stat_declustered": 0.92,
+   "bootstrap_ci95": [
+    -41.59,
+    129.4
+   ],
+   "sharpe_annual_net": 1.215,
+   "sharpe_annual_stress28": 0.977,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 2,
+     "net_bps": 333.72,
+     "total_bps": 667.4,
+     "t": null
+    },
+    "2024": {
+     "n_ep": 58,
+     "net_bps": 24.07,
+     "total_bps": 1396.1,
+     "t": 0.49
+    },
+    "2025": {
+     "n_ep": 48,
+     "net_bps": 57.09,
+     "total_bps": 2740.4,
+     "t": 0.57
+    },
+    "2026": {
+     "n_ep": 28,
+     "net_bps": 16.24,
+     "total_bps": 454.7,
+     "t": 0.32
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2025,
+    "n_ep": 88,
+    "net_bps": 28.62,
+    "t": 0.78
+   },
+   "n_required": 5067.9,
+   "event_rate_per_week_last6m": 1.077,
+   "eta_forward_confirmation_days": 32941.6,
+   "eta_forward_confirmation_years": 90.19,
+   "sample_start": "2023-12-26",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 534,
+   "calendar_span_days": 948,
+   "sign_learned": -1.0,
+   "oos_start": "2023-12-26"
+  },
+  "F3_M6_pair_hold3d": {
+   "mechanism": "M6 \u2014 DVOL_ETH/DVOL_BTC ratio -> BTC/ETH dollar-neutral pair, signal held 3d",
+   "vehicle": "PERP",
+   "notes": "Sign learned on first half (sign=-1); gate OOS from 2023-12-26.",
+   "n_raw": 1282,
+   "n_independent_L1": 1282,
+   "n_independent_L2": 641,
+   "n_independent_L3": 60,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 21.37,
+   "gross_bps_per_episode": 48.55,
+   "net_bps": 42.6,
+   "net_bps_stress28": 36.65,
+   "t_stat_declustered": 0.48,
+   "bootstrap_ci95": [
+    -125.01,
+    222.1
+   ],
+   "sharpe_annual_net": 0.691,
+   "sharpe_annual_stress28": 0.572,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 2,
+     "net_bps": 324.65,
+     "total_bps": 649.3,
+     "t": null
+    },
+    "2024": {
+     "n_ep": 30,
+     "net_bps": 25.39,
+     "total_bps": 761.6,
+     "t": 0.25
+    },
+    "2025": {
+     "n_ep": 12,
+     "net_bps": 61.82,
+     "total_bps": 741.9,
+     "t": 0.17
+    },
+    "2026": {
+     "n_ep": 16,
+     "net_bps": 25.22,
+     "total_bps": 403.4,
+     "t": 0.49
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2024,
+    "n_ep": 30,
+    "net_bps": 59.82,
+    "t": 0.41
+   },
+   "n_required": 8029.6,
+   "event_rate_per_week_last6m": 0.615,
+   "eta_forward_confirmation_days": 91336.9,
+   "eta_forward_confirmation_years": 250.07,
+   "sample_start": "2023-12-26",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 641,
+   "calendar_span_days": 948,
+   "sign_learned": -1.0,
+   "oos_start": "2023-12-26"
+  },
+  "F3_M6_pair_hold5d": {
+   "mechanism": "M6 \u2014 DVOL_ETH/DVOL_BTC ratio -> BTC/ETH dollar-neutral pair, signal held 5d",
+   "vehicle": "PERP",
+   "notes": "Sign learned on first half (sign=-1); gate OOS from 2023-12-26.",
+   "n_raw": 1386,
+   "n_independent_L1": 1386,
+   "n_independent_L2": 693,
+   "n_independent_L3": 54,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 25.67,
+   "gross_bps_per_episode": 49.2,
+   "net_bps": 43.88,
+   "net_bps_stress28": 38.57,
+   "t_stat_declustered": 0.43,
+   "bootstrap_ci95": [
+    -151.91,
+    240.26
+   ],
+   "sharpe_annual_net": 0.661,
+   "sharpe_annual_stress28": 0.569,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 2,
+     "net_bps": 310.11,
+     "total_bps": 620.2,
+     "t": null
+    },
+    "2024": {
+     "n_ep": 24,
+     "net_bps": 26.96,
+     "total_bps": 647.1,
+     "t": 0.19
+    },
+    "2025": {
+     "n_ep": 12,
+     "net_bps": 84.42,
+     "total_bps": 1013.1,
+     "t": 0.23
+    },
+    "2026": {
+     "n_ep": 16,
+     "net_bps": 5.58,
+     "total_bps": 89.3,
+     "t": 0.18
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2025,
+    "n_ep": 42,
+    "net_bps": 32.3,
+    "t": 0.38
+   },
+   "n_required": 9015.9,
+   "event_rate_per_week_last6m": 0.615,
+   "eta_forward_confirmation_days": 102555.4,
+   "eta_forward_confirmation_years": 280.78,
+   "sample_start": "2023-12-26",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 693,
+   "calendar_span_days": 948,
+   "sign_learned": -1.0,
+   "oos_start": "2023-12-26"
+  },
+  "F3_M6_pair_hold10d": {
+   "mechanism": "M6 \u2014 DVOL_ETH/DVOL_BTC ratio -> BTC/ETH dollar-neutral pair, signal held 10d",
+   "vehicle": "PERP",
+   "notes": "Sign learned on first half (sign=-1); gate OOS from 2023-12-26.",
+   "n_raw": 1540,
+   "n_independent_L1": 1540,
+   "n_independent_L2": 770,
+   "n_independent_L3": 28,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 55.0,
+   "gross_bps_per_episode": 105.32,
+   "net_bps": 98.57,
+   "net_bps_stress28": 91.82,
+   "t_stat_declustered": 0.48,
+   "bootstrap_ci95": [
+    -281.94,
+    492.7
+   ],
+   "sharpe_annual_net": 0.767,
+   "sharpe_annual_stress28": 0.712,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 2,
+     "net_bps": 165.16,
+     "total_bps": 330.3,
+     "t": null
+    },
+    "2024": {
+     "n_ep": 12,
+     "net_bps": 111.85,
+     "total_bps": 1342.2,
+     "t": 0.39
+    },
+    "2025": {
+     "n_ep": 6,
+     "net_bps": 158.37,
+     "total_bps": 950.2,
+     "t": 0.22
+    },
+    "2026": {
+     "n_ep": 8,
+     "net_bps": 17.14,
+     "total_bps": 137.1,
+     "t": 0.48
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2024,
+    "n_ep": 16,
+    "net_bps": 88.6,
+    "t": 0.3
+   },
+   "n_required": 3777.7,
+   "event_rate_per_week_last6m": 0.308,
+   "eta_forward_confirmation_days": 85942.5,
+   "eta_forward_confirmation_years": 235.3,
+   "sample_start": "2023-12-26",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 770,
+   "calendar_span_days": 948,
+   "sign_learned": -1.0,
+   "oos_start": "2023-12-26"
+  }
+ },
+ "diagnostics": {
+  "F2_arm_vs_arm_basket": {
+   "n_high_vrp": 342,
+   "n_low_vrp": 370,
+   "mean_high_vrp": 22.74,
+   "mean_low_vrp": -11.27,
+   "diff": 34.02,
+   "t_diff": 1.26,
+   "p_diff": 0.208,
+   "cohens_d": 0.095
+  }
+ }
+}

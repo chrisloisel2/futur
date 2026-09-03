@@ -1,0 +1,579 @@
+{
+ "results": {
+  "M4_pin_magnet_lag1d": {
+   "mechanism": "M4 \u2014 BTC perp toward max-traded-notional strike, 1d before monthly Deribit expiry",
+   "vehicle": "PERP",
+   "notes": "OI-at-strike PROXIED by cumulative traded notional for that expiry (no OI in this dataset). Direction preregistered (toward the magnet), not fitted.",
+   "n_raw": 42,
+   "n_independent_L1": 42,
+   "n_independent_L2": 42,
+   "n_independent_L3": 42,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.0,
+   "gross_bps_per_episode": -23.48,
+   "net_bps": -30.48,
+   "net_bps_stress28": -37.48,
+   "t_stat_declustered": -1.14,
+   "bootstrap_ci95": [
+    -81.03,
+    23.76
+   ],
+   "sharpe_annual_net": -0.744,
+   "sharpe_annual_stress28": -1.012,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 12,
+     "net_bps": -36.83,
+     "total_bps": -442.0,
+     "t": -1.05
+    },
+    "2024": {
+     "n_ep": 12,
+     "net_bps": -16.49,
+     "total_bps": -197.8,
+     "t": -0.26
+    },
+    "2025": {
+     "n_ep": 12,
+     "net_bps": -66.53,
+     "total_bps": -798.3,
+     "t": -1.39
+    },
+    "2026": {
+     "n_ep": 6,
+     "net_bps": 26.32,
+     "total_bps": 157.9,
+     "t": 0.33
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "n_ep": 36,
+    "net_bps": -39.95,
+    "t": -1.41
+   },
+   "n_required": 1009.3,
+   "event_rate_per_week_last6m": 0.231,
+   "eta_forward_confirmation_days": 30615.1,
+   "eta_forward_confirmation_years": 83.82,
+   "sample_start": "2023-01-01",
+   "sample_end": "2026-07-17",
+   "trading_days_active": 42,
+   "calendar_span_days": 1293
+  },
+  "M4_pin_magnet_lag2d": {
+   "mechanism": "M4 \u2014 BTC perp toward max-traded-notional strike, 2d before monthly Deribit expiry",
+   "vehicle": "PERP",
+   "notes": "OI-at-strike PROXIED by cumulative traded notional for that expiry (no OI in this dataset). Direction preregistered (toward the magnet), not fitted.",
+   "n_raw": 42,
+   "n_independent_L1": 42,
+   "n_independent_L2": 42,
+   "n_independent_L3": 42,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.0,
+   "gross_bps_per_episode": 45.73,
+   "net_bps": 38.73,
+   "net_bps_stress28": 31.73,
+   "t_stat_declustered": 1.41,
+   "bootstrap_ci95": [
+    -14.94,
+    92.47
+   ],
+   "sharpe_annual_net": 0.606,
+   "sharpe_annual_stress28": 0.34,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 12,
+     "net_bps": 57.89,
+     "total_bps": 694.7,
+     "t": 1.32
+    },
+    "2024": {
+     "n_ep": 12,
+     "net_bps": 33.76,
+     "total_bps": 405.1,
+     "t": 0.65
+    },
+    "2025": {
+     "n_ep": 12,
+     "net_bps": 41.82,
+     "total_bps": 501.9,
+     "t": 1.01
+    },
+    "2026": {
+     "n_ep": 6,
+     "net_bps": 4.14,
+     "total_bps": 24.8,
+     "t": 0.03
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 30,
+    "net_bps": 31.06,
+    "t": 0.9
+   },
+   "n_required": 664.5,
+   "event_rate_per_week_last6m": 0.231,
+   "eta_forward_confirmation_days": 20157.0,
+   "eta_forward_confirmation_years": 55.19,
+   "sample_start": "2023-01-01",
+   "sample_end": "2026-07-17",
+   "trading_days_active": 42,
+   "calendar_span_days": 1293
+  },
+  "M4_pin_magnet_lag3d": {
+   "mechanism": "M4 \u2014 BTC perp toward max-traded-notional strike, 3d before monthly Deribit expiry",
+   "vehicle": "PERP",
+   "notes": "OI-at-strike PROXIED by cumulative traded notional for that expiry (no OI in this dataset). Direction preregistered (toward the magnet), not fitted.",
+   "n_raw": 42,
+   "n_independent_L1": 42,
+   "n_independent_L2": 42,
+   "n_independent_L3": 42,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.0,
+   "gross_bps_per_episode": -50.97,
+   "net_bps": -57.97,
+   "net_bps_stress28": -64.97,
+   "t_stat_declustered": -1.67,
+   "bootstrap_ci95": [
+    -125.32,
+    10.76
+   ],
+   "sharpe_annual_net": -0.976,
+   "sharpe_annual_stress28": -1.175,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 12,
+     "net_bps": -123.84,
+     "total_bps": -1486.1,
+     "t": -1.98
+    },
+    "2024": {
+     "n_ep": 12,
+     "net_bps": -103.85,
+     "total_bps": -1246.2,
+     "t": -2.26
+    },
+    "2025": {
+     "n_ep": 12,
+     "net_bps": -32.14,
+     "total_bps": -385.7,
+     "t": -0.5
+    },
+    "2026": {
+     "n_ep": 6,
+     "net_bps": 113.93,
+     "total_bps": 683.6,
+     "t": 0.91
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "n_ep": 36,
+    "net_bps": -86.61,
+    "t": -2.6
+   },
+   "n_required": 471.4,
+   "event_rate_per_week_last6m": 0.231,
+   "eta_forward_confirmation_days": 14298.3,
+   "eta_forward_confirmation_years": 39.15,
+   "sample_start": "2023-01-01",
+   "sample_end": "2026-07-17",
+   "trading_days_active": 42,
+   "calendar_span_days": 1293
+  },
+  "M5_beta_tilt_unconditional_CONTROL": {
+   "mechanism": "M5 control \u2014 unconditional high-beta minus low-beta alt tilt (NO options input)",
+   "vehicle": "PERP",
+   "notes": "Control arm: the \u00a71.3 baseline the VRP-conditioned versions must beat.",
+   "n_raw": 43877,
+   "n_independent_L1": 43877,
+   "n_independent_L2": 1955,
+   "n_independent_L3": 1760,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 24.93,
+   "gross_bps_per_episode": -4.62,
+   "net_bps": -5.26,
+   "net_bps_stress28": -5.91,
+   "t_stat_declustered": -0.77,
+   "bootstrap_ci95": [
+    -18.58,
+    8.24
+   ],
+   "sharpe_annual_net": -0.385,
+   "sharpe_annual_stress28": -0.467,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 311,
+     "net_bps": -18.09,
+     "total_bps": -5626.1,
+     "t": -0.64
+    },
+    "2022": {
+     "n_ep": 257,
+     "net_bps": 0.09,
+     "total_bps": 24.2,
+     "t": 0.01
+    },
+    "2023": {
+     "n_ep": 342,
+     "net_bps": 16.94,
+     "total_bps": 5794.2,
+     "t": 1.35
+    },
+    "2024": {
+     "n_ep": 340,
+     "net_bps": -3.37,
+     "total_bps": -1145.1,
+     "t": -0.27
+    },
+    "2025": {
+     "n_ep": 297,
+     "net_bps": -23.45,
+     "total_bps": -6964.1,
+     "t": -2.19
+    },
+    "2026": {
+     "n_ep": 213,
+     "net_bps": -6.31,
+     "total_bps": -1345.0,
+     "t": -0.82
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 1418,
+    "net_bps": -10.62,
+    "t": -1.35
+   },
+   "n_required": 92496.7,
+   "event_rate_per_week_last6m": 7.154,
+   "eta_forward_confirmation_days": 90507.5,
+   "eta_forward_confirmation_years": 247.8,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 1955,
+   "calendar_span_days": 1955
+  },
+  "M5_beta_tilt_high_vrp_only": {
+   "mechanism": "M5 \u2014 high-beta minus low-beta alt tilt, active only when VRP high_vrp_only",
+   "vehicle": "PERP",
+   "notes": "VRP = DVOL_BTC - trailing-30d realised vol of BTC (causal). Compare to the control arm.",
+   "n_raw": 7728,
+   "n_independent_L1": 7728,
+   "n_independent_L2": 342,
+   "n_independent_L3": 1776,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 4.35,
+   "gross_bps_per_episode": -0.43,
+   "net_bps": -1.05,
+   "net_bps_stress28": -1.68,
+   "t_stat_declustered": -0.37,
+   "bootstrap_ci95": [
+    -6.41,
+    4.43
+   ],
+   "sharpe_annual_net": -0.239,
+   "sharpe_annual_stress28": -0.416,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 206,
+     "net_bps": -28.26,
+     "total_bps": -5822.0,
+     "t": -1.74
+    },
+    "2022": {
+     "n_ep": 341,
+     "net_bps": 14.83,
+     "total_bps": 5056.7,
+     "t": 2.18
+    },
+    "2023": {
+     "n_ep": 278,
+     "net_bps": 5.3,
+     "total_bps": 1474.5,
+     "t": 0.94
+    },
+    "2024": {
+     "n_ep": 339,
+     "net_bps": 1.31,
+     "total_bps": 445.4,
+     "t": 0.25
+    },
+    "2025": {
+     "n_ep": 400,
+     "net_bps": -4.77,
+     "total_bps": -1908.1,
+     "t": -1.7
+    },
+    "2026": {
+     "n_ep": 212,
+     "net_bps": -5.28,
+     "total_bps": -1119.7,
+     "t": -0.85
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2022,
+    "n_ep": 1435,
+    "net_bps": -4.83,
+    "t": -1.55
+   },
+   "n_required": 403625.9,
+   "event_rate_per_week_last6m": 6.423,
+   "eta_forward_confirmation_days": 439879.8,
+   "eta_forward_confirmation_years": 1204.33,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 342,
+   "calendar_span_days": 1955
+  },
+  "M5_beta_tilt_low_vrp_only": {
+   "mechanism": "M5 \u2014 high-beta minus low-beta alt tilt, active only when VRP low_vrp_only",
+   "vehicle": "PERP",
+   "notes": "VRP = DVOL_BTC - trailing-30d realised vol of BTC (causal). Compare to the control arm.",
+   "n_raw": 8432,
+   "n_independent_L1": 8432,
+   "n_independent_L2": 370,
+   "n_independent_L3": 1395,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 6.04,
+   "gross_bps_per_episode": -5.79,
+   "net_bps": -6.41,
+   "net_bps_stress28": -7.03,
+   "t_stat_declustered": -2.49,
+   "bootstrap_ci95": [
+    -11.56,
+    -1.44
+   ],
+   "sharpe_annual_net": -1.044,
+   "sharpe_annual_stress28": -1.224,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 34,
+     "net_bps": 14.12,
+     "total_bps": 480.0,
+     "t": 1.24
+    },
+    "2022": {
+     "n_ep": 274,
+     "net_bps": -8.94,
+     "total_bps": -2449.7,
+     "t": -1.07
+    },
+    "2023": {
+     "n_ep": 294,
+     "net_bps": -2.59,
+     "total_bps": -760.1,
+     "t": -0.56
+    },
+    "2024": {
+     "n_ep": 266,
+     "net_bps": -9.34,
+     "total_bps": -2483.3,
+     "t": -1.21
+    },
+    "2025": {
+     "n_ep": 223,
+     "net_bps": -6.51,
+     "total_bps": -1452.6,
+     "t": -1.59
+    },
+    "2026": {
+     "n_ep": 304,
+     "net_bps": -7.48,
+     "total_bps": -2275.1,
+     "t": -2.73
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "n_ep": 1361,
+    "net_bps": -6.92,
+    "t": -2.64
+   },
+   "n_required": 7057.8,
+   "event_rate_per_week_last6m": 11.692,
+   "eta_forward_confirmation_days": 4225.4,
+   "eta_forward_confirmation_years": 11.57,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 370,
+   "calendar_span_days": 1955
+  },
+  "M7_block_delta_flow_fwd1h": {
+   "mechanism": "M7 \u2014 delta-weighted Deribit BLOCK flow (hourly, |z|>1) -> BTC perp, 1h horizon",
+   "vehicle": "PERP",
+   "notes": "Direction preregistered from the hedging mechanism (customer net-long delta => dealer buys perp), NOT fitted. Distinct from W6-M3 (raw notional block flow, daily).",
+   "n_raw": 3845,
+   "n_independent_L1": 3845,
+   "n_independent_L2": 3845,
+   "n_independent_L3": 3086,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.25,
+   "gross_bps_per_episode": 2.7,
+   "net_bps": -5.14,
+   "net_bps_stress28": -12.97,
+   "t_stat_declustered": -3.96,
+   "bootstrap_ci95": [
+    -7.77,
+    -2.53
+   ],
+   "sharpe_annual_net": -0.749,
+   "sharpe_annual_stress28": -1.635,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 981,
+     "net_bps": -0.62,
+     "total_bps": -611.4,
+     "t": -0.25
+    },
+    "2024": {
+     "n_ep": 827,
+     "net_bps": -4.67,
+     "total_bps": -3861.0,
+     "t": -1.81
+    },
+    "2025": {
+     "n_ep": 941,
+     "net_bps": -8.44,
+     "total_bps": -7939.8,
+     "t": -4.19
+    },
+    "2026": {
+     "n_ep": 337,
+     "net_bps": -10.2,
+     "total_bps": -3438.7,
+     "t": -2.45
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 2105,
+    "net_bps": -7.24,
+    "t": -4.8
+   },
+   "n_required": 6168.4,
+   "event_rate_per_week_last6m": 11.385,
+   "eta_forward_confirmation_days": 3792.7,
+   "eta_forward_confirmation_years": 10.38,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 3845,
+   "calendar_span_days": 2037
+  },
+  "M7_block_delta_flow_fwd4h": {
+   "mechanism": "M7 \u2014 delta-weighted Deribit BLOCK flow (hourly, |z|>1) -> BTC perp, 4h horizon",
+   "vehicle": "PERP",
+   "notes": "Direction preregistered from the hedging mechanism (customer net-long delta => dealer buys perp), NOT fitted. Distinct from W6-M3 (raw notional block flow, daily).",
+   "n_raw": 3845,
+   "n_independent_L1": 3845,
+   "n_independent_L2": 3845,
+   "n_independent_L3": 3086,
+   "L3_unit": "contiguous same-sign position episode",
+   "mean_episode_days": 1.25,
+   "gross_bps_per_episode": 7.66,
+   "net_bps": -0.17,
+   "net_bps_stress28": -8.0,
+   "t_stat_declustered": -0.05,
+   "bootstrap_ci95": [
+    -6.58,
+    6.11
+   ],
+   "sharpe_annual_net": -0.213,
+   "sharpe_annual_stress28": -0.679,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 981,
+     "net_bps": 4.3,
+     "total_bps": 4217.1,
+     "t": 0.69
+    },
+    "2024": {
+     "n_ep": 827,
+     "net_bps": -1.39,
+     "total_bps": -1145.5,
+     "t": -0.23
+    },
+    "2025": {
+     "n_ep": 941,
+     "net_bps": -1.57,
+     "total_bps": -1482.0,
+     "t": -0.34
+    },
+    "2026": {
+     "n_ep": 337,
+     "net_bps": -6.27,
+     "total_bps": -2112.7,
+     "t": -0.58
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "n_ep": 2105,
+    "net_bps": -2.25,
+    "t": -0.63
+   },
+   "n_required": 33242600.1,
+   "event_rate_per_week_last6m": 11.385,
+   "eta_forward_confirmation_days": 20439706.8,
+   "eta_forward_confirmation_years": 55960.87,
+   "sample_start": "2021-01-01",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 3845,
+   "calendar_span_days": 2037
+  }
+ },
+ "diagnostics": {
+  "M4_n_monthly_expiries": 50,
+  "M4_n_observations": 126,
+  "M4_gap_describe": {
+   "count": 42.0,
+   "mean": 0.0122,
+   "std": 0.1031,
+   "min": -0.2942,
+   "25%": -0.0255,
+   "50%": 0.0129,
+   "75%": 0.0626,
+   "max": 0.2515
+  },
+  "M4_share_moves_toward_magnet_lag1": 0.405,
+  "M4_binom_p": null,
+  "M5_vrp_describe": {
+   "count": 1956.0,
+   "mean": 8.17,
+   "std": 11.81,
+   "min": -29.97,
+   "25%": 1.76,
+   "50%": 8.35,
+   "75%": 15.53,
+   "max": 46.23
+  },
+  "M5_arm_vs_arm": {
+   "n_high_vrp": 342,
+   "n_low_vrp": 370,
+   "mean_high_vrp": -2.23,
+   "mean_low_vrp": -21.84,
+   "diff": 19.61,
+   "t_diff": 1.02,
+   "p_diff": 0.306,
+   "cohens_d": 0.078
+  },
+  "M5_riskon_arm_vs_arm": {
+   "n_high_vrp": 342,
+   "n_low_vrp": 370,
+   "mean_high_vrp": 26.88,
+   "mean_low_vrp": -12.25,
+   "diff": 39.13,
+   "t_diff": 1.32,
+   "p_diff": 0.188,
+   "cohens_d": 0.1
+  },
+  "M7_hours_with_blocks": 21718,
+  "M7_ic_fwd1h": -0.0058,
+  "M7_n_hours_fwd1h": 31389,
+  "M7_ic_fwd4h": -0.0091,
+  "M7_n_hours_fwd4h": 31386
+ }
+}

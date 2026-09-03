@@ -1,0 +1,112 @@
+{
+ "M11_attention_count": {
+  "n_symbol_days": 346,
+  "n_symbols": 19,
+  "n_distinct_days_L2": 20,
+  "vol_test": {
+   "hypothesis": "attention predicts VOL (plausible)",
+   "spike_n": 38,
+   "spike_rv_ratio_mean": 0.915,
+   "calm_n": 308,
+   "calm_rv_ratio_mean": 1.005,
+   "spread": -0.09,
+   "t_on_daily_means": 0.08
+  },
+  "direction_test": {
+   "hypothesis": "attention does NOT predict direction (implausible that it would)",
+   "spike_net_bps": 21.0,
+   "calm_net_bps": -25.53,
+   "spread_bps": 46.53,
+   "t_spike_daymeans": 1.06
+  },
+  "gate_spike_long": {
+   "name": "M11_attention_spike_long",
+   "note": "",
+   "n_raw": 38,
+   "n_independent_L1": 38,
+   "n_independent_L2": 13,
+   "n_independent_L3": 13,
+   "gross_bps": 112.82,
+   "net_bps": 98.82,
+   "net_bps_stress28": 84.82,
+   "sd_episode_bps": 383.66,
+   "t_stat_declustered": 0.929,
+   "bootstrap_ci95": [
+    -79.15,
+    315.46
+   ],
+   "year_by_year": {
+    "2026": {
+     "n_raw": 38,
+     "n_ep": 13,
+     "net_bps": 98.82
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": null,
+    "net_bps": null,
+    "n_ep": null,
+    "t": null
+   },
+   "year_concentration_frac": 1.0,
+   "n_required": 474,
+   "event_rate_per_week_6m": 0.5,
+   "eta_forward_confirmation_days": 6636.0,
+   "eta_forward_confirmation_years": 18.17
+  }
+ },
+ "M12_attention_dispersion": {
+  "n_days": 19,
+  "hhi_median": 0.474,
+  "concentrated_fwd_rvratio": 1.065,
+  "dispersed_fwd_rvratio": 0.887,
+  "rvratio_spread": 0.179,
+  "concentrated_fwd_btc_net_bps": -55.32,
+  "dispersed_fwd_btc_net_bps": 15.23,
+  "btc_spread_bps": -70.55,
+  "t_conc_btc": -0.93
+ },
+ "M13_coingecko_trending_entry": {
+  "n_entries_raw": 24,
+  "n_distinct_days": 9,
+  "n_distinct_symbols": 18,
+  "raw_net_bps": -99.77,
+  "excess_vs_peer_bps": -38.25,
+  "t_excess_daymeans": -0.76,
+  "gate": {
+   "name": "M13_trending_entry_long",
+   "note": "",
+   "n_raw": 24,
+   "n_independent_L1": 22,
+   "n_independent_L2": 9,
+   "n_independent_L3": 9,
+   "gross_bps": -133.73,
+   "net_bps": -147.73,
+   "net_bps_stress28": -161.73,
+   "sd_episode_bps": 184.97,
+   "t_stat_declustered": -2.396,
+   "bootstrap_ci95": [
+    -271.07,
+    -48.43
+   ],
+   "year_by_year": {
+    "2026": {
+     "n_raw": 24,
+     "n_ep": 9,
+     "net_bps": -147.73
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": null,
+    "net_bps": null,
+    "n_ep": null,
+    "t": null
+   },
+   "year_concentration_frac": 1.0,
+   "n_required": 50,
+   "event_rate_per_week_6m": 0.35,
+   "eta_forward_confirmation_days": 1011.1,
+   "eta_forward_confirmation_years": 2.77
+  }
+ }
+}

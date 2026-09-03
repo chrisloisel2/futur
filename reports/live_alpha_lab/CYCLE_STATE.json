@@ -1,0 +1,178 @@
+{
+  "cycle_started_at": "2026-09-03T08:24:19.625651+00:00",
+  "cycle_finished_at": "2026-09-03T08:33:00.491838+00:00",
+  "duration_sec": 520.87,
+  "status": "OK",
+  "free_gb": 25.39,
+  "registry_drift": [],
+  "producers_run": 10,
+  "producers_ok": 10,
+  "producers_failed": [],
+  "producers_skipped_cadence": [],
+  "steps": [
+    {
+      "name": "LIQ_CASCADE_REPEAT_V1",
+      "script": "scripts/run_liq_cascade_repeat_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 25.88,
+      "started_at": "2026-09-03T08:24:19.720666+00:00",
+      "stdout_tail": "[LIQ_CASCADE_REPEAT_V1] univers fig\u00e9 : 50 symboles, hash=d7897e9bb0b7af0f\n[LIQ_CASCADE_REPEAT_V1] build_event_dataset() (pipeline fig\u00e9, inchang\u00e9)\u2026\n[LIQ_CASCADE_REPEAT_V1] 39745 events LIQ_CASCADE bruts -> 5675 exhaustion LONG_CASCADE tradeable\n[LIQ_CASCADE_REPEAT_V1] rien de nouveau (idempotent) \u2014 5675 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "LIQ_CASCADE_REPEAT_SYSTEMIC_V1",
+      "script": "scripts/run_liq_cascade_repeat_systemic_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 31.47,
+      "started_at": "2026-09-03T08:24:45.604393+00:00",
+      "stdout_tail": "[LIQ_CASCADE_REPEAT_SYSTEMIC_V1] univers fig\u00e9 : 50 symboles, hash=d7897e9bb0b7af0f\n[LIQ_CASCADE_REPEAT_SYSTEMIC_V1] 39745 events bruts -> 5675 exhaustion -> 3653 syst\u00e9miques (densit\u00e9 LONG_CASCADE >= 1 sur 60min)\n[LIQ_CASCADE_REPEAT_SYSTEMIC_V1] rien de nouveau (idempotent) \u2014 3653 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "LIQ_CASCADE_FAR_FROM_LOW_V1",
+      "script": "scripts/run_liq_cascade_far_from_low_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 29.0,
+      "started_at": "2026-09-03T08:25:17.078639+00:00",
+      "stdout_tail": "[LIQ_CASCADE_FAR_FROM_LOW_V1] univers fig\u00e9 : 50 symboles, hash=d7897e9bb0b7af0f\n[LIQ_CASCADE_FAR_FROM_LOW_V1] build_event_dataset() (pipeline fig\u00e9, inchang\u00e9)\u2026\n[LIQ_CASCADE_FAR_FROM_LOW_V1] 39745 events LIQ_CASCADE bruts -> 6823 far-from-low LONG_CASCADE tradeable\n[LIQ_CASCADE_FAR_FROM_LOW_V1] rien de nouveau (idempotent) \u2014 6823 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "SHORT_COVERING_CONTINUATION_V1",
+      "script": "scripts/run_short_covering_continuation_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 75.15,
+      "started_at": "2026-09-03T08:25:46.076734+00:00",
+      "stdout_tail": "[SHORT_COVERING_CONTINUATION_V1] univers fig\u00e9 : 50 symboles, hash=d7897e9bb0b7af0f\n[SHORT_COVERING_CONTINUATION_V1] 3/50 symboles sans donn\u00e9e live derivatives_raw sur cette fen\u00eatre (voir freeze_spec.json).\n[SHORT_COVERING_CONTINUATION_V1] rien de nouveau (idempotent) \u2014 377 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "[SHORT_COVERING_CONTINUATION_V1] MKRUSDT: no live derivatives_raw open_interest data in this window -- symbol likely absent from the live collector (see freeze_spec.json data_reconstruction_notes for the known 3/50-symbol gap).\n[SHORT_COVERING_CONTINUATION_V1] PEPEUSDT: no live derivatives_raw open_interest data in this window -- symbol likely absent from the live collector (see freeze_spec.json data_reconstruction_notes for the known 3/50-symbol gap).\n[SHORT_COVERING_CONTINUATION_V1] RNDRUSDT: no live derivatives_raw open_interest data in this window -- symbol likely absent from the live collector (see freeze_spec.json data_reconstruction_notes for the known 3/50-symbol gap).",
+      "role": "position"
+    },
+    {
+      "name": "WHALE_LSR_SCREEN_V1",
+      "script": "scripts/run_whale_lsr_screen_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 1.47,
+      "started_at": "2026-09-03T08:27:01.228002+00:00",
+      "stdout_tail": "[WHALE_LSR_SCREEN_V1] univers fig\u00e9 : 47 symboles, hash=69612b76c966eef4\n[WHALE_LSR_SCREEN_V1] chargement data/positioning/*_top_position.parquet\u2026\n[WHALE_LSR_SCREEN_V1] 641512 barres charg\u00e9es (47 symboles).\n[WHALE_LSR_SCREEN_V1] 641512 barres \u00e9valu\u00e9es -> 3254 d\u00e9clenchements de screen (main + mirror)\n[WHALE_LSR_SCREEN_V1] rien de nouveau (idempotent) \u2014 3254 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "gate"
+    },
+    {
+      "name": "VOL_FORECAST_LAYER_V1",
+      "script": "scripts/run_vol_forecast_layer_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 29.24,
+      "started_at": "2026-09-03T08:27:02.695426+00:00",
+      "stdout_tail": "[VOL_FORECAST_LAYER_V1] univers fig\u00e9 : ['BTCUSDT'], hash=19aa16aed07f38e9\n[VOL_FORECAST_LAYER_V1] build_daily_panel() (M2 rv_iv_spread + M6 far_otm_put_share + M17 block_count_24h -> combined forecast)\u2026\n[VOL_FORECAST_LAYER_V1] 1328 jours dans le panel (2023-01-01..2026-09-03)\n[VOL_FORECAST_LAYER_V1] rien de nouveau (idempotent) \u2014 1328 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "overlay"
+    },
+    {
+      "name": "FUNDING_BASIS_DISAGREEMENT_V2",
+      "script": "scripts/run_funding_basis_disagreement_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 48.14,
+      "started_at": "2026-09-03T08:27:31.931455+00:00",
+      "stdout_tail": "[FUNDING_BASIS_DISAGREEMENT_V2] univers fig\u00e9 : 2 symboles (['BTCUSDT', 'ETHUSDT']), hash=a2ac4f6320d10608\n[FUNDING_BASIS_DISAGREEMENT_V2] build_panel() par symbole (causal, jambe trimestrielle backfill + jambe funding/perp live derivatives_raw)\u2026\n[FUNDING_BASIS_DISAGREEMENT_V2]   BTCUSDT: 62 jours \u00e9ligibles (near_dte>=7), 2026-06-28..2026-09-01\n[FUNDING_BASIS_DISAGREEMENT_V2]   ETHUSDT: 62 jours \u00e9ligibles (near_dte>=7), 2026-06-28..2026-09-01\n[FUNDING_BASIS_DISAGREEMENT_V2] 124 jours-panel -> 1 entr\u00e9es tradeable (r\u00e9gime fig\u00e9 + d\u00e9cluster \u00e9pisode + d\u00e9cluster non-chevauchement k30d)\n[FUNDING_BASIS_DISAGREEMENT_V2] rien de nouveau (idempotent) \u2014 1 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "CROSS_SECTIONAL_MOMENTUM_LIVE_V1",
+      "script": "scripts/run_cross_sectional_momentum_live_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 4.51,
+      "started_at": "2026-09-03T08:28:20.071816+00:00",
+      "stdout_tail": "[CROSS_SECTIONAL_MOMENTUM_LIVE_V1] univers fig\u00e9 : 50 symboles, hash=d7897e9bb0b7af0f\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V1] 1/50 symboles exclus (listing eligibility live) : MKRUSDT(SETTLING)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V1] 2581 d\u00e9cisions LONG (top-quintile, 7j->fwd_7d) sur 49 symboles avec donn\u00e9e live, 344 rebalances hebdo\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V1] rien de nouveau (idempotent) \u2014 2581 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "CROSS_SECTIONAL_MOMENTUM_LIVE_V2",
+      "script": "scripts/run_cross_sectional_momentum_live_v2_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 87.46,
+      "started_at": "2026-09-03T08:28:24.584550+00:00",
+      "stdout_tail": "[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 200/547 (200 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 250/547 (250 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 300/547 (300 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 350/547 (350 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 400/547 (400 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 450/547 (450 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 500/547 (500 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] klines fetch progress: 547/547 (547 avec donn\u00e9e jusqu'ici)\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] onboard_ts : 3 symboles via fallback 'first_price_data_fallback' (absents du calendrier), 0 'unknown' (ni calendrier ni donn\u00e9e -- exclus de tout rebalance).\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] univers PIT \u00e9ligible : 0 symboles au premier rebalance (2020-01-06) -> 283 au dernier (2026-08-31) -- 348 rebalances audit\u00e9s -> pit_universe_log.parquet / pit_universe_summary.json\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] 11217 d\u00e9cisions LONG (top-quintile, 7j->fwd_7d) sur 547 symboles avec donn\u00e9e live (univers PIT masqu\u00e9), 344 rebalances hebdo\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] rien de nouveau (idempotent) \u2014 11217 d\u00e9cisions d\u00e9j\u00e0 connues.",
+      "stderr_tail": "",
+      "role": "position"
+    },
+    {
+      "name": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
+      "script": "scripts/run_amihud_illiquidity_premium_shadow.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 89.25,
+      "started_at": "2026-09-03T08:29:52.040271+00:00",
+      "stdout_tail": "[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 100/547 (100 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 150/547 (150 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 200/547 (200 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 250/547 (250 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 300/547 (300 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 350/547 (350 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 400/547 (400 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 450/547 (450 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 500/547 (500 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] klines fetch progress: 547/547 (547 avec donn\u00e9e jusqu'ici)\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] 24530 d\u00e9cisions (LONG+SHORT, quintile illiquidit\u00e9) sur 547 symboles (univers PIT masqu\u00e9), 344 rebalances hebdo\n[AMIHUD_ILLIQUIDITY_PREMIUM_V1] 0 nouvelles d\u00e9cisions \u00e9crites (24530 total) -> /home/qbee/futur/reports/live_alpha_lab/AMIHUD_ILLIQUIDITY_PREMIUM_V1/decisions.parquet",
+      "stderr_tail": "",
+      "role": "position"
+    }
+  ],
+  "provenance_tagging": {
+    "name": "APPLY_PROVENANCE_TAGS",
+    "script": "scripts/apply_provenance_tags.py",
+    "status": "OK",
+    "returncode": 0,
+    "duration_sec": 0.94,
+    "started_at": "2026-09-03T08:31:21.289482+00:00",
+    "stdout_tail": "[AMIHUD_ILLIQUIDITY_PREMIUM_V1] freeze=2026-09-02T11:20:10+00:00 -> replay=24530 forward=0\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V1] freeze=2026-08-31T18:30:44+00:00 -> replay=2581 forward=0\n[CROSS_SECTIONAL_MOMENTUM_LIVE_V2] freeze=2026-09-01T10:24:15+00:00 -> replay=11217 forward=0\n[FUNDING_BASIS_DISAGREEMENT_V1] pas d'entr\u00e9e fig\u00e9e dans le registre (freeze_timestamp manquant) \u2014 skip\n[FUNDING_BASIS_DISAGREEMENT_V2] freeze=2026-08-31T18:08:39+00:00 -> replay=1 forward=0\n[LIQ_CASCADE_FAR_FROM_LOW_V1] freeze=2026-08-31T18:08:39+00:00 -> replay=6805 forward=18\n[LIQ_CASCADE_REPEAT_SYSTEMIC_V1] freeze=2026-09-03T08:18:34+00:00 -> replay=3653 forward=0\n[LIQ_CASCADE_REPEAT_V1] freeze=2026-08-31T00:00:00+00:00 -> replay=5667 forward=8\n[SHORT_COVERING_CONTINUATION_V1] freeze=2026-08-31T18:08:39+00:00 -> replay=189 forward=188\n[VOL_FORECAST_LAYER_V1] freeze=2026-08-31T22:05:00+00:00 -> replay=1325 forward=3\n[WHALE_LSR_SCREEN_V1] freeze=2026-08-31T18:08:39+00:00 -> replay=3091 forward=163",
+    "stderr_tail": ""
+  },
+  "portfolio": {
+    "name": "PORTFOLIO_SHADOW",
+    "script": "scripts/run_portfolio_shadow.py",
+    "status": "OK",
+    "returncode": 0,
+    "duration_sec": 96.78,
+    "started_at": "2026-09-03T08:31:22.228497+00:00",
+    "stdout_tail": "[portfolio] VOL_FORECAST_LAYER_V1: 3 forward decisions -> 0 intents\n[portfolio] CROSS_SECTIONAL_MOMENTUM_LIVE_V1: 0 forward decisions -> 0 intents\n[portfolio] CROSS_SECTIONAL_MOMENTUM_LIVE_V2: 0 forward decisions -> 0 intents\n[portfolio] AMIHUD_ILLIQUIDITY_PREMIUM_V1: 0 forward decisions -> 0 intents\n[portfolio] symboles sous screen actif : ['JUPUSDT']\n[portfolio] vol_overlay_multiplier (as_of=2026-09-03T08:31:22.704160+00:00) = 0.9662\n[portfolio] P1_EQUAL_RISK: 13 positions status=OK gross=109,505.36 net=109,505.36 realized=200.15 unrealized=-21.90 fees=233.13 funding=-2.70 equity=199,942.42 dd=-0.1679%\n[portfolio] P1_CONTROL: 13 positions status=OK gross=109,505.36 net=109,505.36 realized=280.22 unrealized=-21.90 fees=233.17 funding=-2.70 equity=200,022.45 dd=-0.1279%\n[portfolio] P1_VOL_OVERLAY: 13 positions status=OK gross=107,225.49 net=107,225.49 realized=280.22 unrealized=-21.45 fees=232.03 funding=-2.71 equity=200,024.04 dd=-0.1271%\n[portfolio] P2_DIVERSIFIED: 13 positions status=OK gross=109,505.36 net=109,505.36 realized=280.22 unrealized=-21.90 fees=233.17 funding=-2.70 equity=200,022.45 dd=-0.1279%\n[portfolio] P3_ALL_CANDIDATES: 13 positions status=OK gross=33,979.17 net=33,979.17 realized=107.83 unrealized=-6.80 fees=71.17 funding=-0.83 equity=200,029.04 dd=-0.0264%\n[portfolio] r\u00e9sum\u00e9 -> /home/qbee/futur/reports/live_alpha_lab/portfolios/SUMMARY.json",
+    "stderr_tail": ""
+  },
+  "scoreboards": [
+    {
+      "name": "compute_live_alpha_lab_scoreboard",
+      "script": "scripts/compute_live_alpha_lab_scoreboard.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 0.67,
+      "started_at": "2026-09-03T08:32:59.007155+00:00",
+      "stdout_tail": "Scoreboard \u00e9crit -> /home/qbee/futur/reports/live_alpha_lab/SCOREBOARD.md\nTotal forward_decisions : 380",
+      "stderr_tail": ""
+    },
+    {
+      "name": "compute_validation_scoreboard",
+      "script": "scripts/compute_validation_scoreboard.py",
+      "status": "OK",
+      "returncode": 0,
+      "duration_sec": 0.82,
+      "started_at": "2026-09-03T08:32:59.676471+00:00",
+      "stdout_tail": "[validation_scoreboard] 31 candidats -> /home/qbee/futur/reports/edge_discovery/validation_2026-09/VALIDATION_AND_FORWARD_SCOREBOARD.md\n[validation_scoreboard] 3 VALIDATED_FOR_FORWARD",
+      "stderr_tail": ""
+    }
+  ],
+  "last_success": {
+    "LIQ_CASCADE_REPEAT_V1": "2026-09-03T08:24:19.720666+00:00",
+    "LIQ_CASCADE_FAR_FROM_LOW_V1": "2026-09-03T08:25:17.078639+00:00",
+    "SHORT_COVERING_CONTINUATION_V1": "2026-09-03T08:25:46.076734+00:00",
+    "WHALE_LSR_SCREEN_V1": "2026-09-03T08:27:01.228002+00:00",
+    "VOL_FORECAST_LAYER_V1": "2026-09-03T08:27:02.695426+00:00",
+    "FUNDING_BASIS_DISAGREEMENT_V2": "2026-09-03T08:27:31.931455+00:00",
+    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "2026-09-03T08:28:20.071816+00:00",
+    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "2026-09-03T08:28:24.584550+00:00",
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "2026-09-03T08:29:52.040271+00:00",
+    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "2026-09-03T08:24:45.604393+00:00"
+  }
+}

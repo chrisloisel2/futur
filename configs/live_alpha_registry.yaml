@@ -277,6 +277,75 @@ alphas:
       (futur-derivatives-collector.service, Restart=always) à
       2026-08-31T18:05:07Z — voir data_segment_boundaries.
 
+
+  - alpha_id: LIQ_CASCADE_REPEAT_SYSTEMIC_V1
+    family: liquidation
+    mechanism: >
+      Cascade LONG_CASCADE en régime "exhaustion" (>=2 cascades same-symbol dans
+      les 24h, spec identique au parent LIQ_CASCADE_REPEAT_V1) MAIS uniquement
+      lorsque le marché entier flushe en même temps : au moins un AUTRE symbole
+      de l'univers a lui aussi eu une LONG_CASCADE dans les 60 minutes
+      strictement précédentes ("densité systémique"). Un flush market-wide épuise
+      les vendeurs forcés plus vite qu'une répétition idiosyncratique sur un seul
+      nom. Le parent trade les deux régimes et mélange donc un bucket payant
+      (systémique, +22.12bps déclusterisé) et un bucket perdant (isolé,
+      -13.35bps) ; cette variante ne trade que le premier.
+      Réutilise sans modification le détecteur figé
+      src/institutional/engines/liq_cascade/detector.py et le classificateur de
+      répétition repeat_variant.py ; n'ajoute que density_variant.py.
+    version: v1.0
+    status: SHADOW_LIVE
+    scientific_status: FROZEN
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-09-01_round3/w4_regime_conditional/REPORT.md#a6
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_REPEAT_DENSITY/REPORT.md
+    signal_definition: src/institutional/engines/liq_cascade/density_variant.py::select_tradeable_systemic
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features:
+      - oi_drop_z
+      - px_ret_30m
+      - n_prior_same_symbol_24h
+      - density_60m
+    model_family: RULE_STATE_MACHINE
+    model_hash: null
+    training_window: 2022-01-01 .. 2026-09-02 (fenêtre de validation indépendante)
+    freeze_timestamp: "2026-09-03T08:18:34+00:00"
+    entry: kind==LONG_CASCADE AND n_prior_same_symbol_24h>=2 AND density_60m>=1
+    exit: fwd_4h (horizon fixe, pas de stop/TP dynamique)
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: round-trip taker ~14bps (COST_RT existant), stress 28bps
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: ~0.775 épisode indépendant/jour (taux conservateur last-1y du rapport de validation), petite taille/event
+    correlation_family: LIQ_CASCADE_DETECTOR
+    live_start_timestamp: "2026-09-03T08:18:34+00:00"
+    expected_net_bps: 22.12
+    expected_n_independent_episodes: 1165
+    expected_bootstrap_ci95_bps: "[9.38, 35.88]"
+    data_live: true
+    notes: >
+      VALIDÉ INDÉPENDAMMENT (verdict VALIDATED_FOR_FORWARD) : réimplémentation à
+      partir du fichier brut avec une métrique de densité différente de celle de
+      la découverte (60min/symboles distincts/same-kind vs 30min/tous-kinds/
+      comptage brut), déclustering au niveau épisode cross-symbole, 5
+      perturbations préenregistrées, block-bootstrap (P(mean<0)=0.0002), 5/5
+      années positives.
+      ⚠ DEUX RÉSERVES MATÉRIELLES reprises du rapport de validation, à ne pas
+      perdre de vue en forward : (1) la magnitude correctement déclusterisée est
+      +22.1bps, PAS les +39.5bps annoncés par la découverte — dont l'N_indep
+      semblait compté par ligne/symbole et non par épisode cross-symbole ;
+      (2) ETA de reconfirmation forward ~9,4 ans à 80% de puissance (dominé par
+      la variance inter-épisode, pas par la rareté) : le monitoring forward doit
+      juger sur la survie du signe, du coût et du mécanisme, PAS sur une
+      significativité fraîche.
+      Le seuil de densité (médiane = 1) est FIGÉ en dur dans density_variant.py
+      et n'est jamais recalculé au runtime — une médiane recalculée ferait
+      dériver la spec en silence sous le freeze_timestamp.
+      RISQUE CORRÉLÉ avec LIQ_CASCADE_REPEAT_V1 : sous-ensemble strict du même
+      détecteur -> même risk_bucket et même correlation_family, déduplication
+      assurée par la couche portefeuille. Les deux tournent en parallèle
+      volontairement : leur écart forward mesure la valeur du filtre.
+
   # ══════════════════════════════════════════════════════════════════════
   # FAMILLE : positioning / wallet (risk_bucket: POSITIONING_WALLET_FAMILY)
   # ══════════════════════════════════════════════════════════════════════

@@ -1,0 +1,330 @@
+{
+  "base": {
+    "spec": "LONG_CASCADE & n_events_sym_24h>=2 (repeat_variant.py frozen spec)",
+    "n": 5457,
+    "period": [
+      "2021-01-05 04:25:00+00:00",
+      "2026-07-03 16:35:00+00:00"
+    ],
+    "mean_net_bps_raw": 16.22
+  },
+  "top_frac_preregistered": 0.3,
+  "results": {
+    "B0_btc_vol_24h_macro": {
+      "gate": "B0_btc_vol_24h_macro",
+      "n_on_raw": 1583,
+      "n_off_raw": 3844,
+      "on_share": 0.292,
+      "mean_on_bps_raw": 47.37,
+      "mean_off_bps_raw": 2.46,
+      "delta_bps_raw": 44.91,
+      "L1": {
+        "n_ep_on": 991,
+        "n_ep_off": 2326,
+        "on_bps": 57.52,
+        "off_bps": 5.54,
+        "delta_bps": 51.98,
+        "welch_t": 3.99,
+        "on_t_vs_zero": 4.76,
+        "on_ci95": [
+          34.39,
+          82.37
+        ]
+      },
+      "L2": {
+        "n_ep_on": 222,
+        "n_ep_off": 888,
+        "on_bps": 28.48,
+        "off_bps": 6.31,
+        "delta_bps": 22.18,
+        "welch_t": 1.57,
+        "on_t_vs_zero": 2.31,
+        "on_ci95": [
+          4.37,
+          52.4
+        ]
+      },
+      "L3": {
+        "n_ep_on": 314,
+        "n_ep_off": 1363,
+        "on_bps": 28.08,
+        "off_bps": 17.84,
+        "delta_bps": 10.23,
+        "welch_t": 0.78,
+        "on_t_vs_zero": 2.41,
+        "on_ci95": [
+          5.91,
+          52.05
+        ]
+      },
+      "L4": {
+        "n_ep_on": 121,
+        "n_ep_off": 401,
+        "on_bps": 34.35,
+        "off_bps": 3.97,
+        "delta_bps": 30.38,
+        "welch_t": 2.13,
+        "on_t_vs_zero": 2.88,
+        "on_ci95": [
+          11.18,
+          57.85
+        ]
+      },
+      "ETA": {
+        "unit": "L4 gate-regime episode",
+        "delta_bps": 30.38,
+        "n_required_on_episodes": 1112,
+        "on_episode_rate_per_week_last6m": 0.735,
+        "eta_days": 10594.8,
+        "eta_years": 29.01,
+        "total_on_episodes_history": 121
+      },
+      "delta_by_year": {
+        "2022": 34.16,
+        "2023": -24.35,
+        "2024": 32.38,
+        "2025": 37.34,
+        "2026": 87.75
+      },
+      "years_positive": "4/5",
+      "on_net_bps_stress28_L4": 20.35
+    },
+    "R1_symbol_vol_24h": {
+      "gate": "R1_symbol_vol_24h",
+      "n_on_raw": 1013,
+      "n_off_raw": 2974,
+      "on_share": 0.254,
+      "mean_on_bps_raw": 95.39,
+      "mean_off_bps_raw": -12.56,
+      "delta_bps_raw": 107.95,
+      "L1": {
+        "n_ep_on": 586,
+        "n_ep_off": 1872,
+        "on_bps": 106.91,
+        "off_bps": -7.91,
+        "delta_bps": 114.82,
+        "welch_t": 5.05,
+        "on_t_vs_zero": 4.82,
+        "on_ci95": [
+          66.29,
+          151.8
+        ]
+      },
+      "L2": {
+        "n_ep_on": 242,
+        "n_ep_off": 772,
+        "on_bps": 32.87,
+        "off_bps": -2.72,
+        "delta_bps": 35.6,
+        "welch_t": 1.53,
+        "on_t_vs_zero": 1.47,
+        "on_ci95": [
+          -9.77,
+          79.43
+        ]
+      },
+      "L3": {
+        "n_ep_on": 321,
+        "n_ep_off": 1161,
+        "on_bps": 65.94,
+        "off_bps": 4.56,
+        "delta_bps": 61.38,
+        "welch_t": 2.71,
+        "on_t_vs_zero": 3.0,
+        "on_ci95": [
+          22.76,
+          108.49
+        ]
+      },
+      "L4": {
+        "n_ep_on": 590,
+        "n_ep_off": 1882,
+        "on_bps": 106.51,
+        "off_bps": -7.22,
+        "delta_bps": 113.73,
+        "welch_t": 5.0,
+        "on_t_vs_zero": 4.8,
+        "on_ci95": [
+          65.78,
+          151.58
+        ]
+      },
+      "ETA": {
+        "unit": "L4 gate-regime episode",
+        "delta_bps": 113.73,
+        "n_required_on_episodes": 646,
+        "on_episode_rate_per_week_last6m": 2.127,
+        "eta_days": 2127.9,
+        "eta_years": 5.83,
+        "total_on_episodes_history": 590
+      },
+      "delta_by_year": {
+        "2022": -33.54,
+        "2023": 20.28,
+        "2024": 104.7,
+        "2025": 215.7,
+        "2026": 110.47
+      },
+      "years_positive": "4/5",
+      "on_net_bps_stress28_L4": 92.51
+    },
+    "R2_symbol_fast_vol_absret1h": {
+      "gate": "R2_symbol_fast_vol_absret1h",
+      "n_on_raw": 979,
+      "n_off_raw": 3008,
+      "on_share": 0.246,
+      "mean_on_bps_raw": 67.69,
+      "mean_off_bps_raw": -2.32,
+      "delta_bps_raw": 70.01,
+      "L1": {
+        "n_ep_on": 774,
+        "n_ep_off": 1929,
+        "on_bps": 62.84,
+        "off_bps": 2.73,
+        "delta_bps": 60.12,
+        "welch_t": 3.18,
+        "on_t_vs_zero": 3.46,
+        "on_ci95": [
+          29.06,
+          99.48
+        ]
+      },
+      "L2": {
+        "n_ep_on": 317,
+        "n_ep_off": 781,
+        "on_bps": 32.58,
+        "off_bps": 1.82,
+        "delta_bps": 30.76,
+        "welch_t": 1.66,
+        "on_t_vs_zero": 1.87,
+        "on_ci95": [
+          -0.63,
+          68.58
+        ]
+      },
+      "L3": {
+        "n_ep_on": 366,
+        "n_ep_off": 1190,
+        "on_bps": 52.32,
+        "off_bps": 10.07,
+        "delta_bps": 42.25,
+        "welch_t": 2.24,
+        "on_t_vs_zero": 2.91,
+        "on_ci95": [
+          18.03,
+          87.55
+        ]
+      },
+      "L4": {
+        "n_ep_on": 828,
+        "n_ep_off": 2033,
+        "on_bps": 65.13,
+        "off_bps": -0.95,
+        "delta_bps": 66.08,
+        "welch_t": 3.41,
+        "on_t_vs_zero": 3.5,
+        "on_ci95": [
+          29.81,
+          103.03
+        ]
+      },
+      "ETA": {
+        "unit": "L4 gate-regime episode",
+        "delta_bps": 66.08,
+        "n_required_on_episodes": 1965,
+        "on_episode_rate_per_week_last6m": 4.293,
+        "eta_days": 3204.7,
+        "eta_years": 8.77,
+        "total_on_episodes_history": 828
+      },
+      "delta_by_year": {
+        "2022": 43.15,
+        "2023": 50.52,
+        "2024": 78.22,
+        "2025": 50.3,
+        "2026": 88.55
+      },
+      "years_positive": "5/5",
+      "on_net_bps_stress28_L4": 51.13
+    },
+    "R3_event_intensity_oi_drop_z": {
+      "gate": "R3_event_intensity_oi_drop_z",
+      "n_on_raw": 1221,
+      "n_off_raw": 2766,
+      "on_share": 0.306,
+      "mean_on_bps_raw": 42.51,
+      "mean_off_bps_raw": 2.67,
+      "delta_bps_raw": 39.84,
+      "L1": {
+        "n_ep_on": 978,
+        "n_ep_off": 1832,
+        "on_bps": 45.06,
+        "off_bps": 8.52,
+        "delta_bps": 36.54,
+        "welch_t": 2.59,
+        "on_t_vs_zero": 3.66,
+        "on_ci95": [
+          22.49,
+          71.33
+        ]
+      },
+      "L2": {
+        "n_ep_on": 469,
+        "n_ep_off": 749,
+        "on_bps": 22.87,
+        "off_bps": 5.06,
+        "delta_bps": 17.81,
+        "welch_t": 1.32,
+        "on_t_vs_zero": 1.98,
+        "on_ci95": [
+          0.61,
+          46.55
+        ]
+      },
+      "L3": {
+        "n_ep_on": 572,
+        "n_ep_off": 1109,
+        "on_bps": 37.69,
+        "off_bps": 12.17,
+        "delta_bps": 25.52,
+        "welch_t": 1.98,
+        "on_t_vs_zero": 3.26,
+        "on_ci95": [
+          15.65,
+          61.69
+        ]
+      },
+      "L4": {
+        "n_ep_on": 1046,
+        "n_ep_off": 1949,
+        "on_bps": 46.48,
+        "off_bps": 6.76,
+        "delta_bps": 39.72,
+        "welch_t": 2.75,
+        "on_t_vs_zero": 3.64,
+        "on_ci95": [
+          22.56,
+          71.53
+        ]
+      },
+      "ETA": {
+        "unit": "L4 gate-regime episode",
+        "delta_bps": 39.72,
+        "n_required_on_episodes": 4083,
+        "on_episode_rate_per_week_last6m": 6.149,
+        "eta_days": 4648.5,
+        "eta_years": 12.73,
+        "total_on_episodes_history": 1046
+      },
+      "delta_by_year": {
+        "2022": -12.36,
+        "2023": 22.35,
+        "2024": 52.25,
+        "2025": 49.02,
+        "2026": 25.41
+      },
+      "years_positive": "4/5",
+      "on_net_bps_stress28_L4": 32.48
+    }
+  }
+}

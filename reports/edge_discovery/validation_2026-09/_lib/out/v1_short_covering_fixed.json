@@ -1,0 +1,95 @@
+{
+  "_deviation_from_prereg": "L3 pr\u00e9enregistr\u00e9 (\u00e9pisode cha\u00een\u00e9 gap<4h) d\u00e9g\u00e9n\u00e9r\u00e9 sur ce panel dense : 22330 signaux -> 5 clusters. Remplac\u00e9 par jour/semaine/mois calendaires, fix\u00e9s avant relecture des r\u00e9sultats.",
+  "_population": {
+    "n_bars": 1447224,
+    "n_symbols": 48,
+    "n_arm_A": 22330,
+    "arm_A_share": 0.01543,
+    "window": [
+      "2022-01-01 00:00:00+00:00",
+      "2026-07-31 19:00:00+00:00"
+    ]
+  },
+  "L3_day": {
+    "arm_A": {
+      "n": 22330,
+      "n_clusters": 1490,
+      "net14": 2.53,
+      "net28": -11.47,
+      "t_cluster_robust": 0.405,
+      "bootstrap_p05": -7.82
+    },
+    "A_minus_B": {
+      "difference_bps": 17.06,
+      "se": 5.746,
+      "t_cluster_robust": 2.97,
+      "n_clusters": 1582
+    }
+  },
+  "L3_week": {
+    "arm_A": {
+      "n": 22330,
+      "n_clusters": 229,
+      "net14": 2.53,
+      "net28": -11.47,
+      "t_cluster_robust": 0.459,
+      "bootstrap_p05": -6.58
+    },
+    "A_minus_B": {
+      "difference_bps": 17.06,
+      "se": 5.294,
+      "t_cluster_robust": 3.223,
+      "n_clusters": 230
+    }
+  },
+  "L3_month": {
+    "arm_A": {
+      "n": 22330,
+      "n_clusters": 55,
+      "net14": 2.53,
+      "net28": -11.47,
+      "t_cluster_robust": 0.423,
+      "bootstrap_p05": -7.49
+    },
+    "A_minus_B": {
+      "difference_bps": 17.06,
+      "se": 5.809,
+      "t_cluster_robust": 2.938,
+      "n_clusters": 55
+    }
+  },
+  "A_minus_B_by_year": {
+    "2022": {
+      "difference_bps": -16.17,
+      "se": 20.756,
+      "t_cluster_robust": -0.779,
+      "n_clusters": 335
+    },
+    "2023": {
+      "difference_bps": 24.06,
+      "se": 8.336,
+      "t_cluster_robust": 2.886,
+      "n_clusters": 333
+    },
+    "2024": {
+      "difference_bps": 28.11,
+      "se": 9.171,
+      "t_cluster_robust": 3.064,
+      "n_clusters": 366
+    },
+    "2025": {
+      "difference_bps": 29.71,
+      "se": 13.809,
+      "t_cluster_robust": 2.151,
+      "n_clusters": 336
+    },
+    "2026": {
+      "difference_bps": 10.75,
+      "se": 8.235,
+      "t_cluster_robust": 1.305,
+      "n_clusters": 212
+    }
+  },
+  "n_years_positive": 4,
+  "arm_A_vs_zero_note": "Le bras A seul est \u00e0 net14 2.53 (cluster=jour, t=0.405) : le contraste A\u2212B est positif mais le PRODUIT lui-m\u00eame ne bat pas z\u00e9ro de fa\u00e7on significative."
+}

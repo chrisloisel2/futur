@@ -34,6 +34,7 @@ LAB_DIR = ROOT / "reports" / "live_alpha_lab"
 # devinée : chaque alpha a un schéma différent selon sa famille.
 TIME_COL_BY_ALPHA = {
     "LIQ_CASCADE_REPEAT_V1": "event_time",
+    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "event_time",
     "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
     "SHORT_COVERING_CONTINUATION_V1": "timestamp",
     "WHALE_LSR_SCREEN_V1": "timestamp",

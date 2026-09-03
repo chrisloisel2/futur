@@ -1,0 +1,98 @@
+{
+ "sign_learned": -1.0,
+ "sign_interpretation": "-1 => high DVOL_ETH/DVOL_BTC => SHORT BTC / LONG ETH",
+ "oos_start": "2023-12-26",
+ "sample": [
+  "2021-05-22",
+  "2026-07-31"
+ ],
+ "baseline_oos": {
+  "n_ep": 68,
+  "net_bps": 77.33,
+  "t": 2.5,
+  "sharpe": 1.215,
+  "eta_years_from_sharpe": 21.27
+ },
+ "baseline_full": {
+  "n_ep": 144,
+  "net_bps": 54.18,
+  "t": 2.29,
+  "sharpe": 0.921,
+  "eta_years_from_sharpe": 37.01
+ },
+ "oos_ex2023": {
+  "n_ep": 68,
+  "net_bps": 76.18,
+  "t": 2.48,
+  "sharpe": 1.205,
+  "eta_years_from_sharpe": 21.64
+ },
+ "threshold_sensitivity": {
+  "0.75/0.25": {
+   "n_ep": 60,
+   "net_bps": 82.12,
+   "t": 2.28,
+   "sharpe": 1.092,
+   "eta_years_from_sharpe": 26.35
+  },
+  "0.8/0.2": {
+   "n_ep": 68,
+   "net_bps": 77.33,
+   "t": 2.5,
+   "sharpe": 1.215,
+   "eta_years_from_sharpe": 21.27
+  },
+  "0.85/0.15": {
+   "n_ep": 60,
+   "net_bps": 51.29,
+   "t": 1.83,
+   "sharpe": 0.768,
+   "eta_years_from_sharpe": 53.26
+  },
+  "0.9/0.1": {
+   "n_ep": 58,
+   "net_bps": 30.57,
+   "t": 1.07,
+   "sharpe": 0.441,
+   "eta_years_from_sharpe": 161.5
+  },
+  "0.7/0.3": {
+   "n_ep": 67,
+   "net_bps": 65.56,
+   "t": 2.03,
+   "sharpe": 0.893,
+   "eta_years_from_sharpe": 39.41
+  }
+ },
+ "confound_correlations": {
+  "spearman_dvolratio_vs_rel_realised_vol_ratio": 0.691,
+  "spearman_dvolratio_vs_rel_momentum_30d": -0.178
+ },
+ "partial_IC": {
+  "raw_IC_spearman": -0.0024,
+  "partial_IC_ctrl_rel_realised_vol": -0.0128,
+  "partial_IC_ctrl_rel_momentum": -0.0032,
+  "partial_IC_ctrl_both": -0.0133
+ },
+ "substitution_realised_vol_ratio_only": {
+  "n_ep": 33,
+  "net_bps": 67.62,
+  "t": 1.16,
+  "sharpe": 0.581,
+  "eta_years_from_sharpe": 92.9
+ },
+ "substitution_rel_momentum_only": {
+  "n_ep": 57,
+  "net_bps": -24.12,
+  "t": -0.51,
+  "sharpe": -0.505,
+  "eta_years_from_sharpe": null
+ },
+ "orthogonalised_dvol_ratio": {
+  "n_ep": 84,
+  "net_bps": 14.84,
+  "t": 0.71,
+  "sharpe": 0.209,
+  "eta_years_from_sharpe": 720.18
+ }
+}

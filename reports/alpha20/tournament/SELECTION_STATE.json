@@ -491,16 +491,35 @@
         "basis_term_v0": "SELECTED_PROVISIONAL",
         "mh_events_exec": "OBSERVING"
       }
+    },
+    {
+      "ts": "2026-09-02T06:20:00.597379+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "SELECTED_PROVISIONAL",
+        "mh_events_exec": "OBSERVING"
+      }
+    },
+    {
+      "ts": "2026-09-03T06:20:00.694384+00:00",
+      "verdict": "NO_SELECTION",
+      "protocol_hash": "53a265970fffd082dbfc5ade",
+      "statuses": {
+        "carry_basis_v12": "OBSERVING",
+        "carry_solusdt": "OBSERVING",
+        "carry_bnbusdt": "OBSERVING",
+        "basis_term_v0": "REJECTED",
+        "mh_events_exec": "OBSERVING"
+      }
     }
   ],
-  "provisional": {
-    "basis_term_v0": {
-      "config_hash": "eb754f95bb0af73a9318baf4",
-      "selected_at": "2026-08-20T06:20:51.186200+00:00"
-    }
-  },
+  "provisional": {},
   "latest": {
-    "ts": "2026-09-01T06:20:51.181099+00:00",
+    "ts": "2026-09-03T06:20:00.694384+00:00",
     "verdict": "NO_SELECTION",
     "statuses": {
       "carry_basis_v12": {
@@ -509,9 +528,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 42.83,
+          "age_days": 44.83,
           "min_days": 30,
-          "n_decisions": 41,
+          "n_decisions": 43,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -523,9 +542,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 42.83,
+          "age_days": 44.83,
           "min_days": 30,
-          "n_decisions": 41,
+          "n_decisions": 43,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -537,9 +556,9 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 42.83,
+          "age_days": 44.83,
           "min_days": 30,
-          "n_decisions": 41,
+          "n_decisions": 43,
           "min_decisions": 300,
           "ready_for_selection": false,
           "leaderboard_informative_only": true
@@ -547,13 +566,14 @@
       },
       "basis_term_v0": {
         "runner_id": "basis_term_v0",
-        "status": "SELECTED_PROVISIONAL",
-        "reasons": [],
+        "status": "REJECTED",
+        "reasons": [
+          "bootstrap_lcb95",
+          "block_bootstrap_lcb95"
+        ],
         "phase": "confirmation",
-        "days_elapsed": 12.0,
-        "new_events": 900,
-        "required_days": 14,
-        "required_events": 100
+        "days_elapsed": 14.0,
+        "new_events": 1047
       },
       "mh_events_exec": {
         "runner_id": "mh_events_exec",
@@ -561,7 +581,7 @@
         "reasons": [],
         "phase": "observation",
         "observation": {
-          "age_days": 42.83,
+          "age_days": 44.83,
           "min_days": 30,
           "n_decisions": 0,
           "min_decisions": 30,

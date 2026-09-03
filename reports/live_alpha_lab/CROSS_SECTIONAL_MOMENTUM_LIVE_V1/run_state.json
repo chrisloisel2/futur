@@ -1,12 +1,12 @@
 {
   "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V1",
-  "last_run": "2026-08-31T21:56:28.029177+00:00",
+  "last_run": "2026-09-03T08:16:40.320768+00:00",
   "universe_hash": "d7897e9bb0b7af0f",
   "universe_size": 50,
   "n_symbols_eligible": 49,
   "n_symbols_excluded": 1,
-  "n_decisions_total": 2571,
-  "n_decisions_new": 2571,
-  "n_rebalances_this_run": 343,
+  "n_decisions_total": 2581,
+  "n_decisions_new": 10,
+  "n_rebalances_this_run": 344,
   "mode": "A_SIGNAL_SHADOW"
 }

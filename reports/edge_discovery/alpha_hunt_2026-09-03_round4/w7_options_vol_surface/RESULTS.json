@@ -1,0 +1,2431 @@
+{
+ "worker": "W7_OPTIONS_VOL_SURFACE",
+ "round": "alpha_hunt_2026-09-03_round4",
+ "date": "2026-09-03",
+ "headline": "7/7 preregistered mechanisms fail. No VALIDATED_FOR_FORWARD candidate. The axis is structurally ETA-bound: with a 2-asset universe the only route to a confirmable edge is a Sharpe above 3.24, and the best mechanism reached 1.22 before its confound control took it to 0.21.",
+ "eta_identity": {
+  "formula": "ETA_years = (z_0.975 + z_0.80)^2 * 4 / SR_annual^2 = 31.4 / SR^2",
+  "derivation": "n_required = 7.849*(sigma/(0.5*mu))^2 episodes; ETA = n_required/R; and SR = (mu/sigma)*sqrt(R), so the episode rate R cancels exactly.",
+  "consequence": "Episode FREQUENCY does not improve ETA on its own -- only Sharpe does. Since the 14bps cost is charged per episode, raising the episode rate usually LOWERS Sharpe and so WORSENS ETA. The lever that works is reducing sigma (market-neutral pairs, cross-sectional tilts), not raising frequency.",
+  "bars": {
+   "ETA_3y_requires_SR": 3.24,
+   "ETA_1y_requires_SR": 5.6
+  }
+ },
+ "cost_convention": "net = gross - 14bps round trip (7bps per unit |position change|); stress = 28bps (14/unit)",
+ "declustering_bug_found_and_fixed": "My own first pass counted per-asset episodes, so a 41-name alt basket registered 41 'independent' observations per calendar day and a 2-leg pair registered 2 per trade. Fixed by collapsing every multi-asset expression to one synthetic instrument before the gate. Effect on M5: t 4.49 -> 1.06. All multi-asset numbers reported here are the collapsed (correct) ones.",
+ "data_coverage": {
+  "deribit_BTC_trades": "2023-01-01 -> 2026-09-03 (~1340 days, 16.2M trades)",
+  "DVOL_BTC_and_ETH": "2021-03-24 -> 2026-09-03 (1990 days)",
+  "perp_panel_data_v2": "ends 2026-07-31 -- the binding end date for every forward outcome",
+  "open_interest": "ABSENT from this dataset (confirmed for the third time in this project)",
+  "universe": "BTC + ETH only at trade level; ETH has index-level DVOL but no trade-level surface"
+ },
+ "mechanisms": {
+  "M1_IV_TERM_STRUCTURE_DIRECTION": {
+   "hypothesis": "IV term-structure slope / inversion (near 2-10d ATM IV minus far 45-180d) predicts BTC perp DIRECTION, not just forward RV.",
+   "distinct_from": "W6-round2 M7 (slope level -> forward RV, confound-killed) and M8 (slope change -> forward RV). Neither targeted direction.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, daily, taker",
+   "verdict": "DEAD",
+   "why": "OOS (sign fitted on first half) net -22.1 bps/episode, t=-0.63, SR=-0.49 on 100 episodes. Full-sample sign-fitted version is also negative (-11.3). The inverted-vs-contango two-arm test on forward 1d returns shows no separation.",
+   "gate": {
+    "n_raw": 246,
+    "n_independent_L1": 246,
+    "n_independent_L2": 246,
+    "n_independent_L3": 100,
+    "L3_unit": "contiguous same-sign position episode",
+    "mean_episode_days": 2.46,
+    "gross_bps_per_episode": -14.97,
+    "net_bps": -22.11,
+    "net_bps_stress28": -29.25,
+    "t_stat_declustered": -0.63,
+    "bootstrap_ci95": [
+     -92.09,
+     46.13
+    ],
+    "sharpe_annual_net": -0.492,
+    "sharpe_annual_stress28": -0.73,
+    "year_by_year": {
+     "2024": {
+      "n_ep": 16,
+      "net_bps": 134.85,
+      "total_bps": 2157.7,
+      "t": 1.07
+     },
+     "2025": {
+      "n_ep": 52,
+      "net_bps": -51.53,
+      "total_bps": -2679.7,
+      "t": -1.51
+     },
+     "2026": {
+      "n_ep": 32,
+      "net_bps": -52.78,
+      "total_bps": -1688.9,
+      "t": -0.75
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2024,
+     "n_ep": 84,
+     "net_bps": -52.01,
+     "t": -1.53
+    },
+    "n_required": 8007.4,
+    "event_rate_per_week_last6m": 1.154,
+    "eta_forward_confirmation_days": 48578.0,
+    "eta_forward_confirmation_years": 133.0,
+    "sample_start": "2024-10-09",
+    "sample_end": "2026-07-17",
+    "two_arm_full_sample": {
+     "n_inverted": 315,
+     "n_contango": 979,
+     "mean_inverted": 36.23,
+     "mean_contango": 6.2,
+     "diff": 30.03,
+     "t_diff": 1.57,
+     "p_diff": 0.116,
+     "cohens_d": 0.123
+    },
+    "sign_learned": 1.0,
+    "oos_start": "2024-10-09"
+   }
+  },
+  "M2_SKEW_VELOCITY_1D": {
+   "hypothesis": "The VARIATION (velocity) of the 25-delta-ish skew, not its level, predicts BTC perp direction.",
+   "distinct_from": "LIQ_REPEAT_SKEW_OVERLAY (validated) uses the skew LEVEL as a conditioner on liquidation-cascade repeat probability; W6-M6 used far-OTM put SHARE against forward RV. Neither used skew velocity against direction.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, daily, taker",
+   "verdict": "DEAD",
+   "why": "OOS net -2.3 bps (1d) / -27.3 bps (3d), t=-0.12 / -1.07, SR negative on both.",
+   "gate": {
+    "n_raw": 272,
+    "n_independent_L1": 272,
+    "n_independent_L2": 272,
+    "n_independent_L3": 223,
+    "L3_unit": "contiguous same-sign position episode",
+    "mean_episode_days": 1.22,
+    "gross_bps_per_episode": 7.35,
+    "net_bps": -2.32,
+    "net_bps_stress28": -11.99,
+    "t_stat_declustered": -0.12,
+    "bootstrap_ci95": [
+     -38.44,
+     35.25
+    ],
+    "sharpe_annual_net": -0.277,
+    "sharpe_annual_stress28": -0.86,
+    "year_by_year": {
+     "2024": {
+      "n_ep": 28,
+      "net_bps": -88.59,
+      "total_bps": -2480.6,
+      "t": -1.29
+     },
+     "2025": {
+      "n_ep": 118,
+      "net_bps": 10.6,
+      "total_bps": 1250.9,
+      "t": 0.54
+     },
+     "2026": {
+      "n_ep": 77,
+      "net_bps": 9.25,
+      "total_bps": 712.5,
+      "t": 0.25
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2025,
+     "n_ep": 105,
+     "net_bps": -16.84,
+     "t": -0.51
+    },
+    "n_required": 450975.5,
+    "event_rate_per_week_last6m": 2.731,
+    "eta_forward_confirmation_days": 1156021.8,
+    "eta_forward_confirmation_years": 3165.02,
+    "sample_start": "2024-10-09",
+    "sample_end": "2026-07-17",
+    "sign_learned": -1.0,
+    "oos_start": "2024-10-09"
+   }
+  },
+  "M2_SKEW_VELOCITY_3D": {
+   "hypothesis": "The VARIATION (velocity) of the 25-delta-ish skew, not its level, predicts BTC perp direction.",
+   "distinct_from": "LIQ_REPEAT_SKEW_OVERLAY (validated) uses the skew LEVEL as a conditioner on liquidation-cascade repeat probability; W6-M6 used far-OTM put SHARE against forward RV. Neither used skew velocity against direction.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, daily, taker",
+   "verdict": "DEAD",
+   "why": "OOS net -2.3 bps (1d) / -27.3 bps (3d), t=-0.12 / -1.07, SR negative on both.",
+   "gate": {
+    "n_raw": 267,
+    "n_independent_L1": 267,
+    "n_independent_L2": 267,
+    "n_independent_L3": 151,
+    "L3_unit": "contiguous same-sign position episode",
+    "mean_episode_days": 1.77,
+    "gross_bps_per_episode": -19.23,
+    "net_bps": -27.34,
+    "net_bps_stress28": -35.45,
+    "t_stat_declustered": -1.07,
+    "bootstrap_ci95": [
+     -78.95,
+     22.05
+    ],
+    "sharpe_annual_net": -0.997,
+    "sharpe_annual_stress28": -1.413,
+    "year_by_year": {
+     "2024": {
+      "n_ep": 22,
+      "net_bps": -138.99,
+      "total_bps": -3057.9,
+      "t": -1.86
+     },
+     "2025": {
+      "n_ep": 81,
+      "net_bps": -8.24,
+      "total_bps": -667.2,
+      "t": -0.27
+     },
+     "2026": {
+      "n_ep": 48,
+      "net_bps": -8.4,
+      "total_bps": -403.4,
+      "t": -0.16
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2026,
+     "n_ep": 103,
+     "net_bps": -36.17,
+     "t": -1.24
+    },
+    "n_required": 4148.7,
+    "event_rate_per_week_last6m": 1.692,
+    "eta_forward_confirmation_days": 17160.6,
+    "eta_forward_confirmation_years": 46.98,
+    "sample_start": "2024-10-09",
+    "sample_end": "2026-07-17",
+    "sign_learned": -1.0,
+    "oos_start": "2024-10-09"
+   }
+  },
+  "M2c_SKEW_CAPITULATION_NORMALISATION": {
+   "hypothesis": "Skew normalising after a put-panic (top-decile skew within 5d, then falling 3d) = capitulation finished -> LONG BTC perp.",
+   "distinct_from": "Direction preregistered, no sign fitting. Not a level test.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, daily, taker, long-only",
+   "verdict": "DEAD",
+   "why": "net -9.9 bps/episode over 70 episodes, t=-0.19. The two-arm test vs all other days shows no separation.",
+   "gate": {
+    "n_raw": 179,
+    "n_independent_L1": 179,
+    "n_independent_L2": 179,
+    "n_independent_L3": 70,
+    "L3_unit": "contiguous same-sign position episode",
+    "mean_episode_days": 2.56,
+    "gross_bps_per_episode": -2.89,
+    "net_bps": -9.89,
+    "net_bps_stress28": -16.89,
+    "t_stat_declustered": -0.19,
+    "bootstrap_ci95": [
+     -107.62,
+     92.0
+    ],
+    "sharpe_annual_net": -0.18,
+    "sharpe_annual_stress28": -0.329,
+    "year_by_year": {
+     "2023": {
+      "n_ep": 13,
+      "net_bps": 120.98,
+      "total_bps": 1572.8,
+      "t": 0.84
+     },
+     "2024": {
+      "n_ep": 15,
+      "net_bps": -29.61,
+      "total_bps": -444.2,
+      "t": -0.27
+     },
+     "2025": {
+      "n_ep": 26,
+      "net_bps": -78.22,
+      "total_bps": -2033.8,
+      "t": -1.11
+     },
+     "2026": {
+      "n_ep": 16,
+      "net_bps": 13.31,
+      "total_bps": 213.0,
+      "t": 0.1
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2023,
+     "n_ep": 57,
+     "net_bps": -39.74,
+     "t": -0.72
+    },
+    "n_required": 62021.2,
+    "event_rate_per_week_last6m": 0.615,
+    "eta_forward_confirmation_days": 705490.9,
+    "eta_forward_confirmation_years": 1931.53,
+    "sample_start": "2023-01-01",
+    "sample_end": "2026-07-17",
+    "two_arm": {
+     "n_normalising": 179,
+     "n_rest": 1026,
+     "mean_normalising": -1.13,
+     "mean_rest": 11.6,
+     "diff": -12.73,
+     "t_diff": -0.61,
+     "p_diff": 0.543,
+     "cohens_d": -0.053
+    }
+   }
+  },
+  "M3_DEALER_GAMMA_PROXY": {
+   "hypothesis": "Dealer gamma positioning (negative => dealers amplify => momentum + high RV; positive => they dampen => reversion) conditions the BTC perp return process. The mechanism the project has never had.",
+   "distinct_from": "Entirely absent from the project. W6-round2 explicitly SKIPPED every OI-weighted construction rather than fake it.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, daily, sign-conditioned momentum/reversion",
+   "verdict": "DEAD",
+   "why": "Tested in 3 drift-robust constructions (raw level, 60d-detrended level, 1d gamma flow) x 3 arms (momentum / reversion / combined). Every arm negative net; best gross arm SR=+0.20. The mechanism's OWN central prediction fails first: short-gamma days do NOT show higher forward |return| than long-gamma days (detrended: 157 vs 178 bps, t=-1.3, WRONG SIGN). The \u00a71.3 arm-vs-arm test of momentum payoff under short vs long gamma gives t=-0.02 to -1.05, p=0.29-0.98.",
+   "proxy_quality": {
+    "open_interest_proxy_start_btc": 1392.6,
+    "open_interest_proxy_end_btc": 211889.8,
+    "gross_position_drift_ratio": 152.15,
+    "dealer_gamma_sign_share_positive": 0.165,
+    "dealer_gamma_autocorr_1d": 0.801,
+    "note": "Gross accumulated |position| grows monotonically because closing trades of positions opened BEFORE 2023-01-01 have no opening leg in the sample, and because taker==customer is violated by market-maker taker flow. Level therefore drifts; only trailing-window-relative measures are used below."
+   },
+   "data_needed_for_a_real_test": "Open interest per strike/expiry (Deribit publishes it per instrument via get_book_summary_by_currency). Without it the inventory must be accumulated from trades since 2023-01-01 under taker==customer, and gross accumulated position drifts 152x over the sample because closing legs of pre-2023 positions have no opening leg. A true GEX test is DATA_LIMITED.",
+   "gate": {
+    "M3_gamma_level_momentum_arm": {
+     "n_raw": 316,
+     "n_independent_L1": 316,
+     "n_independent_L2": 316,
+     "n_independent_L3": 194,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.63,
+     "gross_bps_per_episode": -6.52,
+     "net_bps": -18.14,
+     "net_bps_stress28": -29.76,
+     "t_stat_declustered": -0.81,
+     "bootstrap_ci95": [
+      -60.61,
+      26.49
+     ],
+     "sharpe_annual_net": -0.493,
+     "sharpe_annual_stress28": -0.827,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 72,
+       "net_bps": -56.9,
+       "total_bps": -4096.8,
+       "t": -1.56
+      },
+      "2024": {
+       "n_ep": 45,
+       "net_bps": -50.87,
+       "total_bps": -2289.1,
+       "t": -0.86
+      },
+      "2025": {
+       "n_ep": 43,
+       "net_bps": 22.5,
+       "total_bps": 967.7,
+       "t": 0.66
+      },
+      "2026": {
+       "n_ep": 34,
+       "net_bps": 55.85,
+       "total_bps": 1899.0,
+       "t": 1.18
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 160,
+      "net_bps": -33.86,
+      "t": -1.36
+     },
+     "n_required": 9212.4,
+     "event_rate_per_week_last6m": 1.154,
+     "eta_forward_confirmation_days": 55888.4,
+     "eta_forward_confirmation_years": 153.01,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_level_reversion_arm": {
+     "n_raw": 258,
+     "n_independent_L1": 258,
+     "n_independent_L2": 258,
+     "n_independent_L3": 173,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.49,
+     "gross_bps_per_episode": -24.02,
+     "net_bps": -35.11,
+     "net_bps_stress28": -46.19,
+     "t_stat_declustered": -1.7,
+     "bootstrap_ci95": [
+      -76.35,
+      5.88
+     ],
+     "sharpe_annual_net": -1.004,
+     "sharpe_annual_stress28": -1.368,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 46,
+       "net_bps": -49.81,
+       "total_bps": -2291.1,
+       "t": -1.22
+      },
+      "2024": {
+       "n_ep": 31,
+       "net_bps": -70.74,
+       "total_bps": -2192.9,
+       "t": -1.3
+      },
+      "2025": {
+       "n_ep": 89,
+       "net_bps": -11.93,
+       "total_bps": -1061.7,
+       "t": -0.43
+      },
+      "2026": {
+       "n_ep": 7,
+       "net_bps": -75.41,
+       "total_bps": -527.9,
+       "t": -0.94
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 166,
+      "net_bps": -33.41,
+      "t": -1.57
+     },
+     "n_required": 1885.5,
+     "event_rate_per_week_last6m": 0.269,
+     "eta_forward_confirmation_days": 49023.4,
+     "eta_forward_confirmation_years": 134.22,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_level_combined": {
+     "n_raw": 574,
+     "n_independent_L1": 574,
+     "n_independent_L2": 574,
+     "n_independent_L3": 363,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.58,
+     "gross_bps_per_episode": -14.93,
+     "net_bps": -26.43,
+     "net_bps_stress28": -37.92,
+     "t_stat_declustered": -1.69,
+     "bootstrap_ci95": [
+      -56.97,
+      4.61
+     ],
+     "sharpe_annual_net": -1.012,
+     "sharpe_annual_stress28": -1.497,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 117,
+       "net_bps": -54.54,
+       "total_bps": -6380.8,
+       "t": -1.93
+      },
+      "2024": {
+       "n_ep": 76,
+       "net_bps": -59.16,
+       "total_bps": -4496.1,
+       "t": -1.44
+      },
+      "2025": {
+       "n_ep": 130,
+       "net_bps": -0.72,
+       "total_bps": -94.0,
+       "t": -0.03
+      },
+      "2026": {
+       "n_ep": 40,
+       "net_bps": 34.45,
+       "total_bps": 1378.2,
+       "t": 0.8
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 323,
+      "net_bps": -33.97,
+      "t": -2.04
+     },
+     "n_required": 3966.9,
+     "event_rate_per_week_last6m": 1.385,
+     "eta_forward_confirmation_days": 20055.0,
+     "eta_forward_confirmation_years": 54.91,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_detrended_60d_momentum_arm": {
+     "n_raw": 245,
+     "n_independent_L1": 245,
+     "n_independent_L2": 245,
+     "n_independent_L3": 155,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.58,
+     "gross_bps_per_episode": 23.0,
+     "net_bps": 12.12,
+     "net_bps_stress28": 1.23,
+     "t_stat_declustered": 0.46,
+     "bootstrap_ci95": [
+      -38.42,
+      64.41
+     ],
+     "sharpe_annual_net": 0.2,
+     "sharpe_annual_stress28": -0.108,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 48,
+       "net_bps": 2.6,
+       "total_bps": 125.0,
+       "t": 0.05
+      },
+      "2024": {
+       "n_ep": 39,
+       "net_bps": -17.43,
+       "total_bps": -679.8,
+       "t": -0.25
+      },
+      "2025": {
+       "n_ep": 55,
+       "net_bps": -7.1,
+       "total_bps": -390.7,
+       "t": -0.25
+      },
+      "2026": {
+       "n_ep": 13,
+       "net_bps": 217.2,
+       "total_bps": 2823.6,
+       "t": 2.49
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 142,
+      "net_bps": -6.66,
+      "t": -0.25
+     },
+     "n_required": 22761.6,
+     "event_rate_per_week_last6m": 0.346,
+     "eta_forward_confirmation_days": 460290.6,
+     "eta_forward_confirmation_years": 1260.21,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_detrended_60d_reversion_arm": {
+     "n_raw": 274,
+     "n_independent_L1": 274,
+     "n_independent_L2": 274,
+     "n_independent_L3": 180,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.52,
+     "gross_bps_per_episode": -22.81,
+     "net_bps": -33.74,
+     "net_bps_stress28": -44.66,
+     "t_stat_declustered": -1.41,
+     "bootstrap_ci95": [
+      -80.86,
+      12.44
+     ],
+     "sharpe_annual_net": -0.811,
+     "sharpe_annual_stress28": -1.118,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 36,
+       "net_bps": -40.49,
+       "total_bps": -1457.6,
+       "t": -0.84
+      },
+      "2024": {
+       "n_ep": 45,
+       "net_bps": -24.96,
+       "total_bps": -1123.4,
+       "t": -0.4
+      },
+      "2025": {
+       "n_ep": 90,
+       "net_bps": -38.55,
+       "total_bps": -3469.4,
+       "t": -1.24
+      },
+      "2026": {
+       "n_ep": 9,
+       "net_bps": -2.45,
+       "total_bps": -22.0,
+       "t": -0.06
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 171,
+      "net_bps": -35.38,
+      "t": -1.41
+     },
+     "n_required": 2841.6,
+     "event_rate_per_week_last6m": 0.346,
+     "eta_forward_confirmation_days": 57464.0,
+     "eta_forward_confirmation_years": 157.33,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_detrended_60d_combined": {
+     "n_raw": 519,
+     "n_independent_L1": 519,
+     "n_independent_L2": 519,
+     "n_independent_L3": 330,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.57,
+     "gross_bps_per_episode": -1.64,
+     "net_bps": -12.77,
+     "net_bps_stress28": -23.91,
+     "t_stat_declustered": -0.71,
+     "bootstrap_ci95": [
+      -48.71,
+      21.59
+     ],
+     "sharpe_annual_net": -0.479,
+     "sharpe_annual_stress28": -0.905,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 84,
+       "net_bps": -15.86,
+       "total_bps": -1332.5,
+       "t": -0.47
+      },
+      "2024": {
+       "n_ep": 84,
+       "net_bps": -21.8,
+       "total_bps": -1831.2,
+       "t": -0.47
+      },
+      "2025": {
+       "n_ep": 140,
+       "net_bps": -27.52,
+       "total_bps": -3853.0,
+       "t": -1.21
+      },
+      "2026": {
+       "n_ep": 22,
+       "net_bps": 127.34,
+       "total_bps": 2801.6,
+       "t": 2.19
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 308,
+      "net_bps": -22.78,
+      "t": -1.22
+     },
+     "n_required": 20464.8,
+     "event_rate_per_week_last6m": 0.692,
+     "eta_forward_confirmation_days": 206921.7,
+     "eta_forward_confirmation_years": 566.52,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_flow_1d_momentum_arm": {
+     "n_raw": 278,
+     "n_independent_L1": 278,
+     "n_independent_L2": 278,
+     "n_independent_L3": 247,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.13,
+     "gross_bps_per_episode": -11.97,
+     "net_bps": -19.59,
+     "net_bps_stress28": -27.21,
+     "t_stat_declustered": -1.31,
+     "bootstrap_ci95": [
+      -47.57,
+      9.69
+     ],
+     "sharpe_annual_net": -0.906,
+     "sharpe_annual_stress28": -1.39,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 63,
+       "net_bps": -44.28,
+       "total_bps": -2789.4,
+       "t": -1.9
+      },
+      "2024": {
+       "n_ep": 73,
+       "net_bps": -14.61,
+       "total_bps": -1066.9,
+       "t": -0.41
+      },
+      "2025": {
+       "n_ep": 83,
+       "net_bps": -16.34,
+       "total_bps": -1356.0,
+       "t": -0.74
+      },
+      "2026": {
+       "n_ep": 28,
+       "net_bps": 13.34,
+       "total_bps": 373.5,
+       "t": 0.31
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 219,
+      "net_bps": -23.8,
+      "t": -1.5
+     },
+     "n_required": 4496.1,
+     "event_rate_per_week_last6m": 1.077,
+     "eta_forward_confirmation_days": 29224.5,
+     "eta_forward_confirmation_years": 80.01,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_flow_1d_reversion_arm": {
+     "n_raw": 282,
+     "n_independent_L1": 282,
+     "n_independent_L2": 282,
+     "n_independent_L3": 251,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.12,
+     "gross_bps_per_episode": -7.81,
+     "net_bps": -15.37,
+     "net_bps_stress28": -22.93,
+     "t_stat_declustered": -1.08,
+     "bootstrap_ci95": [
+      -44.32,
+      12.6
+     ],
+     "sharpe_annual_net": -0.738,
+     "sharpe_annual_stress28": -1.208,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 71,
+       "net_bps": -2.29,
+       "total_bps": -162.6,
+       "t": -0.12
+      },
+      "2024": {
+       "n_ep": 71,
+       "net_bps": -41.16,
+       "total_bps": -2922.2,
+       "t": -1.2
+      },
+      "2025": {
+       "n_ep": 88,
+       "net_bps": -0.74,
+       "total_bps": -64.7,
+       "t": -0.03
+      },
+      "2026": {
+       "n_ep": 21,
+       "net_bps": -33.74,
+       "total_bps": -708.5,
+       "t": -0.88
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2025,
+      "n_ep": 163,
+      "net_bps": -23.27,
+      "t": -1.3
+     },
+     "n_required": 6791.7,
+     "event_rate_per_week_last6m": 0.808,
+     "eta_forward_confirmation_days": 58861.7,
+     "eta_forward_confirmation_years": 161.15,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M3_gamma_flow_1d_combined": {
+     "n_raw": 560,
+     "n_independent_L1": 560,
+     "n_independent_L2": 560,
+     "n_independent_L3": 393,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.42,
+     "gross_bps_per_episode": -12.51,
+     "net_bps": -21.74,
+     "net_bps_stress28": -30.96,
+     "t_stat_declustered": -1.61,
+     "bootstrap_ci95": [
+      -48.42,
+      4.5
+     ],
+     "sharpe_annual_net": -1.016,
+     "sharpe_annual_stress28": -1.548,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 108,
+       "net_bps": -26.81,
+       "total_bps": -2896.0,
+       "t": -1.44
+      },
+      "2024": {
+       "n_ep": 117,
+       "net_bps": -34.15,
+       "total_bps": -3996.1,
+       "t": -1.07
+      },
+      "2025": {
+       "n_ep": 128,
+       "net_bps": -10.39,
+       "total_bps": -1329.7,
+       "t": -0.47
+      },
+      "2026": {
+       "n_ep": 40,
+       "net_bps": -8.02,
+       "total_bps": -321.0,
+       "t": -0.21
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 353,
+      "net_bps": -23.29,
+      "t": -1.62
+     },
+     "n_required": 4776.5,
+     "event_rate_per_week_last6m": 1.538,
+     "eta_forward_confirmation_days": 21733.2,
+     "eta_forward_confirmation_years": 59.5,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    }
+   },
+   "arm_diagnostics": {
+    "proxy_quality": {
+     "open_interest_proxy_start_btc": 1392.6,
+     "open_interest_proxy_end_btc": 211889.8,
+     "gross_position_drift_ratio": 152.15,
+     "dealer_gamma_sign_share_positive": 0.165,
+     "dealer_gamma_autocorr_1d": 0.801,
+     "note": "Gross accumulated |position| grows monotonically because closing trades of positions opened BEFORE 2023-01-01 have no opening leg in the sample, and because taker==customer is violated by market-maker taker flow. Level therefore drifts; only trailing-window-relative measures are used below."
+    },
+    "gamma_level_rv_arm": {
+     "n_short_gamma_absret": 316,
+     "n_long_gamma_absret": 258,
+     "mean_short_gamma_absret": 165.46,
+     "mean_long_gamma_absret": 154.12,
+     "diff": 11.34,
+     "t_diff": 0.83,
+     "p_diff": 0.406,
+     "cohens_d": 0.069
+    },
+    "gamma_level_autocorr_arm": {
+     "n_short_gamma": 316,
+     "n_long_gamma": 258,
+     "autocorr_short_gamma": -0.0247,
+     "autocorr_long_gamma": -0.0472
+    },
+    "gamma_level_momentum_arm_vs_arm": {
+     "n_short_gamma": 316,
+     "n_long_gamma": 258,
+     "mean_short_gamma": -4.0,
+     "mean_long_gamma": 16.11,
+     "diff": -20.11,
+     "t_diff": -1.05,
+     "p_diff": 0.293,
+     "cohens_d": -0.087
+    },
+    "gamma_detrended_60d_rv_arm": {
+     "n_short_gamma_absret": 245,
+     "n_long_gamma_absret": 274,
+     "mean_short_gamma_absret": 157.22,
+     "mean_long_gamma_absret": 178.43,
+     "diff": -21.21,
+     "t_diff": -1.3,
+     "p_diff": 0.193,
+     "cohens_d": -0.114
+    },
+    "gamma_detrended_60d_autocorr_arm": {
+     "n_short_gamma": 245,
+     "n_long_gamma": 274,
+     "autocorr_short_gamma": 0.0351,
+     "autocorr_long_gamma": -0.11
+    },
+    "gamma_detrended_60d_momentum_arm_vs_arm": {
+     "n_short_gamma": 245,
+     "n_long_gamma": 274,
+     "mean_short_gamma": 14.55,
+     "mean_long_gamma": 14.98,
+     "diff": -0.43,
+     "t_diff": -0.02,
+     "p_diff": 0.984,
+     "cohens_d": -0.002
+    },
+    "gamma_flow_1d_rv_arm": {
+     "n_short_gamma_absret": 278,
+     "n_long_gamma_absret": 282,
+     "mean_short_gamma_absret": 158.2,
+     "mean_long_gamma_absret": 154.83,
+     "diff": 3.36,
+     "t_diff": 0.24,
+     "p_diff": 0.813,
+     "cohens_d": 0.02
+    },
+    "gamma_flow_1d_autocorr_arm": {
+     "n_short_gamma": 278,
+     "n_long_gamma": 282,
+     "autocorr_short_gamma": -0.084,
+     "autocorr_long_gamma": -0.0704
+    },
+    "gamma_flow_1d_momentum_arm_vs_arm": {
+     "n_short_gamma": 278,
+     "n_long_gamma": 282,
+     "mean_short_gamma": -10.63,
+     "mean_long_gamma": 6.95,
+     "diff": -17.59,
+     "t_diff": -0.91,
+     "p_diff": 0.366,
+     "cohens_d": -0.076
+    }
+   }
+  },
+  "M4_PIN_RISK_STRIKE_MAGNET": {
+   "hypothesis": "Near large monthly Deribit expiries, BTC is pulled toward the max-open-interest strike.",
+   "distinct_from": "W6-M9 tested expiry PROXIMITY -> IV crush / forward RV, and explicitly skipped max-pain for lack of OI. This tests the directional magnet with a traded-notional OI proxy.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, 1-3d before monthly expiry",
+   "verdict": "DEAD",
+   "why": "50 monthly expiries, 126 observations. Price moves TOWARD the magnet on only 40.5% of lag-1 days (a magnet would need >50%). The three lags disagree in sign (-30.5 / +38.7 / -58.0 bps), so the one positive cell is a 1-in-3 multiple-comparison artifact, not a mechanism. Even taking lag-2 at face value: t=1.41, 42 episodes, 0.23 episodes/week, ETA 55 years.",
+   "gate": {
+    "M4_pin_magnet_lag1d": {
+     "n_raw": 42,
+     "n_independent_L1": 42,
+     "n_independent_L2": 42,
+     "n_independent_L3": 42,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.0,
+     "gross_bps_per_episode": -23.48,
+     "net_bps": -30.48,
+     "net_bps_stress28": -37.48,
+     "t_stat_declustered": -1.14,
+     "bootstrap_ci95": [
+      -81.03,
+      23.76
+     ],
+     "sharpe_annual_net": -0.744,
+     "sharpe_annual_stress28": -1.012,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 12,
+       "net_bps": -36.83,
+       "total_bps": -442.0,
+       "t": -1.05
+      },
+      "2024": {
+       "n_ep": 12,
+       "net_bps": -16.49,
+       "total_bps": -197.8,
+       "t": -0.26
+      },
+      "2025": {
+       "n_ep": 12,
+       "net_bps": -66.53,
+       "total_bps": -798.3,
+       "t": -1.39
+      },
+      "2026": {
+       "n_ep": 6,
+       "net_bps": 26.32,
+       "total_bps": 157.9,
+       "t": 0.33
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 36,
+      "net_bps": -39.95,
+      "t": -1.41
+     },
+     "n_required": 1009.3,
+     "event_rate_per_week_last6m": 0.231,
+     "eta_forward_confirmation_days": 30615.1,
+     "eta_forward_confirmation_years": 83.82,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M4_pin_magnet_lag2d": {
+     "n_raw": 42,
+     "n_independent_L1": 42,
+     "n_independent_L2": 42,
+     "n_independent_L3": 42,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.0,
+     "gross_bps_per_episode": 45.73,
+     "net_bps": 38.73,
+     "net_bps_stress28": 31.73,
+     "t_stat_declustered": 1.41,
+     "bootstrap_ci95": [
+      -14.94,
+      92.47
+     ],
+     "sharpe_annual_net": 0.606,
+     "sharpe_annual_stress28": 0.34,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 12,
+       "net_bps": 57.89,
+       "total_bps": 694.7,
+       "t": 1.32
+      },
+      "2024": {
+       "n_ep": 12,
+       "net_bps": 33.76,
+       "total_bps": 405.1,
+       "t": 0.65
+      },
+      "2025": {
+       "n_ep": 12,
+       "net_bps": 41.82,
+       "total_bps": 501.9,
+       "t": 1.01
+      },
+      "2026": {
+       "n_ep": 6,
+       "net_bps": 4.14,
+       "total_bps": 24.8,
+       "t": 0.03
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2023,
+      "n_ep": 30,
+      "net_bps": 31.06,
+      "t": 0.9
+     },
+     "n_required": 664.5,
+     "event_rate_per_week_last6m": 0.231,
+     "eta_forward_confirmation_days": 20157.0,
+     "eta_forward_confirmation_years": 55.19,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    },
+    "M4_pin_magnet_lag3d": {
+     "n_raw": 42,
+     "n_independent_L1": 42,
+     "n_independent_L2": 42,
+     "n_independent_L3": 42,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.0,
+     "gross_bps_per_episode": -50.97,
+     "net_bps": -57.97,
+     "net_bps_stress28": -64.97,
+     "t_stat_declustered": -1.67,
+     "bootstrap_ci95": [
+      -125.32,
+      10.76
+     ],
+     "sharpe_annual_net": -0.976,
+     "sharpe_annual_stress28": -1.175,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 12,
+       "net_bps": -123.84,
+       "total_bps": -1486.1,
+       "t": -1.98
+      },
+      "2024": {
+       "n_ep": 12,
+       "net_bps": -103.85,
+       "total_bps": -1246.2,
+       "t": -2.26
+      },
+      "2025": {
+       "n_ep": 12,
+       "net_bps": -32.14,
+       "total_bps": -385.7,
+       "t": -0.5
+      },
+      "2026": {
+       "n_ep": 6,
+       "net_bps": 113.93,
+       "total_bps": 683.6,
+       "t": 0.91
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 36,
+      "net_bps": -86.61,
+      "t": -2.6
+     },
+     "n_required": 471.4,
+     "event_rate_per_week_last6m": 0.231,
+     "eta_forward_confirmation_days": 14298.3,
+     "eta_forward_confirmation_years": 39.15,
+     "sample_start": "2023-01-01",
+     "sample_end": "2026-07-17"
+    }
+   },
+   "diagnostics": {
+    "M4_n_monthly_expiries": 50,
+    "M4_n_observations": 126,
+    "M4_gap_describe": {
+     "count": 42.0,
+     "mean": 0.0122,
+     "std": 0.1031,
+     "min": -0.2942,
+     "25%": -0.0255,
+     "50%": 0.0129,
+     "75%": 0.0626,
+     "max": 0.2515
+    },
+    "M4_share_moves_toward_magnet_lag1": 0.405,
+    "M4_binom_p": null
+   }
+  },
+  "M5_VRP_CROSS_ASSET_RISK_APPETITE": {
+   "hypothesis": "The BTC variance risk premium (DVOL_BTC minus trailing realised vol) is a risk-appetite gauge that transmits to alts.",
+   "distinct_from": "W6 measured the VRP's own existence and its RV-forecasting content on BTC only. This exports it as a regime onto a 41-name alt cross-section.",
+   "perp_expressible": true,
+   "vehicle": "41-name equal-weight alt perp basket / high-beta-minus-low-beta tilt",
+   "verdict": "DEAD",
+   "why": "THE CAUTIONARY RESULT OF THIS ROUND. Per-asset counting gave net +2.95 bps/day, t=+4.49 on '2496 episodes' -- an apparently strong, cost-stress-surviving edge. Collapsing the 41 correlated alts to the single instrument they actually are (they move together; one basket-day is ONE observation) takes the same data to t=+1.06 on 66 real episodes, CI95 [-88, +327] straddling zero. Year-by-year then shows the effect is 2021-2024 only and NEGATIVE in 2025 and 2026 (-98 and -103 bps), and ex-best-year drops it to t=0.61. Nothing survives.",
+   "gate_per_asset_WRONG": {
+    "F2_M5_high_vrp_long": {
+     "n_raw": 12958,
+     "n_independent_L1": 12958,
+     "n_independent_L2": 342,
+     "n_independent_L3": 2496,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 5.19,
+     "gross_bps_per_episode": 3.12,
+     "net_bps": 2.95,
+     "net_bps_stress28": 2.77,
+     "t_stat_declustered": 4.49,
+     "bootstrap_ci95": [
+      1.65,
+      4.25
+     ],
+     "sharpe_annual_net": 0.41,
+     "sharpe_annual_stress28": 0.36,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 273,
+       "net_bps": 10.64,
+       "total_bps": 2905.6,
+       "t": 3.33
+      },
+      "2022": {
+       "n_ep": 511,
+       "net_bps": 1.83,
+       "total_bps": 936.5,
+       "t": 1.27
+      },
+      "2023": {
+       "n_ep": 400,
+       "net_bps": 5.31,
+       "total_bps": 2122.4,
+       "t": 3.22
+      },
+      "2024": {
+       "n_ep": 410,
+       "net_bps": 8.74,
+       "total_bps": 3584.0,
+       "t": 5.24
+      },
+      "2025": {
+       "n_ep": 615,
+       "net_bps": -2.4,
+       "total_bps": -1474.9,
+       "t": -3.39
+      },
+      "2026": {
+       "n_ep": 287,
+       "net_bps": -2.52,
+       "total_bps": -721.9,
+       "t": -1.48
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2024,
+      "n_ep": 2086,
+      "net_bps": 1.81,
+      "t": 2.54
+     },
+     "n_required": 3893.4,
+     "event_rate_per_week_last6m": 9.462,
+     "eta_forward_confirmation_days": 2880.5,
+     "eta_forward_confirmation_years": 7.89,
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31"
+    },
+    "F2_M5_low_vrp_short": {
+     "n_raw": 14092,
+     "n_independent_L1": 14092,
+     "n_independent_L2": 370,
+     "n_independent_L3": 2019,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 6.98,
+     "gross_bps_per_episode": 2.07,
+     "net_bps": 1.9,
+     "net_bps_stress28": 1.72,
+     "t_stat_declustered": 3.11,
+     "bootstrap_ci95": [
+      0.69,
+      3.07
+     ],
+     "sharpe_annual_net": 0.246,
+     "sharpe_annual_stress28": 0.197,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 62,
+       "net_bps": -4.96,
+       "total_bps": -307.8,
+       "t": -2.75
+      },
+      "2022": {
+       "n_ep": 392,
+       "net_bps": 5.05,
+       "total_bps": 1978.5,
+       "t": 3.0
+      },
+      "2023": {
+       "n_ep": 458,
+       "net_bps": -4.5,
+       "total_bps": -2060.4,
+       "t": -4.1
+      },
+      "2024": {
+       "n_ep": 328,
+       "net_bps": -0.77,
+       "total_bps": -251.8,
+       "t": -0.34
+      },
+      "2025": {
+       "n_ep": 328,
+       "net_bps": 9.49,
+       "total_bps": 3111.7,
+       "t": 8.98
+      },
+      "2026": {
+       "n_ep": 451,
+       "net_bps": 3.01,
+       "total_bps": 1356.1,
+       "t": 4.49
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2025,
+      "n_ep": 1691,
+      "net_bps": 0.42,
+      "t": 0.61
+     },
+     "n_required": 6559.5,
+     "event_rate_per_week_last6m": 17.346,
+     "eta_forward_confirmation_days": 2647.1,
+     "eta_forward_confirmation_years": 7.25,
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31"
+    }
+   },
+   "gate_collapsed_CORRECT": {
+    "M5_high_vrp_long_basket_COLLAPSED": {
+     "n_raw": 342,
+     "n_independent_L1": 342,
+     "n_independent_L2": 342,
+     "n_independent_L3": 66,
+     "L3_unit": "contiguous regime episode (basket = ONE observation)",
+     "mean_episode_days": 5.18,
+     "gross_bps_per_episode": 117.85,
+     "net_bps": 110.85,
+     "net_bps_stress28": 103.85,
+     "t_stat_declustered": 1.06,
+     "bootstrap_ci95": [
+      -87.66,
+      326.69
+     ],
+     "sharpe_annual_net": 0.406,
+     "sharpe_annual_stress28": 0.351,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 9,
+       "net_bps": 321.02,
+       "total_bps": 2889.2
+      },
+      "2022": {
+       "n_ep": 15,
+       "net_bps": 61.25,
+       "total_bps": 918.8
+      },
+      "2023": {
+       "n_ep": 10,
+       "net_bps": 212.07,
+       "total_bps": 2120.7
+      },
+      "2024": {
+       "n_ep": 10,
+       "net_bps": 358.4,
+       "total_bps": 3584.0
+      },
+      "2025": {
+       "n_ep": 15,
+       "net_bps": -98.33,
+       "total_bps": -1474.9
+      },
+      "2026": {
+       "n_ep": 7,
+       "net_bps": -103.12,
+       "total_bps": -721.9
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2024,
+      "n_ep": 56,
+      "net_bps": 66.64,
+      "t": 0.61
+     },
+     "n_required": 1856.8,
+     "event_rate_per_week_last6m": 0.231,
+     "eta_forward_confirmation_days": 56321.5,
+     "eta_forward_confirmation_years": 154.2,
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31",
+     "portfolio_sharpe": 0.406,
+     "portfolio_sharpe_stress": 0.351
+    },
+    "M5_low_vrp_short_basket_COLLAPSED": {
+     "n_raw": 370,
+     "n_independent_L1": 370,
+     "n_independent_L2": 370,
+     "n_independent_L3": 53,
+     "L3_unit": "contiguous regime episode (basket = ONE observation)",
+     "mean_episode_days": 6.98,
+     "gross_bps_per_episode": 78.7,
+     "net_bps": 71.7,
+     "net_bps_stress28": 64.7,
+     "t_stat_declustered": 0.71,
+     "bootstrap_ci95": [
+      -124.59,
+      260.09
+     ],
+     "sharpe_annual_net": 0.242,
+     "sharpe_annual_stress28": 0.189,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 2,
+       "net_bps": -155.61,
+       "total_bps": -311.2
+      },
+      "2022": {
+       "n_ep": 12,
+       "net_bps": 163.45,
+       "total_bps": 1961.4
+      },
+      "2023": {
+       "n_ep": 12,
+       "net_bps": -172.18,
+       "total_bps": -2066.2
+      },
+      "2024": {
+       "n_ep": 8,
+       "net_bps": -31.48,
+       "total_bps": -251.8
+      },
+      "2025": {
+       "n_ep": 8,
+       "net_bps": 388.96,
+       "total_bps": 3111.7
+      },
+      "2026": {
+       "n_ep": 11,
+       "net_bps": 123.28,
+       "total_bps": 1356.1
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2025,
+      "n_ep": 45,
+      "net_bps": 15.3,
+      "t": 0.14
+     },
+     "n_required": 3271.0,
+     "event_rate_per_week_last6m": 0.423,
+     "eta_forward_confirmation_days": 54119.7,
+     "eta_forward_confirmation_years": 148.17,
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31",
+     "portfolio_sharpe": 0.242,
+     "portfolio_sharpe_stress": 0.189
+    },
+    "M5_beta_tilt_unconditional_CONTROL_COLLAPSED": {
+     "n_raw": 1956,
+     "n_independent_L1": 1956,
+     "n_independent_L2": 1956,
+     "n_independent_L3": 1,
+     "L3_unit": "contiguous regime episode (basket = ONE observation)",
+     "mean_episode_days": 1956.0,
+     "gross_bps_per_episode": -4063.88,
+     "net_bps": -10341.34,
+     "net_bps_stress28": -4077.88,
+     "t_stat_declustered": null,
+     "bootstrap_ci95": [
+      -10341.34,
+      -10341.34
+     ],
+     "sharpe_annual_net": -0.303,
+     "sharpe_annual_stress28": -0.303,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 1,
+       "net_bps": -10341.34,
+       "total_bps": -10341.3
+      }
+     },
+     "ex_best_year": null,
+     "n_required": null,
+     "event_rate_per_week_last6m": null,
+     "eta_forward_confirmation_days": "inf",
+     "eta_forward_confirmation_years": "inf",
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31",
+     "portfolio_sharpe": -0.384,
+     "portfolio_sharpe_stress": -0.467
+    },
+    "M5_beta_tilt_high_vrp_COLLAPSED": {
+     "n_raw": 342,
+     "n_independent_L1": 342,
+     "n_independent_L2": 342,
+     "n_independent_L3": 66,
+     "L3_unit": "contiguous regime episode (basket = ONE observation)",
+     "mean_episode_days": 5.18,
+     "gross_bps_per_episode": -5.79,
+     "net_bps": -31.07,
+     "net_bps_stress28": -19.79,
+     "t_stat_declustered": -0.42,
+     "bootstrap_ci95": [
+      -177.75,
+      111.97
+     ],
+     "sharpe_annual_net": -0.21,
+     "sharpe_annual_stress28": -0.358,
+     "year_by_year": {
+      "2021": {
+       "n_ep": 9,
+       "net_bps": -650.83,
+       "total_bps": -5857.5
+      },
+      "2022": {
+       "n_ep": 15,
+       "net_bps": 335.08,
+       "total_bps": 5026.2
+      },
+      "2023": {
+       "n_ep": 10,
+       "net_bps": 81.19,
+       "total_bps": 811.9
+      },
+      "2024": {
+       "n_ep": 10,
+       "net_bps": 102.99,
+       "total_bps": 1029.9
+      },
+      "2025": {
+       "n_ep": 15,
+       "net_bps": -128.11,
+       "total_bps": -1921.7
+      },
+      "2026": {
+       "n_ep": 7,
+       "net_bps": -162.76,
+       "total_bps": -1139.3
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2022,
+      "n_ep": 51,
+      "net_bps": -138.76,
+      "t": -1.72
+     },
+     "n_required": 11977.1,
+     "event_rate_per_week_last6m": 0.231,
+     "eta_forward_confirmation_days": 363306.6,
+     "eta_forward_confirmation_years": 994.68,
+     "sample_start": "2021-03-24",
+     "sample_end": "2026-07-31",
+     "portfolio_sharpe": -0.239,
+     "portfolio_sharpe_stress": -0.416
+    }
+   },
+   "arm_vs_arm": {
+    "basket": {
+     "n_high_vrp": 342,
+     "n_low_vrp": 370,
+     "mean_high_vrp": 22.74,
+     "mean_low_vrp": -11.27,
+     "diff": 34.02,
+     "t_diff": 1.26,
+     "p_diff": 0.208,
+     "cohens_d": 0.095
+    },
+    "tilt": {
+     "n_high_vrp": 342,
+     "n_low_vrp": 370,
+     "mean_high_vrp": -2.23,
+     "mean_low_vrp": -21.84,
+     "diff": 19.61,
+     "t_diff": 1.02,
+     "p_diff": 0.306,
+     "cohens_d": 0.078
+    },
+    "riskon": {
+     "n_high_vrp": 342,
+     "n_low_vrp": 370,
+     "mean_high_vrp": 26.88,
+     "mean_low_vrp": -12.25,
+     "diff": 39.13,
+     "t_diff": 1.32,
+     "p_diff": 0.188,
+     "cohens_d": 0.1
+    }
+   }
+  },
+  "M6_DVOL_BTC_VS_ETH_DIVERGENCE": {
+   "hypothesis": "Divergence between BTC and ETH implied vol (DVOL_ETH/DVOL_BTC) predicts BTC-vs-ETH relative spot performance. Traded as a dollar-neutral perp pair -- the lowest-sigma expression available on this axis and therefore its best ETA candidate.",
+   "distinct_from": "DVOL_ETH is used here for the first time in this project; W6-round2 had no ETH leg at all.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT/ETHUSDT dollar-neutral perp pair, daily",
+   "verdict": "WEAK",
+   "why": "The only mechanism on this axis to clear t>2 after correct declustering: OOS net +77.4 bps/episode, t=+2.50 on 68 independent episodes, bootstrap CI95 [+22.6, +142.0] excluding zero, all four years positive, survives ex-best-year (t=2.12) and cost stress (SR 1.22 -> 0.98). It then fails two controls. (1) CONFOUND: DVOL_ETH/DVOL_BTC is 0.69 Spearman-correlated with the trailing REALISED vol ratio; orthogonalising the signal against relative realised vol and relative 30d momentum collapses it to net +14.8 bps, t=0.71, SR 0.21. The options index is mostly a laundered realised-vol ratio. (2) KNIFE EDGE: raw continuous Spearman IC is -0.0024 (i.e. zero), and tightening the quintile rule toward the tails -- where a real effect should STRENGTHEN -- weakens it monotonically (t: 2.28 / 2.50 / 1.83 / 1.07 at 0.75 / 0.80 / 0.85 / 0.90). Independently, its ETA is 12.2 years (21.3 from the Sharpe identity), so even had it passed the controls it would have been UNCONFIRMABLE_IN_HORIZON.",
+   "gate": {
+    "M6_dvol_z_divergence_pair": {
+     "n_raw": 1050,
+     "n_independent_L1": 1050,
+     "n_independent_L2": 525,
+     "n_independent_L3": 146,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 7.19,
+     "gross_bps_per_episode": 24.64,
+     "net_bps": 21.14,
+     "net_bps_stress28": 17.64,
+     "t_stat_declustered": 0.77,
+     "bootstrap_ci95": [
+      -31.04,
+      75.65
+     ],
+     "sharpe_annual_net": 0.656,
+     "sharpe_annual_stress28": 0.398,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 12,
+       "net_bps": -43.61,
+       "total_bps": -523.3,
+       "t": -1.15
+      },
+      "2024": {
+       "n_ep": 76,
+       "net_bps": 26.44,
+       "total_bps": 2009.1,
+       "t": 0.84
+      },
+      "2025": {
+       "n_ep": 44,
+       "net_bps": 35.7,
+       "total_bps": 1570.9,
+       "t": 0.51
+      },
+      "2026": {
+       "n_ep": 14,
+       "net_bps": 2.16,
+       "total_bps": 30.3,
+       "t": 0.03
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2024,
+      "n_ep": 70,
+      "net_bps": 15.4,
+      "t": 0.33
+     },
+     "n_required": 7806.0,
+     "event_rate_per_week_last6m": 0.538,
+     "eta_forward_confirmation_days": 101478.0,
+     "eta_forward_confirmation_years": 277.83,
+     "sample_start": "2023-11-27",
+     "sample_end": "2026-07-31",
+     "sign_learned": -1.0,
+     "oos_start": "2023-11-27"
+    },
+    "M6_dvol_z_divergence_outright_btc": {
+     "n_raw": 525,
+     "n_independent_L1": 525,
+     "n_independent_L2": 525,
+     "n_independent_L3": 73,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 7.19,
+     "gross_bps_per_episode": -9.6,
+     "net_bps": -16.6,
+     "net_bps_stress28": -23.6,
+     "t_stat_declustered": -0.24,
+     "bootstrap_ci95": [
+      -152.12,
+      119.57
+     ],
+     "sharpe_annual_net": -0.19,
+     "sharpe_annual_stress28": -0.302,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 6,
+       "net_bps": -61.81,
+       "total_bps": -370.9,
+       "t": -0.57
+      },
+      "2024": {
+       "n_ep": 38,
+       "net_bps": 33.64,
+       "total_bps": 1278.4,
+       "t": 0.39
+      },
+      "2025": {
+       "n_ep": 22,
+       "net_bps": -144.57,
+       "total_bps": -3180.6,
+       "t": -0.89
+      },
+      "2026": {
+       "n_ep": 7,
+       "net_bps": 151.56,
+       "total_bps": 1060.9,
+       "t": 0.85
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2024,
+      "n_ep": 35,
+      "net_bps": -71.16,
+      "t": -0.65
+     },
+     "n_required": 39931.7,
+     "event_rate_per_week_last6m": 0.269,
+     "eta_forward_confirmation_days": 1038225.4,
+     "eta_forward_confirmation_years": 2842.51,
+     "sample_start": "2023-11-27",
+     "sample_end": "2026-07-31"
+    },
+    "M6_dvol_dvol_ratio_pair": {
+     "n_raw": 1124,
+     "n_independent_L1": 1124,
+     "n_independent_L2": 562,
+     "n_independent_L3": 138,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 8.14,
+     "gross_bps_per_episode": 39.76,
+     "net_bps": 36.26,
+     "net_bps_stress28": 32.76,
+     "t_stat_declustered": 0.86,
+     "bootstrap_ci95": [
+      -44.33,
+      123.13
+     ],
+     "sharpe_annual_net": 1.106,
+     "sharpe_annual_stress28": 0.873,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 4,
+       "net_bps": 103.32,
+       "total_bps": 413.3,
+       "t": 0.32
+      },
+      "2024": {
+       "n_ep": 58,
+       "net_bps": 24.07,
+       "total_bps": 1396.1,
+       "t": 0.49
+      },
+      "2025": {
+       "n_ep": 48,
+       "net_bps": 57.09,
+       "total_bps": 2740.4,
+       "t": 0.57
+      },
+      "2026": {
+       "n_ep": 28,
+       "net_bps": 16.24,
+       "total_bps": 454.7,
+       "t": 0.32
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2025,
+      "n_ep": 90,
+      "net_bps": 25.16,
+      "t": 0.67
+     },
+     "n_required": 5846.0,
+     "event_rate_per_week_last6m": 1.077,
+     "eta_forward_confirmation_days": 37999.3,
+     "eta_forward_confirmation_years": 104.04,
+     "sample_start": "2023-11-27",
+     "sample_end": "2026-07-31",
+     "sign_learned": -1.0,
+     "oos_start": "2023-11-27"
+    },
+    "M6_dvol_dvol_ratio_outright_btc": {
+     "n_raw": 562,
+     "n_independent_L1": 562,
+     "n_independent_L2": 562,
+     "n_independent_L3": 69,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 8.14,
+     "gross_bps_per_episode": -43.96,
+     "net_bps": -50.96,
+     "net_bps_stress28": -57.96,
+     "t_stat_declustered": -0.51,
+     "bootstrap_ci95": [
+      -252.1,
+      132.81
+     ],
+     "sharpe_annual_net": -0.431,
+     "sharpe_annual_stress28": -0.534,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 2,
+       "net_bps": -597.36,
+       "total_bps": -1194.7,
+       "t": null
+      },
+      "2024": {
+       "n_ep": 29,
+       "net_bps": 70.07,
+       "total_bps": 2032.0,
+       "t": 0.5
+      },
+      "2025": {
+       "n_ep": 24,
+       "net_bps": -221.93,
+       "total_bps": -5326.3,
+       "t": -1.05
+      },
+      "2026": {
+       "n_ep": 14,
+       "net_bps": 69.47,
+       "total_bps": 972.6,
+       "t": 0.64
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2024,
+      "n_ep": 40,
+      "net_bps": -138.71,
+      "t": -0.99
+     },
+     "n_required": 8394.7,
+     "event_rate_per_week_last6m": 0.538,
+     "eta_forward_confirmation_days": 109130.5,
+     "eta_forward_confirmation_years": 298.78,
+     "sample_start": "2023-11-27",
+     "sample_end": "2026-07-31"
+    },
+    "COLLAPSED_CORRECT": {
+     "n_raw": 535,
+     "n_independent_L1": 535,
+     "n_independent_L2": 535,
+     "n_independent_L3": 68,
+     "L3_unit": "contiguous regime episode (basket = ONE observation)",
+     "mean_episode_days": 7.87,
+     "gross_bps_per_episode": 84.33,
+     "net_bps": 77.44,
+     "net_bps_stress28": 70.33,
+     "t_stat_declustered": 2.5,
+     "bootstrap_ci95": [
+      22.62,
+      141.95
+     ],
+     "sharpe_annual_net": 1.215,
+     "sharpe_annual_stress28": 0.977,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 1,
+       "net_bps": 674.45,
+       "total_bps": 674.4
+      },
+      "2024": {
+       "n_ep": 29,
+       "net_bps": 48.14,
+       "total_bps": 1396.1
+      },
+      "2025": {
+       "n_ep": 24,
+       "net_bps": 114.18,
+       "total_bps": 2740.4
+      },
+      "2026": {
+       "n_ep": 14,
+       "net_bps": 32.48,
+       "total_bps": 454.7
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2025,
+      "n_ep": 44,
+      "net_bps": 57.39,
+      "t": 2.12
+     },
+     "n_required": 342.2,
+     "event_rate_per_week_last6m": 0.538,
+     "eta_forward_confirmation_days": 4449.0,
+     "eta_forward_confirmation_years": 12.18,
+     "sample_start": "2023-12-26",
+     "sample_end": "2026-07-31",
+     "sign_learned": -1.0,
+     "oos_start": "2023-12-26",
+     "portfolio_sharpe": 1.217,
+     "portfolio_sharpe_stress": 0.98
+    },
+    "horizon_variants": {
+     "F3_M6_pair_hold1d": {
+      "n_raw": 1068,
+      "n_independent_L1": 1068,
+      "n_independent_L2": 534,
+      "n_independent_L3": 136,
+      "L3_unit": "contiguous same-sign position episode",
+      "mean_episode_days": 7.85,
+      "gross_bps_per_episode": 42.17,
+      "net_bps": 38.67,
+      "net_bps_stress28": 35.17,
+      "t_stat_declustered": 0.92,
+      "bootstrap_ci95": [
+       -41.59,
+       129.4
+      ],
+      "sharpe_annual_net": 1.215,
+      "sharpe_annual_stress28": 0.977,
+      "year_by_year": {
+       "2023": {
+        "n_ep": 2,
+        "net_bps": 333.72,
+        "total_bps": 667.4,
+        "t": null
+       },
+       "2024": {
+        "n_ep": 58,
+        "net_bps": 24.07,
+        "total_bps": 1396.1,
+        "t": 0.49
+       },
+       "2025": {
+        "n_ep": 48,
+        "net_bps": 57.09,
+        "total_bps": 2740.4,
+        "t": 0.57
+       },
+       "2026": {
+        "n_ep": 28,
+        "net_bps": 16.24,
+        "total_bps": 454.7,
+        "t": 0.32
+       }
+      },
+      "ex_best_year": {
+       "dropped_year": 2025,
+       "n_ep": 88,
+       "net_bps": 28.62,
+       "t": 0.78
+      },
+      "n_required": 5067.9,
+      "event_rate_per_week_last6m": 1.077,
+      "eta_forward_confirmation_days": 32941.6,
+      "eta_forward_confirmation_years": 90.19,
+      "sample_start": "2023-12-26",
+      "sample_end": "2026-07-31",
+      "sign_learned": -1.0,
+      "oos_start": "2023-12-26"
+     },
+     "F3_M6_pair_hold3d": {
+      "n_raw": 1282,
+      "n_independent_L1": 1282,
+      "n_independent_L2": 641,
+      "n_independent_L3": 60,
+      "L3_unit": "contiguous same-sign position episode",
+      "mean_episode_days": 21.37,
+      "gross_bps_per_episode": 48.55,
+      "net_bps": 42.6,
+      "net_bps_stress28": 36.65,
+      "t_stat_declustered": 0.48,
+      "bootstrap_ci95": [
+       -125.01,
+       222.1
+      ],
+      "sharpe_annual_net": 0.691,
+      "sharpe_annual_stress28": 0.572,
+      "year_by_year": {
+       "2023": {
+        "n_ep": 2,
+        "net_bps": 324.65,
+        "total_bps": 649.3,
+        "t": null
+       },
+       "2024": {
+        "n_ep": 30,
+        "net_bps": 25.39,
+        "total_bps": 761.6,
+        "t": 0.25
+       },
+       "2025": {
+        "n_ep": 12,
+        "net_bps": 61.82,
+        "total_bps": 741.9,
+        "t": 0.17
+       },
+       "2026": {
+        "n_ep": 16,
+        "net_bps": 25.22,
+        "total_bps": 403.4,
+        "t": 0.49
+       }
+      },
+      "ex_best_year": {
+       "dropped_year": 2024,
+       "n_ep": 30,
+       "net_bps": 59.82,
+       "t": 0.41
+      },
+      "n_required": 8029.6,
+      "event_rate_per_week_last6m": 0.615,
+      "eta_forward_confirmation_days": 91336.9,
+      "eta_forward_confirmation_years": 250.07,
+      "sample_start": "2023-12-26",
+      "sample_end": "2026-07-31",
+      "sign_learned": -1.0,
+      "oos_start": "2023-12-26"
+     },
+     "F3_M6_pair_hold5d": {
+      "n_raw": 1386,
+      "n_independent_L1": 1386,
+      "n_independent_L2": 693,
+      "n_independent_L3": 54,
+      "L3_unit": "contiguous same-sign position episode",
+      "mean_episode_days": 25.67,
+      "gross_bps_per_episode": 49.2,
+      "net_bps": 43.88,
+      "net_bps_stress28": 38.57,
+      "t_stat_declustered": 0.43,
+      "bootstrap_ci95": [
+       -151.91,
+       240.26
+      ],
+      "sharpe_annual_net": 0.661,
+      "sharpe_annual_stress28": 0.569,
+      "year_by_year": {
+       "2023": {
+        "n_ep": 2,
+        "net_bps": 310.11,
+        "total_bps": 620.2,
+        "t": null
+       },
+       "2024": {
+        "n_ep": 24,
+        "net_bps": 26.96,
+        "total_bps": 647.1,
+        "t": 0.19
+       },
+       "2025": {
+        "n_ep": 12,
+        "net_bps": 84.42,
+        "total_bps": 1013.1,
+        "t": 0.23
+       },
+       "2026": {
+        "n_ep": 16,
+        "net_bps": 5.58,
+        "total_bps": 89.3,
+        "t": 0.18
+       }
+      },
+      "ex_best_year": {
+       "dropped_year": 2025,
+       "n_ep": 42,
+       "net_bps": 32.3,
+       "t": 0.38
+      },
+      "n_required": 9015.9,
+      "event_rate_per_week_last6m": 0.615,
+      "eta_forward_confirmation_days": 102555.4,
+      "eta_forward_confirmation_years": 280.78,
+      "sample_start": "2023-12-26",
+      "sample_end": "2026-07-31",
+      "sign_learned": -1.0,
+      "oos_start": "2023-12-26"
+     },
+     "F3_M6_pair_hold10d": {
+      "n_raw": 1540,
+      "n_independent_L1": 1540,
+      "n_independent_L2": 770,
+      "n_independent_L3": 28,
+      "L3_unit": "contiguous same-sign position episode",
+      "mean_episode_days": 55.0,
+      "gross_bps_per_episode": 105.32,
+      "net_bps": 98.57,
+      "net_bps_stress28": 91.82,
+      "t_stat_declustered": 0.48,
+      "bootstrap_ci95": [
+       -281.94,
+       492.7
+      ],
+      "sharpe_annual_net": 0.767,
+      "sharpe_annual_stress28": 0.712,
+      "year_by_year": {
+       "2023": {
+        "n_ep": 2,
+        "net_bps": 165.16,
+        "total_bps": 330.3,
+        "t": null
+       },
+       "2024": {
+        "n_ep": 12,
+        "net_bps": 111.85,
+        "total_bps": 1342.2,
+        "t": 0.39
+       },
+       "2025": {
+        "n_ep": 6,
+        "net_bps": 158.37,
+        "total_bps": 950.2,
+        "t": 0.22
+       },
+       "2026": {
+        "n_ep": 8,
+        "net_bps": 17.14,
+        "total_bps": 137.1,
+        "t": 0.48
+       }
+      },
+      "ex_best_year": {
+       "dropped_year": 2024,
+       "n_ep": 16,
+       "net_bps": 88.6,
+       "t": 0.3
+      },
+      "n_required": 3777.7,
+      "event_rate_per_week_last6m": 0.308,
+      "eta_forward_confirmation_days": 85942.5,
+      "eta_forward_confirmation_years": 235.3,
+      "sample_start": "2023-12-26",
+      "sample_end": "2026-07-31",
+      "sign_learned": -1.0,
+      "oos_start": "2023-12-26"
+     }
+    }
+   },
+   "robustness_and_confounds": {
+    "sign_learned": -1.0,
+    "sign_interpretation": "-1 => high DVOL_ETH/DVOL_BTC => SHORT BTC / LONG ETH",
+    "oos_start": "2023-12-26",
+    "sample": [
+     "2021-05-22",
+     "2026-07-31"
+    ],
+    "baseline_oos": {
+     "n_ep": 68,
+     "net_bps": 77.33,
+     "t": 2.5,
+     "sharpe": 1.215,
+     "eta_years_from_sharpe": 21.27
+    },
+    "baseline_full": {
+     "n_ep": 144,
+     "net_bps": 54.18,
+     "t": 2.29,
+     "sharpe": 0.921,
+     "eta_years_from_sharpe": 37.01
+    },
+    "oos_ex2023": {
+     "n_ep": 68,
+     "net_bps": 76.18,
+     "t": 2.48,
+     "sharpe": 1.205,
+     "eta_years_from_sharpe": 21.64
+    },
+    "threshold_sensitivity": {
+     "0.75/0.25": {
+      "n_ep": 60,
+      "net_bps": 82.12,
+      "t": 2.28,
+      "sharpe": 1.092,
+      "eta_years_from_sharpe": 26.35
+     },
+     "0.8/0.2": {
+      "n_ep": 68,
+      "net_bps": 77.33,
+      "t": 2.5,
+      "sharpe": 1.215,
+      "eta_years_from_sharpe": 21.27
+     },
+     "0.85/0.15": {
+      "n_ep": 60,
+      "net_bps": 51.29,
+      "t": 1.83,
+      "sharpe": 0.768,
+      "eta_years_from_sharpe": 53.26
+     },
+     "0.9/0.1": {
+      "n_ep": 58,
+      "net_bps": 30.57,
+      "t": 1.07,
+      "sharpe": 0.441,
+      "eta_years_from_sharpe": 161.5
+     },
+     "0.7/0.3": {
+      "n_ep": 67,
+      "net_bps": 65.56,
+      "t": 2.03,
+      "sharpe": 0.893,
+      "eta_years_from_sharpe": 39.41
+     }
+    },
+    "confound_correlations": {
+     "spearman_dvolratio_vs_rel_realised_vol_ratio": 0.691,
+     "spearman_dvolratio_vs_rel_momentum_30d": -0.178
+    },
+    "partial_IC": {
+     "raw_IC_spearman": -0.0024,
+     "partial_IC_ctrl_rel_realised_vol": -0.0128,
+     "partial_IC_ctrl_rel_momentum": -0.0032,
+     "partial_IC_ctrl_both": -0.0133
+    },
+    "substitution_realised_vol_ratio_only": {
+     "n_ep": 33,
+     "net_bps": 67.62,
+     "t": 1.16,
+     "sharpe": 0.581,
+     "eta_years_from_sharpe": 92.9
+    },
+    "substitution_rel_momentum_only": {
+     "n_ep": 57,
+     "net_bps": -24.12,
+     "t": -0.51,
+     "sharpe": -0.505,
+     "eta_years_from_sharpe": null
+    },
+    "orthogonalised_dvol_ratio": {
+     "n_ep": 84,
+     "net_bps": 14.84,
+     "t": 0.71,
+     "sharpe": 0.209,
+     "eta_years_from_sharpe": 720.18
+    }
+   }
+  },
+  "M7_OPTIONS_BLOCK_FLOW_TO_PERP": {
+   "hypothesis": "A large Deribit options block forces the dealer to delta-hedge in the perp within hours: customer net-long delta => dealer buys perp => upward pressure. Direction preregistered from the mechanism, never fitted.",
+   "distinct_from": "W6-round2 M3 used RAW NOTIONAL block flow at DAILY horizon and was DEAD. Delta weighting (BS delta per contract) and the 1-72h horizon are both new.",
+   "perp_expressible": true,
+   "vehicle": "BTCUSDT perp, hourly",
+   "verdict": "WEAK",
+   "why": "The mechanism is REAL and correctly signed -- and that is the useful finding. Gross +3.06 bps per episode, t=+2.09 declustered on 2719 independent episodes, in the direction the hedging story predicts. It is simply ~5x too small to trade: the project cost floor is 14 bps round trip, so net is -5.1 bps at 1h. Holding longer to amortise the cost does not work because the effect is specifically a 1-hour effect that decays as the holding period lengthens (gross per episode 2.70 -> 2.55 -> 1.13 -> 0.54 -> 0.37 bps at 1/4/12/24/72h), so gross falls at least as fast as turnover cost does. Every horizon is net-negative. Not COST_FRAGILE in the project's sense (dying between 14 and 28 bps) -- it dies an order of magnitude below 14.",
+   "gate": {
+    "F1_M7_hold1h": {
+     "n_raw": 3845,
+     "n_independent_L1": 3845,
+     "n_independent_L2": 3845,
+     "n_independent_L3": 3086,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 1.25,
+     "gross_bps_per_episode": 2.7,
+     "net_bps": -5.14,
+     "net_bps_stress28": -12.97,
+     "t_stat_declustered": -3.96,
+     "bootstrap_ci95": [
+      -7.77,
+      -2.53
+     ],
+     "sharpe_annual_net": -0.749,
+     "sharpe_annual_stress28": -1.635,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 981,
+       "net_bps": -0.62,
+       "total_bps": -611.4,
+       "t": -0.25
+      },
+      "2024": {
+       "n_ep": 827,
+       "net_bps": -4.67,
+       "total_bps": -3861.0,
+       "t": -1.81
+      },
+      "2025": {
+       "n_ep": 941,
+       "net_bps": -8.44,
+       "total_bps": -7939.8,
+       "t": -4.19
+      },
+      "2026": {
+       "n_ep": 337,
+       "net_bps": -10.2,
+       "total_bps": -3438.7,
+       "t": -2.45
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2023,
+      "n_ep": 2105,
+      "net_bps": -7.24,
+      "t": -4.8
+     },
+     "n_required": 6168.4,
+     "event_rate_per_week_last6m": 11.385,
+     "eta_forward_confirmation_days": 3792.7,
+     "eta_forward_confirmation_years": 10.38,
+     "sample_start": "2021-01-01",
+     "sample_end": "2026-07-31"
+    },
+    "F1_M7_hold4h": {
+     "n_raw": 9675,
+     "n_independent_L1": 9675,
+     "n_independent_L2": 9675,
+     "n_independent_L3": 2315,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 4.18,
+     "gross_bps_per_episode": 2.55,
+     "net_bps": -0.88,
+     "net_bps_stress28": -4.31,
+     "t_stat_declustered": -0.95,
+     "bootstrap_ci95": [
+      -2.73,
+      0.95
+     ],
+     "sharpe_annual_net": -0.238,
+     "sharpe_annual_stress28": -0.71,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 691,
+       "net_bps": 0.51,
+       "total_bps": 349.4,
+       "t": 0.28
+      },
+      "2024": {
+       "n_ep": 639,
+       "net_bps": -1.22,
+       "total_bps": -778.4,
+       "t": -0.65
+      },
+      "2025": {
+       "n_ep": 708,
+       "net_bps": -1.21,
+       "total_bps": -853.5,
+       "t": -0.88
+      },
+      "2026": {
+       "n_ep": 277,
+       "net_bps": -2.72,
+       "total_bps": -752.9,
+       "t": -0.97
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2023,
+      "n_ep": 1624,
+      "net_bps": -1.47,
+      "t": -1.38
+     },
+     "n_required": 79947.1,
+     "event_rate_per_week_last6m": 9.346,
+     "eta_forward_confirmation_days": 59878.1,
+     "eta_forward_confirmation_years": 163.94,
+     "sample_start": "2021-01-01",
+     "sample_end": "2026-07-31"
+    },
+    "F1_M7_hold12h": {
+     "n_raw": 16593,
+     "n_independent_L1": 16593,
+     "n_independent_L2": 16593,
+     "n_independent_L3": 1676,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 9.9,
+     "gross_bps_per_episode": 1.13,
+     "net_bps": -0.73,
+     "net_bps_stress28": -2.58,
+     "t_stat_declustered": -0.98,
+     "bootstrap_ci95": [
+      -2.12,
+      0.73
+     ],
+     "sharpe_annual_net": -0.151,
+     "sharpe_annual_stress28": -0.432,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 492,
+       "net_bps": 0.48,
+       "total_bps": 235.4,
+       "t": 0.29
+      },
+      "2024": {
+       "n_ep": 454,
+       "net_bps": -0.8,
+       "total_bps": -362.7,
+       "t": -0.52
+      },
+      "2025": {
+       "n_ep": 512,
+       "net_bps": -1.93,
+       "total_bps": -986.2,
+       "t": -1.89
+      },
+      "2026": {
+       "n_ep": 218,
+       "net_bps": -0.47,
+       "total_bps": -102.3,
+       "t": -0.31
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2023,
+      "n_ep": 1184,
+      "net_bps": -1.23,
+      "t": -1.57
+     },
+     "n_required": 54349.7,
+     "event_rate_per_week_last6m": 7.385,
+     "eta_forward_confirmation_days": 51519.0,
+     "eta_forward_confirmation_years": 141.05,
+     "sample_start": "2021-01-01",
+     "sample_end": "2026-07-31"
+    },
+    "F1_M7_hold24h": {
+     "n_raw": 20858,
+     "n_independent_L1": 20858,
+     "n_independent_L2": 20858,
+     "n_independent_L3": 1241,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 16.81,
+     "gross_bps_per_episode": 0.54,
+     "net_bps": -0.8,
+     "net_bps_stress28": -2.13,
+     "t_stat_declustered": -1.18,
+     "bootstrap_ci95": [
+      -2.09,
+      0.58
+     ],
+     "sharpe_annual_net": -0.142,
+     "sharpe_annual_stress28": -0.354,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 360,
+       "net_bps": 0.35,
+       "total_bps": 125.2,
+       "t": 0.21
+      },
+      "2024": {
+       "n_ep": 346,
+       "net_bps": -1.99,
+       "total_bps": -688.5,
+       "t": -1.73
+      },
+      "2025": {
+       "n_ep": 377,
+       "net_bps": -1.51,
+       "total_bps": -568.1,
+       "t": -1.59
+      },
+      "2026": {
+       "n_ep": 158,
+       "net_bps": 0.92,
+       "total_bps": 144.6,
+       "t": 0.57
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2026,
+      "n_ep": 1083,
+      "net_bps": -1.04,
+      "t": -1.43
+     },
+     "n_required": 27749.5,
+     "event_rate_per_week_last6m": 5.385,
+     "eta_forward_confirmation_days": 36074.4,
+     "eta_forward_confirmation_years": 98.77,
+     "sample_start": "2021-01-01",
+     "sample_end": "2026-07-31"
+    },
+    "F1_M7_hold72h": {
+     "n_raw": 27022,
+     "n_independent_L1": 27022,
+     "n_independent_L2": 27022,
+     "n_independent_L3": 779,
+     "L3_unit": "contiguous same-sign position episode",
+     "mean_episode_days": 34.69,
+     "gross_bps_per_episode": 0.37,
+     "net_bps": -0.42,
+     "net_bps_stress28": -1.21,
+     "t_stat_declustered": -0.58,
+     "bootstrap_ci95": [
+      -1.8,
+      1.05
+     ],
+     "sharpe_annual_net": -0.073,
+     "sharpe_annual_stress28": -0.197,
+     "year_by_year": {
+      "2023": {
+       "n_ep": 224,
+       "net_bps": 1.24,
+       "total_bps": 277.7,
+       "t": 0.68
+      },
+      "2024": {
+       "n_ep": 228,
+       "net_bps": -1.78,
+       "total_bps": -406.4,
+       "t": -1.42
+      },
+      "2025": {
+       "n_ep": 232,
+       "net_bps": -1.41,
+       "total_bps": -327.1,
+       "t": -1.66
+      },
+      "2026": {
+       "n_ep": 95,
+       "net_bps": 1.32,
+       "total_bps": 125.7,
+       "t": 0.69
+      }
+     },
+     "ex_best_year": {
+      "dropped_year": 2023,
+      "n_ep": 555,
+      "net_bps": -1.1,
+      "t": -1.55
+     },
+     "n_required": 72133.7,
+     "event_rate_per_week_last6m": 3.115,
+     "eta_forward_confirmation_days": 162078.2,
+     "eta_forward_confirmation_years": 443.75,
+     "sample_start": "2021-01-01",
+     "sample_end": "2026-07-31"
+    }
+   },
+   "gross_significance": {
+    "n_episodes": 2719,
+    "gross_bps_per_episode": 3.06,
+    "t_stat_declustered_GROSS": 2.09,
+    "cost_floor_bps_round_trip": 14.0,
+    "verdict_note": "gross effect is real and correctly signed but ~5x below the cost floor"
+   },
+   "spearman_ic": {
+    "M7_hours_with_blocks": 21718,
+    "M7_ic_fwd1h": -0.0058,
+    "M7_n_hours_fwd1h": 31389,
+    "M7_ic_fwd4h": -0.0091,
+    "M7_n_hours_fwd4h": 31386
+   }
+  }
+ }
+}

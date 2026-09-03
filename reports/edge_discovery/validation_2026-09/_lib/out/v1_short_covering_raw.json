@@ -1,0 +1,1320 @@
+{
+  "_population": {
+    "n_bars": 1454971,
+    "n_symbols": 48,
+    "window": [
+      "2022-01-01 00:00:00+00:00",
+      "2026-07-31 23:00:00+00:00"
+    ]
+  },
+  "PRIMARY": {
+    "label": "PRIMARY decile 720h fwd4h",
+    "n_A": 22330,
+    "n_B": 1424894,
+    "episode_A": {
+      "gross_bps": 11.98,
+      "net_bps": -2.02,
+      "net_bps_stress28": -16.02,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.722,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -17.03,
+        "2023": 7.35,
+        "2024": 18.94,
+        "2025": -2.34
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -7.26,
+      "worst_episode_bps": -27.74,
+      "max_drawdown_bps_cumule": -6.32,
+      "n_raw": 22330,
+      "n_independent_L1": 324,
+      "n_independent_L2": 1490,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -0.26,
+      "cluster_robust_se": 7.77,
+      "bootstrap_ci95": [
+        -15.64,
+        10.43
+      ],
+      "bootstrap_p05": -13.7,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22330
+    },
+    "episode_B": {
+      "gross_bps": -1.21,
+      "net_bps": -15.21,
+      "net_bps_stress28": -29.21,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.76,
+        "2023": -7.93,
+        "2024": -11.95,
+        "2025": -18.65
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -17.03,
+      "worst_episode_bps": -23.76,
+      "max_drawdown_bps_cumule": -52.29,
+      "n_raw": 1424894,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.543,
+      "cluster_robust_se": 2.744,
+      "bootstrap_ci95": [
+        -19.76,
+        -10.7
+      ],
+      "bootstrap_p05": -19.4,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1424894
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 11.98,
+      "arm_B_gross_bps": -1.21,
+      "difference_bps": 13.19,
+      "welch_t": 1.6,
+      "welch_p_one_sided": 0.0853,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -1.84,
+        26.78
+      ],
+      "bootstrap_P_diff_le_0": 0.0432
+    },
+    "event_A": {
+      "label": "PRIMARY decile 720h fwd4h A",
+      "n_events": 22330,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 2.53,
+      "se_naive": 1.901,
+      "se_cluster_robust": 7.138,
+      "se_inflation_x": 3.76,
+      "t_naive": 1.329,
+      "t_cluster_robust": 0.354,
+      "bootstrap_ci95": [
+        -7.81,
+        16.14
+      ],
+      "bootstrap_p05": -7.46
+    },
+    "event_A_minus_B": {
+      "label": "PRIMARY decile 720h fwd4h A\u2212B",
+      "difference_bps": 17.06,
+      "se_cluster_robust": 6.372,
+      "t_cluster_robust": 2.678,
+      "n_A": 22330,
+      "n_B": 1424894,
+      "n_clusters": 5
+    }
+  },
+  "P1_quintile": {
+    "label": "P1 quintile",
+    "n_A": 62185,
+    "n_B": 1385039,
+    "episode_A": {
+      "gross_bps": 6.94,
+      "net_bps": -7.06,
+      "net_bps_stress28": -21.06,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.131,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -14.64,
+        "2023": 1.31,
+        "2024": 4.01,
+        "2025": -11.35
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -9.83,
+      "worst_episode_bps": -21.11,
+      "max_drawdown_bps_cumule": -14.19,
+      "n_raw": 62185,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1561,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -1.56,
+      "cluster_robust_se": 4.526,
+      "bootstrap_ci95": [
+        -14.68,
+        0.5
+      ],
+      "bootstrap_p05": -13.98,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 62185
+    },
+    "episode_B": {
+      "gross_bps": -1.36,
+      "net_bps": -15.36,
+      "net_bps_stress28": -29.36,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.92,
+        "2023": -8.08,
+        "2024": -12.18,
+        "2025": -18.72
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -17.18,
+      "worst_episode_bps": -23.94,
+      "max_drawdown_bps_cumule": -52.87,
+      "n_raw": 1385039,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.607,
+      "cluster_robust_se": 2.74,
+      "bootstrap_ci95": [
+        -19.92,
+        -10.88
+      ],
+      "bootstrap_p05": -19.58,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1385039
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 6.94,
+      "arm_B_gross_bps": -1.36,
+      "difference_bps": 8.3,
+      "welch_t": 1.569,
+      "welch_p_one_sided": 0.0816,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -1.05,
+        17.19
+      ],
+      "bootstrap_P_diff_le_0": 0.044
+    },
+    "event_A": {
+      "label": "P1 quintile A",
+      "n_events": 62185,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": -5.15,
+      "se_naive": 1.009,
+      "se_cluster_robust": 4.023,
+      "se_inflation_x": 3.98,
+      "t_naive": -5.105,
+      "t_cluster_robust": -1.281,
+      "bootstrap_ci95": [
+        -11.71,
+        2.53
+      ],
+      "bootstrap_p05": -10.95
+    },
+    "event_A_minus_B": {
+      "label": "P1 quintile A\u2212B",
+      "difference_bps": 9.53,
+      "se_cluster_robust": 2.928,
+      "t_cluster_robust": 3.256,
+      "n_A": 62185,
+      "n_B": 1385039,
+      "n_clusters": 5
+    }
+  },
+  "P2_window360": {
+    "label": "P2 fen\u00eatre 360h",
+    "n_A": 22626,
+    "n_B": 1424598,
+    "episode_A": {
+      "gross_bps": 9.95,
+      "net_bps": -4.05,
+      "net_bps_stress28": -18.05,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.511,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.56,
+        "2023": 2.67,
+        "2024": 18.49,
+        "2025": -4.29
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -9.69,
+      "worst_episode_bps": -31.84,
+      "max_drawdown_bps_cumule": -5.28,
+      "n_raw": 22626,
+      "n_independent_L1": 320,
+      "n_independent_L2": 1504,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -0.497,
+      "cluster_robust_se": 8.144,
+      "bootstrap_ci95": [
+        -19.43,
+        9.18
+      ],
+      "bootstrap_p05": -15.7,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22626
+    },
+    "episode_B": {
+      "gross_bps": -1.19,
+      "net_bps": -15.19,
+      "net_bps_stress28": -29.19,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.74,
+        "2023": -7.9,
+        "2024": -11.95,
+        "2025": -18.63
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -17.01,
+      "worst_episode_bps": -23.69,
+      "max_drawdown_bps_cumule": -52.25,
+      "n_raw": 1424598,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.551,
+      "cluster_robust_se": 2.736,
+      "bootstrap_ci95": [
+        -19.73,
+        -10.69
+      ],
+      "bootstrap_p05": -19.36,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1424598
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 9.95,
+      "arm_B_gross_bps": -1.19,
+      "difference_bps": 11.14,
+      "welch_t": 1.296,
+      "welch_p_one_sided": 0.1263,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -4.64,
+        25.14
+      ],
+      "bootstrap_P_diff_le_0": 0.081
+    },
+    "event_A": {
+      "label": "P2 fen\u00eatre 360h A",
+      "n_events": 22626,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 2.02,
+      "se_naive": 1.828,
+      "se_cluster_robust": 6.926,
+      "se_inflation_x": 3.79,
+      "t_naive": 1.103,
+      "t_cluster_robust": 0.291,
+      "bootstrap_ci95": [
+        -8.28,
+        14.61
+      ],
+      "bootstrap_p05": -7.57
+    },
+    "event_A_minus_B": {
+      "label": "P2 fen\u00eatre 360h A\u2212B",
+      "difference_bps": 16.55,
+      "se_cluster_robust": 6.006,
+      "t_cluster_robust": 2.756,
+      "n_A": 22626,
+      "n_B": 1424598,
+      "n_clusters": 5
+    }
+  },
+  "P3_live_score": {
+    "label": "P3 score live min()",
+    "n_A": 22330,
+    "n_B": 1424894,
+    "episode_A": {
+      "gross_bps": 11.98,
+      "net_bps": -2.02,
+      "net_bps_stress28": -16.02,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.722,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -17.03,
+        "2023": 7.35,
+        "2024": 18.94,
+        "2025": -2.34
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -7.26,
+      "worst_episode_bps": -27.74,
+      "max_drawdown_bps_cumule": -6.32,
+      "n_raw": 22330,
+      "n_independent_L1": 324,
+      "n_independent_L2": 1490,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -0.26,
+      "cluster_robust_se": 7.77,
+      "bootstrap_ci95": [
+        -15.64,
+        10.43
+      ],
+      "bootstrap_p05": -13.7,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22330
+    },
+    "episode_B": {
+      "gross_bps": -1.21,
+      "net_bps": -15.21,
+      "net_bps_stress28": -29.21,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.76,
+        "2023": -7.93,
+        "2024": -11.95,
+        "2025": -18.65
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -17.03,
+      "worst_episode_bps": -23.76,
+      "max_drawdown_bps_cumule": -52.29,
+      "n_raw": 1424894,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.543,
+      "cluster_robust_se": 2.744,
+      "bootstrap_ci95": [
+        -19.76,
+        -10.7
+      ],
+      "bootstrap_p05": -19.4,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1424894
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 11.98,
+      "arm_B_gross_bps": -1.21,
+      "difference_bps": 13.19,
+      "welch_t": 1.6,
+      "welch_p_one_sided": 0.0853,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -1.84,
+        26.78
+      ],
+      "bootstrap_P_diff_le_0": 0.0432
+    },
+    "event_A": {
+      "label": "P3 score live min() A",
+      "n_events": 22330,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 2.53,
+      "se_naive": 1.901,
+      "se_cluster_robust": 7.138,
+      "se_inflation_x": 3.76,
+      "t_naive": 1.329,
+      "t_cluster_robust": 0.354,
+      "bootstrap_ci95": [
+        -7.81,
+        16.14
+      ],
+      "bootstrap_p05": -7.46
+    },
+    "event_A_minus_B": {
+      "label": "P3 score live min() A\u2212B",
+      "difference_bps": 17.06,
+      "se_cluster_robust": 6.372,
+      "t_cluster_robust": 2.678,
+      "n_A": 22330,
+      "n_B": 1424894,
+      "n_clusters": 5
+    }
+  },
+  "P4_fwd1h": {
+    "label": "P4 horizon 1h",
+    "n_A": 22337,
+    "n_B": 1425202,
+    "episode_A": {
+      "gross_bps": 3.69,
+      "net_bps": -10.31,
+      "net_bps_stress28": -24.31,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -15.6,
+        "2023": -2.79,
+        "2024": -5.14,
+        "2025": -12.43
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -12.19,
+      "worst_episode_bps": -20.59,
+      "max_drawdown_bps_cumule": -30.97,
+      "n_raw": 22337,
+      "n_independent_L1": 324,
+      "n_independent_L2": 1490,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -3.315,
+      "cluster_robust_se": 3.11,
+      "bootstrap_ci95": [
+        -15.7,
+        -5.19
+      ],
+      "bootstrap_p05": -15.03,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22337
+    },
+    "episode_B": {
+      "gross_bps": -0.28,
+      "net_bps": -14.28,
+      "net_bps_stress28": -28.28,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -15.11,
+        "2023": -12.56,
+        "2024": -13.46,
+        "2025": -15.13
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -14.7,
+      "worst_episode_bps": -16.28,
+      "max_drawdown_bps_cumule": -55.1,
+      "n_raw": 1425202,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -21.943,
+      "cluster_robust_se": 0.651,
+      "bootstrap_ci95": [
+        -15.35,
+        -13.2
+      ],
+      "bootstrap_p05": -15.26,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1425202
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 3.69,
+      "arm_B_gross_bps": -0.28,
+      "difference_bps": 3.96,
+      "welch_t": 1.248,
+      "welch_p_one_sided": 0.1376,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -1.75,
+        9.19
+      ],
+      "bootstrap_P_diff_le_0": 0.0874
+    },
+    "event_A": {
+      "label": "P4 horizon 1h A",
+      "n_events": 22337,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": -9.42,
+      "se_naive": 0.996,
+      "se_cluster_robust": 1.875,
+      "se_inflation_x": 1.88,
+      "t_naive": -9.455,
+      "t_cluster_robust": -5.021,
+      "bootstrap_ci95": [
+        -12.84,
+        -5.8
+      ],
+      "bootstrap_p05": -12.42
+    },
+    "event_A_minus_B": {
+      "label": "P4 horizon 1h A\u2212B",
+      "difference_bps": 4.7,
+      "se_cluster_robust": 1.555,
+      "t_cluster_robust": 3.024,
+      "n_A": 22337,
+      "n_B": 1425202,
+      "n_clusters": 5
+    }
+  },
+  "P4_fwd8h": {
+    "label": "P4 horizon 8h",
+    "n_A": 22322,
+    "n_B": 1424482,
+    "episode_A": {
+      "gross_bps": 18.29,
+      "net_bps": 4.29,
+      "net_bps_stress28": -9.71,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 1.343,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -26.28,
+        "2023": 35.89,
+        "2024": 43.62,
+        "2025": -5.52
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -5.55,
+      "worst_episode_bps": -56.94,
+      "max_drawdown_bps_cumule": -5.52,
+      "n_raw": 22322,
+      "n_independent_L1": 324,
+      "n_independent_L2": 1490,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": 0.24,
+      "cluster_robust_se": 17.876,
+      "bootstrap_ci95": [
+        -26.54,
+        32.68
+      ],
+      "bootstrap_p05": -24.11,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": 1687.3,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": 410576.1,
+      "eta_p50": "410576 days (~1124.1 years)",
+      "eta_conservative_days": 615864.2,
+      "eta_conservative": "615864 days (~1686.1 years)",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22322
+    },
+    "episode_B": {
+      "gross_bps": -2.41,
+      "net_bps": -16.41,
+      "net_bps_stress28": -30.41,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -23.67,
+        "2023": -1.78,
+        "2024": -9.86,
+        "2025": -23.05
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -20.06,
+      "worst_episode_bps": -33.64,
+      "max_drawdown_bps_cumule": -48.4,
+      "n_raw": 1424482,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -2.983,
+      "cluster_robust_se": 5.501,
+      "bootstrap_ci95": [
+        -25.66,
+        -7.4
+      ],
+      "bootstrap_p05": -24.9,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1424482
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 18.29,
+      "arm_B_gross_bps": -2.41,
+      "difference_bps": 20.7,
+      "welch_t": 1.107,
+      "welch_p_one_sided": 0.1607,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -13.55,
+        50.8
+      ],
+      "bootstrap_P_diff_le_0": 0.1144
+    },
+    "event_A": {
+      "label": "P4 horizon 8h A",
+      "n_events": 22322,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 13.44,
+      "se_naive": 2.621,
+      "se_cluster_robust": 12.921,
+      "se_inflation_x": 4.93,
+      "t_naive": 5.127,
+      "t_cluster_robust": 1.04,
+      "bootstrap_ci95": [
+        -8.91,
+        37.75
+      ],
+      "bootstrap_p05": -6.89
+    },
+    "event_A_minus_B": {
+      "label": "P4 horizon 8h A\u2212B",
+      "difference_bps": 28.5,
+      "se_cluster_robust": 10.531,
+      "t_cluster_robust": 2.706,
+      "n_A": 22322,
+      "n_B": 1424482,
+      "n_clusters": 5
+    }
+  },
+  "P6_cost150": {
+    "label": "P6 co\u00fbt +50%",
+    "n_A": 22330,
+    "n_B": 1424894,
+    "episode_A": {
+      "gross_bps": 11.98,
+      "net_bps": -9.02,
+      "net_bps_stress28": -30.02,
+      "cost_nominal_bps": 21.0,
+      "cost_stress_bps": 42.0,
+      "pf": 0.214,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -24.03,
+        "2023": 0.35,
+        "2024": 11.94,
+        "2025": -9.34
+      },
+      "n_years_positive": 2,
+      "n_years": 4,
+      "best_year": 2024,
+      "ex_best_year_net_bps": -14.26,
+      "worst_episode_bps": -34.74,
+      "max_drawdown_bps_cumule": -13.32,
+      "n_raw": 22330,
+      "n_independent_L1": 324,
+      "n_independent_L2": 1490,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -1.161,
+      "cluster_robust_se": 7.77,
+      "bootstrap_ci95": [
+        -22.64,
+        3.43
+      ],
+      "bootstrap_p05": -20.7,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 22330
+    },
+    "episode_B": {
+      "gross_bps": -1.21,
+      "net_bps": -22.21,
+      "net_bps_stress28": -43.21,
+      "cost_nominal_bps": 21.0,
+      "cost_stress_bps": 42.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -25.76,
+        "2023": -14.93,
+        "2024": -18.95,
+        "2025": -25.65
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -24.03,
+      "worst_episode_bps": -30.76,
+      "max_drawdown_bps_cumule": -80.29,
+      "n_raw": 1424894,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -8.094,
+      "cluster_robust_se": 2.744,
+      "bootstrap_ci95": [
+        -26.76,
+        -17.7
+      ],
+      "bootstrap_p05": -26.4,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1424894
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 11.98,
+      "arm_B_gross_bps": -1.21,
+      "difference_bps": 13.19,
+      "welch_t": 1.6,
+      "welch_p_one_sided": 0.0853,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -1.84,
+        26.78
+      ],
+      "bootstrap_P_diff_le_0": 0.0432
+    },
+    "event_A": {
+      "label": "P6 co\u00fbt +50% A",
+      "n_events": 22330,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 2.53,
+      "se_naive": 1.901,
+      "se_cluster_robust": 7.138,
+      "se_inflation_x": 3.76,
+      "t_naive": 1.329,
+      "t_cluster_robust": 0.354,
+      "bootstrap_ci95": [
+        -7.81,
+        16.14
+      ],
+      "bootstrap_p05": -7.46
+    },
+    "event_A_minus_B": {
+      "label": "P6 co\u00fbt +50% A\u2212B",
+      "difference_bps": 17.06,
+      "se_cluster_robust": 6.372,
+      "t_cluster_robust": 2.678,
+      "n_A": 22330,
+      "n_B": 1424894,
+      "n_clusters": 5
+    }
+  },
+  "P8_oi_notional": {
+    "label": "P8 OI notionnel",
+    "n_A": 2486,
+    "n_B": 1444738,
+    "episode_A": {
+      "gross_bps": 15.02,
+      "net_bps": 1.02,
+      "net_bps_stress28": -12.98,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 1.041,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -59.54,
+        "2023": 0.01,
+        "2024": 58.11,
+        "2025": 66.07
+      },
+      "n_years_positive": 3,
+      "n_years": 4,
+      "best_year": 2025,
+      "ex_best_year_net_bps": -15.24,
+      "worst_episode_bps": -124.93,
+      "max_drawdown_bps_cumule": 0.0,
+      "n_raw": 2486,
+      "n_independent_L1": 251,
+      "n_independent_L2": 765,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": 0.03,
+      "cluster_robust_se": 34.19,
+      "bootstrap_ci95": [
+        -63.33,
+        51.27
+      ],
+      "bootstrap_p05": -50.12,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": 111517.2,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": 27135854.0,
+      "eta_p50": "27135854 days (~74293.9 years)",
+      "eta_conservative_days": 40703780.9,
+      "eta_conservative": "40703781 days (~111440.9 years)",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 2486
+    },
+    "episode_B": {
+      "gross_bps": -1.03,
+      "net_bps": -15.03,
+      "net_bps_stress28": -29.03,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 5,
+      "year_by_year": {
+        "2022": -18.67,
+        "2023": -7.78,
+        "2024": -11.55,
+        "2025": -18.48
+      },
+      "n_years_positive": 0,
+      "n_years": 4,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -16.84,
+      "worst_episode_bps": -23.64,
+      "max_drawdown_bps_cumule": -51.52,
+      "n_raw": 1444738,
+      "n_independent_L1": 327,
+      "n_independent_L2": 1582,
+      "n_independent_L3": 5,
+      "n_validation_independent": 5,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.444,
+      "cluster_robust_se": 2.761,
+      "bootstrap_ci95": [
+        -19.67,
+        -10.47
+      ],
+      "bootstrap_p05": -19.24,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1444738
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 15.02,
+      "arm_B_gross_bps": -1.03,
+      "difference_bps": 16.05,
+      "welch_t": 0.468,
+      "welch_p_one_sided": 0.3319,
+      "n_episodes_A": 5,
+      "n_episodes_B": 5,
+      "bootstrap_ci95": [
+        -50.43,
+        66.91
+      ],
+      "bootstrap_P_diff_le_0": 0.2856
+    },
+    "event_A": {
+      "label": "P8 OI notionnel A",
+      "n_events": 2486,
+      "n_L3_episodes": 5,
+      "net14_event_weighted": 21.21,
+      "se_naive": 6.011,
+      "se_cluster_robust": 15.926,
+      "se_inflation_x": 2.65,
+      "t_naive": 3.529,
+      "t_cluster_robust": 1.332,
+      "bootstrap_ci95": [
+        -5.77,
+        59.27
+      ],
+      "bootstrap_p05": -0.42
+    },
+    "event_A_minus_B": {
+      "label": "P8 OI notionnel A\u2212B",
+      "difference_bps": 35.55,
+      "se_cluster_robust": 16.095,
+      "t_cluster_robust": 2.208,
+      "n_A": 2486,
+      "n_B": 1444738,
+      "n_clusters": 5
+    }
+  },
+  "P5_ex2022": {
+    "label": "P5 hors 2022",
+    "n_A": 18374,
+    "n_B": 1186483,
+    "episode_A": {
+      "gross_bps": 23.74,
+      "net_bps": 9.74,
+      "net_bps_stress28": -4.26,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 17.645,
+      "n_periods": 4,
+      "year_by_year": {
+        "2023": 11.19,
+        "2024": 18.94,
+        "2025": -2.34
+      },
+      "n_years_positive": 2,
+      "n_years": 3,
+      "best_year": 2024,
+      "ex_best_year_net_bps": 6.68,
+      "worst_episode_bps": -2.34,
+      "max_drawdown_bps_cumule": -2.34,
+      "n_raw": 18374,
+      "n_independent_L1": 286,
+      "n_independent_L2": 1175,
+      "n_independent_L3": 4,
+      "n_validation_independent": 4,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": 2.077,
+      "cluster_robust_se": 4.691,
+      "bootstrap_ci95": [
+        2.0,
+        16.98
+      ],
+      "bootstrap_p05": 2.51,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": 17.4,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": 4226.2,
+      "eta_p50": "4226 days (~11.6 years)",
+      "eta_conservative_days": 6339.2,
+      "eta_conservative": "6339 days (~17.4 years)",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 18374
+    },
+    "episode_B": {
+      "gross_bps": 1.88,
+      "net_bps": -12.12,
+      "net_bps_stress28": -26.12,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 0.0,
+      "n_periods": 4,
+      "year_by_year": {
+        "2023": -8.95,
+        "2024": -11.95,
+        "2025": -18.65
+      },
+      "n_years_positive": 0,
+      "n_years": 3,
+      "best_year": 2023,
+      "ex_best_year_net_bps": -15.3,
+      "worst_episode_bps": -18.65,
+      "max_drawdown_bps_cumule": -38.53,
+      "n_raw": 1186483,
+      "n_independent_L1": 286,
+      "n_independent_L2": 1247,
+      "n_independent_L3": 4,
+      "n_validation_independent": 4,
+      "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+      "t_stat_declustered": -5.217,
+      "cluster_robust_se": 2.324,
+      "bootstrap_ci95": [
+        -16.48,
+        -8.93
+      ],
+      "bootstrap_p05": -15.97,
+      "historical_event_rate": "0.029/week",
+      "recent_event_rate": "0.038/week",
+      "conservative_event_rate": "0.019/week",
+      "event_rates_per_day": {
+        "last_2y": 0.00411,
+        "last_1y": 0.00274,
+        "last_6m": 0.00549
+      },
+      "n_required_statistical": null,
+      "minimum_calendar_days": 60,
+      "eta_p50_days": null,
+      "eta_p50": "unbounded",
+      "eta_conservative_days": null,
+      "eta_conservative": "unbounded",
+      "confirmable_in_horizon": false,
+      "n_events_raw": 1186483
+    },
+    "episode_A_minus_B": {
+      "arm_A_gross_bps": 23.74,
+      "arm_B_gross_bps": 1.88,
+      "difference_bps": 21.87,
+      "welch_t": 4.177,
+      "welch_p_one_sided": 0.0057,
+      "n_episodes_A": 4,
+      "n_episodes_B": 4,
+      "bootstrap_ci95": [
+        12.92,
+        30.58
+      ],
+      "bootstrap_P_diff_le_0": 0.0
+    },
+    "event_A": {
+      "label": "P5 hors 2022 A",
+      "n_events": 18374,
+      "n_L3_episodes": 4,
+      "net14_event_weighted": 10.91,
+      "se_naive": 1.923,
+      "se_cluster_robust": 6.116,
+      "se_inflation_x": 3.18,
+      "t_naive": 5.674,
+      "t_cluster_robust": 1.784,
+      "bootstrap_ci95": [
+        -1.46,
+        18.21
+      ],
+      "bootstrap_p05": -1.46
+    },
+    "event_A_minus_B": {
+      "label": "P5 hors 2022 A\u2212B",
+      "difference_bps": 24.3,
+      "se_cluster_robust": 4.145,
+      "t_cluster_robust": 5.863,
+      "n_A": 18374,
+      "n_B": 1186483,
+      "n_clusters": 4
+    }
+  },
+  "ledger_agreement": {
+    "n_ledger_rows": 377,
+    "n_ledger_hours": 0,
+    "n_mine_in_common_window": 0,
+    "n_agreed": 0,
+    "ledger_window": [
+      "2026-08-28 17:00:00+00:00",
+      "2026-09-03 08:00:00+00:00"
+    ],
+    "note": "accord = m\u00eame (symbole, heure UTC) class\u00e9 SHORT_COVERING"
+  },
+  "overlap_with_cascade_population": {
+    "n_arm_A_hours": 22338,
+    "n_shared_hours": 716,
+    "share": 0.0321
+  }
+}

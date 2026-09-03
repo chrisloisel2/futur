@@ -1,0 +1,250 @@
+{
+  "SS_exhaustion": {
+    "n_raw": 2719,
+    "mean_raw_bps_LONG": 15.45,
+    "L1": {
+      "unit": "symbol|24h",
+      "n_units": 1823,
+      "size_mean": 1.49,
+      "size_median": 1.0,
+      "size_p95": 3.0,
+      "size_max": 10,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 20.82,
+      "dur_h_max": 71.92,
+      "pct_units_size1": 0.703,
+      "mean_of_episode_means_bps": 4.29,
+      "t": 0.65,
+      "size_weighted_check_bps": 15.45,
+      "corr_size_vs_perf": 0.077
+    },
+    "L2": {
+      "unit": "calendar day",
+      "n_units": 739,
+      "size_mean": 3.68,
+      "size_median": 2.0,
+      "size_p95": 11.0,
+      "size_max": 81,
+      "dur_h_median": 1.0,
+      "dur_h_p95": 19.83,
+      "dur_h_max": 23.67,
+      "pct_units_size1": 0.444,
+      "mean_of_episode_means_bps": -18.91,
+      "t": -2.49,
+      "size_weighted_check_bps": 15.45,
+      "corr_size_vs_perf": 0.071
+    },
+    "L3": {
+      "unit": "cross-sym chain 4h",
+      "n_units": 1004,
+      "size_mean": 2.71,
+      "size_median": 1.0,
+      "size_p95": 9.0,
+      "size_max": 82,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 6.65,
+      "dur_h_max": 29.67,
+      "pct_units_size1": 0.624,
+      "mean_of_episode_means_bps": -30.46,
+      "t": -4.52,
+      "size_weighted_check_bps": 15.45,
+      "corr_size_vs_perf": 0.114
+    },
+    "L3b_gap1h": {
+      "n_units": 1441,
+      "mean_of_episode_means_bps": -20.2,
+      "t": -2.7
+    },
+    "L3c_gap12h": {
+      "n_units": 640,
+      "mean_of_episode_means_bps": -17.79,
+      "t": -2.42
+    }
+  },
+  "SS_onset": {
+    "n_raw": 5199,
+    "mean_raw_bps_LONG": -3.34,
+    "L1": {
+      "unit": "symbol|24h",
+      "n_units": 5199,
+      "size_mean": 1.0,
+      "size_median": 1.0,
+      "size_p95": 1.0,
+      "size_max": 1,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 0.0,
+      "dur_h_max": 0.0,
+      "pct_units_size1": 1.0,
+      "mean_of_episode_means_bps": -3.34,
+      "t": -0.94,
+      "size_weighted_check_bps": -3.34,
+      "corr_size_vs_perf": NaN
+    },
+    "L2": {
+      "unit": "calendar day",
+      "n_units": 1355,
+      "size_mean": 3.84,
+      "size_median": 3.0,
+      "size_p95": 11.0,
+      "size_max": 29,
+      "dur_h_median": 4.75,
+      "dur_h_p95": 20.0,
+      "dur_h_max": 23.83,
+      "pct_units_size1": 0.292,
+      "mean_of_episode_means_bps": -30.69,
+      "t": -6.18,
+      "size_weighted_check_bps": -3.34,
+      "corr_size_vs_perf": 0.129
+    },
+    "L3": {
+      "unit": "cross-sym chain 4h",
+      "n_units": 2088,
+      "size_mean": 2.49,
+      "size_median": 1.0,
+      "size_p95": 8.0,
+      "size_max": 29,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 5.42,
+      "dur_h_max": 21.25,
+      "pct_units_size1": 0.536,
+      "mean_of_episode_means_bps": -34.7,
+      "t": -7.99,
+      "size_weighted_check_bps": -3.34,
+      "corr_size_vs_perf": 0.122
+    },
+    "L3b_gap1h": {
+      "n_units": 2908,
+      "mean_of_episode_means_bps": -22.51,
+      "t": -5.17
+    },
+    "L3c_gap12h": {
+      "n_units": 1159,
+      "mean_of_episode_means_bps": -34.65,
+      "t": -6.37
+    }
+  },
+  "LC_exhaustion": {
+    "n_raw": 5457,
+    "mean_raw_bps_LONG": 16.22,
+    "L1": {
+      "unit": "symbol|24h",
+      "n_units": 3157,
+      "size_mean": 1.73,
+      "size_median": 1.0,
+      "size_p95": 4.0,
+      "size_max": 15,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 25.12,
+      "dur_h_max": 71.33,
+      "pct_units_size1": 0.597,
+      "mean_of_episode_means_bps": 23.1,
+      "t": 4.63,
+      "size_weighted_check_bps": 16.22,
+      "corr_size_vs_perf": -0.044
+    },
+    "L2": {
+      "unit": "calendar day",
+      "n_units": 1034,
+      "size_mean": 5.28,
+      "size_median": 3.0,
+      "size_p95": 17.0,
+      "size_max": 76,
+      "dur_h_median": 7.29,
+      "dur_h_p95": 21.17,
+      "dur_h_max": 23.67,
+      "pct_units_size1": 0.246,
+      "mean_of_episode_means_bps": 11.31,
+      "t": 1.84,
+      "size_weighted_check_bps": 16.22,
+      "corr_size_vs_perf": -0.015
+    },
+    "L3": {
+      "unit": "cross-sym chain 4h",
+      "n_units": 1645,
+      "size_mean": 3.32,
+      "size_median": 2.0,
+      "size_p95": 10.0,
+      "size_max": 96,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 8.98,
+      "dur_h_max": 37.25,
+      "pct_units_size1": 0.495,
+      "mean_of_episode_means_bps": 22.54,
+      "t": 4.11,
+      "size_weighted_check_bps": 16.22,
+      "corr_size_vs_perf": -0.052
+    },
+    "L3b_gap1h": {
+      "n_units": 2825,
+      "mean_of_episode_means_bps": 1.87,
+      "t": 0.37
+    },
+    "L3c_gap12h": {
+      "n_units": 761,
+      "mean_of_episode_means_bps": 15.88,
+      "t": 2.66
+    }
+  },
+  "ALL": {
+    "n_raw": 38122,
+    "mean_raw_bps_LONG": -3.01,
+    "L1": {
+      "unit": "symbol|24h",
+      "n_units": 18333,
+      "size_mean": 2.08,
+      "size_median": 1.0,
+      "size_p95": 5.0,
+      "size_max": 26,
+      "dur_h_median": 0.0,
+      "dur_h_p95": 43.83,
+      "dur_h_max": 139.25,
+      "pct_units_size1": 0.523,
+      "mean_of_episode_means_bps": -2.55,
+      "t": -1.78,
+      "size_weighted_check_bps": -3.01,
+      "corr_size_vs_perf": -0.009
+    },
+    "L2": {
+      "unit": "calendar day",
+      "n_units": 1725,
+      "size_mean": 22.1,
+      "size_median": 17.0,
+      "size_p95": 60.0,
+      "size_max": 200,
+      "dur_h_median": 19.0,
+      "dur_h_p95": 23.25,
+      "dur_h_max": 23.92,
+      "pct_units_size1": 0.065,
+      "mean_of_episode_means_bps": -1.87,
+      "t": -0.69,
+      "size_weighted_check_bps": -3.01,
+      "corr_size_vs_perf": -0.011
+    },
+    "L3": {
+      "unit": "cross-sym chain 4h",
+      "n_units": 2691,
+      "size_mean": 14.17,
+      "size_median": 5.0,
+      "size_p95": 57.0,
+      "size_max": 312,
+      "dur_h_median": 3.5,
+      "dur_h_p95": 26.88,
+      "dur_h_max": 108.0,
+      "pct_units_size1": 0.231,
+      "mean_of_episode_means_bps": -0.97,
+      "t": -0.38,
+      "size_weighted_check_bps": -3.01,
+      "corr_size_vs_perf": -0.018
+    },
+    "L3b_gap1h": {
+      "n_units": 9331,
+      "mean_of_episode_means_bps": -5.17,
+      "t": -2.45
+    },
+    "L3c_gap12h": {
+      "n_units": 398,
+      "mean_of_episode_means_bps": 0.74,
+      "t": 0.13
+    }
+  }
+}

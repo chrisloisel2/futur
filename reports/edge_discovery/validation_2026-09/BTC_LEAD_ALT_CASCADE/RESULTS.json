@@ -1,0 +1,147 @@
+{
+  "candidate_id": "BTC_LEAD_ALT_CASCADE",
+  "family": "liquidation",
+  "verdict": "VALIDATED_FOR_FORWARD",
+  "validated_for_forward": true,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "UNCONFIRMABLE_IN_HORIZON"
+  ],
+  "discovery_net_bps": 33.0,
+  "validation_net_bps": 46.87,
+  "validation_net_bps_stress28": 32.87,
+  "pf": 1.782,
+  "n_raw": 2485,
+  "n_independent_L1": 2239,
+  "n_independent_L2": 261,
+  "n_independent_L3": 259,
+  "n_validation_independent": 259,
+  "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+  "t_stat_declustered": 3.315,
+  "bootstrap_ci95": [
+    18.52,
+    74.52
+  ],
+  "bootstrap_p05": 23.7,
+  "year_by_year": {
+    "2022": 24.04,
+    "2023": 79.88,
+    "2024": 107.96,
+    "2025": -40.0,
+    "2026": 48.26
+  },
+  "ex_best_year_net_bps": 22.9,
+  "worst_episode_bps": -536.12,
+  "max_drawdown_bps_cumule": -3302.38,
+  "historical_event_rate": "1.227/week",
+  "recent_event_rate": "1.154/week",
+  "conservative_event_rate": "1.154/week",
+  "n_required_statistical": 585.0,
+  "minimum_calendar_days": 60,
+  "eta_p50": "3337 days (~9.1 years)",
+  "eta_conservative": "3549 days (~9.7 years)",
+  "overlap_with_existing_live": {
+    "LIQ_CASCADE_REPEAT_V1": {
+      "n_arm_events": 2485,
+      "n_ledger_rows": 5675,
+      "n_matched_within_5min": 558,
+      "share_of_arm_in_ledger": 0.2245,
+      "ledger_window": [
+        "2020-10-08 17:55:00+00:00",
+        "2026-09-01 22:40:00+00:00"
+      ]
+    }
+  },
+  "validation_caveats": "Passe les 5 crit\u00e8res pr\u00e9enregistr\u00e9s dans les DEUX conventions de pond\u00e9ration (\u00e9pisode t=3.32 ; \u00e9v\u00e9nement t_cluster=1.85). SE na\u00efve surestim\u00e9e x2.2 -> preuve 12x plus mince que publi\u00e9e (259 \u00e9pisodes vs N_indep 3097 r\u00e9clam\u00e9), mais l'edge survit. 2025 est la seule ann\u00e9e n\u00e9gative (-40.0 bps) et c'est la plus r\u00e9cente compl\u00e8te : \u00e0 surveiller en priorit\u00e9. Hors 2024 (meilleure ann\u00e9e) t tombe \u00e0 1.41. ETA de reconfirmation ~9.7 ans -> monitoring forward sur survie signe/co\u00fbt/m\u00e9canisme, pas sur significativit\u00e9 fra\u00eeche.",
+  "recommended_next_step": "FREEZE_AND_LAUNCH_SHADOW",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/BTC_LEAD_ALT_CASCADE/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "arm_difference_shock_minus_noshock": {
+    "arm_A_gross_bps": 60.87,
+    "arm_B_gross_bps": 31.52,
+    "difference_bps": 29.35,
+    "welch_t": 2.035,
+    "welch_p_one_sided": 0.0214,
+    "n_episodes_A": 259,
+    "n_episodes_B": 2875,
+    "bootstrap_ci95": [
+      1.3,
+      58.22
+    ],
+    "bootstrap_P_diff_le_0": 0.0194
+  },
+  "event_weighted_cluster_robust": {
+    "shock": {
+      "label": "shock (q90 causal)",
+      "n_events": 2485,
+      "n_L3_episodes": 259,
+      "net14_event_weighted": 41.7,
+      "se_naive": 10.18,
+      "se_cluster_robust": 22.58,
+      "se_inflation_x": 2.22,
+      "t_naive": 4.097,
+      "t_cluster_robust": 1.847,
+      "bootstrap_ci95": [
+        -0.6,
+        86.26
+      ],
+      "bootstrap_p05": 5.72
+    },
+    "no_shock": {
+      "label": "no_shock",
+      "n_events": 24065,
+      "n_L3_episodes": 2875,
+      "net14_event_weighted": -6.93,
+      "se_naive": 1.692,
+      "se_cluster_robust": 3.759,
+      "se_inflation_x": 2.22,
+      "t_naive": -4.095,
+      "t_cluster_robust": -1.843,
+      "bootstrap_ci95": [
+        -14.22,
+        0.36
+      ],
+      "bootstrap_p05": -12.91
+    },
+    "shock_minus_noshock": {
+      "label": "shock \u2212 no_shock",
+      "difference_bps": 48.63,
+      "se_cluster_robust": 22.395,
+      "t_cluster_robust": 2.172,
+      "n_A": 2485,
+      "n_B": 24065,
+      "n_clusters": 2884
+    },
+    "down_shock": {
+      "label": "down-shock",
+      "n_events": 2491,
+      "n_L3_episodes": 254,
+      "net14_event_weighted": 41.67,
+      "se_naive": 10.123,
+      "se_cluster_robust": 22.784,
+      "se_inflation_x": 2.25,
+      "t_naive": 4.116,
+      "t_cluster_robust": 1.829,
+      "bootstrap_ci95": [
+        0.01,
+        88.65
+      ],
+      "bootstrap_p05": 6.14
+    },
+    "down_minus_rest": {
+      "label": "down-shock \u2212 reste",
+      "difference_bps": 48.61,
+      "se_cluster_robust": 22.533,
+      "t_cluster_robust": 2.157,
+      "n_A": 2491,
+      "n_B": 24059,
+      "n_clusters": 2884
+    }
+  },
+  "direction_control_signed_split": {
+    "down_shock": 46.36,
+    "up_shock": -8.94,
+    "note": "le m\u00e9canisme pr\u00e9dit que le choc BAISSIER porte l'effet \u2014 confirm\u00e9"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "candidate_id": "OI_COLLAPSE_BOUNCE",
+  "family": "liquidation",
+  "verdict": "NEEDS_MORE_RESEARCH",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "UNCONFIRMABLE_IN_HORIZON",
+    "CONDITIONING_ADDS_NOTHING"
+  ],
+  "discovery_net_bps": 247.0,
+  "validation_net_bps": 18.31,
+  "validation_net_bps_stress28": 4.31,
+  "pf": 1.311,
+  "n_raw": 2411,
+  "n_independent_L1": 1769,
+  "n_independent_L2": 771,
+  "n_independent_L3": 833,
+  "n_validation_independent": 833,
+  "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+  "t_stat_declustered": 2.744,
+  "bootstrap_ci95": [
+    5.49,
+    31.27
+  ],
+  "bootstrap_p05": 7.45,
+  "year_by_year": {
+    "2022": 7.96,
+    "2023": 53.36,
+    "2024": 18.45,
+    "2025": -10.45,
+    "2026": 22.23
+  },
+  "ex_best_year_net_bps": 9.13,
+  "worst_episode_bps": -580.61,
+  "max_drawdown_bps_cumule": -3597.21,
+  "historical_event_rate": "3.701/week",
+  "recent_event_rate": "4.692/week",
+  "conservative_event_rate": "3.701/week",
+  "n_required_statistical": 2698.5,
+  "minimum_calendar_days": 60,
+  "eta_p50": "5103 days (~14.0 years)",
+  "eta_conservative": "5103 days (~14.0 years)",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Le bras seul est positif et significatif dans les deux conventions (\u00e9pisode +18.31/t=2.74 ; \u00e9v\u00e9nement +27.61/t_cluster=2.47). MAIS le test obligatoire bras A - bras B au niveau \u00c9PISODE donne -0.39 bps (Welch -0.05) : conditionner sur l'effondrement d'OI n'apporte RIEN par rapport au fade inconditionnel de cascade, qui porte d\u00e9j\u00e0 cet edge. Au niveau \u00e9v\u00e9nement le contraste est significatif (+32.99, t=2.88) uniquement parce que la r\u00e9f\u00e9rence \u00e9v\u00e9nement est n\u00e9gative. Le +247 bps r\u00e9clam\u00e9 ne se reproduit \u00e0 aucune convention (max +50.79 sur la queue q05). ETA 14-28 ans.",
+  "recommended_next_step": "MORE_RESEARCH",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/OI_COLLAPSE_BOUNCE/RESULTS.json",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "arm_difference_episode": {
+    "arm_A_gross_bps": 32.31,
+    "arm_B_gross_bps": 32.7,
+    "difference_bps": -0.39,
+    "welch_t": -0.053,
+    "welch_p_one_sided": 0.5212,
+    "n_episodes_A": 833,
+    "n_episodes_B": 2842,
+    "bootstrap_ci95": [
+      -14.18,
+      13.72
+    ],
+    "bootstrap_P_diff_le_0": 0.528
+  },
+  "arm_difference_event_weighted": {
+    "label": "oi_ret_24h <= q10 causal A\u2212B",
+    "difference_bps": 32.99,
+    "se_cluster_robust": 11.452,
+    "t_cluster_robust": 2.88,
+    "n_A": 2411,
+    "n_B": 24139,
+    "n_clusters": 2884
+  },
+  "event_weighted_cluster_robust": {
+    "label": "oi_ret_24h <= q10 causal bras A",
+    "n_events": 2411,
+    "n_L3_episodes": 833,
+    "net14_event_weighted": 27.61,
+    "se_naive": 7.793,
+    "se_cluster_robust": 11.165,
+    "se_inflation_x": 1.43,
+    "t_naive": 3.543,
+    "t_cluster_robust": 2.473,
+    "bootstrap_ci95": [
+      6.0,
+      49.18
+    ],
+    "bootstrap_p05": 9.35
+  },
+  "perturbations": {
+    "P1_q05": 18.79,
+    "P2_oi_pctile_30d": 16.09
+  }
+}

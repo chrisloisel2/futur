@@ -1,0 +1,111 @@
+{
+  "candidate_id": "XSEC_RESIDUAL_MOMENTUM_14D",
+  "family": "cross_sectional",
+  "verdict": "REJECTED",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "UNCONFIRMABLE_IN_HORIZON"
+  ],
+  "discovery_net_bps": 64.8,
+  "validation_net_bps": 31.5,
+  "validation_net_bps_stress28": 17.5,
+  "pf": 1.178,
+  "n_raw": 4784,
+  "n_independent_L1": 4784,
+  "n_independent_L2": 166,
+  "n_independent_L3": 77,
+  "n_validation_independent": 77,
+  "l3_definition": "mois calendaire de la date de rebalancement",
+  "t_stat_declustered": 0.626,
+  "bootstrap_ci95": [
+    -68.4,
+    127.3
+  ],
+  "bootstrap_p05": -52.1,
+  "year_by_year": {
+    "2020": 167.11,
+    "2021": 82.12,
+    "2022": -133.56,
+    "2023": 6.65,
+    "2024": -17.7,
+    "2025": 97.51,
+    "2026": 74.02
+  },
+  "ex_best_year_net_bps": 12.93,
+  "worst_episode_bps": -4012.57,
+  "max_drawdown_bps_cumule": -5199.96,
+  "historical_event_rate": "0.230/week",
+  "recent_event_rate": "0.231/week",
+  "conservative_event_rate": "0.230/week",
+  "n_required_statistical": 4768.7,
+  "minimum_calendar_days": 182,
+  "eta_p50": "145047 days (~397.1 years)",
+  "eta_conservative": "145047 days (~397.1 years)",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Excess sur l'univers \u00e9ligible +31.50 net14 mais t_L3=0.63 et bootstrap p05=-52.10 : non significatif. Surtout, CE N'EST PAS UN FACTEUR DISTINCT : corr\u00e9lation de rang avec le momentum 14j brut = 0.951, corr\u00e9lation des rendements de portefeuille = 0.928, recouvrement Jaccard des jambes longues = 0.82. Le test appari\u00e9 (resid - brut) sur les m\u00eames dates donne -21.51 bps (t=-1.00) : le strip de beta n'AM\u00c9LIORE PAS le momentum brut, il le d\u00e9grade l\u00e9g\u00e8rement. Le +64.8 r\u00e9clam\u00e9 \u00e9tait mesur\u00e9 contre z\u00e9ro, pas contre l'univers.",
+  "recommended_next_step": "REJECT",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/XSEC_RESIDUAL_MOMENTUM_14D/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "same_factor_checks": {
+    "mom14_vs_mom7": {
+      "mean": 0.587,
+      "std": 0.162,
+      "n": 167
+    },
+    "mom14_vs_resid14": {
+      "mean": 0.951,
+      "std": 0.073,
+      "n": 166
+    },
+    "mom14_vs_amihud": {
+      "mean": -0.001,
+      "std": 0.181,
+      "n": 167
+    },
+    "resid14_vs_amihud": {
+      "mean": -0.003,
+      "std": 0.185,
+      "n": 166
+    },
+    "portfolio_return_corr": {
+      "mom14": {
+        "mom14": 1.0,
+        "resid14": 0.928,
+        "mom7": 0.819,
+        "amihud": 0.156
+      },
+      "resid14": {
+        "mom14": 0.928,
+        "resid14": 1.0,
+        "mom7": 0.821,
+        "amihud": 0.056
+      },
+      "mom7": {
+        "mom14": 0.819,
+        "resid14": 0.821,
+        "mom7": 1.0,
+        "amihud": 0.227
+      },
+      "amihud": {
+        "mom14": 0.156,
+        "resid14": 0.056,
+        "mom7": 0.227,
+        "amihud": 1.0
+      }
+    },
+    "n_common_periods": 166,
+    "jaccard_mom14_vs_resid14_long_leg": {
+      "mean": 0.82,
+      "n": 166
+    },
+    "paired_resid_minus_raw": {
+      "mean_bps": -21.51,
+      "t_L3": -0.997,
+      "n_periods": 166,
+      "n_L3": 77
+    }
+  },
+  "note_perturbation": "P7 (plancher $2M) donne t=2.02 mais une perturbation ne sauve jamais la PRIMARY (prereg \u00a77)."
+}

@@ -19,5 +19,5 @@ RUN pip install \
     pymongo==4.10.1
 
 WORKDIR /app
-EXPOSE 80
-CMD ["uvicorn", "frontend_pipeline.command_center:app", "--host", "0.0.0.0", "--port", "80"]
+EXPOSE 90
+CMD ["uvicorn", "frontend_pipeline.command_center:app", "--host", "0.0.0.0", "--port", "90"]

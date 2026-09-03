@@ -1,0 +1,47 @@
+[
+  {
+    "candidate_id": "w1_e01a",
+    "family": "CASCADE_THEN_VOLUME_ABSORPTION_CHAIN",
+    "economic_risk_factor": "distress persists (elevated next-day volume) after a cascade -- the fade is fighting ongoing forced flow, not a clean climax",
+    "mechanism": "cascade event with next-calendar-day vol_z in top quartile (distress persists) -> fade outcome on the ORIGINAL cascade",
+    "N_raw": 9478,
+    "N_independent": 4461,
+    "gross_bps": 1.2,
+    "net_bps": -12.8,
+    "net_bps_stress": -26.8,
+    "PF": 1.01,
+    "stability": "positive 5/6 yrs",
+    "distinctness": "Completes B18, named but not implemented in the pre-interruption plan (group_b_volume.py docstring). Genuine POST-event conditioning (next-day volume strictly after the cascade, no lookahead) -- the reverse-time direction from every other volume mechanism tested (w1_b01/b02/b03 all condition on volume BEFORE or confirming into the event)",
+    "horizon": "fwd_4h"
+  },
+  {
+    "candidate_id": "w1_e01b",
+    "family": "CASCADE_THEN_VOLUME_ABSORPTION_CHAIN",
+    "economic_risk_factor": "clean absorption (next-day volume normalizes quickly) after a cascade signals the flush is genuinely over",
+    "mechanism": "cascade event with next-calendar-day vol_z in bottom quartile (quiet, absorbed) -> fade outcome on the ORIGINAL cascade",
+    "N_raw": 9478,
+    "N_independent": 6342,
+    "gross_bps": 14.69,
+    "net_bps": 0.69,
+    "net_bps_stress": -13.31,
+    "PF": 1.24,
+    "stability": "positive 5/6 yrs",
+    "distinctness": "Contrast branch, same family as w1_e01a",
+    "horizon": "fwd_4h"
+  },
+  {
+    "candidate_id": "w1_e02",
+    "family": "CASCADE_THEN_PREMIUM_DISLOCATION_CHAIN",
+    "economic_risk_factor": "a forced-liquidation cascade leaves behind a perp-spot premium dislocation (overshoot) that itself mean-reverts",
+    "mechanism": "liq_cascade_dataset event -> premium_dataset extreme event (either kind) on same symbol within 6h -> fade outcome on the premium event",
+    "N_raw": 6290,
+    "N_independent": 4178,
+    "gross_bps": 16.49,
+    "net_bps": 2.49,
+    "net_bps_stress": -11.51,
+    "PF": 1.13,
+    "stability": "positive 5/6 yrs",
+    "distinctness": "Reverse-time direction from w1_c03/w1_c04 (PREMIUM -> CASCADE): here the cascade is the LEADING event and the premium dislocation is the downstream, tradeable outcome. Genuinely different causal ordering, not a restatement",
+    "horizon": "fwd_4h"
+  }
+]

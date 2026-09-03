@@ -1,0 +1,75 @@
+{
+  "candidate_id": "PREMIUM_EXTREME_THEN_CASCADE",
+  "family": "liquidation",
+  "verdict": "NEEDS_MORE_RESEARCH",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "THIN_EPISODE_EVIDENCE"
+  ],
+  "discovery_net_bps": 12.1,
+  "validation_net_bps": 19.69,
+  "validation_net_bps_stress28": 5.69,
+  "pf": 1.217,
+  "n_raw": 1760,
+  "n_independent_L1": 1640,
+  "n_independent_L2": 523,
+  "n_independent_L3": 533,
+  "n_validation_independent": 533,
+  "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+  "t_stat_declustered": 1.455,
+  "bootstrap_ci95": [
+    -6.12,
+    46.43
+  ],
+  "bootstrap_p05": -1.87,
+  "year_by_year": {
+    "2022": -36.37,
+    "2023": 41.97,
+    "2024": 118.41,
+    "2025": 11.8,
+    "2026": 5.45
+  },
+  "ex_best_year_net_bps": 7.86,
+  "worst_episode_bps": -1230.53,
+  "max_drawdown_bps_cumule": -4213.69,
+  "historical_event_rate": "3.059/week",
+  "recent_event_rate": "4.538/week",
+  "conservative_event_rate": "3.059/week",
+  "n_required_statistical": 6110.1,
+  "minimum_calendar_days": 60,
+  "eta_p50": "13982 days (~38.3 years)",
+  "eta_conservative": "13982 days (~38.3 years)",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Le seul candidat de la vague avec un contraste A-B positif dans les deux conventions (\u00e9pisode +21.41 ; \u00e9v\u00e9nement +32.99... t=3.08) MAIS un t d'\u00e9pisode de 1.455 sous le seuil 1.645. Population inconditionnelle PREM_CAPITULATION = 0 (\u00e9pisode +0.12) : c'est bien la QUEUE extr\u00eame qui porte l'effet, et le contr\u00f4le de direction est propre (queue haute nulle, -1.43). Grand \u00e9cart \u00e9pisode (+19.69) / \u00e9v\u00e9nement (+101.85) = quelques gros \u00e9pisodes dominent -> preuve concentr\u00e9e. \u00c0 reprendre avec une d\u00e9finition d'\u00e9pisode pr\u00e9enregistr\u00e9e et un N plus grand avant tout freeze.",
+  "recommended_next_step": "MORE_RESEARCH",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/PREMIUM_EXTREME_THEN_CASCADE/RESULTS.json",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "arm_difference_episode": {
+    "arm_A_gross_bps": 33.69,
+    "arm_B_gross_bps": 12.28,
+    "difference_bps": 21.41,
+    "welch_t": 1.529,
+    "welch_p_one_sided": 0.0634,
+    "n_episodes_A": 533,
+    "n_episodes_B": 2678,
+    "bootstrap_ci95": [
+      -5.65,
+      48.73
+    ],
+    "bootstrap_P_diff_le_0": 0.0586
+  },
+  "arm_difference_event_weighted": {
+    "label": "PREM_CAPITULATION prem_z_at<=q10 causal A\u2212B",
+    "difference_bps": 114.24,
+    "se_cluster_robust": 37.055,
+    "t_cluster_robust": 3.083,
+    "n_A": 1760,
+    "n_B": 16696,
+    "n_clusters": 2730
+  },
+  "unconditional_population": 0.12,
+  "direction_control_high_tail": -1.43,
+  "prem_fomo_arm": -17.56
+}

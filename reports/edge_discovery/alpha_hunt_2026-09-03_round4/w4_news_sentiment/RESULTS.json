@@ -1,0 +1,1015 @@
+{
+ "worker": "W4_NEWS_SENTIMENT",
+ "round": "alpha_hunt_2026-09-03_round4",
+ "date": "2026-09-03",
+ "axis": "news, sentiment, attention",
+ "headline": "AXIS KILLED. 13 mechanisms taken to the gate. Zero VALIDATED_FOR_FORWARD. The deep leg (F&G, 8.5y) is a coherent but unusable regime marker: the one real effect needs 20.8 years to confirm and adds +0.44bps as a gate on the project's own frozen alpha. The shallow leg (news_raw, 53 days) is killed on TIMING rather than on sample size: publication is a coincident, not leading, marker of volatility, and the collector is look-ahead biased by a median 21 minutes.",
+ "cost_convention": {
+  "net_bps": "gross - 14",
+  "stress": "gross - 28"
+ },
+ "declustering": {
+  "L1": "first event per symbol per 24h",
+  "L2": "distinct calendar days",
+  "L3": "F&G regime episode (maximal consecutive-day run in one tercile) for the deep block; title-token story cluster within 24h for the news block"
+ },
+ "mechanisms": [
+  {
+   "id": "M1",
+   "name": "F&G extreme-fear -> long BTC 1d (NEGATIVE CONTROL)",
+   "family": "sentiment_directional",
+   "data_depth": "2018-02 to 2026-07 (8.5y)",
+   "best_arm": "fg_pct365 <= 0.20",
+   "n_raw": 647,
+   "n_independent_L1": 647,
+   "n_independent_L2": 647,
+   "n_independent_L3": 94,
+   "gross_bps": 63.75,
+   "net_bps": 49.75,
+   "net_bps_stress28": 35.75,
+   "t_stat_declustered": 2.248,
+   "bootstrap_ci95": [
+    7.61,
+    94.35
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 60,
+     "n_ep": 10,
+     "net_bps": 39.69
+    },
+    "2019": {
+     "n_raw": 28,
+     "n_ep": 7,
+     "net_bps": 149.01
+    },
+    "2020": {
+     "n_raw": 48,
+     "n_ep": 2,
+     "net_bps": 50.42
+    },
+    "2021": {
+     "n_raw": 103,
+     "n_ep": 13,
+     "net_bps": 116.87
+    },
+    "2022": {
+     "n_raw": 105,
+     "n_ep": 18,
+     "net_bps": 41.06
+    },
+    "2024": {
+     "n_raw": 70,
+     "n_ep": 11,
+     "net_bps": 84.9
+    },
+    "2025": {
+     "n_raw": 138,
+     "n_ep": 20,
+     "net_bps": -13.17
+    },
+    "2026": {
+     "n_raw": 95,
+     "n_ep": 14,
+     "net_bps": 22.9
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2019,
+    "net_bps": 41.77,
+    "n_ep": 87,
+    "t": 2.11
+   },
+   "year_concentration_frac": 0.286,
+   "n_required": 585,
+   "event_rate_per_week_6m": 0.54,
+   "eta_forward_confirmation_days": 7605.0,
+   "eta_forward_confirmation_years": 20.82,
+   "arm_comparison": {
+    "fear_minus_greed_bps": 79.78,
+    "greed_arm_net_bps": -30.03,
+    "mid_arm_net_bps": -28.21,
+    "always_long_same_pop_net_bps": -4.57
+   },
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "why": "The single most publicly backtested crypto rule reproduces: +49.8bps net, t=2.25, positive in 7 of 8 years, ex-best-year +41.8 (t=2.11), concentration 0.29 - it is NOT a year artifact. It is nevertheless unusable: F&G regimes are slow, so 8.5 years yield only 94 independent regime episodes (~11/yr), and confirming a 50%-haircut edge forward needs 20.8 YEARS. It is also public knowledge, and M5b shows it cannot be separated from trailing drawdown on this sample.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M2",
+   "name": "M2_liq_cascade_repeat_x_fg (best arm: low_fear)",
+   "family": "sentiment_regime_conditioner",
+   "data_depth": "2021-01 to 2026-07 x F&G",
+   "best_arm": "low_fear",
+   "n_raw": 1764,
+   "n_independent_L1": 1117,
+   "n_independent_L2": 357,
+   "n_independent_L3": 140,
+   "gross_bps": 30.25,
+   "net_bps": 16.25,
+   "net_bps_stress28": 2.25,
+   "t_stat_declustered": 1.102,
+   "bootstrap_ci95": [
+    -12.38,
+    44.29
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 37,
+     "n_ep": 13,
+     "net_bps": 131.22
+    },
+    "2022": {
+     "n_raw": 348,
+     "n_ep": 38,
+     "net_bps": -7.04
+    },
+    "2023": {
+     "n_raw": 7,
+     "n_ep": 1,
+     "net_bps": -1.88
+    },
+    "2024": {
+     "n_raw": 417,
+     "n_ep": 20,
+     "net_bps": 43.52
+    },
+    "2025": {
+     "n_raw": 562,
+     "n_ep": 40,
+     "net_bps": -10.74
+    },
+    "2026": {
+     "n_raw": 393,
+     "n_ep": 28,
+     "net_bps": 14.22
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": 4.48,
+    "n_ep": 127,
+    "t": 0.33
+   },
+   "year_concentration_frac": 0.464,
+   "n_required": 3623,
+   "event_rate_per_week_6m": 1.08,
+   "eta_forward_confirmation_days": 23549.5,
+   "eta_forward_confirmation_years": 64.48,
+   "arm_comparison": {
+    "spread_low_minus_high": {
+     "comparison": "low_fear minus high_greed",
+     "net_A": 16.25,
+     "net_B": 2.04,
+     "spread_bps": 14.21,
+     "nA_L3": 140,
+     "nB_L3": 130
+    },
+    "delta_low_vs_uncond": {
+     "comparison": "low_fear minus unconditional",
+     "net_A": 16.25,
+     "net_B": 15.81,
+     "spread_bps": 0.44,
+     "nA_L3": 140,
+     "nB_L3": 425
+    }
+   },
+   "year_composition_max_share": 0.319,
+   "verdict": "DEAD",
+   "why": "Preregistered direction CONFIRMED but economically empty. low_fear 16.25 vs high_greed 2.04 (spread +14.21) looks like a gate until compared to the RIGHT baseline: the SAME population ungated pays 15.81. The F&G gate adds +0.44bps and throws away 68% of the events. Tercile ordering is non-monotone (low 16.25 < mid 26.95 > high 2.04) - the shape of noise, not a regime. t=1.10 on 140 episodes.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M3",
+   "name": "M3_short_squeeze_repeat_x_fg (best arm: low_fear)",
+   "family": "sentiment_regime_conditioner",
+   "data_depth": "2021-01 to 2026-07 x F&G",
+   "best_arm": "low_fear",
+   "n_raw": 1231,
+   "n_independent_L1": 843,
+   "n_independent_L2": 301,
+   "n_independent_L3": 142,
+   "gross_bps": 11.02,
+   "net_bps": -2.98,
+   "net_bps_stress28": -16.98,
+   "t_stat_declustered": -0.23,
+   "bootstrap_ci95": [
+    -26.45,
+    23.64
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 37,
+     "n_ep": 15,
+     "net_bps": 17.52
+    },
+    "2022": {
+     "n_raw": 328,
+     "n_ep": 40,
+     "net_bps": -11.93
+    },
+    "2023": {
+     "n_raw": 11,
+     "n_ep": 1,
+     "net_bps": -88.15
+    },
+    "2024": {
+     "n_raw": 284,
+     "n_ep": 22,
+     "net_bps": -34.89
+    },
+    "2025": {
+     "n_raw": 364,
+     "n_ep": 36,
+     "net_bps": 6.95
+    },
+    "2026": {
+     "n_raw": 207,
+     "n_ep": 28,
+     "net_bps": 14.14
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": -5.41,
+    "n_ep": 127,
+    "t": -0.41
+   },
+   "year_concentration_frac": 0.342,
+   "n_required": 84574,
+   "event_rate_per_week_6m": 1.08,
+   "eta_forward_confirmation_days": 549731.0,
+   "eta_forward_confirmation_years": 1505.08,
+   "arm_comparison": {
+    "spread_low_minus_high": {
+     "comparison": "low_fear minus high_greed",
+     "net_A": -2.98,
+     "net_B": -21.19,
+     "spread_bps": 18.21,
+     "nA_L3": 142,
+     "nB_L3": 127
+    },
+    "delta_low_vs_uncond": {
+     "comparison": "low_fear minus unconditional",
+     "net_A": -2.98,
+     "net_B": -12.73,
+     "spread_bps": 9.75,
+     "nA_L3": 142,
+     "nB_L3": 407
+    }
+   },
+   "year_composition_max_share": 0.296,
+   "verdict": "DEAD",
+   "why": "Every arm is net-negative under episode-level declustering (low -2.98, mid -14.96, high -21.19). Spread +18.21 is in the predicted direction but no arm clears cost, so there is nothing to gate. See the round-3 A4 cross-check below: the underlying base signal is itself fragile.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M4",
+   "name": "M4_cascade_onset_x_fg (best arm: mid)",
+   "family": "sentiment_regime_conditioner",
+   "data_depth": "2021-01 to 2026-07 x F&G",
+   "best_arm": "mid",
+   "n_raw": 5544,
+   "n_independent_L1": 5544,
+   "n_independent_L2": 531,
+   "n_independent_L3": 172,
+   "gross_bps": 7.35,
+   "net_bps": -6.65,
+   "net_bps_stress28": -20.65,
+   "t_stat_declustered": -0.704,
+   "bootstrap_ci95": [
+    -24.72,
+    12.89
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 79,
+     "n_ep": 38,
+     "net_bps": 28.51
+    },
+    "2022": {
+     "n_raw": 1239,
+     "n_ep": 47,
+     "net_bps": -10.19
+    },
+    "2023": {
+     "n_raw": 1031,
+     "n_ep": 13,
+     "net_bps": -39.61
+    },
+    "2024": {
+     "n_raw": 945,
+     "n_ep": 30,
+     "net_bps": -21.5
+    },
+    "2025": {
+     "n_raw": 1485,
+     "n_ep": 36,
+     "net_bps": -19.32
+    },
+    "2026": {
+     "n_raw": 765,
+     "n_ep": 10,
+     "net_bps": 0.54
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": -16.62,
+    "n_ep": 134,
+    "t": -1.8
+   },
+   "year_concentration_frac": 0.316,
+   "n_required": 10899,
+   "event_rate_per_week_6m": 0.38,
+   "eta_forward_confirmation_days": 198361.8,
+   "eta_forward_confirmation_years": 543.09,
+   "arm_comparison": {
+    "spread_low_minus_high": {
+     "comparison": "low_fear minus high_greed",
+     "net_A": -14.95,
+     "net_B": -12.57,
+     "spread_bps": -2.38,
+     "nA_L3": 109,
+     "nB_L3": 97
+    },
+    "delta_low_vs_uncond": {
+     "comparison": "low_fear minus unconditional",
+     "net_A": -14.95,
+     "net_B": -10.56,
+     "spread_bps": -4.39,
+     "nA_L3": 109,
+     "nB_L3": 378
+    }
+   },
+   "year_composition_max_share": 0.268,
+   "verdict": "DEAD",
+   "why": "Exogenous sentiment does NOT rescue the onset null that market-internal regimes could not rescue (round 3 A1/A2/T1.9). All three arms net-negative; low_fear minus high_greed = -2.38, i.e. the wrong sign versus the preregistered prediction. Clean corroboration of the existing DEAD.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M6",
+   "name": "M6_fg_change_x_liq_repeat (best arm: flat)",
+   "family": "sentiment_regime_conditioner",
+   "data_depth": "2021-01 to 2026-07 x F&G",
+   "best_arm": "flat",
+   "n_raw": 3565,
+   "n_independent_L1": 2324,
+   "n_independent_L2": 710,
+   "n_independent_L3": 304,
+   "gross_bps": 33.74,
+   "net_bps": 19.74,
+   "net_bps_stress28": 5.74,
+   "t_stat_declustered": 2.339,
+   "bootstrap_ci95": [
+    3.3,
+    35.63
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 29,
+     "n_ep": 11,
+     "net_bps": 24.21
+    },
+    "2022": {
+     "n_raw": 530,
+     "n_ep": 64,
+     "net_bps": -21.13
+    },
+    "2023": {
+     "n_raw": 976,
+     "n_ep": 62,
+     "net_bps": 45.77
+    },
+    "2024": {
+     "n_raw": 1028,
+     "n_ep": 66,
+     "net_bps": 41.24
+    },
+    "2025": {
+     "n_raw": 633,
+     "n_ep": 68,
+     "net_bps": 19.01
+    },
+    "2026": {
+     "n_raw": 369,
+     "n_ep": 33,
+     "net_bps": 7.15
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "net_bps": 13.07,
+    "n_ep": 242,
+    "t": 1.34
+   },
+   "year_concentration_frac": 0.326,
+   "n_required": 1745,
+   "event_rate_per_week_6m": 1.27,
+   "eta_forward_confirmation_days": 9623.9,
+   "eta_forward_confirmation_years": 26.35,
+   "arm_comparison": {
+    "spread_deteriorating_minus_improving": {
+     "comparison": "deteriorating minus improving",
+     "net_A": 10.97,
+     "net_B": -6.97,
+     "spread_bps": 17.94,
+     "nA_L3": 90,
+     "nB_L3": 88
+    }
+   },
+   "year_composition_max_share": null,
+   "verdict": "DEAD",
+   "why": "The best arm is 'sentiment NOT changing' (+19.74, t=2.34) - which is just the majority of the population (3565/5442) and therefore not a signal. Both extreme arms fail: deteriorating +10.97 (t=0.52), improving -6.97 (t=-0.38). Sentiment momentum carries no more than sentiment level.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M8",
+   "name": "M8_fg_vs_lsr_divergence (best arm: other)",
+   "family": "sentiment_regime_conditioner",
+   "data_depth": "2021-01 to 2026-07 x F&G",
+   "best_arm": "other",
+   "n_raw": 3681,
+   "n_independent_L1": 2277,
+   "n_independent_L2": 676,
+   "n_independent_L3": 211,
+   "gross_bps": 38.14,
+   "net_bps": 24.14,
+   "net_bps_stress28": 10.14,
+   "t_stat_declustered": 2.207,
+   "bootstrap_ci95": [
+    4.36,
+    46.93
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 31,
+     "n_ep": 6,
+     "net_bps": 90.72
+    },
+    "2022": {
+     "n_raw": 393,
+     "n_ep": 43,
+     "net_bps": -43.32
+    },
+    "2023": {
+     "n_raw": 1222,
+     "n_ep": 66,
+     "net_bps": 47.84
+    },
+    "2024": {
+     "n_raw": 1210,
+     "n_ep": 46,
+     "net_bps": 19.41
+    },
+    "2025": {
+     "n_raw": 569,
+     "n_ep": 35,
+     "net_bps": 39.12
+    },
+    "2026": {
+     "n_raw": 256,
+     "n_ep": 15,
+     "net_bps": 66.16
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": 22.19,
+    "n_ep": 205,
+    "t": 1.98
+   },
+   "year_concentration_frac": 0.358,
+   "n_required": 1360,
+   "event_rate_per_week_6m": 0.58,
+   "eta_forward_confirmation_days": 16501.3,
+   "eta_forward_confirmation_years": 45.18,
+   "arm_comparison": {
+    "spread_divergent_minus_aligned": {
+     "comparison": "divergent minus aligned",
+     "net_A": -16.74,
+     "net_B": 9.45,
+     "spread_bps": -26.19,
+     "nA_L3": 182,
+     "nB_L3": 202
+    }
+   },
+   "year_composition_max_share": null,
+   "verdict": "DEAD",
+   "why": "HYPOTHESIS REJECTED IN DIRECTION. The brief's most-favoured angle - talk disagreeing with money - is the WORST arm: divergent (fear + crowded long) -16.74, aligned +9.45, neither-fear +24.14. Spread divergent-minus-aligned = -26.19. On the long-history positioning proxy (ls_ratio_z, 1.2% NaN, 2021-2026) divergence destroys the edge rather than sharpening it.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M7",
+   "name": "F&G vs funding divergence (best arm: aligned_fear)",
+   "family": "sentiment_vs_positioning",
+   "data_depth": "2021-2026 but funding_z30 is 76% NaN",
+   "best_arm": "aligned_fear",
+   "n_raw": 229,
+   "n_independent_L1": 158,
+   "n_independent_L2": 106,
+   "n_independent_L3": 89,
+   "gross_bps": 54.33,
+   "net_bps": 40.33,
+   "net_bps_stress28": 26.33,
+   "t_stat_declustered": 2.312,
+   "bootstrap_ci95": [
+    9.3,
+    76.46
+   ],
+   "year_by_year": {
+    "2021": {
+     "n_raw": 7,
+     "n_ep": 5,
+     "net_bps": 76.48
+    },
+    "2022": {
+     "n_raw": 70,
+     "n_ep": 21,
+     "net_bps": 83.65
+    },
+    "2023": {
+     "n_raw": 2,
+     "n_ep": 1,
+     "net_bps": 44.8
+    },
+    "2024": {
+     "n_raw": 43,
+     "n_ep": 13,
+     "net_bps": 29.21
+    },
+    "2025": {
+     "n_raw": 63,
+     "n_ep": 30,
+     "net_bps": 12.62
+    },
+    "2026": {
+     "n_raw": 44,
+     "n_ep": 19,
+     "net_bps": 34.04
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2022,
+    "net_bps": 26.95,
+    "n_ep": 68,
+    "t": 1.37
+   },
+   "year_concentration_frac": 0.489,
+   "n_required": 523,
+   "event_rate_per_week_6m": 0.73,
+   "eta_forward_confirmation_days": 5009.8,
+   "eta_forward_confirmation_years": 13.72,
+   "arm_comparison": {
+    "comparison": "divergent minus aligned",
+    "net_A": -29.06,
+    "net_B": 40.33,
+    "spread_bps": -69.39,
+    "nA_L3": 83,
+    "nB_L3": 89
+   },
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "why": "HYPOTHESIS REJECTED IN DIRECTION, same as M8. The DIVERGENT arm (fear in the talk, longs still paying funding) is -29.06; the ALIGNED arm (fear in the talk AND in the money) is +40.33, t=2.31. Spread = -69.39, i.e. agreement pays and disagreement does not - the exact opposite of the preregistered hypothesis. The aligned arm survives cost 28 (+26.33) but rests on 229 raw / 89 episodes carved out of a base where funding is 76% missing, and its ETA is 13.7 years.",
+   "gate_box_missing": "funding_z30 coverage (76% NaN) + ETA 13.7y"
+  },
+  {
+   "id": "M5a",
+   "name": "INCREMENTALITY: is F&G laundered volatility?",
+   "family": "diagnostic",
+   "data_depth": "2021-2026",
+   "result": {
+    "unconditional_fg_spread_bps": 14.21,
+    "mean_within_vol_bucket_fg_spread_bps": 11.96,
+    "retention_frac": 0.842,
+    "per_vol_bucket_fg_spread": {
+     "vol_low": 39.4,
+     "vol_mid": -24.18,
+     "vol_high": 20.67
+    },
+    "reverse_vol_spread_within_each_fg_bucket": {
+     "low_fear": {
+      "vol_high_net": 50.05,
+      "vol_low_net": 8.61,
+      "spread": 41.44
+     },
+     "mid": {
+      "vol_high_net": 102.94,
+      "vol_low_net": 15.3,
+      "spread": 87.64
+     },
+     "high_greed": {
+      "vol_high_net": 29.38,
+      "vol_low_net": -30.79,
+      "spread": 60.17
+     }
+    }
+   },
+   "verdict": "DEAD",
+   "why": "F&G is not merely laundered vol (retention 0.84), but that is irrelevant because what survives is incoherent: the within-vol-bucket F&G spread SIGN-FLIPS across buckets (+39.4 / -24.2 / +20.7). The reverse test is decisive - the btc_vol spread stays large and same-signed inside EVERY F&G bucket (+41.4 / +87.6 / +60.2). Round 3's T1.1 volatility gate is real and robust to F&G; F&G is not robust to volatility. Per preregistered veto rule 6, M2/M3 are capped.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M5b",
+   "name": "INCREMENTALITY: is 'buy fear' just buying a drawdown?",
+   "family": "diagnostic",
+   "data_depth": "2018-2026",
+   "result": {
+    "dd_deep": {
+     "fear_net": 34.74,
+     "greed_net": -138.77,
+     "uncond_net": -24.03,
+     "fear_L3": 37,
+     "greed_L3": 5,
+     "spread": 173.51
+    },
+    "dd_mid": {
+     "fear_net": 26.99,
+     "greed_net": 94.93,
+     "uncond_net": 10.01,
+     "fear_L3": 48,
+     "greed_L3": 10,
+     "spread": -67.94
+    },
+    "dd_shallow": {
+     "fear_net": -27.53,
+     "greed_net": -25.05,
+     "uncond_net": -19.66,
+     "fear_L3": 8,
+     "greed_L3": 55,
+     "spread": -2.48
+    },
+    "_unconditional_spread": 70.46,
+    "_mean_within_dd_spread": 34.36,
+    "_retention_frac": 0.488,
+    "_drawdown_only_spread_deep_minus_shallow": -4.37,
+    "fg_r2_on_trailing_price": {
+     "r2_fg_pct365_on_trail30d_vol30d_dd365": 0.475,
+     "corr_fg_vs_trail30d": 0.664,
+     "corr_fg_vs_dd365": 0.423,
+     "corr_fg_vs_trailvol30": -0.233,
+     "n": 2468
+    }
+   },
+   "verdict": "DATA_LIMITED",
+   "why": "F&G is 47.5% mechanically explained by trailing price alone (R^2 of fg_pct365 on 30d return + 30d vol + 365d drawdown; corr with 30d return = 0.664). Controlling for drawdown halves the fear-vs-greed spread (retention 0.49) and makes it sign-unstable across buckets (+173.5 / -67.9 / -2.5). But the off-diagonal cells are nearly empty - greed inside a deep drawdown is 5 episodes, fear inside a shallow one is 8 - so F&G and drawdown are too collinear on 8.5 years of DAILY data to be separated at all. Honest answer: not identified. Trailing drawdown alone does NOT reproduce the effect (-4.37), so it is not pure mean-reversion either.",
+   "gate_box_missing": "identification - needs an instrument for sentiment orthogonal to price"
+  },
+  {
+   "id": "M10",
+   "name": "PIT AUDIT of data/news_raw (infrastructure finding)",
+   "family": "data_integrity",
+   "data_depth": "all 5,793 rows",
+   "result": {
+    "n_rows_total": 5793,
+    "n_unique_url_hash": 2390,
+    "ts_column_semantics": "SOURCE-DECLARED pubDate (collector `_parse_rss` uses parsedate_to_datetime(pubDate)); NOT collection time. No collection-time column is persisted.",
+    "collection_time_recovery": "file mtime of the parquet part (written via tmp.replace at fetch time)",
+    "filename_vs_mtime_agreement_sec_abs_median": 0.0,
+    "declared_range": [
+     "2025-12-29 16:10:19+00:00",
+     "2026-09-03 08:00:00.960043+00:00"
+    ],
+    "collect_range": [
+     "2026-07-10 20:58:58.591575861+00:00",
+     "2026-09-03 08:00:01.151427746+00:00"
+    ],
+    "lag_declared_to_collect_min": {
+     "p05": 0.0,
+     "p25": 0.0,
+     "median": 0.0,
+     "p75": 14.2,
+     "p95": 120.7,
+     "max_days": 193.5
+    },
+    "lag_RSS_only_min": {
+     "n": 2052,
+     "median": 21.3,
+     "p25": 12.5,
+     "p75": 30.9,
+     "p95": 1871.3,
+     "frac_lag_gt_30min": 0.283,
+     "frac_lag_gt_120min": 0.142
+    },
+    "backlog_rows_declared_gt_7d_before_collection": 20,
+    "continuous_coverage_days": 53,
+    "per_source_counts": {
+     "coingecko_trending": 3741,
+     "cointelegraph": 985,
+     "decrypt": 621,
+     "bitcoinmagazine": 253,
+     "newsbtc": 193
+    }
+   },
+   "verdict": "DATA_LIMITED",
+   "pit_stamp": "PIT_UNVERIFIED",
+   "why": "CONFIRMED DEFECT. `collector._parse_rss` sets ts = parsedate_to_datetime(pubDate) - the SOURCE-DECLARED time - and no collection-time column is persisted, while the hive partition key is derived from that same declared time. Any backtest anchored on `ts` is look-ahead biased by a MEDIAN of 21.3 minutes; 28.3% of RSS rows arrive >30min after their own timestamp, 14.2% >2h, p95 = 31 hours, max 193 days. Collection time is recoverable from the parquet mtime (filename HHMMSS agrees to a median 0.0s). Real continuous coverage is 53 collection days, not the 74 partitions the directory listing suggests.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M9",
+   "name": "News -> price latency (THE KILL TEST) + random-time placebo",
+   "family": "news_timing",
+   "data_depth": "2026-07-10 to 2026-09-03, 53 days",
+   "pit_stamp": "PIT_OK (anchored on recovered collection time, not on the declared ts)",
+   "result": {
+    "n_raw_btc_stories": 755,
+    "n_independent_story_L3": 651,
+    "cluster_ratio": 1.16,
+    "placebo_n_stories": 272,
+    "placebo_draws": 1000,
+    "excess_abs_move_over_placebo_bps": {
+     "declared_pubDate": {
+      "[-30,0]": 3.8,
+      "[0,30]": 4.83,
+      "[0,60]": 6.42,
+      "[0,120]": 7.16
+     },
+     "collection_time": {
+      "[-30,0]": 5.42,
+      "[0,30]": 4.71,
+      "[0,60]": 3.52,
+      "[0,120]": 8.95
+     }
+    },
+    "post_over_pre_excess_ratio": {
+     "declared_pubDate": 1.27,
+     "collection_time": 0.87
+    },
+    "signed_return_after_bps": {
+     "declared_pubDate": 2.28,
+     "collection_time": 3.95
+    },
+    "full_window_profile": {
+     "declared_pubDate": {
+      "[-360,-120]": {
+       "n": 651,
+       "mean_abs_bps": 20.6,
+       "mean_signed_bps": 3.5,
+       "t_signed": 2.1
+      },
+      "[-120,-30]": {
+       "n": 651,
+       "mean_abs_bps": 14.4,
+       "mean_signed_bps": 0.0,
+       "t_signed": 0.01
+      },
+      "[-30,0]": {
+       "n": 651,
+       "mean_abs_bps": 8.1,
+       "mean_signed_bps": -0.5,
+       "t_signed": -0.75
+      },
+      "[0,30]": {
+       "n": 651,
+       "mean_abs_bps": 8.4,
+       "mean_signed_bps": 1.0,
+       "t_signed": 1.42
+      },
+      "[0,60]": {
+       "n": 651,
+       "mean_abs_bps": 11.8,
+       "mean_signed_bps": 1.5,
+       "t_signed": 1.57
+      },
+      "[0,120]": {
+       "n": 651,
+       "mean_abs_bps": 16.0,
+       "mean_signed_bps": 0.9,
+       "t_signed": 0.66
+      },
+      "[0,360]": {
+       "n": 651,
+       "mean_abs_bps": 25.5,
+       "mean_signed_bps": -1.2,
+       "t_signed": -0.56
+      }
+     },
+     "collection_time": {
+      "[-360,-120]": {
+       "n": 651,
+       "mean_abs_bps": 20.1,
+       "mean_signed_bps": 3.8,
+       "t_signed": 2.21
+      },
+      "[-120,-30]": {
+       "n": 651,
+       "mean_abs_bps": 14.8,
+       "mean_signed_bps": -2.4,
+       "t_signed": -1.94
+      },
+      "[-30,0]": {
+       "n": 651,
+       "mean_abs_bps": 8.8,
+       "mean_signed_bps": 1.1,
+       "t_signed": 1.57
+      },
+      "[0,30]": {
+       "n": 651,
+       "mean_abs_bps": 8.4,
+       "mean_signed_bps": 1.6,
+       "t_signed": 2.24
+      },
+      "[0,60]": {
+       "n": 651,
+       "mean_abs_bps": 10.5,
+       "mean_signed_bps": -0.2,
+       "t_signed": -0.21
+      },
+      "[0,120]": {
+       "n": 651,
+       "mean_abs_bps": 16.4,
+       "mean_signed_bps": -0.5,
+       "t_signed": -0.35
+      },
+      "[0,360]": {
+       "n": 651,
+       "mean_abs_bps": 24.4,
+       "mean_signed_bps": -1.2,
+       "t_signed": -0.59
+      }
+     }
+    }
+   },
+   "verdict": "DEAD",
+   "why": "The decisive result of this worker. Crypto news stories DO sit in volatile moments - the absolute BTC move around a story beats a 1000-draw random-time placebo by ~4-9bps, p<0.001 in every window. But that excess is SYMMETRIC about the timestamp: +3.80bps in the 30min BEFORE the declared publication vs +4.83 in the 30min after (ratio 1.27), and at the collection anchor - the only time a system could actually act - +5.42 BEFORE vs +4.71 AFTER (ratio 0.87, i.e. MORE of the move is already gone than remains). Publication is a COINCIDENT marker of volatility, not a leading one. Signed returns after publication are +2.3 to +4.0bps against a 14bps cost floor and flip sign between anchors. The feed describes a move already in progress; adding the 21-minute median collection lag puts a real system strictly on the late side of it.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "M11",
+   "name": "Attention COUNT (not polarity) -> forward vol / direction",
+   "family": "attention",
+   "data_depth": "53 days, one regime",
+   "pit_stamp": "PIT_OK (anchored on recovered collection time)",
+   "best_arm": "att_z >= 1.0",
+   "n_raw": 38,
+   "n_independent_L1": 38,
+   "n_independent_L2": 13,
+   "n_independent_L3": 13,
+   "gross_bps": 112.82,
+   "net_bps": 98.82,
+   "net_bps_stress28": 84.82,
+   "t_stat_declustered": 0.929,
+   "bootstrap_ci95": [
+    -79.15,
+    315.46
+   ],
+   "year_by_year": {
+    "2026": {
+     "n_raw": 38,
+     "n_ep": 13,
+     "net_bps": 98.82
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": null,
+    "net_bps": null,
+    "n_ep": null,
+    "t": null
+   },
+   "year_concentration_frac": 1.0,
+   "n_required": 474,
+   "event_rate_per_week_6m": 0.5,
+   "eta_forward_confirmation_days": 6636.0,
+   "eta_forward_confirmation_years": 18.17,
+   "result": {
+    "vol_test": {
+     "hypothesis": "attention predicts VOL (plausible)",
+     "spike_n": 38,
+     "spike_rv_ratio_mean": 0.915,
+     "calm_n": 308,
+     "calm_rv_ratio_mean": 1.005,
+     "spread": -0.09,
+     "t_on_daily_means": 0.08
+    },
+    "direction_test": {
+     "hypothesis": "attention does NOT predict direction (implausible that it would)",
+     "spike_net_bps": 21.0,
+     "calm_net_bps": -25.53,
+     "spread_bps": 46.53,
+     "t_spike_daymeans": 1.06
+    },
+    "n_symbol_days": 346,
+    "n_distinct_days_L2": 20
+   },
+   "verdict": "DATA_LIMITED",
+   "why": "Preregistered as the more robust half of the axis, and it fails on its OWN hypothesis: attention spikes precede LOWER relative vol (rv ratio 0.915 vs 1.005 calm, spread -0.09, t=0.08), so the plausible leg is flat. The direction leg shows +98.8bps net but on 13 independent days with a bootstrap CI of [-79, +315] and ETA 18.2 years. After the causal 14d z-window warm-up only 20 usable days survive. Nothing is claimable.",
+   "gate_box_missing": "history - needs >=8 months and multiple F&G regimes"
+  },
+  {
+   "id": "M12",
+   "name": "Attention DISPERSION (HHI / entropy) as a regime marker",
+   "family": "attention",
+   "data_depth": "19 usable days",
+   "pit_stamp": "PIT_OK (anchored on recovered collection time)",
+   "result": {
+    "n_days": 19,
+    "hhi_median": 0.474,
+    "concentrated_fwd_rvratio": 1.065,
+    "dispersed_fwd_rvratio": 0.887,
+    "rvratio_spread": 0.179,
+    "concentrated_fwd_btc_net_bps": -55.32,
+    "dispersed_fwd_btc_net_bps": 15.23,
+    "btc_spread_bps": -70.55,
+    "t_conc_btc": -0.93
+   },
+   "verdict": "DATA_LIMITED",
+   "why": "19 usable days. Concentrated-attention days precede a higher forward vol ratio (1.065 vs 0.887) which is the plausible sign, and a worse forward BTC return (-55.3 vs +15.2 net, spread -70.6) - but t=-0.93 on 19 observations inside a single extreme-fear regime. Reporting the sign only; there is no test here.",
+   "gate_box_missing": "history"
+  },
+  {
+   "id": "M13",
+   "name": "CoinGecko trending ENTRY -> forward 1d return",
+   "family": "attention",
+   "data_depth": "53 days",
+   "pit_stamp": "PIT_OK (anchored on recovered collection time)",
+   "best_arm": "first appearance in >=7d",
+   "n_raw": 24,
+   "n_independent_L1": 22,
+   "n_independent_L2": 9,
+   "n_independent_L3": 9,
+   "gross_bps": -133.73,
+   "net_bps": -147.73,
+   "net_bps_stress28": -161.73,
+   "t_stat_declustered": -2.396,
+   "bootstrap_ci95": [
+    -271.07,
+    -48.43
+   ],
+   "year_by_year": {
+    "2026": {
+     "n_raw": 24,
+     "n_ep": 9,
+     "net_bps": -147.73
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": null,
+    "net_bps": null,
+    "n_ep": null,
+    "t": null
+   },
+   "year_concentration_frac": 1.0,
+   "n_required": 50,
+   "event_rate_per_week_6m": 0.35,
+   "eta_forward_confirmation_days": 1011.1,
+   "eta_forward_confirmation_years": 2.77,
+   "result": {
+    "n_entries_raw": 24,
+    "n_distinct_days": 9,
+    "n_distinct_symbols": 18,
+    "raw_net_bps": -99.77,
+    "excess_vs_peer_bps": -38.25,
+    "t_excess_daymeans": -0.76
+   },
+   "verdict": "DATA_LIMITED",
+   "why": "Directionally consistent with the preregistered 'attention is a sell' prior: entering the CoinGecko trending list is followed by -147.7bps net, t=-2.40, and -38.3bps excess versus same-day peers. But 24 entries on 9 independent days in one regime, and the tradeable version is a SHORT on small-cap alts where the 14bps cost model does not apply. Recorded as the single most interesting lead in the shallow block, not as a result.",
+   "gate_box_missing": "N (9 episodes), regime coverage, and a cost model for small-cap alt shorts"
+  },
+  {
+   "id": "X1",
+   "name": "CROSS-CHECK: round-3 A4 SHORT_SQUEEZE repeat under episode weighting",
+   "family": "cross_check",
+   "data_depth": "2021-2026",
+   "result": {
+    "round3_reported_net_bps_gap4h_event_weighted": 11.14,
+    "reproduced_exactly": true,
+    "n_round3": 2381,
+    "by_year_net_bps": {
+     "2021": 9.38,
+     "2022": -62.01,
+     "2023": -8.8,
+     "2024": 29.51,
+     "2025": 63.96,
+     "2026": 2.48
+    },
+    "net_bps_under_fg_episode_equal_weighting": -12.73
+   },
+   "verdict": "REGIME_DEPENDENT",
+   "why": "Round 3's A4 baseline (+11.14bps, N=2381, gap>=4h) reproduces EXACTLY here, which validates both pipelines. But it is carried entirely by 2024 (+29.5) and 2025 (+64.0) against 2022 (-62.0) and 2023 (-8.8), and it flips to -12.73 when independent episodes are equal-weighted instead of events. Handing this back to whoever owns A4: it is REGIME_DEPENDENT, not a stable base to build a gate on.",
+   "gate_box_missing": null
+  },
+  {
+   "id": "X2",
+   "name": "INFRA: the Fear & Greed feed is dead in production",
+   "family": "infrastructure",
+   "data_depth": "n/a",
+   "result": {
+    "systemd_unit_description": "Futur news/social collector (RSS + F&G + CoinGecko, sources publiques)",
+    "actually_fetched_by_collect_once": [
+     "cointelegraph",
+     "decrypt",
+     "bitcoinmagazine",
+     "newsbtc",
+     "coingecko_trending"
+    ],
+    "fear_greed_fetch_in_collector": false,
+    "fear_greed_last_value_date": "2026-07-10",
+    "days_stale_as_of_2026_09_03": 55,
+    "only_producer": "scripts/backfill_fear_greed.py (one-shot, not scheduled)"
+   },
+   "verdict": "DEAD",
+   "why": "futur-news.service advertises 'RSS + F&G + CoinGecko' but collect_once() fetches only RSS and CoinGecko trending - there is no Fear & Greed call anywhere in the collector. data/news_backfill/fear_greed.parquet is produced solely by a one-shot backfill script that last ran 2026-07-10, so the series has been 55 days stale and silently so. Anything that reads it as a live feature is reading a frozen file. Cheap fix; reported, not applied (src/institutional/ is read-only for this worker).",
+   "gate_box_missing": null
+  }
+ ]
+}

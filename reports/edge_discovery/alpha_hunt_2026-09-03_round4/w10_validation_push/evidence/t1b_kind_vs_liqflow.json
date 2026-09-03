@@ -1,0 +1,24 @@
+{
+  "window": "+/-30min",
+  "n_events_matched": 1107,
+  "detector": "src/institutional/engines/liq_cascade/detector.py (frozen, read-only import)",
+  "period": [
+    "2026-07-05 00:45:00+00:00",
+    "2026-09-01 22:40:00+00:00"
+  ],
+  "LONG_CASCADE": {
+    "n": 843,
+    "usd_weighted_short_liq_share": 0.0814,
+    "mean_event_short_liq_share": 0.1208,
+    "median_event_short_liq_share": 0.0,
+    "pct_events_majority_short_liq": 0.1139
+  },
+  "SHORT_SQUEEZE": {
+    "n": 264,
+    "usd_weighted_short_liq_share": 0.9116,
+    "mean_event_short_liq_share": 0.757,
+    "median_event_short_liq_share": 0.9704,
+    "pct_events_majority_short_liq": 0.7841
+  },
+  "welch_t_shortshare_SQUEEZE_minus_CASCADE": 26.16
+}

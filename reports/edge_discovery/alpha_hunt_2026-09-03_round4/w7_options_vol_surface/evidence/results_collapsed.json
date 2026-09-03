@@ -1,0 +1,330 @@
+{
+ "results": {
+  "M6_dvol_ratio_pair_COLLAPSED": {
+   "mechanism": "M6 \u2014 DVOL_ETH/DVOL_BTC -> BTC/ETH dollar-neutral pair (ONE instrument, correct declustering)",
+   "vehicle": "PERP",
+   "notes": "Supersedes the per-asset count. Sign from first half (-1), OOS from 2023-12-26.",
+   "n_raw": 535,
+   "n_independent_L1": 535,
+   "n_independent_L2": 535,
+   "n_independent_L3": 68,
+   "L3_unit": "contiguous regime episode (basket = ONE observation)",
+   "mean_episode_days": 7.87,
+   "gross_bps_per_episode": 84.33,
+   "net_bps": 77.44,
+   "net_bps_stress28": 70.33,
+   "t_stat_declustered": 2.5,
+   "bootstrap_ci95": [
+    22.62,
+    141.95
+   ],
+   "sharpe_annual_net": 1.215,
+   "sharpe_annual_stress28": 0.977,
+   "year_by_year": {
+    "2023": {
+     "n_ep": 1,
+     "net_bps": 674.45,
+     "total_bps": 674.4
+    },
+    "2024": {
+     "n_ep": 29,
+     "net_bps": 48.14,
+     "total_bps": 1396.1
+    },
+    "2025": {
+     "n_ep": 24,
+     "net_bps": 114.18,
+     "total_bps": 2740.4
+    },
+    "2026": {
+     "n_ep": 14,
+     "net_bps": 32.48,
+     "total_bps": 454.7
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2025,
+    "n_ep": 44,
+    "net_bps": 57.39,
+    "t": 2.12
+   },
+   "n_required": 342.2,
+   "event_rate_per_week_last6m": 0.538,
+   "eta_forward_confirmation_days": 4449.0,
+   "eta_forward_confirmation_years": 12.18,
+   "sample_start": "2023-12-26",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 535,
+   "calendar_span_days": 948,
+   "sign_learned": -1.0,
+   "oos_start": "2023-12-26",
+   "portfolio_net_bps_per_day": 5.054,
+   "portfolio_sharpe": 1.217,
+   "portfolio_net_bps_per_day_stress": 4.066,
+   "portfolio_sharpe_stress": 0.98
+  },
+  "M5_high_vrp_long_basket_COLLAPSED": {
+   "mechanism": "M5 \u2014 equal-weight alt basket LONG while VRP in top quintile (ONE instrument)",
+   "vehicle": "PERP",
+   "notes": "Supersedes F2_M5_high_vrp_long, which counted 40 correlated alts as 40 observations/day.",
+   "n_raw": 342,
+   "n_independent_L1": 342,
+   "n_independent_L2": 342,
+   "n_independent_L3": 66,
+   "L3_unit": "contiguous regime episode (basket = ONE observation)",
+   "mean_episode_days": 5.18,
+   "gross_bps_per_episode": 117.85,
+   "net_bps": 110.85,
+   "net_bps_stress28": 103.85,
+   "t_stat_declustered": 1.06,
+   "bootstrap_ci95": [
+    -87.66,
+    326.69
+   ],
+   "sharpe_annual_net": 0.406,
+   "sharpe_annual_stress28": 0.351,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 9,
+     "net_bps": 321.02,
+     "total_bps": 2889.2
+    },
+    "2022": {
+     "n_ep": 15,
+     "net_bps": 61.25,
+     "total_bps": 918.8
+    },
+    "2023": {
+     "n_ep": 10,
+     "net_bps": 212.07,
+     "total_bps": 2120.7
+    },
+    "2024": {
+     "n_ep": 10,
+     "net_bps": 358.4,
+     "total_bps": 3584.0
+    },
+    "2025": {
+     "n_ep": 15,
+     "net_bps": -98.33,
+     "total_bps": -1474.9
+    },
+    "2026": {
+     "n_ep": 7,
+     "net_bps": -103.12,
+     "total_bps": -721.9
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2024,
+    "n_ep": 56,
+    "net_bps": 66.64,
+    "t": 0.61
+   },
+   "n_required": 1856.8,
+   "event_rate_per_week_last6m": 0.231,
+   "eta_forward_confirmation_days": 56321.5,
+   "eta_forward_confirmation_years": 154.2,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 342,
+   "calendar_span_days": 1955,
+   "portfolio_net_bps_per_day": 3.504,
+   "portfolio_sharpe": 0.406,
+   "portfolio_net_bps_per_day_stress": 3.032,
+   "portfolio_sharpe_stress": 0.351
+  },
+  "M5_low_vrp_short_basket_COLLAPSED": {
+   "mechanism": "M5 \u2014 equal-weight alt basket SHORT while VRP in bottom quintile (ONE instrument)",
+   "vehicle": "PERP",
+   "notes": "",
+   "n_raw": 370,
+   "n_independent_L1": 370,
+   "n_independent_L2": 370,
+   "n_independent_L3": 53,
+   "L3_unit": "contiguous regime episode (basket = ONE observation)",
+   "mean_episode_days": 6.98,
+   "gross_bps_per_episode": 78.7,
+   "net_bps": 71.7,
+   "net_bps_stress28": 64.7,
+   "t_stat_declustered": 0.71,
+   "bootstrap_ci95": [
+    -124.59,
+    260.09
+   ],
+   "sharpe_annual_net": 0.242,
+   "sharpe_annual_stress28": 0.189,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 2,
+     "net_bps": -155.61,
+     "total_bps": -311.2
+    },
+    "2022": {
+     "n_ep": 12,
+     "net_bps": 163.45,
+     "total_bps": 1961.4
+    },
+    "2023": {
+     "n_ep": 12,
+     "net_bps": -172.18,
+     "total_bps": -2066.2
+    },
+    "2024": {
+     "n_ep": 8,
+     "net_bps": -31.48,
+     "total_bps": -251.8
+    },
+    "2025": {
+     "n_ep": 8,
+     "net_bps": 388.96,
+     "total_bps": 3111.7
+    },
+    "2026": {
+     "n_ep": 11,
+     "net_bps": 123.28,
+     "total_bps": 1356.1
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2025,
+    "n_ep": 45,
+    "net_bps": 15.3,
+    "t": 0.14
+   },
+   "n_required": 3271.0,
+   "event_rate_per_week_last6m": 0.423,
+   "eta_forward_confirmation_days": 54119.7,
+   "eta_forward_confirmation_years": 148.17,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 370,
+   "calendar_span_days": 1955,
+   "portfolio_net_bps_per_day": 1.753,
+   "portfolio_sharpe": 0.242,
+   "portfolio_net_bps_per_day_stress": 1.374,
+   "portfolio_sharpe_stress": 0.189
+  },
+  "M5_beta_tilt_unconditional_CONTROL_COLLAPSED": {
+   "mechanism": "M5 control \u2014 unconditional high-beta minus low-beta alt tilt (ONE instrument)",
+   "vehicle": "PERP",
+   "notes": "",
+   "n_raw": 1956,
+   "n_independent_L1": 1956,
+   "n_independent_L2": 1956,
+   "n_independent_L3": 1,
+   "L3_unit": "contiguous regime episode (basket = ONE observation)",
+   "mean_episode_days": 1956.0,
+   "gross_bps_per_episode": -4063.88,
+   "net_bps": -10341.34,
+   "net_bps_stress28": -4077.88,
+   "t_stat_declustered": null,
+   "bootstrap_ci95": [
+    -10341.34,
+    -10341.34
+   ],
+   "sharpe_annual_net": -0.303,
+   "sharpe_annual_stress28": -0.303,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 1,
+     "net_bps": -10341.34,
+     "total_bps": -10341.3
+    }
+   },
+   "ex_best_year": null,
+   "n_required": null,
+   "event_rate_per_week_last6m": null,
+   "eta_forward_confirmation_days": "inf",
+   "eta_forward_confirmation_years": "inf",
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 1956,
+   "calendar_span_days": 1955,
+   "portfolio_net_bps_per_day": -5.287,
+   "portfolio_sharpe": -0.384,
+   "portfolio_net_bps_per_day_stress": -6.419,
+   "portfolio_sharpe_stress": -0.467
+  },
+  "M5_beta_tilt_high_vrp_COLLAPSED": {
+   "mechanism": "M5 \u2014 beta tilt active only when VRP top quintile (ONE instrument)",
+   "vehicle": "PERP",
+   "notes": "",
+   "n_raw": 342,
+   "n_independent_L1": 342,
+   "n_independent_L2": 342,
+   "n_independent_L3": 66,
+   "L3_unit": "contiguous regime episode (basket = ONE observation)",
+   "mean_episode_days": 5.18,
+   "gross_bps_per_episode": -5.79,
+   "net_bps": -31.07,
+   "net_bps_stress28": -19.79,
+   "t_stat_declustered": -0.42,
+   "bootstrap_ci95": [
+    -177.75,
+    111.97
+   ],
+   "sharpe_annual_net": -0.21,
+   "sharpe_annual_stress28": -0.358,
+   "year_by_year": {
+    "2021": {
+     "n_ep": 9,
+     "net_bps": -650.83,
+     "total_bps": -5857.5
+    },
+    "2022": {
+     "n_ep": 15,
+     "net_bps": 335.08,
+     "total_bps": 5026.2
+    },
+    "2023": {
+     "n_ep": 10,
+     "net_bps": 81.19,
+     "total_bps": 811.9
+    },
+    "2024": {
+     "n_ep": 10,
+     "net_bps": 102.99,
+     "total_bps": 1029.9
+    },
+    "2025": {
+     "n_ep": 15,
+     "net_bps": -128.11,
+     "total_bps": -1921.7
+    },
+    "2026": {
+     "n_ep": 7,
+     "net_bps": -162.76,
+     "total_bps": -1139.3
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2022,
+    "n_ep": 51,
+    "net_bps": -138.76,
+    "t": -1.72
+   },
+   "n_required": 11977.1,
+   "event_rate_per_week_last6m": 0.231,
+   "eta_forward_confirmation_days": 363306.6,
+   "eta_forward_confirmation_years": 994.68,
+   "sample_start": "2021-03-24",
+   "sample_end": "2026-07-31",
+   "trading_days_active": 342,
+   "calendar_span_days": 1955,
+   "portfolio_net_bps_per_day": -1.521,
+   "portfolio_sharpe": -0.239,
+   "portfolio_net_bps_per_day_stress": -2.651,
+   "portfolio_sharpe_stress": -0.416
+  }
+ },
+ "diagnostics": {
+  "M7_gross_significance": {
+   "n_episodes": 2719,
+   "gross_bps_per_episode": 3.06,
+   "t_stat_declustered_GROSS": 2.09,
+   "cost_floor_bps_round_trip": 14.0,
+   "verdict_note": "gross effect is real and correctly signed but ~5x below the cost floor"
+  }
+ }
+}

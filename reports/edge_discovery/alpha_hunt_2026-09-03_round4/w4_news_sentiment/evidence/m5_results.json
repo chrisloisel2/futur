@@ -1,0 +1,595 @@
+{
+ "M5a_fg_incremental_over_btcvol": {
+  "vol_low": {
+   "low_fear": {
+    "name": "M5a_vol_low_lowfear",
+    "note": "",
+    "n_raw": 360,
+    "n_independent_L1": 243,
+    "n_independent_L2": 108,
+    "n_independent_L3": 63,
+    "gross_bps": 22.61,
+    "net_bps": 8.61,
+    "net_bps_stress28": -5.39,
+    "sd_episode_bps": 340.08,
+    "t_stat_declustered": 0.201,
+    "bootstrap_ci95": [
+     -60.79,
+     105.23
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 1,
+      "n_ep": 1,
+      "net_bps": 245.49
+     },
+     "2022": {
+      "n_raw": 9,
+      "n_ep": 4,
+      "net_bps": 36.86
+     },
+     "2024": {
+      "n_raw": 75,
+      "n_ep": 11,
+      "net_bps": -28.5
+     },
+     "2025": {
+      "n_raw": 205,
+      "n_ep": 30,
+      "net_bps": -34.51
+     },
+     "2026": {
+      "n_raw": 70,
+      "n_ep": 17,
+      "net_bps": 88.15
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2021,
+     "net_bps": 4.79,
+     "n_ep": 62,
+     "t": 0.11
+    },
+    "year_concentration_frac": 0.462,
+    "n_required": 48974,
+    "event_rate_per_week_6m": 0.69,
+    "eta_forward_confirmation_days": 495181.6,
+    "eta_forward_confirmation_years": 1355.73
+   },
+   "high_greed": {
+    "name": "M5a_vol_low_highgreed",
+    "note": "",
+    "n_raw": 672,
+    "n_independent_L1": 449,
+    "n_independent_L2": 186,
+    "n_independent_L3": 81,
+    "gross_bps": -16.79,
+    "net_bps": -30.79,
+    "net_bps_stress28": -44.79,
+    "sd_episode_bps": 155.62,
+    "t_stat_declustered": -1.781,
+    "bootstrap_ci95": [
+     -64.85,
+     0.01
+    ],
+    "year_by_year": {
+     "2022": {
+      "n_raw": 60,
+      "n_ep": 10,
+      "net_bps": -83.41
+     },
+     "2023": {
+      "n_raw": 306,
+      "n_ep": 32,
+      "net_bps": 9.26
+     },
+     "2024": {
+      "n_raw": 195,
+      "n_ep": 26,
+      "net_bps": -50.02
+     },
+     "2025": {
+      "n_raw": 111,
+      "n_ep": 13,
+      "net_bps": -50.44
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2023,
+     "net_bps": -56.95,
+     "n_ep": 49,
+     "t": -2.58
+    },
+    "year_concentration_frac": 0.421,
+    "n_required": 802,
+    "event_rate_per_week_6m": 0.42,
+    "eta_forward_confirmation_days": 13269.5,
+    "eta_forward_confirmation_years": 36.33
+   },
+   "uncond": {
+    "name": "M5a_vol_low_uncond",
+    "note": "",
+    "n_raw": 1815,
+    "n_independent_L1": 1155,
+    "n_independent_L2": 495,
+    "n_independent_L3": 253,
+    "gross_bps": 12.88,
+    "net_bps": -1.12,
+    "net_bps_stress28": -15.12,
+    "sd_episode_bps": 235.69,
+    "t_stat_declustered": -0.076,
+    "bootstrap_ci95": [
+     -27.79,
+     30.58
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 3,
+      "n_ep": 3,
+      "net_bps": 138.8
+     },
+     "2022": {
+      "n_raw": 119,
+      "n_ep": 30,
+      "net_bps": -54.92
+     },
+     "2023": {
+      "n_raw": 488,
+      "n_ep": 58,
+      "net_bps": 25.11
+     },
+     "2024": {
+      "n_raw": 386,
+      "n_ep": 53,
+      "net_bps": -27.09
+     },
+     "2025": {
+      "n_raw": 544,
+      "n_ep": 78,
+      "net_bps": -21.25
+     },
+     "2026": {
+      "n_raw": 275,
+      "n_ep": 31,
+      "net_bps": 83.33
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2021,
+     "net_bps": -2.8,
+     "n_ep": 250,
+     "t": -0.19
+    },
+    "year_concentration_frac": 0.281,
+    "n_required": 1381240,
+    "event_rate_per_week_6m": 1.19,
+    "eta_forward_confirmation_days": 8109215.5,
+    "eta_forward_confirmation_years": 22201.82
+   },
+   "fg_spread_within_vol": 39.4
+  },
+  "vol_mid": {
+   "low_fear": {
+    "name": "M5a_vol_mid_lowfear",
+    "note": "",
+    "n_raw": 567,
+    "n_independent_L1": 424,
+    "n_independent_L2": 176,
+    "n_independent_L3": 86,
+    "gross_bps": -19.5,
+    "net_bps": -33.5,
+    "net_bps_stress28": -47.5,
+    "sd_episode_bps": 200.7,
+    "t_stat_declustered": -1.548,
+    "bootstrap_ci95": [
+     -77.09,
+     8.65
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 9,
+      "n_ep": 5,
+      "net_bps": 132.17
+     },
+     "2022": {
+      "n_raw": 60,
+      "n_ep": 19,
+      "net_bps": -71.37
+     },
+     "2023": {
+      "n_raw": 7,
+      "n_ep": 1,
+      "net_bps": -1.88
+     },
+     "2024": {
+      "n_raw": 139,
+      "n_ep": 17,
+      "net_bps": -9.44
+     },
+     "2025": {
+      "n_raw": 178,
+      "n_ep": 21,
+      "net_bps": -98.35
+     },
+     "2026": {
+      "n_raw": 174,
+      "n_ep": 23,
+      "net_bps": 1.81
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2021,
+     "net_bps": -43.73,
+     "n_ep": 81,
+     "t": -2.04
+    },
+    "year_concentration_frac": 0.482,
+    "n_required": 1127,
+    "event_rate_per_week_6m": 0.88,
+    "eta_forward_confirmation_days": 8918.0,
+    "eta_forward_confirmation_years": 24.42
+   },
+   "high_greed": {
+    "name": "M5a_vol_mid_highgreed",
+    "note": "",
+    "n_raw": 894,
+    "n_independent_L1": 628,
+    "n_independent_L2": 176,
+    "n_independent_L3": 87,
+    "gross_bps": 4.68,
+    "net_bps": -9.32,
+    "net_bps_stress28": -23.32,
+    "sd_episode_bps": 179.84,
+    "t_stat_declustered": -0.484,
+    "bootstrap_ci95": [
+     -49.11,
+     26.93
+    ],
+    "year_by_year": {
+     "2022": {
+      "n_raw": 42,
+      "n_ep": 8,
+      "net_bps": -78.27
+     },
+     "2023": {
+      "n_raw": 389,
+      "n_ep": 35,
+      "net_bps": 11.17
+     },
+     "2024": {
+      "n_raw": 350,
+      "n_ep": 33,
+      "net_bps": -7.21
+     },
+     "2025": {
+      "n_raw": 101,
+      "n_ep": 10,
+      "net_bps": -19.12
+     },
+     "2026": {
+      "n_raw": 12,
+      "n_ep": 1,
+      "net_bps": -146.91
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2023,
+     "net_bps": -23.12,
+     "n_ep": 52,
+     "t": -0.83
+    },
+    "year_concentration_frac": 0.393,
+    "n_required": 11681,
+    "event_rate_per_week_6m": 0.12,
+    "eta_forward_confirmation_days": 708647.3,
+    "eta_forward_confirmation_years": 1940.17
+   },
+   "uncond": {
+    "name": "M5a_vol_mid_uncond",
+    "note": "",
+    "n_raw": 1815,
+    "n_independent_L1": 1316,
+    "n_independent_L2": 459,
+    "n_independent_L3": 253,
+    "gross_bps": -6.99,
+    "net_bps": -20.99,
+    "net_bps_stress28": -34.99,
+    "sd_episode_bps": 216.37,
+    "t_stat_declustered": -1.543,
+    "bootstrap_ci95": [
+     -48.23,
+     6.14
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 32,
+      "n_ep": 7,
+      "net_bps": 118.03
+     },
+     "2022": {
+      "n_raw": 191,
+      "n_ep": 50,
+      "net_bps": -68.79
+     },
+     "2023": {
+      "n_raw": 409,
+      "n_ep": 43,
+      "net_bps": 34.24
+     },
+     "2024": {
+      "n_raw": 615,
+      "n_ep": 73,
+      "net_bps": -14.6
+     },
+     "2025": {
+      "n_raw": 344,
+      "n_ep": 49,
+      "net_bps": -56.0
+     },
+     "2026": {
+      "n_raw": 224,
+      "n_ep": 31,
+      "net_bps": -11.6
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2021,
+     "net_bps": -24.94,
+     "n_ep": 246,
+     "t": -1.82
+    },
+    "year_concentration_frac": 0.347,
+    "n_required": 3338,
+    "event_rate_per_week_6m": 1.19,
+    "eta_forward_confirmation_days": 19597.3,
+    "eta_forward_confirmation_years": 53.65
+   },
+   "fg_spread_within_vol": -24.18
+  },
+  "vol_high": {
+   "low_fear": {
+    "name": "M5a_vol_high_lowfear",
+    "note": "",
+    "n_raw": 837,
+    "n_independent_L1": 536,
+    "n_independent_L2": 149,
+    "n_independent_L3": 75,
+    "gross_bps": 64.05,
+    "net_bps": 50.05,
+    "net_bps_stress28": 36.05,
+    "sd_episode_bps": 224.42,
+    "t_stat_declustered": 1.931,
+    "bootstrap_ci95": [
+     -1.76,
+     98.54
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 27,
+      "n_ep": 11,
+      "net_bps": 143.71
+     },
+     "2022": {
+      "n_raw": 279,
+      "n_ep": 28,
+      "net_bps": -2.08
+     },
+     "2024": {
+      "n_raw": 203,
+      "n_ep": 10,
+      "net_bps": 68.1
+     },
+     "2025": {
+      "n_raw": 179,
+      "n_ep": 14,
+      "net_bps": 57.89
+     },
+     "2026": {
+      "n_raw": 149,
+      "n_ep": 12,
+      "net_bps": 61.65
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2021,
+     "net_bps": 33.95,
+     "n_ep": 64,
+     "t": 1.34
+    },
+    "year_concentration_frac": 0.408,
+    "n_required": 632,
+    "event_rate_per_week_6m": 0.46,
+    "eta_forward_confirmation_days": 9585.3,
+    "eta_forward_confirmation_years": 26.24
+   },
+   "high_greed": {
+    "name": "M5a_vol_high_highgreed",
+    "note": "",
+    "n_raw": 758,
+    "n_independent_L1": 493,
+    "n_independent_L2": 105,
+    "n_independent_L3": 49,
+    "gross_bps": 43.38,
+    "net_bps": 29.38,
+    "net_bps_stress28": 15.38,
+    "sd_episode_bps": 114.35,
+    "t_stat_declustered": 1.798,
+    "bootstrap_ci95": [
+     -2.09,
+     60.69
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 4,
+      "n_ep": 3,
+      "net_bps": 62.59
+     },
+     "2022": {
+      "n_raw": 52,
+      "n_ep": 4,
+      "net_bps": -141.78
+     },
+     "2023": {
+      "n_raw": 275,
+      "n_ep": 18,
+      "net_bps": 77.19
+     },
+     "2024": {
+      "n_raw": 383,
+      "n_ep": 18,
+      "net_bps": 29.32
+     },
+     "2025": {
+      "n_raw": 44,
+      "n_ep": 6,
+      "net_bps": -16.38
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2023,
+     "net_bps": 1.62,
+     "n_ep": 31,
+     "t": 0.08
+    },
+    "year_concentration_frac": 0.502,
+    "n_required": 476,
+    "event_rate_per_week_6m": 0.15,
+    "eta_forward_confirmation_days": 21658.0,
+    "eta_forward_confirmation_years": 59.3
+   },
+   "uncond": {
+    "name": "M5a_vol_high_uncond",
+    "note": "",
+    "n_raw": 1815,
+    "n_independent_L1": 1186,
+    "n_independent_L2": 309,
+    "n_independent_L3": 160,
+    "gross_bps": 69.62,
+    "net_bps": 55.62,
+    "net_bps_stress28": 41.62,
+    "sd_episode_bps": 283.25,
+    "t_stat_declustered": 2.484,
+    "bootstrap_ci95": [
+     18.08,
+     104.81
+    ],
+    "year_by_year": {
+     "2021": {
+      "n_raw": 33,
+      "n_ep": 15,
+      "net_bps": 121.31
+     },
+     "2022": {
+      "n_raw": 431,
+      "n_ep": 53,
+      "net_bps": -0.69
+     },
+     "2023": {
+      "n_raw": 332,
+      "n_ep": 22,
+      "net_bps": 61.65
+     },
+     "2024": {
+      "n_raw": 626,
+      "n_ep": 34,
+      "net_bps": 44.94
+     },
+     "2025": {
+      "n_raw": 243,
+      "n_ep": 23,
+      "net_bps": 152.67
+     },
+     "2026": {
+      "n_raw": 150,
+      "n_ep": 13,
+      "net_bps": 55.4
+     }
+    },
+    "ex_best_year": {
+     "dropped_year": 2025,
+     "net_bps": 39.33,
+     "n_ep": 137,
+     "t": 2.52
+    },
+    "year_concentration_frac": 0.391,
+    "n_required": 815,
+    "event_rate_per_week_6m": 0.5,
+    "eta_forward_confirmation_days": 11410.0,
+    "eta_forward_confirmation_years": 31.24
+   },
+   "fg_spread_within_vol": 20.67
+  },
+  "_unconditional_fg_spread": 14.21,
+  "_mean_within_vol_fg_spread": 11.96,
+  "_retention_frac": 0.842,
+  "_reverse_vol_spread_within_fg": {
+   "low_fear": {
+    "vol_high_net": 50.05,
+    "vol_low_net": 8.61,
+    "spread": 41.44
+   },
+   "mid": {
+    "vol_high_net": 102.94,
+    "vol_low_net": 15.3,
+    "spread": 87.64
+   },
+   "high_greed": {
+    "vol_high_net": 29.38,
+    "vol_low_net": -30.79,
+    "spread": 60.17
+   }
+  }
+ },
+ "M5c_fg_explained_by_trailing_price": {
+  "r2_fg_pct365_on_trail30d_vol30d_dd365": 0.475,
+  "corr_fg_vs_trail30d": 0.664,
+  "corr_fg_vs_dd365": 0.423,
+  "corr_fg_vs_trailvol30": -0.233,
+  "n": 2468
+ },
+ "M5b_fg_incremental_over_drawdown": {
+  "dd_deep": {
+   "fear_net": 34.74,
+   "greed_net": -138.77,
+   "uncond_net": -24.03,
+   "fear_L3": 37,
+   "greed_L3": 5,
+   "spread": 173.51
+  },
+  "dd_mid": {
+   "fear_net": 26.99,
+   "greed_net": 94.93,
+   "uncond_net": 10.01,
+   "fear_L3": 48,
+   "greed_L3": 10,
+   "spread": -67.94
+  },
+  "dd_shallow": {
+   "fear_net": -27.53,
+   "greed_net": -25.05,
+   "uncond_net": -19.66,
+   "fear_L3": 8,
+   "greed_L3": 55,
+   "spread": -2.48
+  },
+  "_unconditional_spread": 70.46,
+  "_mean_within_dd_spread": 34.36,
+  "_retention_frac": 0.488,
+  "_drawdown_only_spread_deep_minus_shallow": -4.37,
+  "_drawdown_only_deep": {
+   "n_raw": 823,
+   "n_independent_L3": 84,
+   "net_bps": -24.03,
+   "t_stat_declustered": -0.899,
+   "eta_forward_confirmation_years": 90.27
+  }
+ },
+ "M5d_estimator_audit": {
+  "event_weighted_net_bps": 16.02,
+  "episode_weighted_net_bps": 15.81,
+  "gap_bps": 0.21,
+  "n_events": 5445,
+  "n_episodes": 425,
+  "note": "event-weighted means over-weight long clustered episodes; the episode-weighted figure is the declustered estimator and is the one the gate uses"
+ }
+}

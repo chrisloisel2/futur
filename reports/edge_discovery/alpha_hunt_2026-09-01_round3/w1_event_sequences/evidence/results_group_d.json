@@ -1,0 +1,62 @@
+[
+  {
+    "candidate_id": "w1_d01",
+    "family": "DVOL_SHOCK_THEN_CASCADE_CHAIN",
+    "economic_risk_factor": "an options-implied-vol shock (DVOL) is a leading options-market fear/repricing signal that precedes a forced perp liquidation cascade",
+    "mechanism": "|DVOL daily chg_z|>=2 (BTC/ETH) -> liq_cascade_dataset event on same underlying within 5d -> fade outcome on the cascade",
+    "N_raw": 172,
+    "N_independent": 149,
+    "gross_bps": -50.93,
+    "net_bps": -64.93,
+    "net_bps_stress": -78.93,
+    "PF": 0.5,
+    "stability": "positive 0/6 yrs",
+    "distinctness": "New cross-market chain (deribit options DVOL leading binance perp liquidations), directly implements the task's suggested 'options vol shock -> perp positioning change' axis. Distinct from round2 W6/W9's options work (all forecast realized-vol magnitude via IC, none tested a directional chain into a subsequent liquidation cascade)",
+    "horizon": "fwd_4h"
+  },
+  {
+    "candidate_id": "w1_d02",
+    "family": "DVOL_SHOCK_THEN_FUNDING_FLIP_CHAIN",
+    "economic_risk_factor": "an options-implied-vol shock precedes a perp funding-sign flip (positioning regime change), and the crowd chases the new funding sign",
+    "mechanism": "|DVOL daily chg_z|>=2 -> funding sign flip within 5d -> trade with new funding sign, fwd3d from flip",
+    "N_raw": 130,
+    "N_independent": 102,
+    "gross_bps": -136.23,
+    "net_bps": -150.23,
+    "net_bps_stress": -164.23,
+    "PF": 0.55,
+    "stability": "positive 0/6 yrs",
+    "distinctness": "Genuine cross-market 2-step chain (options DVOL leads perp funding regime), the direct 'options vol shock -> perp positioning change' construction from the task brief. Distinct from w1_b17 (funding flip -> VOLUME confirmation, no options data) and from w1_d01 (same DVOL trigger, but chains to a liq_cascade event, not a funding flip)",
+    "horizon": "fwd3d"
+  },
+  {
+    "candidate_id": "w1_d03",
+    "family": "FUNDING_EXTREME_THEN_CASCADE_DIRECT_CHAIN",
+    "economic_risk_factor": "an extreme funding print directly precedes a forced-liquidation cascade within days, without requiring an intervening organic volume-shock confirmation",
+    "mechanism": "|funding_z|>=2 (8h funding, 90d z) -> liq_cascade_dataset event on same symbol within 3d -> fade outcome on the cascade",
+    "N_raw": 10616,
+    "N_independent": 5349,
+    "gross_bps": 15.23,
+    "net_bps": 1.23,
+    "net_bps_stress": -12.77,
+    "PF": 1.16,
+    "stability": "positive 4/6 yrs",
+    "distinctness": "Contrast construction to w1_b02 (required a volume-shock CONFIRMATION leg before trading fwd3d) and to w1_a10 (which conditions on funding_z30 AT the moment of an already-realized cascade, simultaneous not leading). This chains funding directly to the cascade, no confirmation filter, outcome measured on the cascade itself",
+    "horizon": "fwd_4h"
+  },
+  {
+    "candidate_id": "w1_d04",
+    "family": "POSITIONING_DELTA_THEN_CASCADE_CHAIN",
+    "economic_risk_factor": "a sharp 24h swing in top-trader LSR leads a cascade",
+    "mechanism": "chain attempted",
+    "N_raw": 0,
+    "N_independent": 0,
+    "gross_bps": NaN,
+    "net_bps": NaN,
+    "net_bps_stress": NaN,
+    "PF": NaN,
+    "stability": "DATA_LIMITED ",
+    "distinctness": "data/positioning only covers ~48 days (2026-07-16 to 2026-09-02), single regime -- too few matched chain events to compute a meaningful stat_block",
+    "horizon": "fwd_4h"
+  }
+]

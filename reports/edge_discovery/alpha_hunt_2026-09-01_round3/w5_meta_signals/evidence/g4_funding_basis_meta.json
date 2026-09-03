@@ -1,0 +1,98 @@
+{
+  "baseline_m7_funding_basis_disagreement": {
+    "btc_meta": {
+      "lo": -6.652754413516345,
+      "hi": 12.333731870135681,
+      "n_train": 1105,
+      "n_test_days": 737
+    },
+    "eth_meta": {
+      "lo": -5.791415481387336,
+      "hi": 15.589922278084742,
+      "n_train": 1104,
+      "n_test_days": 737
+    },
+    "btc_stats": {
+      "n": 24,
+      "mean_bps": 7.68,
+      "pf": 1.932,
+      "t_stat": 1.04,
+      "win_rate": 0.75
+    },
+    "eth_stats": {
+      "n": 25,
+      "mean_bps": 15.26,
+      "pf": 5.243,
+      "t_stat": 2.58,
+      "win_rate": 0.68
+    },
+    "pooled_stats": {
+      "n": 49,
+      "mean_bps": 11.55,
+      "pf": 2.968,
+      "t_stat": 2.46,
+      "win_rate": 0.714
+    },
+    "n_raw": 49,
+    "n_independent": 49
+  },
+  "T3_1": {
+    "test_id": "T3.1",
+    "desc": "SELECT_ASSET: on weeks where both BTC and ETH M7 fire concurrently, pick the larger-|funding-basis-disagreement| leg (a priori rule, no fit) vs naive equal-weight-both",
+    "n_concurrent_weeks": 10,
+    "without": {
+      "n": 10,
+      "mean_bps": 14.85,
+      "pf": 3.816,
+      "t_stat": 1.37,
+      "win_rate": 0.8
+    },
+    "with_": {
+      "n": 10,
+      "mean_bps": 11.24,
+      "pf": 2.668,
+      "t_stat": 1.06,
+      "win_rate": 0.8
+    },
+    "delta_net_bps": -3.61
+  },
+  "T3_2": {
+    "test_id": "T3.2",
+    "desc": "REDUCE/INCREASE_RISK: size M7 trades by within-symbol train-period |disagreement| z-score instead of flat 1x, mean-1-normalized",
+    "n": 49,
+    "without": {
+      "n": 49,
+      "mean_bps": 11.55,
+      "pf": 2.968,
+      "t_stat": 2.46,
+      "win_rate": 0.714
+    },
+    "with_": {
+      "mean_bps": 4.54
+    },
+    "delta_net_bps": -7.01
+  },
+  "T3_3": {
+    "test_id": "T3.3",
+    "desc": "ENABLE/DISABLE M7 (pooled BTC+ETH) by BTC 20d realized-vol regime, chronological-order train/test split (thin N, DATA_LIMITED)",
+    "n_train": 24,
+    "n_test": 25,
+    "direction": "<=",
+    "threshold": 0.025068,
+    "without": {
+      "n": 25,
+      "mean_bps": 5.66,
+      "pf": 3.031,
+      "t_stat": 2.08,
+      "win_rate": 0.68
+    },
+    "with_": {
+      "n": 17,
+      "mean_bps": 6.47,
+      "pf": 3.08,
+      "t_stat": 1.79,
+      "win_rate": 0.765
+    },
+    "delta_net_bps": 0.81
+  }
+}

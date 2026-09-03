@@ -1,0 +1,154 @@
+{
+  "baseline_xsmom_top_quintile": {
+    "n_weeks": 131,
+    "stats": {
+      "n": 131,
+      "mean_bps": 263.96,
+      "pf": 1.633,
+      "t_stat": 2.09
+    }
+  },
+  "T2_1": {
+    "test_id": "T2.1",
+    "desc": "ENABLE/DISABLE cross-sectional momentum basket by BTC 20d realized-vol regime",
+    "feature": "btc_rvol_20d",
+    "direction": ">",
+    "threshold": 0.031923,
+    "n_train": 65,
+    "n_test": 66,
+    "test_without": {
+      "n": 66,
+      "mean_bps": 156.81,
+      "pf": 1.446,
+      "t_stat": 1.12
+    },
+    "test_with": {
+      "n": 14,
+      "mean_bps": 336.04,
+      "pf": 2.483,
+      "t_stat": 1.28
+    },
+    "delta_net_bps_oos": 179.23,
+    "full_without": {
+      "n": 131,
+      "mean_bps": 263.96,
+      "pf": 1.633,
+      "t_stat": 2.09
+    },
+    "full_with": {
+      "n": 46,
+      "mean_bps": 712.21,
+      "pf": 3.861,
+      "t_stat": 3.29
+    },
+    "delta_net_bps_full_context": 448.25
+  },
+  "T2_2": {
+    "test_id": "T2.2",
+    "desc": "ENABLE/DISABLE by cross-sectional return-dispersion regime (trailing 7d avg)",
+    "feature": "xs_dispersion_7d_avg",
+    "direction": ">",
+    "threshold": 0.038639,
+    "n_train": 65,
+    "n_test": 66,
+    "test_without": {
+      "n": 66,
+      "mean_bps": 156.81,
+      "pf": 1.446,
+      "t_stat": 1.12
+    },
+    "test_with": {
+      "n": 53,
+      "mean_bps": 89.75,
+      "pf": 1.241,
+      "t_stat": 0.57
+    },
+    "delta_net_bps_oos": -67.06,
+    "full_without": {
+      "n": 131,
+      "mean_bps": 263.96,
+      "pf": 1.633,
+      "t_stat": 2.09
+    },
+    "full_with": {
+      "n": 85,
+      "mean_bps": 300.52,
+      "pf": 1.721,
+      "t_stat": 1.85
+    },
+    "delta_net_bps_full_context": 36.56
+  },
+  "T2_3": {
+    "test_id": "T2.3",
+    "desc": "ENABLE/DISABLE by market breadth regime (trailing 7d avg % names positive)",
+    "feature": "xs_breadth_7d_avg",
+    "direction": ">",
+    "threshold": 0.517347,
+    "n_train": 65,
+    "n_test": 66,
+    "test_without": {
+      "n": 66,
+      "mean_bps": 156.81,
+      "pf": 1.446,
+      "t_stat": 1.12
+    },
+    "test_with": {
+      "n": 24,
+      "mean_bps": 735.12,
+      "pf": 4.359,
+      "t_stat": 2.71
+    },
+    "delta_net_bps_oos": 578.31,
+    "full_without": {
+      "n": 131,
+      "mean_bps": 263.96,
+      "pf": 1.633,
+      "t_stat": 2.09
+    },
+    "full_with": {
+      "n": 56,
+      "mean_bps": 654.52,
+      "pf": 3.039,
+      "t_stat": 3.22
+    },
+    "delta_net_bps_full_context": 390.56
+  },
+  "T2_4": {
+    "test_id": "T2.4",
+    "desc": "REDUCE/INCREASE_RISK: size xsmom basket inversely to BTC 20d realized vol (0.5x high-vol / 1.5x low-vol weeks, mean-1-normalized)",
+    "n": 131,
+    "without": {
+      "n": 131,
+      "mean_bps": 263.96,
+      "pf": 1.633,
+      "t_stat": 2.09
+    },
+    "with_": {
+      "mean_bps": 158.6
+    },
+    "delta_net_bps": -105.36
+  },
+  "T2_5": {
+    "test_id": "T2.5",
+    "desc": "SELECT_HORIZON: BTC-vol-regime picks {7d,14d} on train half, evaluated OOS on test half",
+    "train_picks": {
+      "low_vol": "7d",
+      "high_vol": "14d"
+    },
+    "n_train": 62,
+    "n_test": 62,
+    "without": {
+      "n": 62,
+      "mean_bps": 121.28,
+      "pf": 1.324,
+      "t_stat": 0.82
+    },
+    "with_": {
+      "n": 62,
+      "mean_bps": 237.83,
+      "pf": 1.697,
+      "t_stat": 1.32
+    },
+    "delta_net_bps": 116.55
+  }
+}

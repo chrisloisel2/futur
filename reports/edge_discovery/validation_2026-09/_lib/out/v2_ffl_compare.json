@@ -1,0 +1,107 @@
+{
+  "full_2020plus": {
+    "population_n": 27030,
+    "window": [
+      "2021-12-04 00:50:00+00:00",
+      "2026-08-27 13:00:00+00:00"
+    ],
+    "far_live_0p05": {
+      "n": 6731,
+      "net14_event_level": 6.84,
+      "t_naive": 1.69,
+      "pf": 1.064,
+      "n_L3": 1670,
+      "net14_episode_level": -11.13,
+      "t_L3": -1.988
+    },
+    "near_live_0p05": {
+      "n": 20299,
+      "net14_event_level": -6.58,
+      "t_naive": -3.32,
+      "pf": 0.925,
+      "n_L3": 2563,
+      "net14_episode_level": 24.56,
+      "t_L3": 8.662
+    },
+    "oos_2025plus": {
+      "far": {
+        "n": 2395,
+        "net14_event_level": 20.21,
+        "t_naive": 2.85,
+        "pf": 1.207,
+        "n_L3": 521,
+        "net14_episode_level": -25.83,
+        "t_L3": -2.744
+      },
+      "near": {
+        "n": 7705,
+        "net14_event_level": -21.46,
+        "t_naive": -6.03,
+        "pf": 0.77,
+        "n_L3": 895,
+        "net14_episode_level": 20.47,
+        "t_L3": 4.405
+      }
+    },
+    "far_live_by_year_event_level": {
+      "2021": 5.62,
+      "2022": -19.11,
+      "2023": 12.57,
+      "2024": -1.88,
+      "2025": 20.5,
+      "2026": 19.77
+    }
+  },
+  "claim_window_2022plus": {
+    "population_n": 26750,
+    "window": [
+      "2022-01-01 04:15:00+00:00",
+      "2026-08-27 13:00:00+00:00"
+    ],
+    "far_live_0p05": {
+      "n": 6650,
+      "net14_event_level": 6.86,
+      "t_naive": 1.68,
+      "pf": 1.064,
+      "n_L3": 1637,
+      "net14_episode_level": -11.56,
+      "t_L3": -2.044
+    },
+    "near_live_0p05": {
+      "n": 20100,
+      "net14_event_level": -5.91,
+      "t_naive": -2.98,
+      "pf": 0.932,
+      "n_L3": 2529,
+      "net14_episode_level": 24.36,
+      "t_L3": 8.57
+    },
+    "oos_2025plus": {
+      "far": {
+        "n": 2395,
+        "net14_event_level": 20.21,
+        "t_naive": 2.85,
+        "pf": 1.207,
+        "n_L3": 521,
+        "net14_episode_level": -25.83,
+        "t_L3": -2.744
+      },
+      "near": {
+        "n": 7705,
+        "net14_event_level": -21.46,
+        "t_naive": -6.03,
+        "pf": 0.77,
+        "n_L3": 895,
+        "net14_episode_level": 20.47,
+        "t_L3": 4.405
+      }
+    },
+    "far_live_by_year_event_level": {
+      "2022": -19.11,
+      "2023": 12.57,
+      "2024": -1.88,
+      "2025": 20.5,
+      "2026": 19.77
+    }
+  }
+}

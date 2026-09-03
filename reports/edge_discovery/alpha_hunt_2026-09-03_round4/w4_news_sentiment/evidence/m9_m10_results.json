@@ -1,0 +1,139 @@
+{
+ "M10_pit_audit": {
+  "n_rows_total": 5793,
+  "n_unique_url_hash": 2390,
+  "ts_column_semantics": "SOURCE-DECLARED pubDate (collector `_parse_rss` uses parsedate_to_datetime(pubDate)); NOT collection time. No collection-time column is persisted.",
+  "collection_time_recovery": "file mtime of the parquet part (written via tmp.replace at fetch time)",
+  "filename_vs_mtime_agreement_sec_abs_median": 0.0,
+  "declared_range": [
+   "2025-12-29 16:10:19+00:00",
+   "2026-09-03 08:00:00.960043+00:00"
+  ],
+  "collect_range": [
+   "2026-07-10 20:58:58.591575861+00:00",
+   "2026-09-03 08:00:01.151427746+00:00"
+  ],
+  "lag_declared_to_collect_min": {
+   "p05": 0.0,
+   "p25": 0.0,
+   "median": 0.0,
+   "p75": 14.2,
+   "p95": 120.7,
+   "max_days": 193.5
+  },
+  "lag_RSS_only_min": {
+   "n": 2052,
+   "median": 21.3,
+   "p25": 12.5,
+   "p75": 30.9,
+   "p95": 1871.3,
+   "frac_lag_gt_30min": 0.283,
+   "frac_lag_gt_120min": 0.142
+  },
+  "backlog_rows_declared_gt_7d_before_collection": 20,
+  "continuous_coverage_days": 53,
+  "per_source_counts": {
+   "coingecko_trending": 3741,
+   "cointelegraph": 985,
+   "decrypt": 621,
+   "bitcoinmagazine": 253,
+   "newsbtc": 193
+  }
+ },
+ "M9_news_to_price_latency": {
+  "n_btc_rss_raw": 755,
+  "n_btc_rss_independent_story_L3": 651,
+  "cluster_ratio_raw_over_indep": 1.16,
+  "window_profile_abs_and_signed_bps": {
+   "declared_pubDate": {
+    "[-360,-120]": {
+     "n": 651,
+     "mean_abs_bps": 20.6,
+     "mean_signed_bps": 3.5,
+     "t_signed": 2.1
+    },
+    "[-120,-30]": {
+     "n": 651,
+     "mean_abs_bps": 14.4,
+     "mean_signed_bps": 0.0,
+     "t_signed": 0.01
+    },
+    "[-30,0]": {
+     "n": 651,
+     "mean_abs_bps": 8.1,
+     "mean_signed_bps": -0.5,
+     "t_signed": -0.75
+    },
+    "[0,30]": {
+     "n": 651,
+     "mean_abs_bps": 8.4,
+     "mean_signed_bps": 1.0,
+     "t_signed": 1.42
+    },
+    "[0,60]": {
+     "n": 651,
+     "mean_abs_bps": 11.8,
+     "mean_signed_bps": 1.5,
+     "t_signed": 1.57
+    },
+    "[0,120]": {
+     "n": 651,
+     "mean_abs_bps": 16.0,
+     "mean_signed_bps": 0.9,
+     "t_signed": 0.66
+    },
+    "[0,360]": {
+     "n": 651,
+     "mean_abs_bps": 25.5,
+     "mean_signed_bps": -1.2,
+     "t_signed": -0.56
+    }
+   },
+   "collection_time": {
+    "[-360,-120]": {
+     "n": 651,
+     "mean_abs_bps": 20.1,
+     "mean_signed_bps": 3.8,
+     "t_signed": 2.21
+    },
+    "[-120,-30]": {
+     "n": 651,
+     "mean_abs_bps": 14.8,
+     "mean_signed_bps": -2.4,
+     "t_signed": -1.94
+    },
+    "[-30,0]": {
+     "n": 651,
+     "mean_abs_bps": 8.8,
+     "mean_signed_bps": 1.1,
+     "t_signed": 1.57
+    },
+    "[0,30]": {
+     "n": 651,
+     "mean_abs_bps": 8.4,
+     "mean_signed_bps": 1.6,
+     "t_signed": 2.24
+    },
+    "[0,60]": {
+     "n": 651,
+     "mean_abs_bps": 10.5,
+     "mean_signed_bps": -0.2,
+     "t_signed": -0.21
+    },
+    "[0,120]": {
+     "n": 651,
+     "mean_abs_bps": 16.4,
+     "mean_signed_bps": -0.5,
+     "t_signed": -0.35
+    },
+    "[0,360]": {
+     "n": 651,
+     "mean_abs_bps": 24.4,
+     "mean_signed_bps": -1.2,
+     "t_signed": -0.59
+    }
+   }
+  },
+  "interpretation_key": "if mean_abs_bps in [-120,-30] >= mean_abs_bps in [0,+30], the move is already complete BEFORE the timestamp and the feed is a lagging description"
+ }
+}

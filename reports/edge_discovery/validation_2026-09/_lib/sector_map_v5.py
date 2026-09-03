@@ -1,0 +1,98 @@
+"""Carte sectorielle du validateur V5 — construite ici, jamais lue depuis un
+`sector_map.py` de découverte (briefing §2 + prereg SECTOR_ROTATION §0).
+
+Assignation par nature économique du protocole, décidée AVANT tout calcul de rendement.
+Tout symbole absent tombe dans `OTHER`, qui reste un panier à part entière.
+"""
+from __future__ import annotations
+
+SECTORS: dict[str, list[str]] = {
+    "L1": [
+        "SOLUSDT", "ADAUSDT", "AVAXUSDT", "DOTUSDT", "ATOMUSDT", "NEARUSDT", "APTUSDT",
+        "SUIUSDT", "SEIUSDT", "TONUSDT", "TRXUSDT", "ICPUSDT", "ALGOUSDT", "HBARUSDT",
+        "EGLDUSDT", "KSMUSDT", "ONEUSDT", "ZILUSDT", "QTUMUSDT", "ONTUSDT", "NEOUSDT",
+        "VETUSDT", "IOTAUSDT", "XTZUSDT", "TIAUSDT", "INJUSDT", "KAVAUSDT", "ROSEUSDT",
+        "LUNA2USDT", "1000LUNCUSDT", "BERAUSDT", "SUSDT", "IPUSDT", "SOMIUSDT",
+        "0GUSDT", "INITUSDT", "SAGAUSDT", "DYMUSDT", "MOVEUSDT", "XPLUSDT",
+    ],
+    "L2_SCALING": [
+        "ARBUSDT", "OPUSDT", "STRKUSDT", "ZKUSDT", "MANTAUSDT", "IMXUSDT", "LRCUSDT",
+        "LINEAUSDT", "METISUSDT", "SKLUSDT", "CYBERUSDT", "TAIKOUSDT", "SCRUSDT",
+        "BLASTUSDT", "MODEUSDT", "NXPCUSDT", "OPNUSDT",
+    ],
+    "DEFI": [
+        "AAVEUSDT", "UNIUSDT", "CRVUSDT", "SUSHIUSDT", "COMPUSDT", "MKRUSDT", "SNXUSDT",
+        "LDOUSDT", "PENDLEUSDT", "ENAUSDT", "DYDXUSDT", "1INCHUSDT", "YFIUSDT",
+        "LQTYUSDT", "UMAUSDT", "RUNEUSDT", "JUPUSDT", "JTOUSDT", "ETHFIUSDT",
+        "EIGENUSDT", "USUALUSDT", "RESOLVUSDT", "LISTAUSDT", "AEVOUSDT", "BALUSDT",
+        "CAKEUSDT", "BANANAUSDT", "MYXUSDT", "AVNTUSDT", "SPKUSDT", "VVVUSDT",
+        "ASTERUSDT", "HYPEUSDT", "PERPUSDT", "BONDUSDT", "STGUSDT", "IDUSDT",
+    ],
+    "MEME": [
+        "DOGEUSDT", "1000SHIBUSDT", "1000PEPEUSDT", "WIFUSDT", "1000BONKUSDT",
+        "1000FLOKIUSDT", "POPCATUSDT", "MEWUSDT", "NEIROUSDT", "NEIROETHUSDT",
+        "PNUTUSDT", "MOODENGUSDT", "TURBOUSDT", "BOMEUSDT", "ACTUSDT", "GOATUSDT",
+        "MEMEUSDT", "DOGSUSDT", "1MBABYDOGEUSDT", "MELANIAUSDT", "TRUMPUSDT",
+        "FARTCOINUSDT", "PENGUUSDT", "PUMPUSDT", "SPXUSDT", "GIGGLEUSDT",
+        "BANANAS31USDT", "MUBARAKUSDT", "TSTUSDT", "1000RATSUSDT", "1000SATSUSDT",
+        "CATIUSDT", "BABYUSDT", "PIPPINUSDT", "SWARMSUSDT", "VINEUSDT", "PEOPLEUSDT",
+        "BASEDUSDT", "CHIPUSDT", "SIRENUSDT", "GUNUSDT", "BIOUSDT", "ZORAUSDT",
+    ],
+    "AI": [
+        "TAOUSDT", "FETUSDT", "AGIXUSDT", "OCEANUSDT", "RENDERUSDT", "WLDUSDT",
+        "AIXBTUSDT", "AI16ZUSDT", "VIRTUALUSDT", "ARCUSDT", "KAITOUSDT", "IOUSDT",
+        "NMRUSDT", "SKYAIUSDT", "ALCHUSDT", "PROVEUSDT", "AIUSDT", "AIGENSYNUSDT",
+        "COAIUSDT", "KITEUSDT", "SAHARAUSDT", "ARIAUSDT", "ENSOUSDT", "ROBOUSDT",
+    ],
+    "GAMING_NFT": [
+        "AXSUSDT", "SANDUSDT", "MANAUSDT", "GALAUSDT", "ENJUSDT", "APEUSDT", "BLURUSDT",
+        "PIXELUSDT", "YGGUSDT", "MAGICUSDT", "ALICEUSDT", "TLMUSDT", "BIGTIMEUSDT",
+        "XAIUSDT", "PORTALUSDT", "GMTUSDT", "ACEUSDT", "NFPUSDT", "RAREUSDT",
+        "AGLDUSDT", "PLAYUSDT", "ESPORTSUSDT", "KGENUSDT", "PARTIUSDT",
+    ],
+    "INFRA_DATA": [
+        "LINKUSDT", "GRTUSDT", "API3USDT", "BANDUSDT", "TRBUSDT", "PYTHUSDT",
+        "FILUSDT", "ARUSDT", "STORJUSDT", "ANKRUSDT", "RLCUSDT", "CKBUSDT", "HOTUSDT",
+        "IOSTUSDT", "JASMYUSDT", "THETAUSDT", "OGNUSDT", "POWRUSDT", "ENSUSDT",
+        "ZROUSDT", "WUSDT", "NOTUSDT", "CFXUSDT", "LPTUSDT", "MASKUSDT", "RSRUSDT",
+        "LAYERUSDT", "ALLOUSDT", "WCTUSDT", "OPENUSDT", "UBUSDT", "FOGOUSDT",
+        "MMTUSDT", "EVAAUSDT", "NIGHTUSDT", "BLESSUSDT", "FFUSDT", "POLYXUSDT",
+    ],
+    "PRIVACY": ["XMRUSDT", "ZECUSDT", "ZENUSDT", "DASHUSDT", "SCRTUSDT", "XVGUSDT"],
+    "PAYMENT_LEGACY": [
+        "LTCUSDT", "BCHUSDT", "ETCUSDT", "XLMUSDT", "EOSUSDT", "RVNUSDT", "BATUSDT",
+        "ZRXUSDT", "KNCUSDT", "OMGUSDT", "WAVESUSDT", "DENTUSDT", "SXPUSDT", "CHZUSDT",
+        "COTIUSDT", "CELRUSDT", "ARPAUSDT", "MTLUSDT", "STMXUSDT", "LOOMUSDT",
+        "LINAUSDT", "REEFUSDT", "FUNUSDT", "TROYUSDT", "BLZUSDT", "CHRUSDT",
+        "GASUSDT", "SUNUSDT", "CTSIUSDT", "ARKUSDT", "ONGUSDT", "HIFIUSDT",
+        "BNXUSDT", "STRAXUSDT", "VIDTUSDT", "ORBSUSDT", "LEVERUSDT", "UNFIUSDT",
+        "BAKEUSDT", "ALPHAUSDT", "LITUSDT", "HOOKUSDT", "HIGHUSDT", "EDUUSDT",
+        "C98USDT", "EDGEUSDT", "EDUUSDT", "EOSUSDT", "EGLDUSDT", "FLMUSDT",
+        "BELUSDT", "EOSUSDT", "TLMUSDT", "IOTXUSDT", "FTMUSDT", "CUSDT", "KNCUSDT",
+    ],
+    "RWA_STABLE": [
+        "PAXGUSDT", "ONDOUSDT", "XAUTUSDT", "STBLUSDT", "USTCUSDT", "OMUSDT",
+        "RIVERUSDT", "WLFIUSDT", "BILLUSDT", "REDUSDT",
+    ],
+}
+
+# Carte grossière (perturbation P1 — sensibilité obligatoire à la carte)
+COARSE: dict[str, list[str]] = {
+    "MAJOR_L1": SECTORS["L1"] + SECTORS["L2_SCALING"] + SECTORS["PRIVACY"],
+    "DEFI_INFRA": SECTORS["DEFI"] + SECTORS["INFRA_DATA"] + SECTORS["RWA_STABLE"],
+    "MEME_RETAIL": SECTORS["MEME"] + SECTORS["GAMING_NFT"] + SECTORS["AI"],
+}
+
+
+def _invert(d: dict[str, list[str]]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for sec, syms in d.items():
+        for s in syms:
+            out.setdefault(s, sec)      # première assignation gagne (pas de doublon silencieux)
+    return out
+
+
+SECTOR_OF = _invert(SECTORS)
+COARSE_OF = _invert(COARSE)
+
+EXCLUDED_FROM_RANKING = {"BTCUSDT", "ETHUSDT"}   # paniers à eux seuls (prereg §1)

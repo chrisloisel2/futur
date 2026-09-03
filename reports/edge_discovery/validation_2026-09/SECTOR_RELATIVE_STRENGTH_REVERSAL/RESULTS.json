@@ -1,0 +1,137 @@
+{
+  "candidate_id": "SECTOR_RELATIVE_STRENGTH_REVERSAL",
+  "family": "relative_value",
+  "verdict": "REJECTED",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": true,
+  "secondary_tags": [
+    "COST_FRAGILE",
+    "REGIME_DEPENDENT",
+    "UNCONFIRMABLE_IN_HORIZON"
+  ],
+  "discovery_net_bps": 46.4,
+  "validation_net_bps": -21.72,
+  "validation_net_bps_stress28": -35.72,
+  "pf": 0.806,
+  "n_raw": 9350,
+  "n_independent_L1": 9350,
+  "n_independent_L2": 318,
+  "n_independent_L3": 74,
+  "n_validation_independent": 74,
+  "l3_definition": "mois calendaire de la date de rebalancement",
+  "t_stat_declustered": -1.327,
+  "bootstrap_ci95": [
+    -54.18,
+    11.01
+  ],
+  "bootstrap_p05": -49.07,
+  "year_by_year": {
+    "2020": -172.81,
+    "2021": -29.39,
+    "2022": 18.22,
+    "2023": 37.29,
+    "2024": -29.42,
+    "2025": -22.81,
+    "2026": -30.09
+  },
+  "ex_best_year_net_bps": -33.26,
+  "worst_episode_bps": -1210.83,
+  "max_drawdown_bps_cumule": -7938.91,
+  "historical_event_rate": "0.230/week",
+  "recent_event_rate": "0.231/week",
+  "conservative_event_rate": "0.230/week",
+  "n_required_statistical": null,
+  "minimum_calendar_days": 182,
+  "eta_p50": "unbounded",
+  "eta_conservative": "unbounded",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Excess -21.72 net14 (t=-1.33) : N\u00c9GATIF l\u00e0 o\u00f9 la d\u00e9couverte r\u00e9clamait +46.4. Le signal de reversal intra-secteur a une corr\u00e9lation de rang de 0.86 avec le momentum 7j \u2014 ce n'est pas un facteur sectoriel, c'est du momentum invers\u00e9, et le parier \u00e0 l'envers perd. P1 (carte grossi\u00e8re) aggrave (-35.88, t=-2.03), donc le signe n\u00e9gatif n'est pas un artefact de carte.",
+  "recommended_next_step": "REJECT",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/SECTOR_ROTATION/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "same_factor_checks": {
+    "rank_corr": {
+      "sector_score_vs_mom7": {
+        "mean": 0.281,
+        "std": 0.101,
+        "n": 318
+      },
+      "sector_reversal_vs_mom7": {
+        "mean": 0.86,
+        "std": 0.073,
+        "n": 318
+      }
+    },
+    "portfolio_return_corr": {
+      "sector_rotation": {
+        "sector_rotation": 1.0,
+        "sector_reversal": -0.042,
+        "mom7": 0.463
+      },
+      "sector_reversal": {
+        "sector_rotation": -0.042,
+        "sector_reversal": 1.0,
+        "mom7": -0.535
+      },
+      "mom7": {
+        "sector_rotation": 0.463,
+        "sector_reversal": -0.535,
+        "mom7": 1.0
+      }
+    },
+    "n_common_periods": 318,
+    "mom7_reference_excess": {
+      "gross_bps": 18.87,
+      "net_bps": 4.87,
+      "net_bps_stress28": -9.13,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 1.054,
+      "n_periods": 333,
+      "year_by_year": {
+        "2020": 88.73,
+        "2021": 20.21,
+        "2022": -38.25,
+        "2023": -6.71,
+        "2024": -5.89,
+        "2025": -0.78,
+        "2026": -14.47
+      },
+      "n_years_positive": 2,
+      "n_years": 7,
+      "best_year": 2020,
+      "ex_best_year_net_bps": -7.24,
+      "worst_episode_bps": -880.32,
+      "max_drawdown_bps_cumule": -6629.98,
+      "n_raw": 15929,
+      "n_independent_L1": 15929,
+      "n_independent_L2": 333,
+      "n_independent_L3": 77,
+      "n_validation_independent": 77,
+      "l3_definition": "mois calendaire de la date de rebalancement",
+      "t_stat_declustered": 0.314,
+      "cluster_robust_se": 15.481,
+      "bootstrap_ci95": [
+        -24.68,
+        36.05
+      ],
+      "bootstrap_p05": -19.8,
+      "historical_event_rate": "0.230/week",
+      "recent_event_rate": "0.231/week",
+      "conservative_event_rate": "0.230/week",
+      "event_rates_per_day": {
+        "last_2y": 0.03288,
+        "last_1y": 0.03288,
+        "last_6m": 0.03297
+      },
+      "n_required_statistical": 19141.1,
+      "minimum_calendar_days": 182,
+      "eta_p50_days": 582209.5,
+      "eta_p50": "582210 days (~1594.0 years)",
+      "eta_conservative_days": 582209.5,
+      "eta_conservative": "582210 days (~1594.0 years)",
+      "confirmable_in_horizon": false
+    }
+  }
+}

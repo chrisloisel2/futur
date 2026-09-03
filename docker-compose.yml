@@ -35,7 +35,7 @@ services:
       start_period: 10s
 
   # ── front : COMMAND CENTER (PWA) ───────────────────────────────────────────
-  # Port 80 dans le conteneur (cible du tunnel ngrok), 8899 côté hôte.
+  # Port 90 dans le conteneur (cible du tunnel ngrok), 8899 côté hôte.
   # Le dépôt est bind-monté : reports/ et data/ sont alimentés en continu par
   # les services systemd hôte ; le HTML/py se modifie sans rebuild d'image.
   command-center:
@@ -44,7 +44,7 @@ services:
     container_name: futur-command-center
     restart: unless-stopped
     ports:
-      - "0.0.0.0:8899:80"
+      - "0.0.0.0:8899:90"
     environment:
       MONGO_URL: mongodb://mongodb:27017
       TZ: Europe/Paris
@@ -54,23 +54,35 @@ services:
       mongodb:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:80/', timeout=5)"]
+      test: ["CMD", "python3", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:90/', timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
 
-  # ── tunnel ngrok → https://default.internal ────────────────────────────────
-  # « command-center:80 » = le port 80 de l'app sur le réseau compose
-  # (équivalent de `ngrok http 80` lancé depuis le conteneur de l'app).
-  # NGROK_AUTHTOKEN vient du fichier .env (gitignoré).
+  # ── tunnel ngrok → https://futur.ngrok-free.app ────────────────────────────
+  # « command-center:90 » = le port 90 de l'app sur le réseau compose
+  # (équivalent de `ngrok http 90` lancé depuis le conteneur de l'app).
+  # NGROK_AUTHTOKEN vient du fichier .env (gitignoré) ; NGROK_URL est
+  # surchargeable pour pointer un autre domaine réservé.
+  # État du tunnel : `docker compose logs -f ngrok` ou l'inspecteur
+  # http://127.0.0.1:4041 (requêtes entrantes, rejeu). 4041 côté hôte car
+  # 4040 est déjà pris par l'agent ngrok hôte du projet konfirm.
   ngrok:
     image: ngrok/ngrok:3
     container_name: futur-ngrok
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:4041:4040"
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?NGROK_AUTHTOKEN manquant — à définir dans .env}
-    command: ["http", "command-center:80", "--url", "https://default.internal", "--log", "stdout"]
+    command:
+      - "http"
+      - "command-center:90"
+      - "--url"
+      - "${NGROK_URL:-https://futur.ngrok-free.app}"
+      - "--log"
+      - "stdout"
     depends_on:
       command-center:
         condition: service_healthy

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T10:28:09.102497+00:00",
+  "generated_at": "2026-09-03T08:29:49.266052+00:00",
   "min_listing_age_days": 30,
   "min_liquidity_usd": 2000000.0,
   "note": "One entry per rebalance date. eligible_universe_size/selected_universe = symbols passing ALL PIT gates that date (existed, listing age, real history, liquidity) -- the pool the top-quintile ranking runs over, NOT only the symbols actually picked LONG that week (see decisions.parquet for the actual picks). Full per-symbol detail, including every rejection reason, is in pit_universe_log.parquet (queryable).",

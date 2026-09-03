@@ -1,0 +1,563 @@
+{
+ "M1_term_structure_direction": {
+  "mechanism": "M1 \u2014 IV term-structure slope (near 2-10d minus far 45-180d) -> BTC perp direction",
+  "vehicle": "PERP",
+  "notes": "Sign learned on first half (sign=+1), gate run OOS from 2024-10-09. Two-arm descriptive (full sample, inverted vs contango, forward 1d BTC bps): {'n_inverted': 315, 'n_contango': 979, 'mean_inverted': 36.23, 'mean_contango': 6.2, 'diff': 30.03, 't_diff': 1.57, 'p_diff': 0.116, 'cohens_d': 0.123}. Distinct from W6-M7/M8 which targeted forward RV, not direction.",
+  "n_raw": 246,
+  "n_independent_L1": 246,
+  "n_independent_L2": 246,
+  "n_independent_L3": 100,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 2.46,
+  "gross_bps_per_episode": -14.97,
+  "net_bps": -22.11,
+  "net_bps_stress28": -29.25,
+  "t_stat_declustered": -0.63,
+  "bootstrap_ci95": [
+   -92.09,
+   46.13
+  ],
+  "sharpe_annual_net": -0.492,
+  "sharpe_annual_stress28": -0.73,
+  "year_by_year": {
+   "2024": {
+    "n_ep": 16,
+    "net_bps": 134.85,
+    "total_bps": 2157.7,
+    "t": 1.07
+   },
+   "2025": {
+    "n_ep": 52,
+    "net_bps": -51.53,
+    "total_bps": -2679.7,
+    "t": -1.51
+   },
+   "2026": {
+    "n_ep": 32,
+    "net_bps": -52.78,
+    "total_bps": -1688.9,
+    "t": -0.75
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2024,
+   "n_ep": 84,
+   "net_bps": -52.01,
+   "t": -1.53
+  },
+  "n_required": 8007.4,
+  "event_rate_per_week_last6m": 1.154,
+  "eta_forward_confirmation_days": 48578.0,
+  "eta_forward_confirmation_years": 133.0,
+  "sample_start": "2024-10-09",
+  "sample_end": "2026-07-17",
+  "trading_days_active": 246,
+  "calendar_span_days": 646,
+  "two_arm_full_sample": {
+   "n_inverted": 315,
+   "n_contango": 979,
+   "mean_inverted": 36.23,
+   "mean_contango": 6.2,
+   "diff": 30.03,
+   "t_diff": 1.57,
+   "p_diff": 0.116,
+   "cohens_d": 0.123
+  },
+  "sign_learned": 1.0,
+  "oos_start": "2024-10-09"
+ },
+ "M1_term_structure_direction_FULLSAMPLE": {
+  "mechanism": "M1b \u2014 same, full sample (sign-fitted in-sample, reported for completeness only)",
+  "vehicle": "PERP",
+  "notes": "SIGN-FITTED on this same sample -> optimistic, not a validation basis.",
+  "n_raw": 487,
+  "n_independent_L1": 487,
+  "n_independent_L2": 487,
+  "n_independent_L3": 183,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 2.66,
+  "gross_bps_per_episode": -4.0,
+  "net_bps": -11.27,
+  "net_bps_stress28": -18.54,
+  "t_stat_declustered": -0.43,
+  "bootstrap_ci95": [
+   -64.07,
+   39.81
+  ],
+  "sharpe_annual_net": -0.296,
+  "sharpe_annual_stress28": -0.526,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 36,
+    "net_bps": -83.07,
+    "total_bps": -2990.4,
+    "t": -1.53
+   },
+   "2024": {
+    "n_ep": 63,
+    "net_bps": 84.08,
+    "total_bps": 5296.8,
+    "t": 1.6
+   },
+   "2025": {
+    "n_ep": 52,
+    "net_bps": -51.53,
+    "total_bps": -2679.7,
+    "t": -1.51
+   },
+   "2026": {
+    "n_ep": 32,
+    "net_bps": -52.78,
+    "total_bps": -1688.9,
+    "t": -0.75
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2024,
+   "n_ep": 120,
+   "net_bps": -61.33,
+   "t": -2.14
+  },
+  "n_required": 31758.0,
+  "event_rate_per_week_last6m": 1.154,
+  "eta_forward_confirmation_days": 192665.1,
+  "eta_forward_confirmation_years": 527.49,
+  "sample_start": "2023-01-01",
+  "sample_end": "2026-07-17",
+  "trading_days_active": 487,
+  "calendar_span_days": 1293
+ },
+ "M2_skew_velocity_1d": {
+  "mechanism": "M2 \u2014 skew velocity_1d (d put-wing IV minus call-wing IV) -> BTC perp direction",
+  "vehicle": "PERP",
+  "notes": "Sign learned first half (sign=-1), gate OOS from 2024-10-09. Level is NOT tested (already covered by LIQ_REPEAT_SKEW_OVERLAY + W6-M6).",
+  "n_raw": 272,
+  "n_independent_L1": 272,
+  "n_independent_L2": 272,
+  "n_independent_L3": 223,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 1.22,
+  "gross_bps_per_episode": 7.35,
+  "net_bps": -2.32,
+  "net_bps_stress28": -11.99,
+  "t_stat_declustered": -0.12,
+  "bootstrap_ci95": [
+   -38.44,
+   35.25
+  ],
+  "sharpe_annual_net": -0.277,
+  "sharpe_annual_stress28": -0.86,
+  "year_by_year": {
+   "2024": {
+    "n_ep": 28,
+    "net_bps": -88.59,
+    "total_bps": -2480.6,
+    "t": -1.29
+   },
+   "2025": {
+    "n_ep": 118,
+    "net_bps": 10.6,
+    "total_bps": 1250.9,
+    "t": 0.54
+   },
+   "2026": {
+    "n_ep": 77,
+    "net_bps": 9.25,
+    "total_bps": 712.5,
+    "t": 0.25
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2025,
+   "n_ep": 105,
+   "net_bps": -16.84,
+   "t": -0.51
+  },
+  "n_required": 450975.5,
+  "event_rate_per_week_last6m": 2.731,
+  "eta_forward_confirmation_days": 1156021.8,
+  "eta_forward_confirmation_years": 3165.02,
+  "sample_start": "2024-10-09",
+  "sample_end": "2026-07-17",
+  "trading_days_active": 272,
+  "calendar_span_days": 646,
+  "sign_learned": -1.0,
+  "oos_start": "2024-10-09"
+ },
+ "M2_skew_velocity_3d": {
+  "mechanism": "M2 \u2014 skew velocity_3d (d put-wing IV minus call-wing IV) -> BTC perp direction",
+  "vehicle": "PERP",
+  "notes": "Sign learned first half (sign=-1), gate OOS from 2024-10-09. Level is NOT tested (already covered by LIQ_REPEAT_SKEW_OVERLAY + W6-M6).",
+  "n_raw": 267,
+  "n_independent_L1": 267,
+  "n_independent_L2": 267,
+  "n_independent_L3": 151,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 1.77,
+  "gross_bps_per_episode": -19.23,
+  "net_bps": -27.34,
+  "net_bps_stress28": -35.45,
+  "t_stat_declustered": -1.07,
+  "bootstrap_ci95": [
+   -78.95,
+   22.05
+  ],
+  "sharpe_annual_net": -0.997,
+  "sharpe_annual_stress28": -1.413,
+  "year_by_year": {
+   "2024": {
+    "n_ep": 22,
+    "net_bps": -138.99,
+    "total_bps": -3057.9,
+    "t": -1.86
+   },
+   "2025": {
+    "n_ep": 81,
+    "net_bps": -8.24,
+    "total_bps": -667.2,
+    "t": -0.27
+   },
+   "2026": {
+    "n_ep": 48,
+    "net_bps": -8.4,
+    "total_bps": -403.4,
+    "t": -0.16
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2026,
+   "n_ep": 103,
+   "net_bps": -36.17,
+   "t": -1.24
+  },
+  "n_required": 4148.7,
+  "event_rate_per_week_last6m": 1.692,
+  "eta_forward_confirmation_days": 17160.6,
+  "eta_forward_confirmation_years": 46.98,
+  "sample_start": "2024-10-09",
+  "sample_end": "2026-07-17",
+  "trading_days_active": 267,
+  "calendar_span_days": 646,
+  "sign_learned": -1.0,
+  "oos_start": "2024-10-09"
+ },
+ "M2_skew_capitulation_normalisation": {
+  "mechanism": "M2c \u2014 skew normalising after a put-panic (top-decile skew within 5d, then 3d fall) -> LONG BTC perp",
+  "vehicle": "PERP",
+  "notes": "Direction preregistered LONG (no sign fitting). Two-arm vs rest: {'n_normalising': 179, 'n_rest': 1026, 'mean_normalising': -1.13, 'mean_rest': 11.6, 'diff': -12.73, 't_diff': -0.61, 'p_diff': 0.543, 'cohens_d': -0.053}",
+  "n_raw": 179,
+  "n_independent_L1": 179,
+  "n_independent_L2": 179,
+  "n_independent_L3": 70,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 2.56,
+  "gross_bps_per_episode": -2.89,
+  "net_bps": -9.89,
+  "net_bps_stress28": -16.89,
+  "t_stat_declustered": -0.19,
+  "bootstrap_ci95": [
+   -107.62,
+   92.0
+  ],
+  "sharpe_annual_net": -0.18,
+  "sharpe_annual_stress28": -0.329,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 13,
+    "net_bps": 120.98,
+    "total_bps": 1572.8,
+    "t": 0.84
+   },
+   "2024": {
+    "n_ep": 15,
+    "net_bps": -29.61,
+    "total_bps": -444.2,
+    "t": -0.27
+   },
+   "2025": {
+    "n_ep": 26,
+    "net_bps": -78.22,
+    "total_bps": -2033.8,
+    "t": -1.11
+   },
+   "2026": {
+    "n_ep": 16,
+    "net_bps": 13.31,
+    "total_bps": 213.0,
+    "t": 0.1
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2023,
+   "n_ep": 57,
+   "net_bps": -39.74,
+   "t": -0.72
+  },
+  "n_required": 62021.2,
+  "event_rate_per_week_last6m": 0.615,
+  "eta_forward_confirmation_days": 705490.9,
+  "eta_forward_confirmation_years": 1931.53,
+  "sample_start": "2023-01-01",
+  "sample_end": "2026-07-17",
+  "trading_days_active": 179,
+  "calendar_span_days": 1293,
+  "two_arm": {
+   "n_normalising": 179,
+   "n_rest": 1026,
+   "mean_normalising": -1.13,
+   "mean_rest": 11.6,
+   "diff": -12.73,
+   "t_diff": -0.61,
+   "p_diff": 0.543,
+   "cohens_d": -0.053
+  }
+ },
+ "M6_dvol_z_divergence_pair": {
+  "mechanism": "M6 \u2014 DVOL z_divergence -> dollar-neutral BTC/ETH perp pair",
+  "vehicle": "PERP",
+  "notes": "Sign learned first half (sign=-1), gate OOS from 2023-11-27. DVOL_ETH is used here for the first time in this project (W6 had no ETH leg). Coverage 2021-03-24..2026-07-31.",
+  "n_raw": 1050,
+  "n_independent_L1": 1050,
+  "n_independent_L2": 525,
+  "n_independent_L3": 146,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 7.19,
+  "gross_bps_per_episode": 24.64,
+  "net_bps": 21.14,
+  "net_bps_stress28": 17.64,
+  "t_stat_declustered": 0.77,
+  "bootstrap_ci95": [
+   -31.04,
+   75.65
+  ],
+  "sharpe_annual_net": 0.656,
+  "sharpe_annual_stress28": 0.398,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 12,
+    "net_bps": -43.61,
+    "total_bps": -523.3,
+    "t": -1.15
+   },
+   "2024": {
+    "n_ep": 76,
+    "net_bps": 26.44,
+    "total_bps": 2009.1,
+    "t": 0.84
+   },
+   "2025": {
+    "n_ep": 44,
+    "net_bps": 35.7,
+    "total_bps": 1570.9,
+    "t": 0.51
+   },
+   "2026": {
+    "n_ep": 14,
+    "net_bps": 2.16,
+    "total_bps": 30.3,
+    "t": 0.03
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2024,
+   "n_ep": 70,
+   "net_bps": 15.4,
+   "t": 0.33
+  },
+  "n_required": 7806.0,
+  "event_rate_per_week_last6m": 0.538,
+  "eta_forward_confirmation_days": 101478.0,
+  "eta_forward_confirmation_years": 277.83,
+  "sample_start": "2023-11-27",
+  "sample_end": "2026-07-31",
+  "trading_days_active": 525,
+  "calendar_span_days": 977,
+  "sign_learned": -1.0,
+  "oos_start": "2023-11-27"
+ },
+ "M6_dvol_z_divergence_outright_btc": {
+  "mechanism": "M6b \u2014 DVOL z_divergence -> outright BTC perp (control arm for the pair)",
+  "vehicle": "PERP",
+  "notes": "Control: same signal, outright instead of market-neutral, to isolate the sigma reduction.",
+  "n_raw": 525,
+  "n_independent_L1": 525,
+  "n_independent_L2": 525,
+  "n_independent_L3": 73,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 7.19,
+  "gross_bps_per_episode": -9.6,
+  "net_bps": -16.6,
+  "net_bps_stress28": -23.6,
+  "t_stat_declustered": -0.24,
+  "bootstrap_ci95": [
+   -152.12,
+   119.57
+  ],
+  "sharpe_annual_net": -0.19,
+  "sharpe_annual_stress28": -0.302,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 6,
+    "net_bps": -61.81,
+    "total_bps": -370.9,
+    "t": -0.57
+   },
+   "2024": {
+    "n_ep": 38,
+    "net_bps": 33.64,
+    "total_bps": 1278.4,
+    "t": 0.39
+   },
+   "2025": {
+    "n_ep": 22,
+    "net_bps": -144.57,
+    "total_bps": -3180.6,
+    "t": -0.89
+   },
+   "2026": {
+    "n_ep": 7,
+    "net_bps": 151.56,
+    "total_bps": 1060.9,
+    "t": 0.85
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2024,
+   "n_ep": 35,
+   "net_bps": -71.16,
+   "t": -0.65
+  },
+  "n_required": 39931.7,
+  "event_rate_per_week_last6m": 0.269,
+  "eta_forward_confirmation_days": 1038225.4,
+  "eta_forward_confirmation_years": 2842.51,
+  "sample_start": "2023-11-27",
+  "sample_end": "2026-07-31",
+  "trading_days_active": 525,
+  "calendar_span_days": 977
+ },
+ "M6_dvol_dvol_ratio_pair": {
+  "mechanism": "M6 \u2014 DVOL dvol_ratio -> dollar-neutral BTC/ETH perp pair",
+  "vehicle": "PERP",
+  "notes": "Sign learned first half (sign=-1), gate OOS from 2023-11-27. DVOL_ETH is used here for the first time in this project (W6 had no ETH leg). Coverage 2021-03-24..2026-07-31.",
+  "n_raw": 1124,
+  "n_independent_L1": 1124,
+  "n_independent_L2": 562,
+  "n_independent_L3": 138,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 8.14,
+  "gross_bps_per_episode": 39.76,
+  "net_bps": 36.26,
+  "net_bps_stress28": 32.76,
+  "t_stat_declustered": 0.86,
+  "bootstrap_ci95": [
+   -44.33,
+   123.13
+  ],
+  "sharpe_annual_net": 1.106,
+  "sharpe_annual_stress28": 0.873,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 4,
+    "net_bps": 103.32,
+    "total_bps": 413.3,
+    "t": 0.32
+   },
+   "2024": {
+    "n_ep": 58,
+    "net_bps": 24.07,
+    "total_bps": 1396.1,
+    "t": 0.49
+   },
+   "2025": {
+    "n_ep": 48,
+    "net_bps": 57.09,
+    "total_bps": 2740.4,
+    "t": 0.57
+   },
+   "2026": {
+    "n_ep": 28,
+    "net_bps": 16.24,
+    "total_bps": 454.7,
+    "t": 0.32
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2025,
+   "n_ep": 90,
+   "net_bps": 25.16,
+   "t": 0.67
+  },
+  "n_required": 5846.0,
+  "event_rate_per_week_last6m": 1.077,
+  "eta_forward_confirmation_days": 37999.3,
+  "eta_forward_confirmation_years": 104.04,
+  "sample_start": "2023-11-27",
+  "sample_end": "2026-07-31",
+  "trading_days_active": 562,
+  "calendar_span_days": 977,
+  "sign_learned": -1.0,
+  "oos_start": "2023-11-27"
+ },
+ "M6_dvol_dvol_ratio_outright_btc": {
+  "mechanism": "M6b \u2014 DVOL dvol_ratio -> outright BTC perp (control arm for the pair)",
+  "vehicle": "PERP",
+  "notes": "Control: same signal, outright instead of market-neutral, to isolate the sigma reduction.",
+  "n_raw": 562,
+  "n_independent_L1": 562,
+  "n_independent_L2": 562,
+  "n_independent_L3": 69,
+  "L3_unit": "contiguous same-sign position episode",
+  "mean_episode_days": 8.14,
+  "gross_bps_per_episode": -43.96,
+  "net_bps": -50.96,
+  "net_bps_stress28": -57.96,
+  "t_stat_declustered": -0.51,
+  "bootstrap_ci95": [
+   -252.1,
+   132.81
+  ],
+  "sharpe_annual_net": -0.431,
+  "sharpe_annual_stress28": -0.534,
+  "year_by_year": {
+   "2023": {
+    "n_ep": 2,
+    "net_bps": -597.36,
+    "total_bps": -1194.7,
+    "t": null
+   },
+   "2024": {
+    "n_ep": 29,
+    "net_bps": 70.07,
+    "total_bps": 2032.0,
+    "t": 0.5
+   },
+   "2025": {
+    "n_ep": 24,
+    "net_bps": -221.93,
+    "total_bps": -5326.3,
+    "t": -1.05
+   },
+   "2026": {
+    "n_ep": 14,
+    "net_bps": 69.47,
+    "total_bps": 972.6,
+    "t": 0.64
+   }
+  },
+  "ex_best_year": {
+   "dropped_year": 2024,
+   "n_ep": 40,
+   "net_bps": -138.71,
+   "t": -0.99
+  },
+  "n_required": 8394.7,
+  "event_rate_per_week_last6m": 0.538,
+  "eta_forward_confirmation_days": 109130.5,
+  "eta_forward_confirmation_years": 298.78,
+  "sample_start": "2023-11-27",
+  "sample_end": "2026-07-31",
+  "trading_days_active": 562,
+  "calendar_span_days": 977
+ }
+}

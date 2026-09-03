@@ -1,0 +1,98 @@
+# configs/live_alpha_runners.yaml — mapping alpha_id -> producteur de signal.
+#
+# Fichier DÉLIBÉRÉMENT SÉPARÉ de configs/live_alpha_registry.yaml.
+# Raison : provenance.alpha_spec_hash() hashe l'entrée complète d'un alpha
+# dans le registre, et config_hash() hashe le fichier registre entier. Ajouter
+# un champ purement opérationnel (quel script tourne, à quelle cadence) DANS
+# le registre ferait bouger ces deux hashs et enverrait un faux signal de
+# "changement de spec" dans la piste d'audit de chaque décision. La cadence
+# d'ordonnancement n'est pas une propriété économique de l'alpha : elle vit ici.
+#
+# `cadence_minutes` = intervalle minimum entre deux exécutions réussies du
+# producteur. L'orchestrateur (scripts/run_live_alpha_lab_cycle.py) saute un
+# producteur qui n'est pas dû. Tous les producteurs sont idempotents
+# (append-only avec déduplication sur (event_time, symbol, direction)), donc
+# tourner trop souvent est sans danger — c'est juste du CPU gaspillé.
+#
+# La cadence suit la fréquence ÉCONOMIQUE du mécanisme, pas une envie :
+#   - familles événementielles (cascades, short-covering, positionnement) :
+#     l'événement peut tomber n'importe quand -> cadence courte.
+#   - familles cross-sectionnelles (momentum, Amihud) : rebalance quotidienne
+#     ou hebdomadaire par construction -> cadence longue, rien à gagner à
+#     tourner plus vite.
+
+schema_version: 1
+
+runners:
+
+  # ── familles événementielles : cadence courte ────────────────────────────
+  - alpha_id: LIQ_CASCADE_REPEAT_V1
+    script: scripts/run_liq_cascade_repeat_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: position
+
+  # Variante systémique du précédent (candidat LIQ_REPEAT_DENSITY, validé
+  # indépendamment le 2026-09-02). Même détecteur, même cadence : les deux
+  # tournent côte à côte, leur écart forward mesure la valeur du filtre densité.
+  - alpha_id: LIQ_CASCADE_REPEAT_SYSTEMIC_V1
+    script: scripts/run_liq_cascade_repeat_systemic_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: position
+
+  - alpha_id: LIQ_CASCADE_FAR_FROM_LOW_V1
+    script: scripts/run_liq_cascade_far_from_low_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: position
+
+  - alpha_id: SHORT_COVERING_CONTINUATION_V1
+    script: scripts/run_short_covering_continuation_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: position
+
+  # WHALE_LSR_SCREEN_V1 n'est pas un alpha de position : c'est le GATE lu par
+  # le portefeuille (gate.active_screen_symbols). Il doit donc tourner AVANT
+  # l'agrégation de portefeuille -- garanti par l'ordre producteurs -> portfolio
+  # de l'orchestrateur, pas par cet ordre de fichier.
+  - alpha_id: WHALE_LSR_SCREEN_V1
+    script: scripts/run_whale_lsr_screen_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: gate
+
+  # ── overlay de risque : cadence horaire ──────────────────────────────────
+  - alpha_id: VOL_FORECAST_LAYER_V1
+    script: scripts/run_vol_forecast_layer_shadow.py
+    cadence_minutes: 60
+    timeout_sec: 900
+    role: overlay
+
+  # ── relative value : l'événement est rare (~15-18/an/actif) mais la donnée
+  #    de base (funding/basis) bouge en continu ────────────────────────────
+  - alpha_id: FUNDING_BASIS_DISAGREEMENT_V2
+    script: scripts/run_funding_basis_disagreement_shadow.py
+    cadence_minutes: 60
+    timeout_sec: 900
+    role: position
+
+  # ── cross-sectional : rebalance quotidienne/hebdomadaire par construction ─
+  - alpha_id: CROSS_SECTIONAL_MOMENTUM_LIVE_V1
+    script: scripts/run_cross_sectional_momentum_live_shadow.py
+    cadence_minutes: 360
+    timeout_sec: 1800
+    role: position
+
+  - alpha_id: CROSS_SECTIONAL_MOMENTUM_LIVE_V2
+    script: scripts/run_cross_sectional_momentum_live_v2_shadow.py
+    cadence_minutes: 360
+    timeout_sec: 1800
+    role: position
+
+  - alpha_id: AMIHUD_ILLIQUIDITY_PREMIUM_V1
+    script: scripts/run_amihud_illiquidity_premium_shadow.py
+    cadence_minutes: 360
+    timeout_sec: 1800
+    role: position

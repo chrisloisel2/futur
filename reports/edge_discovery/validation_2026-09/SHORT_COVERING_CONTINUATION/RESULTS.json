@@ -1,0 +1,95 @@
+{
+  "candidate_id": "SHORT_COVERING_CONTINUATION",
+  "family": "liquidation",
+  "verdict": "NEEDS_MORE_RESEARCH",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "COST_FRAGILE",
+    "MECHANISM_CONFIRMED_PRODUCT_NOT"
+  ],
+  "discovery_net_bps": 9.2,
+  "discovery_claim_detail": "excess vs baseline +9.2 plein / +19.0 OOS ; net14 produit -2.72 plein / +2.3 OOS",
+  "validation_net_bps": 2.53,
+  "validation_net_bps_stress28": -11.47,
+  "validation_excess_bps": 17.06,
+  "t_stat_declustered": 2.97,
+  "t_stat_arm_A_vs_zero": 0.405,
+  "bootstrap_p05": -7.82,
+  "n_raw": 22330,
+  "n_independent_L1": null,
+  "n_independent_L2": 1490,
+  "n_independent_L3": 1582,
+  "n_validation_independent": 1582,
+  "l3_definition": "jour calendaire UTC (l'unite prereg 'episode chaine <4h' etait degeneree : 5 clusters)",
+  "robustness_across_cluster_units": {
+    "L3_day": {
+      "excess": 17.06,
+      "t": 2.97,
+      "clusters": 1582
+    },
+    "L3_week": {
+      "excess": 17.06,
+      "t": 3.223,
+      "clusters": 230
+    },
+    "L3_month": {
+      "excess": 17.06,
+      "t": 2.938,
+      "clusters": 55
+    }
+  },
+  "year_by_year": {
+    "2022": -16.17,
+    "2023": 24.06,
+    "2024": 28.11,
+    "2025": 29.71,
+    "2026": 10.75
+  },
+  "n_years_positive": 4,
+  "n_years": 5,
+  "perturbations_excess": {
+    "PRIMARY": 17.06,
+    "P1_quintile": 9.53,
+    "P2_window360": 16.55,
+    "P3_live_score": 17.06,
+    "P4_fwd1h": 4.7,
+    "P4_fwd8h": 28.5,
+    "P6_cost150": 17.06,
+    "P8_oi_notional": 35.55,
+    "P5_ex2022": 24.3
+  },
+  "overlap_with_existing_live": {
+    "cascade_population_share": 0.0321,
+    "ledger_agreement": {
+      "n_ledger_rows": 377,
+      "n_ledger_hours": 0,
+      "n_mine_in_common_window": 0,
+      "n_agreed": 0,
+      "ledger_window": [
+        "2026-08-28 17:00:00+00:00",
+        "2026-09-03 08:00:00+00:00"
+      ],
+      "note": "accord = m\u00eame (symbole, heure UTC) class\u00e9 SHORT_COVERING"
+    }
+  },
+  "deviation_from_prereg": "L3 pr\u00e9enregistr\u00e9 (\u00e9pisode cha\u00een\u00e9 gap<4h) d\u00e9g\u00e9n\u00e9r\u00e9 sur ce panel dense : 22330 signaux -> 5 clusters. Remplac\u00e9 par jour/semaine/mois calendaires, fix\u00e9s avant relecture des r\u00e9sultats.",
+  "population": {
+    "n_bars": 1447224,
+    "n_symbols": 48,
+    "n_arm_A": 22330,
+    "arm_A_share": 0.01543,
+    "window": [
+      "2022-01-01 00:00:00+00:00",
+      "2026-07-31 19:00:00+00:00"
+    ]
+  },
+  "eta_conservative": "non defini (pas d'edge positif a dimensionner sur le produit)",
+  "minimum_calendar_days": 60,
+  "validation_caveats": "Le MECANISME se reproduit et est le plus stable de la vague : excess A-B = +17.06 bps avec t = 2.94-3.22 sur les TROIS unites de cluster (jour/semaine/mois), 4/5 annees positives et les 3 dernieres les plus fortes. Le score combinateur min() de la spec live (P3) selectionne exactement la meme population que la conjonction decile -> la reconstruction est FIDELE, ce n'est pas un cas LIQ_CASCADE_FAR_FROM_LOW. MAIS le produit long autonome ne bat pas zero : +2.53 bps net14 (t=0.41, bootstrap p05 negatif), -11.47 au cout de stress. Sa valeur est celle d'un signal RELATIF (overlay/filtre cross-sectionnel), pas d'un long directionnel. ECART AU PREREG declare : l'unite L3 preenregistree (episode chaine gap<4h) est degeneree sur un panel de barres denses (22330 signaux -> 5 clusters) et a ete remplacee par jour/semaine/mois, fixes avant relecture. Chevauchement cascade 3.2% seulement. Le test d'accord avec le ledger live n'a PAS pu etre fait : data_v2 s'arrete au 2026-07-31, le ledger commence au 2026-08-28, zero heure commune.",
+  "recommended_next_step": "MORE_RESEARCH",
+  "live_status_recommendation": "GARDER SIGNAL_SHADOW inchange (ni upgrade ni downgrade)",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/SHORT_COVERING_CONTINUATION/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03"
+}

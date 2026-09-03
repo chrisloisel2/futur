@@ -1,0 +1,587 @@
+{
+ "1d": {
+  "fear": {
+   "name": "M1_1d_fear",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 647,
+   "n_independent_L1": 647,
+   "n_independent_L2": 647,
+   "n_independent_L3": 94,
+   "gross_bps": 63.75,
+   "net_bps": 49.75,
+   "net_bps_stress28": 35.75,
+   "sd_episode_bps": 214.61,
+   "t_stat_declustered": 2.248,
+   "bootstrap_ci95": [
+    7.61,
+    94.35
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 60,
+     "n_ep": 10,
+     "net_bps": 39.69
+    },
+    "2019": {
+     "n_raw": 28,
+     "n_ep": 7,
+     "net_bps": 149.01
+    },
+    "2020": {
+     "n_raw": 48,
+     "n_ep": 2,
+     "net_bps": 50.42
+    },
+    "2021": {
+     "n_raw": 103,
+     "n_ep": 13,
+     "net_bps": 116.87
+    },
+    "2022": {
+     "n_raw": 105,
+     "n_ep": 18,
+     "net_bps": 41.06
+    },
+    "2024": {
+     "n_raw": 70,
+     "n_ep": 11,
+     "net_bps": 84.9
+    },
+    "2025": {
+     "n_raw": 138,
+     "n_ep": 20,
+     "net_bps": -13.17
+    },
+    "2026": {
+     "n_raw": 95,
+     "n_ep": 14,
+     "net_bps": 22.9
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2019,
+    "net_bps": 41.77,
+    "n_ep": 87,
+    "t": 2.11
+   },
+   "year_concentration_frac": 0.286,
+   "n_required": 585,
+   "event_rate_per_week_6m": 0.54,
+   "eta_forward_confirmation_days": 7605.0,
+   "eta_forward_confirmation_years": 20.82
+  },
+  "greed": {
+   "name": "M1_1d_greed",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 536,
+   "n_independent_L1": 536,
+   "n_independent_L2": 536,
+   "n_independent_L3": 65,
+   "gross_bps": -16.03,
+   "net_bps": -30.03,
+   "net_bps_stress28": -44.03,
+   "sd_episode_bps": 179.57,
+   "t_stat_declustered": -1.348,
+   "bootstrap_ci95": [
+    -70.5,
+    18.72
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 10,
+     "n_ep": 1,
+     "net_bps": -126.94
+    },
+    "2020": {
+     "n_raw": 131,
+     "n_ep": 10,
+     "net_bps": -67.7
+    },
+    "2021": {
+     "n_raw": 32,
+     "n_ep": 4,
+     "net_bps": 215.79
+    },
+    "2022": {
+     "n_raw": 3,
+     "n_ep": 2,
+     "net_bps": -307.92
+    },
+    "2023": {
+     "n_raw": 203,
+     "n_ep": 12,
+     "net_bps": 4.57
+    },
+    "2024": {
+     "n_raw": 138,
+     "n_ep": 22,
+     "net_bps": -8.4
+    },
+    "2025": {
+     "n_raw": 19,
+     "n_ep": 16,
+     "net_bps": -68.16
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": -42.25,
+    "n_ep": 62,
+    "t": -2.5
+   },
+   "year_concentration_frac": 0.302,
+   "n_required": 1123,
+   "event_rate_per_week_6m": 0.5,
+   "eta_forward_confirmation_days": 15722.0,
+   "eta_forward_confirmation_years": 43.04
+  },
+  "mid": {
+   "name": "M1_1d_mid",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 1464,
+   "n_independent_L1": 1464,
+   "n_independent_L2": 1464,
+   "n_independent_L3": 160,
+   "gross_bps": -14.21,
+   "net_bps": -28.21,
+   "net_bps_stress28": -42.21,
+   "sd_episode_bps": 189.61,
+   "t_stat_declustered": -1.882,
+   "bootstrap_ci95": [
+    -59.13,
+    1.84
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 80,
+     "n_ep": 12,
+     "net_bps": -176.47
+    },
+    "2019": {
+     "n_raw": 87,
+     "n_ep": 8,
+     "net_bps": -76.09
+    },
+    "2020": {
+     "n_raw": 187,
+     "n_ep": 12,
+     "net_bps": 31.29
+    },
+    "2021": {
+     "n_raw": 230,
+     "n_ep": 17,
+     "net_bps": -42.63
+    },
+    "2022": {
+     "n_raw": 257,
+     "n_ep": 20,
+     "net_bps": -95.73
+    },
+    "2023": {
+     "n_raw": 162,
+     "n_ep": 12,
+     "net_bps": 87.52
+    },
+    "2024": {
+     "n_raw": 157,
+     "n_ep": 33,
+     "net_bps": -26.05
+    },
+    "2025": {
+     "n_raw": 208,
+     "n_ep": 36,
+     "net_bps": 1.05
+    },
+    "2026": {
+     "n_raw": 96,
+     "n_ep": 14,
+     "net_bps": 19.79
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "net_bps": -36.85,
+    "n_ep": 149,
+    "t": -2.55
+   },
+   "year_concentration_frac": 0.266,
+   "n_required": 1418,
+   "event_rate_per_week_6m": 0.5,
+   "eta_forward_confirmation_days": 19852.0,
+   "eta_forward_confirmation_years": 54.35
+  },
+  "spread_fear_minus_greed": {
+   "comparison": "fear_bucket minus greed_bucket",
+   "net_A": 49.75,
+   "net_B": -30.03,
+   "spread_bps": 79.78,
+   "nA_L3": 94,
+   "nB_L3": 65
+  },
+  "baseline_always_long": {
+   "name": "M1_1d_baseline_alwayslong",
+   "note": "unconditional drift, same population",
+   "n_raw": 2647,
+   "n_independent_L1": 2647,
+   "n_independent_L2": 2647,
+   "n_independent_L3": 2647,
+   "gross_bps": 9.43,
+   "net_bps": -4.57,
+   "net_bps_stress28": -18.57,
+   "sd_episode_bps": 320.84,
+   "t_stat_declustered": -0.733,
+   "bootstrap_ci95": [
+    -16.7,
+    7.32
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 150,
+     "n_ep": 150,
+     "net_bps": -54.32
+    },
+    "2019": {
+     "n_raw": 115,
+     "n_ep": 115,
+     "net_bps": -40.98
+    },
+    "2020": {
+     "n_raw": 366,
+     "n_ep": 366,
+     "net_bps": 33.14
+    },
+    "2021": {
+     "n_raw": 365,
+     "n_ep": 365,
+     "net_bps": 8.32
+    },
+    "2022": {
+     "n_raw": 365,
+     "n_ep": 365,
+     "net_bps": -37.24
+    },
+    "2023": {
+     "n_raw": 365,
+     "n_ep": 365,
+     "net_bps": 15.52
+    },
+    "2024": {
+     "n_raw": 365,
+     "n_ep": 365,
+     "net_bps": 10.28
+    },
+    "2025": {
+     "n_raw": 365,
+     "n_ep": 365,
+     "net_bps": -13.34
+    },
+    "2026": {
+     "n_raw": 191,
+     "n_ep": 191,
+     "net_bps": -28.12
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2020,
+    "net_bps": -10.63,
+    "n_ep": 2281,
+    "t": -1.66
+   },
+   "year_concentration_frac": 0.222,
+   "n_required": 154468,
+   "event_rate_per_week_6m": 7.04,
+   "eta_forward_confirmation_days": 153623.9,
+   "eta_forward_confirmation_years": 420.6
+  }
+ },
+ "7d": {
+  "fear": {
+   "name": "M1_7d_fear",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 95,
+   "n_independent_L1": 95,
+   "n_independent_L2": 95,
+   "n_independent_L3": 27,
+   "gross_bps": 160.99,
+   "net_bps": 146.99,
+   "net_bps_stress28": 132.99,
+   "sd_episode_bps": 469.0,
+   "t_stat_declustered": 1.629,
+   "bootstrap_ci95": [
+    -17.21,
+    335.75
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 10,
+     "n_ep": 3,
+     "net_bps": 60.51
+    },
+    "2019": {
+     "n_raw": 6,
+     "n_ep": 2,
+     "net_bps": -101.27
+    },
+    "2020": {
+     "n_raw": 7,
+     "n_ep": 1,
+     "net_bps": 313.52
+    },
+    "2021": {
+     "n_raw": 12,
+     "n_ep": 2,
+     "net_bps": 765.72
+    },
+    "2022": {
+     "n_raw": 16,
+     "n_ep": 4,
+     "net_bps": -194.76
+    },
+    "2024": {
+     "n_raw": 13,
+     "n_ep": 4,
+     "net_bps": 383.61
+    },
+    "2025": {
+     "n_raw": 17,
+     "n_ep": 6,
+     "net_bps": 210.41
+    },
+    "2026": {
+     "n_raw": 14,
+     "n_ep": 6,
+     "net_bps": 55.43
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": 97.49,
+    "n_ep": 25,
+    "t": 1.19
+   },
+   "year_concentration_frac": 0.25,
+   "n_required": 320,
+   "event_rate_per_week_6m": 0.23,
+   "eta_forward_confirmation_days": 9706.7,
+   "eta_forward_confirmation_years": 26.58
+  },
+  "greed": {
+   "name": "M1_7d_greed",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 76,
+   "n_independent_L1": 76,
+   "n_independent_L2": 76,
+   "n_independent_L3": 19,
+   "gross_bps": -46.62,
+   "net_bps": -60.62,
+   "net_bps_stress28": -74.62,
+   "sd_episode_bps": 572.16,
+   "t_stat_declustered": -0.462,
+   "bootstrap_ci95": [
+    -323.07,
+    177.09
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 1,
+     "n_ep": 1,
+     "net_bps": -1204.11
+    },
+    "2020": {
+     "n_raw": 19,
+     "n_ep": 3,
+     "net_bps": 233.54
+    },
+    "2021": {
+     "n_raw": 3,
+     "n_ep": 2,
+     "net_bps": 357.12
+    },
+    "2023": {
+     "n_raw": 29,
+     "n_ep": 4,
+     "net_bps": 175.7
+    },
+    "2024": {
+     "n_raw": 20,
+     "n_ep": 7,
+     "net_bps": -144.97
+    },
+    "2025": {
+     "n_raw": 4,
+     "n_ep": 4,
+     "net_bps": -189.86
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": -91.35,
+    "n_ep": 18,
+    "t": -0.67
+   },
+   "year_concentration_frac": 0.236,
+   "n_required": 2798,
+   "event_rate_per_week_6m": 0.15,
+   "eta_forward_confirmation_days": 127309.0,
+   "eta_forward_confirmation_years": 348.55
+  },
+  "mid": {
+   "name": "M1_7d_mid",
+   "note": "unconditional long BTC inside the bucket",
+   "n_raw": 207,
+   "n_independent_L1": 207,
+   "n_independent_L2": 207,
+   "n_independent_L3": 47,
+   "gross_bps": -137.41,
+   "net_bps": -151.41,
+   "net_bps_stress28": -165.41,
+   "sd_episode_bps": 673.57,
+   "t_stat_declustered": -1.541,
+   "bootstrap_ci95": [
+    -366.0,
+    29.34
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 10,
+     "n_ep": 5,
+     "net_bps": -818.06
+    },
+    "2019": {
+     "n_raw": 10,
+     "n_ep": 2,
+     "net_bps": -484.26
+    },
+    "2020": {
+     "n_raw": 27,
+     "n_ep": 4,
+     "net_bps": 171.82
+    },
+    "2021": {
+     "n_raw": 37,
+     "n_ep": 4,
+     "net_bps": 82.89
+    },
+    "2022": {
+     "n_raw": 36,
+     "n_ep": 4,
+     "net_bps": -262.06
+    },
+    "2023": {
+     "n_raw": 23,
+     "n_ep": 4,
+     "net_bps": 301.46
+    },
+    "2024": {
+     "n_raw": 19,
+     "n_ep": 10,
+     "net_bps": 54.14
+    },
+    "2025": {
+     "n_raw": 31,
+     "n_ep": 10,
+     "net_bps": 32.22
+    },
+    "2026": {
+     "n_raw": 14,
+     "n_ep": 6,
+     "net_bps": -568.5
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2023,
+    "net_bps": -166.79,
+    "n_ep": 44,
+    "t": -1.6
+   },
+   "year_concentration_frac": 0.324,
+   "n_required": 622,
+   "event_rate_per_week_6m": 0.23,
+   "eta_forward_confirmation_days": 18867.3,
+   "eta_forward_confirmation_years": 51.66
+  },
+  "spread_fear_minus_greed": {
+   "comparison": "fear_bucket minus greed_bucket",
+   "net_A": 146.99,
+   "net_B": -60.62,
+   "spread_bps": 207.61,
+   "nA_L3": 27,
+   "nB_L3": 19
+  },
+  "baseline_always_long": {
+   "name": "M1_7d_baseline_alwayslong",
+   "note": "unconditional drift, same population",
+   "n_raw": 378,
+   "n_independent_L1": 378,
+   "n_independent_L2": 378,
+   "n_independent_L3": 54,
+   "gross_bps": 68.1,
+   "net_bps": 54.1,
+   "net_bps_stress28": 40.1,
+   "sd_episode_bps": 344.24,
+   "t_stat_declustered": 1.155,
+   "bootstrap_ci95": [
+    -36.9,
+    146.62
+   ],
+   "year_by_year": {
+    "2018": {
+     "n_raw": 21,
+     "n_ep": 3,
+     "net_bps": -280.55
+    },
+    "2019": {
+     "n_raw": 16,
+     "n_ep": 3,
+     "net_bps": -166.02
+    },
+    "2020": {
+     "n_raw": 53,
+     "n_ep": 8,
+     "net_bps": 372.92
+    },
+    "2021": {
+     "n_raw": 52,
+     "n_ep": 9,
+     "net_bps": 33.1
+    },
+    "2022": {
+     "n_raw": 52,
+     "n_ep": 8,
+     "net_bps": -141.62
+    },
+    "2023": {
+     "n_raw": 52,
+     "n_ep": 9,
+     "net_bps": 224.8
+    },
+    "2024": {
+     "n_raw": 52,
+     "n_ep": 8,
+     "net_bps": 168.77
+    },
+    "2025": {
+     "n_raw": 52,
+     "n_ep": 8,
+     "net_bps": 2.53
+    },
+    "2026": {
+     "n_raw": 28,
+     "n_ep": 4,
+     "net_bps": -107.61
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2020,
+    "net_bps": 7.55,
+    "n_ep": 48,
+    "t": 0.18
+   },
+   "year_concentration_frac": 0.311,
+   "n_required": 1272,
+   "event_rate_per_week_6m": 0.15,
+   "eta_forward_confirmation_days": 57876.0,
+   "eta_forward_confirmation_years": 158.46
+  }
+ }
+}

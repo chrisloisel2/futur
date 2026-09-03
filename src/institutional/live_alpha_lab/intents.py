@@ -56,8 +56,16 @@ def _expiry(ts: pd.Timestamp, hours: float) -> pd.Timestamp:
 
 def _liq_cascade_intents(alpha_id: str, family: str, risk_bucket: str,
                          correlation_family: str, df: pd.DataFrame) -> List[PortfolioIntent]:
-    """LIQ_CASCADE_REPEAT_V1 / LIQ_CASCADE_FAR_FROM_LOW_V1 : conviction pleine
-    (pas de gradient de sizing dans la spec gelée), horizon fwd_4h fixe."""
+    """LIQ_CASCADE_REPEAT_V1 / LIQ_CASCADE_REPEAT_SYSTEMIC_V1 /
+    LIQ_CASCADE_FAR_FROM_LOW_V1 : conviction pleine (pas de gradient de sizing
+    dans les specs gelées), horizon fwd_4h fixe.
+
+    LIQ_CASCADE_REPEAT_SYSTEMIC_V1 partage cet adaptateur parce qu'il partage
+    exactement le schéma de décision du parent (event_time/symbol, direction
+    LONG, fwd_4h) : sa restriction au régime de densité systémique est faite en
+    AMONT, dans son runner, pas ici. Le portefeuille ne doit pas avoir à
+    connaître la règle de densité — il ne voit qu'un flux de décisions déjà
+    filtré, comme pour tout autre alpha."""
     out = []
     for _, r in df.iterrows():
         ts = pd.Timestamp(r["event_time"])
@@ -170,6 +178,7 @@ def _amihud_illiquidity_intents(alpha_id: str, family: str, risk_bucket: str,
 # alpha_id -> (family, risk_bucket, correlation_family, adapter_fn)
 ADAPTERS: Dict[str, Callable] = {
     "LIQ_CASCADE_REPEAT_V1": _liq_cascade_intents,
+    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": _liq_cascade_intents,
     "LIQ_CASCADE_FAR_FROM_LOW_V1": _liq_cascade_intents,
     "SHORT_COVERING_CONTINUATION_V1": _short_covering_intents,
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": _cross_sectional_intents,

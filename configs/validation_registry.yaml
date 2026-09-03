@@ -323,6 +323,377 @@ candidates:
       composantes -- OI-down reste une preuve corroborante valable pour la
       robustesse de l'alpha EXISTANT, pas un nouvel alpha_id.
 
+  # ══════════════════════════ WAVE 2 (2026-09-03) — validation indépendante en cours ══
+  # Briefing : reports/edge_discovery/validation_2026-09/VALIDATION_BRIEFING_WAVE2.md
+  # Tous les candidats PROMISING round 2/3 jamais validés + les alphas shadow RECONSTRUCTED
+  # jamais validés indépendamment. Statut VALIDATING = réimplémentation en cours ; les champs
+  # de résultat sont ajoutés par le coordinateur depuis <dossier>/RESULTS.json à l'atterrissage.
+
+  - candidate_id: LIQ_CASCADE_FAR_FROM_LOW
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR
+    economic_mechanism: >
+      Reversion post-cascade plus forte quand le prix est "loin du plus bas local"
+      (dist_low_24h élevé) que "au plus bas" -- la cascade loin du support est un
+      overshoot, celle au support une vraie rupture.
+    source_round: round2
+    source_worker: W2 (liquidation_leverage), row 4
+    discovery_result: "+15.5 -> +73.3bps OOS (fwd_4h), PF 1.18-1.98, les deux variantes concordent, near-low flippe négatif OOS"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: null
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_CASCADE_FAR_FROM_LOW/REPORT.md
+    discovery_net_bps: 15.5
+    validation_net_bps: -6.76
+    validation_net_bps_stress28: -20.76
+    n_validation_independent: 1620   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: -1.192
+    eta_conservative: "unbounded"
+    recommended_next_step: DOWNGRADE_LIVE_STATUS
+    secondary_tags: ["EVIDENCE_ARTEFACT"]
+    validation_result: >
+      La réimplémentation REPRODUIT exactement le chiffre publié sous la convention de la
+      découverte (+6.84 net14 plein / +20.21 OOS 2025+, vs +6.7/+19.84 du freeze_spec) : il
+      n'y a AUCUN désaccord d'implémentation. Le rejet porte sur l'inférence : SE sous-estimée
+      x1.9-2.6 par le comptage de jambes corrélées, t_cluster tombe à 0.90 (far seul) et 1.30
+      (far-near). Le SIGNE dépend de l'unité de pondération (positif par événement, négatif
+      par épisode) -> l'affirmation 'far bat near' n'est établie dans AUCUNE direction.
+      far-baseline est négatif à tous les gaps d'épisode >= 1h. 3/5 années positives, pas 5/6.
+      Ce qui reste vrai : le fade INCONDITIONNEL de cascade LONG est solide (+20.15 net14 au
+      niveau épisode).
+    validation_wave: 2
+    validation_worker: V2
+    existing_live_alpha: LIQ_CASCADE_FAR_FROM_LOW_V1   # RECONSTRUCTED (seuil 0.05 = 75e centile reconstruit), jamais validé indépendamment
+    data_available: "data/events/{liq_cascade,cascade}_dataset.parquet"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/LIQ_CASCADE_FAR_FROM_LOW/REPORT.md
+
+  - candidate_id: BTC_LEAD_ALT_CASCADE
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR   # chevauchement avec LIQ_CASCADE_REPEAT_V1 à mesurer en priorité
+    economic_mechanism: >
+      Un choc BTC précède/co-occurre avec une cascade alt -- la cascade alt "expliquée"
+      par BTC est un overshoot de contagion qui revert, pas une rupture idiosyncratique.
+    source_round: round3
+    source_worker: W1 (event_sequences), w1_a12
+    discovery_result: "N_indep 3097, net14 +33.0 / net28 +19.0, PF 1.41, positif 5/6 années"
+    current_status: VALIDATED_FOR_FORWARD   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: true
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/BTC_LEAD_ALT_CASCADE/REPORT.md
+    discovery_net_bps: 33.0
+    validation_net_bps: 46.87
+    validation_net_bps_stress28: 32.87
+    n_validation_independent: 259   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: 3.315
+    eta_conservative: "3549 days (~9.7 years)"
+    recommended_next_step: FREEZE_AND_LAUNCH_SHADOW
+    secondary_tags: ["UNCONFIRMABLE_IN_HORIZON"]
+    validation_result: >
+      Passe les 5 critères préenregistrés dans les DEUX conventions de pondération (épisode
+      t=3.32 ; événement t_cluster=1.85). SE naïve surestimée x2.2 -> preuve 12x plus mince
+      que publiée (259 épisodes vs N_indep 3097 réclamé), mais l'edge survit. 2025 est la
+      seule année négative (-40.0 bps) et c'est la plus récente complète : à surveiller en
+      priorité. Hors 2024 (meilleure année) t tombe à 1.41. ETA de reconfirmation ~9.7 ans ->
+      monitoring forward sur survie signe/coût/mécanisme, pas sur significativité fraîche.
+    validation_wave: 2
+    validation_worker: V2
+    existing_live_alpha: null
+    data_available: "data/events + data/enriched (BTC)"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/BTC_LEAD_ALT_CASCADE/REPORT.md
+
+  - candidate_id: XSEC_MOMENTUM_HORIZON_EXTENSION
+    family: cross_sectional
+    overlap_family: CROSS_SECTIONAL_XSMOM
+    economic_mechanism: >
+      Momentum cross-sectionnel à horizons 14 j et 30 j (long-only top-quintile, et LS)
+      -- même facteur que le 7 j déjà en shadow, ou prime distincte à horizon plus long
+      avec turnover plus faible ?
+    source_round: round3
+    source_worker: W2 (cross_sectional)
+    discovery_result: "14D_LO +199.3 net (N_indep 167), 30D_LO +462.8 (N_indep 78), 14D_LS +59.5, 4/7 années+"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/XSEC_MOMENTUM_HORIZON_EXTENSION/REPORT.md
+    discovery_net_bps: 199.3
+    validation_net_bps: 51.78
+    validation_net_bps_stress28: 37.78
+    n_validation_independent: 77   # mois calendaire de la date de rebalancement
+    t_stat_declustered: 0.85
+    eta_conservative: "78698 days (~215.5 years)"
+    recommended_next_step: REJECT
+    secondary_tags: ["UNCONFIRMABLE_IN_HORIZON"]
+    validation_result: >
+      Excess +51.78 net14, t_L3=0.85, p05=-48.76 -> échec du critère 1. Le raw vs zéro
+      (+254.53) dépasse même la réclamation (+199.3), ce qui confirme que le chiffre publié
+      mesurait surtout la dérive inconditionnelle du panier alt, pas le mécanisme. P1 (30D_LO)
+      est NÉGATIF (-66.73) alors que la découverte réclamait +462.8 : la variante 30 jours ne
+      se reproduit pas du tout. Direction stable (14/14 ancrages positifs, pooled +60.07) mais
+      magnitude non significative.
+    validation_wave: 2
+    validation_worker: V3
+    existing_live_alpha: CROSS_SECTIONAL_MOMENTUM_LIVE_V2   # même famille, horizon 7 j
+    data_available: "data_v2/normalized/perp_ohlcv (312 sym PIT) + listings_calendar"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/XSEC_MOMENTUM_HORIZON_EXTENSION/REPORT.md
+
+  - candidate_id: XSEC_RESIDUAL_MOMENTUM_14D
+    family: cross_sectional
+    overlap_family: CROSS_SECTIONAL_XSMOM
+    economic_mechanism: >
+      Momentum résiduel (beta-BTC strippé) à 14 j -- tendance idiosyncratique,
+      indépendante du beta marché.
+    source_round: round3
+    source_worker: W2 (cross_sectional)
+    discovery_result: "+64.8 net, N_indep 167, PF 1.34, 5/7 années+"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/XSEC_RESIDUAL_MOMENTUM_14D/REPORT.md
+    discovery_net_bps: 64.8
+    validation_net_bps: 31.5
+    validation_net_bps_stress28: 17.5
+    n_validation_independent: 77   # mois calendaire de la date de rebalancement
+    t_stat_declustered: 0.626
+    eta_conservative: "145047 days (~397.1 years)"
+    recommended_next_step: REJECT
+    secondary_tags: ["UNCONFIRMABLE_IN_HORIZON"]
+    validation_result: >
+      Excess sur l'univers éligible +31.50 net14 mais t_L3=0.63 et bootstrap p05=-52.10 : non
+      significatif. Surtout, CE N'EST PAS UN FACTEUR DISTINCT : corrélation de rang avec le
+      momentum 14j brut = 0.951, corrélation des rendements de portefeuille = 0.928,
+      recouvrement Jaccard des jambes longues = 0.82. Le test apparié (resid - brut) sur les
+      mêmes dates donne -21.51 bps (t=-1.00) : le strip de beta n'AMÉLIORE PAS le momentum
+      brut, il le dégrade légèrement. Le +64.8 réclamé était mesuré contre zéro, pas contre
+      l'univers.
+    validation_wave: 2
+    validation_worker: V3
+    existing_live_alpha: null
+    data_available: "data_v2/normalized/perp_ohlcv + listings_calendar"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/XSEC_RESIDUAL_MOMENTUM_14D/REPORT.md
+
+  - candidate_id: XSEC_RELATIVE_LEVERAGE_14D
+    family: cross_sectional
+    overlap_family: LEVERAGE_CROWDING_FACTOR
+    economic_mechanism: >
+      Rang cross-sectionnel du levier relatif (OI / vol 30 j) -> 14 j fwd, long high /
+      short low -- prime de risque de liquidation / crowding de levier.
+    source_round: round3
+    source_worker: W2 (cross_sectional)
+    discovery_result: "+73.3 net, N_indep 121, PF 1.6, 5/6 années+"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V4
+    existing_live_alpha: null
+    data_available: "data_v2 perp_ohlcv + OI (binance_vision_metrics / event_feature_panel)"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/XSEC_RELATIVE_LEVERAGE_14D/REPORT.md
+
+  - candidate_id: CROSS_ASSET_OI_BUILDUP_FADE
+    family: relative_value
+    overlap_family: LEVERAGE_CROWDING_FACTOR   # même facteur que XSEC_RELATIVE_LEVERAGE_14D ? à mesurer
+    economic_mechanism: >
+      Rang cross-sectionnel de la variation d'OI sur 7 j, FADE -- le build-up de
+      positionnement se dénoue.
+    source_round: round3
+    source_worker: W3 (relative_value), D-OICHGRANK-G_fade-7D
+    discovery_result: "+32.5 net / +18.4 stress28, N_indep 241, PF 1.38, 4/6 années, capacité MED ($154M)"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V4
+    existing_live_alpha: null
+    data_available: "OI panel (binance_vision_metrics / event_feature_panel)"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/CROSS_ASSET_OI_BUILDUP_FADE/REPORT.md
+
+  - candidate_id: SECTOR_RELATIVE_STRENGTH_REVERSAL
+    family: relative_value
+    overlap_family: SECTOR_RELATIVE
+    economic_mechanism: >
+      Rang de la force relative 7 j vs le secteur du nom (carte sectorielle), REVERSAL
+      -- la sur/sous-performance idiosyncratique intra-secteur revient à la moyenne.
+    source_round: round3
+    source_worker: W3 (relative_value), D-RVSECTOR-C_rev-7D
+    discovery_result: "+46.4 net / +32.4 stress28, N_indep 324, PF 1.34, 5/7 années, capacité MED ($268M)"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: true
+    validation_report: reports/edge_discovery/validation_2026-09/SECTOR_ROTATION/REPORT.md
+    discovery_net_bps: 46.4
+    validation_net_bps: -21.72
+    validation_net_bps_stress28: -35.72
+    n_validation_independent: 74   # mois calendaire de la date de rebalancement
+    t_stat_declustered: -1.327
+    eta_conservative: "unbounded"
+    recommended_next_step: REJECT
+    secondary_tags: ["COST_FRAGILE", "REGIME_DEPENDENT", "UNCONFIRMABLE_IN_HORIZON"]
+    validation_result: >
+      Excess -21.72 net14 (t=-1.33) : NÉGATIF là où la découverte réclamait +46.4. Le signal
+      de reversal intra-secteur a une corrélation de rang de 0.86 avec le momentum 7j — ce
+      n'est pas un facteur sectoriel, c'est du momentum inversé, et le parier à l'envers perd.
+      P1 (carte grossière) aggrave (-35.88, t=-2.03), donc le signe négatif n'est pas un
+      artefact de carte.
+    validation_wave: 2
+    validation_worker: V5
+    existing_live_alpha: null
+    data_available: "data_v2 perp_ohlcv + carte sectorielle propre au validateur"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/SECTOR_RELATIVE_STRENGTH_REVERSAL/REPORT.md
+
+  - candidate_id: SECTOR_ROTATION
+    family: relative_value
+    overlap_family: SECTOR_RELATIVE   # chevauchement avec le momentum 7 j à mesurer (panier sectoriel = momentum débruité ?)
+    economic_mechanism: >
+      10 paniers sectoriels rangés par rendement moyen 7 j, continuation, tiers haut /
+      tiers bas -- rotation sectorielle.
+    source_round: round3
+    source_worker: W3 (relative_value), D-SECTOR-ROTATION-D_mom-7D
+    discovery_result: "+103.0 net / +89.0 stress28, N_indep 259, PF 1.49, 6/6 années, caveat low-df"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/SECTOR_ROTATION/REPORT.md
+    discovery_net_bps: 103.0
+    validation_net_bps: 13.29
+    validation_net_bps_stress28: -0.71
+    n_validation_independent: 74   # mois calendaire de la date de rebalancement
+    t_stat_declustered: 0.807
+    eta_conservative: "83299 days (~228.1 years)"
+    recommended_next_step: REJECT
+    secondary_tags: ["COST_FRAGILE", "UNCONFIRMABLE_IN_HORIZON"]
+    validation_result: >
+      Excess +13.29 net14, t_L3=0.81, net28=-0.71 (négatif) -> échoue sur significativité ET
+      sur le coût de stress. Le raw vs zéro (+89.80) approche la réclamation (+103.0) : encore
+      une fois le chiffre publié capture la dérive du panier, pas la rotation. Effondrement
+      sur les perturbations structurelles : P2 (>=5 membres/secteur) -> -1.63 ; P3 (sans le
+      panier OTHER) -> +3.94 ; P4 (hors 2021) -> +2.69, c'est-à-dire que l'essentiel de
+      l'effet est concentré sur 2021. La carte grossière (P1) garde le signe (+15.73), donc le
+      résultat n'est pas un artefact de MA carte — il est simplement trop faible.
+    validation_wave: 2
+    validation_worker: V5
+    existing_live_alpha: null
+    data_available: "data_v2 perp_ohlcv + carte sectorielle propre au validateur"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/SECTOR_ROTATION/REPORT.md
+
+  - candidate_id: BASIS_RICHENING_FADE
+    family: relative_value
+    overlap_family: CALENDAR_BASIS_CURVE
+    economic_mechanism: >
+      Rang de la VÉLOCITÉ de basis (basis_z_1d - basis_z_7d), fade -- flux de
+      positionnement via la basis, pas le niveau (le niveau est arbitré depuis 2025).
+    source_round: round3
+    source_worker: W3 (relative_value), D-BASISMOTION-RANK-J2_fade-7D
+    discovery_result: "+29.7 net / +15.7 stress28, N_indep 324, PF 1.29, 5/7 années, capacité HIGH ($378M)"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V6
+    existing_live_alpha: null
+    data_available: "data_v2/normalized/basis + derivatives_backfill premium/metrics"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/BASIS_RICHENING_FADE/REPORT.md
+
+  - candidate_id: BASIS_FUNDING_AGREEMENT_FADE
+    family: relative_value
+    overlap_family: CALENDAR_BASIS_CURVE
+    economic_mechanism: >
+      Fade conditionné : quand basis et funding s'ACCORDENT (même signe extrême) le fade
+      paie, quand ils divergent il ne paie pas -- interaction, pas niveau.
+    source_round: round2
+    source_worker: W9 (cross_dataset_interactions)
+    discovery_result: "+18.5 à +20.6bps/1j quand basis+funding s'accordent vs -1.3 à -1.7 quand ils divergent"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V6
+    existing_live_alpha: null
+    data_available: "data_v2/normalized/basis + funding"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/BASIS_FUNDING_AGREEMENT_FADE/REPORT.md
+
+  - candidate_id: XSMOM_REGIME_META
+    family: cross_sectional
+    overlap_family: CROSS_SECTIONAL_XSMOM   # méta-signal SUR le xsmom hebdo, pas un nouveau détecteur
+    economic_mechanism: >
+      Méta-signaux ENABLE/DISABLE et SELECT_HORIZON sur le momentum cross-sectionnel
+      hebdo : régime de vol BTC 20 j (T2.1, B8), breadth de marché (T2.3), sélection
+      d'horizon 7/14 j par vol (T2.5).
+    source_round: round3
+    source_worker: W5 (meta_signals) T2.1/T2.3/T2.5 + W4 (regime_conditional) B8
+    discovery_result: "delta +179 (vol), +578 (breadth), +116 (horizon) sur N=124-131 hebdo ; B8 +63.8 low-vol vs -48.7 high-vol"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V7
+    existing_live_alpha: CROSS_SECTIONAL_MOMENTUM_LIVE_V2
+    data_available: "data_v2 perp_ohlcv + BTC enriched"
+    execution_available: true   # overlay/gate sur un alpha existant
+    validation_report: reports/edge_discovery/validation_2026-09/XSMOM_REGIME_META/REPORT.md
+
+  - candidate_id: FUNDING_CARRY_X_DISPERSION
+    family: relative_value
+    overlap_family: FUNDING_CARRY
+    economic_mechanism: >
+      Carry de funding cross-sectionnel conditionné au régime de dispersion des funding
+      (low-dispersion = carry paie) -- interaction carry x régime.
+    source_round: round3
+    source_worker: W4 (regime_conditional), B1
+    discovery_result: "+46.4 net low-disp, N_indep 117, 4/5 années, PROMISING-CAVEAT"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V7
+    existing_live_alpha: null
+    data_available: "funding (derivatives_backfill / event_feature_panel)"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/FUNDING_CARRY_X_DISPERSION/REPORT.md
+
+  - candidate_id: OPTIONS_IV_SHOCK_MEMORY
+    family: options_vol_overlay
+    overlap_family: OPTIONS_DERIBIT_BTC
+    economic_mechanism: >
+      Mémoire de chocs DVOL à la hausse (count 30 j, time_since_prev, intensité cumulée
+      90 j) -> rendement BTC forward -- famille options nouvelle, N mince.
+    source_round: round3
+    source_worker: W7 (event_memory_generalization), W7-033/034/035
+    discovery_result: "+400 à +570bps, N=30-51, PF outlier-driven, PROMISING-WITH-CAVEAT"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V8
+    existing_live_alpha: null
+    data_available: "data/options_backfill/deribit (DVOL BTC/ETH)"
+    execution_available: true   # BTC perp
+    validation_report: reports/edge_discovery/validation_2026-09/OPTIONS_IV_SHOCK_MEMORY/REPORT.md
+
+  - candidate_id: SPILLOVER_X_DVOL_STRESS
+    family: options_vol_overlay
+    overlap_family: OPTIONS_DERIBIT_BTC
+    economic_mechanism: >
+      Continuation de spillover conditionnée au régime DVOL (low-DVOL : contagion
+      corrélée continue ; high-DVOL : non).
+    source_round: round3
+    source_worker: W8 (cross_asset_interactions), W8-17a/b
+    discovery_result: "low-DVOL t=3.36, +4/6 années, mais 2025-26 négatif ; WEAK/PROMISING-WITH-CAVEAT"
+    current_status: VALIDATING
+    validation_wave: 2
+    validation_worker: V8
+    existing_live_alpha: null
+    data_available: "data/events/spillover_dataset.parquet + DVOL"
+    execution_available: true
+    validation_report: reports/edge_discovery/validation_2026-09/SPILLOVER_X_DVOL_STRESS/REPORT.md
+
   # ══════════════════════════ AUTRES CANDIDATS SÉRIEUX (round 1-2) ════════
 
   - candidate_id: SHORT_COVERING_CONTINUATION
@@ -332,7 +703,40 @@ candidates:
     source_round: round2
     source_worker: W2
     discovery_result: "excess +9.2bps full / +19.0bps OOS, t=5.5/4.7 -- meilleure couverture capacité/majors de tout round2"
-    current_status: ALREADY_LIVE   # déjà SHORT_COVERING_CONTINUATION_V1, RECONSTRUCTED/SIGNAL_SHADOW -- pas de nouvelle validation requise, hors scope de cette mission
+    current_status: NEEDS_MORE_RESEARCH   # wave 2, 2026-09-03
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/SHORT_COVERING_CONTINUATION/REPORT.md
+    discovery_net_bps: 9.2   # excess reclame ; +19.0 OOS
+    validation_net_bps: 2.53   # produit long seul, net de 14bps
+    validation_net_bps_stress28: -11.47
+    validation_excess_bps: 17.06   # bras A - bras B, LE mecanisme
+    t_stat_declustered: 2.97   # sur l'excess, cluster = jour
+    t_stat_arm_A_vs_zero: 0.405   # le produit ne bat pas zero
+    n_validation_independent: 1582   # jour calendaire UTC (l'unite prereg 'episode chaine <4h' etait degeneree : 5 clusters)
+    eta_conservative: "non defini (pas d'edge positif a dimensionner sur le produit)"
+    recommended_next_step: MORE_RESEARCH
+    live_status_recommendation: "GARDER SIGNAL_SHADOW inchange (ni upgrade ni downgrade)"
+    secondary_tags: ["COST_FRAGILE", "MECHANISM_CONFIRMED_PRODUCT_NOT"]
+    validation_result: >
+      Le MECANISME se reproduit et est le plus stable de la vague : excess A-B = +17.06 bps
+      avec t = 2.94-3.22 sur les TROIS unites de cluster (jour/semaine/mois), 4/5 annees
+      positives et les 3 dernieres les plus fortes. Le score combinateur min() de la spec live
+      (P3) selectionne exactement la meme population que la conjonction decile -> la
+      reconstruction est FIDELE, ce n'est pas un cas LIQ_CASCADE_FAR_FROM_LOW. MAIS le produit
+      long autonome ne bat pas zero : +2.53 bps net14 (t=0.41, bootstrap p05 negatif), -11.47
+      au cout de stress. Sa valeur est celle d'un signal RELATIF (overlay/filtre
+      cross-sectionnel), pas d'un long directionnel. ECART AU PREREG declare : l'unite L3
+      preenregistree (episode chaine gap<4h) est degeneree sur un panel de barres denses
+      (22330 signaux -> 5 clusters) et a ete remplacee par jour/semaine/mois, fixes avant
+      relecture. Chevauchement cascade 3.2% seulement. Le test d'accord avec le ledger live
+      n'a PAS pu etre fait : data_v2 s'arrete au 2026-07-31, le ledger commence au 2026-08-28,
+      zero heure commune.
+    validation_wave: 2
+    validation_worker: V1
+    validation_report: reports/edge_discovery/validation_2026-09/SHORT_COVERING_CONTINUATION/REPORT.md
     existing_live_alpha: SHORT_COVERING_CONTINUATION_V1
     data_available: "event_feature_panel (frozen-50)"
     execution_available: true
@@ -422,3 +826,145 @@ candidates:
     existing_live_alpha: null
     data_available: "market_physics_v3/raw + data/microstructure_reduced (1 jour seulement au 2026-09-02)"
     execution_available: true
+
+  # ═════════════ WAVE 2 — candidats hors round 1-3 (liste de mission #12/13/18/19) ═════════════
+  # Inventoriés ET validés dans la même passe (2026-09-03) : ils n'étaient dans aucun
+  # registre auparavant. Même gate que le reste de la vague.
+
+  - candidate_id: OI_COLLAPSE_BOUNCE
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR
+    economic_mechanism: >
+      Effondrement extrême de l'open interest sur 24 h au moment d'une cascade LONG : le
+      déleveraging forcé est terminé, le prix rebondit. Conditionnement du fade de cascade,
+      pas un détecteur nouveau.
+    source_round: round4 / liste de mission #12
+    mission_list_rank: 12
+    discovery_result: "réclamation liste de mission : 247.0 bps net"
+    current_status: NEEDS_MORE_RESEARCH   # wave 2, 2026-09-03
+    existing_live_alpha: null
+    data_available: "data/events/{cascade,premium,crowding}_dataset.parquet"
+    execution_available: true
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/OI_COLLAPSE_BOUNCE/RESULTS.json
+    discovery_net_bps: 247.0
+    validation_net_bps: 18.31
+    validation_net_bps_stress28: 4.31
+    n_validation_independent: 833   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: 2.744
+    eta_conservative: "5103 days (~14.0 years)"
+    recommended_next_step: MORE_RESEARCH
+    secondary_tags: ["UNCONFIRMABLE_IN_HORIZON", "CONDITIONING_ADDS_NOTHING"]
+    validation_result: >
+      Le bras seul est positif et significatif dans les deux conventions (épisode
+      +18.31/t=2.74 ; événement +27.61/t_cluster=2.47). MAIS le test obligatoire bras A - bras
+      B au niveau ÉPISODE donne -0.39 bps (Welch -0.05) : conditionner sur l'effondrement d'OI
+      n'apporte RIEN par rapport au fade inconditionnel de cascade, qui porte déjà cet edge.
+      Au niveau événement le contraste est significatif (+32.99, t=2.88) uniquement parce que
+      la référence événement est négative. Le +247 bps réclamé ne se reproduit à aucune
+      convention (max +50.79 sur la queue q05). ETA 14-28 ans.
+
+  - candidate_id: CVD_SHOCK_DOWN_MEMORY
+    family: liquidation
+    overlap_family: LIQ_CASCADE_DETECTOR
+    economic_mechanism: >
+      Choc baissier du déséquilibre de flux taker (proxy CVD) au moment d'une cascade :
+      mémoire du choc supposée porter une reprise.
+    source_round: round4 / liste de mission #13
+    mission_list_rank: 13
+    discovery_result: "réclamation liste de mission : 15.5 bps net"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    existing_live_alpha: null
+    data_available: "data/events/{cascade,premium,crowding}_dataset.parquet"
+    execution_available: true
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: true
+    validation_report: reports/edge_discovery/validation_2026-09/CVD_SHOCK_DOWN_MEMORY/RESULTS.json
+    discovery_net_bps: 15.5
+    validation_net_bps: -0.02
+    validation_net_bps_stress28: -14.02
+    n_validation_independent: 1133   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: -0.003
+    eta_conservative: "unbounded"
+    recommended_next_step: REJECT
+    secondary_tags: []
+    validation_result: >
+      Nul à négatif dans toutes les lectures : bras seul épisode -0.02 (t=-0.003), événement
+      -5.31 (t=-0.72). Le contraste A-B est NÉGATIF et significatif (-19.4 épisode, Welch
+      -2.66). La variante taker_delta_1h est significativement négative (-11.88,
+      t_cluster=-2.19). Le 'gros N' invoqué par la découverte est un N de jambes corrélées :
+      2305 événements pour 1133 épisodes seulement.
+
+  - candidate_id: PREMIUM_EXTREME_THEN_CASCADE
+    family: liquidation
+    overlap_family: PREMIUM_DISLOCATION
+    economic_mechanism: >
+      Premium index en dislocation extrême (queue basse causale) suivi d'une cascade : la
+      dislocation perp/spot se referme.
+    source_round: round3 W1 c03 / liste de mission #18
+    mission_list_rank: 18
+    discovery_result: "réclamation liste de mission : 12.1 bps net"
+    current_status: NEEDS_MORE_RESEARCH   # wave 2, 2026-09-03
+    existing_live_alpha: null
+    data_available: "data/events/{cascade,premium,crowding}_dataset.parquet"
+    execution_available: true
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/PREMIUM_EXTREME_THEN_CASCADE/RESULTS.json
+    discovery_net_bps: 12.1
+    validation_net_bps: 19.69
+    validation_net_bps_stress28: 5.69
+    n_validation_independent: 533   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: 1.455
+    eta_conservative: "13982 days (~38.3 years)"
+    recommended_next_step: MORE_RESEARCH
+    secondary_tags: ["THIN_EPISODE_EVIDENCE"]
+    validation_result: >
+      Le seul candidat de la vague avec un contraste A-B positif dans les deux conventions
+      (épisode +21.41 ; événement +32.99... t=3.08) MAIS un t d'épisode de 1.455 sous le seuil
+      1.645. Population inconditionnelle PREM_CAPITULATION = 0 (épisode +0.12) : c'est bien la
+      QUEUE extrême qui porte l'effet, et le contrôle de direction est propre (queue haute
+      nulle, -1.43). Grand écart épisode (+19.69) / événement (+101.85) = quelques gros
+      épisodes dominent -> preuve concentrée. À reprendre avec une définition d'épisode
+      préenregistrée et un N plus grand avant tout freeze.
+
+  - candidate_id: CROWD_WASHOUT_NO_CASCADE
+    family: positioning
+    overlap_family: CROWDING
+    economic_mechanism: >
+      Capitulation du positionnement des top traders SANS cascade de liquidation associée —
+      washout de foule pur.
+    source_round: round3 W1 c08 / liste de mission #19
+    mission_list_rank: 19
+    discovery_result: "réclamation liste de mission : 10.6 bps net"
+    current_status: REJECTED   # wave 2, 2026-09-03
+    existing_live_alpha: null
+    data_available: "data/events/{cascade,premium,crowding}_dataset.parquet"
+    execution_available: true
+    wave2_validated_at: "2026-09-03"   # Alpha Validation Factory wave 2, worker unique (session futur-49)
+    validated_for_forward: false
+    confirmable_in_horizon: false
+    sign_correction_required: false
+    validation_report: reports/edge_discovery/validation_2026-09/CROWD_WASHOUT_NO_CASCADE/RESULTS.json
+    discovery_net_bps: 10.6
+    validation_net_bps: -6.35
+    validation_net_bps_stress28: -20.35
+    n_validation_independent: 1050   # épisode cross-symbole chaîné (gap < 4h)
+    t_stat_declustered: -1.05
+    eta_conservative: "unbounded"
+    recommended_next_step: REJECT
+    secondary_tags: ["DATA_LIMITED"]
+    validation_result: >
+      La réclamation ('+10.6 bps, 6/7 années stable') ne se reproduit pas : population
+      inconditionnelle CROWD_WASHOUT à -6.35 net14 (t=-1.05) au niveau épisode, avec seulement
+      1/5 années positives. La lecture événement est positive (+33.08) mais non significative
+      (t_cluster=1.60) et contredit la lecture épisode. La queue extrême n'a que 215
+      événements / 101 épisodes -> trop mince pour trancher (event +257.73 mais t=1.62).
+      Dataset de 2200 événements sur 2022-2026 : c'est la contrainte dure.

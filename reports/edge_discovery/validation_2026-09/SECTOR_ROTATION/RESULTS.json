@@ -1,0 +1,151 @@
+{
+  "candidate_id": "SECTOR_ROTATION",
+  "family": "relative_value",
+  "verdict": "REJECTED",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": false,
+  "secondary_tags": [
+    "COST_FRAGILE",
+    "UNCONFIRMABLE_IN_HORIZON"
+  ],
+  "discovery_net_bps": 103.0,
+  "validation_net_bps": 13.29,
+  "validation_net_bps_stress28": -0.71,
+  "pf": 1.165,
+  "n_raw": 15471,
+  "n_independent_L1": 15471,
+  "n_independent_L2": 318,
+  "n_independent_L3": 74,
+  "n_validation_independent": 74,
+  "l3_definition": "mois calendaire de la date de rebalancement",
+  "t_stat_declustered": 0.807,
+  "bootstrap_ci95": [
+    -17.66,
+    46.36
+  ],
+  "bootstrap_p05": -12.71,
+  "year_by_year": {
+    "2020": -52.63,
+    "2021": 67.48,
+    "2022": 1.85,
+    "2023": 25.92,
+    "2024": -7.64,
+    "2025": 0.01,
+    "2026": 36.24
+  },
+  "ex_best_year_net_bps": 2.69,
+  "worst_episode_bps": -999.87,
+  "max_drawdown_bps_cumule": -3536.64,
+  "historical_event_rate": "0.230/week",
+  "recent_event_rate": "0.231/week",
+  "conservative_event_rate": "0.230/week",
+  "n_required_statistical": 2738.6,
+  "minimum_calendar_days": 182,
+  "eta_p50": "83299 days (~228.1 years)",
+  "eta_conservative": "83299 days (~228.1 years)",
+  "overlap_with_existing_live": null,
+  "validation_caveats": "Excess +13.29 net14, t_L3=0.81, net28=-0.71 (n\u00e9gatif) -> \u00e9choue sur significativit\u00e9 ET sur le co\u00fbt de stress. Le raw vs z\u00e9ro (+89.80) approche la r\u00e9clamation (+103.0) : encore une fois le chiffre publi\u00e9 capture la d\u00e9rive du panier, pas la rotation. Effondrement sur les perturbations structurelles : P2 (>=5 membres/secteur) -> -1.63 ; P3 (sans le panier OTHER) -> +3.94 ; P4 (hors 2021) -> +2.69, c'est-\u00e0-dire que l'essentiel de l'effet est concentr\u00e9 sur 2021. La carte grossi\u00e8re (P1) garde le signe (+15.73), donc le r\u00e9sultat n'est pas un artefact de MA carte \u2014 il est simplement trop faible.",
+  "recommended_next_step": "REJECT",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/SECTOR_ROTATION/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "anchors": {
+    "per_anchor": [
+      27.29,
+      32.36,
+      39.51,
+      5.83,
+      19.8,
+      21.85,
+      32.92
+    ],
+    "pooled": 25.65,
+    "n_positive": 7,
+    "n": 7
+  },
+  "same_factor_checks": {
+    "rank_corr": {
+      "sector_score_vs_mom7": {
+        "mean": 0.281,
+        "std": 0.101,
+        "n": 318
+      },
+      "sector_reversal_vs_mom7": {
+        "mean": 0.86,
+        "std": 0.073,
+        "n": 318
+      }
+    },
+    "portfolio_return_corr": {
+      "sector_rotation": {
+        "sector_rotation": 1.0,
+        "sector_reversal": -0.042,
+        "mom7": 0.463
+      },
+      "sector_reversal": {
+        "sector_rotation": -0.042,
+        "sector_reversal": 1.0,
+        "mom7": -0.535
+      },
+      "mom7": {
+        "sector_rotation": 0.463,
+        "sector_reversal": -0.535,
+        "mom7": 1.0
+      }
+    },
+    "n_common_periods": 318,
+    "mom7_reference_excess": {
+      "gross_bps": 18.87,
+      "net_bps": 4.87,
+      "net_bps_stress28": -9.13,
+      "cost_nominal_bps": 14.0,
+      "cost_stress_bps": 28.0,
+      "pf": 1.054,
+      "n_periods": 333,
+      "year_by_year": {
+        "2020": 88.73,
+        "2021": 20.21,
+        "2022": -38.25,
+        "2023": -6.71,
+        "2024": -5.89,
+        "2025": -0.78,
+        "2026": -14.47
+      },
+      "n_years_positive": 2,
+      "n_years": 7,
+      "best_year": 2020,
+      "ex_best_year_net_bps": -7.24,
+      "worst_episode_bps": -880.32,
+      "max_drawdown_bps_cumule": -6629.98,
+      "n_raw": 15929,
+      "n_independent_L1": 15929,
+      "n_independent_L2": 333,
+      "n_independent_L3": 77,
+      "n_validation_independent": 77,
+      "l3_definition": "mois calendaire de la date de rebalancement",
+      "t_stat_declustered": 0.314,
+      "cluster_robust_se": 15.481,
+      "bootstrap_ci95": [
+        -24.68,
+        36.05
+      ],
+      "bootstrap_p05": -19.8,
+      "historical_event_rate": "0.230/week",
+      "recent_event_rate": "0.231/week",
+      "conservative_event_rate": "0.230/week",
+      "event_rates_per_day": {
+        "last_2y": 0.03288,
+        "last_1y": 0.03288,
+        "last_6m": 0.03297
+      },
+      "n_required_statistical": 19141.1,
+      "minimum_calendar_days": 182,
+      "eta_p50_days": 582209.5,
+      "eta_p50": "582210 days (~1594.0 years)",
+      "eta_conservative_days": 582209.5,
+      "eta_conservative": "582210 days (~1594.0 years)",
+      "confirmable_in_horizon": false
+    }
+  },
+  "sector_map": "_lib/sector_map_v5.py (construite par le validateur)"
+}

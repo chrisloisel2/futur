@@ -1,0 +1,378 @@
+{
+  "candidate_id": "LIQ_CASCADE_FAR_FROM_LOW",
+  "family": "liquidation",
+  "verdict": "REJECTED",
+  "validated_for_forward": false,
+  "confirmable_in_horizon": false,
+  "sign_correction_required": null,
+  "secondary_tags": [
+    "EVIDENCE_ARTEFACT"
+  ],
+  "discovery_net_bps": 15.5,
+  "validation_net_bps": -6.76,
+  "validation_net_bps_stress28": -20.76,
+  "pf": 0.918,
+  "n_raw": 6664,
+  "n_independent_L1": 4377,
+  "n_independent_L2": 1222,
+  "n_independent_L3": 1620,
+  "n_validation_independent": 1620,
+  "l3_definition": "\u00e9pisode cross-symbole cha\u00een\u00e9 (gap < 4h)",
+  "t_stat_declustered": -1.192,
+  "bootstrap_ci95": [
+    -18.07,
+    4.5
+  ],
+  "bootstrap_p05": -16.24,
+  "year_by_year": {
+    "2022": -17.85,
+    "2023": 9.38,
+    "2024": 3.49,
+    "2025": -19.55,
+    "2026": -17.6
+  },
+  "ex_best_year_net_bps": -11.3,
+  "worst_episode_bps": -1050.85,
+  "max_drawdown_bps_cumule": -17482.67,
+  "historical_event_rate": "6.060/week",
+  "recent_event_rate": "7.000/week",
+  "conservative_event_rate": "6.060/week",
+  "n_required_statistical": null,
+  "minimum_calendar_days": 60,
+  "eta_p50": "unbounded",
+  "eta_conservative": "unbounded",
+  "overlap_with_existing_live": {
+    "LIQ_CASCADE_REPEAT_V1": {
+      "n_arm_events": 6664,
+      "n_ledger_rows": 5675,
+      "n_matched_within_5min": 1924,
+      "share_of_arm_in_ledger": 0.2887,
+      "ledger_window": [
+        "2020-10-08 17:55:00+00:00",
+        "2026-09-01 22:40:00+00:00"
+      ]
+    }
+  },
+  "validation_caveats": "La r\u00e9impl\u00e9mentation REPRODUIT exactement le chiffre publi\u00e9 sous la convention de la d\u00e9couverte (+6.84 net14 plein / +20.21 OOS 2025+, vs +6.7/+19.84 du freeze_spec) : il n'y a AUCUN d\u00e9saccord d'impl\u00e9mentation. Le rejet porte sur l'inf\u00e9rence : SE sous-estim\u00e9e x1.9-2.6 par le comptage de jambes corr\u00e9l\u00e9es, t_cluster tombe \u00e0 0.90 (far seul) et 1.30 (far-near). Le SIGNE d\u00e9pend de l'unit\u00e9 de pond\u00e9ration (positif par \u00e9v\u00e9nement, n\u00e9gatif par \u00e9pisode) -> l'affirmation 'far bat near' n'est \u00e9tablie dans AUCUNE direction. far-baseline est n\u00e9gatif \u00e0 tous les gaps d'\u00e9pisode >= 1h. 3/5 ann\u00e9es positives, pas 5/6. Ce qui reste vrai : le fade INCONDITIONNEL de cascade LONG est solide (+20.15 net14 au niveau \u00e9pisode).",
+  "recommended_next_step": "DOWNGRADE_LIVE_STATUS",
+  "validation_report": "/home/qbee/futur/reports/edge_discovery/validation_2026-09/LIQ_CASCADE_FAR_FROM_LOW/REPORT.md",
+  "validated_by": "Alpha Validation Factory wave 2, worker unique (session futur-49), 2026-09-03",
+  "live_alpha_affected": "LIQ_CASCADE_FAR_FROM_LOW_V1 (SIGNAL_SHADOW, RECONSTRUCTED)",
+  "reproduction_of_claim_event_level": {
+    "full_2020plus": {
+      "population_n": 27030,
+      "window": [
+        "2021-12-04 00:50:00+00:00",
+        "2026-08-27 13:00:00+00:00"
+      ],
+      "far_live_0p05": {
+        "n": 6731,
+        "net14_event_level": 6.84,
+        "t_naive": 1.69,
+        "pf": 1.064,
+        "n_L3": 1670,
+        "net14_episode_level": -11.13,
+        "t_L3": -1.988
+      },
+      "near_live_0p05": {
+        "n": 20299,
+        "net14_event_level": -6.58,
+        "t_naive": -3.32,
+        "pf": 0.925,
+        "n_L3": 2563,
+        "net14_episode_level": 24.56,
+        "t_L3": 8.662
+      },
+      "oos_2025plus": {
+        "far": {
+          "n": 2395,
+          "net14_event_level": 20.21,
+          "t_naive": 2.85,
+          "pf": 1.207,
+          "n_L3": 521,
+          "net14_episode_level": -25.83,
+          "t_L3": -2.744
+        },
+        "near": {
+          "n": 7705,
+          "net14_event_level": -21.46,
+          "t_naive": -6.03,
+          "pf": 0.77,
+          "n_L3": 895,
+          "net14_episode_level": 20.47,
+          "t_L3": 4.405
+        }
+      },
+      "far_live_by_year_event_level": {
+        "2021": 5.62,
+        "2022": -19.11,
+        "2023": 12.57,
+        "2024": -1.88,
+        "2025": 20.5,
+        "2026": 19.77
+      }
+    },
+    "claim_window_2022plus": {
+      "population_n": 26750,
+      "window": [
+        "2022-01-01 04:15:00+00:00",
+        "2026-08-27 13:00:00+00:00"
+      ],
+      "far_live_0p05": {
+        "n": 6650,
+        "net14_event_level": 6.86,
+        "t_naive": 1.68,
+        "pf": 1.064,
+        "n_L3": 1637,
+        "net14_episode_level": -11.56,
+        "t_L3": -2.044
+      },
+      "near_live_0p05": {
+        "n": 20100,
+        "net14_event_level": -5.91,
+        "t_naive": -2.98,
+        "pf": 0.932,
+        "n_L3": 2529,
+        "net14_episode_level": 24.36,
+        "t_L3": 8.57
+      },
+      "oos_2025plus": {
+        "far": {
+          "n": 2395,
+          "net14_event_level": 20.21,
+          "t_naive": 2.85,
+          "pf": 1.207,
+          "n_L3": 521,
+          "net14_episode_level": -25.83,
+          "t_L3": -2.744
+        },
+        "near": {
+          "n": 7705,
+          "net14_event_level": -21.46,
+          "t_naive": -6.03,
+          "pf": 0.77,
+          "n_L3": 895,
+          "net14_episode_level": 20.47,
+          "t_L3": 4.405
+        }
+      },
+      "far_live_by_year_event_level": {
+        "2022": -19.11,
+        "2023": 12.57,
+        "2024": -1.88,
+        "2025": 20.5,
+        "2026": 19.77
+      }
+    }
+  },
+  "episode_gap_sensitivity": {
+    "rows": [
+      {
+        "gap": "30min",
+        "far": {
+          "n_ep": 4261,
+          "net14": 0.67,
+          "t": 0.14
+        },
+        "near": {
+          "n_ep": 7340,
+          "net14": -4.71,
+          "t": -1.98
+        },
+        "baseline": {
+          "n_ep": 10061,
+          "net14": -1.44,
+          "t": -0.62
+        },
+        "far_minus_baseline": 2.11
+      },
+      {
+        "gap": "1h",
+        "far": {
+          "n_ep": 3657,
+          "net14": 2.57,
+          "t": 0.53
+        },
+        "near": {
+          "n_ep": 6067,
+          "net14": 3.27,
+          "t": 1.33
+        },
+        "baseline": {
+          "n_ep": 7969,
+          "net14": 6.39,
+          "t": 2.63
+        },
+        "far_minus_baseline": -3.82
+      },
+      {
+        "gap": "2h",
+        "far": {
+          "n_ep": 2802,
+          "net14": 2.69,
+          "t": 0.51
+        },
+        "near": {
+          "n_ep": 4611,
+          "net14": 14.77,
+          "t": 5.78
+        },
+        "baseline": {
+          "n_ep": 5459,
+          "net14": 15.42,
+          "t": 6.1
+        },
+        "far_minus_baseline": -12.73
+      },
+      {
+        "gap": "4h",
+        "far": {
+          "n_ep": 1955,
+          "net14": -7.54,
+          "t": -1.3
+        },
+        "near": {
+          "n_ep": 2868,
+          "net14": 27.58,
+          "t": 9.83
+        },
+        "baseline": {
+          "n_ep": 2926,
+          "net14": 20.15,
+          "t": 7.28
+        },
+        "far_minus_baseline": -27.69
+      },
+      {
+        "gap": "6h",
+        "far": {
+          "n_ep": 1507,
+          "net14": -23.88,
+          "t": -3.99
+        },
+        "near": {
+          "n_ep": 1965,
+          "net14": 28.1,
+          "t": 8.83
+        },
+        "baseline": {
+          "n_ep": 1755,
+          "net14": 13.63,
+          "t": 4.47
+        },
+        "far_minus_baseline": -37.51
+      },
+      {
+        "gap": "12h",
+        "far": {
+          "n_ep": 845,
+          "net14": -30.89,
+          "t": -4.45
+        },
+        "near": {
+          "n_ep": 744,
+          "net14": 22.67,
+          "t": 4.58
+        },
+        "baseline": {
+          "n_ep": 474,
+          "net14": 2.34,
+          "t": 0.51
+        },
+        "far_minus_baseline": -33.23
+      },
+      {
+        "gap": "24h",
+        "far": {
+          "n_ep": 404,
+          "net14": -32.51,
+          "t": -3.79
+        },
+        "near": {
+          "n_ep": 165,
+          "net14": 5.21,
+          "t": 0.49
+        },
+        "baseline": {
+          "n_ep": 69,
+          "net14": -18.57,
+          "t": -1.68
+        },
+        "far_minus_baseline": -13.94
+      }
+    ],
+    "event_level": {
+      "far": 6.86,
+      "near": -5.91
+    }
+  },
+  "event_weighted_cluster_robust": {
+    "far_live_0p05": {
+      "label": "far (seuil live 0.05)",
+      "n_events": 6650,
+      "n_L3_episodes": 1637,
+      "net14_event_weighted": 6.86,
+      "se_naive": 4.072,
+      "se_cluster_robust": 7.629,
+      "se_inflation_x": 1.87,
+      "t_naive": 1.683,
+      "t_cluster_robust": 0.899,
+      "bootstrap_ci95": [
+        -7.85,
+        21.62
+      ],
+      "bootstrap_p05": -5.73
+    },
+    "near": {
+      "label": "near",
+      "n_events": 20100,
+      "n_L3_episodes": 2529,
+      "net14_event_weighted": -5.91,
+      "se_naive": 1.982,
+      "se_cluster_robust": 5.22,
+      "se_inflation_x": 2.63,
+      "t_naive": -2.982,
+      "t_cluster_robust": -1.132,
+      "bootstrap_ci95": [
+        -16.36,
+        4.15
+      ],
+      "bootstrap_p05": -14.74
+    },
+    "baseline_all_A": {
+      "label": "baseline inconditionnel",
+      "n_events": 26750,
+      "n_L3_episodes": 2926,
+      "net14_event_weighted": -2.74,
+      "se_naive": 1.801,
+      "se_cluster_robust": 4.137,
+      "se_inflation_x": 2.3,
+      "t_naive": -1.519,
+      "t_cluster_robust": -0.661,
+      "bootstrap_ci95": [
+        -10.87,
+        5.49
+      ],
+      "bootstrap_p05": -9.68
+    },
+    "far_minus_near": {
+      "label": "far \u2212 near",
+      "difference_bps": 12.76,
+      "se_cluster_robust": 9.844,
+      "t_cluster_robust": 1.297,
+      "n_A": 6650,
+      "n_B": 20100,
+      "n_clusters": 2926
+    },
+    "far_minus_baseline": {
+      "label": "far \u2212 baseline",
+      "difference_bps": 9.59,
+      "se_cluster_robust": 7.381,
+      "t_cluster_robust": 1.299,
+      "n_A": 6650,
+      "n_B": 26750,
+      "n_clusters": 2926
+    }
+  },
+  "sign_status": "NOT_ESTABLISHED_EITHER_DIRECTION"
+}
