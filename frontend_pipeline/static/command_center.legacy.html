@@ -86,6 +86,14 @@
   .lab-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
   #crossChart{height:290px} #corrHeat{height:230px} #yearly{height:230px}
   .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+  /* hero Live Alpha Lab */
+  .pfsel{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+  .pfsel button{padding:3px 9px;font-size:11px;border-radius:999px;color:var(--ink2);min-height:0}
+  .pfsel button.sel{color:var(--ink);border-color:rgba(8,145,178,.6);background:rgba(8,145,178,.14)}
+  .pfchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:1px 8px 1px 3px;margin:3px 4px 0 0;font-size:11px;color:var(--ink2)}
+  .pftag{font-size:9px;letter-spacing:.06em;padding:0 5px;border-radius:999px;border:1px solid currentColor;line-height:1.5;white-space:nowrap}
+  #liveHero details{margin-top:10px}
+  #liveHero summary{cursor:pointer;font-size:11.5px;color:var(--ink2);letter-spacing:.06em}
   /* tournoi */
   .tcard{min-width:0;transition:box-shadow .3s}
   .tcard.flash{box-shadow:0 0 0 1px rgba(8,145,178,.6),var(--glow) rgba(8,145,178,.25)}
@@ -131,7 +139,7 @@
     #eq{height:290px} #cChart{height:270px} #crossChart{height:240px}
     #corrHeat{height:210px} #yearly{height:200px}
     select,input,button{min-height:40px}
-    #pfInit button{display:block;width:100%;margin:8px 0 0!important}
+    .pfsel button{min-height:30px}
   }
 </style>
 </head>
@@ -156,25 +164,27 @@
 <div class="view active" id="v-portfolio">
   <section class="panel blk" id="liveHero" style="margin-top:0;border-color:rgba(8,145,178,.4);box-shadow:0 0 40px rgba(8,145,178,.08)">
     <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;letter-spacing:.2em;color:var(--ink2);text-transform:uppercase">Portefeuille paper live <span class="badge" id="pfLiveDot">● live</span> <button id="pfBell" onclick="toggleNotif()" title="Alertes gros gains / grosses pertes (±500 €)" style="border:none;background:transparent;cursor:pointer;font-size:14px;padding:0 4px">🔕</button></div>
-        <div id="pfValue" style="font-size:44px;font-weight:800;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums">—</div>
+      <div style="min-width:0">
+        <div style="font-size:11px;letter-spacing:.2em;color:var(--ink2);text-transform:uppercase">Portefeuille shadow live — Live Alpha Lab <span class="badge amb" id="pfLiveDot">● chargement</span></div>
+        <div class="pfsel" id="pfSel"></div>
+        <div id="pfValue" style="font-size:44px;font-weight:800;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums">—</div>
         <div id="pfPnl" style="font-size:15px;margin-top:2px"></div>
         <div id="pfMeta" style="font-size:11px;color:var(--ink3);margin-top:6px"></div>
       </div>
       <div style="flex:1;min-width:280px"><div id="pfCurve" style="height:130px"></div></div>
-      <div id="pfInit" style="display:none;align-self:center">
-        <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">Ouvre ton portefeuille de 200 000 € :</div>
-        <button onclick="initPf('adaptive')" style="border-color:var(--c4);background:rgba(5,150,105,.15)">▶ adaptatif (yield live vs borrow)</button>
-        <button onclick="initPf('max')" style="margin-left:6px">full-stack (~18-19%/an, ~5× gross)</button>
-        <button onclick="initPf('aggressive')" style="margin-left:6px">agressive (~10%/an)</button>
-        <button onclick="initPf('strategy')" style="margin-left:6px">calme (Δ-neutre)</button>
-        <button onclick="initPf('core')" style="margin-left:6px">cœur liquide</button>
-        <button onclick="initPf('forecasts')" style="margin-left:6px">mes prévisions</button>
-      </div>
     </div>
-    <table id="pfPos" style="margin-top:14px"><thead><tr><th>actif</th><th>poids</th><th>entrée</th><th>prix live</th><th>valeur</th><th>P&L</th></tr></thead><tbody></tbody></table>
-    <div class="footnote">Forward paper trading RÉEL : ouvert le <span id="pfSince">—</span>, marqué au prix live (crypto × EUR/USD) toutes les 2,5 s. Le suivi commence à l'ouverture — l'historique backtest ci-dessous est simulé, séparé. Aucun ordre réel.</div>
+    <table id="pfPos" style="margin-top:14px"><thead><tr><th>actif</th><th>alpha</th><th>quantité</th><th>entrée</th><th>notional entrée</th><th>réalisé</th><th>frais</th></tr></thead><tbody><tr><td colspan=7 style="color:var(--ink3)">chargement…</td></tr></tbody></table>
+    <details id="pfRoster">
+      <summary>Roster — <span id="pfRosterN">—</span> alphas, statut honnête</summary>
+      <table id="pfRosterTbl" style="margin-top:8px"><thead><tr><th>alpha_id</th><th>famille</th><th>statut scientifique</th><th>statut opérationnel</th><th>label</th><th>forward / replay</th><th>confiance</th><th>freeze</th></tr></thead><tbody></tbody></table>
+      <div class="footnote">VALIDATED_FORWARD = validé indépendamment ; EXPERIMENTAL_SHADOW = tourne, preuve en cours ; OVERLAY/GATE = pas une position ; NO_CAPITAL = collecte seule, aucun capital.</div>
+    </details>
+    <details id="pfLegacy">
+      <summary>Ancien portefeuille paper (arrêté le 03/09/2026) — lecture seule</summary>
+      <div id="pfLegacyBody" class="footnote">chargement…</div>
+      <div class="footnote">Notifications de l'ancien moteur <button id="pfBell" onclick="toggleNotif()" title="alertes de l'ancien portefeuille (arrêté le 03/09/2026) — plus aucun nouvel événement attendu" style="border:none;background:transparent;cursor:pointer;font-size:14px;padding:0 4px">🔕</button> : gains/pertes ±500 €, flips, rolls — historique seul, aucun nouvel événement depuis l'arrêt. Ne concerne pas les portefeuilles du Lab.</div>
+    </details>
+    <div class="footnote">Paper trading shadow : capital virtuel 200 000 € par portefeuille, marqué au prix réel par le cycle Live Alpha Lab toutes les 15 min (pas de tick 2,5 s). Aucun ordre réel. Les 5 portefeuilles tournent en parallèle sur les mêmes signaux avec des règles d'allocation différentes.</div>
   </section>
   <section class="panel blk" id="eventBook" style="border-color:rgba(139,92,246,.35)">
     <div class="sec-t" style="margin-bottom:8px">Stratégie événementielle — PAPER LIVE (multi-horizon) <span class="badge" id="ebFwd"></span> <span class="badge" id="ebPf"></span></div>
@@ -544,79 +554,136 @@ async function lab(){
   document.getElementById("crossBtn").onclick=go;go();
 }
 
-// ── PORTEFEUILLE PAPER LIVE 200k€ (tick 2.5s) ──
-let pfCurve,pfPrev=null;
-async function initPf(policy){
-  document.getElementById("pfInit").style.display="none";
-  await j("/api/portfolio/init",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({policy})});
-  portfolioLive();
+// ── PORTEFEUILLE SHADOW LIVE — Live Alpha Lab (cycle 15 min, poll 30 s, capital virtuel, aucun ordre réel) ──
+const LAB_CAP=200000,LAB_DEFAULT="P1_EQUAL_RISK";
+const LAB_LABEL_CLS={VALIDATED_FORWARD:"pos",NO_CAPITAL:"neg"};   // autres labels -> amb
+let pfCurve,pfPrev=null,labData=null,labRoster={},labSel=LAB_DEFAULT;
+try{labSel=localStorage.getItem("labPf")||LAB_DEFAULT;}catch(e){}
+const eur0=v=>v==null?"—":Math.round(v).toLocaleString("fr-FR")+" €";
+const seur=(v,d=0)=>v==null?"—":(v>=0?"+":"")+v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d})+" €";
+const sgn=v=>v>0?"pos":v<0?"neg":"";
+const hhmm=t=>t?new Date(t).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"—";
+const dfr=t=>t?new Date(t).toLocaleString("fr-FR"):"—";
+const labelCls=l=>LAB_LABEL_CLS[l]||"amb";
+function setDot(txt,cls){const b=document.getElementById("pfLiveDot");b.textContent=txt;b.className="badge "+cls;}
+function selectLabPf(name){
+  if(name===labSel)return;
+  labSel=name;pfPrev=null;
+  try{localStorage.setItem("labPf",name);}catch(e){}
+  renderLab();labDetail();
 }
-async function portfolioLive(){
+function renderLab(){
+  const d=labData;if(!d)return;
+  const pfs=d.portfolios||[],cy=d.cycle||{};
+  if(cy.live)setDot("● live","pos");
+  else if(cy.status==="OK")setDot("● stale — "+(cy.age_min!=null?Math.round(cy.age_min)+"min":"âge inconnu"),"amb");
+  else setDot("● erreur"+(cy.status?" — "+cy.status:""),"neg");
+  document.getElementById("pfSel").innerHTML=pfs.map(p=>
+    `<button class="${p.name===labSel?'sel':''}" onclick="selectLabPf('${p.name}')" title="${p.status||'—'} · ${p.n_positions} positions">${p.name}</button>`).join("")
+    ||`<span style="color:var(--ink3);font-size:11px">aucun portefeuille (state.json absent)</span>`;
+  const p=pfs.find(x=>x.name===labSel),el=document.getElementById("pfValue");
+  if(!p){el.textContent="—";document.getElementById("pfPnl").textContent="";document.getElementById("pfMeta").textContent="";return;}
+  const val=p.equity;
+  el.textContent=eur0(val);
+  // flash couleur quand la valeur change (au rythme du cycle, pas d'un tick)
+  if(pfPrev!=null&&val!==pfPrev){el.style.color=val>pfPrev?"#34d399":"#f87171";setTimeout(()=>el.style.color="var(--ink)",400);}
+  pfPrev=val;
+  const up=p.pnl_eur>=0,cap=d.capital_eur!=null?d.capital_eur:LAB_CAP;
+  document.getElementById("pfPnl").innerHTML=
+    `<span class="${up?'pos':'neg'}">${up?"▲":"▼"} ${seur(p.pnl_eur)} (${up?"+":""}${(p.pnl_pct*100).toFixed(3)}%)</span> `+
+    `<span style="color:var(--ink3)" title="${p.since?"1er point : "+dfr(p.since):""}">depuis l'ouverture (capital virtuel ${eur0(cap)})</span>`;
+  // pnl_by_alpha est BRUT (réalisé+latent, frais non déduits) ; cost_by_alpha = frais
+  // cumulés attribués à l'alpha. Affiché NET = brut − frais, brut et frais inline.
+  // Le funding n'est pas attribué par alpha → somme des chips ≠ P&L titre (écart = funding).
+  const costs=p.cost_by_alpha||{};
+  const chips=Object.entries(p.pnl_by_alpha||{}).map(([a,v])=>{const c=costs[a]||0;return [a,v,c,v-c];})
+    .sort((a,b)=>Math.abs(b[3])-Math.abs(a[3])).map(([a,v,c,net])=>{
+    const r=labRoster[a];
+    const tag=r?`<span class="pftag ${labelCls(r.label)}">${r.label}</span>`:"";
+    return `<span class="pfchip" title="${r?"net = brut − frais attribués à l'alpha (funding non attribué par alpha)":"hors roster"}">${tag}${a} <b class="${sgn(net)}">${seur(net)}</b> <span style="color:var(--ink3)">(brut ${seur(v)}, frais ${eur0(c)})</span></span>`;}).join("");
+  document.getElementById("pfMeta").innerHTML=
+    `gross ${eur0(p.gross_exposure)} · net ${eur0(p.net_exposure)} · ${p.n_positions} positions · frais ${eur0(p.fees)} · funding ${seur(p.funding)} · drawdown ${(p.drawdown*100).toFixed(2)}%`+
+    ` · dernier cycle ${hhmm(cy.finished_at)} (${cy.producers_ok!=null?cy.producers_ok:"?"}/${cy.producers_run!=null?cy.producers_run:"?"} producteurs)`+
+    (p.name==="P1_VOL_OVERLAY"&&d.vol_overlay_multiplier!=null?` · overlay vol ×${d.vol_overlay_multiplier.toFixed(3)}`:"")+
+    (chips?`<br>${chips}`:"");
+}
+function renderRoster(){
+  const ro=(labData&&labData.roster)||[];
+  document.getElementById("pfRosterN").textContent=ro.length;
+  document.querySelector("#pfRosterTbl tbody").innerHTML=ro.map(r=>
+    `<tr><td><b>${r.alpha_id}</b><br><span style="color:var(--ink3);font-size:10.5px">${r.risk_bucket||""}${r.correlation_family?" · "+r.correlation_family:""}</span></td>`+
+    `<td>${r.family||"—"}</td><td>${r.scientific_status||"—"}</td>`+
+    `<td>${r.operational_status||"—"}${r.role?`<br><span style="color:var(--ink3);font-size:10.5px">rôle ${r.role}</span>`:""}</td>`+
+    `<td><span class="pftag ${labelCls(r.label)}">${r.label}</span></td>`+
+    `<td>${r.forward_decisions!=null?r.forward_decisions:"—"} / ${r.replay_decisions!=null?r.replay_decisions:"—"}`+
+      `<br><span style="color:var(--ink3);font-size:10.5px">${r.independent_episodes!=null?r.independent_episodes+" épisodes indép.":""}${r.last_trigger_h_ago!=null?" · dernier signal il y a "+Math.round(r.last_trigger_h_ago)+" h":""}</span></td>`+
+    `<td>${r.confidence!=null?r.confidence:"—"}</td><td>${r.freeze_timestamp?String(r.freeze_timestamp).slice(0,10):"—"}</td></tr>`).join("")
+    ||`<tr><td colspan=8 style="color:var(--ink3)">roster indisponible</td></tr>`;
+}
+function drawLabCurve(h){
+  const hist=h.history||[],base=h.capital_eur!=null?h.capital_eur:LAB_CAP;
+  if(!pfCurve){pfCurve=echarts.init(document.getElementById("pfCurve"),null,{renderer:"svg"});
+    window.addEventListener("resize",()=>pfCurve&&pfCurve.resize());}
+  if(!hist.length){pfCurve.clear();return;}
+  const vals=hist.map(x=>x.v),last=vals[vals.length-1];
+  pfCurve.setOption({backgroundColor:"transparent",
+    tooltip:{trigger:"axis",backgroundColor:"#121a33",borderColor:line,textStyle:{color:"#e6edf7"},
+      formatter:p=>{const x=hist[p[0].dataIndex];
+        return `${new Date(x.t).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}<br>${eur0(x.v)} · gross ${eur0(x.gross)} · ${x.n_positions} pos.${x.status&&x.status!=="OK"?" · "+x.status:""}`;}},
+    grid:{left:0,right:0,top:6,bottom:6},
+    xAxis:{type:"category",show:false,data:hist.map(x=>x.t)},
+    yAxis:{type:"value",scale:true,show:false},
+    series:[{type:"line",data:vals,showSymbol:false,lineStyle:{width:2,color:last>=base?"#059669":"#dc2626"},
+      areaStyle:{color:last>=base?"rgba(5,150,105,.12)":"rgba(220,38,38,.10)"},
+      markLine:{silent:true,symbol:"none",data:[{yAxis:base}],lineStyle:{color:ink3,type:"dashed"},label:{show:false}}}]},{notMerge:true});
+}
+function renderLabPositions(p){
+  const rows=(p.positions||[]).map(x=>
+    `<tr><td><b>${(x.instrument||"—").replace("USDT","")}</b></td><td style="font-size:11px">${x.owner_alpha||"—"}</td>`+
+    `<td>${x.quantity==null?"—":x.quantity.toLocaleString("fr-FR",{maximumFractionDigits:4})}</td><td>${num(x.entry_price)}</td>`+
+    `<td>${eur0(x.notional_entry)}</td><td class="${sgn(x.realized_pnl)}">${seur(x.realized_pnl,2)}</td>`+
+    `<td>${x.fees_paid==null?"—":x.fees_paid.toFixed(2)+" €"}${x.funding_paid?` <span style="color:var(--ink3)">(funding ${seur(x.funding_paid,2)})</span>`:""}</td></tr>`).join("");
+  document.querySelector("#pfPos tbody").innerHTML=rows
+    ||`<tr><td colspan=7 style="color:var(--ink3)">aucune position ouverte${p.as_of?" — état au "+dfr(p.as_of):""}</td></tr>`;
+}
+async function labDetail(){
+  const name=labSel;
+  try{
+    const [h,p]=await Promise.all([j(`/api/lab/portfolio/${encodeURIComponent(name)}/history`),j(`/api/lab/portfolio/${encodeURIComponent(name)}/positions`)]);
+    if(name!==labSel)return;                              // sélection changée entre-temps
+    drawLabCurve(h);renderLabPositions(p);
+  }catch(e){
+    if(name!==labSel)return;
+    document.querySelector("#pfPos tbody").innerHTML=`<tr><td colspan=7 style="color:var(--ink3)">positions indisponibles (${name})</td></tr>`;
+  }
+}
+async function labPortfolios(){
+  try{
+    const d=await j("/api/lab/portfolios");
+    labData=d;labRoster={};(d.roster||[]).forEach(r=>labRoster[r.alpha_id]=r);
+    const pfs=d.portfolios||[];
+    if(pfs.length&&!pfs.some(x=>x.name===labSel)){labSel=pfs.some(x=>x.name===LAB_DEFAULT)?LAB_DEFAULT:pfs[0].name;pfPrev=null;}
+    renderLab();renderRoster();
+    await labDetail();
+  }catch(e){setDot("● erreur — API indisponible","neg");}
+  setTimeout(labPortfolios,30000);
+}
+// ancien portefeuille Mongo (arrêté 2026-09-03) : lecture seule, jamais de POST /api/portfolio/init
+async function legacyPf(){
+  const el=document.getElementById("pfLegacyBody");
   try{
     const d=await j("/api/portfolio/live");
-    if(!d.exists){document.getElementById("pfInit").style.display="block";
-      document.getElementById("pfValue").textContent="—";
-      setTimeout(portfolioLive,4000);return;}
-    document.getElementById("pfInit").style.display="none";
-    const val=d.value_eur;
-    const el=document.getElementById("pfValue");
-    el.textContent=val.toLocaleString("fr-FR",{maximumFractionDigits:0})+" €";
-    // flash couleur sur tick
-    if(pfPrev!=null&&val!==pfPrev){el.style.color=val>pfPrev?"#34d399":"#f87171";
-      setTimeout(()=>el.style.color="var(--ink)",400);}
-    pfPrev=val;
-    const up=d.pnl_eur>=0;
-    document.getElementById("pfPnl").innerHTML=
-      `<span class="${up?'pos':'neg'}">${up?"▲":"▼"} ${up?"+":""}${d.pnl_eur.toLocaleString("fr-FR",{maximumFractionDigits:0})} € (${up?"+":""}${(d.pnl_pct*100).toFixed(3)}%)</span> <span style="color:var(--ink3)">depuis l'ouverture</span>`;
-    if(d.mode==="strategy"){
-      const sl=d.sleeves_eur||{};
-      document.getElementById("pfMeta").innerHTML=
-        `<b>${d.policy}</b><br>EUR/USDT ${d.eur_usdt} · régime <span class="${d.longs_active?'pos':'amb'}">${d.regime}</span> (longs ${d.longs_active?'actifs':'flat'}) · `+
-        `sleeves : carry <span class="${sl.carry>=0?'pos':'neg'}">${sl.carry>=0?"+":""}${sl.carry.toFixed(2)}€</span> · `+
-        `basis <span class="${sl.basis>=0?'pos':'neg'}">${sl.basis>=0?"+":""}${sl.basis.toFixed(2)}€</span> · `+
-        `longs <span class="${sl.longs>=0?'pos':'neg'}">${sl.longs>=0?"+":""}${sl.longs.toFixed(2)}€</span>`+
-        (sl.fees!=null?` · frais <span class="neg">${sl.fees.toFixed(2)}€</span>`:"")+
-        (sl.borrow!=null&&sl.borrow!==0?` · borrow <span class="neg">${sl.borrow.toFixed(2)}€</span>`:"")+
-        (d.gross_leverage!=null?` · <b>${d.gross_leverage}× spot</b>`:"")+
-        (d.breakdown_eur?`<br><span style="color:var(--ink3);font-size:11px">comptabilité v2 (réalisée) : funding encaissé ${d.breakdown_eur["funding_encaissé"].toFixed(2)}€ · longs réalisés ${d.breakdown_eur["longs_réalisé"].toFixed(2)}€ · latent ${d.breakdown_eur["longs_latent"].toFixed(2)}€${d.rebalanced_at?` · rebalancé ${new Date(d.rebalanced_at).toLocaleString("fr-FR")}`:""}</span>`:"");
-      document.querySelector("#pfPos thead").innerHTML=`<tr><th>actif</th><th>sleeve</th><th>notional</th><th>prix live</th><th>P&L</th><th>détail</th></tr>`;
-      document.querySelector("#pfPos tbody").innerHTML=d.positions.map(p=>{
-        const u=p.pnl_eur>=0,sc=p.sleeve.includes("carry")?"var(--c1)":p.sleeve.includes("basis")?"var(--c3)":"var(--c4)";
-        return `<tr><td><b>${p.symbol.replace("USDT","")}</b></td>
-          <td><span class="swatch" style="background:${sc}"></span>${p.sleeve}</td>
-          <td>${p.notional_eur.toLocaleString("fr-FR",{maximumFractionDigits:0})} €</td>
-          <td>${num(p.price)}</td>
-          <td class="${u?'pos':'neg'}">${u?"+":""}${p.pnl_eur.toFixed(2)} €</td>
-          <td style="color:var(--ink3);font-size:11px">${p.detail}</td></tr>`;}).join("");
-    }else{
-      document.getElementById("pfMeta").textContent=`EUR/USDT ${d.eur_usdt} · cash ${(d.cash_eur||0).toLocaleString("fr-FR",{maximumFractionDigits:0})} € · ${d.positions.length} positions · politique: ${d.policy}`;
-      document.querySelector("#pfPos thead").innerHTML=`<tr><th>actif</th><th>poids</th><th>entrée</th><th>prix live</th><th>valeur</th><th>P&L</th></tr>`;
-      document.querySelector("#pfPos tbody").innerHTML=d.positions.map(p=>{
-        const u=p.pnl_pct>=0;
-        return `<tr><td><b>${p.symbol.replace("USDT","")}</b></td><td style="color:var(--ink3)">${(p.weight*100||0).toFixed(0)}%</td>
-          <td>${num(p.entry)}</td><td>${num(p.price)}</td><td>${p.value_eur.toLocaleString("fr-FR",{maximumFractionDigits:0})} €</td>
-          <td class="${u?'pos':'neg'}">${u?"+":""}${(p.pnl_pct*100).toFixed(2)}%</td></tr>`;}).join("");
+    if(!d.exists){el.textContent="aucun"+(d.backend==="unavailable"?" (Mongo indisponible)":"");}
+    else{
+      const up=(d.pnl_eur||0)>=0;
+      el.innerHTML=`<span class="badge neg">arrêté</span> valeur <b>${eur0(d.value_eur)}</b> (capital ${eur0(d.capital_eur)}) · `+
+        `P&L <span class="${up?'pos':'neg'}">${seur(d.pnl_eur)} (${up?"+":""}${((d.pnl_pct||0)*100).toFixed(3)}%)</span>`+
+        ` · ouvert le ${dfr(d.created_at)} · dernier rebalancement ${dfr(d.rebalanced_at)} · arrêté le ${dfr(d.stopped_at)}`+
+        ` · ex-politique ${d.policy_label||d.preset||"—"} · ${d.history_points!=null?d.history_points:0} points d'historique`+
+        (d.hint?`<br><span style="color:var(--ink3)">${d.hint}</span>`:"");
     }
-    document.getElementById("pfSince").textContent=new Date(d.created_at).toLocaleString("fr-FR");
-    // courbe live
-    const h=await j("/api/portfolio/history");
-    const hist=h.history||[];
-    if(hist.length){
-      pfCurve=pfCurve||echarts.init(document.getElementById("pfCurve"),null,{renderer:"svg"});
-      const vals=hist.map(x=>x.v),base=200000;
-      pfCurve.setOption({backgroundColor:"transparent",
-        tooltip:{trigger:"axis",backgroundColor:"#121a33",borderColor:line,textStyle:{color:"#e6edf7"},
-          formatter:p=>`${new Date(hist[p[0].dataIndex].t).toLocaleTimeString("fr-FR")}<br>${p[0].value.toLocaleString("fr-FR",{maximumFractionDigits:0})} €`},
-        grid:{left:0,right:0,top:6,bottom:6},
-        xAxis:{type:"category",show:false,data:hist.map(x=>x.t)},
-        yAxis:{type:"value",scale:true,show:false},
-        series:[{type:"line",data:vals,showSymbol:false,lineStyle:{width:2,color:val>=base?"#059669":"#dc2626"},
-          areaStyle:{color:val>=base?"rgba(5,150,105,.12)":"rgba(220,38,38,.10)"},
-          markLine:{silent:true,symbol:"none",data:[{yAxis:base}],lineStyle:{color:ink3,type:"dashed"},label:{show:false}}}]},{notMerge:true});
-      window.addEventListener("resize",()=>pfCurve&&pfCurve.resize());
-    }
-  }catch(e){}
-  setTimeout(portfolioLive,2500);
+  }catch(e){el.textContent="indisponible";}
+  setTimeout(legacyPf,300000);
 }
 
 // ── EVENT STRATEGY paper live ──
@@ -718,9 +785,9 @@ async function tournamentSelection(){
 }
 
 // ── notifications portefeuille : toasts in-app + Notification navigateur ────
-// Les événements (gain/perte ±500 €, flips de gate, rolls, rebalances) sont
-// émis CÔTÉ SERVEUR par le moteur paper (timer 15 min, tourne PWA fermée) ;
-// ici on les affiche dès que l'app est ouverte.
+// Les événements (gain/perte ±500 €, flips de gate, rolls, rebalances) étaient
+// émis CÔTÉ SERVEUR par l'ancien moteur paper (arrêté le 2026-09-03 : plus aucun
+// nouvel événement attendu). Lecture seule de l'historique, poll 5 min.
 function notifOn(){return localStorage.getItem("pfNotif")==="1"&&("Notification" in window)&&Notification.permission==="granted";}
 function paintBell(){const b=document.getElementById("pfBell");if(b)b.textContent=notifOn()?"🔔":"🔕";}
 async function toggleNotif(){
@@ -763,10 +830,10 @@ async function pfEvents(){
     }
     if(evs.length)localStorage.setItem("pfEvtSeen",evs[evs.length-1].ts);
   }catch(e){}
-  setTimeout(pfEvents,20000);
+  setTimeout(pfEvents,300000);
 }
 paintBell();pfEvents();
-boot();live();lab();worldmon();portfolioLive();eventBook();tournamentSelection();tournamentLive();
+boot();live();lab();worldmon();labPortfolios();legacyPf();eventBook();tournamentSelection();tournamentLive();
 
 // ── PWA : service worker + prompt d'installation ──
 if("serviceWorker" in navigator){

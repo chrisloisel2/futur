@@ -14,8 +14,10 @@ en Mongo — aucun ordre, rien d'envoyé à l'extérieur). Caches TTL.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import subprocess
+import threading
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -28,6 +30,7 @@ import yaml
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
+from starlette.staticfiles import StaticFiles
 
 ROOT = Path(__file__).resolve().parents[1]
 LC = ROOT / "reports" / "liq_cascade"
@@ -35,9 +38,51 @@ STATIC = Path(__file__).parent / "static"
 
 app = FastAPI(title="FUTUR Command Center")
 _cache: Dict[str, tuple] = {}
+_cache_locks: Dict[str, threading.Lock] = {}
+_cache_locks_guard = threading.Lock()
 
 # localhost par défaut (run natif) ; surchargé en Docker (mongodb://mongodb:27017)
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+
+# ── LIVE ALPHA LAB (/api/lab/*) : seul trading encore actif (shadow, capital
+# virtuel). Import gardé : une erreur dans lab_api ne doit pas faire tomber
+# tout le command center — le reste du dashboard continue de servir.
+try:
+    from frontend_pipeline.lab_api import router as lab_router
+    app.include_router(lab_router)
+except Exception as _lab_err:   # pragma: no cover
+    logging.getLogger(__name__).warning("lab_api indisponible : %s", _lab_err)
+    lab_router = None
+
+# ── AUTH (exposition publique ngrok) : garde ASGI + /login /logout /api/me
+# /health. Import NON gardé volontairement : si auth.py ne s'importe pas,
+# l'app ne doit pas démarrer ouverte (fail closed).
+from frontend_pipeline.auth import AuthGate, router as auth_router  # noqa: E402
+app.add_middleware(AuthGate)
+app.include_router(auth_router)
+
+# ── /api/status : vivacité par fraîcheur des artefacts (import gardé)
+try:
+    from frontend_pipeline.status_api import router as status_router
+    app.include_router(status_router)
+except Exception as _status_err:   # pragma: no cover
+    logging.getLogger(__name__).warning("status_api indisponible : %s", _status_err)
+    status_router = None
+
+
+class NoCacheStatic(StaticFiles):
+    """/static : Cache-Control no-cache pour html/js/css (déploiements sans
+    rebuild : le navigateur revalide à chaque visite)."""
+    NO_CACHE_SUFFIXES = (".html", ".js", ".css")
+
+    def file_response(self, full_path, stat_result, scope, status_code=200):
+        resp = super().file_response(full_path, stat_result, scope, status_code)
+        if str(full_path).endswith(self.NO_CACHE_SUFFIXES):
+            resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
+app.mount("/static", NoCacheStatic(directory=str(STATIC)), name="static")
 
 
 def _universe() -> List[str]:
@@ -70,12 +115,30 @@ def _clean(o):
 
 
 def cached(key: str, ttl: float, fn):
-    now = time.time()
-    if key in _cache and now - _cache[key][0] < ttl:
-        return _cache[key][1]
-    v = fn()
-    _cache[key] = (now, v)
-    return v
+    """Cache TTL par clé, UN seul recalcul à la fois par clé (verrou).
+    Pendant qu'un thread recalcule, les autres reçoivent la dernière valeur
+    connue même périmée (stale-while-revalidate) au lieu de relancer fn —
+    sinon un poll plus rapide que le calcul (/api/tournament/live ≈ 40 s,
+    poll PWA 4 s) empile les threads et étouffe tout le serveur (GIL).
+    Sans valeur connue, les appelants attendent le résultat du seul calcul."""
+    hit = _cache.get(key)
+    if hit is not None and time.time() - hit[0] < ttl:
+        return hit[1]
+    with _cache_locks_guard:
+        lock = _cache_locks.setdefault(key, threading.Lock())
+    if not lock.acquire(blocking=False):
+        if hit is not None:                 # recalcul déjà en cours → valeur périmée
+            return hit[1]
+        lock.acquire()                      # rien à servir → on attend le calcul
+    try:
+        hit = _cache.get(key)
+        if hit is not None and time.time() - hit[0] < ttl:
+            return hit[1]                   # rafraîchi par un autre thread entre-temps
+        v = fn()
+        _cache[key] = (time.time(), v)
+        return v
+    finally:
+        lock.release()
 
 
 # ── jambes / équités ─────────────────────────────────────────────────────────
@@ -577,7 +640,34 @@ def api_del_forecast(symbol: str):
     return {"ok": True}
 
 
-# ── PORTEFEUILLE PAPER LIVE 200 000 € (forward réel, marqué au prix live) ────
+# ── PORTEFEUILLE PAPER LEGACY 200 000 € — GELÉ le 2026-09-03 ─────────────────
+# Instruction utilisateur (2026-09-03) : TOUT trading est arrêté, sauf le Live
+# Alpha Lab (scripts/run_live_alpha_lab_cycle.py, timer systemd 15 min, servi
+# par /api/lab/*). Ce portefeuille Mongo (futur_ui.paper_portfolio, _id "main",
+# preset adaptive, créé le 2026-07-17) était marqué au marché DANS le handler
+# HTTP à chaque poll de 2,5 s — et mark_to_market() rebalance/flippe, donc
+# écrit un état de trading. Il n'est plus JAMAIS marqué : lecture seule de la
+# dernière valeur enregistrée (history), affiché comme arrêté. Seule écriture
+# tolérée : `stopped_at`, posé UNE fois si absent. /init répond 410.
+# Capital virtuel, aucun ordre réel. history/events restent en lecture seule.
+
+LEGACY_STOPPED_ON = "2026-09-03"
+LEGACY_HINT = "arrêté le 2026-09-03 — remplacé par /api/lab/portfolios"
+# Libellés au PASSÉ : ce sont des ex-politiques, plus rien n'est re-alloué.
+_LEGACY_STOPPED_SUFFIX = " — arrêtée le %s, plus aucune ré-allocation" % LEGACY_STOPPED_ON
+_LEGACY_POLICY_LABEL = {
+    "max": "FULL-STACK — visait +21,8 % backtest (~18-19 %/an après borrow, ~5× gross)"
+           + _LEGACY_STOPPED_SUFFIX,
+    "aggressive": "AGRESSIVE — 40 % directionnel + cœur Δ-neutre, ciblait ~+10 %/an (DD ~-13 %)"
+                  + _LEGACY_STOPPED_SUFFIX,
+    "adaptive": "ADAPTATIF — était re-alloué toutes les 8h par SCORE NET (yield − coûts A/R "
+                "amortis − borrow), hystérésis garder si brut > 0, min-hold 72h, "
+                "comptabilité v2 (funding réel encaissé, P&L réalisé aux flips, "
+                "frais déclarés, anti-churn 2 %), contrefactuel churn_guard"
+                + _LEGACY_STOPPED_SUFFIX,
+}
+_LEGACY_POLICY_DEFAULT = ("V1.2 (carry+basis Δ-neutre + longs gatés)" + _LEGACY_STOPPED_SUFFIX)
+
 
 def _paper():
     from src.institutional.live.paper_portfolio import PaperPortfolio
@@ -591,33 +681,49 @@ def _paper():
 
 
 class InitReq(BaseModel):
-    policy: str = "core"        # core | forecasts
+    policy: str = "core"        # conservé pour compatibilité ; /init répond 410
 
 
 @app.get("/api/portfolio/live")
 def api_portfolio_live():
+    """Legacy GELÉ : ne marque plus, ne rebalance plus (voir bloc ci-dessus).
+    Lecture du doc + dernier point d'historique ; unique écriture = stopped_at."""
     pp = _paper()
-    if not pp.exists():
-        return {"exists": False,
-                "hint": "portefeuille non initialisé — POST /api/portfolio/init"}
-    return _clean(pp.mark_to_market())
+    if pp.col is None:
+        return {"exists": False, "stopped": True, "backend": "unavailable"}
+    doc = pp.get()
+    if doc is None:
+        return {"exists": False, "stopped": True}
+    stopped_at = doc.get("stopped_at")
+    if not stopped_at:
+        stopped_at = datetime.now(timezone.utc).isoformat()
+        pp.col.update_one({"_id": "main"}, {"$set": {"stopped_at": stopped_at}})
+    hist = doc.get("history") or []
+    capital = float(doc.get("capital_eur") or 0.0)
+    last = hist[-1] if hist else None
+    value = float(last["v"]) if isinstance(last, dict) and last.get("v") is not None else capital
+    pnl = value - capital
+    return _clean({
+        "exists": True,
+        "stopped": True,
+        "stopped_at": stopped_at,
+        "value_eur": round(value, 2),
+        "capital_eur": capital,
+        "pnl_eur": round(pnl, 2),
+        "pnl_pct": (pnl / capital) if capital else None,
+        "created_at": doc.get("created_at"),
+        "rebalanced_at": doc.get("rebalanced_at"),
+        "preset": doc.get("preset"),
+        "policy_label": _LEGACY_POLICY_LABEL.get(doc.get("preset"), _LEGACY_POLICY_DEFAULT),
+        "history_points": len(hist),
+        "hint": LEGACY_HINT,
+    })
 
 
 @app.post("/api/portfolio/init")
-def api_portfolio_init(req: InitReq):
-    pp = _paper()
-    if pp.col is None:
-        raise HTTPException(503, "MongoDB indisponible")
-    if req.policy in ("strategy", "aggressive", "max", "adaptive"):
-        preset = {"strategy": "calm", "aggressive": "aggressive",
-                  "max": "max", "adaptive": "adaptive"}[req.policy]
-        return _clean(pp.initialize_strategy(preset=preset))
-    forecasts = None
-    if req.policy == "forecasts":
-        fdb = _forecast_db()
-        if fdb is not None:
-            forecasts = [{**d, "symbol": d["_id"]} for d in fdb.find()]
-    return _clean(pp.initialize(policy=req.policy, forecasts=forecasts))
+def api_portfolio_init():
+    """Legacy GELÉ : plus aucune (ré)initialisation possible."""
+    raise HTTPException(410, "portefeuille legacy arrêté le 2026-09-03 — voir /api/lab/portfolios")
 
 
 @app.get("/api/portfolio/history")
@@ -709,6 +815,10 @@ def api_event_book():
 
 
 # ── TOURNOI ALPHA_20 — runners paper-live isolés (bus/broker/ledgers) ────────
+# Le calcul de /api/tournament/live prend ≈ 40 s (reconciliation.runner_gate
+# ≈ 5-6 s × 5 runners). TTL ≥ 60 s + verrou dans cached() : un seul recalcul
+# par minute, les polls (4 s) reçoivent la dernière valeur connue.
+TOURNAMENT_LIVE_TTL_S = 60.0
 
 def _tournament_mod():
     import sys
@@ -721,9 +831,10 @@ def _tournament_mod():
 
 @app.get("/api/tournament/live")
 def api_tournament_live():
-    """Rafraîchi toutes les ~4 s côté PWA — NAV/décisions/réconciliation
-    RECALCULÉS depuis le ledger de chaque runner (jamais le dashboard
-    quotidien, qui ne tourne qu'une fois par jour)."""
+    """Pollé toutes les ~4 s côté PWA, recalculé au plus une fois par
+    TOURNAMENT_LIVE_TTL_S — NAV/décisions/réconciliation depuis le ledger de
+    chaque runner (jamais le dashboard quotidien, qui ne tourne qu'une fois
+    par jour)."""
     def load():
         orchestrator, reconciliation, PaperAccount, runnable_specs = _tournament_mod()
         rows = []
@@ -763,7 +874,7 @@ def api_tournament_live():
                 "age_days": round(acc.age_days(), 2),
             })
         return {"ts": pd.Timestamp.now(tz="UTC").isoformat(), "runners": rows}
-    return _clean(cached("tournament_live", 4, load))
+    return _clean(cached("tournament_live", TOURNAMENT_LIVE_TTL_S, load))
 
 
 @app.get("/api/tournament/events")
@@ -819,7 +930,13 @@ def api_tournament_selection():
 
 @app.get("/", response_class=HTMLResponse)
 def index():
-    return (STATIC / "command_center.html").read_text()
+    # shell modulaire (index.html) ; repli sur l'ancien fichier monolithique si
+    # le déploiement est partiel — l'app ne doit jamais rendre une page blanche.
+    p = STATIC / "index.html"
+    if not p.is_file():
+        p = STATIC / "command_center.html"
+    return HTMLResponse(p.read_text(encoding="utf-8"),
+                        headers={"Cache-Control": "no-cache"})
 
 
 # ── PWA : manifest, service worker, icônes ───────────────────────────────────

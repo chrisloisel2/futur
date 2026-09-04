@@ -3,18 +3,8 @@
     "runner_id": "carry_basis_v12",
     "status": "evaluated",
     "gate_usdt": 0.01,
-    "n_marks": 953,
+    "n_marks": 955,
     "intervals": [
-      {
-        "ts": "2026-09-02T08:05:04.165489+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
-      {
-        "ts": "2026-09-02T09:05:06.151529+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
       {
         "ts": "2026-09-02T10:05:11.559780+00:00",
         "gap_usdt": 0.0,
@@ -154,9 +144,19 @@
         "ts": "2026-09-03T13:05:04.729450+00:00",
         "gap_usdt": 0.0,
         "passed": true
+      },
+      {
+        "ts": "2026-09-03T14:05:04.225802+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
+      },
+      {
+        "ts": "2026-09-03T15:05:04.677640+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
       }
     ],
-    "consecutive_ok": 952,
+    "consecutive_ok": 954,
     "integrity": {
       "chain_ok": true,
       "duplicate_facts": [],
@@ -169,18 +169,8 @@
     "runner_id": "carry_solusdt",
     "status": "evaluated",
     "gate_usdt": 0.01,
-    "n_marks": 953,
+    "n_marks": 955,
     "intervals": [
-      {
-        "ts": "2026-09-02T08:05:04.223673+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
-      {
-        "ts": "2026-09-02T09:05:06.202403+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
       {
         "ts": "2026-09-02T10:05:11.533079+00:00",
         "gap_usdt": 0.0,
@@ -320,9 +310,19 @@
         "ts": "2026-09-03T13:05:04.640849+00:00",
         "gap_usdt": 0.0,
         "passed": true
+      },
+      {
+        "ts": "2026-09-03T14:05:04.249812+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
+      },
+      {
+        "ts": "2026-09-03T15:05:04.708996+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
       }
     ],
-    "consecutive_ok": 952,
+    "consecutive_ok": 954,
     "integrity": {
       "chain_ok": true,
       "duplicate_facts": [],
@@ -335,18 +335,8 @@
     "runner_id": "carry_bnbusdt",
     "status": "evaluated",
     "gate_usdt": 0.01,
-    "n_marks": 953,
+    "n_marks": 955,
     "intervals": [
-      {
-        "ts": "2026-09-02T08:05:04.202259+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
-      {
-        "ts": "2026-09-02T09:05:06.126688+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
       {
         "ts": "2026-09-02T10:05:11.560643+00:00",
         "gap_usdt": 0.0,
@@ -486,9 +476,19 @@
         "ts": "2026-09-03T13:05:04.706675+00:00",
         "gap_usdt": 0.0,
         "passed": true
+      },
+      {
+        "ts": "2026-09-03T14:05:04.276536+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
+      },
+      {
+        "ts": "2026-09-03T15:05:04.720316+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
       }
     ],
-    "consecutive_ok": 952,
+    "consecutive_ok": 954,
     "integrity": {
       "chain_ok": true,
       "duplicate_facts": [],
@@ -501,18 +501,8 @@
     "runner_id": "basis_term_v0",
     "status": "evaluated",
     "gate_usdt": 0.01,
-    "n_marks": 953,
+    "n_marks": 955,
     "intervals": [
-      {
-        "ts": "2026-09-02T08:05:03.874053+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
-      {
-        "ts": "2026-09-02T09:05:05.826685+00:00",
-        "gap_usdt": 0.0,
-        "passed": true
-      },
       {
         "ts": "2026-09-02T10:05:11.236750+00:00",
         "gap_usdt": 0.0,
@@ -652,9 +642,19 @@
         "ts": "2026-09-03T13:05:04.316169+00:00",
         "gap_usdt": 0.0,
         "passed": true
+      },
+      {
+        "ts": "2026-09-03T14:05:03.919422+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
+      },
+      {
+        "ts": "2026-09-03T15:05:04.357690+00:00",
+        "gap_usdt": 0.0,
+        "passed": true
       }
     ],
-    "consecutive_ok": 952,
+    "consecutive_ok": 954,
     "integrity": {
       "chain_ok": true,
       "duplicate_facts": [],

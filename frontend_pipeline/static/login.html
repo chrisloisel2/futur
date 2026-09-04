@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050608">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<title>FUTUR ▮ CONNEXION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="/static/css/terminal.css">
+</head>
+<body>
+<main class="login">
+  <section class="panel">
+    <header class="panel-h"><span class="code">AUTH</span><span class="ttl">connexion</span><span class="asof" id="clk">--:--:--</span></header>
+    <div class="panel-b">
+      <div class="brand"><div class="wordmark">FUTUR <b>▮</b> TERMINAL</div></div>
+      <div class="err" id="err" hidden role="alert"></div>
+      <form method="post" action="/login" id="f" autocomplete="off">
+        <input type="hidden" name="next" id="next" value="/">
+        <label class="field"><span class="lbl">identifiant</span>
+          <input name="username" id="u" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus></label>
+        <label class="field"><span class="lbl">mot de passe</span>
+          <input name="password" id="p" type="password" autocomplete="off" required></label>
+        <button type="submit" class="btn-primary">entrer</button>
+      </form>
+      <div class="fn">accès invité : lecture seule</div>
+      <div class="fn">Poste de contrôle paper/shadow : capital virtuel, aucun ordre réel.</div>
+    </div>
+  </section>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var err = q.get("error"), el = document.getElementById("err");
+  if (err) {
+    el.textContent = err === "rate" ? "trop de tentatives, réessaie dans 5 min" : "identifiants invalides";
+    el.hidden = false;
+  }
+  // "next" : uniquement un chemin relatif interne (pas d'URL absolue, pas de //)
+  var next = q.get("next") || "/";
+  if (!/^\/(?!\/)/.test(next)) next = "/";
+  document.getElementById("next").value = next;
+  document.getElementById("f").action = "/login?next=" + encodeURIComponent(next);
+  function p2(n) { return (n < 10 ? "0" : "") + n; }
+  function tick() { var d = new Date(); document.getElementById("clk").textContent = p2(d.getHours()) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds()); }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

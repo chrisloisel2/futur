@@ -1,11 +1,11 @@
 {
   "alpha_id": "WHALE_LSR_SCREEN_V1",
-  "last_run": "2026-09-03T08:15:29.463988+00:00",
+  "last_run": "2026-09-04T10:41:56.133993+00:00",
   "universe_hash": "69612b76c966eef4",
   "universe_size": 47,
-  "n_decisions_total": 3254,
-  "n_decisions_new": 102,
+  "n_decisions_total": 3349,
+  "n_decisions_new": 12,
   "mode": "A_SIGNAL_SHADOW",
-  "n_screen_flag_total": 2587,
+  "n_screen_flag_total": 2682,
   "n_mirror_flag_unconfirmed_total": 667
 }

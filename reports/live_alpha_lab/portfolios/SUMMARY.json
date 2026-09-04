@@ -1,120 +1,337 @@
 {
-  "generated_at": "2026-09-03T08:31:22.704160+00:00",
-  "n_forward_intents_total": 214,
+  "generated_at": "2026-09-04T22:08:36.421467+00:00",
+  "n_forward_intents_total": 12,
   "screened_symbols": [
-    "JUPUSDT"
+    "IMXUSDT"
   ],
-  "vol_overlay_multiplier": 0.9662241499477064,
+  "vol_overlay_multiplier": 1.0,
+  "forward_capital_eligibility": [
+    {
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "eligible": true,
+      "reason": "ELIGIBLE_VALIDATED",
+      "detail": "valid\u00e9 par LIQ_REPEAT_DENSITY, LIQ_REPEAT_SKEW_OVERLAY",
+      "validation_candidates": [
+        {
+          "candidate_id": "LIQ_REPEAT_VOL_GATE",
+          "current_status": "NEEDS_MORE_RESEARCH",
+          "validated_for_forward": false,
+          "validation_net_bps": null
+        },
+        {
+          "candidate_id": "LIQ_REPEAT_DENSITY",
+          "current_status": "VALIDATED_FOR_FORWARD",
+          "validated_for_forward": true,
+          "validation_net_bps": 22.1
+        },
+        {
+          "candidate_id": "LIQ_REPEAT_SKEW_OVERLAY",
+          "current_status": "VALIDATED_FOR_FORWARD",
+          "validated_for_forward": true,
+          "validation_net_bps": null
+        },
+        {
+          "candidate_id": "OI_CVD_MEMORY_OVERLAP",
+          "current_status": "REJECTED",
+          "validated_for_forward": false,
+          "validation_net_bps": null
+        }
+      ]
+    },
+    {
+      "alpha_id": "BTC_LEAD_ALT_CASCADE_V1",
+      "eligible": true,
+      "reason": "ELIGIBLE_VALIDATED",
+      "detail": "valid\u00e9 par BTC_LEAD_ALT_CASCADE",
+      "validation_candidates": [
+        {
+          "candidate_id": "BTC_LEAD_ALT_CASCADE",
+          "current_status": "VALIDATED_FOR_FORWARD",
+          "validated_for_forward": true,
+          "validation_net_bps": 46.87
+        }
+      ]
+    },
+    {
+      "alpha_id": "LIQ_CASCADE_FAR_FROM_LOW_V1",
+      "eligible": false,
+      "reason": "BLOCK_SCIENTIFIC_STATUS",
+      "detail": "scientific_status='INVALIDATED_PENDING_RESPEC' -> m\u00e9canisme mort ou en attente de respec",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='CODE_MISSING' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "SHORT_COVERING_CONTINUATION_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_VALIDATED_FOR_FORWARD",
+      "detail": "aucun candidat valid\u00e9 pour le forward (SHORT_COVERING_CONTINUATION=NEEDS_MORE_RESEARCH/validated_for_forward=False)",
+      "validation_candidates": [
+        {
+          "candidate_id": "SHORT_COVERING_CONTINUATION",
+          "current_status": "NEEDS_MORE_RESEARCH",
+          "validated_for_forward": false,
+          "validation_net_bps": 2.53
+        }
+      ]
+    },
+    {
+      "alpha_id": "LIQ_CASCADE_REPEAT_SYSTEMIC_V1",
+      "eligible": false,
+      "reason": "BLOCK_NO_VALIDATION_RECORD",
+      "detail": "aucun candidat du VALIDATION_REGISTRY ne vise cet alpha_id (ni frozen_alpha_id ni existing_live_alpha) -- fail closed : absence de preuve != preuve d'absence de probl\u00e8me",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "WHALE_LSR_SCREEN_V1",
+      "eligible": true,
+      "reason": "NOT_A_POSITION_ALPHA",
+      "detail": "gate/overlay : ne consomme pas de capital (il en retire), porte non applicable",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "FUNDING_BASIS_DISAGREEMENT_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='DATA_BLOCKED' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "FUNDING_BASIS_DISAGREEMENT_V2",
+      "eligible": false,
+      "reason": "BLOCK_NOT_VALIDATED_FOR_FORWARD",
+      "detail": "aucun candidat valid\u00e9 pour le forward (FUNDING_BASIS_DISAGREEMENT=ALREADY_LIVE/validated_for_forward=None)",
+      "validation_candidates": [
+        {
+          "candidate_id": "FUNDING_BASIS_DISAGREEMENT",
+          "current_status": "ALREADY_LIVE",
+          "validated_for_forward": null,
+          "validation_net_bps": null
+        }
+      ]
+    },
+    {
+      "alpha_id": "OPTIONS_RV_IV_SPREAD_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='MERGED_INTO_VOL_FORECAST_LAYER_V1' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "OPTIONS_FAR_OTM_PUT_SHARE_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='MERGED_INTO_VOL_FORECAST_LAYER_V1' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "OPTIONS_BLOCK_FLOW_TO_RV_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='MERGED_INTO_VOL_FORECAST_LAYER_V1' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "VOL_FORECAST_LAYER_V1",
+      "eligible": true,
+      "reason": "NOT_A_POSITION_ALPHA",
+      "detail": "gate/overlay : ne consomme pas de capital (il en retire), porte non applicable",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "CROSS_SECTIONAL_MOMENTUM_PIT_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='DATA_BLOCKED' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V1",
+      "eligible": false,
+      "reason": "BLOCK_NO_VALIDATION_RECORD",
+      "detail": "aucun candidat du VALIDATION_REGISTRY ne vise cet alpha_id (ni frozen_alpha_id ni existing_live_alpha) -- fail closed : absence de preuve != preuve d'absence de probl\u00e8me",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V2",
+      "eligible": false,
+      "reason": "BLOCK_NOT_VALIDATED_FOR_FORWARD",
+      "detail": "aucun candidat valid\u00e9 pour le forward (XSEC_MOMENTUM_HORIZON_EXTENSION=REJECTED/validated_for_forward=False, XSMOM_REGIME_META=VALIDATING/validated_for_forward=None)",
+      "validation_candidates": [
+        {
+          "candidate_id": "XSEC_MOMENTUM_HORIZON_EXTENSION",
+          "current_status": "REJECTED",
+          "validated_for_forward": false,
+          "validation_net_bps": 51.78
+        },
+        {
+          "candidate_id": "XSMOM_REGIME_META",
+          "current_status": "VALIDATING",
+          "validated_for_forward": null,
+          "validation_net_bps": null
+        }
+      ]
+    },
+    {
+      "alpha_id": "MICROSTRUCTURE_OFI_CLUSTER_V1",
+      "eligible": false,
+      "reason": "BLOCK_NOT_OPERATIONAL",
+      "detail": "operational_status='CODE_MISSING' hors ['EXECUTION_SHADOW', 'SIGNAL_SHADOW']",
+      "validation_candidates": []
+    },
+    {
+      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
+      "eligible": true,
+      "reason": "ELIGIBLE_VALIDATED",
+      "detail": "valid\u00e9 par AMIHUD_ILLIQUIDITY_PREMIUM",
+      "validation_candidates": [
+        {
+          "candidate_id": "AMIHUD_ILLIQUIDITY_PREMIUM",
+          "current_status": "VALIDATED_FOR_FORWARD",
+          "validated_for_forward": true,
+          "validation_net_bps": 105.7
+        }
+      ]
+    }
+  ],
+  "negative_expected_value_gate": [
+    {
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "n_decisions_in": 12,
+      "n_blocked_negative_ev": 0,
+      "n_decisions_sized": 12,
+      "blocked_reason": "REJECT_NEGATIVE_EXPECTED_VALUE"
+    },
+    {
+      "alpha_id": "BTC_LEAD_ALT_CASCADE_V1",
+      "n_decisions_in": 0,
+      "n_blocked_negative_ev": 0,
+      "n_decisions_sized": 0,
+      "blocked_reason": "REJECT_NEGATIVE_EXPECTED_VALUE"
+    },
+    {
+      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
+      "n_decisions_in": 0,
+      "n_blocked_negative_ev": 0,
+      "n_decisions_sized": 0,
+      "blocked_reason": "REJECT_NEGATIVE_EXPECTED_VALUE"
+    }
+  ],
   "portfolios": {
     "P1_EQUAL_RISK": {
       "status": "OK",
-      "n_positions": 13,
-      "gross_exposure": 109505.36373318633,
-      "net_exposure": 109505.36373318633,
-      "realized_pnl": 200.1469679767444,
-      "unrealized_pnl": -21.901072746634622,
-      "total_pnl": 178.2458952301098,
-      "cumulative_fees_usd": 233.1276672040167,
-      "cumulative_funding_usd": -2.7027619647577086,
-      "cumulative_turnover_usd": 466255.33440803335,
+      "n_positions": 0,
+      "gross_exposure": 0.0,
+      "net_exposure": 0.0,
+      "realized_pnl": 1208.8971866300628,
+      "unrealized_pnl": 0.0,
+      "total_pnl": 1208.8971866300628,
+      "cumulative_fees_usd": 942.3875152579169,
+      "cumulative_funding_usd": -3.9750070118531964,
+      "cumulative_turnover_usd": 1884775.030515831,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 233.1276672040167
+        "SHORT_COVERING_CONTINUATION_V1": 942.3875152579169
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 176.77956098189554
+        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484
       },
-      "equity": 199942.41546606133,
-      "drawdown": -0.0016789650393530511,
-      "n_equity_points": 10
+      "equity": 200262.53466436028,
+      "drawdown": -0.013015964828042889,
+      "n_equity_points": 132
     },
     "P1_CONTROL": {
       "status": "OK",
-      "n_positions": 13,
-      "gross_exposure": 109505.36373318633,
-      "net_exposure": 109505.36373318633,
-      "realized_pnl": 280.22134559887485,
-      "unrealized_pnl": -21.901072746634622,
-      "total_pnl": 258.32027285224024,
-      "cumulative_fees_usd": 233.16770298517227,
-      "cumulative_funding_usd": -2.703220340257167,
-      "cumulative_turnover_usd": 466335.40597034444,
+      "n_positions": 0,
+      "gross_exposure": 0.0,
+      "net_exposure": 0.0,
+      "realized_pnl": 1290.0019700848325,
+      "unrealized_pnl": 0.0,
+      "total_pnl": 1290.0019700848325,
+      "cumulative_fees_usd": 942.5207540304615,
+      "cumulative_funding_usd": -3.982608355755965,
+      "cumulative_turnover_usd": 1885041.5080609191,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 233.16770298517227
+        "SHORT_COVERING_CONTINUATION_V1": 942.5207540304615
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 256.853938604026
+        "SHORT_COVERING_CONTINUATION_V1": 1288.535635836618
       },
-      "equity": 200022.4493495268,
-      "drawdown": -0.0012793571722007886,
-      "n_equity_points": 10
+      "equity": 200343.4986076986,
+      "drawdown": -0.01300625084851173,
+      "n_equity_points": 132
     },
     "P1_VOL_OVERLAY": {
       "status": "OK",
-      "n_positions": 13,
-      "gross_exposure": 107225.49385465651,
-      "net_exposure": 107225.49385465651,
-      "realized_pnl": 280.22134559887485,
-      "unrealized_pnl": -21.445098770928727,
-      "total_pnl": 258.7762468279461,
-      "cumulative_fees_usd": 232.02754005891947,
-      "cumulative_funding_usd": -2.7065073092373955,
-      "cumulative_turnover_usd": 464055.080117839,
+      "n_positions": 0,
+      "gross_exposure": 0.0,
+      "net_exposure": 0.0,
+      "realized_pnl": 1233.6132674917853,
+      "unrealized_pnl": 0.0,
+      "total_pnl": 1233.6132674917853,
+      "cumulative_fees_usd": 940.0731169473472,
+      "cumulative_funding_usd": -4.110103299825659,
+      "cumulative_turnover_usd": 1880146.2338946897,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 232.02754005891947
+        "SHORT_COVERING_CONTINUATION_V1": 940.0731169473472
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 257.3099125797319
+        "SHORT_COVERING_CONTINUATION_V1": 1232.1469332435713
       },
-      "equity": 200024.0421994598,
-      "drawdown": -0.001271404004372994,
-      "n_equity_points": 10
+      "equity": 200289.43004724462,
+      "drawdown": -0.013024337528798722,
+      "n_equity_points": 132
     },
     "P2_DIVERSIFIED": {
       "status": "OK",
-      "n_positions": 13,
-      "gross_exposure": 109505.36373318633,
-      "net_exposure": 109505.36373318633,
-      "realized_pnl": 280.22134559887485,
-      "unrealized_pnl": -21.901072746634622,
-      "total_pnl": 258.32027285224024,
-      "cumulative_fees_usd": 233.16770298517227,
-      "cumulative_funding_usd": -2.703220340257167,
-      "cumulative_turnover_usd": 466335.40597034444,
+      "n_positions": 0,
+      "gross_exposure": 0.0,
+      "net_exposure": 0.0,
+      "realized_pnl": 1288.9619876331265,
+      "unrealized_pnl": 0.0,
+      "total_pnl": 1288.9619876331265,
+      "cumulative_fees_usd": 942.5259999721351,
+      "cumulative_funding_usd": -3.9822065696766478,
+      "cumulative_turnover_usd": 1885051.9999442664,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 233.16770298517227
+        "SHORT_COVERING_CONTINUATION_V1": 942.5259999721351
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 256.853938604026
+        "SHORT_COVERING_CONTINUATION_V1": 1287.495653384912
       },
-      "equity": 200022.4493495268,
-      "drawdown": -0.0012793571722007886,
-      "n_equity_points": 10
+      "equity": 200342.45378109132,
+      "drawdown": -0.013011398194632255,
+      "n_equity_points": 132
     },
     "P3_ALL_CANDIDATES": {
       "status": "OK",
-      "n_positions": 13,
-      "gross_exposure": 33979.166666666664,
-      "net_exposure": 33979.166666666664,
-      "realized_pnl": 107.8308091911667,
-      "unrealized_pnl": -6.795833333331833,
-      "total_pnl": 101.03497585783487,
-      "cumulative_fees_usd": 71.16654425556342,
-      "cumulative_funding_usd": -0.8289511999368997,
-      "cumulative_turnover_usd": 142333.08851112684,
+      "n_positions": 0,
+      "gross_exposure": 0.0,
+      "net_exposure": 0.0,
+      "realized_pnl": 1048.8432440731997,
+      "unrealized_pnl": 0.0,
+      "total_pnl": 1048.8432440731997,
+      "cumulative_fees_usd": 420.2228775376965,
+      "cumulative_funding_usd": -1.0093692819204876,
+      "cumulative_turnover_usd": 840445.755075396,
       "cumulative_cost_by_alpha": {
-        "SHORT_COVERING_CONTINUATION_V1": 71.16654425556342
+        "SHORT_COVERING_CONTINUATION_V1": 420.2228775376965
       },
       "pnl_by_alpha": {
         "UNATTRIBUTED": 0.43990027446421975,
-        "SHORT_COVERING_CONTINUATION_V1": 100.59507558337066
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
       },
-      "equity": 200029.0394804023,
-      "drawdown": -0.00026373725208328925,
-      "n_equity_points": 10
+      "equity": 200627.61099725362,
+      "drawdown": -0.005266928495655904,
+      "n_equity_points": 132
     }
   }
 }

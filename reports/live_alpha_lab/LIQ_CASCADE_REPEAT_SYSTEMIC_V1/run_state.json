@@ -1,10 +1,10 @@
 {
   "alpha_id": "LIQ_CASCADE_REPEAT_SYSTEMIC_V1",
-  "last_run": "2026-09-03T08:19:20.356306+00:00",
+  "last_run": "2026-09-04T06:40:44.439119+00:00",
   "universe_hash": "d7897e9bb0b7af0f",
   "universe_size": 50,
-  "n_decisions_total": 3653,
-  "n_decisions_new": 3653,
+  "n_decisions_total": 3654,
+  "n_decisions_new": 1,
   "mode": "A_SIGNAL_SHADOW",
   "density_window_minutes": 60,
   "density_systemic_min": 1

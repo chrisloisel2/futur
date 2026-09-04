@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="FUTUR terminal : Live Alpha Lab (shadow, capital virtuel), cryptos, prévisions, world monitor, edge lab. Aucun ordre réel.">
+<meta name="theme-color" content="#050608">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FUTUR">
+<title>FUTUR ▮ TERMINAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="/static/css/terminal.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<header id="cmdbar"></header>
+<nav id="nav" aria-label="vues"></nav>
+<main id="views">
+  <section class="view" id="v-portfolio" aria-label="Portefeuille"></section>
+  <section class="view" id="v-lab" aria-label="Live Alpha Lab"></section>
+  <section class="view" id="v-tournament" aria-label="Tournoi (arrêté)"></section>
+  <section class="view" id="v-cryptos" aria-label="Cryptos"></section>
+  <section class="view" id="v-forecasts" aria-label="Prévisions"></section>
+  <section class="view" id="v-world" aria-label="World"></section>
+  <section class="view" id="v-edgelab" aria-label="Edge lab"></section>
+</main>
+<footer id="statusbar"></footer>
+<div id="overlay" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<script>
+// PWA : service worker cc-v4 (HTML/JS/CSS network-first, /api/* network-first avec repli cache).
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(function () {});
+  });
+}
+</script>
+<script src="/static/js/core.js"></script>
+<script src="/static/js/views/portfolio.js"></script>
+<script src="/static/js/views/lab.js"></script>
+<script src="/static/js/views/tournament.js"></script>
+<script src="/static/js/views/cryptos.js"></script>
+<script src="/static/js/views/forecasts.js"></script>
+<script src="/static/js/views/world.js"></script>
+<script src="/static/js/views/edgelab.js"></script>
+</body>
+</html>
