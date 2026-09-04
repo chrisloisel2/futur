@@ -47,6 +47,16 @@ runners:
     timeout_sec: 900
     role: position
 
+  # Fade des cascades alt conditionné à un choc BTC contemporain (candidat
+  # BTC_LEAD_ALT_CASCADE, validé indépendamment le 2026-09-03, déployé le même
+  # jour). Même flux d'événements LONG_CASCADE que la famille repeat, même
+  # cadence ; conditionnement différent (choc BTC, pas répétition same-symbol).
+  - alpha_id: BTC_LEAD_ALT_CASCADE_V1
+    script: scripts/run_btc_lead_alt_cascade_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 900
+    role: position
+
   - alpha_id: SHORT_COVERING_CONTINUATION_V1
     script: scripts/run_short_covering_continuation_shadow.py
     cadence_minutes: 15

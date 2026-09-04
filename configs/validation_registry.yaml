@@ -392,6 +392,12 @@ candidates:
     t_stat_declustered: 3.315
     eta_conservative: "3549 days (~9.7 years)"
     recommended_next_step: FREEZE_AND_LAUNCH_SHADOW
+    # ── déploiement paper (2026-09-03) : figé + lancé en SIGNAL_SHADOW, voir
+    #    configs/live_alpha_registry.yaml et reports/live_alpha_lab/DEPLOYMENT_DECISIONS_2026-09-03.md §4 ──
+    scientific_status: FROZEN
+    operational_status: SIGNAL_SHADOW
+    frozen_alpha_id: BTC_LEAD_ALT_CASCADE_V1
+    freeze_timestamp: "2026-09-03T16:20:00+00:00"
     secondary_tags: ["UNCONFIRMABLE_IN_HORIZON"]
     validation_result: >
       Passe les 5 critères préenregistrés dans les DEUX conventions de pondération (épisode

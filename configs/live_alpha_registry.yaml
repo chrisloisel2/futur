@@ -112,6 +112,80 @@ alphas:
       1ere occurrence). Distinct de A7-TAIL-E1 (Jaccard overlap=0.116) mais
       RISQUE CORRÉLÉ : même détecteur/flux d'events -> même risk_bucket.
 
+  - alpha_id: BTC_LEAD_ALT_CASCADE_V1
+    family: liquidation
+    mechanism: >
+      Cascade de liquidation LONG_CASCADE sur un ALT (jamais BTCUSDT lui-même)
+      survenant pendant un CHOC BTC contemporain : |btc_ret_30m| >= 90e centile
+      causal des 365 jours strictement antérieurs (>= 200 événements antérieurs
+      exigés, sinon écarté) -> LONG, horizon fwd_4h. La cascade alt "expliquée"
+      par BTC est un overshoot de contagion (déleveraging forcé corrélé) qui se
+      retourne quand la pression passe, pas une rupture idiosyncratique.
+      Contrôle économique décisif du validateur (split signé non préenregistré) :
+      choc BTC BAISSIER +46.4bps (t 3.23) vs HAUSSIER -8.9bps (t -1.58) -- le
+      sens économique se vérifie sur un split non utilisé pour construire la
+      règle. La spec figée trade le choc en valeur ABSOLUE (c'est ce qui a été
+      préenregistré et validé) ; le signe est porté dans chaque décision
+      (btc_shock_sign) pour audit forward, jamais utilisé comme filtre.
+      Réutilise sans modification le détecteur figé
+      src/institutional/engines/liq_cascade/detector.py + dataset.py (qui porte
+      déjà la feature causale btc_ret_30m) ; n'ajoute que btc_lead_variant.py.
+    version: v1.0
+    status: SHADOW_LIVE
+    scientific_status: FROZEN
+    operational_status: SIGNAL_SHADOW
+    source_report: reports/edge_discovery/alpha_hunt_2026-09-01_round3/w1_event_sequences/REPORT.md#w1_a12
+    validation_report: reports/edge_discovery/validation_2026-09/BTC_LEAD_ALT_CASCADE/REPORT.md
+    signal_definition: src/institutional/engines/liq_cascade/btc_lead_variant.py::select_tradeable_btc_lead
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features:
+      - btc_ret_30m
+      - btc_q90_365d
+    model_family: RULE_STATE_MACHINE
+    model_hash: null
+    training_window: 2022-01-01 .. 2026-08-27 (fenêtre de validation indépendante, cascade_dataset.parquet)
+    freeze_timestamp: "2026-09-03T16:20:00+00:00"
+    entry: kind==LONG_CASCADE AND symbol!=BTCUSDT AND event_time>=2022-01-01 AND |btc_ret_30m| >= q90(|btc_ret_30m| sur population A dans [t-365j, t), >=200 événements antérieurs)
+    exit: fwd_4h (horizon fixe, pas de stop/TP dynamique)
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: round-trip taker ~14bps (COST_RT existant), stress 28bps
+    risk_bucket: LIQUIDATION_FAMILY
+    expected_capacity: ~1.15 épisode indépendant (L3, gap<4h) / semaine (taux conservateur 6 mois du rapport de validation) ; ~2 485 événements bruts sur 4.7 ans
+    correlation_family: LIQ_CASCADE_DETECTOR
+    live_start_timestamp: "2026-09-03T16:20:00+00:00"
+    expected_net_bps: 46.87
+    expected_net_bps_stress28: 32.87
+    expected_n_independent_episodes: 259
+    expected_bootstrap_p05_bps: 23.70
+    expected_overlap_LIQ_CASCADE_REPEAT_V1: "22.45% des événements shock appariés à ±5min (S5 <= 50% passé)"
+    data_live: true
+    notes: >
+      VALIDÉ INDÉPENDAMMENT (verdict VALIDATED_FOR_FORWARD, tag secondaire
+      UNCONFIRMABLE_IN_HORIZON) : réimplémentation depuis la définition économique
+      sans ouvrir l'evidence de la découverte, règle de choc CAUSALE (le centile
+      in-sample de la découverte relégué en perturbation BLA-P1), déclustering
+      au niveau épisode cross-symbole (gap < 4h), 8 perturbations préenregistrées,
+      bras A-B testé (shock - no_shock +29.35, Welch 2.04, P=0.019), 4/5 années
+      positives, reproduit sur dataset alternatif (BLA-P6 +46.58).
+      Contrôle de fidélité de CE code (tests/test_liq_cascade_btc_lead_variant.py)
+      sur le parquet du validateur : population A 26 750 / shock 2 485 /
+      no_shock 24 065 / écartés 200 / net14 pondéré-événement +41.6 -- identiques
+      au rapport.
+      ⚠ QUATRE RÉSERVES MATÉRIELLES reprises du rapport de validation :
+      (1) 2025 est la SEULE année négative (-40.0bps) et la plus récente complète
+      -- à surveiller en priorité en forward ; (2) hors meilleure année (2024) t
+      tombe à 1.41 et p05 bootstrap à -3.63 : magnitude non uniformément répartie ;
+      (3) la découverte publiait t sur N_indep 3 097, l'inférence honnête porte
+      sur 259 épisodes -- preuve 12x plus mince que publiée, magnitude confirmée ;
+      (4) ETA de reconfirmation ~9.7 ans : le monitoring forward doit juger sur
+      la survie du signe, du coût et du mécanisme sur le plancher 60j, PAS sur
+      une significativité fraîche.
+      Le centile glissant est recalculé à chaque événement à partir du seul
+      passé : c'est la SPEC préenregistrée (seuil causal), pas une constante
+      ajustée -- le recalcul n'est donc pas une dérive de spec. Tout changement
+      de quantile/fenêtre/min_prior = nouvel alpha_id, nouveau freeze.
+
   - alpha_id: LIQ_CASCADE_FAR_FROM_LOW_V1
     family: liquidation
     mechanism: >
@@ -120,7 +194,10 @@ alphas:
       ("far from local low beats at the low").
     version: v1.0
     status: SHADOW_LIVE   # legacy, voir scientific_status/operational_status ci-dessous
-    scientific_status: RECONSTRUCTED     # seuil reverse-engineered, PAS publié par le rapport source
+    scientific_status: INVALIDATED_PENDING_RESPEC   # dégradé 2026-09-03 (Alpha Validation Factory wave 2,
+      # voir reports/edge_discovery/validation_2026-09/ALPHA_PORTFOLIO_STATUS.md §4) : reproduit le freeze_spec
+      # mais SE sous-estimée x1.9-2.6 (t tombe à 0.90) et le signe dépend de l'unité de pondération -- "far bat
+      # near" n'est établi dans aucune direction. Collecte forward maintenue (informative), capital coupé.
     operational_status: SIGNAL_SHADOW
     source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-4
     signal_definition: src/institutional/engines/liq_cascade/far_from_low_variant.py::select_tradeable

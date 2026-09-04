@@ -1319,3 +1319,123 @@ def test_attribution_handoff_realized_pnl_stays_with_owner_at_time_of_close_not_
     physical_total = state.equity_curve[-1]["realized_pnl"] + state.equity_curve[-1]["unrealized_pnl"]
     attributed_total = sum(state.equity_curve[-1]["pnl_by_alpha"].values())
     assert attributed_total == pytest.approx(physical_total, abs=1e-6)
+
+
+# ── 2026-09-03 (soir) : budget par alpha non appliqué (bug) ─────────────
+# Bug réel : aggregate() dimensionnait chaque intent live dédupliqué en
+# `budget_alpha * frac`, donc K intents simultanés d'UN alpha sommaient à
+# K × son budget (constaté live : 5 portefeuilles ~100 % gross LONG sur ~30
+# alt perps, toutes SHORT_COVERING_CONTINUATION_V1, budget documenté 1/6 ou
+# 5 %). Correctif SIZING_RULE = PER_ALPHA_BUDGET_CAP_V2 : somme des frac
+# d'un alpha normalisée à 1 au plus, intent multi-leg compté UNE fois.
+
+def _permissive_config(name="TEST_ALPHA_CAP", family_frac=0.30, **kw):
+    return PortfolioConfig(name=name, capital_eur=100_000,
+                           family_budget_fraction={"LIQUIDATION_FAMILY": family_frac,
+                                                   "CROSS_SECTIONAL_FAMILY": family_frac},
+                           max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0, **kw)
+
+
+def test_one_alpha_five_concurrent_intents_sum_to_its_budget_not_five_times():
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    intents = [_bucket_intent("SC_V1", "LIQUIDATION_FAMILY", "FAM_SC", sym, "LONG", ts0, frac=1.0)
+              for sym in ("AUSDT", "BUSDT", "CUSDT", "DUSDT", "EUSDT")]
+    agg = aggregate(intents, _permissive_config(), set(), as_of=ts0)
+    total = sum(abs(v) for v in agg.target_notional.values())
+    assert total == pytest.approx(30_000.0, abs=1e-6)        # PAS 150_000 (5 × 30 000)
+    assert len(agg.target_notional) == 5
+    for sym in ("AUSDT", "BUSDT", "CUSDT", "DUSDT", "EUSDT"):
+        assert agg.target_notional[sym] == pytest.approx(6_000.0, abs=1e-6)
+        assert agg.owner[sym] == "SC_V1"
+
+
+def test_two_alphas_same_bucket_keep_budget_split_and_neither_exceeds_it_with_three_intents_each():
+    """Sémantique existante conservée : budget famille / n_alphas du bucket
+    (30 000 / 2 = 15 000 chacun). Avec 3 intents pleine conviction chacun,
+    aucun des deux ne dépasse ses 15 000 ; total famille = 30 000."""
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    intents = (
+        [_bucket_intent("ALPHA_X", "LIQUIDATION_FAMILY", "FAM_X", sym, "LONG", ts0) for sym in ("X1", "X2", "X3")]
+        + [_bucket_intent("ALPHA_Y", "LIQUIDATION_FAMILY", "FAM_Y", sym, "SHORT", ts0) for sym in ("Y1", "Y2", "Y3")]
+    )
+    agg = aggregate(intents, _permissive_config(), set(), as_of=ts0)
+    by_alpha = {"ALPHA_X": 0.0, "ALPHA_Y": 0.0}
+    for instr, notional in agg.target_notional.items():
+        by_alpha[agg.owner[instr]] += abs(notional)
+    assert by_alpha["ALPHA_X"] == pytest.approx(15_000.0, abs=1e-6)
+    assert by_alpha["ALPHA_Y"] == pytest.approx(15_000.0, abs=1e-6)
+    assert sum(by_alpha.values()) == pytest.approx(30_000.0, abs=1e-6)
+    for sym in ("X1", "X2", "X3"):
+        assert agg.target_notional[sym] == pytest.approx(5_000.0, abs=1e-6)
+    for sym in ("Y1", "Y2", "Y3"):
+        assert agg.target_notional[sym] == pytest.approx(-5_000.0, abs=1e-6)
+
+
+def test_multi_leg_intent_counted_once_not_per_leg_in_alpha_budget_cap():
+    """Un intent multi-leg (2 jambes opposées) compte UNE fois dans la somme
+    des frac : chaque jambe reçoit le budget entier (pas budget/2). Le test
+    historique test_aggregate_multi_leg_produces_two_opposite_instruments
+    (signes opposés) reste vert par ailleurs."""
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    config = PortfolioConfig(name="TEST_ML", capital_eur=100_000,
+                             family_budget_fraction={"RELATIVE_VALUE_FAMILY": 0.20},
+                             max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0)
+    agg = aggregate(
+        [_intent(alpha_id="FBD_V2", instrument="BTCUSDT_QUARTERLY", direction="LONG", frac=1.0,
+                multi_leg=True, leg_b="BTCUSDT_PERP", risk_bucket="RELATIVE_VALUE_FAMILY",
+                correlation_family="CALENDAR_BASIS_CURVE", ts=ts0)],
+        config, set(), as_of=ts0)
+    assert agg.target_notional["BTCUSDT_QUARTERLY"] == pytest.approx(20_000.0, abs=1e-6)
+    assert agg.target_notional["BTCUSDT_PERP"] == pytest.approx(-20_000.0, abs=1e-6)
+
+
+def test_cross_sectional_basket_summing_to_one_is_unchanged_total_equals_budget():
+    """Adapter qui somme déjà à 1 (panier cross-sectionnel 4 noms, 1/4 chacun) :
+    somme des frac = 1 -> diviseur 1 -> exactement le budget, inchangé."""
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    df = pd.DataFrame([{"event_time": ts0, "symbol": s} for s in ("BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT")])
+    entry = {"family": "cross_sectional", "risk_bucket": "CROSS_SECTIONAL_FAMILY",
+            "correlation_family": "CROSS_SECTIONAL_XSMOM"}
+    intents = build_intents("CROSS_SECTIONAL_MOMENTUM_LIVE_V2", entry, df)
+    assert sum(i.target_position_fraction for i in intents) == pytest.approx(1.0)
+    agg = aggregate(intents, _permissive_config(), set(), as_of=ts0)
+    total = sum(abs(v) for v in agg.target_notional.values())
+    assert total == pytest.approx(30_000.0, abs=1e-6)
+    for s in ("BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"):
+        assert agg.target_notional[s] == pytest.approx(7_500.0, abs=1e-6)
+
+
+def test_new_equity_points_carry_sizing_rule_and_pre_existing_point_is_left_untouched(tmp_path, monkeypatch):
+    """Frontière de segment forward : chaque NOUVEAU point d'equity_curve porte
+    sizing_rule == SIZING_RULE ; un point ANTÉRIEUR au correctif (sans le
+    champ) n'est jamais réécrit."""
+    monkeypatch.setattr(portfolio_mod, "PORTFOLIO_DIR", tmp_path)
+    config = _config()
+    ts0 = _ts("2026-09-01T00:00:00Z")
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(100.0, ts=ts0))
+    agg = aggregate([_intent(frac=1.0, ts=ts0)], config, set(), as_of=ts0)
+    s1 = step("T", config, agg, ts0)
+    assert portfolio_mod.SIZING_RULE == "PER_ALPHA_BUDGET_CAP_V2"
+    assert s1.equity_curve[-1]["sizing_rule"] == "PER_ALPHA_BUDGET_CAP_V2"
+
+    # simule un point pré-correctif persisté sans le champ (état "ancien")
+    import json as _json
+    sp = portfolio_mod.state_path("T")
+    d = _json.loads(sp.read_text())
+    old_point = dict(d["equity_curve"][-1])
+    old_point.pop("sizing_rule")
+    old_point["ts"] = (ts0 - pd.Timedelta(minutes=15)).isoformat()
+    d["equity_curve"] = [old_point] + d["equity_curve"]
+    sp.write_text(_json.dumps(d))
+
+    ts1 = ts0 + pd.Timedelta(minutes=15)
+    monkeypatch.setattr(portfolio_mod, "get_mark", _mock_mark(101.0, ts=ts1))
+    s2 = step("T", config, agg, ts1)
+    assert len(s2.equity_curve) == 3
+    assert "sizing_rule" not in s2.equity_curve[0]            # ancien point intact
+    assert s2.equity_curve[0] == old_point
+    assert s2.equity_curve[1]["sizing_rule"] == "PER_ALPHA_BUDGET_CAP_V2"
+    assert s2.equity_curve[2]["sizing_rule"] == "PER_ALPHA_BUDGET_CAP_V2"
+    reloaded = load_state("T", config.capital_eur)
+    assert "sizing_rule" not in reloaded.equity_curve[0]
+    assert reloaded.equity_curve[-1]["sizing_rule"] == "PER_ALPHA_BUDGET_CAP_V2"

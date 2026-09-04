@@ -552,6 +552,15 @@ class ReasonCode(str, Enum):
     REJECT_COOLDOWN = "REJECT_COOLDOWN"
     REJECT_CORRELATION = "REJECT_CORRELATION"
     REJECT_NO_DATA = "REJECT_NO_DATA"
+    # Audit forward 2026-09-04 : score_net = expected_return - expected_cost.
+    # Une valeur NÉGATIVE est, par construction, une espérance négative APRÈS
+    # coûts -- il n'existe aucun dimensionnement qui rende une telle décision
+    # rentable. 37,5 % des décisions forward de la fenêtre 03/09->04/09
+    # portaient score_net < 0 et étaient malgré tout étiquetées ACCEPT_SHADOW
+    # puis exécutées par le portefeuille. Ce code est le refus explicite
+    # correspondant, appliqué à la porte de CAPITAL (le ledger, lui, continue
+    # d'enregistrer la décision telle que le moteur l'a produite).
+    REJECT_NEGATIVE_EXPECTED_VALUE = "REJECT_NEGATIVE_EXPECTED_VALUE"
     ACCEPT_TRADE = "ACCEPT_TRADE"
     ACCEPT_SHADOW = "ACCEPT_SHADOW"
 

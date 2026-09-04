@@ -90,9 +90,62 @@ _fleet_run_log: List[str] = []
 
 # ─── Auto-scheduler ───────────────────────────────────────────────────────────
 
+import signal as _signal
 import time as _time
 
-_sched_enabled:   bool              = True
+
+def run_subprocess_gracefully(cmd, timeout, grace_seconds=45, **kwargs):
+    """`subprocess.run(..., timeout=N)` équivalent, mais qui TERMINE au lieu de TUER.
+
+    ⚠ CAUSE RACINE RÉELLE, trouvée le 2026-09-04 (audit infra, item P0.4).
+    `subprocess.run(timeout=N)` appelle `Popen.kill()` -- SIGKILL, incatchable.
+    Quand le processus tué est `scripts/live_data_update.py` en train de
+    réécrire un enriched (parquet de 4050 colonnes, ~1,5 Go, écrit via
+    `atomic_parquet.atomic_write_parquet`), le SIGKILL laisse au sol un `.tmp`
+    de la taille du fichier. Ce scheduler tourne toutes les heures sur 10
+    symboles avec `timeout=360` -- un budget trop court pour ~15 Go d'E/S.
+    Résultat mesuré : 62 `.tmp` orphelins, 39,5 Go, du 4 juillet au 4 septembre,
+    sur un disque à 98 %.
+
+    Ici on envoie SIGTERM, on laisse `grace_seconds` au processus pour
+    dérouler ses handlers (atomic_parquet nettoie alors son temporaire), et on
+    ne recourt à SIGKILL qu'en dernier ressort. Le budget de temps n'est PAS
+    augmenté : c'est la manière de l'appliquer qui est corrigée.
+    """
+    # `capture_output`/`text` sont des arguments de subprocess.run(), pas de
+    # Popen() : absorbés ici pour rester compatible avec les appels existants.
+    kwargs.pop("capture_output", None)
+    kwargs.pop("text", None)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, **kwargs)
+    try:
+        out, err = proc.communicate(timeout=timeout)
+        return subprocess.CompletedProcess(cmd, proc.returncode, out, err)
+    except subprocess.TimeoutExpired:
+        proc.send_signal(_signal.SIGTERM)
+        try:
+            out, err = proc.communicate(timeout=grace_seconds)
+            err = (err or "") + f"\n[graceful] SIGTERM après {timeout}s, arrêt propre."
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            out, err = proc.communicate()
+            err = (err or "") + (f"\n[graceful] SIGTERM ignoré {grace_seconds}s -> SIGKILL. "
+                                 "Un .tmp orphelin est possible : "
+                                 "scripts/sweep_orphan_tmp.py")
+        return subprocess.CompletedProcess(cmd, proc.returncode or -1, out, err)
+
+
+# ⚠ 2026-09-04 : défaut passé à False. Décision utilisateur du 2026-09-03 --
+# « le laboratoire est LE seul véhicule de trading » : futur-paper-v1,
+# futur-alpha20-*, futur-paper-mh et futur-portfolio-mark ont été arrêtés et
+# désactivés ce jour-là. CE scheduler-ci, interne à l'API, avait été oublié :
+# il continuait de lancer `live_data_update.py` (10 enriched réécrits par
+# heure) PUIS `paper_multi_signal.py` (qui trade et écrit
+# reports/paper_trading/*/state.json). C'est à la fois la source de la
+# pression disque et un véhicule de trading parallèle non voulu.
+# Le changement de défaut ne prend effet qu'au PROCHAIN démarrage de l'API ;
+# sur un process déjà lancé, utiliser POST /api/scheduler/toggle.
+_sched_enabled:   bool              = False
 _sched_running:   bool              = False
 _sched_last_run:  Optional[datetime] = None
 _sched_next_run:  Optional[datetime] = None
@@ -115,10 +168,10 @@ def _sched_do_run() -> None:
 
         if available:
             _sched_log.append(f"[data] Mise à jour {len(available)} assets…")
-            p = subprocess.run(
+            p = run_subprocess_gracefully(
                 ["python3", str(ROOT / "scripts" / "live_data_update.py"),
                  "--symbols"] + available,
-                capture_output=True, text=True, cwd=str(ROOT), timeout=360,
+                cwd=str(ROOT), timeout=360,
             )
             for line in p.stdout.splitlines()[-6:]:
                 _sched_log.append(f"  {line}")
@@ -615,7 +668,7 @@ def data_update(symbols: str = "BTCUSDT,ETHUSDT"):
         _run_log = ["[data_update] Démarrage…"]
         cmd = ["python3", str(ROOT / "scripts" / "live_data_update.py"), "--symbols"] + sym_list
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(ROOT), timeout=300)
+            proc = run_subprocess_gracefully(cmd, cwd=str(ROOT), timeout=300)
             _run_log.extend(proc.stdout.splitlines()[-20:])
             if proc.returncode != 0:
                 _run_log.append(f"[ERROR] {proc.stderr[-500:]}")
@@ -641,10 +694,10 @@ def signal_run(update_data: bool = True):
         if update_data:
             _run_log.append("[signal_run] Mise à jour données live…")
             try:
-                p = subprocess.run(
+                p = run_subprocess_gracefully(
                     ["python3", str(ROOT / "scripts" / "live_data_update.py"),
                      "--symbols", "BTCUSDT", "ETHUSDT"],
-                    capture_output=True, text=True, cwd=str(ROOT), timeout=300,
+                    cwd=str(ROOT), timeout=300,
                 )
                 _run_log.extend(p.stdout.splitlines()[-10:])
             except Exception as e:
@@ -736,7 +789,7 @@ def fleet_run(update_data: bool = True):
                          if (ENRICHED_DIR / f"{s}_1h_enriched.parquet").exists()]
             if available:
                 try:
-                    p = subprocess.run(
+                    p = run_subprocess_gracefully(
                         ["python3", str(ROOT / "scripts" / "live_data_update.py"),
                          "--symbols"] + available,
                         capture_output=True, text=True, cwd=str(ROOT), timeout=600,

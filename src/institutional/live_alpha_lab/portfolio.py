@@ -23,6 +23,7 @@ et ce fait est propagé dans le snapshot d'équity (ne pas lire une métrique
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from collections import defaultdict
 from dataclasses import asdict, dataclass, field
@@ -45,6 +46,113 @@ PORTFOLIO_DIR = ROOT / "reports" / "live_alpha_lab" / "portfolios"
 TAKER_FEE_BPS = 5.0
 FIXED_SLIPPAGE_BPS = 2.0
 FUNDING_INTERVAL_HOURS = 8.0   # cadence standard funding perp
+
+# ⚠ Bug réel trouvé 2026-09-03 (soir, phase PORTFOLIO FORWARD) : aggregate()
+# dimensionnait chaque intent live dédupliqué en `budget_alpha * frac`, donc K
+# intents simultanés d'UN MÊME alpha sommaient à K × son budget -- seuls le
+# plafond par actif et le plafond gross global rattrapaient ensuite. Constaté
+# en live : les 5 portefeuilles shadow ~100 % gross LONG sur ~30 alt perps,
+# toutes détenues par SHORT_COVERING_CONTINUATION_V1 dont le budget documenté
+# est 1/6 du capital (P1/P2, family_budget_fraction) ou 5 % (P3,
+# per_alpha_budget_fraction). Correctif : la somme des frac d'un alpha est
+# normalisée à 1 au plus (voir aggregate()). Chaque NOUVEAU point d'equity_curve
+# porte `sizing_rule` = cette constante (les points antérieurs ne sont jamais
+# réécrits) -- c'est la frontière du nouveau segment forward (BUG POLICY,
+# en-tête de configs/live_alpha_registry.yaml).
+SIZING_RULE = "PER_ALPHA_BUDGET_CAP_V2"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# item P0.3 — BANDE DE NON-NÉGOCIATION (audit forward 2026-09-04)
+# ═══════════════════════════════════════════════════════════════════════════
+# Mesure : 1 073 026 USD de turnover sur 33 333 USD d'exposition brute en
+# 26,6 h (32x), pour 751 USD de frictions, alors que l'horizon déclaré de
+# l'alpha est de 4 h. 96,2 % de ce turnover se concentrait dans les 38 cycles
+# (sur 107) où la CIBLE changeait, et le seuil de déclenchement d'un ordre
+# était `abs(delta_notional) >= 1e-6` -- c'est-à-dire aucun seuil du tout.
+#
+# Deux causes distinctes, toutes deux corrigées ici :
+#
+#   (a) REDISTRIBUTION MÉCANIQUE. aggregate() divise le budget d'un alpha par
+#       `sum_frac_by_alpha` (la somme des fractions de ses intents VIVANTS).
+#       Quand un intent entre ou sort, ce diviseur change, donc la cible de
+#       TOUTES les autres positions du même alpha change proportionnellement,
+#       alors qu'AUCUN de leurs signaux n'a bougé. C'est du turnover à
+#       espérance nulle et à coût strictement positif.
+#
+#   (b) DÉRIVE DE PRIX. La cible est un NOTIONNEL constant ; quand le prix
+#       bouge, la quantité cible bouge avec lui, donc un ordre partait à
+#       chaque cycle même signal et budget parfaitement figés.
+#
+# La bande. On ne rééquilibre que si l'écart à la cible vaut plus cher à
+# porter qu'à corriger. Corriger coûte un aller-retour :
+#
+#     round_trip_cost_frac = 2 x (TAKER_FEE_BPS + FIXED_SLIPPAGE_BPS) / 1e4
+#
+# Porter l'écart coûte l'espérance qu'on rate dessus, soit au plus l'edge
+# déclaré de la décision, `edge_frac`. La bande est le rapport des deux :
+#
+#     band = round_trip_cost_frac / edge_frac        (borné à [0, 1])
+#
+# Lecture : un alpha qui espère 60 bps peut se permettre de corriger un écart
+# de 23 % (14/60) ; un alpha qui espère 14 bps ne peut RIEN corriger
+# (band=1) -- ce qui est le verdict économique correct, pas une punition.
+#
+# Aucune constante inventée : TAKER_FEE_BPS et FIXED_SLIPPAGE_BPS sont déjà
+# les coûts du simulateur, `edge_frac` vient de la décision (colonne
+# expected_return du ledger) ou, à défaut, de `expected_net_bps` du registre.
+# Si NI l'un NI l'autre n'existe -> band = 1.0, la politique la plus
+# conservatrice (voir docstring de no_trade_band_fraction).
+#
+# La bande ne peut JAMAIS empêcher : une ouverture depuis flat, une clôture
+# vers flat, un retournement de sens. Ces trois cas satisfont
+# |delta| >= 1.0 x max(|cible|, |accepté|) par construction, donc passent
+# même à band = 1.0. Seuls les REDIMENSIONNEMENTS sont filtrés.
+NO_TRADE_BAND_RULE = "COST_OVER_EDGE_BAND_V1"
+
+# Epsilon purement NUMÉRIQUE (bruit flottant), pas un seuil économique : les
+# décisions économiques sont prises par la bande ci-dessus.
+NUMERICAL_EPSILON_USD = 1e-6
+
+
+def round_trip_cost_fraction() -> float:
+    """Coût d'un aller-retour, en fraction de prix. Une seule source pour les
+    frais et le slippage : les constantes du simulateur, ci-dessus."""
+    return 2.0 * (TAKER_FEE_BPS + FIXED_SLIPPAGE_BPS) / 10_000.0
+
+
+def no_trade_band_fraction(edge_fraction: Optional[float]) -> float:
+    """Largeur de bande, en fraction de la position visée.
+
+    `edge_fraction` = espérance de rendement de la décision sur son horizon
+    (fraction de prix). Retourne `round_trip_cost / edge`, borné à [0, 1].
+
+    Bornes et cas dégénérés, tous du côté prudent :
+      - edge None, NaN, <= 0  -> 1.0 (aucun redimensionnement ; ouvertures,
+        clôtures et retournements restent possibles). Un edge inconnu ou nul
+        ne justifie AUCUN coût de rééquilibrage.
+      - edge <= coût A/R      -> 1.0 (l'alpha ne paie pas son propre churn).
+      - edge très grand       -> band -> 0, on suit la cible de près.
+    """
+    if edge_fraction is None:
+        return 1.0
+    try:
+        edge = float(edge_fraction)
+    except (TypeError, ValueError):
+        return 1.0
+    if not (edge > 0) or edge != edge:     # <= 0 ou NaN
+        return 1.0
+    return min(1.0, round_trip_cost_fraction() / edge)
+
+
+# Classes de turnover — répondent à « distinguer turnover de signal vs
+# turnover mécanique » (item P0.3). Portées par chaque ordre et cumulées
+# dans PortfolioState.cumulative_turnover_by_class.
+TURNOVER_ENTRY = "ENTRY"                       # ouverture depuis flat
+TURNOVER_EXIT = "EXIT"                         # clôture vers flat
+TURNOVER_FLIP = "FLIP"                         # retournement de sens
+TURNOVER_SIGNAL_RESIZE = "SIGNAL_RESIZE"       # le jeu d'intents a changé
+TURNOVER_MECHANICAL_RESIZE = "MECHANICAL_RESIZE"   # ni entrée/sortie/flip ni changement de signal
+TURNOVER_FILL_CONVERGENCE = "FILL_CONVERGENCE"  # suite d'un ordre partiellement rempli
 
 
 @dataclass
@@ -132,11 +240,24 @@ class AggregationResult:
     # la réduction/clôture éventuelle vient d'ailleurs (screen/cap/dedup),
     # pas de l'expiration.
     expired_driven_instruments: set = field(default_factory=set)
+    # item P0.3 : empreinte du JEU D'INTENTS VIVANTS visant chaque instrument
+    # (alpha, sens, fraction, timestamp de décision). Deux steps qui portent
+    # la même empreinte pour un instrument ont, par définition, le MÊME signal
+    # dessus -- tout écart de cible entre ces deux steps est alors mécanique
+    # (rediviseur de budget, plafond, overlay), jamais un changement d'avis.
+    intent_signature: Dict[str, str] = field(default_factory=dict)
+    # item P0.3 : espérance déclarée de l'intent GAGNANT par instrument
+    # (fraction de prix), source de la largeur de bande. Absent = inconnu.
+    expected_edge: Dict[str, float] = field(default_factory=dict)
+    # item P0.3 : dénominateur de budget par alpha, à CLIQUET (voir aggregate).
+    # Retourné pour être persisté par step() et réinjecté au cycle suivant.
+    denominator_high_water: Dict[str, float] = field(default_factory=dict)
 
 
 def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
              screened_symbols: set, vol_overlay_multiplier: float = 1.0,
-             as_of: Optional[pd.Timestamp] = None) -> AggregationResult:
+             as_of: Optional[pd.Timestamp] = None,
+             denominator_high_water: Optional[Dict[str, float]] = None) -> AggregationResult:
     """⚠ Bug réel trouvé 2026-09-01 (phase ECONOMIC TRUTH) : `PortfolioIntent.
     expiry` existait comme champ mais n'était JAMAIS vérifié -- une décision
     restait indéfiniment "active" (contribuait au dedup MAX pour toujours),
@@ -178,18 +299,77 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
     for it in deduped:
         n_alphas_per_bucket[it.risk_bucket].add(it.alpha_id)
 
-    target: Dict[str, float] = defaultdict(float)
-    owner: Dict[str, str] = {}
-    owner_intent_ts: Dict[str, str] = {}
+    # ⚠ Correctif 2026-09-03 (SIZING_RULE = PER_ALPHA_BUDGET_CAP_V2) : la somme
+    # des frac vivantes d'un alpha ne doit jamais dépasser 1 (= son budget).
+    # Un intent multi-leg compte UNE fois (pas une par jambe). Les adapters qui
+    # somment déjà à 1 (cross-sectional, jambes Amihud) ne sont pas touchés :
+    # somme <= 1 -> diviseur 1.
+    sized: List[tuple] = []
+    sum_frac_by_alpha: Dict[str, float] = defaultdict(float)
     for it in deduped:
         frac = apply_screen(it.target_position_fraction, it.instrument, it.direction, screened_symbols)
         if config.apply_vol_overlay:
             frac *= vol_overlay_multiplier
         if frac <= 0:
             continue
+        sum_frac_by_alpha[it.alpha_id] += frac
+        sized.append((it, frac))
+
+    # ═══ item P0.3, cause (a) : DÉNOMINATEUR DE BUDGET À CLIQUET ═══════════
+    # `sum_frac_by_alpha` est le diviseur qui garantit qu'un alpha ne dépasse
+    # jamais son budget (correctif PER_ALPHA_BUDGET_CAP_V2). Mais il SUIT le
+    # nombre d'intents vivants : quand un intent SORT, il diminue, donc la
+    # cible de toutes les positions restantes AUGMENTE mécaniquement — et
+    # toutes sont retradées alors qu'aucun de leurs signaux n'a bougé.
+    #
+    # Correction : le dénominateur ne descend jamais tant que l'alpha a au
+    # moins un intent vivant. Il monte quand une entrée l'exige (le plafond de
+    # budget reste strictement respecté, c'est non négociable) et reste en
+    # place quand un intent sort — le budget libéré reste INUTILISÉ plutôt que
+    # de gonfler les positions survivantes. Une sortie ailleurs n'est pas une
+    # information nouvelle sur les noms restants ; elle ne doit pas les
+    # redimensionner.
+    #
+    # Remise à zéro quand l'alpha n'a plus AUCUN intent vivant : l'épisode est
+    # terminé, le suivant repart proprement. C'est un point de reset naturel,
+    # pas un paramètre.
+    hw: Dict[str, float] = dict(denominator_high_water or {})
+    alphas_with_live_intents = {it.alpha_id for it, _ in sized}
+    for alpha_id in list(hw):
+        if alpha_id not in alphas_with_live_intents:
+            del hw[alpha_id]
+    for alpha_id, s in sum_frac_by_alpha.items():
+        hw[alpha_id] = max(hw.get(alpha_id, 0.0), s)
+
+    target: Dict[str, float] = defaultdict(float)
+    owner: Dict[str, str] = {}
+    owner_intent_ts: Dict[str, str] = {}
+    # item P0.3 : empreinte du signal par instrument. Construite à partir des
+    # intents RÉELLEMENT dimensionnés (post-expiry, post-dedup, post-screen) --
+    # c'est bien « quel signal vise cet instrument maintenant », pas « quelles
+    # décisions ont un jour existé ». `frac` est celui d'AVANT la division par
+    # sum_frac_by_alpha : c'est la conviction de l'alpha, indépendante du
+    # nombre de ses autres positions -- sinon l'empreinte changerait à chaque
+    # entrée/sortie et tout redimensionnement mécanique passerait pour du
+    # signal, ce qui viderait la mesure de son sens.
+    sig_parts: Dict[str, List[str]] = defaultdict(list)
+    edge_by_instrument: Dict[str, float] = {}
+
+    def _note(instr: str, it: PortfolioIntent, frac: float, direction: str) -> None:
+        sig_parts[instr].append(
+            f"{it.alpha_id}|{direction}|{frac:.12g}|{it.timestamp.isoformat()}")
+        if it.expected_edge_fraction is not None:
+            prev = edge_by_instrument.get(instr)
+            # plusieurs intents sur le même instrument : garder le PLUS PETIT
+            # edge (bande la plus large = le plus prudent), jamais le plus
+            # flatteur.
+            e = float(it.expected_edge_fraction)
+            edge_by_instrument[instr] = e if prev is None else min(prev, e)
+
+    for it, frac in sized:
         budget = _alpha_budget(it.risk_bucket, it.alpha_id, config,
                                len(n_alphas_per_bucket[it.risk_bucket]))
-        notional = budget * frac
+        notional = budget * frac / max(1.0, hw.get(it.alpha_id, sum_frac_by_alpha[it.alpha_id]))
         sign = 1.0 if it.direction == "LONG" else -1.0
 
         if it.multi_leg and it.leg_instrument_b:
@@ -199,10 +379,14 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
             owner[it.leg_instrument_b] = it.alpha_id
             owner_intent_ts[it.instrument] = it.timestamp.isoformat()
             owner_intent_ts[it.leg_instrument_b] = it.timestamp.isoformat()
+            _note(it.instrument, it, frac, it.direction)
+            _note(it.leg_instrument_b, it, frac,
+                  "SHORT" if it.direction == "LONG" else "LONG")
         else:
             target[it.instrument] += sign * notional
             owner[it.instrument] = it.alpha_id
             owner_intent_ts[it.instrument] = it.timestamp.isoformat()
+            _note(it.instrument, it, frac, it.direction)
 
     cap_asset = config.capital_eur * config.max_per_asset_fraction
     for instr, notional in list(target.items()):
@@ -215,8 +399,13 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
         scale = cap_gross / gross
         target = {k: v * scale for k, v in target.items()}
 
+    intent_signature = {
+        instr: hashlib.sha1(";".join(sorted(parts)).encode()).hexdigest()[:16]
+        for instr, parts in sig_parts.items()
+    }
     return AggregationResult(dict(target), owner, dict(raw_by_instrument), owner_intent_ts,
-                             expired_driven_instruments)
+                             expired_driven_instruments, intent_signature,
+                             dict(edge_by_instrument), hw)
 
 
 @dataclass
@@ -269,6 +458,26 @@ class PortfolioState:
     # même n'est PAS persisté, seul son résultat via step() l'est ici).
     orders: List[dict] = field(default_factory=list)
     fills: List[dict] = field(default_factory=list)
+    # ── item P0.3 (bande de non-négociation) ─────────────────────────────
+    # `accepted_target_notional` est la cible à laquelle le portefeuille s'est
+    # ENGAGÉ. Elle ne suit la cible calculée que lorsque l'écart franchit la
+    # bande. Entre deux franchissements, la position est laissée tranquille --
+    # c'est tout le mécanisme anti-churn.
+    accepted_target_notional: Dict[str, float] = field(default_factory=dict)
+    # empreinte du signal au moment du dernier engagement : sert à qualifier
+    # un futur écart de cible en SIGNAL_RESIZE vs MECHANICAL_RESIZE.
+    accepted_intent_signature: Dict[str, str] = field(default_factory=dict)
+    # instruments dont le dernier ordre est resté PARTIELLEMENT rempli : on
+    # continue de converger vers la cible acceptée sans repasser par la bande
+    # (un ordre inachevé n'est pas du churn, c'est une décision non terminée).
+    converging: Dict[str, bool] = field(default_factory=dict)
+    cumulative_turnover_by_class: Dict[str, float] = field(default_factory=dict)
+    # item P0.3 : dénominateur de budget à cliquet par alpha (voir aggregate).
+    alpha_denominator_high_water: Dict[str, float] = field(default_factory=dict)
+    # turnover NON exécuté grâce à la bande, pour pouvoir chiffrer ce que la
+    # correction évite (comptabilité honnête : on mesure ce qu'on refuse).
+    suppressed_turnover_usd: float = 0.0
+    suppressed_order_count: int = 0
 
 
 def state_path(portfolio_name: str) -> Path:
@@ -417,11 +626,98 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
         if mark.is_stale():
             any_stale_used = True
 
-        target_notional = target.get(instr, 0.0)
-        target_quantity = target_notional / mark.price if mark.price else 0.0
+        # ══ item P0.3 : cible calculée -> cible ACCEPTÉE, via la bande ══
+        raw_target_notional = target.get(instr, 0.0)
+        accepted_before = state.accepted_target_notional.get(instr)
+        sig_now = agg.intent_signature.get(instr)
+        sig_before = state.accepted_intent_signature.get(instr)
+        band = no_trade_band_fraction(agg.expected_edge.get(instr))
+        current_notional = pos.quantity * mark.price
+
+        gap = abs(raw_target_notional - (accepted_before if accepted_before is not None else 0.0))
+        scale = max(abs(raw_target_notional),
+                    abs(accepted_before) if accepted_before is not None else 0.0)
+        crosses_band = gap >= band * scale if scale > 0 else False
+        flips_sign = (accepted_before is not None and accepted_before != 0.0
+                      and raw_target_notional != 0.0
+                      and (raw_target_notional > 0) != (accepted_before > 0))
+
+        # Ouverture, clôture et retournement ne sont JAMAIS filtrés. Les deux
+        # premiers passent déjà la bande par construction (gap == scale, et
+        # band <= 1) ; ils sont écrits explicitement pour que la propriété soit
+        # lisible ici, pas seulement déductible de l'arithmétique.
+        is_entry = accepted_before is None or (accepted_before == 0.0 and raw_target_notional != 0.0)
+        is_exit = raw_target_notional == 0.0 and (
+            accepted_before is None or accepted_before != 0.0 or pos.quantity != 0)
+
+        # ⚠ Le cœur de la correction P0.3. Un changement d'EMPREINTE DE SIGNAL
+        # sur CET instrument (nouvelle décision, décision expirée, conviction
+        # révisée, changement de propriétaire au dedup) est un vrai changement
+        # d'avis : on y répond toujours, sans bande. Une bande qui s'y
+        # appliquerait ne serait pas prudente, elle laisserait sur le livre du
+        # risque que plus aucun signal ne veut.
+        #
+        # A contrario, quand l'empreinte est INCHANGÉE, tout écart de cible
+        # vient du rediviseur de budget (une entrée/sortie AILLEURS chez le
+        # même alpha), d'un plafond, de l'overlay ou de la dérive de prix :
+        # espérance nulle, coût positif. C'est là — et seulement là — que la
+        # bande tranche. C'est exactement « une modification d'un signal ne
+        # doit pas provoquer le resize de toutes les autres positions » : les
+        # autres positions ont, elles, une empreinte inchangée.
+        signal_changed = sig_now != sig_before
+        accept_new_target = (is_entry or is_exit or flips_sign
+                             or signal_changed or crosses_band)
+
+        if not accept_new_target and abs(raw_target_notional - (accepted_before or 0.0)) > NUMERICAL_EPSILON_USD:
+            # turnover que la bande vient d'éviter : mesuré, jamais ignoré.
+            state.suppressed_turnover_usd += abs(raw_target_notional - (accepted_before or 0.0))
+            state.suppressed_order_count += 1
+
+        if accept_new_target:
+            state.accepted_target_notional[instr] = raw_target_notional
+            if sig_now is not None:
+                state.accepted_intent_signature[instr] = sig_now
+            elif instr in state.accepted_intent_signature:
+                del state.accepted_intent_signature[instr]
+            state.converging[instr] = True
+
+        accepted_notional = state.accepted_target_notional.get(instr, 0.0)
+        target_quantity = accepted_notional / mark.price if mark.price else 0.0
         delta_quantity = target_quantity - pos.quantity
 
-        if abs(delta_quantity * mark.price) >= 1e-6:
+        # Classe de turnover -- la réponse à « signal ou mécanique ? ».
+        if is_exit:
+            turnover_class = TURNOVER_EXIT
+        elif flips_sign:
+            turnover_class = TURNOVER_FLIP
+        elif is_entry:
+            turnover_class = TURNOVER_ENTRY
+        elif accept_new_target:
+            turnover_class = (TURNOVER_SIGNAL_RESIZE if signal_changed
+                              else TURNOVER_MECHANICAL_RESIZE)
+        else:
+            turnover_class = TURNOVER_FILL_CONVERGENCE
+
+        # Hors convergence d'un ordre inachevé, un écart résiduel à la cible
+        # acceptée (typiquement la dérive de prix : la quantité cible bouge
+        # quand le mark bouge, à notionnel constant) doit lui aussi franchir la
+        # bande pour justifier un ordre.
+        residual_ok = state.converging.get(instr, False) or (
+            abs(delta_quantity * mark.price) >= band * max(abs(accepted_notional),
+                                                           abs(current_notional)))
+
+        if abs(delta_quantity * mark.price) >= NUMERICAL_EPSILON_USD and not residual_ok:
+            state.suppressed_turnover_usd += abs(delta_quantity * mark.price)
+            state.suppressed_order_count += 1
+        elif abs(delta_quantity * mark.price) < NUMERICAL_EPSILON_USD:
+            # Position exactement à la cible acceptée : la décision est
+            # terminée. Sans cette ligne, un `converging=True` posé par une
+            # acceptation dont le delta était déjà nul resterait vrai pour
+            # toujours et la bande ne s'appliquerait plus jamais à cet
+            # instrument (la dérive de prix repasserait librement).
+            state.converging[instr] = False
+
+        if abs(delta_quantity * mark.price) >= NUMERICAL_EPSILON_USD and residual_ok:
             decision_ts_iso = agg.owner_intent_ts.get(instr, as_of.isoformat())
             current_owner = owner.get(instr, pos.owner_alpha)
             intent_id = signal_id = f"{current_owner}:{instr}:{decision_ts_iso}"
@@ -439,9 +735,18 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
             executed_qty = order.filled_quantity if order.side == "BUY" else -order.filled_quantity
             executed_delta[instr] = executed_qty * (order.fill_price or 0.0)
 
+            # item P0.3 : un ordre partiellement rempli laisse l'instrument en
+            # convergence (on finira la décision au prochain step) ; un ordre
+            # complet la termine, et la bande reprend la main.
+            state.converging[instr] = (
+                abs(order.filled_quantity - order.requested_quantity) > 1e-12)
+
             if abs(executed_qty) > 1e-12:
                 state.cumulative_fees_usd += order.fee_amount
-                state.cumulative_turnover_usd += abs(executed_qty * order.fill_price)
+                turn = abs(executed_qty * order.fill_price)
+                state.cumulative_turnover_usd += turn
+                state.cumulative_turnover_by_class[turnover_class] = (
+                    state.cumulative_turnover_by_class.get(turnover_class, 0.0) + turn)
                 pos.fees_paid += order.fee_amount
 
                 same_sign_or_flat = (pos.quantity == 0) or (
@@ -485,7 +790,10 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
                     state.cumulative_cost_by_alpha.get(current_owner, 0.0) + order.fee_amount)
 
             # persisté APRES la détermination d'exit_reason ci-dessus (item P0.4)
-            state.orders.append(asdict(order))
+            order_d = asdict(order)
+            order_d["turnover_class"] = turnover_class      # item P0.3
+            order_d["no_trade_band_fraction"] = band
+            state.orders.append(order_d)
 
         # funding (perp uniquement, pas les contrats _QUARTERLY) : accrual
         # proportionnel au temps écoulé depuis le dernier step, APPROXIMATION
@@ -507,6 +815,13 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
         k: v for k, v in state.positions.items()
         if abs(v["quantity"]) > 1e-9 or k in skipped_no_mark
     }
+    # item P0.3 : un instrument sans position ET sans cible n'a plus d'état de
+    # bande à garder -- sinon `accepted_target_notional` grossirait sans fin et
+    # une réouverture future serait jugée contre une cible périmée.
+    for aux in (state.accepted_target_notional, state.accepted_intent_signature,
+                state.converging):
+        for k in [k for k in aux if k not in state.positions and not target.get(k)]:
+            del aux[k]
 
     realized_pnl = state.cumulative_realized_pnl
     unrealized_pnl = 0.0
@@ -548,7 +863,14 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
         "equity": equity, "drawdown": drawdown,
         "gross_exposure": gross, "net_exposure": net, "n_positions": len(state.positions),
         "skipped_no_mark": skipped_no_mark,
+        "sizing_rule": SIZING_RULE,   # 2026-09-03 : frontière de segment, points antérieurs non réécrits
+        # item P0.3 : frontière du segment « bande de non-négociation »
+        "no_trade_band_rule": NO_TRADE_BAND_RULE,
+        "turnover_by_class": dict(state.cumulative_turnover_by_class),
+        "suppressed_turnover_usd": state.suppressed_turnover_usd,
+        "suppressed_order_count": state.suppressed_order_count,
     })
+    state.alpha_denominator_high_water = dict(agg.denominator_high_water)
     state.last_step_ts = as_of.isoformat()
     _append_intent_ledger(portfolio_name, as_of, agg.raw_intents_by_instrument, target, executed_delta)
     save_state(portfolio_name, state)

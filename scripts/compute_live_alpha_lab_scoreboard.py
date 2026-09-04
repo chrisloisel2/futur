@@ -42,6 +42,7 @@ def load_decisions(alpha_id: str):
 # dépendre de l'exécution préalable de l'autre pour connaître le nom de colonne).
 _TIME_COL = {
     "LIQ_CASCADE_REPEAT_V1": "event_time", "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
+    "BTC_LEAD_ALT_CASCADE_V1": "event_time",
     "SHORT_COVERING_CONTINUATION_V1": "timestamp", "WHALE_LSR_SCREEN_V1": "timestamp",
     "FUNDING_BASIS_DISAGREEMENT_V1": "date", "FUNDING_BASIS_DISAGREEMENT_V2": "date",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
@@ -51,6 +52,7 @@ _TIME_COL = {
 # `asset`, hérité du schéma Opportunity). Jamais deviné, mappé explicitement.
 _SYMBOL_COL = {
     "LIQ_CASCADE_REPEAT_V1": "symbol", "LIQ_CASCADE_FAR_FROM_LOW_V1": "symbol",
+    "BTC_LEAD_ALT_CASCADE_V1": "symbol",
     "SHORT_COVERING_CONTINUATION_V1": "asset", "WHALE_LSR_SCREEN_V1": "symbol",
     "FUNDING_BASIS_DISAGREEMENT_V1": "symbol", "FUNDING_BASIS_DISAGREEMENT_V2": "symbol",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "symbol",

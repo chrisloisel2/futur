@@ -17,13 +17,41 @@ le portfolio layer, pas ici) :
     sur le même instrument), pas une position propre. Voir gate.py.
   - VOL_FORECAST_LAYER_V1 : alimente le multiplicateur de sizing de l'overlay
     (item 3 de la mission), pas une position propre. Voir overlay.py.
+
+PORTE score_net (audit forward 2026-09-04, item P0.2)
+─────────────────────────────────────────────────────
+`score_net` est défini une seule fois dans tout le repo, dans
+`src/institutional/contracts.py` :
+
+    score_net = expected_return - expected_cost          (fractions de prix)
+
+C'est donc littéralement l'espérance de rendement APRÈS coûts de la décision.
+Une valeur strictement négative signifie que le moteur lui-même annonce que
+la décision perd de l'argent en espérance : aucun dimensionnement ne peut la
+rendre rentable. Ces décisions sont refusées ICI, à la porte de CAPITAL, avec
+`ReasonCode.REJECT_NEGATIVE_EXPECTED_VALUE`.
+
+Deux propriétés voulues :
+  - AUCUN seuil arbitraire. Le critère est exactement `score_net < 0`, la
+    frontière économique elle-même. `score_net == 0` (espérance exactement
+    nulle) n'est PAS bloqué : le bloquer supposerait un seuil inventé.
+  - AUCUNE réécriture du ledger. Le producteur continue d'écrire sa décision
+    telle qu'il l'a produite (`ACCEPT_SHADOW`, `score_net` négatif inclus) --
+    c'est la matière première de la mesure forward. Seul le capital est refusé.
+
+La porte est GÉNÉRIQUE : elle s'applique à tout ledger portant une colonne
+`score_net`, quel que soit l'alpha. Les ledgers sans cette colonne (famille
+liq_cascade, cross-sectional…) ne portent pas de modèle de coût par décision
+et passent inchangés -- ne rien inventer là où le moteur ne dit rien.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional
+from dataclasses import dataclass, replace
+from typing import Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
+
+from src.institutional.contracts import ReasonCode
 
 REGISTRY_HORIZON_HOURS = {
     "fwd_4h": 4.0,
@@ -48,6 +76,14 @@ class PortfolioIntent:
     expiry: pd.Timestamp             # timestamp + horizon_hours
     multi_leg: bool = False          # True pour FUNDING_BASIS_DISAGREEMENT_V2 (2 jambes opposées)
     leg_instrument_b: Optional[str] = None   # 2e jambe si multi_leg
+    # item P0.3 : espérance de rendement de CETTE décision (fraction de prix,
+    # sur son horizon), telle que le moteur la déclare. Sert UNIQUEMENT à
+    # calculer la bande de non-négociation économique (portfolio.py :
+    # no_trade_band_fraction) -- jamais au sizing, qui reste
+    # target_position_fraction. None = le moteur ne déclare pas d'espérance
+    # par décision ; le portefeuille retombe alors sur `expected_net_bps` du
+    # registre, et à défaut sur la politique la plus conservatrice.
+    expected_edge_fraction: Optional[float] = None
 
 
 def _expiry(ts: pd.Timestamp, hours: float) -> pd.Timestamp:
@@ -93,6 +129,7 @@ def _short_covering_intents(alpha_id: str, family: str, risk_bucket: str,
         if w <= 0:
             continue
         ts = pd.Timestamp(r["timestamp"])
+        edge = r.get("expected_return")
         out.append(PortfolioIntent(
             alpha_id=alpha_id, family=family, risk_bucket=risk_bucket,
             correlation_family=correlation_family, timestamp=ts,
@@ -100,6 +137,9 @@ def _short_covering_intents(alpha_id: str, family: str, risk_bucket: str,
             target_position_fraction=w * float(r.get("p_success", 1.0)),
             confidence=float(r.get("confidence", w)),
             horizon_hours=4.0, expiry=_expiry(ts, 4.0),
+            # ce ledger déclare une espérance PAR DÉCISION -- on l'utilise
+            # telle quelle plutôt que la moyenne du registre.
+            expected_edge_fraction=float(edge) if pd.notna(edge) else None,
         ))
     return out
 
@@ -180,6 +220,7 @@ ADAPTERS: Dict[str, Callable] = {
     "LIQ_CASCADE_REPEAT_V1": _liq_cascade_intents,
     "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": _liq_cascade_intents,
     "LIQ_CASCADE_FAR_FROM_LOW_V1": _liq_cascade_intents,
+    "BTC_LEAD_ALT_CASCADE_V1": _liq_cascade_intents,
     "SHORT_COVERING_CONTINUATION_V1": _short_covering_intents,
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": _cross_sectional_intents,
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": _cross_sectional_intents,
@@ -193,8 +234,38 @@ ADAPTERS: Dict[str, Callable] = {
 NOT_A_POSITION_ALPHA = {"WHALE_LSR_SCREEN_V1", "VOL_FORECAST_LAYER_V1"}
 
 
-def build_intents(alpha_id: str, registry_entry: dict, decisions_forward_only: pd.DataFrame
-                  ) -> List[PortfolioIntent]:
+# item P0.2 : nom de la colonne portant l'espérance nette de coûts. Défini
+# dans contracts.OPPORTUNITY_COLUMNS -- un seul endroit dans tout le repo.
+SCORE_NET_COLUMN = "score_net"
+
+
+def filter_negative_expected_value(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Sépare (gardées, refusées) sur le critère `score_net < 0`.
+
+    Retourne `(df, df.iloc[0:0])` inchangé si la colonne n'existe pas : un
+    ledger sans modèle de coût par décision n'est pas jugé sur un coût qu'il
+    n'a pas déclaré. Les valeurs manquantes (NaN) sont GARDÉES -- « je ne sais
+    pas » n'est pas « c'est négatif », et inventer un refus sur une absence
+    serait exactement le genre de seuil arbitraire à éviter.
+    """
+    if df.empty or SCORE_NET_COLUMN not in df.columns:
+        return df, df.iloc[0:0]
+    score = pd.to_numeric(df[SCORE_NET_COLUMN], errors="coerce")
+    negative = score < 0            # NaN < 0 vaut False -> NaN gardé, voulu
+    return df.loc[~negative].copy(), df.loc[negative].copy()
+
+
+def build_intents(alpha_id: str, registry_entry: dict, decisions_forward_only: pd.DataFrame,
+                  stats: Optional[dict] = None) -> List[PortfolioIntent]:
+    """`stats`, si fourni, est rempli en place avec la comptabilité de la porte
+    score_net (item P0.2) : n_decisions_in / n_blocked_negative_ev /
+    n_decisions_sized / blocked_reason. Passer un dict est le seul moyen
+    d'obtenir ce détail sans changer le type de retour (et donc sans casser
+    les appelants et tests existants)."""
+    if stats is not None:
+        stats.update({"alpha_id": alpha_id, "n_decisions_in": int(len(decisions_forward_only)),
+                      "n_blocked_negative_ev": 0, "n_decisions_sized": 0,
+                      "blocked_reason": ReasonCode.REJECT_NEGATIVE_EXPECTED_VALUE.value})
     if alpha_id not in ADAPTERS:
         if alpha_id in NOT_A_POSITION_ALPHA:
             return []
@@ -204,6 +275,39 @@ def build_intents(alpha_id: str, registry_entry: dict, decisions_forward_only: p
         )
     if decisions_forward_only.empty:
         return []
+
+    kept, blocked = filter_negative_expected_value(decisions_forward_only)
+    if stats is not None:
+        stats["n_blocked_negative_ev"] = int(len(blocked))
+        stats["n_decisions_sized"] = int(len(kept))
+    if kept.empty:
+        return []
+
     fn = ADAPTERS[alpha_id]
-    return fn(alpha_id, registry_entry.get("family"), registry_entry.get("risk_bucket"),
-             registry_entry.get("correlation_family"), decisions_forward_only)
+    out = fn(alpha_id, registry_entry.get("family"), registry_entry.get("risk_bucket"),
+             registry_entry.get("correlation_family"), kept)
+    return _fill_registry_edge_fallback(out, registry_entry)
+
+
+def _fill_registry_edge_fallback(intents: List[PortfolioIntent],
+                                 registry_entry: dict) -> List[PortfolioIntent]:
+    """item P0.3 : un ledger qui ne déclare pas d'espérance PAR DÉCISION
+    (famille liq_cascade, cross-sectional…) retombe sur `expected_net_bps` du
+    registre — l'espérance MOYENNE documentée de l'alpha.
+
+    C'est un chiffre déjà NET de coûts, donc plus petit que l'espérance brute :
+    l'utiliser élargit la bande, c'est-à-dire fait moins trader. L'erreur, si
+    erreur il y a, est du côté prudent — jamais du côté qui autorise plus de
+    churn. Un `expected_net_bps` absent ou négatif laisse l'edge à None et la
+    bande à son maximum (aucun redimensionnement mécanique).
+    """
+    raw = registry_entry.get("expected_net_bps")
+    try:
+        edge = float(raw) / 10_000.0 if raw is not None else None
+    except (TypeError, ValueError):
+        edge = None
+    if edge is None or edge <= 0:
+        return intents
+    return [it if it.expected_edge_fraction is not None
+            else replace(it, expected_edge_fraction=edge)
+            for it in intents]
