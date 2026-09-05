@@ -22,6 +22,15 @@ trading-system/__pycache__/
 *.csv
 *.csv.gz
 *.parquet
+
+# ── Exception : livrables CSV des campagnes edge_discovery ───────────────────
+# `*.csv` est volontairement global (données lourdes), mais il emportait aussi
+# les LIVRABLES d'analyse des workers : tables de verdicts, audits de colonnes,
+# grilles de résultats. Constaté le 2026-09-05 sur le round 4 — 18 fichiers,
+# 1,7 Mo, dont l'audit des 4 178 colonnes de data/enriched, qui n'auraient
+# jamais été commités et auraient disparu au premier nettoyage. Ce sont des
+# résultats, pas de la donnée : ils doivent survivre à leur worker.
+!reports/edge_discovery/**/*.csv
 *.feather
 *.h5
 *.hdf5
