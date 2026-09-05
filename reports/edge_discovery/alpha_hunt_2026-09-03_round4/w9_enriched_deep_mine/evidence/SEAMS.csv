@@ -1,0 +1,79 @@
+symbol,seam_type,t,detail,ratio
+AVAXUSDT,feature_count,2026-05-20 01:00:00,4073 -> 4023,
+BNBUSDT,feature_count,2026-05-20 01:00:00,4073 -> 4023,
+LINKUSDT,feature_count,2026-05-20 01:00:00,4073 -> 4023,
+ADAUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+BTCUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+DOGEUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+ETHUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+SOLUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+XRPUSDT,feature_count,2026-05-29 09:00:00,3986 -> 4023,
+DOTUSDT,feature_count,2026-06-28 23:00:00,4073 -> 4023,
+MANAUSDT,obv_reset,2021-10-30 14:00:00,2.18e+09 -> 2.76e+09 (54 sigma),
+TRXUSDT,obv_reset,2022-06-15 08:00:00,5.44e+10 -> 6.21e+10 (52 sigma),
+INJUSDT,obv_reset,2023-01-25 14:00:00,2.15e+08 -> 2.63e+08 (52 sigma),
+GRTUSDT,obv_reset,2023-02-07 20:00:00,7.78e+09 -> 9.04e+09 (56 sigma),
+BCHUSDT,obv_reset,2023-06-30 02:00:00,2.22e+07 -> 2.58e+07 (54 sigma),
+PENDLEUSDT,obv_reset,2023-08-23 13:00:00,-4.82e+07 -> 9.81e+06 (55 sigma),
+RUNEUSDT,obv_reset,2025-02-02 01:00:00,-4.54e+08 -> -2.9e+08 (57 sigma),
+PYTHUSDT,obv_reset,2025-08-28 14:00:00,-3.32e+09 -> -1.67e+09 (64 sigma),
+BTCUSDT,obv_reset,2026-01-01 00:00:00,-1.94e+06 -> -1.35e+05 (116 sigma),
+UNIUSDT,obv_reset,2026-02-11 14:00:00,-2.58e+08 -> -1.86e+08 (68 sigma),
+ADAUSDT,obv_reset,2026-05-20 01:00:00,-1.54e+10 -> -4.66e+08 (216 sigma),
+AVAXUSDT,obv_reset,2026-05-20 01:00:00,-2.08e+08 -> -1.2e+07 (193 sigma),
+BNBUSDT,obv_reset,2026-05-20 01:00:00,6.73e+07 -> 1.6e+05 (223 sigma),
+ETHUSDT,obv_reset,2026-05-20 01:00:00,-1.25e+08 -> -7.91e+06 (253 sigma),
+LINKUSDT,obv_reset,2026-05-20 01:00:00,-2.08e+08 -> -4.1e+06 (149 sigma),
+DOGEUSDT,obv_reset,2026-05-24 00:00:00,2.24e+11 -> -8.46e+08 (243 sigma),
+XRPUSDT,obv_reset,2026-05-24 00:00:00,5.03e+09 -> -7.38e+07 (166 sigma),
+DOTUSDT,obv_reset,2026-06-28 23:00:00,-2.08e+09 -> -1.57e+08 (219 sigma),
+DOGEUSDT,volume_level_jump,2020-07-06 03:00:00,mediane volume 168h x69.88,69.877
+MANAUSDT,volume_level_jump,2021-10-25 20:00:00,mediane volume 168h x32.80,32.803
+SANDUSDT,volume_level_jump,2021-10-28 01:00:00,mediane volume 168h x13.64,13.637
+LTCUSDT,volume_level_jump,2021-11-08 02:00:00,mediane volume 168h x3.75,3.749
+NEARUSDT,volume_level_jump,2021-12-05 11:00:00,mediane volume 168h x4.30,4.304
+IMXUSDT,volume_level_jump,2022-03-06 22:00:00,mediane volume 168h x14.48,14.475
+TRXUSDT,volume_level_jump,2022-05-01 06:00:00,mediane volume 168h x9.25,9.253
+ETCUSDT,volume_level_jump,2022-07-16 13:00:00,mediane volume 168h x17.72,17.716
+OPUSDT,volume_level_jump,2022-07-17 02:00:00,mediane volume 168h x8.07,8.071
+FILUSDT,volume_level_jump,2022-07-29 13:00:00,mediane volume 168h x7.61,7.606
+ALGOUSDT,volume_level_jump,2022-09-18 17:00:00,mediane volume 168h x7.84,7.835
+LDOUSDT,volume_level_jump,2023-01-01 14:00:00,mediane volume 168h x6.85,6.848
+APTUSDT,volume_level_jump,2023-01-09 14:00:00,mediane volume 168h x7.24,7.238
+FETUSDT,volume_level_jump,2023-02-03 09:00:00,mediane volume 168h x6.15,6.154
+GRTUSDT,volume_level_jump,2023-02-04 14:00:00,mediane volume 168h x11.79,11.794
+ATOMUSDT,volume_level_jump,2023-03-09 02:00:00,mediane volume 168h x3.19,3.194
+ARBUSDT,volume_level_jump,2023-04-13 05:00:00,mediane volume 168h x4.02,4.019
+STXUSDT,volume_level_jump,2023-06-05 11:00:00,mediane volume 168h x5.69,5.687
+BCHUSDT,volume_level_jump,2023-06-20 16:00:00,mediane volume 168h x22.59,22.589
+RUNEUSDT,volume_level_jump,2023-08-10 18:00:00,mediane volume 168h x19.58,19.576
+SUIUSDT,volume_level_jump,2023-08-17 19:00:00,mediane volume 168h x7.52,7.524
+PENDLEUSDT,volume_level_jump,2023-08-23 12:00:00,mediane volume 168h x6.06,6.056
+AAVEUSDT,volume_level_jump,2023-10-19 13:00:00,mediane volume 168h x5.30,5.3
+VETUSDT,volume_level_jump,2024-02-11 08:00:00,mediane volume 168h x6.15,6.148
+WLDUSDT,volume_level_jump,2024-02-14 12:00:00,mediane volume 168h x7.97,7.968
+ARUSDT,volume_level_jump,2024-02-15 18:00:00,mediane volume 168h x5.90,5.903
+UNIUSDT,volume_level_jump,2024-02-23 14:00:00,mediane volume 168h x6.57,6.57
+PEPEUSDT,volume_level_jump,2024-02-24 17:00:00,mediane volume 168h x6.03,6.029
+TIAUSDT,volume_level_jump,2024-04-12 17:00:00,mediane volume 168h x6.36,6.357
+HBARUSDT,volume_level_jump,2024-04-23 13:00:00,mediane volume 168h x8.24,8.235
+INJUSDT,volume_level_jump,2024-06-07 05:00:00,mediane volume 168h x4.38,4.382
+RNDRUSDT,volume_level_jump,2024-07-12 22:00:00,mediane volume 168h x0.00,0.0
+JUPUSDT,volume_level_jump,2025-01-16 21:00:00,mediane volume 168h x10.92,10.917
+WIFUSDT,volume_level_jump,2025-01-28 16:00:00,mediane volume 168h x3.16,3.165
+SEIUSDT,volume_level_jump,2025-06-18 18:00:00,mediane volume 168h x8.46,8.461
+PYTHUSDT,volume_level_jump,2025-08-28 12:00:00,mediane volume 168h x13.24,13.236
+MKRUSDT,volume_level_jump,2025-09-04 22:00:00,mediane volume 168h x0.00,0.0
+TAOUSDT,volume_level_jump,2025-10-09 19:00:00,mediane volume 168h x4.57,4.568
+ICPUSDT,volume_level_jump,2025-11-01 20:00:00,mediane volume 168h x11.10,11.096
+BTCUSDT,volume_level_jump,2025-12-31 20:00:00,mediane volume 168h x0.18,0.178
+ORDIUSDT,volume_level_jump,2026-04-13 12:00:00,mediane volume 168h x22.13,22.127
+BNBUSDT,volume_level_jump,2026-05-18 21:00:00,mediane volume 168h x0.19,0.185
+SOLUSDT,volume_level_jump,2026-05-19 05:00:00,mediane volume 168h x0.11,0.113
+ETHUSDT,volume_level_jump,2026-05-19 10:00:00,mediane volume 168h x0.07,0.072
+ADAUSDT,volume_level_jump,2026-05-20 00:00:00,mediane volume 168h x0.17,0.17
+AVAXUSDT,volume_level_jump,2026-05-20 00:00:00,mediane volume 168h x0.15,0.152
+LINKUSDT,volume_level_jump,2026-05-20 00:00:00,mediane volume 168h x0.17,0.165
+ENAUSDT,volume_level_jump,2026-05-31 13:00:00,mediane volume 168h x3.12,3.116
+DOTUSDT,volume_level_jump,2026-06-29 04:00:00,mediane volume 168h x0.09,0.088
+XRPUSDT,volume_level_jump,2026-08-19 14:00:00,mediane volume 168h x7.32,7.322

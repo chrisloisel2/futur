@@ -1,0 +1,24 @@
+{
+ "m8_episodes": 19921,
+ "coverage_share": 0.1434666934390844,
+ "overlap_pm1h_all": 0.06816926861101351,
+ "overlap_pm1h_covered_symbols": 0.47515745276417076,
+ "overlap_pm12h_all": 0.08925254756287335,
+ "overlap_pm12h_covered_symbols": 0.622113365990203,
+ "cascade_overlapping": {
+  "n_raw": 1778,
+  "n_independent_L1": 1517,
+  "net_bps": 58.77021871210653,
+  "net_bps_stress28": 44.77021871210653,
+  "t_stat_declustered": 2.650179431519326,
+  "eta_forward_confirmation_years": 30.459441072559375
+ },
+ "cascade_disjoint": {
+  "n_raw": 1080,
+  "n_independent_L1": 958,
+  "net_bps": -17.013299125524536,
+  "net_bps_stress28": -31.013299125524536,
+  "t_stat_declustered": -0.4411118968829594,
+  "eta_forward_confirmation_years": null
+ }
+}

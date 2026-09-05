@@ -1,0 +1,631 @@
+{
+  "worker": "W10_VALIDATION_PUSH",
+  "round": "alpha_hunt_2026-09-03_round4",
+  "report_date": "2026-09-05",
+  "session_note": "Session du 2026-09-03 interrompue apres t1a/t1b/t1c/t1d + scripts t2/t2b. Reprise 2026-09-05 : t2b execute, t1e/t1f/t4 ajoutes, verdicts rendus.",
+  "scope": "Aucun nouveau mecanisme cherche. Transformation en verdicts definitifs des candidats en suspens du validation_registry.",
+  "write_scope": "reports/edge_discovery/alpha_hunt_2026-09-03_round4/w10_validation_push/ uniquement. configs/validation_registry.yaml NON modifie.",
+  "cost_convention": "net_bps = gross_bps - 14 (5bps taker + 2bps slippage aller-retour) ; stress obligatoire -28.",
+  "mechanisms": [
+    {
+      "candidate_id": "LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION",
+      "entering_status": "BLOCKED",
+      "verdict": "REJECTED",
+      "verdict_is_final": true,
+      "family": "liquidation",
+      "sign_convention_resolved": true,
+      "sign_semantics": {
+        "question": "Un forceOrder de cote SELL est-il la liquidation d'un LONG ?",
+        "answer": "OUI. side=SELL = vente forcee = LONG liquide ; side=BUY = achat force = SHORT liquide.",
+        "evidence": "evidence/t1a_sign_semantics.json",
+        "sources": [
+          {
+            "source": "OKX posSide explicite (verite terrain, lu hors normalisation projet)",
+            "symbols": [
+              "BTCUSDT",
+              "ETHUSDT",
+              "SOLUSDT"
+            ],
+            "corr_imb_ret": [
+              0.4434,
+              0.4373,
+              0.5356
+            ],
+            "t_stat": [
+              29.94,
+              33.17,
+              35.42
+            ]
+          },
+          {
+            "source": "Bybit side normalise (collector.py:223)",
+            "symbols": [
+              "BTCUSDT",
+              "ETHUSDT",
+              "SOLUSDT"
+            ],
+            "corr_imb_ret": [
+              0.4485,
+              0.4637,
+              0.4843
+            ],
+            "t_stat": [
+              31.97,
+              32.2,
+              33.15
+            ]
+          },
+          {
+            "source": "Binance Vision COIN-M side brut (archive externe, periode disjointe 2023-06 -> 2024-10)",
+            "symbols": [
+              "BTCUSD_PERP",
+              "ETHUSD_PERP"
+            ],
+            "corr_imb_ret": [
+              0.4321,
+              0.45
+            ],
+            "t_stat": [
+              65.26,
+              54.01
+            ]
+          },
+          {
+            "source": "CONTROLE NEGATIF : convention inverse sur Bybit",
+            "corr_imb_ret": [
+              -0.4485,
+              -0.4637,
+              -0.4843
+            ],
+            "note": "signe exactement oppose -> le test discrimine"
+          }
+        ],
+        "detector_label_check": {
+          "evidence": "evidence/t1b_kind_vs_liqflow.json",
+          "window": "+/-30min autour de l'event, 2026-07-05 -> 2026-09-01, 1107 events, detecteur figé rejoué en import lecture seule",
+          "SHORT_SQUEEZE": {
+            "n": 264,
+            "usd_weighted_short_liq_share": 0.9116,
+            "pct_events_majority_short_liq": 0.7841
+          },
+          "LONG_CASCADE": {
+            "n": 843,
+            "usd_weighted_short_liq_share": 0.0814,
+            "pct_events_majority_short_liq": 0.1139
+          },
+          "welch_t": 26.16,
+          "conclusion": "kind=SHORT_SQUEEZE correspond bien a des SHORTS liquides (achats forces). La docstring detector.py:9 etait exacte ; l'ambiguite etait documentaire, pas factuelle."
+        }
+      },
+      "gate": {
+        "SSE_CONT_LONG_thr3_round2_published_spec": {
+          "n_raw": 1140,
+          "n_independent_L1": 745,
+          "n_independent_L2": 353,
+          "n_independent_L3": 437,
+          "gross_bps": 54.02,
+          "net_bps": 40.02,
+          "net_bps_stress28": 26.02,
+          "net_bps_L3_declustered": -8.65,
+          "t_stat_raw": 3.62,
+          "t_stat_declustered_L1": 2.82,
+          "t_stat_declustered_L2": -0.58,
+          "t_stat_declustered": -0.71,
+          "bootstrap_ci95_equal_weight_L3": [
+            -31.47,
+            16.39
+          ],
+          "bootstrap_ci95_size_weighted_blockboot": [
+            -9.62,
+            91.7
+          ],
+          "block_boot_p_le_0_size_weighted": 0.0629,
+          "year_by_year": {
+            "2021": 53.36,
+            "2022": -58.53,
+            "2023": -8.16,
+            "2024": -5.14,
+            "2025": 26.3,
+            "2026": -27.33
+          },
+          "best_year": 2021,
+          "ex_best_year_net_bps": -10.56,
+          "ex_best_year_t": -0.85,
+          "n_required": 21513,
+          "event_rate_per_week_L3_last6m": 1.934,
+          "eta_days": 77880.1,
+          "eta_years": 213.22,
+          "pnl_share_top1_episode": 0.391,
+          "pnl_share_top3_episodes": 1.081,
+          "pnl_share_top5_episodes": 1.304,
+          "net_bps_ex_top5_episodes": -13.85,
+          "pre2025_net_bps": 6.98,
+          "pre2025_ci95": [
+            -40.45,
+            59.9
+          ],
+          "y2025plus_net_bps": 114.6,
+          "y2025plus_ci95": [
+            3.45,
+            195.44
+          ]
+        },
+        "SSE_CONT_LONG_thr2_frozen_code_spec": {
+          "n_raw": 2719,
+          "n_independent_L1": 1823,
+          "n_independent_L2": 739,
+          "n_independent_L3": 1004,
+          "gross_bps": 29.45,
+          "net_bps": 15.45,
+          "net_bps_stress28": 1.45,
+          "net_bps_L3_declustered": -30.46,
+          "t_stat_declustered": -4.52,
+          "bootstrap_ci95_equal_weight_L3": [
+            -43.6,
+            -17.87
+          ],
+          "bootstrap_ci95_size_weighted_blockboot": [
+            -18.15,
+            51.12
+          ],
+          "block_boot_p_le_0_size_weighted": 0.2013,
+          "year_by_year": {
+            "2021": -17.87,
+            "2022": -52.7,
+            "2023": -17.8,
+            "2024": -28.65,
+            "2025": -25.79,
+            "2026": -27.18
+          },
+          "ex_best_year_net_bps": -32.95,
+          "ex_best_year_t": -4.38,
+          "eta_years": 4.66,
+          "pnl_share_top1_episode": 0.679,
+          "net_bps_ex_top5_episodes": -17.24
+        },
+        "SSE_MEANREV_SHORT_thr3_symmetric_hypothesis": {
+          "n_raw": 1140,
+          "n_independent_L3": 437,
+          "net_bps": -68.02,
+          "net_bps_stress28": -82.02,
+          "net_bps_L3_declustered": -19.35,
+          "t_stat_declustered": -1.58,
+          "bootstrap_ci95": [
+            -44.39,
+            3.47
+          ],
+          "ex_best_year_net_bps": -30.69,
+          "eta_years": 42.67
+        },
+        "SSE_MEANREV_SHORT_thr2": {
+          "n_raw": 2719,
+          "n_independent_L3": 1004,
+          "net_bps": -43.45,
+          "net_bps_L3_declustered": 2.46,
+          "t_stat_declustered": 0.37,
+          "bootstrap_ci95": [
+            -10.13,
+            15.6
+          ],
+          "ex_best_year_net_bps": -3.17,
+          "eta_years": 711.91
+        },
+        "CONTROL_LONG_CASCADE_exhaustion_LONG_thr3": {
+          "n_raw": 1988,
+          "n_independent_L3": 789,
+          "net_bps": 27.07,
+          "net_bps_stress28": 13.07,
+          "net_bps_L3_declustered": 25.42,
+          "t_stat_declustered": 2.75,
+          "bootstrap_ci95_equal_weight_L3": [
+            7.92,
+            43.44
+          ],
+          "bootstrap_ci95_size_weighted_blockboot": [
+            4.08,
+            51.05
+          ],
+          "block_boot_p_le_0_size_weighted": 0.0097,
+          "ex_best_year_net_bps": 21.99,
+          "ex_best_year_t": 2.37,
+          "net_bps_ex_top5_episodes": 10.77,
+          "eta_years": 10.99,
+          "role": "CONTROLE POSITIF : l'alpha deja en shadow passe le meme test que SHORT_SQUEEZE echoue -> la methode separe, elle ne tue pas tout."
+        }
+      },
+      "contrasts_arm_vs_arm": {
+        "SS_exhaustion_minus_onset_LONG_thr3": {
+          "delta_bps": 26.04,
+          "welch_t_declustered": 2.01,
+          "ci95": [
+            1.54,
+            52.18
+          ]
+        },
+        "SS_exhaustion_minus_onset_LONG_thr2": {
+          "delta_bps": 4.23,
+          "welch_t_declustered": 0.53,
+          "ci95": [
+            -10.62,
+            19.88
+          ]
+        },
+        "SS_exh_minus_LC_exh_cross_kind_thr3": {
+          "delta_bps": -34.08,
+          "welch_t_declustered": -2.23
+        },
+        "SS_exh_minus_LC_exh_cross_kind_thr2": {
+          "delta_bps": -53.0,
+          "welch_t_declustered": -6.1
+        },
+        "note": "Le seul contraste favorable (thr3, t=2.01) disparait au seuil du code figé (t=0.53) et le bras exhaustion lui-meme (+5.35 bps bruts declusterises) est SOUS le cout de 14 bps."
+      },
+      "decluster_sanity": {
+        "evidence": "evidence/t1d_decluster_diagnostics.json",
+        "L3_units_pct_size1": 0.624,
+        "L3_median_size": 1.0,
+        "L3_median_duration_h": 0.0,
+        "L3_p95_duration_h": 6.65,
+        "L3_max_duration_h": 29.67,
+        "sign_stable_across_gaps": {
+          "gap1h": -20.2,
+          "gap4h": -30.46,
+          "gap12h": -17.79
+        },
+        "corr_log_episode_size_vs_perf": 0.114,
+        "conclusion": "L3 ne fabrique pas de mega-episodes ; le signe negatif survit a tous les gaps ; les gros episodes performent mieux, ce qui est la cause mecanique du gonflement de la moyenne brute."
+      },
+      "robustness": {
+        "evidence": "evidence/t1f_bootstrap_robustness.json",
+        "configurations": "4 gaps d'episode (1h/4h/12h/24h) x 3 graines",
+        "SS_exhaustion_ci95_contains_zero": "24/24 configurations",
+        "SS_exhaustion_p_le_0_range": [
+          0.05,
+          0.216
+        ],
+        "CONTROL_LC_ci95_excludes_zero": "9/12 configurations (p 0.006-0.018 aux gaps 4h/12h/24h ; marginal 0.036 au gap 1h)"
+      },
+      "why_the_published_number_was_wrong": "Le +40.0bps plein / +114.6bps OOS du round 2 est reproduit a l'identique, puis explique : (1) IC naif iid [18.3, 61.7] ~2x trop etroit car ignore le clustering ; (2) le top-1 episode porte 39% du PnL total, le top-3 en porte 108%, le top-5 130% ; retirer 5 episodes sur 437 fait passer l'edge a -13.9bps ; (3) l'effet est entierement 2025 (pre-2025 : +7.0bps, IC [-40.5, +59.9] = rien). Ce n'etait pas un probleme de convention de signe : c'etait un artefact de clustering et de concentration.",
+      "execution_constraint_inherited": "Sans objet (REJECTED), mais consigne : toute la famille cascade lit data/derivatives_backfill/binance_vision_metrics/ (backfill d'archives quotidiennes, pas un flux live) -> lag median 45.5h pour un horizon de 4h, 100% de decisions perimees. Ref: reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md. Contrainte toujours active pour les 4 alphas figes qui en dependent.",
+      "operational_recommendation": "L'exclusion de SHORT_SQUEEZE dans repeat_variant.py:53 etait CORRECTE et doit le rester. Elle n'a jamais coute d'edge au projet.",
+      "evidence_files": [
+        "evidence/t1a_sign_semantics.py",
+        "evidence/t1a_sign_semantics.json",
+        "evidence/t1b_kind_vs_liqflow.py",
+        "evidence/t1b_kind_vs_liqflow.json",
+        "evidence/t1c_short_squeeze_gate.py",
+        "evidence/t1c_short_squeeze_gate_thr2.json",
+        "evidence/t1c_short_squeeze_gate_thr3.json",
+        "evidence/t1d_decluster_diagnostics.py",
+        "evidence/t1d_decluster_diagnostics.json",
+        "evidence/t1e_weighting_robustness.py",
+        "evidence/t1e_weighting_robustness.json",
+        "evidence/t1f_bootstrap_robustness.py",
+        "evidence/t1f_bootstrap_robustness.json",
+        "evidence/gate.py"
+      ],
+      "briefing_vocabulary": "DEAD",
+      "registry_verdict_proposed": "REJECTED (remplace BLOCKED)"
+    },
+    {
+      "candidate_id": "LIQ_REPEAT_VOL_GATE",
+      "entering_status": "NEEDS_MORE_RESEARCH",
+      "verdict": "UNCONFIRMABLE_IN_HORIZON",
+      "verdict_is_final": true,
+      "family": "liquidation",
+      "question_asked": "Existe-t-il une formulation du meme mecanisme economique avec un taux d'episodes independants nettement plus eleve que l'etat macro lent 'vol BTC 24h elevee' (268 episodes -> ETA 28-38.5 ans) ?",
+      "base_population": "LONG_CASCADE & n_events_sym_24h>=2 (spec du code fige), n=5457, 2021-01-05 -> 2026-07-03",
+      "preregistered_threshold": "top 30% (decile superieur), percentile CAUSAL trailing 200 events precedents du meme symbole, min 30",
+      "decluster_unit_L4": "episode de regime du gate = run maximal d'events consecutifs de meme etat, coupe a 24h (l'unite qui avait detruit la preuve d'origine)",
+      "reformulations": {
+        "B0_btc_vol_24h_macro_REPRODUCTION": {
+          "n_on": 1583,
+          "delta_bps_L4": 30.38,
+          "welch_t_L4": 2.13,
+          "n_on_episodes_history": 121,
+          "on_episode_rate_per_week": 0.735,
+          "eta_years_L4": 29.01,
+          "eta_years_calendar_day": 62.49,
+          "welch_t_calendar_day": 1.45,
+          "years_delta_positive": "4/5",
+          "on_arm_net_bps_stress28": 20.35,
+          "note": "reproduit le diagnostic d'origine (29.0 vs 28-38.5 ans publies) -> pipeline calibre"
+        },
+        "R1_symbol_vol_24h": {
+          "n_on": 1013,
+          "delta_bps_L4": 113.73,
+          "welch_t_L4": 5.0,
+          "n_on_episodes_history": 590,
+          "on_episode_rate_per_week": 2.127,
+          "eta_years_L4": 5.83,
+          "eta_years_calendar_day": 53.95,
+          "welch_t_calendar_day": 1.26,
+          "years_delta_positive": "4/5",
+          "on_arm_net_bps_stress28": 92.51,
+          "jaccard_with_macro_B0": 0.27,
+          "lift_vs_macro": 2.93,
+          "intra_day_cross_symbol_state_share": 0.9,
+          "expected_if_independent": 0.814
+        },
+        "R2_symbol_fast_vol_absret1h": {
+          "n_on": 979,
+          "delta_bps_L4": 66.08,
+          "welch_t_L4": 3.41,
+          "n_on_episodes_history": 828,
+          "on_episode_rate_per_week": 4.293,
+          "eta_years_L4": 8.77,
+          "eta_years_calendar_day": 39.31,
+          "welch_t_calendar_day": 1.5,
+          "years_delta_positive": "5/5",
+          "on_arm_net_bps_stress28": 51.13,
+          "jaccard_with_macro_B0": 0.188,
+          "lift_vs_macro": 1.73,
+          "intra_day_cross_symbol_state_share": 0.86,
+          "expected_if_independent": 0.821
+        },
+        "R3_event_intensity_oi_drop_z": {
+          "n_on": 1221,
+          "delta_bps_L4": 39.72,
+          "welch_t_L4": 2.75,
+          "n_on_episodes_history": 1046,
+          "on_episode_rate_per_week": 6.149,
+          "eta_years_L4": 12.73,
+          "eta_years_calendar_day": 68.85,
+          "welch_t_calendar_day": 1.14,
+          "years_delta_positive": "4/5",
+          "on_arm_net_bps_stress28": 32.48,
+          "jaccard_with_macro_B0": 0.164,
+          "lift_vs_macro": 1.17,
+          "intra_day_cross_symbol_state_share": 0.81,
+          "expected_if_independent": 0.776
+        }
+      },
+      "decision_rule_applied": "Preenregistree : recuperation seulement si delta ON-OFF > 0 net ET stress 28bps ET IC95 declusterise exclut 0 ET ETA < 3 ans. Meilleur cas R1 = 5.83 ans sur l'unite la PLUS favorable (episode de regime par symbole) et 53.95 ans / non significatif (t=1.26) sur l'unite JOUR CALENDAIRE, l'un des trois niveaux imposes par le briefing. Aucune reformulation ne passe.",
+      "independence_caveat": "Les episodes 'locaux' gagnes ne sont que partiellement independants : R1 partage 90% d'etat au sein d'une meme journee (attendu 81.4% sous independance) et a un lift de 2.93 avec l'etat macro. L'ecart 5.83 ans (unite L4) vs 53.95 ans (unite jour) EST la mesure de la dependance residuelle ; les deux bornes depassent 3 ans.",
+      "salvaged_knowledge": "Le mecanisme economique est corrobore et affine : le conditionnement de stress marche MIEUX par symbole (R1, delta +113.7, t=5.00) que macro (B0, +30.4, t=2.13). R2 (vol rapide) est la seule positive sur 5/5 annees. Si la famille cascade est ravivee apres resolution de la latence, retenir la formulation LOCALE, pas la macro.",
+      "evidence_files": [
+        "evidence/t2_vol_gate_reformulations.py",
+        "evidence/t2_vol_gate_reformulations_thr2.json",
+        "evidence/t2b_gate_independence_check.py",
+        "evidence/t2b_gate_independence_check.json",
+        "evidence/gate.py"
+      ],
+      "registry_verdict_proposed": "UNCONFIRMABLE_IN_HORIZON (remplace NEEDS_MORE_RESEARCH)"
+    },
+    {
+      "candidate_id": "CROSS_SECTIONAL_MOMENTUM_CVD",
+      "entering_status": "REJECTED",
+      "verdict": "MECHANISM_DEAD",
+      "rejection_holds": true,
+      "grid_criteria_met": [
+        "d"
+      ],
+      "reason": "Rebalancement HEBDOMADAIRE => plafond structurel ~52 episodes independants/an. Cote tradable (CONFIRMED) non significatif (single-anchor +4.5bps, t=0.22), fragile (retirer 1 date sur 333 inverse le signe ; 4/9 perturbations changent de signe au niveau ancre), ETA 3272 ans. Cote robuste (DIVERGENT, 0/9 inversion) est un FILTRE et non une position, et demande 63 ans. Pour atteindre 3 ans il faudrait n_required<156, soit t~7 sur les 333 episodes disponibles contre 0.22 mesure.",
+      "expression_vs_mechanism": "MECANISME. Aucune expression HEBDOMADAIRE de ce mecanisme n'est confirmable ; une version haute frequence serait un mecanisme different (momentum intraday), pas une reformulation.",
+      "eta_screen": {
+        "n_indep": 333,
+        "t": 0.22,
+        "n_required": 170152,
+        "eta_years": 3272.1,
+        "episodes_per_year": 52.0
+      },
+      "eta_screen_divergent_side": {
+        "n_indep": 330,
+        "t": -1.58,
+        "n_required": 3269,
+        "eta_years": 62.9
+      },
+      "registry_verdict_unchanged": "REJECTED",
+      "briefing_vocabulary": "DEAD"
+    },
+    {
+      "candidate_id": "BTC_ETH_CURVE_STEEPNESS",
+      "entering_status": "REJECTED",
+      "verdict": "MECHANISM_DEAD",
+      "rejection_holds": true,
+      "grid_criteria_met": [
+        "d",
+        "c"
+      ],
+      "reason": "(d) ~21 episodes/an (franchissements |z|>=1.5 d'un spread de pente trimestrielle) ; ETA 140-218 ans (validation) / 860 ans (ecran uniforme). Il faudrait n_required<63, soit t~3.2 sur 57 episodes contre 0.28 mesure. (c) l'histoire NE PEUT PAS etre etendue vers l'arriere : avant 2023-08-18 Binance ne cotait quasiment jamais deux trimestriels simultanement (26/332 jours en 2021, 21/365 en 2022) -- le spread near-far n'existe pas. L'echantillon ne croit qu'a ~21 episodes/an.",
+      "expression_vs_mechanism": "MECANISME. La piste 'ETH single-asset momentum' (+259.6bps, t=2.35, 4/4 annees) signalee par la validation n'est PAS ce mecanisme -- c'est precisement ce contre quoi le candidat etait defini, et la these centrale de la decouverte ('single-asset DEAD, seul le cross-asset marche') s'INVERSE. Refermee par l'ecran ETA : 13.1 ans. Necessiterait son propre preenregistrement et echouerait au gate ETA a l'arrivee.",
+      "eta_screen": {
+        "n_indep": 57,
+        "t": 0.28,
+        "n_required": 17980,
+        "eta_years": 860.3,
+        "episodes_per_year": 20.9
+      },
+      "eta_screen_discovery_own_numbers": {
+        "n_indep": 157,
+        "t": 1.94,
+        "n_required": 1032,
+        "eta_years": 49.4
+      },
+      "eta_screen_eth_single_asset_thread": {
+        "n_indep": 61,
+        "t": 2.35,
+        "n_required": 273,
+        "eta_years": 13.1
+      },
+      "registry_verdict_unchanged": "REJECTED",
+      "briefing_vocabulary": "DEAD"
+    },
+    {
+      "candidate_id": "POSITIONING_TAKER_FLOW",
+      "entering_status": "REJECTED",
+      "verdict": "MECHANISM_DEAD",
+      "rejection_holds": true,
+      "grid_criteria_met": [
+        "d"
+      ],
+      "reason": "Sur les chiffres publies par la DECOUVERTE elle-meme (N_indep=224, t=2.16, ~37 episodes independants/an), l'ecran donne n_required=1187 et ETA=31.8 ans. Critere (d) rempli sans aucune donnee nouvelle. L'expression 24h effectivement testee par la validation est par ailleurs sans appel : aucun edge brut dans les deux directions (gross -7.3 a +7.8bps), 0/7 perturbations repassent positives, et le N independant reel est de 49 clusters systemiques et non 978 (surestimation x20).",
+      "expression_vs_mechanism": "NUANCE HONNETE, mais MECANISME au final. La validation n'a PAS teste la revendication d'origine : la source imposee (data/positioning) ne contient que 48 jours (51 mesures aujourd'hui, 2026-07-16 -> 2026-09-05, un seul regime, retention API Binance 30j donc aucune profondeur historique possible), donc l'horizon a du passer de 7 jours a 24 heures. C'est une raison economique nommable et non 'les parametres etaient mauvais' : a 24h on mesure un desequilibre de flux intraday, a 7 jours une accumulation de positionnement -- ce ne sont pas le meme mecanisme. Le mecanisme 7 jours est donc NON TESTE, pas refute. Mais il n'a pas besoin d'etre teste pour etre clos : il meurt sur (d) avec les chiffres de sa propre decouverte.",
+      "data_coverage_measured_2026_09_05": "data/positioning : 2026-07-16 -> 2026-09-05, 51 jours, 47 symboles, un seul regime. Extensible vers l'avant a 1 jour/jour seulement ; extension vers l'arriere impossible (retention API 30 jours).",
+      "eta_screen_discovery_own_numbers": {
+        "n_indep": 224,
+        "t": 2.16,
+        "n_required": 1187,
+        "eta_years": 31.8,
+        "episodes_per_year": 37.3
+      },
+      "registry_verdict_unchanged": "REJECTED",
+      "briefing_vocabulary": "DEAD"
+    },
+    {
+      "candidate_id": "GLOBAL_ACCOUNT_LSR_FADE",
+      "entering_status": "REJECTED",
+      "verdict": "MECHANISM_DEAD",
+      "rejection_holds": true,
+      "grid_criteria_met": [
+        "d",
+        "b"
+      ],
+      "reason": "(d) sur les chiffres de la decouverte (N_indep=239, t=2.05, ~40 episodes/an) : n_required=1406, ETA=35.3 ans. Signe en outre OPPOSE et constant : les 7 perturbations testant la direction fade revendiquee sont negatives, et la plupart le sont AVANT COUTS (gross -12.4 a -42.1bps) ; N independant reel 63 clusters systemiques et non 685 (x11). (b) la reformulation notionnelle que j'aurais proposee est deja deployee.",
+      "expression_vs_mechanism": "MECANISME. Reformulation nommee AVANT verification (et donc eligible a EXPRESSION_DEAD_MECHANISM_OPEN) : le global_account LSR est un ratio DE COMPTES et non de NOTIONNEL -- une foule de petits comptes peut etre longue a 80% en headcount en ne portant que 5% du risque, donc le crowding mesure n'est pas le crowding qui compte ; la version notionnelle serait top_position. VERIFICATION FAITE : c'est exactement ce qu'utilise deja l'alpha live WHALE_LSR_SCREEN_V1. La reformulation est donc deja deployee -> critere (b), non-independance. Dossier clos.",
+      "eta_screen_discovery_own_numbers": {
+        "n_indep": 239,
+        "t": 2.05,
+        "n_required": 1406,
+        "eta_years": 35.3,
+        "episodes_per_year": 39.8
+      },
+      "eta_screen_mirror_momentum_thread": {
+        "n_indep": 63,
+        "t": 0.64,
+        "n_required": 3804,
+        "eta_years": 8.0
+      },
+      "registry_verdict_unchanged": "REJECTED",
+      "briefing_vocabulary": "DEAD"
+    },
+    {
+      "candidate_id": "OI_CVD_MEMORY_OVERLAP",
+      "entering_status": "REJECTED",
+      "verdict": "MECHANISM_DEAD",
+      "rejection_holds": true,
+      "grid_criteria_met": [
+        "b",
+        "a"
+      ],
+      "reason": "Moitie OI (b) : 79% des events LONG_CASCADE du detecteur de PRODUCTION se retrouvent dans un detecteur d'OI-down construit INDEPENDAMMENT (autre source, autre pipeline, autre seuil). Mecaniquement attendu -- le declencheur de LIQ_CASCADE EST un z-score de chute d'OI -- mais desormais etabli empiriquement. Corroboration de LIQ_CASCADE_REPEAT_V1, pas un alpha independant, aucun nouvel alpha_id. Moitie CVD (a) : sur le residu NON chevauchant (N=5024, 3530 episodes independants, 63 jours, tous les planchers de preuve franchis) la forme revendiquee 'la repetition renforce' est ABSENTE et INVERSEE : onset +7.51bps bruts (le MEILLEUR bucket), exhaustion -2.47 ; exhaustion-onset = -9.98bps, t=-1.93 ; bootstrap par blocs IC90% [-23.04, -9.37], P(moyenne>0)=0.000. Ce n'est pas un manque de puissance, c'est un resultat negatif propre.",
+      "expression_vs_mechanism": "MECANISME, avec sa raison economique -- la meilleure facon de clore : la vente FORCEE s'epuise a la 3e repetition parce que le stock de longs sur-levieries est FINI ; la vente agressive ORGANIQUE (flux informe, tendance, news) n'a aucune dynamique de stock fini et ne doit pas presenter la meme forme. Le faible recouvrement EN NOMBRE (3-4%) masquait un fort recouvrement ECONOMIQUE.",
+      "note": "Le plus net des cinq. Aucun ETA calculable (edge negatif) et aucun n'est necessaire.",
+      "registry_verdict_unchanged": "REJECTED",
+      "briefing_vocabulary": "DEAD"
+    },
+    {
+      "candidate_id": "MICROSTRUCTURE_ALL_ROUND3",
+      "entering_status": "DATA_ACCUMULATION",
+      "verdict": "DATA_LIMITED",
+      "verdict_is_final": false,
+      "family": "microstructure",
+      "measured_at": "2026-09-05T06:27Z",
+      "definition_complete_day": "24h x 3 venues x 3 symboles presents sur les DEUX flux (bbo + trades) = 216 fichiers horaires par flux",
+      "n_complete_independent_days": 3,
+      "complete_days": [
+        "2026-09-01",
+        "2026-09-02",
+        "2026-09-03"
+      ],
+      "partial_days": [
+        {
+          "date": "2026-08-31",
+          "hours": 1
+        },
+        {
+          "date": "2026-09-04",
+          "hours": 9,
+          "cause": "incident disque 2026-09-04, trou 07:00-21:59"
+        },
+        {
+          "date": "2026-09-05",
+          "hours": 7,
+          "cause": "en cours"
+        }
+      ],
+      "preregistered_threshold": ">= 60 jours complets ET >= 2 regimes de vol distincts",
+      "days_remaining": 57,
+      "gib_per_complete_day": 1.205,
+      "collector_footprint_gib": 4.038,
+      "machine_free_gib": 57.1,
+      "observed_complete_day_yield_per_elapsed_day": 0.75,
+      "target_date_if_100pct_uptime": "2026-11-01",
+      "target_date_at_observed_yield": "2026-11-20",
+      "blocking_constraint": {
+        "type": "DISK",
+        "collector_disk_budget_gb": 12.0,
+        "mechanism": "scripts/collect_microstructure_reduced.py::disk_budget_status -- le collecteur S'ARRETE quand son empreinte atteint le plafond (il n'ecrase rien)",
+        "budget_headroom_gib": 7.96,
+        "days_until_budget_stop": 6.6,
+        "budget_stop_date_estimate": "2026-09-11",
+        "complete_days_reachable_before_stop": 9,
+        "gib_needed_to_reach_60_days": 68.7,
+        "verdict": "UNREACHABLE : 68.7 GiB requis > plafond collecteur (7.96 GiB de marge) ET > espace libre machine (57.1 GiB)"
+      },
+      "levers_not_applied": [
+        "Reduire le debit : le flux bbo pese 90% du volume (1132 Mo/j vs 111 Mo/j pour trades). Un BBO echantillonne a 100ms ou agrege en barres 1s ferait tenir 60 jours dans quelques GiB en preservant OFI/microprice/desequilibre/absorption/lead-lag cross-venue.",
+        "Reduire la portee : 1 symbole au lieu de 3 divise par ~3 mais detruit le lead-lag cross-symbole.",
+        "Relever le plafond : ~69 GiB requis contre 57 GiB libres -> non viable sans le levier 1."
+      ],
+      "second_criterion_reminder": ">= 2 regimes de vol distincts n'est PAS garanti par le calendrier ; 60 jours consecutifs en marche calme resteraient REGIME_DEPENDENT (lecon market_physics_v3). A verifier a l'echeance, pas a supposer.",
+      "evidence_files": [
+        "evidence/t4_microstructure_readiness.py",
+        "evidence/t4_microstructure_readiness.json"
+      ],
+      "registry_verdict_proposed": "DATA_LIMITED (precise DATA_ACCUMULATION : 3/60 jours, echeance datee, blocage disque)"
+    }
+  ],
+  "summary": {
+    "alphas_recovered": 0,
+    "dossiers_closed_definitively": 8,
+    "verdicts": {
+      "LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION": "REJECTED",
+      "LIQ_REPEAT_VOL_GATE": "UNCONFIRMABLE_IN_HORIZON",
+      "CROSS_SECTIONAL_MOMENTUM_CVD": "MECHANISM_DEAD (rejet maintenu)",
+      "BTC_ETH_CURVE_STEEPNESS": "MECHANISM_DEAD (rejet maintenu)",
+      "POSITIONING_TAKER_FLOW": "MECHANISM_DEAD (rejet maintenu)",
+      "GLOBAL_ACCOUNT_LSR_FADE": "MECHANISM_DEAD (rejet maintenu)",
+      "OI_CVD_MEMORY_OVERLAP": "MECHANISM_DEAD (rejet maintenu)",
+      "MICROSTRUCTURE_ALL_ROUND3": "DATA_LIMITED"
+    },
+    "resurrections": 0,
+    "blocked_statuses_removed": [
+      "LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION (BLOCKED -> REJECTED, convention de signe tranchee)"
+    ]
+  },
+  "cross_cutting_findings": [
+    {
+      "id": "ETA_SCREEN_APPLICABLE_AT_DISCOVERY",
+      "finding": "n_required = (z_a+z_b)^2/haircut^2 * N_indep / t^2 = 24.74 * N_indep / t^2 ne depend QUE de deux nombres que chaque rapport de decouverte publie deja. L'ecran ETA est donc applicable AU MOMENT DE LA DECOUVERTE, pour un cout nul.",
+      "calibration": "Redonne 18.4 ans pour AMIHUD_ILLIQUIDITY_PREMIUM_V1 (ETA publie ~17.0) et 11.0 ans pour LIQ_CASCADE_REPEAT exhaustion (ETA mesure dans ce rapport : 11.0).",
+      "retroactive_impact": "Aurait classe POSITIONING_TAKER_FLOW (31.8 ans), GLOBAL_ACCOUNT_LSR_FADE (35.3 ans) et BTC_ETH_CURVE_STEEPNESS (49.4 ans) UNCONFIRMABLE_IN_HORIZON sur leurs propres chiffres de decouverte -- avant de depenser trois workers de validation complets.",
+      "recommendation": "Faire de 24.74*N_indep/t^2 une colonne OBLIGATOIRE du scoreboard de decouverte, au meme titre que net_bps. Un candidat dont l'ETA depasse 3 ans des la decouverte ne devrait pas entrer en file de validation.",
+      "conservative_direction": "Quand le N_indep publie surestime l'independance reelle (x11 a x20 constates sur le LSR et le taker flow), le VRAI ETA est encore PIRE. L'ecran ne peut donc pas faire passer pour mort un candidat vivant.",
+      "evidence": "evidence/t3_eta_screen.py, evidence/t3_eta_screen.json"
+    },
+    {
+      "id": "WHOLE_PORTFOLIO_IS_ETA_BOUND",
+      "finding": "Applique aux deux alphas que le projet a ACCEPTES, l'ecran donne 18.4 ans (AMIHUD, FROZEN) et 11.0 ans (LIQ_CASCADE_REPEAT, shadow). AUCUN alpha du projet ne passe actuellement la barre des 3 ans.",
+      "implication": "Le goulot d'etranglement n'est pas le taux de rejet en validation : c'est que tout le portefeuille est construit sur des mecanismes a FAIBLE frequence d'episodes independants. A t constant, diviser l'ETA par 10 demande de multiplier le taux d'episodes par 10 -- aucun gain de bps ne peut compenser. Confirme quantitativement le point que le briefing §2 designe comme 'le vrai critere manquant dans ce projet'."
+    },
+    {
+      "id": "GATING_DEGRADES_CONFIRMABILITY",
+      "finding": "Sur la famille LIQ_CASCADE_REPEAT, tous les bras ON gates ont un ETA PIRE que la base non gatee (5.44 ans non gate -> 6.32 a 12.61 ans gate), alors meme que leur edge est 2.5x a 6x plus eleve.",
+      "implication": "Un gate ameliore l'edge mais retire plus d'echantillon independant qu'il n'ajoute de signal/bruit. Tout meta-signal ENABLE/DISABLE doit donc etre juge sur l'ETA du bras ON, pas seulement sur le delta ON-OFF.",
+      "evidence": "evidence/t2c_on_arm_supplementary.json"
+    },
+    {
+      "id": "CLUSTERING_ARTIFACT_SIGNATURE",
+      "finding": "Signature diagnostique d'un edge artefactuel, isolee sur la cible 1 et absente du controle : (1) la moyenne size-weighted et la moyenne equiponderee par episode sont de SIGNES OPPOSES ; (2) corr(log taille d'episode, perf) > 0 ; (3) le top-3 des episodes porte >100% du PnL total ; (4) l'IC bootstrap par blocs contient zero alors que l'IC naif iid est ~2x trop etroit et l'exclut.",
+      "usage": "Test bon marche a appliquer a tout candidat dont le net_bps brut est porte par un N eleve mais clusterise."
+    }
+  ],
+  "deliverables": {
+    "report": "reports/edge_discovery/alpha_hunt_2026-09-03_round4/w10_validation_push/REPORT.md",
+    "results": "reports/edge_discovery/alpha_hunt_2026-09-03_round4/w10_validation_push/RESULTS.json",
+    "preregistration": "reports/edge_discovery/alpha_hunt_2026-09-03_round4/w10_validation_push/PREREGISTRATION.md",
+    "evidence_dir": "reports/edge_discovery/alpha_hunt_2026-09-03_round4/w10_validation_push/evidence/"
+  },
+  "verdict_vocabulary_note": "Vocabulaire : les verdicts du briefing §3 sont VALIDATED_FOR_FORWARD / PROMISING_NEEDS_VALIDATION / UNCONFIRMABLE_IN_HORIZON / COST_FRAGILE / REGIME_DEPENDENT / WEAK / DEAD / DATA_LIMITED. Cible 1 : REJECTED (vocabulaire du registre) == DEAD (vocabulaire du briefing). Cible 3 : MECHANISM_DEAD / EXPRESSION_DEAD_MECHANISM_OPEN sont la grille de MON preenregistrement pour classer des rejets DEJA prononces ; le verdict de registre de ces 5 candidats reste REJECTED, inchange. MECHANISM_DEAD signifie 'le rejet porte sur le mecanisme, dossier definitivement clos', pas un nouveau statut."
+}

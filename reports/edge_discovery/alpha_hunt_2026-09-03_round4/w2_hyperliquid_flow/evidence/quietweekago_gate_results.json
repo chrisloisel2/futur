@@ -1,0 +1,292 @@
+{
+ "mechanisms": [
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S60 [REFIT]",
+   "ret_col": "S60",
+   "n_raw": 23273,
+   "n_independent_L1_user_coin_day": 14562,
+   "n_independent_L2_coin_day": 10059,
+   "n_independent_L3_day": 883,
+   "gross_bps": 4.22,
+   "net_bps": -9.78,
+   "net_bps_stress28": -23.78,
+   "t_stat_declustered_L3day": 2.51,
+   "t_stat_L2_coin_day": 0.91,
+   "bootstrap_ci95": [
+    -0.32,
+    8.6
+   ],
+   "sd_day_bps": 50.0,
+   "year_by_year": {
+    "2024": [
+     -2.88,
+     3810
+    ],
+    "2025": [
+     7.07,
+     11246
+    ],
+    "2026": [
+     3.62,
+     8217
+    ]
+   },
+   "ex_best_year": 1.56,
+   "ex_best_year_dropped": "2025",
+   "n_required": 4403,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 4403.1,
+   "eta_forward_confirmation_years": 12.05,
+   "train_bps": 8.7,
+   "test_bps": 0.5,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 30577,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S240 [REFIT]",
+   "ret_col": "S240",
+   "n_raw": 23273,
+   "n_independent_L1_user_coin_day": 14562,
+   "n_independent_L2_coin_day": 10059,
+   "n_independent_L3_day": 883,
+   "gross_bps": 10.04,
+   "net_bps": -3.96,
+   "net_bps_stress28": -17.96,
+   "t_stat_declustered_L3day": 2.97,
+   "t_stat_L2_coin_day": 1.03,
+   "bootstrap_ci95": [
+    0.35,
+    20.01
+   ],
+   "sd_day_bps": 100.5,
+   "year_by_year": {
+    "2024": [
+     -3.18,
+     3810
+    ],
+    "2025": [
+     13.5,
+     11246
+    ],
+    "2026": [
+     11.44,
+     8217
+    ]
+   },
+   "ex_best_year": 6.81,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3137,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3137.1,
+   "eta_forward_confirmation_years": 8.59,
+   "train_bps": 13.35,
+   "test_bps": 7.29,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 122308,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S720 [REFIT]",
+   "ret_col": "S720",
+   "n_raw": 23270,
+   "n_independent_L1_user_coin_day": 14561,
+   "n_independent_L2_coin_day": 10058,
+   "n_independent_L3_day": 883,
+   "gross_bps": 22.51,
+   "net_bps": 8.51,
+   "net_bps_stress28": -5.49,
+   "t_stat_declustered_L3day": 3.69,
+   "t_stat_L2_coin_day": 1.36,
+   "bootstrap_ci95": [
+    4.35,
+    40.15
+   ],
+   "sd_day_bps": 181.0,
+   "year_by_year": {
+    "2024": [
+     11.64,
+     3810
+    ],
+    "2025": [
+     22.55,
+     11243
+    ],
+    "2026": [
+     27.49,
+     8217
+    ]
+   },
+   "ex_best_year": 19.79,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2028,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2028.5,
+   "eta_forward_confirmation_years": 5.55,
+   "train_bps": 19.75,
+   "test_bps": 24.81,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 366926,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "ret_col": "S1440",
+   "n_raw": 23267,
+   "n_independent_L1_user_coin_day": 14559,
+   "n_independent_L2_coin_day": 10058,
+   "n_independent_L3_day": 883,
+   "gross_bps": 29.72,
+   "net_bps": 15.72,
+   "net_bps_stress28": 1.72,
+   "t_stat_declustered_L3day": 3.79,
+   "t_stat_L2_coin_day": 1.4,
+   "bootstrap_ci95": [
+    7.44,
+    49.7
+   ],
+   "sd_day_bps": 233.0,
+   "year_by_year": {
+    "2024": [
+     36.38,
+     3810
+    ],
+    "2025": [
+     23.71,
+     11240
+    ],
+    "2026": [
+     34.86,
+     8217
+    ]
+   },
+   "ex_best_year": 28.42,
+   "ex_best_year_dropped": "2024",
+   "n_required": 1927,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1927.3,
+   "eta_forward_confirmation_years": 5.28,
+   "train_bps": 22.85,
+   "test_bps": 35.45,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 733853,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_A240 [REFIT]",
+   "ret_col": "A240",
+   "n_raw": 22007,
+   "n_independent_L1_user_coin_day": 13962,
+   "n_independent_L2_coin_day": 9903,
+   "n_independent_L3_day": 881,
+   "gross_bps": 7.47,
+   "net_bps": -6.53,
+   "net_bps_stress28": -20.53,
+   "t_stat_declustered_L3day": 1.92,
+   "t_stat_L2_coin_day": 0.39,
+   "bootstrap_ci95": [
+    -2.61,
+    17.63
+   ],
+   "sd_day_bps": 115.5,
+   "year_by_year": {
+    "2024": [
+     -6.31,
+     3700
+    ],
+    "2025": [
+     9.47,
+     10215
+    ],
+    "2026": [
+     11.24,
+     8092
+    ]
+   },
+   "ex_best_year": 5.28,
+   "ex_best_year_dropped": "2026",
+   "n_required": 7496,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 7496.3,
+   "eta_forward_confirmation_years": 20.52,
+   "train_bps": 8.95,
+   "test_bps": 6.27,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 122308,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_A1440 [REFIT]",
+   "ret_col": "A1440",
+   "n_raw": 21996,
+   "n_independent_L1_user_coin_day": 13954,
+   "n_independent_L2_coin_day": 9900,
+   "n_independent_L3_day": 881,
+   "gross_bps": 21.02,
+   "net_bps": 7.02,
+   "net_bps_stress28": -6.98,
+   "t_stat_declustered_L3day": 2.41,
+   "t_stat_L2_coin_day": 1.08,
+   "bootstrap_ci95": [
+    -0.89,
+    41.33
+   ],
+   "sd_day_bps": 258.5,
+   "year_by_year": {
+    "2024": [
+     18.41,
+     3699
+    ],
+    "2025": [
+     12.45,
+     10205
+    ],
+    "2026": [
+     33.03,
+     8092
+    ]
+   },
+   "ex_best_year": 14.04,
+   "ex_best_year_dropped": "2026",
+   "n_required": 4741,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 4741.2,
+   "eta_forward_confirmation_years": 12.98,
+   "train_bps": 24.67,
+   "test_bps": 18.07,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 733853,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "CONTRAST quiet_wk_ago - rest_S240",
+   "arm_a_bps": 10.04,
+   "arm_b_bps": 3.35,
+   "spread_bps": 6.69,
+   "n_days_paired": 825,
+   "spread_t_daypaired": 0.62
+  },
+  {
+   "mechanism": "CONTRAST quiet_wk_ago - rest_S1440",
+   "arm_a_bps": 29.72,
+   "arm_b_bps": 9.9,
+   "spread_bps": 19.82,
+   "n_days_paired": 825,
+   "spread_t_daypaired": 1.16
+  }
+ ],
+ "trigger_n": 23512,
+ "trigger_share": 0.0990629634623163
+}

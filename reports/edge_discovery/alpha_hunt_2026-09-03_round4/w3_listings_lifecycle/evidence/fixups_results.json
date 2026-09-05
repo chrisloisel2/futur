@@ -1,0 +1,470 @@
+[
+ {
+  "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_bask7",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement forward de bask7 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+  "paired_episodes": false,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 22,
+  "arm_A_bps": -112.6,
+  "arm_B_bps": 83.7,
+  "gross_bps": -196.3,
+  "net_bps": -210.3,
+  "net_bps_stress28": -224.3,
+  "t_stat_declustered": -1.12,
+  "bootstrap_ci95": [
+   -539.7,
+   135.4
+  ],
+  "n_required": 429.3,
+  "event_rate_per_week_6m": 0.155,
+  "eta_forward_confirmation": {
+   "days": 19424.0,
+   "years": 53.18
+  },
+  "n_raw": 2124,
+  "median_spell_days": 21.0,
+  "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "diff_bps": -1092.9,
+    "n_hi": 20,
+    "n_lo": 37
+   },
+   {
+    "year": 2021,
+    "diff_bps": 520.6,
+    "n_hi": 32,
+    "n_lo": 169
+   },
+   {
+    "year": 2022,
+    "diff_bps": -665.1,
+    "n_hi": 8,
+    "n_lo": 239
+   },
+   {
+    "year": 2023,
+    "diff_bps": -769.3,
+    "n_hi": 227,
+    "n_lo": 51
+   },
+   {
+    "year": 2024,
+    "diff_bps": 665.1,
+    "n_hi": 218,
+    "n_lo": 66
+   },
+   {
+    "year": 2026,
+    "diff_bps": -171.4,
+    "n_hi": 46,
+    "n_lo": 28
+   }
+  ],
+  "years_same_sign": "4/6",
+  "ex_best_year": {
+   "dropped": 2020,
+   "gross_bps": -21.2
+  }
+ },
+ {
+  "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_bask30",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement forward de bask30 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+  "paired_episodes": false,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 21,
+  "arm_A_bps": 506.2,
+  "arm_B_bps": -46.7,
+  "gross_bps": 552.9,
+  "net_bps": 538.9,
+  "net_bps_stress28": 524.9,
+  "t_stat_declustered": 0.75,
+  "bootstrap_ci95": [
+   -893.7,
+   1912.6
+  ],
+  "n_required": 937.3,
+  "event_rate_per_week_6m": 0.116,
+  "eta_forward_confirmation": {
+   "days": 56553.0,
+   "years": 154.84
+  },
+  "n_raw": 2124,
+  "median_spell_days": 21.0,
+  "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "diff_bps": -3957.8,
+    "n_hi": 20,
+    "n_lo": 37
+   },
+   {
+    "year": 2021,
+    "diff_bps": 1148.5,
+    "n_hi": 32,
+    "n_lo": 169
+   },
+   {
+    "year": 2022,
+    "diff_bps": -638.4,
+    "n_hi": 8,
+    "n_lo": 239
+   },
+   {
+    "year": 2023,
+    "diff_bps": -1856.4,
+    "n_hi": 227,
+    "n_lo": 51
+   },
+   {
+    "year": 2024,
+    "diff_bps": 2843.3,
+    "n_hi": 218,
+    "n_lo": 66
+   },
+   {
+    "year": 2026,
+    "diff_bps": 4.9,
+    "n_hi": 46,
+    "n_lo": 28
+   }
+  ],
+  "years_same_sign": "3/6",
+  "ex_best_year": {
+   "dropped": 2024,
+   "gross_bps": -1037.0
+  }
+ },
+ {
+  "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_btc7",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement forward de btc7 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+  "paired_episodes": false,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 22,
+  "arm_A_bps": 96.1,
+  "arm_B_bps": 48.1,
+  "gross_bps": 48.0,
+  "net_bps": 34.0,
+  "net_bps_stress28": 20.0,
+  "t_stat_declustered": 0.31,
+  "bootstrap_ci95": [
+   -242.3,
+   345.5
+  ],
+  "n_required": 5620.2,
+  "event_rate_per_week_6m": 0.155,
+  "eta_forward_confirmation": {
+   "days": 254312.0,
+   "years": 696.28
+  },
+  "n_raw": 2124,
+  "median_spell_days": 21.0,
+  "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "diff_bps": -577.9,
+    "n_hi": 20,
+    "n_lo": 37
+   },
+   {
+    "year": 2021,
+    "diff_bps": 75.3,
+    "n_hi": 32,
+    "n_lo": 169
+   },
+   {
+    "year": 2022,
+    "diff_bps": -481.6,
+    "n_hi": 8,
+    "n_lo": 239
+   },
+   {
+    "year": 2023,
+    "diff_bps": -543.1,
+    "n_hi": 227,
+    "n_lo": 51
+   },
+   {
+    "year": 2024,
+    "diff_bps": 358.6,
+    "n_hi": 218,
+    "n_lo": 66
+   },
+   {
+    "year": 2026,
+    "diff_bps": 150.8,
+    "n_hi": 46,
+    "n_lo": 28
+   }
+  ],
+  "years_same_sign": "3/6",
+  "ex_best_year": {
+   "dropped": 2024,
+   "gross_bps": -13.0
+  }
+ },
+ {
+  "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_btc30",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement forward de btc30 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+  "paired_episodes": false,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 21,
+  "arm_A_bps": 1136.4,
+  "arm_B_bps": -35.5,
+  "gross_bps": 1171.9,
+  "net_bps": 1157.9,
+  "net_bps_stress28": 1143.9,
+  "t_stat_declustered": 2.01,
+  "bootstrap_ci95": [
+   53.0,
+   2307.9
+  ],
+  "n_required": 132.6,
+  "event_rate_per_week_6m": 0.116,
+  "eta_forward_confirmation": {
+   "days": 7997.0,
+   "years": 21.9
+  },
+  "n_raw": 2124,
+  "median_spell_days": 21.0,
+  "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "diff_bps": -1235.8,
+    "n_hi": 20,
+    "n_lo": 37
+   },
+   {
+    "year": 2021,
+    "diff_bps": -683.9,
+    "n_hi": 32,
+    "n_lo": 169
+   },
+   {
+    "year": 2022,
+    "diff_bps": -54.4,
+    "n_hi": 8,
+    "n_lo": 239
+   },
+   {
+    "year": 2023,
+    "diff_bps": -691.8,
+    "n_hi": 227,
+    "n_lo": 51
+   },
+   {
+    "year": 2024,
+    "diff_bps": 2007.9,
+    "n_hi": 218,
+    "n_lo": 66
+   },
+   {
+    "year": 2026,
+    "diff_bps": 257.5,
+    "n_hi": 46,
+    "n_lo": 28
+   }
+  ],
+  "years_same_sign": "2/6",
+  "ex_best_year": {
+   "dropped": 2024,
+   "gross_bps": -28.9
+  }
+ },
+ {
+  "id": "A1b_LIST_FADE_SIGN_TEST_d1h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+  "n_raw": 478,
+  "n_independent_L3": 138,
+  "hit_rate": 0.68,
+  "hit_rate_declustered": 0.696,
+  "t_stat_declustered": 7.17,
+  "bootstrap_ci95_hitrate": [
+   0.642,
+   0.748
+  ],
+  "median_bps": 1291.6,
+  "mean_bps": 280.0,
+  "sd_bps": 4936.5,
+  "skew": -2.79,
+  "worst_single_event_bps": -31078.9,
+  "mean_excl_5_worst_bps": 564.9,
+  "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini"
+ },
+ {
+  "id": "A1b_LIST_FADE_SIGN_TEST_d4h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+  "n_raw": 479,
+  "n_independent_L3": 138,
+  "hit_rate": 0.693,
+  "hit_rate_declustered": 0.709,
+  "t_stat_declustered": 7.91,
+  "bootstrap_ci95_hitrate": [
+   0.657,
+   0.76
+  ],
+  "median_bps": 1263.5,
+  "mean_bps": 327.0,
+  "sd_bps": 4600.4,
+  "skew": -2.75,
+  "worst_single_event_bps": -31770.7,
+  "mean_excl_5_worst_bps": 574.6,
+  "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini"
+ },
+ {
+  "id": "A1b_LIST_FADE_SIGN_TEST_d24h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+  "n_raw": 488,
+  "n_independent_L3": 143,
+  "hit_rate": 0.691,
+  "hit_rate_declustered": 0.721,
+  "t_stat_declustered": 8.68,
+  "bootstrap_ci95_hitrate": [
+   0.672,
+   0.77
+  ],
+  "median_bps": 1028.0,
+  "mean_bps": 264.5,
+  "sd_bps": 4107.5,
+  "skew": -2.97,
+  "worst_single_event_bps": -30795.5,
+  "mean_excl_5_worst_bps": 505.7,
+  "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini"
+ },
+ {
+  "id": "A1b_LIST_FADE_SIGN_TEST_d24h_h72h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+  "n_raw": 488,
+  "n_independent_L3": 143,
+  "hit_rate": 0.652,
+  "hit_rate_declustered": 0.653,
+  "t_stat_declustered": 5.66,
+  "bootstrap_ci95_hitrate": [
+   0.602,
+   0.705
+  ],
+  "median_bps": 599.4,
+  "mean_bps": 127.3,
+  "sd_bps": 3068.7,
+  "skew": -4.71,
+  "worst_single_event_bps": -33795.4,
+  "mean_excl_5_worst_bps": 328.1,
+  "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini"
+ },
+ {
+  "id": "A4b_LIST_WAVE_SIZE_COND_h72h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade plus rentable dans les grandes vagues (>=5 listings/semaine) que dans les petites",
+  "paired_episodes": false,
+  "n_independent_L3": 45,
+  "n_episodes_A": 45,
+  "n_episodes_B": 98,
+  "arm_A_bps": -85.4,
+  "arm_B_bps": 336.9,
+  "gross_bps": -422.3,
+  "net_bps": -450.3,
+  "net_bps_stress28": -478.3,
+  "t_stat_declustered": -1.53,
+  "bootstrap_ci95": [
+   -995.2,
+   91.1
+  ],
+  "n_required": 606.9,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 6103.0,
+   "years": 16.71
+  },
+  "n_raw": 488,
+  "median_wave_size": 5.0,
+  "note": "bras disjoints par construction (la taille de vague est constante dans une semaine) -> Welch"
+ },
+ {
+  "id": "A4b_LIST_WAVE_SIZE_COND_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade plus rentable dans les grandes vagues (>=5 listings/semaine) que dans les petites",
+  "paired_episodes": false,
+  "n_independent_L3": 45,
+  "n_episodes_A": 45,
+  "n_episodes_B": 98,
+  "arm_A_bps": 266.5,
+  "arm_B_bps": 440.9,
+  "gross_bps": -174.4,
+  "net_bps": -202.4,
+  "net_bps_stress28": -230.4,
+  "t_stat_declustered": -0.44,
+  "bootstrap_ci95": [
+   -939.2,
+   617.1
+  ],
+  "n_required": 7391.1,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 74322.0,
+   "years": 203.49
+  },
+  "n_raw": 488,
+  "median_wave_size": 5.0,
+  "note": "bras disjoints par construction (la taille de vague est constante dans une semaine) -> Welch"
+ },
+ {
+  "id": "C2c_AGE_CARRY_RAW",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "short-perp jeunes(<90j) - matures(>=1a), funding>0, 7j \u2014 sensibilite a la winsorisation 1/99",
+  "winsorized": false,
+  "n_raw": 265485,
+  "n_independent_L3": 305,
+  "gross_bps": -202.4,
+  "net_bps": -230.4,
+  "net_bps_stress28": -258.4,
+  "t_stat_declustered": -2.31,
+  "bootstrap_ci95": [
+   -382.9,
+   -39.0
+  ],
+  "n_required": 1796.6,
+  "event_rate_per_week_6m": 0.967,
+  "eta_forward_confirmation": {
+   "days": 13007.0,
+   "years": 35.61
+  }
+ },
+ {
+  "id": "C2c_AGE_CARRY_WINSORIZED",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "short-perp jeunes(<90j) - matures(>=1a), funding>0, 7j \u2014 sensibilite a la winsorisation 1/99",
+  "winsorized": true,
+  "n_raw": 265485,
+  "n_independent_L3": 305,
+  "gross_bps": -43.0,
+  "net_bps": -71.0,
+  "net_bps_stress28": -99.0,
+  "t_stat_declustered": -0.76,
+  "bootstrap_ci95": [
+   -159.3,
+   67.8
+  ],
+  "n_required": 16565.7,
+  "event_rate_per_week_6m": 0.967,
+  "eta_forward_confirmation": {
+   "days": 119935.0,
+   "years": 328.37
+  }
+ }
+]

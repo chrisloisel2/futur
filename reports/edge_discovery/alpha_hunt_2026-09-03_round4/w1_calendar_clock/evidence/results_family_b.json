@@ -531,7 +531,7 @@
   "mechanism": "B1_hour_00_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 885.7,
@@ -591,13 +591,14 @@
   "notes": "",
   "verdict": "WEAK",
   "verdict_reason": "|t_declustered|=1.32 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_01_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1012.4,
@@ -657,13 +658,14 @@
   "notes": "",
   "verdict": "WEAK",
   "verdict_reason": "|t_declustered|=2.66 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_02_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1030.7,
@@ -723,13 +725,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.60 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_03_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1024.2,
@@ -789,13 +792,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.11 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_04_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 975.7,
@@ -855,13 +859,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.47 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_05_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 962.8,
@@ -921,13 +926,14 @@
   "notes": "",
   "verdict": "WEAK",
   "verdict_reason": "|t_declustered|=1.02 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_06_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1074.4,
@@ -987,13 +993,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.50 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_07_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 831.6,
@@ -1053,13 +1060,14 @@
   "notes": "",
   "verdict": "WEAK",
   "verdict_reason": "|t_declustered|=1.36 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_08_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1004.8,
@@ -1119,13 +1127,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.46 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_09_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 884.1,
@@ -1185,13 +1194,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.75 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_10_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1051.5,
@@ -1251,13 +1261,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.45 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_11_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 990.9,
@@ -1317,13 +1328,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.99 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_12_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 969.8,
@@ -1383,13 +1395,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.80 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_13_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1057.1,
@@ -1449,13 +1462,14 @@
   "notes": "",
   "verdict": "WEAK",
   "verdict_reason": "|t_declustered|=1.04 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_14_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1030.0,
@@ -1515,13 +1529,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.60 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_15_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 937.6,
@@ -1581,13 +1596,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.96 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_16_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1047.5,
@@ -1647,13 +1663,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.19 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_17_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1058.7,
@@ -1713,13 +1730,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.28 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_18_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 950.8,
@@ -1779,13 +1797,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.57 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_19_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1098.4,
@@ -1845,13 +1864,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.24 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_20_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 885.4,
@@ -1911,13 +1931,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.54 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_21_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1059.9,
@@ -1977,13 +1998,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.49 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_22_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1001.1,
@@ -2043,13 +2065,14 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.25 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  },
  {
   "mechanism": "B1_hour_23_market_factor",
   "hypothesis": "H_B1: no reliable hour-of-day drift",
   "n_raw": 2202,
-  "n_independent_L1": null,
+  "n_independent_L1": 2202,
   "n_independent_L2": 2202,
   "n_independent_L3": 316,
   "n_independent_L2_eff_diag": 1147.4,
@@ -2109,6 +2132,7 @@
   "notes": "",
   "verdict": "DEAD",
   "verdict_reason": "|t_declustered|=0.23 < family max-t crit 4.53",
-  "family_maxt_crit": 4.528
+  "family_maxt_crit": 4.528,
+  "n_independent_L1_note": "one-leg market factor: the observation is the whole cross-section for that day+hour, so L1 has no separate per-symbol meaning and equals L2"
  }
 ]

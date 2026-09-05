@@ -1,0 +1,808 @@
+{
+ "mechanisms": [
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h1h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": -6.97,
+   "net_bps": -34.97,
+   "net_bps_stress28": -62.97,
+   "t_stat_declustered_L3day": -1.86,
+   "t_stat_L2_coin_day": 1.01,
+   "bootstrap_ci95": [
+    -17.9,
+    6.32
+   ],
+   "sd_day_bps": 22.8,
+   "year_by_year": {
+    "2026": [
+     -6.97,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 336,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 6053.7,
+   "eta_forward_confirmation_years": 16.57,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h1h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.59,
+   "net_bps": -26.41,
+   "net_bps_stress28": -54.41,
+   "t_stat_declustered_L3day": 9.17,
+   "t_stat_L2_coin_day": 18.14,
+   "bootstrap_ci95": [
+    1.16,
+    2.19
+   ],
+   "sd_day_bps": 1.1,
+   "year_by_year": {
+    "2026": [
+     1.59,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 13,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 248.6,
+   "eta_forward_confirmation_years": 0.68,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h1h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3603,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": -4.27,
+   "net_bps": -32.27,
+   "net_bps_stress28": -60.27,
+   "t_stat_declustered_L3day": -2.02,
+   "t_stat_L2_coin_day": -0.16,
+   "bootstrap_ci95": [
+    -10.12,
+    0.63
+   ],
+   "sd_day_bps": 12.8,
+   "year_by_year": {
+    "2026": [
+     -4.27,
+     3603
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 283,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 5101.2,
+   "eta_forward_confirmation_years": 13.97,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h1h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3603,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.07,
+   "net_bps": -26.93,
+   "net_bps_stress28": -54.93,
+   "t_stat_declustered_L3day": 14.17,
+   "t_stat_L2_coin_day": 22.12,
+   "bootstrap_ci95": [
+    0.89,
+    1.24
+   ],
+   "sd_day_bps": 0.5,
+   "year_by_year": {
+    "2026": [
+     1.07,
+     3603
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 5,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 104.0,
+   "eta_forward_confirmation_years": 0.28,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h4h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": -28.0,
+   "net_bps": -56.0,
+   "net_bps_stress28": -84.0,
+   "t_stat_declustered_L3day": -1.85,
+   "t_stat_L2_coin_day": 0.99,
+   "bootstrap_ci95": [
+    -83.25,
+    35.01
+   ],
+   "sd_day_bps": 91.8,
+   "year_by_year": {
+    "2026": [
+     -28.0,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 337,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 6073.7,
+   "eta_forward_confirmation_years": 16.63,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h4h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": 2.1,
+   "net_bps": -25.9,
+   "net_bps_stress28": -53.9,
+   "t_stat_declustered_L3day": 6.59,
+   "t_stat_L2_coin_day": 17.88,
+   "bootstrap_ci95": [
+    1.09,
+    3.31
+   ],
+   "sd_day_bps": 1.9,
+   "year_by_year": {
+    "2026": [
+     2.1,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 26,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 480.3,
+   "eta_forward_confirmation_years": 1.32,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h4h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3591,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": -12.45,
+   "net_bps": -40.45,
+   "net_bps_stress28": -68.45,
+   "t_stat_declustered_L3day": -1.33,
+   "t_stat_L2_coin_day": 0.48,
+   "bootstrap_ci95": [
+    -39.28,
+    10.38
+   ],
+   "sd_day_bps": 57.1,
+   "year_by_year": {
+    "2026": [
+     -12.45,
+     3591
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 659,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 11877.2,
+   "eta_forward_confirmation_years": 32.52,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h4h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3591,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.34,
+   "net_bps": -26.66,
+   "net_bps_stress28": -54.66,
+   "t_stat_declustered_L3day": 10.02,
+   "t_stat_L2_coin_day": 22.4,
+   "bootstrap_ci95": [
+    0.97,
+    1.64
+   ],
+   "sd_day_bps": 0.8,
+   "year_by_year": {
+    "2026": [
+     1.34,
+     3591
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 11,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 207.9,
+   "eta_forward_confirmation_years": 0.57,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h24h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 870,
+   "n_independent_L1_user_coin_day": 234,
+   "n_independent_L2_coin_day": 234,
+   "n_independent_L3_day": 36,
+   "gross_bps": -147.21,
+   "net_bps": -175.21,
+   "net_bps_stress28": -203.21,
+   "t_stat_declustered_L3day": -2.95,
+   "t_stat_L2_coin_day": -1.15,
+   "bootstrap_ci95": [
+    -323.99,
+    51.42
+   ],
+   "sd_day_bps": 299.2,
+   "year_by_year": {
+    "2026": [
+     -147.21,
+     870
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 129,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 2332.3,
+   "eta_forward_confirmation_years": 6.39,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h24h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 870,
+   "n_independent_L1_user_coin_day": 234,
+   "n_independent_L2_coin_day": 234,
+   "n_independent_L3_day": 36,
+   "gross_bps": 2.41,
+   "net_bps": -25.59,
+   "net_bps_stress28": -53.59,
+   "t_stat_declustered_L3day": 5.15,
+   "t_stat_L2_coin_day": 15.8,
+   "bootstrap_ci95": [
+    0.97,
+    4.23
+   ],
+   "sd_day_bps": 2.8,
+   "year_by_year": {
+    "2026": [
+     2.41,
+     870
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 42,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 765.1,
+   "eta_forward_confirmation_years": 2.09,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h24h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3477,
+   "n_independent_L1_user_coin_day": 388,
+   "n_independent_L2_coin_day": 388,
+   "n_independent_L3_day": 37,
+   "gross_bps": -71.48,
+   "net_bps": -99.48,
+   "net_bps_stress28": -127.48,
+   "t_stat_declustered_L3day": -1.98,
+   "t_stat_L2_coin_day": -2.65,
+   "bootstrap_ci95": [
+    -179.24,
+    15.73
+   ],
+   "sd_day_bps": 219.7,
+   "year_by_year": {
+    "2026": [
+     -71.48,
+     3477
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 296,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 5334.8,
+   "eta_forward_confirmation_years": 14.61,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)"
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h24h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3477,
+   "n_independent_L1_user_coin_day": 388,
+   "n_independent_L2_coin_day": 388,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.55,
+   "net_bps": -26.45,
+   "net_bps_stress28": -54.45,
+   "t_stat_declustered_L3day": 4.61,
+   "t_stat_L2_coin_day": 15.76,
+   "bootstrap_ci95": [
+    0.59,
+    2.38
+   ],
+   "sd_day_bps": 2.0,
+   "year_by_year": {
+    "2026": [
+     1.55,
+     3477
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 54,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 981.1,
+   "eta_forward_confirmation_years": 2.69,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all"
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z2_h4h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 400,
+   "n_independent_L1_user_coin_day": 118,
+   "n_independent_L2_coin_day": 118,
+   "n_independent_L3_day": 34,
+   "gross_bps": 12.82,
+   "net_bps": -1.18,
+   "net_bps_stress28": -15.18,
+   "t_stat_declustered_L3day": 0.78,
+   "t_stat_L2_coin_day": 1.21,
+   "bootstrap_ci95": [
+    -30.75,
+    58.1
+   ],
+   "sd_day_bps": 96.3,
+   "year_by_year": {
+    "2026": [
+     12.82,
+     400
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 1770,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 31870.4,
+   "eta_forward_confirmation_years": 87.26,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 56217,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window"
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z1_h4h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 1568,
+   "n_independent_L1_user_coin_day": 214,
+   "n_independent_L2_coin_day": 214,
+   "n_independent_L3_day": 37,
+   "gross_bps": 6.59,
+   "net_bps": -7.41,
+   "net_bps_stress28": -21.41,
+   "t_stat_declustered_L3day": 0.71,
+   "t_stat_L2_coin_day": 2.3,
+   "bootstrap_ci95": [
+    -12.64,
+    26.66
+   ],
+   "sd_day_bps": 56.3,
+   "year_by_year": {
+    "2026": [
+     6.59,
+     1568
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 2288,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 41199.0,
+   "eta_forward_confirmation_years": 112.8,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 46280,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window"
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z2_h24h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 399,
+   "n_independent_L1_user_coin_day": 117,
+   "n_independent_L2_coin_day": 117,
+   "n_independent_L3_day": 33,
+   "gross_bps": 45.3,
+   "net_bps": 31.3,
+   "net_bps_stress28": 17.3,
+   "t_stat_declustered_L3day": 1.0,
+   "t_stat_L2_coin_day": 2.26,
+   "bootstrap_ci95": [
+    -53.9,
+    163.58
+   ],
+   "sd_day_bps": 260.6,
+   "year_by_year": {
+    "2026": [
+     45.3,
+     399
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 1037,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 18677.3,
+   "eta_forward_confirmation_years": 51.14,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 337303,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window"
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z1_h24h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 1531,
+   "n_independent_L1_user_coin_day": 212,
+   "n_independent_L2_coin_day": 212,
+   "n_independent_L3_day": 37,
+   "gross_bps": 18.26,
+   "net_bps": 4.26,
+   "net_bps_stress28": -9.74,
+   "t_stat_declustered_L3day": 0.66,
+   "t_stat_L2_coin_day": 1.71,
+   "bootstrap_ci95": [
+    -36.7,
+    88.04
+   ],
+   "sd_day_bps": 168.2,
+   "year_by_year": {
+    "2026": [
+     18.26,
+     1531
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 2661,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 47911.7,
+   "eta_forward_confirmation_years": 131.18,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 277680,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window"
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h5min",
+   "ret_col": "S",
+   "n_raw": 563901,
+   "n_independent_L1_user_coin_day": 440,
+   "n_independent_L2_coin_day": 440,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.51,
+   "net_bps": -13.49,
+   "net_bps_stress28": -27.49,
+   "t_stat_declustered_L3day": 11.71,
+   "t_stat_L2_coin_day": 11.38,
+   "bootstrap_ci95": [
+    0.43,
+    0.6
+   ],
+   "sd_day_bps": 0.3,
+   "year_by_year": {
+    "2026": [
+     0.51,
+     563901
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 9,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 137.2,
+   "eta_forward_confirmation_years": 0.38,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 5,
+   "median_top_of_book_depth_usd": 9139
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h5min",
+   "ret_col": "S",
+   "n_raw": 239651,
+   "n_independent_L1_user_coin_day": 439,
+   "n_independent_L2_coin_day": 439,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.89,
+   "net_bps": -13.11,
+   "net_bps_stress28": -27.11,
+   "t_stat_declustered_L3day": 14.56,
+   "t_stat_L2_coin_day": 12.23,
+   "bootstrap_ci95": [
+    0.76,
+    1.01
+   ],
+   "sd_day_bps": 0.4,
+   "year_by_year": {
+    "2026": [
+     0.89,
+     239651
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 5,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 88.8,
+   "eta_forward_confirmation_years": 0.24,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 5,
+   "median_top_of_book_depth_usd": 9139
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h15min",
+   "ret_col": "S",
+   "n_raw": 563791,
+   "n_independent_L1_user_coin_day": 440,
+   "n_independent_L2_coin_day": 440,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.55,
+   "net_bps": -13.45,
+   "net_bps_stress28": -27.45,
+   "t_stat_declustered_L3day": 7.32,
+   "t_stat_L2_coin_day": 6.46,
+   "bootstrap_ci95": [
+    0.38,
+    0.7
+   ],
+   "sd_day_bps": 0.5,
+   "year_by_year": {
+    "2026": [
+     0.55,
+     563791
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 23,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 350.8,
+   "eta_forward_confirmation_years": 0.96,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 15,
+   "median_top_of_book_depth_usd": 9139
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h15min",
+   "ret_col": "S",
+   "n_raw": 239617,
+   "n_independent_L1_user_coin_day": 437,
+   "n_independent_L2_coin_day": 437,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.96,
+   "net_bps": -13.04,
+   "net_bps_stress28": -27.04,
+   "t_stat_declustered_L3day": 7.71,
+   "t_stat_L2_coin_day": 6.51,
+   "bootstrap_ci95": [
+    0.69,
+    1.23
+   ],
+   "sd_day_bps": 0.8,
+   "year_by_year": {
+    "2026": [
+     0.96,
+     239617
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 21,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 316.3,
+   "eta_forward_confirmation_years": 0.87,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 15,
+   "median_top_of_book_depth_usd": 9139
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h60min",
+   "ret_col": "S",
+   "n_raw": 563296,
+   "n_independent_L1_user_coin_day": 429,
+   "n_independent_L2_coin_day": 429,
+   "n_independent_L3_day": 39,
+   "gross_bps": 0.58,
+   "net_bps": -13.42,
+   "net_bps_stress28": -27.42,
+   "t_stat_declustered_L3day": 3.2,
+   "t_stat_L2_coin_day": 2.25,
+   "bootstrap_ci95": [
+    0.24,
+    0.92
+   ],
+   "sd_day_bps": 1.1,
+   "year_by_year": {
+    "2026": [
+     0.58,
+     563296
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 119,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 1792.3,
+   "eta_forward_confirmation_years": 4.91,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 60,
+   "median_top_of_book_depth_usd": 9139
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h60min",
+   "ret_col": "S",
+   "n_raw": 239453,
+   "n_independent_L1_user_coin_day": 429,
+   "n_independent_L2_coin_day": 429,
+   "n_independent_L3_day": 39,
+   "gross_bps": 0.99,
+   "net_bps": -13.01,
+   "net_bps_stress28": -27.01,
+   "t_stat_declustered_L3day": 3.01,
+   "t_stat_L2_coin_day": 2.1,
+   "bootstrap_ci95": [
+    0.35,
+    1.64
+   ],
+   "sd_day_bps": 2.1,
+   "year_by_year": {
+    "2026": [
+     0.99,
+     239453
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 134,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 2019.7,
+   "eta_forward_confirmation_years": 5.53,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 60,
+   "median_top_of_book_depth_usd": 9139
+  }
+ ],
+ "window": {
+  "start": "2026-07-18",
+  "end": "2026-08-29",
+  "n_calendar_days": 40,
+  "n_coins": 11
+ }
+}

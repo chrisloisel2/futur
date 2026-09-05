@@ -1,0 +1,1068 @@
+{
+ "mechanisms": [
+  {
+   "mechanism": "T1 HLTWAP_ALL_h4h",
+   "ret_col": "S240",
+   "n_raw": 233047,
+   "n_independent_L1_user_coin_day": 108378,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 4.02,
+   "net_bps": -9.98,
+   "net_bps_stress28": -23.98,
+   "t_stat_declustered_L3day": 3.84,
+   "t_stat_L2_coin_day": -0.27,
+   "bootstrap_ci95": [
+    1.09,
+    6.65
+   ],
+   "sd_day_bps": 31.4,
+   "year_by_year": {
+    "2024": [
+     -3.62,
+     8719
+    ],
+    "2025": [
+     4.43,
+     81021
+    ],
+    "2026": [
+     4.26,
+     143307
+    ]
+   },
+   "ex_best_year": 3.81,
+   "ex_best_year_dropped": "2025",
+   "n_required": 1905,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1905.3,
+   "eta_forward_confirmation_years": 5.22,
+   "train_bps": 4.8,
+   "test_bps": 3.81,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 732442,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h",
+   "ret_col": "S1440",
+   "n_raw": 233043,
+   "n_independent_L1_user_coin_day": 108376,
+   "n_independent_L2_coin_day": 24150,
+   "n_independent_L3_day": 895,
+   "gross_bps": 11.88,
+   "net_bps": -2.12,
+   "net_bps_stress28": -16.12,
+   "t_stat_declustered_L3day": 4.28,
+   "t_stat_L2_coin_day": 0.23,
+   "bootstrap_ci95": [
+    3.85,
+    19.35
+   ],
+   "sd_day_bps": 83.1,
+   "year_by_year": {
+    "2024": [
+     3.37,
+     8719
+    ],
+    "2025": [
+     8.39,
+     81017
+    ],
+    "2026": [
+     14.37,
+     143307
+    ]
+   },
+   "ex_best_year": 7.9,
+   "ex_best_year_dropped": "2026",
+   "n_required": 1535,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1535.3,
+   "eta_forward_confirmation_years": 4.2,
+   "train_bps": 11.91,
+   "test_bps": 11.88,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_hDUR",
+   "ret_col": "SDUR",
+   "n_raw": 233049,
+   "n_independent_L1_user_coin_day": 108379,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 3.42,
+   "net_bps": -10.58,
+   "net_bps_stress28": -24.58,
+   "t_stat_declustered_L3day": 5.42,
+   "t_stat_L2_coin_day": 2.2,
+   "bootstrap_ci95": [
+    1.71,
+    4.99
+   ],
+   "sd_day_bps": 18.9,
+   "year_by_year": {
+    "2024": [
+     -1.02,
+     8719
+    ],
+    "2025": [
+     3.42,
+     81023
+    ],
+    "2026": [
+     3.69,
+     143307
+    ]
+   },
+   "ex_best_year": 2.99,
+   "ex_best_year_dropped": "2026",
+   "n_required": 956,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 956.1,
+   "eta_forward_confirmation_years": 2.62,
+   "train_bps": 3.84,
+   "test_bps": 3.3,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h4h_PLACEBOADJ",
+   "ret_col": "A240",
+   "n_raw": 231116,
+   "n_independent_L1_user_coin_day": 107538,
+   "n_independent_L2_coin_day": 23979,
+   "n_independent_L3_day": 893,
+   "gross_bps": 1.26,
+   "net_bps": -12.74,
+   "net_bps_stress28": -26.74,
+   "t_stat_declustered_L3day": 1.06,
+   "t_stat_L2_coin_day": -1.86,
+   "bootstrap_ci95": [
+    -2.44,
+    4.6
+   ],
+   "sd_day_bps": 35.6,
+   "year_by_year": {
+    "2024": [
+     -6.29,
+     8598
+    ],
+    "2025": [
+     -0.11,
+     79336
+    ],
+    "2026": [
+     2.48,
+     143182
+    ]
+   },
+   "ex_best_year": -0.72,
+   "ex_best_year_dropped": "2026",
+   "n_required": 24945,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 24945.5,
+   "eta_forward_confirmation_years": 68.3,
+   "train_bps": 1.57,
+   "test_bps": 1.18,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 732442,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 231065,
+   "n_independent_L1_user_coin_day": 107512,
+   "n_independent_L2_coin_day": 23975,
+   "n_independent_L3_day": 893,
+   "gross_bps": -6.88,
+   "net_bps": -20.88,
+   "net_bps_stress28": -34.88,
+   "t_stat_declustered_L3day": -1.83,
+   "t_stat_L2_coin_day": -2.26,
+   "bootstrap_ci95": [
+    -19.15,
+    4.02
+   ],
+   "sd_day_bps": 112.4,
+   "year_by_year": {
+    "2024": [
+     -8.57,
+     8597
+    ],
+    "2025": [
+     -8.14,
+     79286
+    ],
+    "2026": [
+     -6.08,
+     143182
+    ]
+   },
+   "ex_best_year": -8.18,
+   "ex_best_year_dropped": "2026",
+   "n_required": 8369,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 8369.6,
+   "eta_forward_confirmation_years": 22.91,
+   "train_bps": 0.39,
+   "test_bps": -8.82,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h_PLACEBOADJ2SIDED",
+   "ret_col": "B1440",
+   "n_raw": 224908,
+   "n_independent_L1_user_coin_day": 104640,
+   "n_independent_L2_coin_day": 23597,
+   "n_independent_L3_day": 886,
+   "gross_bps": 1.24,
+   "net_bps": -12.76,
+   "net_bps_stress28": -26.76,
+   "t_stat_declustered_L3day": 0.37,
+   "t_stat_L2_coin_day": -0.98,
+   "bootstrap_ci95": [
+    -9.8,
+    11.26
+   ],
+   "sd_day_bps": 99.3,
+   "year_by_year": {
+    "2024": [
+     6.71,
+     8593
+    ],
+    "2025": [
+     1.83,
+     79285
+    ],
+    "2026": [
+     0.55,
+     137030
+    ]
+   },
+   "ex_best_year": 1.02,
+   "ex_best_year_dropped": "2024",
+   "n_required": 201425,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 209575.7,
+   "eta_forward_confirmation_years": 573.79,
+   "train_bps": 7.52,
+   "test_bps": -0.5,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_hDUR_PLACEBOADJ",
+   "ret_col": "ADUR",
+   "n_raw": 231115,
+   "n_independent_L1_user_coin_day": 107542,
+   "n_independent_L2_coin_day": 23979,
+   "n_independent_L3_day": 893,
+   "gross_bps": 0.53,
+   "net_bps": -13.47,
+   "net_bps_stress28": -27.47,
+   "t_stat_declustered_L3day": 0.69,
+   "t_stat_L2_coin_day": 0.75,
+   "bootstrap_ci95": [
+    -1.84,
+    2.57
+   ],
+   "sd_day_bps": 22.8,
+   "year_by_year": {
+    "2024": [
+     -2.08,
+     8598
+    ],
+    "2025": [
+     -0.16,
+     79335
+    ],
+    "2026": [
+     1.06,
+     143182
+    ]
+   },
+   "ex_best_year": -0.35,
+   "ex_best_year_dropped": "2026",
+   "n_required": 59044,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 59044.1,
+   "eta_forward_confirmation_years": 161.65,
+   "train_bps": 2.03,
+   "test_bps": 0.12,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_BUYONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 141259,
+   "n_independent_L1_user_coin_day": 71210,
+   "n_independent_L2_coin_day": 18173,
+   "n_independent_L3_day": 878,
+   "gross_bps": 22.16,
+   "net_bps": 8.16,
+   "net_bps_stress28": -5.84,
+   "t_stat_declustered_L3day": 3.13,
+   "t_stat_L2_coin_day": -4.79,
+   "bootstrap_ci95": [
+    -2.04,
+    44.39
+   ],
+   "sd_day_bps": 210.0,
+   "year_by_year": {
+    "2024": [
+     4.33,
+     6111
+    ],
+    "2025": [
+     11.59,
+     50540
+    ],
+    "2026": [
+     29.77,
+     84608
+    ]
+   },
+   "ex_best_year": 10.81,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2815,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2815.3,
+   "eta_forward_confirmation_years": 7.71,
+   "train_bps": 21.41,
+   "test_bps": 22.38,
+   "median_ntl_planned_usd": 13898,
+   "capacity_usd_estimate": 4166362,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T1 HLTWAP_BUYONLY_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 140062,
+   "n_independent_L1_user_coin_day": 70613,
+   "n_independent_L2_coin_day": 18024,
+   "n_independent_L3_day": 877,
+   "gross_bps": -35.38,
+   "net_bps": -49.38,
+   "net_bps_stress28": -63.38,
+   "t_stat_declustered_L3day": -3.51,
+   "t_stat_L2_coin_day": -8.23,
+   "bootstrap_ci95": [
+    -69.1,
+    -3.62
+   ],
+   "sd_day_bps": 298.3,
+   "year_by_year": {
+    "2024": [
+     -21.55,
+     6024
+    ],
+    "2025": [
+     -36.97,
+     49497
+    ],
+    "2026": [
+     -35.43,
+     84541
+    ]
+   },
+   "ex_best_year": -36.0,
+   "ex_best_year_dropped": "2024",
+   "n_required": 2229,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2229.1,
+   "eta_forward_confirmation_years": 6.1,
+   "train_bps": -16.27,
+   "test_bps": -40.75,
+   "median_ntl_planned_usd": 13898,
+   "capacity_usd_estimate": 4166362,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T5 HLTWAP_NONREDUCEONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 203829,
+   "n_independent_L1_user_coin_day": 97195,
+   "n_independent_L2_coin_day": 22154,
+   "n_independent_L3_day": 891,
+   "gross_bps": 13.86,
+   "net_bps": -0.14,
+   "net_bps_stress28": -14.14,
+   "t_stat_declustered_L3day": 4.13,
+   "t_stat_L2_coin_day": -0.1,
+   "bootstrap_ci95": [
+    3.61,
+    23.54
+   ],
+   "sd_day_bps": 100.2,
+   "year_by_year": {
+    "2024": [
+     1.81,
+     7991
+    ],
+    "2025": [
+     10.86,
+     71460
+    ],
+    "2026": [
+     16.37,
+     124378
+    ]
+   },
+   "ex_best_year": 9.95,
+   "ex_best_year_dropped": "2026",
+   "n_required": 1637,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1637.6,
+   "eta_forward_confirmation_years": 4.48,
+   "train_bps": 15.3,
+   "test_bps": 13.47,
+   "median_ntl_planned_usd": 13370,
+   "capacity_usd_estimate": 4837956,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T5 HLTWAP_NONREDUCEONLY_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 202095,
+   "n_independent_L1_user_coin_day": 96395,
+   "n_independent_L2_coin_day": 21982,
+   "n_independent_L3_day": 889,
+   "gross_bps": -9.44,
+   "net_bps": -23.44,
+   "net_bps_stress28": -37.44,
+   "t_stat_declustered_L3day": -2.08,
+   "t_stat_L2_coin_day": -2.78,
+   "bootstrap_ci95": [
+    -24.1,
+    4.53
+   ],
+   "sd_day_bps": 135.6,
+   "year_by_year": {
+    "2024": [
+     -9.6,
+     7882
+    ],
+    "2025": [
+     -9.44,
+     69945
+    ],
+    "2026": [
+     -9.43,
+     124268
+    ]
+   },
+   "ex_best_year": -9.46,
+   "ex_best_year_dropped": "2026",
+   "n_required": 6470,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 6470.9,
+   "eta_forward_confirmation_years": 17.72,
+   "train_bps": 3.86,
+   "test_bps": -13.03,
+   "median_ntl_planned_usd": 13370,
+   "capacity_usd_estimate": 4837956,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T5 HLTWAP_REDUCEONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 29214,
+   "n_independent_L1_user_coin_day": 17871,
+   "n_independent_L2_coin_day": 9012,
+   "n_independent_L3_day": 721,
+   "gross_bps": -1.95,
+   "net_bps": -15.95,
+   "net_bps_stress28": -29.95,
+   "t_stat_declustered_L3day": -0.35,
+   "t_stat_L2_coin_day": 0.78,
+   "bootstrap_ci95": [
+    -17.74,
+    12.2
+   ],
+   "sd_day_bps": 150.5,
+   "year_by_year": {
+    "2024": [
+     20.44,
+     728
+    ],
+    "2025": [
+     -10.03,
+     9557
+    ],
+    "2026": [
+     1.26,
+     18929
+    ]
+   },
+   "ex_best_year": -2.52,
+   "ex_best_year_dropped": "2024",
+   "n_required": 186362,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 186362.3,
+   "eta_forward_confirmation_years": 510.23,
+   "train_bps": -13.08,
+   "test_bps": 0.91,
+   "median_ntl_planned_usd": 31669,
+   "capacity_usd_estimate": 2522725,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T7 HLTWAP_DUR_GE180_h24h",
+   "ret_col": "S1440",
+   "n_raw": 40160,
+   "n_independent_L1_user_coin_day": 26235,
+   "n_independent_L2_coin_day": 9765,
+   "n_independent_L3_day": 803,
+   "gross_bps": 17.8,
+   "net_bps": 3.8,
+   "net_bps_stress28": -10.2,
+   "t_stat_declustered_L3day": 3.25,
+   "t_stat_L2_coin_day": 1.47,
+   "bootstrap_ci95": [
+    0.45,
+    32.75
+   ],
+   "sd_day_bps": 155.1,
+   "year_by_year": {
+    "2024": [
+     -5.46,
+     1596
+    ],
+    "2025": [
+     8.52,
+     13754
+    ],
+    "2026": [
+     24.44,
+     24810
+    ]
+   },
+   "ex_best_year": 7.07,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2382,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2382.3,
+   "eta_forward_confirmation_years": 6.52,
+   "train_bps": 14.5,
+   "test_bps": 18.78,
+   "median_ntl_planned_usd": 42439,
+   "capacity_usd_estimate": 5163435,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T7 HLTWAP_DUR_LE15_h24h",
+   "ret_col": "S1440",
+   "n_raw": 81342,
+   "n_independent_L1_user_coin_day": 37024,
+   "n_independent_L2_coin_day": 13173,
+   "n_independent_L3_day": 822,
+   "gross_bps": 9.61,
+   "net_bps": -4.39,
+   "net_bps_stress28": -18.39,
+   "t_stat_declustered_L3day": 2.82,
+   "t_stat_L2_coin_day": 1.88,
+   "bootstrap_ci95": [
+    0.41,
+    18.14
+   ],
+   "sd_day_bps": 97.6,
+   "year_by_year": {
+    "2024": [
+     -19.68,
+     2768
+    ],
+    "2025": [
+     11.36,
+     28612
+    ],
+    "2026": [
+     10.24,
+     49962
+    ]
+   },
+   "ex_best_year": 8.67,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3233,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3233.7,
+   "eta_forward_confirmation_years": 8.85,
+   "train_bps": 11.66,
+   "test_bps": 9.07,
+   "median_ntl_planned_usd": 9004,
+   "capacity_usd_estimate": 4205936,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T2 HLTWAP_POSTEND_REVERSION",
+   "ret_col": "SPOST",
+   "n_raw": 233040,
+   "n_independent_L1_user_coin_day": 108380,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 1.13,
+   "net_bps": -12.87,
+   "net_bps_stress28": -26.87,
+   "t_stat_declustered_L3day": 2.2,
+   "t_stat_L2_coin_day": -0.45,
+   "bootstrap_ci95": [
+    -0.25,
+    2.35
+   ],
+   "sd_day_bps": 15.3,
+   "year_by_year": {
+    "2024": [
+     0.76,
+     8722
+    ],
+    "2025": [
+     0.51,
+     81037
+    ],
+    "2026": [
+     1.5,
+     143281
+    ]
+   },
+   "ex_best_year": 0.54,
+   "ex_best_year_dropped": "2026",
+   "n_required": 5801,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 5801.6,
+   "eta_forward_confirmation_years": 15.88,
+   "train_bps": 0.59,
+   "test_bps": 1.27,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP10PCT_h24h(thr=4.91e-04,TRAIN)",
+   "ret_col": "S1440",
+   "n_raw": 25927,
+   "n_independent_L1_user_coin_day": 15983,
+   "n_independent_L2_coin_day": 9626,
+   "n_independent_L3_day": 726,
+   "gross_bps": 13.73,
+   "net_bps": -0.27,
+   "net_bps_stress28": -14.27,
+   "t_stat_declustered_L3day": 2.63,
+   "t_stat_L2_coin_day": 2.22,
+   "bootstrap_ci95": [
+    0.31,
+    24.86
+   ],
+   "sd_day_bps": 140.6,
+   "year_by_year": {
+    "2024": [
+     -23.0,
+     669
+    ],
+    "2025": [
+     1.78,
+     7428
+    ],
+    "2026": [
+     20.08,
+     17830
+    ]
+   },
+   "ex_best_year": -0.27,
+   "ex_best_year_dropped": "2026",
+   "n_required": 3289,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3289.7,
+   "eta_forward_confirmation_years": 9.01,
+   "train_bps": 9.4,
+   "test_bps": 14.76,
+   "median_ntl_planned_usd": 153375,
+   "capacity_usd_estimate": 490703,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP1PCT_h24h(thr=5.00e-03,TRAIN)",
+   "ret_col": "S1440",
+   "n_raw": 3216,
+   "n_independent_L1_user_coin_day": 2168,
+   "n_independent_L2_coin_day": 1911,
+   "n_independent_L3_day": 465,
+   "gross_bps": 10.93,
+   "net_bps": -3.07,
+   "net_bps_stress28": -17.07,
+   "t_stat_declustered_L3day": 1.05,
+   "t_stat_L2_coin_day": 2.0,
+   "bootstrap_ci95": [
+    -12.91,
+    33.96
+   ],
+   "sd_day_bps": 224.2,
+   "year_by_year": {
+    "2024": [
+     66.25,
+     53
+    ],
+    "2025": [
+     -27.61,
+     872
+    ],
+    "2026": [
+     24.32,
+     2291
+    ]
+   },
+   "ex_best_year": 10.01,
+   "ex_best_year_dropped": "2024",
+   "n_required": 13184,
+   "event_rate_indep_per_week": 6.88,
+   "eta_forward_confirmation_days": 13407.9,
+   "eta_forward_confirmation_years": 36.71,
+   "train_bps": 22.61,
+   "test_bps": 8.78,
+   "median_ntl_planned_usd": 501094,
+   "capacity_usd_estimate": 248355,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP1PCT_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 3202,
+   "n_independent_L1_user_coin_day": 2158,
+   "n_independent_L2_coin_day": 1906,
+   "n_independent_L3_day": 462,
+   "gross_bps": 15.82,
+   "net_bps": 1.82,
+   "net_bps_stress28": -12.18,
+   "t_stat_declustered_L3day": 1.2,
+   "t_stat_L2_coin_day": 1.49,
+   "bootstrap_ci95": [
+    -12.5,
+    44.45
+   ],
+   "sd_day_bps": 283.5,
+   "year_by_year": {
+    "2024": [
+     79.3,
+     52
+    ],
+    "2025": [
+     -2.46,
+     859
+    ],
+    "2026": [
+     21.24,
+     2291
+    ]
+   },
+   "ex_best_year": 14.78,
+   "ex_best_year_dropped": "2024",
+   "n_required": 10065,
+   "event_rate_indep_per_week": 6.88,
+   "eta_forward_confirmation_days": 10235.7,
+   "eta_forward_confirmation_years": 28.02,
+   "train_bps": 64.08,
+   "test_bps": 7.19,
+   "median_ntl_planned_usd": 501094,
+   "capacity_usd_estimate": 248355,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T3 HLTWAP_NTL_GE1M_h24h",
+   "ret_col": "S1440",
+   "n_raw": 6968,
+   "n_independent_L1_user_coin_day": 4060,
+   "n_independent_L2_coin_day": 2304,
+   "n_independent_L3_day": 630,
+   "gross_bps": 9.13,
+   "net_bps": -4.87,
+   "net_bps_stress28": -18.87,
+   "t_stat_declustered_L3day": 1.27,
+   "t_stat_L2_coin_day": 1.87,
+   "bootstrap_ci95": [
+    -6.13,
+    25.51
+   ],
+   "sd_day_bps": 180.6,
+   "year_by_year": {
+    "2024": [
+     -109.61,
+     246
+    ],
+    "2025": [
+     17.05,
+     2750
+    ],
+    "2026": [
+     11.0,
+     3972
+    ]
+   },
+   "ex_best_year": 3.96,
+   "ex_best_year_dropped": "2025",
+   "n_required": 12274,
+   "event_rate_indep_per_week": 6.92,
+   "eta_forward_confirmation_days": 12412.5,
+   "eta_forward_confirmation_years": 33.98,
+   "train_bps": 1.35,
+   "test_bps": 11.48,
+   "median_ntl_planned_usd": 2002289,
+   "capacity_usd_estimate": 33190186,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only",
+   "ret_col": "S1440",
+   "n_raw": 8318,
+   "n_independent_L1_user_coin_day": 4119,
+   "n_independent_L2_coin_day": 2591,
+   "n_independent_L3_day": 332,
+   "gross_bps": 44.81,
+   "net_bps": 30.81,
+   "net_bps_stress28": 16.81,
+   "t_stat_declustered_L3day": 4.2,
+   "t_stat_L2_coin_day": 2.31,
+   "bootstrap_ci95": [
+    18.49,
+    72.85
+   ],
+   "sd_day_bps": 194.4,
+   "year_by_year": {
+    "2025": [
+     42.06,
+     3552
+    ],
+    "2026": [
+     46.87,
+     4766
+    ]
+   },
+   "ex_best_year": 42.06,
+   "ex_best_year_dropped": "2026",
+   "n_required": 589,
+   "event_rate_indep_per_week": 6.96,
+   "eta_forward_confirmation_days": 593.3,
+   "eta_forward_confirmation_years": 1.62,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 48.0,
+   "test_half2_bps": 40.13,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 8256,
+   "n_independent_L1_user_coin_day": 4085,
+   "n_independent_L2_coin_day": 2580,
+   "n_independent_L3_day": 332,
+   "gross_bps": 20.47,
+   "net_bps": 6.47,
+   "net_bps_stress28": -7.53,
+   "t_stat_declustered_L3day": 1.34,
+   "t_stat_L2_coin_day": 1.21,
+   "bootstrap_ci95": [
+    -16.43,
+    59.75
+   ],
+   "sd_day_bps": 277.4,
+   "year_by_year": {
+    "2025": [
+     -4.17,
+     3494
+    ],
+    "2026": [
+     38.56,
+     4762
+    ]
+   },
+   "ex_best_year": -4.17,
+   "ex_best_year_dropped": "2026",
+   "n_required": 5759,
+   "event_rate_indep_per_week": 6.96,
+   "eta_forward_confirmation_days": 5791.3,
+   "eta_forward_confirmation_years": 15.86,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 11.33,
+   "test_half2_bps": 33.75,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed"
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only_PLACEBOADJ2SIDED",
+   "ret_col": "B1440",
+   "n_raw": 8184,
+   "n_independent_L1_user_coin_day": 4036,
+   "n_independent_L2_coin_day": 2548,
+   "n_independent_L3_day": 325,
+   "gross_bps": 24.56,
+   "net_bps": 10.56,
+   "net_bps_stress28": -3.44,
+   "t_stat_declustered_L3day": 1.75,
+   "t_stat_L2_coin_day": 1.49,
+   "bootstrap_ci95": [
+    -16.29,
+    61.61
+   ],
+   "sd_day_bps": 252.7,
+   "year_by_year": {
+    "2025": [
+     25.92,
+     3494
+    ],
+    "2026": [
+     23.54,
+     4690
+    ]
+   },
+   "ex_best_year": 23.54,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3321,
+   "event_rate_indep_per_week": 6.69,
+   "eta_forward_confirmation_days": 3476.4,
+   "eta_forward_confirmation_years": 9.52,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 18.07,
+   "test_half2_bps": 34.19,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed"
+  }
+ ],
+ "contrasts": [
+  {
+   "mechanism": "T5 nonRO - RO @24h",
+   "arm_a_bps": 13.86,
+   "arm_b_bps": -1.95,
+   "spread_bps": 15.82,
+   "n_a": 203829,
+   "n_b": 29214,
+   "n_days_paired": 717,
+   "spread_t_daypaired": 1.86
+  },
+  {
+   "mechanism": "T5 nonRO - RO @24h PLACEBOADJ",
+   "arm_a_bps": -9.44,
+   "arm_b_bps": 11.01,
+   "spread_bps": -20.45,
+   "n_a": 202095,
+   "n_b": 28970,
+   "n_days_paired": 716,
+   "spread_t_daypaired": 0.23
+  },
+  {
+   "mechanism": "T7 short - long TWAP @24h",
+   "arm_a_bps": 9.61,
+   "arm_b_bps": 18.61,
+   "spread_bps": -9.0,
+   "n_a": 81342,
+   "n_b": 34186,
+   "n_days_paired": 752,
+   "spread_t_daypaired": -1.54
+  },
+  {
+   "mechanism": "randomize true - false @24h",
+   "arm_a_bps": 8.57,
+   "arm_b_bps": 12.78,
+   "spread_bps": -4.21,
+   "n_a": 49721,
+   "n_b": 183322,
+   "n_days_paired": 803,
+   "spread_t_daypaired": 1.18
+  },
+  {
+   "mechanism": "T3 sizeRatio top1% - bottom90% @24h",
+   "arm_a_bps": 10.93,
+   "arm_b_bps": 11.54,
+   "spread_bps": -0.61,
+   "n_a": 3216,
+   "n_b": 207104,
+   "n_days_paired": 465,
+   "spread_t_daypaired": -0.48
+  },
+  {
+   "mechanism": "T6 top - bottom cohort @24h TEST",
+   "arm_a_bps": 44.81,
+   "arm_b_bps": 5.21,
+   "spread_bps": 39.61,
+   "n_a": 8318,
+   "n_b": 8125,
+   "n_days_paired": 332,
+   "spread_t_daypaired": 0.7
+  },
+  {
+   "mechanism": "T6 top - bottom cohort @24h TEST PLACEBOADJ",
+   "arm_a_bps": 20.47,
+   "arm_b_bps": -12.28,
+   "spread_bps": 32.76,
+   "n_a": 8256,
+   "n_b": 8084,
+   "n_days_paired": 332,
+   "spread_t_daypaired": 0.15
+  },
+  {
+   "mechanism": "T1 event window - t-7d placebo (same symbol, same direction) @24h",
+   "arm_a_bps": 11.88,
+   "arm_b_bps": 17.95,
+   "spread_bps": -6.88,
+   "n_a": 233043,
+   "n_b": 231086,
+   "n_days_paired": 895,
+   "spread_t_daypaired": -1.83
+  }
+ ],
+ "momentum_control": {
+  "note": "run_event_gate.py reported gross=-0.00 bps for the residualised series; that is mean-zero BY CONSTRUCTION (OLS residual) and carried no information. The informative quantities are the intercept and the slope.",
+  "intercept_bps": 12.53,
+  "beta_on_signed_trailing_24h": -0.0343,
+  "edge_by_trailing_momentum_quintile_bps": {
+   "0": [
+    7.91,
+    46527
+   ],
+   "1": [
+    -3.47,
+    46526
+   ],
+   "2": [
+    5.06,
+    46526
+   ],
+   "3": [
+    14.71,
+    46526
+   ],
+   "4": [
+    34.55,
+    46527
+   ]
+  },
+  "conclusion": "The LINEAR beta is ~0, but the quintile decomposition is strongly non-linear: the signed 24h drift goes from -3.5 bps in Q2 of signed trailing momentum to +34.6 bps in Q5. So OLS residualisation is simply the wrong control here (heavy tails drive beta to 0 while the conditional means fan out). The decisive control is the t-7d placebo, not momentum residualisation."
+ },
+ "entry_lag_sensitivity_h24h_bps": {
+  "0": 13.03,
+  "5": 12.56,
+  "15": 11.88,
+  "30": 11.11,
+  "60": 10.6
+ },
+ "entry_lag_sensitivity_h24h_PLACEBOADJ_bps": {
+  "0": -5.73,
+  "5": -6.22,
+  "15": -6.88,
+  "30": -7.48,
+  "60": -8.0
+ }
+}

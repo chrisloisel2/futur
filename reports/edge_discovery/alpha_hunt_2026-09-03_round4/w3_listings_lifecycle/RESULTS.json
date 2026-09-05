@@ -1,0 +1,3457 @@
+{
+ "worker": "W3_LISTINGS_LIFECYCLE",
+ "round": "alpha_hunt_2026-09-03_round4",
+ "written": "2026-09-05",
+ "n_mechanisms": 59,
+ "verdict_counts": {
+  "UNCONFIRMABLE_IN_HORIZON": 8,
+  "REGIME_DEPENDENT": 2,
+  "WEAK": 12,
+  "DEAD": 23,
+  "DATA_LIMITED": 11,
+  "DESCRIPTIVE": 3
+ },
+ "axis_level_conclusion": "Axe entier UNCONFIRMABLE_IN_HORIZON : le taux d'episodes independants plafonne a ~0,70 vague de cotation/semaine (evenements) et ~0,16 plage de regime/semaine (signaux de regime). Aucun mecanisme de l'axe n'atteint le t de decouverte qu'il faudrait pour un ETA < 3 ans.",
+ "mechanisms": [
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d4h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 479,
+   "n_independent_L1": 479,
+   "n_independent_L2": 335,
+   "n_independent_L3": 138,
+   "gross_bps": 472.5,
+   "net_bps": 444.5,
+   "net_bps_stress28": 416.5,
+   "t_stat_L2": 2.78,
+   "t_stat_declustered": 2.03,
+   "bootstrap_ci95": [
+    6.5,
+    898.1
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 1063.2,
+     "t": 3.54
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 376.0,
+     "t": 1.15
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 543.0,
+     "t": 1.55
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -116.1,
+     "t": -0.12
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 335.3,
+    "t": 1.21,
+    "n_ep": 112
+   },
+   "years_same_sign": "3/4",
+   "n_required": 1047.9,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 10537.0,
+    "years": 28.85
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 749.5,
+    "rate_wk": 0.232,
+    "years": 61.9
+   },
+   "abs_gross_bps_long": -350.1,
+   "bench_gross_bps": -23.1,
+   "frac_dead_names": 0.177,
+   "n_symbols": 479,
+   "_source": "axisA_results.json",
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "ETA de confirmation forward = 28.85 ans (> 3.0)",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1b_LIST_FADE_SIGN_TEST_d1h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+   "n_raw": 478,
+   "n_independent_L3": 138,
+   "hit_rate": 0.68,
+   "hit_rate_declustered": 0.696,
+   "t_stat_declustered": 7.17,
+   "bootstrap_ci95_hitrate": [
+    0.642,
+    0.748
+   ],
+   "median_bps": 1291.6,
+   "mean_bps": 280.0,
+   "sd_bps": 4936.5,
+   "skew": -2.79,
+   "worst_single_event_bps": -31078.9,
+   "mean_excl_5_worst_bps": 564.9,
+   "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini",
+   "_source": "fixups_results.json",
+   "event_rate_per_week_6m": 0.696,
+   "hitrate_n_required": 84.3,
+   "hitrate_eta_years": 2.32,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "taux de reussite 69.6% confirmable en ~2.32 ans, mais la MOYENNE (ce qui compose) n'est pas significative : skew=-2.79, pire evenement -31078.9bps ; le P&L correspondant est celui de A1/A5, ETA 29-104 ans",
+   "prereg_status": "COMPLEMENT (test de signe sur la meme population que A1, aucun seuil modifie)",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1b_LIST_FADE_SIGN_TEST_d24h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+   "n_raw": 488,
+   "n_independent_L3": 143,
+   "hit_rate": 0.691,
+   "hit_rate_declustered": 0.721,
+   "t_stat_declustered": 8.68,
+   "bootstrap_ci95_hitrate": [
+    0.672,
+    0.77
+   ],
+   "median_bps": 1028.0,
+   "mean_bps": 264.5,
+   "sd_bps": 4107.5,
+   "skew": -2.97,
+   "worst_single_event_bps": -30795.5,
+   "mean_excl_5_worst_bps": 505.7,
+   "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini",
+   "_source": "fixups_results.json",
+   "event_rate_per_week_6m": 0.696,
+   "hitrate_n_required": 59.6,
+   "hitrate_eta_years": 1.64,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "taux de reussite 72.1% confirmable en ~1.64 ans, mais la MOYENNE (ce qui compose) n'est pas significative : skew=-2.97, pire evenement -30795.5bps ; le P&L correspondant est celui de A1/A5, ETA 29-104 ans",
+   "prereg_status": "COMPLEMENT (test de signe sur la meme population que A1, aucun seuil modifie)",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A1b_LIST_FADE_SIGN_TEST_d24h_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+   "n_raw": 488,
+   "n_independent_L3": 143,
+   "hit_rate": 0.652,
+   "hit_rate_declustered": 0.653,
+   "t_stat_declustered": 5.66,
+   "bootstrap_ci95_hitrate": [
+    0.602,
+    0.705
+   ],
+   "median_bps": 599.4,
+   "mean_bps": 127.3,
+   "sd_bps": 3068.7,
+   "skew": -4.71,
+   "worst_single_event_bps": -33795.4,
+   "mean_excl_5_worst_bps": 328.1,
+   "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini",
+   "_source": "fixups_results.json",
+   "event_rate_per_week_6m": 0.696,
+   "hitrate_n_required": 140.1,
+   "hitrate_eta_years": 3.86,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "taux de reussite 65.3% confirmable en ~3.86 ans, mais la MOYENNE (ce qui compose) n'est pas significative : skew=-4.71, pire evenement -33795.4bps ; le P&L correspondant est celui de A1/A5, ETA 29-104 ans",
+   "prereg_status": "COMPLEMENT (test de signe sur la meme population que A1, aucun seuil modifie)",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A1b_LIST_FADE_SIGN_TEST_d4h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "taux de reussite du fade de listing (short nouveau / long panier), declusterise par semaine",
+   "n_raw": 479,
+   "n_independent_L3": 138,
+   "hit_rate": 0.693,
+   "hit_rate_declustered": 0.709,
+   "t_stat_declustered": 7.91,
+   "bootstrap_ci95_hitrate": [
+    0.657,
+    0.76
+   ],
+   "median_bps": 1263.5,
+   "mean_bps": 327.0,
+   "sd_bps": 4600.4,
+   "skew": -2.75,
+   "worst_single_event_bps": -31770.7,
+   "mean_excl_5_worst_bps": 574.6,
+   "note": "taux de reussite tres significatif MAIS payoff a queue gauche non bornee : la moyenne (ce qui compose) n'est pas confirmable, la mediane n'est pas harvestable sans structure a risque defini",
+   "_source": "fixups_results.json",
+   "event_rate_per_week_6m": 0.696,
+   "hitrate_n_required": 69.2,
+   "hitrate_eta_years": 1.91,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "taux de reussite 70.9% confirmable en ~1.91 ans, mais la MOYENNE (ce qui compose) n'est pas significative : skew=-2.75, pire evenement -31770.7bps ; le P&L correspondant est celui de A1/A5, ETA 29-104 ans",
+   "prereg_status": "COMPLEMENT (test de signe sur la meme population que A1, aucun seuil modifie)",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A3_LIST_FUNDING_CARRY_YOUNG",
+   "family": "LISTING_EVENT",
+   "hypothesis": "funding cumule sur les 30 premiers jours d'un listing - funding cumule 30j des noms matures, meme semaine",
+   "paired_episodes": true,
+   "n_raw": 230185,
+   "n_arm_A": 518,
+   "n_arm_B": 229667,
+   "n_independent_L3": 152,
+   "arm_A_bps": -310.5,
+   "arm_B_bps": 60.6,
+   "gross_bps": -321.5,
+   "net_bps": -321.5,
+   "net_bps_stress28": -321.5,
+   "t_stat_declustered": -5.74,
+   "bootstrap_ci95": [
+    -438.5,
+    -213.2
+   ],
+   "n_required": 144.8,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 1456.0,
+    "years": 3.99
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "ETA de confirmation forward = 3.99 ans (> 3.0)",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.62
+  },
+  {
+   "id": "C2_AGE_FUNDING_CARRY_YOUNG_VS_MATURE",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "short-perp sur jeunes (<90j, funding>0) - short-perp sur matures (>=1a, funding>0), 7j, funding inclus",
+   "paired_episodes": true,
+   "n_raw": 201978,
+   "n_arm_A": 21441,
+   "n_arm_B": 180537,
+   "n_independent_L3": 305,
+   "arm_A_bps": -217.3,
+   "arm_B_bps": -15.0,
+   "gross_bps": -202.4,
+   "net_bps": -230.4,
+   "net_bps_stress28": -258.4,
+   "t_stat_declustered": -2.31,
+   "bootstrap_ci95": [
+    -382.9,
+    -39.0
+   ],
+   "n_required": 1796.6,
+   "event_rate_per_week_6m": 0.967,
+   "eta_forward_confirmation": {
+    "days": 13007.0,
+    "years": 35.61
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "ETA de confirmation forward = 35.61 ans (> 3.0)",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.95
+  },
+  {
+   "id": "C2c_AGE_CARRY_RAW",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "short-perp jeunes(<90j) - matures(>=1a), funding>0, 7j \u2014 sensibilite a la winsorisation 1/99",
+   "winsorized": false,
+   "n_raw": 265485,
+   "n_independent_L3": 305,
+   "gross_bps": -202.4,
+   "net_bps": -230.4,
+   "net_bps_stress28": -258.4,
+   "t_stat_declustered": -2.31,
+   "bootstrap_ci95": [
+    -382.9,
+    -39.0
+   ],
+   "n_required": 1796.6,
+   "event_rate_per_week_6m": 0.967,
+   "eta_forward_confirmation": {
+    "days": 13007.0,
+    "years": 35.61
+   },
+   "_source": "fixups_results.json",
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "verdict_reason": "ETA de confirmation forward = 35.61 ans (> 3.0)",
+   "prereg_status": "COMPLEMENT (sensibilite de C2 a la winsorisation transversale)",
+   "t_stat_needed_for_eta_3y": 7.95
+  },
+  {
+   "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_btc30",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement forward de btc30 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+   "paired_episodes": false,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 21,
+   "arm_A_bps": 1136.4,
+   "arm_B_bps": -35.5,
+   "gross_bps": 1171.9,
+   "net_bps": 1157.9,
+   "net_bps_stress28": 1143.9,
+   "t_stat_declustered": 2.01,
+   "bootstrap_ci95": [
+    53.0,
+    2307.9
+   ],
+   "n_required": 132.6,
+   "event_rate_per_week_6m": 0.116,
+   "eta_forward_confirmation": {
+    "days": 7997.0,
+    "years": 21.9
+   },
+   "n_raw": 2124,
+   "median_spell_days": 21.0,
+   "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "diff_bps": -1235.8,
+     "n_hi": 20,
+     "n_lo": 37
+    },
+    {
+     "year": 2021,
+     "diff_bps": -683.9,
+     "n_hi": 32,
+     "n_lo": 169
+    },
+    {
+     "year": 2022,
+     "diff_bps": -54.4,
+     "n_hi": 8,
+     "n_lo": 239
+    },
+    {
+     "year": 2023,
+     "diff_bps": -691.8,
+     "n_hi": 227,
+     "n_lo": 51
+    },
+    {
+     "year": 2024,
+     "diff_bps": 2007.9,
+     "n_hi": 218,
+     "n_lo": 66
+    },
+    {
+     "year": 2026,
+     "diff_bps": 257.5,
+     "n_hi": 46,
+     "n_lo": 28
+    }
+   ],
+   "years_same_sign": "2/6",
+   "ex_best_year": {
+    "dropped": 2024,
+    "gross_bps": -28.9
+   },
+   "_source": "fixups_results.json",
+   "verdict": "REGIME_DEPENDENT",
+   "verdict_reason": "le signe s'inverse en retirant 2024 (+1172 -> -29bps)",
+   "prereg_status": "METHOD_AMENDED (plage de regime, mais cible fwd7/fwd30 encore chevauchante entre plages)",
+   "t_stat_needed_for_eta_3y": 5.42
+  },
+  {
+   "id": "E2b_WAVE_COND_XSEC_MOM_SPELL",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement quotidien moyen de livre momentum transversal 7j (Q5-Q1) PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+   "paired_episodes": false,
+   "n_raw": 2124,
+   "n_independent_L1": 1466,
+   "n_independent_L2": 49,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 22,
+   "arm_A_bps": -613.6,
+   "arm_B_bps": 583.4,
+   "gross_bps": -1197.0,
+   "net_bps": -1225.0,
+   "net_bps_stress28": -1253.0,
+   "t_stat_declustered": -2.29,
+   "bootstrap_ci95": [
+    -2217.0,
+    -246.7
+   ],
+   "n_required": 101.5,
+   "event_rate_per_week_6m": 0.155,
+   "eta_forward_confirmation": {
+    "days": 4593.0,
+    "years": 12.58
+   },
+   "unit": "bps par 30d de detention continue",
+   "median_spell_days": 21.0,
+   "n_days_HI": 887,
+   "n_days_LO": 579,
+   "mean_spell_cum_bps_HI": 22.2,
+   "mean_spell_cum_bps_LO": 119.6,
+   "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -5300.2
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 1615.6
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -201.3
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -1176.1
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 416.5
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 28,
+     "diff_bps": -294.8
+    }
+   ],
+   "years_same_sign": "4/6",
+   "ex_best_year": {
+    "dropped": 2020,
+    "gross_bps": 76.9
+   },
+   "_source": "final_results.json",
+   "verdict": "REGIME_DEPENDENT",
+   "verdict_reason": "le signe s'inverse en retirant 2020 (-1197 -> +77bps)",
+   "prereg_status": "METHOD_AMENDED (idem E1c)",
+   "t_stat_needed_for_eta_3y": 4.69
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d1h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 478,
+   "n_independent_L1": 478,
+   "n_independent_L2": 334,
+   "n_independent_L3": 138,
+   "gross_bps": 422.9,
+   "net_bps": 394.9,
+   "net_bps_stress28": 366.9,
+   "net_bps_thin60": 362.9,
+   "t_stat_L2": 2.46,
+   "t_stat_declustered": 1.72,
+   "bootstrap_ci95": [
+    -68.2,
+    888.2
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 1048.6,
+     "t": 2.69
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 369.0,
+     "t": 1.13
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 468.7,
+     "t": 1.26
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -235.2,
+     "t": -0.22
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 277.6,
+    "t": 0.96,
+    "n_ep": 112
+   },
+   "years_same_sign": "3/4",
+   "n_required": 1467.5,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 14756.0,
+    "years": 40.4
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 1014.7,
+    "rate_wk": 0.232,
+    "years": 83.81
+   },
+   "abs_gross_bps_long": -319.1,
+   "bench_gross_bps": -39.1,
+   "frac_dead_names": 0.178,
+   "n_symbols": 478,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.72 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d1h_h24h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 478,
+   "n_independent_L1": 478,
+   "n_independent_L2": 334,
+   "n_independent_L3": 138,
+   "gross_bps": 164.8,
+   "net_bps": 136.8,
+   "net_bps_stress28": 108.8,
+   "net_bps_thin60": 104.8,
+   "t_stat_L2": 1.75,
+   "t_stat_declustered": 1.23,
+   "bootstrap_ci95": [
+    -105.5,
+    417.1
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 341.4,
+     "t": 0.8
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 46.0,
+     "t": 0.19
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 208.7,
+     "t": 1.17
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 102.7,
+     "t": 0.31
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 123.8,
+    "t": 0.93,
+    "n_ep": 112
+   },
+   "years_same_sign": "4/4",
+   "n_required": 2854.0,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 28698.0,
+    "years": 78.57
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 794.6,
+    "rate_wk": 0.232,
+    "years": 65.63
+   },
+   "abs_gross_bps_long": -150.9,
+   "bench_gross_bps": -18.2,
+   "frac_dead_names": 0.178,
+   "n_symbols": 478,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.23 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d1h_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 478,
+   "n_independent_L1": 478,
+   "n_independent_L2": 334,
+   "n_independent_L3": 138,
+   "gross_bps": 247.1,
+   "net_bps": 219.1,
+   "net_bps_stress28": 191.1,
+   "net_bps_thin60": 187.1,
+   "t_stat_L2": 2.25,
+   "t_stat_declustered": 1.37,
+   "bootstrap_ci95": [
+    -110.0,
+    594.4
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 358.3,
+     "t": 0.97
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 20.5,
+     "t": 0.06
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 438.8,
+     "t": 1.9
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 131.3,
+     "t": 0.21
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 149.5,
+    "t": 0.59,
+    "n_ep": 87
+   },
+   "years_same_sign": "4/4",
+   "n_required": 2313.2,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 23260.0,
+    "years": 63.68
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 348.9,
+    "rate_wk": 0.232,
+    "years": 28.81
+   },
+   "abs_gross_bps_long": -170.7,
+   "bench_gross_bps": -5.7,
+   "frac_dead_names": 0.178,
+   "n_symbols": 478,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.37 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d24h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 488,
+   "n_independent_L1": 488,
+   "n_independent_L2": 343,
+   "n_independent_L3": 143,
+   "gross_bps": 386.0,
+   "net_bps": 358.0,
+   "net_bps_stress28": 330.0,
+   "t_stat_L2": 2.56,
+   "t_stat_declustered": 1.85,
+   "bootstrap_ci95": [
+    -42.6,
+    767.0
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 811.5,
+     "t": 3.03
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 359.7,
+     "t": 1.15
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 370.6,
+     "t": 1.25
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -70.5,
+     "t": -0.07
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 268.2,
+    "t": 1.05,
+    "n_ep": 112
+   },
+   "years_same_sign": "3/4",
+   "n_required": 1307.9,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 13152.0,
+    "years": 36.01
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 34,
+    "n_required": 513.4,
+    "rate_wk": 0.232,
+    "years": 42.4
+   },
+   "abs_gross_bps_long": -306.7,
+   "bench_gross_bps": -42.2,
+   "frac_dead_names": 0.178,
+   "n_symbols": 488,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.85 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d24h_h24h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 488,
+   "n_independent_L1": 488,
+   "n_independent_L2": 343,
+   "n_independent_L3": 143,
+   "gross_bps": 160.9,
+   "net_bps": 132.9,
+   "net_bps_stress28": 104.9,
+   "t_stat_L2": 2.34,
+   "t_stat_declustered": 1.7,
+   "bootstrap_ci95": [
+    -30.3,
+    346.6
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 58.6,
+     "t": 0.35
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": -116.3,
+     "t": -0.54
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 381.8,
+     "t": 3.12
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 260.3,
+     "t": 0.85
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 32.7,
+    "t": 0.25,
+    "n_ep": 92
+   },
+   "years_same_sign": "3/4",
+   "n_required": 1558.7,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 15674.0,
+    "years": 42.91
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 34,
+    "n_required": 178.3,
+    "rate_wk": 0.232,
+    "years": 14.73
+   },
+   "abs_gross_bps_long": -100.7,
+   "bench_gross_bps": 19.9,
+   "frac_dead_names": 0.178,
+   "n_symbols": 488,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.70 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d24h_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 488,
+   "n_independent_L1": 488,
+   "n_independent_L2": 343,
+   "n_independent_L3": 143,
+   "gross_bps": 204.0,
+   "net_bps": 176.0,
+   "net_bps_stress28": 148.0,
+   "t_stat_L2": 1.79,
+   "t_stat_declustered": 1.66,
+   "bootstrap_ci95": [
+    -40.4,
+    440.2
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 175.4,
+     "t": 0.69
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 55.6,
+     "t": 0.21
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 356.5,
+     "t": 1.95
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 183.9,
+     "t": 0.56
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 126.6,
+    "t": 0.79,
+    "n_ep": 92
+   },
+   "years_same_sign": "4/4",
+   "n_required": 1628.6,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 16377.0,
+    "years": 44.84
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 34,
+    "n_required": 529.0,
+    "rate_wk": 0.232,
+    "years": 43.69
+   },
+   "abs_gross_bps_long": -121.2,
+   "bench_gross_bps": 6.1,
+   "frac_dead_names": 0.178,
+   "n_symbols": 488,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.66 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d4h_h24h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 479,
+   "n_independent_L1": 479,
+   "n_independent_L2": 335,
+   "n_independent_L3": 138,
+   "gross_bps": 218.0,
+   "net_bps": 190.0,
+   "net_bps_stress28": 162.0,
+   "t_stat_L2": 2.68,
+   "t_stat_declustered": 1.87,
+   "bootstrap_ci95": [
+    -16.4,
+    438.2
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 217.2,
+     "t": 0.67
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 22.2,
+     "t": 0.11
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 427.1,
+     "t": 2.57
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 116.7,
+     "t": 0.34
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 104.4,
+    "t": 0.67,
+    "n_ep": 87
+   },
+   "years_same_sign": "4/4",
+   "n_required": 1235.1,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 12419.0,
+    "years": 34.0
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 782.9,
+    "rate_wk": 0.232,
+    "years": 64.66
+   },
+   "abs_gross_bps_long": -217.3,
+   "bench_gross_bps": -6.7,
+   "frac_dead_names": 0.177,
+   "n_symbols": 479,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.87 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d4h_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 479,
+   "n_independent_L1": 479,
+   "n_independent_L2": 335,
+   "n_independent_L3": 138,
+   "gross_bps": 275.2,
+   "net_bps": 247.2,
+   "net_bps_stress28": 219.2,
+   "t_stat_L2": 2.27,
+   "t_stat_declustered": 1.7,
+   "bootstrap_ci95": [
+    -50.3,
+    581.4
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 391.2,
+     "t": 1.55
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 27.3,
+     "t": 0.08
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 521.4,
+     "t": 2.4
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": 86.8,
+     "t": 0.15
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 151.1,
+    "t": 0.68,
+    "n_ep": 87
+   },
+   "years_same_sign": "4/4",
+   "n_required": 1508.0,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 15164.0,
+    "years": 41.52
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 324.9,
+    "rate_wk": 0.232,
+    "years": 26.83
+   },
+   "abs_gross_bps_long": -174.7,
+   "bench_gross_bps": 8.7,
+   "frac_dead_names": 0.177,
+   "n_symbols": 479,
+   "_source": "axisA_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.70 < 2.0",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A4b_LIST_WAVE_SIZE_COND_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade plus rentable dans les grandes vagues (>=5 listings/semaine) que dans les petites",
+   "paired_episodes": false,
+   "n_independent_L3": 45,
+   "n_episodes_A": 45,
+   "n_episodes_B": 98,
+   "arm_A_bps": -85.4,
+   "arm_B_bps": 336.9,
+   "gross_bps": -422.3,
+   "net_bps": -450.3,
+   "net_bps_stress28": -478.3,
+   "t_stat_declustered": -1.53,
+   "bootstrap_ci95": [
+    -995.2,
+    91.1
+   ],
+   "n_required": 606.9,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 6103.0,
+    "years": 16.71
+   },
+   "n_raw": 488,
+   "median_wave_size": 5.0,
+   "note": "bras disjoints par construction (la taille de vague est constante dans une semaine) -> Welch",
+   "_source": "fixups_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.53 < 2.0",
+   "prereg_status": "CORRECTION (bras disjoints/Welch : l'appariement par semaine de A4 donnait L3=0)",
+   "t_stat_needed_for_eta_3y": 3.6
+  },
+  {
+   "id": "A5_LIST_FADE_NET_OF_FUNDING_d24h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+   "paired_episodes": true,
+   "n_raw": 488,
+   "n_independent_L1": 488,
+   "n_independent_L2": 343,
+   "n_independent_L3": 143,
+   "gross_bps": 230.9,
+   "net_bps": 202.9,
+   "net_bps_stress28": 174.9,
+   "t_stat_declustered": 1.09,
+   "bootstrap_ci95": [
+    -201.1,
+    624.6
+   ],
+   "n_required": 3772.3,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 37932.0,
+    "years": 103.85
+   },
+   "price_only_gross_bps": 386.0,
+   "funding_drag_short_leg_bps": -142.1,
+   "funding_drag_long_leg_bps": -2.0,
+   "total_funding_drag_bps": -144.1,
+   "median_funding_new_listing_bps": 16.0,
+   "n_events": 488,
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 604.4,
+     "t": 2.32
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 338.1,
+     "t": 1.06
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 172.0,
+     "t": 0.54
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -277.9,
+     "t": -0.29
+    }
+   ],
+   "years_same_sign": "3/4",
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 127.6,
+    "t": 0.49,
+    "n_ep": 112
+   },
+   "_source": "final_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.09 < 2.0",
+   "prereg_status": "POST_HOC_COMBINATION (A1 x A3, non preenregistre ; degrade le resultat, ne le sauve pas)",
+   "t_stat_needed_for_eta_3y": 6.42
+  },
+  {
+   "id": "A5_LIST_FADE_NET_OF_FUNDING_d4h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+   "paired_episodes": true,
+   "n_raw": 479,
+   "n_independent_L1": 479,
+   "n_independent_L2": 335,
+   "n_independent_L3": 138,
+   "gross_bps": 277.3,
+   "net_bps": 249.3,
+   "net_bps_stress28": 221.3,
+   "t_stat_declustered": 1.17,
+   "bootstrap_ci95": [
+    -198.8,
+    718.4
+   ],
+   "n_required": 3177.8,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 31954.0,
+    "years": 87.49
+   },
+   "price_only_gross_bps": 472.5,
+   "funding_drag_short_leg_bps": -183.5,
+   "funding_drag_long_leg_bps": -1.9,
+   "total_funding_drag_bps": -185.5,
+   "median_funding_new_listing_bps": 10.0,
+   "n_events": 479,
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 776.5,
+     "t": 2.61
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 343.4,
+     "t": 1.02
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 285.4,
+     "t": 0.77
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -334.3,
+     "t": -0.33
+    }
+   ],
+   "years_same_sign": "3/4",
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 161.4,
+    "t": 0.57,
+    "n_ep": 112
+   },
+   "_source": "final_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.17 < 2.0",
+   "prereg_status": "POST_HOC_COMBINATION (A1 x A3, non preenregistre ; degrade le resultat, ne le sauve pas)",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_bask7",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement forward de bask7 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+   "paired_episodes": false,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 22,
+   "arm_A_bps": -112.6,
+   "arm_B_bps": 83.7,
+   "gross_bps": -196.3,
+   "net_bps": -210.3,
+   "net_bps_stress28": -224.3,
+   "t_stat_declustered": -1.12,
+   "bootstrap_ci95": [
+    -539.7,
+    135.4
+   ],
+   "n_required": 429.3,
+   "event_rate_per_week_6m": 0.155,
+   "eta_forward_confirmation": {
+    "days": 19424.0,
+    "years": 53.18
+   },
+   "n_raw": 2124,
+   "median_spell_days": 21.0,
+   "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "diff_bps": -1092.9,
+     "n_hi": 20,
+     "n_lo": 37
+    },
+    {
+     "year": 2021,
+     "diff_bps": 520.6,
+     "n_hi": 32,
+     "n_lo": 169
+    },
+    {
+     "year": 2022,
+     "diff_bps": -665.1,
+     "n_hi": 8,
+     "n_lo": 239
+    },
+    {
+     "year": 2023,
+     "diff_bps": -769.3,
+     "n_hi": 227,
+     "n_lo": 51
+    },
+    {
+     "year": 2024,
+     "diff_bps": 665.1,
+     "n_hi": 218,
+     "n_lo": 66
+    },
+    {
+     "year": 2026,
+     "diff_bps": -171.4,
+     "n_hi": 46,
+     "n_lo": 28
+    }
+   ],
+   "years_same_sign": "4/6",
+   "ex_best_year": {
+    "dropped": 2020,
+    "gross_bps": -21.2
+   },
+   "_source": "fixups_results.json",
+   "verdict": "WEAK",
+   "verdict_reason": "|t_L3|=1.12 < 2.0",
+   "prereg_status": "METHOD_AMENDED (plage de regime, mais cible fwd7/fwd30 encore chevauchante entre plages)",
+   "t_stat_needed_for_eta_3y": 4.69
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d1h_h695h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 473,
+   "n_independent_L1": 473,
+   "n_independent_L2": 329,
+   "n_independent_L3": 136,
+   "gross_bps": 283.7,
+   "net_bps": 255.7,
+   "net_bps_stress28": 227.7,
+   "net_bps_thin60": 223.7,
+   "t_stat_L2": -0.61,
+   "t_stat_declustered": 0.45,
+   "bootstrap_ci95": [
+    -1135.8,
+    1304.5
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 1538.9,
+     "t": 2.04
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 791.8,
+     "t": 1.42
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": -655.8,
+     "t": -0.43
+    },
+    {
+     "year": 2026,
+     "n_ep": 20,
+     "mean_bps": 196.9,
+     "t": 0.23
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": -13.0,
+    "t": -0.02,
+    "n_ep": 110
+   },
+   "years_same_sign": "3/4",
+   "n_required": 21474.4,
+   "event_rate_per_week_6m": 0.619,
+   "eta_forward_confirmation": {
+    "days": 242929.0,
+    "years": 665.12
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 2597.6,
+    "rate_wk": 0.232,
+    "years": 214.55
+   },
+   "abs_gross_bps_long": 532.7,
+   "bench_gross_bps": -217.7,
+   "frac_dead_names": 0.18,
+   "n_symbols": 473,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.45, gross=283.7bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.64
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d24h_h672h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 483,
+   "n_independent_L1": 483,
+   "n_independent_L2": 338,
+   "n_independent_L3": 141,
+   "gross_bps": -148.5,
+   "net_bps": -176.5,
+   "net_bps_stress28": -204.5,
+   "t_stat_L2": -0.8,
+   "t_stat_declustered": -0.16,
+   "bootstrap_ci95": [
+    -2271.5,
+    1173.5
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 1158.3,
+     "t": 1.9
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 711.1,
+     "t": 1.26
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": -1661.0,
+     "t": -0.67
+    },
+    {
+     "year": 2026,
+     "n_ep": 20,
+     "mean_bps": 163.8,
+     "t": 0.19
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 743.5,
+    "t": 2.0,
+    "n_ep": 90
+   },
+   "years_same_sign": "1/4",
+   "n_required": 178624.8,
+   "event_rate_per_week_6m": 0.619,
+   "eta_forward_confirmation": {
+    "days": 2020694.0,
+    "years": 5532.47
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 34,
+    "n_required": 5080.0,
+    "rate_wk": 0.232,
+    "years": 419.58
+   },
+   "abs_gross_bps_long": 1378.7,
+   "bench_gross_bps": -206.5,
+   "frac_dead_names": 0.18,
+   "n_symbols": 483,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.16, gross=-148.5bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.76
+  },
+  {
+   "id": "A1_LIST_DRIFT_XSNEUTRAL_d4h_h692h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance relative post-listing (short nouveau / long panier eligible)",
+   "n_raw": 474,
+   "n_independent_L1": 474,
+   "n_independent_L2": 330,
+   "n_independent_L3": 136,
+   "gross_bps": 204.9,
+   "net_bps": 176.9,
+   "net_bps_stress28": 148.9,
+   "t_stat_L2": -0.67,
+   "t_stat_declustered": 0.26,
+   "bootstrap_ci95": [
+    -1515.4,
+    1340.3
+   ],
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 1485.7,
+     "t": 2.13
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 858.0,
+     "t": 1.62
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": -891.9,
+     "t": -0.46
+    },
+    {
+     "year": 2026,
+     "n_ep": 20,
+     "mean_bps": 224.0,
+     "t": 0.26
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": -97.9,
+    "t": -0.1,
+    "n_ep": 110
+   },
+   "years_same_sign": "3/4",
+   "n_required": 60932.4,
+   "event_rate_per_week_6m": 0.619,
+   "eta_forward_confirmation": {
+    "days": 689298.0,
+    "years": 1887.23
+   },
+   "eta_L3_alt": {
+    "unit": "['wave_gap7']",
+    "n_ep": 31,
+    "n_required": 2610.8,
+    "rate_wk": 0.232,
+    "years": 215.64
+   },
+   "abs_gross_bps_long": 796.7,
+   "bench_gross_bps": -206.9,
+   "frac_dead_names": 0.179,
+   "n_symbols": 474,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.26, gross=204.9bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 6.64
+  },
+  {
+   "id": "A2_LIST_D0_COND_SPREAD_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade plus rentable apres un pump jour-0 qu'apres un dump jour-0 (A-B)",
+   "n_raw": 372,
+   "n_arm_A": 61,
+   "n_arm_B": 311,
+   "n_independent_L3": 39,
+   "arm_A_bps": 550.6,
+   "arm_B_bps": 923.2,
+   "gross_bps": -372.6,
+   "net_bps": -400.6,
+   "net_bps_stress28": -428.6,
+   "t_stat_declustered": -0.52,
+   "bootstrap_ci95": [
+    -1800.3,
+    958.3
+   ],
+   "n_required": 4491.3,
+   "event_rate_per_week_6m": 0.077,
+   "eta_forward_confirmation": {
+    "days": 406459.0,
+    "years": 1112.85
+   },
+   "year_by_year": null,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.52, gross=-372.6bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 10.08
+  },
+  {
+   "id": "A2_LIST_D0_COND_SPREAD_h24h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade plus rentable apres un pump jour-0 qu'apres un dump jour-0 (A-B)",
+   "n_raw": 372,
+   "n_arm_A": 61,
+   "n_arm_B": 311,
+   "n_independent_L3": 39,
+   "arm_A_bps": 412.5,
+   "arm_B_bps": 233.1,
+   "gross_bps": 179.4,
+   "net_bps": 151.4,
+   "net_bps_stress28": 123.4,
+   "t_stat_declustered": 0.42,
+   "bootstrap_ci95": [
+    -664.2,
+    989.1
+   ],
+   "n_required": 7010.1,
+   "event_rate_per_week_6m": 0.077,
+   "eta_forward_confirmation": {
+    "days": 634413.0,
+    "years": 1736.96
+   },
+   "year_by_year": null,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.42, gross=179.4bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 10.08
+  },
+  {
+   "id": "A2_LIST_D0_COND_SPREAD_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade plus rentable apres un pump jour-0 qu'apres un dump jour-0 (A-B)",
+   "n_raw": 372,
+   "n_arm_A": 61,
+   "n_arm_B": 311,
+   "n_independent_L3": 39,
+   "arm_A_bps": 667.2,
+   "arm_B_bps": 453.3,
+   "gross_bps": 213.9,
+   "net_bps": 185.9,
+   "net_bps_stress28": 157.9,
+   "t_stat_declustered": 0.44,
+   "bootstrap_ci95": [
+    -751.6,
+    1134.3
+   ],
+   "n_required": 6218.2,
+   "event_rate_per_week_6m": 0.077,
+   "eta_forward_confirmation": {
+    "days": 562748.0,
+    "years": 1540.75
+   },
+   "year_by_year": null,
+   "_source": "axisA_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.44, gross=213.9bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 10.08
+  },
+  {
+   "id": "A4b_LIST_WAVE_SIZE_COND_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade plus rentable dans les grandes vagues (>=5 listings/semaine) que dans les petites",
+   "paired_episodes": false,
+   "n_independent_L3": 45,
+   "n_episodes_A": 45,
+   "n_episodes_B": 98,
+   "arm_A_bps": 266.5,
+   "arm_B_bps": 440.9,
+   "gross_bps": -174.4,
+   "net_bps": -202.4,
+   "net_bps_stress28": -230.4,
+   "t_stat_declustered": -0.44,
+   "bootstrap_ci95": [
+    -939.2,
+    617.1
+   ],
+   "n_required": 7391.1,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 74322.0,
+    "years": 203.49
+   },
+   "n_raw": 488,
+   "median_wave_size": 5.0,
+   "note": "bras disjoints par construction (la taille de vague est constante dans une semaine) -> Welch",
+   "_source": "fixups_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.44, gross=-174.4bps : indistinguable de zero",
+   "prereg_status": "CORRECTION (bras disjoints/Welch : l'appariement par semaine de A4 donnait L3=0)",
+   "t_stat_needed_for_eta_3y": 3.6
+  },
+  {
+   "id": "A5_LIST_FADE_NET_OF_FUNDING_d1h_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+   "paired_episodes": true,
+   "n_raw": 478,
+   "n_independent_L1": 478,
+   "n_independent_L2": 334,
+   "n_independent_L3": 138,
+   "gross_bps": 217.1,
+   "net_bps": 189.1,
+   "net_bps_stress28": 161.1,
+   "t_stat_declustered": 0.86,
+   "bootstrap_ci95": [
+    -282.0,
+    698.7
+   ],
+   "n_required": 5812.9,
+   "event_rate_per_week_6m": 0.696,
+   "eta_forward_confirmation": {
+    "days": 58452.0,
+    "years": 160.04
+   },
+   "price_only_gross_bps": 422.9,
+   "funding_drag_short_leg_bps": -195.8,
+   "funding_drag_long_leg_bps": -1.9,
+   "total_funding_drag_bps": -197.7,
+   "median_funding_new_listing_bps": 3.9,
+   "n_events": 478,
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 26,
+     "mean_bps": 752.7,
+     "t": 1.89
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 330.1,
+     "t": 0.99
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": 193.9,
+     "t": 0.5
+    },
+    {
+     "year": 2026,
+     "n_ep": 22,
+     "mean_bps": -457.2,
+     "t": -0.43
+    }
+   ],
+   "years_same_sign": "3/4",
+   "ex_best_year": {
+    "dropped": 2023,
+    "gross_bps": 92.7,
+    "t": 0.31,
+    "n_ep": 112
+   },
+   "_source": "final_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.86, gross=217.1bps : indistinguable de zero",
+   "prereg_status": "POST_HOC_COMBINATION (A1 x A3, non preenregistre ; degrade le resultat, ne le sauve pas)",
+   "t_stat_needed_for_eta_3y": 6.31
+  },
+  {
+   "id": "A5_LIST_FADE_NET_OF_FUNDING_d24h_h672h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+   "paired_episodes": true,
+   "n_raw": 483,
+   "n_independent_L1": 483,
+   "n_independent_L2": 338,
+   "n_independent_L3": 141,
+   "gross_bps": -425.4,
+   "net_bps": -453.4,
+   "net_bps_stress28": -481.4,
+   "t_stat_declustered": -0.45,
+   "bootstrap_ci95": [
+    -2569.5,
+    906.1
+   ],
+   "n_required": 22192.2,
+   "event_rate_per_week_6m": 0.619,
+   "eta_forward_confirmation": {
+    "days": 251049.0,
+    "years": 687.35
+   },
+   "price_only_gross_bps": -148.5,
+   "funding_drag_short_leg_bps": -232.9,
+   "funding_drag_long_leg_bps": -5.5,
+   "total_funding_drag_bps": -238.4,
+   "median_funding_new_listing_bps": 50.0,
+   "n_events": 483,
+   "year_by_year": [
+    {
+     "year": 2023,
+     "n_ep": 31,
+     "mean_bps": 912.4,
+     "t": 1.51
+    },
+    {
+     "year": 2024,
+     "n_ep": 39,
+     "mean_bps": 701.5,
+     "t": 1.19
+    },
+    {
+     "year": 2025,
+     "n_ep": 52,
+     "mean_bps": -2014.2,
+     "t": -0.81
+    },
+    {
+     "year": 2026,
+     "n_ep": 20,
+     "mean_bps": -467.1,
+     "t": -0.52
+    }
+   ],
+   "years_same_sign": "2/4",
+   "ex_best_year": {
+    "dropped": 2025,
+    "gross_bps": 514.4,
+    "t": 1.34,
+    "n_ep": 90
+   },
+   "_source": "final_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.45, gross=-425.4bps : indistinguable de zero",
+   "prereg_status": "POST_HOC_COMBINATION (A1 x A3, non preenregistre ; degrade le resultat, ne le sauve pas)",
+   "t_stat_needed_for_eta_3y": 6.76
+  },
+  {
+   "id": "B1_XSEC_AGE_FACTOR_1D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "long quintile le plus vieux / short quintile le plus jeune, equal-weight",
+   "n_raw": 2255,
+   "n_independent_L1": 2255,
+   "n_independent_L2": 2255,
+   "n_independent_L3": 323,
+   "gross_bps": 1.4,
+   "net_bps": -26.6,
+   "net_bps_stress28": -54.6,
+   "t_stat_L2": 0.29,
+   "t_stat_declustered": 0.21,
+   "bootstrap_ci95": [
+    -11.3,
+    13.8
+   ],
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_ep": 32,
+     "mean_bps": 12.6,
+     "t": 0.35
+    },
+    {
+     "year": 2021,
+     "n_ep": 53,
+     "mean_bps": -21.0,
+     "t": -0.93
+    },
+    {
+     "year": 2022,
+     "n_ep": 53,
+     "mean_bps": 16.0,
+     "t": 1.79
+    },
+    {
+     "year": 2023,
+     "n_ep": 53,
+     "mean_bps": -5.3,
+     "t": -0.49
+    },
+    {
+     "year": 2024,
+     "n_ep": 53,
+     "mean_bps": 7.7,
+     "t": 0.61
+    },
+    {
+     "year": 2025,
+     "n_ep": 53,
+     "mean_bps": 15.6,
+     "t": 1.17
+    },
+    {
+     "year": 2026,
+     "n_ep": 31,
+     "mean_bps": -23.7,
+     "t": -1.95
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2022,
+    "gross_bps": -1.7,
+    "t": -0.23,
+    "n_ep": 272
+   },
+   "years_same_sign": "4/7",
+   "n_required": 221063.1,
+   "event_rate_per_week_6m": 1.006,
+   "eta_forward_confirmation": {
+    "days": 1538940.0,
+    "years": 4213.47
+   },
+   "eta_L3_alt": {
+    "unit": "['_month']",
+    "n_ep": 75,
+    "n_required": 294859.0,
+    "rate_wk": 0.232,
+    "years": 24353.44
+   },
+   "arm_old_bps": 8.2,
+   "arm_young_bps": 6.7,
+   "xs_universe_bps": 7.9,
+   "n_rebalance_dates_overlapping": 2255,
+   "mean_names_per_date": 150.8,
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.21, gross=1.4bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 8.02
+  },
+  {
+   "id": "B1_XSEC_AGE_FACTOR_7D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "long quintile le plus vieux / short quintile le plus jeune, equal-weight",
+   "n_raw": 322,
+   "n_independent_L1": 322,
+   "n_independent_L2": 322,
+   "n_independent_L3": 75,
+   "gross_bps": -34.7,
+   "net_bps": -62.7,
+   "net_bps_stress28": -90.7,
+   "t_stat_L2": -0.45,
+   "t_stat_declustered": -0.6,
+   "bootstrap_ci95": [
+    -145.8,
+    75.1
+   ],
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_ep": 8,
+     "mean_bps": -19.6,
+     "t": -0.08
+    },
+    {
+     "year": 2021,
+     "n_ep": 12,
+     "mean_bps": -248.0,
+     "t": -1.04
+    },
+    {
+     "year": 2022,
+     "n_ep": 12,
+     "mean_bps": 68.1,
+     "t": 1.07
+    },
+    {
+     "year": 2023,
+     "n_ep": 12,
+     "mean_bps": -53.6,
+     "t": -0.52
+    },
+    {
+     "year": 2024,
+     "n_ep": 12,
+     "mean_bps": 62.4,
+     "t": 0.45
+    },
+    {
+     "year": 2025,
+     "n_ep": 12,
+     "mean_bps": 73.7,
+     "t": 0.7
+    },
+    {
+     "year": 2026,
+     "n_ep": 7,
+     "mean_bps": -182.0,
+     "t": -2.6
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2021,
+    "gross_bps": 6.0,
+    "t": 0.12,
+    "n_ep": 63
+   },
+   "years_same_sign": "4/7",
+   "n_required": 6476.5,
+   "event_rate_per_week_6m": 0.232,
+   "eta_forward_confirmation": {
+    "days": 195375.0,
+    "years": 534.92
+   },
+   "eta_L3_alt": {
+    "unit": "['_quarter']",
+    "n_ep": 26,
+    "n_required": 4266.6,
+    "rate_wk": 0.077,
+    "years": 1057.17
+   },
+   "arm_old_bps": 56.5,
+   "arm_young_bps": 76.5,
+   "xs_universe_bps": 67.5,
+   "n_rebalance_dates_overlapping": 2249,
+   "mean_names_per_date": 150.4,
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.60, gross=-34.7bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 8.05
+  },
+  {
+   "id": "B2_XSEC_AGE_RESID_LIQ_1D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "coefficient Fama-MacBeth de log(age) apres controle log(qvol) et Amihud (bps par 1 sigma d'age)",
+   "n_raw": 2220,
+   "n_independent_L1": 2220,
+   "n_independent_L2": 2220,
+   "n_independent_L3": 318,
+   "gross_bps": 0.9,
+   "net_bps": 0.9,
+   "net_bps_stress28": 0.9,
+   "t_stat_L2": 0.55,
+   "t_stat_declustered": 0.47,
+   "bootstrap_ci95": [
+    -2.9,
+    4.9
+   ],
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_ep": 27,
+     "mean_bps": -0.1,
+     "t": -0.01
+    },
+    {
+     "year": 2021,
+     "n_ep": 53,
+     "mean_bps": -3.3,
+     "t": -0.49
+    },
+    {
+     "year": 2022,
+     "n_ep": 53,
+     "mean_bps": 4.1,
+     "t": 1.36
+    },
+    {
+     "year": 2023,
+     "n_ep": 53,
+     "mean_bps": 2.7,
+     "t": 0.66
+    },
+    {
+     "year": 2024,
+     "n_ep": 53,
+     "mean_bps": 2.4,
+     "t": 0.65
+    },
+    {
+     "year": 2025,
+     "n_ep": 53,
+     "mean_bps": 2.8,
+     "t": 0.67
+    },
+    {
+     "year": 2026,
+     "n_ep": 31,
+     "mean_bps": -7.3,
+     "t": -1.79
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2022,
+    "gross_bps": 0.3,
+    "t": 0.12,
+    "n_ep": 267
+   },
+   "years_same_sign": "4/7",
+   "n_required": 45171.2,
+   "event_rate_per_week_6m": 1.006,
+   "eta_forward_confirmation": {
+    "days": 314461.0,
+    "years": 860.96
+   },
+   "eta_L3_alt": {
+    "unit": "['_month']",
+    "n_ep": 73,
+    "n_required": 14399.5,
+    "rate_wk": 0.232,
+    "years": 1189.31
+   },
+   "univariate_age_coef_bps": 0.2,
+   "univariate_age_t": 0.09,
+   "note": "coefficient de regression, PAS un rendement de livre : cout non applicable (cost_rt=0)",
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.47, gross=0.9bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.96
+  },
+  {
+   "id": "B2_XSEC_AGE_RESID_LIQ_7D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "coefficient Fama-MacBeth de log(age) apres controle log(qvol) et Amihud (bps par 1 sigma d'age)",
+   "n_raw": 317,
+   "n_independent_L1": 317,
+   "n_independent_L2": 317,
+   "n_independent_L3": 73,
+   "gross_bps": -6.0,
+   "net_bps": -6.0,
+   "net_bps_stress28": -6.0,
+   "t_stat_L2": -0.17,
+   "t_stat_declustered": -0.31,
+   "bootstrap_ci95": [
+    -45.9,
+    29.8
+   ],
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_ep": 6,
+     "mean_bps": 0.8,
+     "t": 0.01
+    },
+    {
+     "year": 2021,
+     "n_ep": 12,
+     "mean_bps": -70.4,
+     "t": -0.82
+    },
+    {
+     "year": 2022,
+     "n_ep": 12,
+     "mean_bps": 18.0,
+     "t": 0.79
+    },
+    {
+     "year": 2023,
+     "n_ep": 12,
+     "mean_bps": 15.4,
+     "t": 0.44
+    },
+    {
+     "year": 2024,
+     "n_ep": 12,
+     "mean_bps": 12.7,
+     "t": 0.31
+    },
+    {
+     "year": 2025,
+     "n_ep": 12,
+     "mean_bps": 17.1,
+     "t": 0.55
+    },
+    {
+     "year": 2026,
+     "n_ep": 7,
+     "mean_bps": -51.5,
+     "t": -2.25
+    }
+   ],
+   "ex_best_year": {
+    "dropped": 2021,
+    "gross_bps": 6.6,
+    "t": 0.41,
+    "n_ep": 61
+   },
+   "years_same_sign": "2/7",
+   "n_required": 23425.6,
+   "event_rate_per_week_6m": 0.232,
+   "eta_forward_confirmation": {
+    "days": 706674.0,
+    "years": 1934.81
+   },
+   "eta_L3_alt": {
+    "unit": "['_month']",
+    "n_ep": 73,
+    "n_required": 23425.6,
+    "rate_wk": 0.232,
+    "years": 1934.81
+   },
+   "univariate_age_coef_bps": -8.4,
+   "univariate_age_t": -0.4,
+   "note": "coefficient de regression, PAS un rendement de livre : cout non applicable (cost_rt=0)",
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.31, gross=-6.0bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.94
+  },
+  {
+   "id": "B3_AGE_BUCKET_MONOTONICITY_1D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "rendement forward demeane monotone en age ; bras extremes compares entre eux",
+   "n_raw": 342918,
+   "n_independent_L3": 231,
+   "spearman_rho_bucket_rank": 0.543,
+   "bucket_table": [
+    {
+     "bucket": "<30j",
+     "n_obs": 8735,
+     "n_ep_L3": 305,
+     "mean_dm_bps": -11.1,
+     "t": -0.95,
+     "n_symbols": 308,
+     "frac_dead": 0.165
+    },
+    {
+     "bucket": "30-90j",
+     "n_obs": 18472,
+     "n_ep_L3": 334,
+     "mean_dm_bps": -9.1,
+     "t": -1.43,
+     "n_symbols": 310,
+     "frac_dead": 0.169
+    },
+    {
+     "bucket": "90-180j",
+     "n_obs": 27169,
+     "n_ep_L3": 344,
+     "mean_dm_bps": 2.2,
+     "t": 0.55,
+     "n_symbols": 309,
+     "frac_dead": 0.164
+    },
+    {
+     "bucket": "180-365j",
+     "n_obs": 51716,
+     "n_ep_L3": 335,
+     "mean_dm_bps": 5.7,
+     "t": 2.02,
+     "n_symbols": 297,
+     "frac_dead": 0.164
+    },
+    {
+     "bucket": "1-2a",
+     "n_obs": 78351,
+     "n_ep_L3": 308,
+     "mean_dm_bps": 0.0,
+     "t": 0.0,
+     "n_symbols": 255,
+     "frac_dead": 0.16
+    },
+    {
+     "bucket": ">2a",
+     "n_obs": 158475,
+     "n_ep_L3": 256,
+     "mean_dm_bps": 1.1,
+     "t": 0.47,
+     "n_symbols": 186,
+     "frac_dead": 0.113
+    }
+   ],
+   "gross_bps": 8.9,
+   "net_bps": -19.1,
+   "net_bps_stress28": -47.1,
+   "t_stat_declustered": 0.62,
+   "bootstrap_ci95": [
+    -20.4,
+    36.9
+   ],
+   "n_required": 18715.5,
+   "event_rate_per_week_6m": 0.851,
+   "eta_forward_confirmation": {
+    "days": 153978.0,
+    "years": 421.58
+   },
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.62, gross=8.9bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.38
+  },
+  {
+   "id": "B3_AGE_BUCKET_MONOTONICITY_7D",
+   "family": "INSTRUMENT_AGE_FACTOR",
+   "hypothesis": "rendement forward demeane monotone en age ; bras extremes compares entre eux",
+   "n_raw": 341052,
+   "n_independent_L3": 231,
+   "spearman_rho_bucket_rank": 0.486,
+   "bucket_table": [
+    {
+     "bucket": "<30j",
+     "n_obs": 8735,
+     "n_ep_L3": 305,
+     "mean_dm_bps": -16.3,
+     "t": -0.24,
+     "n_symbols": 308,
+     "frac_dead": 0.165
+    },
+    {
+     "bucket": "30-90j",
+     "n_obs": 18455,
+     "n_ep_L3": 333,
+     "mean_dm_bps": -23.5,
+     "t": -0.6,
+     "n_symbols": 310,
+     "frac_dead": 0.169
+    },
+    {
+     "bucket": "90-180j",
+     "n_obs": 27097,
+     "n_ep_L3": 343,
+     "mean_dm_bps": 24.7,
+     "t": 1.0,
+     "n_symbols": 307,
+     "frac_dead": 0.164
+    },
+    {
+     "bucket": "180-365j",
+     "n_obs": 51465,
+     "n_ep_L3": 334,
+     "mean_dm_bps": 35.0,
+     "t": 2.02,
+     "n_symbols": 296,
+     "frac_dead": 0.164
+    },
+    {
+     "bucket": "1-2a",
+     "n_obs": 77941,
+     "n_ep_L3": 307,
+     "mean_dm_bps": -3.5,
+     "t": -0.18,
+     "n_symbols": 253,
+     "frac_dead": 0.16
+    },
+    {
+     "bucket": ">2a",
+     "n_obs": 157359,
+     "n_ep_L3": 255,
+     "mean_dm_bps": 3.4,
+     "t": 0.24,
+     "n_symbols": 186,
+     "frac_dead": 0.113
+    }
+   ],
+   "gross_bps": 5.5,
+   "net_bps": -22.5,
+   "net_bps_stress28": -50.5,
+   "t_stat_declustered": 0.07,
+   "bootstrap_ci95": [
+    -164.2,
+    169.0
+   ],
+   "n_required": 1670039.1,
+   "event_rate_per_week_6m": 0.851,
+   "eta_forward_confirmation": {
+    "days": 13739867.0,
+    "years": 37618.48
+   },
+   "_source": "axisB_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.07, gross=5.5bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.38
+  },
+  {
+   "id": "C2b_AGE_FUNDING_LEVEL_DIFFERENTIAL",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "funding encaisse sur 7j : jeunes (<90j) - matures (>=1a), flux seul sans le prix",
+   "paired_episodes": true,
+   "n_raw": 201978,
+   "n_arm_A": 21441,
+   "n_arm_B": 180537,
+   "n_independent_L3": 305,
+   "arm_A_bps": 28.8,
+   "arm_B_bps": 22.8,
+   "gross_bps": 2.5,
+   "net_bps": 2.5,
+   "net_bps_stress28": 2.5,
+   "t_stat_declustered": 0.77,
+   "bootstrap_ci95": [
+    -4.4,
+    8.3
+   ],
+   "n_required": 16006.4,
+   "event_rate_per_week_6m": 0.967,
+   "eta_forward_confirmation": {
+    "days": 115886.0,
+    "years": 317.29
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.77, gross=2.5bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.95
+  },
+  {
+   "id": "C2c_AGE_CARRY_WINSORIZED",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "short-perp jeunes(<90j) - matures(>=1a), funding>0, 7j \u2014 sensibilite a la winsorisation 1/99",
+   "winsorized": true,
+   "n_raw": 265485,
+   "n_independent_L3": 305,
+   "gross_bps": -43.0,
+   "net_bps": -71.0,
+   "net_bps_stress28": -99.0,
+   "t_stat_declustered": -0.76,
+   "bootstrap_ci95": [
+    -159.3,
+    67.8
+   ],
+   "n_required": 16565.7,
+   "event_rate_per_week_6m": 0.967,
+   "eta_forward_confirmation": {
+    "days": 119935.0,
+    "years": 328.37
+   },
+   "_source": "fixups_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.76, gross=-43.0bps : indistinguable de zero",
+   "prereg_status": "COMPLEMENT (sensibilite de C2 a la winsorisation transversale)",
+   "t_stat_needed_for_eta_3y": 7.95
+  },
+  {
+   "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_bask30",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement forward de bask30 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+   "paired_episodes": false,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 21,
+   "arm_A_bps": 506.2,
+   "arm_B_bps": -46.7,
+   "gross_bps": 552.9,
+   "net_bps": 538.9,
+   "net_bps_stress28": 524.9,
+   "t_stat_declustered": 0.75,
+   "bootstrap_ci95": [
+    -893.7,
+    1912.6
+   ],
+   "n_required": 937.3,
+   "event_rate_per_week_6m": 0.116,
+   "eta_forward_confirmation": {
+    "days": 56553.0,
+    "years": 154.84
+   },
+   "n_raw": 2124,
+   "median_spell_days": 21.0,
+   "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "diff_bps": -3957.8,
+     "n_hi": 20,
+     "n_lo": 37
+    },
+    {
+     "year": 2021,
+     "diff_bps": 1148.5,
+     "n_hi": 32,
+     "n_lo": 169
+    },
+    {
+     "year": 2022,
+     "diff_bps": -638.4,
+     "n_hi": 8,
+     "n_lo": 239
+    },
+    {
+     "year": 2023,
+     "diff_bps": -1856.4,
+     "n_hi": 227,
+     "n_lo": 51
+    },
+    {
+     "year": 2024,
+     "diff_bps": 2843.3,
+     "n_hi": 218,
+     "n_lo": 66
+    },
+    {
+     "year": 2026,
+     "diff_bps": 4.9,
+     "n_hi": 46,
+     "n_lo": 28
+    }
+   ],
+   "years_same_sign": "3/6",
+   "ex_best_year": {
+    "dropped": 2024,
+    "gross_bps": -1037.0
+   },
+   "_source": "fixups_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.75, gross=552.9bps : indistinguable de zero",
+   "prereg_status": "METHOD_AMENDED (plage de regime, mais cible fwd7/fwd30 encore chevauchante entre plages)",
+   "t_stat_needed_for_eta_3y": 5.42
+  },
+  {
+   "id": "E1b_LISTING_WAVE_RISK_REGIME_SPELL_btc7",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement forward de btc7 en regime HAUTE intensite de cotation - BASSE, declusterise par SPELL",
+   "paired_episodes": false,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 22,
+   "arm_A_bps": 96.1,
+   "arm_B_bps": 48.1,
+   "gross_bps": 48.0,
+   "net_bps": 34.0,
+   "net_bps_stress28": 20.0,
+   "t_stat_declustered": 0.31,
+   "bootstrap_ci95": [
+    -242.3,
+    345.5
+   ],
+   "n_required": 5620.2,
+   "event_rate_per_week_6m": 0.155,
+   "eta_forward_confirmation": {
+    "days": 254312.0,
+    "years": 696.28
+   },
+   "n_raw": 2124,
+   "median_spell_days": 21.0,
+   "note": "L3 = run contigu de regime (unite macro naturelle d'un signal persistant)",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "diff_bps": -577.9,
+     "n_hi": 20,
+     "n_lo": 37
+    },
+    {
+     "year": 2021,
+     "diff_bps": 75.3,
+     "n_hi": 32,
+     "n_lo": 169
+    },
+    {
+     "year": 2022,
+     "diff_bps": -481.6,
+     "n_hi": 8,
+     "n_lo": 239
+    },
+    {
+     "year": 2023,
+     "diff_bps": -543.1,
+     "n_hi": 227,
+     "n_lo": 51
+    },
+    {
+     "year": 2024,
+     "diff_bps": 358.6,
+     "n_hi": 218,
+     "n_lo": 66
+    },
+    {
+     "year": 2026,
+     "diff_bps": 150.8,
+     "n_hi": 46,
+     "n_lo": 28
+    }
+   ],
+   "years_same_sign": "3/6",
+   "ex_best_year": {
+    "dropped": 2024,
+    "gross_bps": -13.0
+   },
+   "_source": "fixups_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.31, gross=48.0bps : indistinguable de zero",
+   "prereg_status": "METHOD_AMENDED (plage de regime, mais cible fwd7/fwd30 encore chevauchante entre plages)",
+   "t_stat_needed_for_eta_3y": 4.69
+  },
+  {
+   "id": "E1c_LISTING_WAVE_REGIME_SPELL_bask",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement quotidien moyen de panier equal-weight eligible PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+   "paired_episodes": false,
+   "n_raw": 2124,
+   "n_independent_L1": 1466,
+   "n_independent_L2": 49,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 22,
+   "arm_A_bps": 135.2,
+   "arm_B_bps": 244.0,
+   "gross_bps": -108.8,
+   "net_bps": -122.8,
+   "net_bps_stress28": -136.8,
+   "t_stat_declustered": -0.1,
+   "bootstrap_ci95": [
+    -2197.7,
+    2066.7
+   ],
+   "n_required": 54894.5,
+   "event_rate_per_week_6m": 0.155,
+   "eta_forward_confirmation": {
+    "days": 2483976.0,
+    "years": 6800.89
+   },
+   "unit": "bps par 30d de detention continue",
+   "median_spell_days": 21.0,
+   "n_days_HI": 887,
+   "n_days_LO": 579,
+   "mean_spell_cum_bps_HI": 334.7,
+   "mean_spell_cum_bps_LO": 191.0,
+   "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -1999.2
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 3506.9
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -3842.9
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -2756.2
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 2788.7
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 28,
+     "diff_bps": -1387.3
+    }
+   ],
+   "years_same_sign": "4/6",
+   "ex_best_year": {
+    "dropped": 2022,
+    "gross_bps": -548.5
+   },
+   "_source": "final_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.10, gross=-108.8bps : indistinguable de zero",
+   "prereg_status": "METHOD_AMENDED (unite L3 = plage de regime au lieu du mois ; cible = fwd 1j moyen dans la plage au lieu de fwd7/fwd30 chevauchants) \u2014 plus conservateur",
+   "t_stat_needed_for_eta_3y": 4.69
+  },
+  {
+   "id": "E1c_LISTING_WAVE_REGIME_SPELL_btc",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "rendement quotidien moyen de BTCUSDT PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+   "paired_episodes": false,
+   "n_raw": 2124,
+   "n_independent_L1": 1466,
+   "n_independent_L2": 49,
+   "n_independent_L3": 17,
+   "n_episodes_A": 17,
+   "n_episodes_B": 22,
+   "arm_A_bps": 341.7,
+   "arm_B_bps": 629.7,
+   "gross_bps": -287.9,
+   "net_bps": -301.9,
+   "net_bps_stress28": -315.9,
+   "t_stat_declustered": -0.39,
+   "bootstrap_ci95": [
+    -1741.5,
+    1081.5
+   ],
+   "n_required": 3549.0,
+   "event_rate_per_week_6m": 0.155,
+   "eta_forward_confirmation": {
+    "days": 160594.0,
+    "years": 439.69
+   },
+   "unit": "bps par 30d de detention continue",
+   "median_spell_days": 21.0,
+   "n_days_HI": 887,
+   "n_days_LO": 579,
+   "mean_spell_cum_bps_HI": 906.4,
+   "mean_spell_cum_bps_LO": 211.9,
+   "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -1260.3
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 1062.0
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -3677.9
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -2469.3
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 1116.9
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 28,
+     "diff_bps": 73.4
+    }
+   ],
+   "years_same_sign": "3/6",
+   "ex_best_year": {
+    "dropped": 2022,
+    "gross_bps": -135.1
+   },
+   "_source": "final_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.39, gross=-287.9bps : indistinguable de zero",
+   "prereg_status": "METHOD_AMENDED (unite L3 = plage de regime au lieu du mois ; cible = fwd 1j moyen dans la plage au lieu de fwd7/fwd30 chevauchants) \u2014 plus conservateur",
+   "t_stat_needed_for_eta_3y": 4.69
+  },
+  {
+   "id": "F1_AGE_X_XSEC_MOM_7D",
+   "family": "AGE_INTERACTION",
+   "hypothesis": "momentum transversal 7d sur la moitie JEUNE - sur la moitie VIEILLE (age median PIT)",
+   "n_independent_L3": 73,
+   "gross_bps": 47.1,
+   "net_bps": 19.1,
+   "net_bps_stress28": -8.9,
+   "t_stat_declustered": 0.84,
+   "bootstrap_ci95": [
+    -58.1,
+    162.1
+   ],
+   "n_required": 3283.9,
+   "event_rate_per_week_6m": 0.232,
+   "eta_forward_confirmation": {
+    "days": 99065.0,
+    "years": 271.23
+   },
+   "n_raw": 316,
+   "arm_young_bps": 40.8,
+   "arm_old_bps": -14.2,
+   "_source": "axisEF_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.84, gross=47.1bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.94
+  },
+  {
+   "id": "F2_AGE_X_LIQ_CASCADE_REPEAT",
+   "family": "AGE_INTERACTION",
+   "hypothesis": "effet cascade-repetee (3e+, fwd 4h) sur contrats JEUNES - sur contrats VIEUX (age median des evenements)",
+   "n_independent_L3": 120,
+   "gross_bps": -16.3,
+   "net_bps": -30.3,
+   "net_bps_stress28": -44.3,
+   "t_stat_declustered": -0.65,
+   "bootstrap_ci95": [
+    -62.6,
+    32.8
+   ],
+   "n_required": 8959.2,
+   "event_rate_per_week_6m": 0.425,
+   "eta_forward_confirmation": {
+    "days": 147420.0,
+    "years": 403.62
+   },
+   "n_raw": 1988,
+   "n_arm_A": 994,
+   "n_arm_B": 994,
+   "arm_young_bps": 35.3,
+   "arm_old_bps": 46.9,
+   "median_age_split_days": 1013.0,
+   "n_symbols": 49,
+   "note": "univers cascade = 49 symboles seulement (dataset enrichi), majoritairement matures",
+   "_source": "axisEF_results.json",
+   "verdict": "DEAD",
+   "verdict_reason": "|t_L3|=0.65, gross=-16.3bps : indistinguable de zero",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": 7.53
+  },
+  {
+   "id": "A4_LIST_WAVE_SIZE_COND_h168h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance plus forte dans les grandes vagues (wave_size>=5) - petites",
+   "n_raw": 488,
+   "n_independent_L3": 0,
+   "verdict": "DATA_LIMITED",
+   "note": "episodes L3 apparies < 3",
+   "median_wave_size": 5.0,
+   "_source": "axisA_results.json",
+   "verdict_reason": "episodes L3 apparies < 3",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "A4_LIST_WAVE_SIZE_COND_h72h",
+   "family": "LISTING_EVENT",
+   "hypothesis": "sous-performance plus forte dans les grandes vagues (wave_size>=5) - petites",
+   "n_raw": 488,
+   "n_independent_L3": 0,
+   "verdict": "DATA_LIMITED",
+   "note": "episodes L3 apparies < 3",
+   "median_wave_size": 5.0,
+   "_source": "axisA_results.json",
+   "verdict_reason": "episodes L3 apparies < 3",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "D1_DELIST_PRE_DRIFT_30d",
+   "family": "DELISTING",
+   "hypothesis": "derive relative negative dans les 30 jours precedant la radiation",
+   "n_raw": 14,
+   "n_symbols": 14,
+   "n_independent_L1": 14,
+   "n_independent_L2": 9,
+   "n_independent_L3": 9,
+   "gross_bps": -315.5,
+   "net_bps": -343.5,
+   "net_bps_stress28": -371.5,
+   "t_stat_declustered": -0.45,
+   "bootstrap_ci95": [
+    -1615.5,
+    952.2
+   ],
+   "n_required": 1409.7,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=9 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "D1_DELIST_PRE_DRIFT_7d",
+   "family": "DELISTING",
+   "hypothesis": "derive relative negative dans les 7 jours precedant la radiation",
+   "n_raw": 14,
+   "n_symbols": 14,
+   "n_independent_L1": 14,
+   "n_independent_L2": 9,
+   "n_independent_L3": 9,
+   "gross_bps": -809.7,
+   "net_bps": -837.7,
+   "net_bps_stress28": -865.7,
+   "t_stat_declustered": -1.09,
+   "bootstrap_ci95": [
+    -2251.8,
+    452.6
+   ],
+   "n_required": 236.3,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=9 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "D1_DELIST_PRE_DRIFT_90d",
+   "family": "DELISTING",
+   "hypothesis": "derive relative negative dans les 90 jours precedant la radiation",
+   "n_raw": 14,
+   "n_symbols": 14,
+   "n_independent_L1": 14,
+   "n_independent_L2": 9,
+   "n_independent_L3": 9,
+   "gross_bps": 268.6,
+   "net_bps": 240.6,
+   "net_bps_stress28": 212.6,
+   "t_stat_declustered": 0.34,
+   "bootstrap_ci95": [
+    -1205.0,
+    1668.2
+   ],
+   "n_required": 2403.7,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "_source": "axisCD_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=9 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "D2_DELIST_FUNDING_BASIS_DISLOCATION",
+   "family": "DELISTING",
+   "hypothesis": "|funding| et |basis_z| deviennent extremes dans les 30 derniers jours (comparaison intra-nom)",
+   "n_raw": 13,
+   "n_symbols": 13,
+   "n_independent_L3": 13,
+   "median_ratio_abs_funding": 1.0,
+   "median_ratio_abs_basis_z": 1.066,
+   "median_ratio_qvol": 0.349,
+   "median_ratio_rvol": 0.265,
+   "t_stat_declustered": -1.92,
+   "note": "ratios fin-de-vie / reste-de-vie du MEME symbole (1.0 = pas de dislocation)",
+   "_source": "axisCD_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=13, n_raw=13 : echantillon insuffisant",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "E1_LISTING_WAVE_RISK_REGIME_bask30",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "regime haute intensite de cotation - basse intensite, cible bask30 (30j)",
+   "n_independent_L3": 9,
+   "gross_bps": -1733.4,
+   "net_bps": -1747.4,
+   "net_bps_stress28": -1761.4,
+   "t_stat_declustered": -1.31,
+   "bootstrap_ci95": [
+    -4197.8,
+    701.2
+   ],
+   "n_required": 164.8,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "paired_episodes": true,
+   "n_raw": 2094,
+   "n_days_high": 903,
+   "n_days_low": 582,
+   "arm_high_bps": 146.2,
+   "arm_low_bps": 550.0,
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -3957.8
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 1148.5
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -638.4
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -1856.4
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 2843.3
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 20,
+     "diff_bps": 4.9
+    }
+   ],
+   "years_same_sign": "3/6",
+   "_source": "axisEF_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=9 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "E1_LISTING_WAVE_RISK_REGIME_bask7",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "regime haute intensite de cotation - basse intensite, cible bask7 (7j)",
+   "n_independent_L3": 4,
+   "gross_bps": -1078.6,
+   "net_bps": -1092.6,
+   "net_bps_stress28": -1106.6,
+   "t_stat_declustered": -2.39,
+   "bootstrap_ci95": [
+    -1911.6,
+    -374.2
+   ],
+   "n_required": 22.1,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "paired_episodes": true,
+   "n_raw": 2117,
+   "n_days_high": 903,
+   "n_days_low": 583,
+   "arm_high_bps": 2.7,
+   "arm_low_bps": 69.4,
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -1092.9
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 520.6
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -665.1
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -769.3
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 665.1
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 21,
+     "diff_bps": -171.4
+    }
+   ],
+   "years_same_sign": "4/6",
+   "_source": "axisEF_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=4 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "E1_LISTING_WAVE_RISK_REGIME_btc30",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "regime haute intensite de cotation - basse intensite, cible btc30 (30j)",
+   "n_independent_L3": 9,
+   "gross_bps": -611.8,
+   "net_bps": -625.8,
+   "net_bps_stress28": -639.8,
+   "t_stat_declustered": -1.71,
+   "bootstrap_ci95": [
+    -1254.4,
+    88.7
+   ],
+   "n_required": 96.8,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "paired_episodes": true,
+   "n_raw": 2094,
+   "n_days_high": 903,
+   "n_days_low": 582,
+   "arm_high_bps": 496.2,
+   "arm_low_bps": 147.7,
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -1235.8
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": -683.9
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -54.4
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -691.8
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 2007.9
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 20,
+     "diff_bps": 257.5
+    }
+   ],
+   "years_same_sign": "4/6",
+   "_source": "axisEF_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=9 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "E1_LISTING_WAVE_RISK_REGIME_btc7",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "regime haute intensite de cotation - basse intensite, cible btc7 (7j)",
+   "n_independent_L3": 4,
+   "gross_bps": -485.1,
+   "net_bps": -499.1,
+   "net_bps_stress28": -513.1,
+   "t_stat_declustered": -2.57,
+   "bootstrap_ci95": [
+    -799.7,
+    -170.5
+   ],
+   "n_required": 19.0,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "paired_episodes": true,
+   "n_raw": 2117,
+   "n_days_high": 903,
+   "n_days_low": 583,
+   "arm_high_bps": 99.9,
+   "arm_low_bps": 39.1,
+   "year_by_year": [
+    {
+     "year": 2020,
+     "n_hi": 20,
+     "n_lo": 37,
+     "diff_bps": -577.9
+    },
+    {
+     "year": 2021,
+     "n_hi": 32,
+     "n_lo": 169,
+     "diff_bps": 75.3
+    },
+    {
+     "year": 2022,
+     "n_hi": 8,
+     "n_lo": 239,
+     "diff_bps": -481.6
+    },
+    {
+     "year": 2023,
+     "n_hi": 227,
+     "n_lo": 51,
+     "diff_bps": -543.1
+    },
+    {
+     "year": 2024,
+     "n_hi": 218,
+     "n_lo": 66,
+     "diff_bps": 358.6
+    },
+    {
+     "year": 2026,
+     "n_hi": 46,
+     "n_lo": 21,
+     "diff_bps": 150.8
+    }
+   ],
+   "years_same_sign": "3/6",
+   "_source": "axisEF_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=4 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "E2_WAVE_COND_XSEC_MOM_7D",
+   "family": "LISTING_WAVE_REGIME",
+   "hypothesis": "momentum transversal 7d en regime haute-vague - en regime basse-vague",
+   "n_independent_L3": 3,
+   "gross_bps": 92.0,
+   "net_bps": 64.0,
+   "net_bps_stress28": 36.0,
+   "t_stat_declustered": 1.12,
+   "bootstrap_ci95": [
+    -19.0,
+    252.1
+   ],
+   "n_required": 74.9,
+   "event_rate_per_week_6m": 0.0,
+   "eta_forward_confirmation": {
+    "days": null,
+    "years": null
+   },
+   "n_raw": 303,
+   "arm_high_bps": 174.4,
+   "arm_low_bps": -65.0,
+   "n_periods_high": 133,
+   "n_periods_low": 83,
+   "_source": "axisEF_results.json",
+   "verdict": "DATA_LIMITED",
+   "verdict_reason": "L3=3 (< 10 episodes independants) : declustering effondre, t non exploitable",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "C1_AGE_VOL_MATURATION",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "la vol realisee decroit avec l'age de l'instrument",
+   "descriptive_only": true,
+   "table": [
+    {
+     "bucket": "<30j",
+     "n_obs": 8735,
+     "n_symbols": 308,
+     "rvol_med_bps": 531.462,
+     "hl_range_med_bps": 1504.196,
+     "qvol_med_musd": 84.954,
+     "n_trades_med": 455042.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.185,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.518,
+     "abs_basis_z7_med": 0.744
+    },
+    {
+     "bucket": "30-90j",
+     "n_obs": 18474,
+     "n_symbols": 310,
+     "rvol_med_bps": 408.897,
+     "hl_range_med_bps": 1109.706,
+     "qvol_med_musd": 38.413,
+     "n_trades_med": 210573.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.514,
+     "abs_basis_z7_med": 0.776
+    },
+    {
+     "bucket": "90-180j",
+     "n_obs": 27181,
+     "n_symbols": 309,
+     "rvol_med_bps": 348.513,
+     "hl_range_med_bps": 967.91,
+     "qvol_med_musd": 30.357,
+     "n_trades_med": 173304.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.506,
+     "abs_basis_z7_med": 0.789
+    },
+    {
+     "bucket": "180-365j",
+     "n_obs": 51757,
+     "n_symbols": 297,
+     "rvol_med_bps": 341.993,
+     "hl_range_med_bps": 926.522,
+     "qvol_med_musd": 35.269,
+     "n_trades_med": 193795.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.474,
+     "abs_basis_z7_med": 0.788
+    },
+    {
+     "bucket": "1-2a",
+     "n_obs": 78421,
+     "n_symbols": 256,
+     "rvol_med_bps": 316.875,
+     "hl_range_med_bps": 821.364,
+     "qvol_med_musd": 33.203,
+     "n_trades_med": 184203.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 2.898,
+     "frac_4h_funding": 0.342,
+     "abs_basis_z7_med": 0.794
+    },
+    {
+     "bucket": ">2a",
+     "n_obs": 158661,
+     "n_symbols": 186,
+     "rvol_med_bps": 244.145,
+     "hl_range_med_bps": 640.02,
+     "qvol_med_musd": 23.061,
+     "n_trades_med": 148905.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 2.484,
+     "frac_4h_funding": 0.116,
+     "abs_basis_z7_med": 0.801
+    }
+   ],
+   "n_raw": 343229,
+   "verdict": "DESCRIPTIVE",
+   "_source": "axisCD_results.json",
+   "verdict_reason": "",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "C3_AGE_LIQUIDITY_MATURATION",
+   "family": "MICROSTRUCTURE_MATURATION",
+   "hypothesis": "volume/nb de trades/Amihud maturent avec l'age (borne de capacite)",
+   "descriptive_only": true,
+   "table": [
+    {
+     "bucket": "<30j",
+     "n_obs": 8735,
+     "n_symbols": 308,
+     "rvol_med_bps": 531.462,
+     "hl_range_med_bps": 1504.196,
+     "qvol_med_musd": 84.954,
+     "n_trades_med": 455042.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.185,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.518,
+     "abs_basis_z7_med": 0.744
+    },
+    {
+     "bucket": "30-90j",
+     "n_obs": 18474,
+     "n_symbols": 310,
+     "rvol_med_bps": 408.897,
+     "hl_range_med_bps": 1109.706,
+     "qvol_med_musd": 38.413,
+     "n_trades_med": 210573.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.514,
+     "abs_basis_z7_med": 0.776
+    },
+    {
+     "bucket": "90-180j",
+     "n_obs": 27181,
+     "n_symbols": 309,
+     "rvol_med_bps": 348.513,
+     "hl_range_med_bps": 967.91,
+     "qvol_med_musd": 30.357,
+     "n_trades_med": 173304.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.506,
+     "abs_basis_z7_med": 0.789
+    },
+    {
+     "bucket": "180-365j",
+     "n_obs": 51757,
+     "n_symbols": 297,
+     "rvol_med_bps": 341.993,
+     "hl_range_med_bps": 926.522,
+     "qvol_med_musd": 35.269,
+     "n_trades_med": 193795.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 3.0,
+     "frac_4h_funding": 0.474,
+     "abs_basis_z7_med": 0.788
+    },
+    {
+     "bucket": "1-2a",
+     "n_obs": 78421,
+     "n_symbols": 256,
+     "rvol_med_bps": 316.875,
+     "hl_range_med_bps": 821.364,
+     "qvol_med_musd": 33.203,
+     "n_trades_med": 184203.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 2.898,
+     "frac_4h_funding": 0.342,
+     "abs_basis_z7_med": 0.794
+    },
+    {
+     "bucket": ">2a",
+     "n_obs": 158661,
+     "n_symbols": 186,
+     "rvol_med_bps": 244.145,
+     "hl_range_med_bps": 640.02,
+     "qvol_med_musd": 23.061,
+     "n_trades_med": 148905.0,
+     "amihud_med": 0.001,
+     "abs_funding_med_bps": 1.0,
+     "funding_paid_med_bps": 2.484,
+     "frac_4h_funding": 0.116,
+     "abs_basis_z7_med": 0.801
+    }
+   ],
+   "n_raw": 343229,
+   "verdict": "DESCRIPTIVE",
+   "_source": "axisCD_results.json",
+   "verdict_reason": "",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  },
+  {
+   "id": "S0_SURVIVORSHIP_AUDIT",
+   "family": "META",
+   "verdict": "DESCRIPTIVE",
+   "hypothesis": "verification explicite que les instruments RADIES sont dans les univers testes",
+   "panel_312": {
+    "n": 312,
+    "by_status": {
+     "TRADING": 259,
+     "SETTLING": 38,
+     "DELISTED": 14,
+     "DELISTED_NO_DATA": 1
+    },
+    "n_dead": 53,
+    "pct_dead": 17.0,
+    "n_dead_with_life_end_inside_window": 15
+   },
+   "listings_universe": {
+    "n": 518,
+    "by_status": {
+     "TRADING": 419,
+     "SETTLING": 95,
+     "DELISTED": 4
+    },
+    "n_dead": 99,
+    "pct_dead": 19.1
+   },
+   "calendar_full": {
+    "n": 683,
+    "by_status": {
+     "TRADING": 530,
+     "SETTLING": 122,
+     "DELISTED": 27,
+     "PENDING_TRADING": 2,
+     "DELISTED_NO_DATA": 2
+    }
+   },
+   "panel_end": "2026-07-31",
+   "known_limitation": "les perps radies AVANT 2023 et absents de fapi/exchangeInfo ne sont pas recuperables (listings_backfill_store.yaml _meta.missing_delisted) : l'axe A est propre sur 2023+ uniquement",
+   "A1_survivorship_counterfactual": [
+    {
+     "delay_h": 24,
+     "horizon_h": 168,
+     "n_all": 488,
+     "n_dead": 87,
+     "pct_dead": 17.8,
+     "fade_bps_all_names": 386.0,
+     "fade_bps_survivors_only": 109.9,
+     "survivorship_inflation_bps": -276.1,
+     "dead_names_fade_bps": 1171.1,
+     "live_names_fade_bps": 67.8
+    },
+    {
+     "delay_h": 24,
+     "horizon_h": 672,
+     "n_all": 483,
+     "n_dead": 87,
+     "pct_dead": 18.0,
+     "fade_bps_all_names": -148.5,
+     "fade_bps_survivors_only": -561.7,
+     "survivorship_inflation_bps": -413.3,
+     "dead_names_fade_bps": 2484.1,
+     "live_names_fade_bps": -2479.2
+    },
+    {
+     "delay_h": 1,
+     "horizon_h": 168,
+     "n_all": 478,
+     "n_dead": 85,
+     "pct_dead": 17.8,
+     "fade_bps_all_names": 422.9,
+     "fade_bps_survivors_only": 164.8,
+     "survivorship_inflation_bps": -258.1,
+     "dead_names_fade_bps": 1318.1,
+     "live_names_fade_bps": 55.5
+    }
+   ],
+   "_source": "final_results.json",
+   "verdict_reason": "",
+   "prereg_status": "PREREGISTERED",
+   "t_stat_needed_for_eta_3y": null
+  }
+ ]
+}

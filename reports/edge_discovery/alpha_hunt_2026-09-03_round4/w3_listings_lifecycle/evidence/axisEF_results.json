@@ -1,0 +1,338 @@
+[
+ {
+  "id": "E1_LISTING_WAVE_RISK_REGIME_bask7",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "regime haute intensite de cotation - basse intensite, cible bask7 (7j)",
+  "n_independent_L3": 4,
+  "gross_bps": -1078.6,
+  "net_bps": -1092.6,
+  "net_bps_stress28": -1106.6,
+  "t_stat_declustered": -2.39,
+  "bootstrap_ci95": [
+   -1911.6,
+   -374.2
+  ],
+  "n_required": 22.1,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  },
+  "paired_episodes": true,
+  "n_raw": 2117,
+  "n_days_high": 903,
+  "n_days_low": 583,
+  "arm_high_bps": 2.7,
+  "arm_low_bps": 69.4,
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -1092.9
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 520.6
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -665.1
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -769.3
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 665.1
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 21,
+    "diff_bps": -171.4
+   }
+  ],
+  "years_same_sign": "4/6"
+ },
+ {
+  "id": "E1_LISTING_WAVE_RISK_REGIME_bask30",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "regime haute intensite de cotation - basse intensite, cible bask30 (30j)",
+  "n_independent_L3": 9,
+  "gross_bps": -1733.4,
+  "net_bps": -1747.4,
+  "net_bps_stress28": -1761.4,
+  "t_stat_declustered": -1.31,
+  "bootstrap_ci95": [
+   -4197.8,
+   701.2
+  ],
+  "n_required": 164.8,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  },
+  "paired_episodes": true,
+  "n_raw": 2094,
+  "n_days_high": 903,
+  "n_days_low": 582,
+  "arm_high_bps": 146.2,
+  "arm_low_bps": 550.0,
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -3957.8
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 1148.5
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -638.4
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -1856.4
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 2843.3
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 20,
+    "diff_bps": 4.9
+   }
+  ],
+  "years_same_sign": "3/6"
+ },
+ {
+  "id": "E1_LISTING_WAVE_RISK_REGIME_btc7",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "regime haute intensite de cotation - basse intensite, cible btc7 (7j)",
+  "n_independent_L3": 4,
+  "gross_bps": -485.1,
+  "net_bps": -499.1,
+  "net_bps_stress28": -513.1,
+  "t_stat_declustered": -2.57,
+  "bootstrap_ci95": [
+   -799.7,
+   -170.5
+  ],
+  "n_required": 19.0,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  },
+  "paired_episodes": true,
+  "n_raw": 2117,
+  "n_days_high": 903,
+  "n_days_low": 583,
+  "arm_high_bps": 99.9,
+  "arm_low_bps": 39.1,
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -577.9
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 75.3
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -481.6
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -543.1
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 358.6
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 21,
+    "diff_bps": 150.8
+   }
+  ],
+  "years_same_sign": "3/6"
+ },
+ {
+  "id": "E1_LISTING_WAVE_RISK_REGIME_btc30",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "regime haute intensite de cotation - basse intensite, cible btc30 (30j)",
+  "n_independent_L3": 9,
+  "gross_bps": -611.8,
+  "net_bps": -625.8,
+  "net_bps_stress28": -639.8,
+  "t_stat_declustered": -1.71,
+  "bootstrap_ci95": [
+   -1254.4,
+   88.7
+  ],
+  "n_required": 96.8,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  },
+  "paired_episodes": true,
+  "n_raw": 2094,
+  "n_days_high": 903,
+  "n_days_low": 582,
+  "arm_high_bps": 496.2,
+  "arm_low_bps": 147.7,
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -1235.8
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": -683.9
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -54.4
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -691.8
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 2007.9
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 20,
+    "diff_bps": 257.5
+   }
+  ],
+  "years_same_sign": "4/6"
+ },
+ {
+  "id": "E2_WAVE_COND_XSEC_MOM_7D",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "momentum transversal 7d en regime haute-vague - en regime basse-vague",
+  "n_independent_L3": 3,
+  "gross_bps": 92.0,
+  "net_bps": 64.0,
+  "net_bps_stress28": 36.0,
+  "t_stat_declustered": 1.12,
+  "bootstrap_ci95": [
+   -19.0,
+   252.1
+  ],
+  "n_required": 74.9,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  },
+  "n_raw": 303,
+  "arm_high_bps": 174.4,
+  "arm_low_bps": -65.0,
+  "n_periods_high": 133,
+  "n_periods_low": 83
+ },
+ {
+  "id": "F1_AGE_X_XSEC_MOM_7D",
+  "family": "AGE_INTERACTION",
+  "hypothesis": "momentum transversal 7d sur la moitie JEUNE - sur la moitie VIEILLE (age median PIT)",
+  "n_independent_L3": 73,
+  "gross_bps": 47.1,
+  "net_bps": 19.1,
+  "net_bps_stress28": -8.9,
+  "t_stat_declustered": 0.84,
+  "bootstrap_ci95": [
+   -58.1,
+   162.1
+  ],
+  "n_required": 3283.9,
+  "event_rate_per_week_6m": 0.232,
+  "eta_forward_confirmation": {
+   "days": 99065.0,
+   "years": 271.23
+  },
+  "n_raw": 316,
+  "arm_young_bps": 40.8,
+  "arm_old_bps": -14.2
+ },
+ {
+  "id": "F2_AGE_X_LIQ_CASCADE_REPEAT",
+  "family": "AGE_INTERACTION",
+  "hypothesis": "effet cascade-repetee (3e+, fwd 4h) sur contrats JEUNES - sur contrats VIEUX (age median des evenements)",
+  "n_independent_L3": 120,
+  "gross_bps": -16.3,
+  "net_bps": -30.3,
+  "net_bps_stress28": -44.3,
+  "t_stat_declustered": -0.65,
+  "bootstrap_ci95": [
+   -62.6,
+   32.8
+  ],
+  "n_required": 8959.2,
+  "event_rate_per_week_6m": 0.425,
+  "eta_forward_confirmation": {
+   "days": 147420.0,
+   "years": 403.62
+  },
+  "n_raw": 1988,
+  "n_arm_A": 994,
+  "n_arm_B": 994,
+  "arm_young_bps": 35.3,
+  "arm_old_bps": 46.9,
+  "median_age_split_days": 1013.0,
+  "n_symbols": 49,
+  "note": "univers cascade = 49 symboles seulement (dataset enrichi), majoritairement matures"
+ }
+]

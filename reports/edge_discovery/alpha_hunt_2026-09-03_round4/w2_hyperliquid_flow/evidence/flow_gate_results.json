@@ -1,0 +1,116 @@
+{
+ "mechanisms": [
+  {
+   "mechanism": "T4_FLOW_IMBALANCE_XS_LS_4h_LEAKY_v1",
+   "ret_col": "spread_bps",
+   "n_raw": 2713,
+   "n_independent_L1_user_coin_day": 2713,
+   "n_independent_L2_coin_day": 596,
+   "n_independent_L3_day": 596,
+   "gross_bps": 19.14,
+   "net_bps": 5.14,
+   "net_bps_stress28": -8.86,
+   "t_stat_declustered_L3day": 4.41,
+   "t_stat_L2_coin_day": 2.76,
+   "bootstrap_ci95": [
+    11.46,
+    27.39
+   ],
+   "sd_day_bps": 105.8,
+   "year_by_year": {
+    "2024": [
+     -15.03,
+     157
+    ],
+    "2025": [
+     11.53,
+     1399
+    ],
+    "2026": [
+     32.97,
+     1157
+    ]
+   },
+   "ex_best_year": 8.85,
+   "ex_best_year_dropped": "2026",
+   "n_required": 959,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 998.1,
+   "eta_forward_confirmation_years": 2.73,
+   "mechanism_family": "T4",
+   "long_leg_bps": 13.17,
+   "short_leg_bps": -5.97,
+   "capacity_usd_estimate": 196643,
+   "n_rebalances": 2713,
+   "ic_ic_mean": 0.03127,
+   "ic_ic_t_day": 4.0,
+   "ic_n_days": 596,
+   "ic_ic_test_h1": 0.02802,
+   "ic_ic_test_h2": 0.06699,
+   "train_bps": 4.9,
+   "test_bps": 27.25
+  },
+  {
+   "mechanism": "T4_FLOW_IMBALANCE_XS_LS_4h_PIT_CLEAN_v2",
+   "ret_col": "spread_bps",
+   "n_raw": 2713,
+   "n_independent_L1_user_coin_day": 2713,
+   "n_independent_L2_coin_day": 596,
+   "n_independent_L3_day": 596,
+   "gross_bps": -0.66,
+   "net_bps": -14.66,
+   "net_bps_stress28": -28.66,
+   "t_stat_declustered_L3day": -0.17,
+   "t_stat_L2_coin_day": -1.12,
+   "bootstrap_ci95": [
+    -7.98,
+    7.17
+   ],
+   "sd_day_bps": 95.9,
+   "year_by_year": {
+    "2024": [
+     -31.13,
+     157
+    ],
+    "2025": [
+     -6.64,
+     1399
+    ],
+    "2026": [
+     10.72,
+     1157
+    ]
+   },
+   "ex_best_year": -9.11,
+   "ex_best_year_dropped": "2026",
+   "n_required": 667990,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 695018.8,
+   "eta_forward_confirmation_years": 1902.86,
+   "mechanism_family": "T4",
+   "long_leg_bps": 2.55,
+   "short_leg_bps": 3.21,
+   "capacity_usd_estimate": 163168,
+   "n_rebalances": 2713,
+   "ic_ic_mean": -0.00306,
+   "ic_ic_t_day": -0.39,
+   "ic_n_days": 596,
+   "ic_ic_test_h1": -0.01614,
+   "ic_ic_test_h2": 0.02003,
+   "train_bps": -11.19,
+   "test_bps": 5.35
+  }
+ ],
+ "leak_diagnostic": {
+  "median_ratio_known_over_forward_notional": 1.1253,
+  "interpretation": "at a 4h horizon the median share of the v1 forward-window scheduled notional that is actually observable at decision time is 112.5%; the remaining share belongs to TWAPs not yet created."
+ },
+ "meta": {
+  "LEAKY_v1": {
+   "n_rows_panel": 38945
+  },
+  "PIT_CLEAN_v2": {
+   "n_rows_panel": 38945
+  }
+ }
+}

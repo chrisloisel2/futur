@@ -1,0 +1,169 @@
+{
+  "note": "block-bootstrap par EPISODE L3 sur la moyenne SIZE-WEIGHTED (= PnL par trade reellement realisable). NBOOT=8000 seed=20260905",
+  "cases": [
+    {
+      "label": "SHORT_SQUEEZE exhaustion LONG (SSE_CONT)",
+      "exhaustion_thr": 2,
+      "n_raw": 2719,
+      "n_episodes_L3": 1004,
+      "mean_net_bps_size_weighted": 15.45,
+      "mean_net_bps_equal_weight_L3": -30.46,
+      "block_boot_ci95_size_weighted": [
+        -18.15,
+        51.12
+      ],
+      "block_boot_p_le_0": 0.2013,
+      "naive_iid_ci95": [
+        1.68,
+        29.22
+      ],
+      "pnl_share_top1_episodes": 0.679,
+      "pnl_share_top3_episodes": 1.602,
+      "pnl_share_top5_episodes": 2.032,
+      "pnl_share_top10_episodes": 2.547,
+      "pnl_share_top1pct_episodes": 2.547,
+      "mean_net_bps_size_weighted_ex_top5_episodes": -17.24,
+      "pre2025": {
+        "n": 1797,
+        "n_ep": 630,
+        "mean_net_bps_size_weighted": -7.2,
+        "block_boot_ci95": [
+          -43.24,
+          33.25
+        ]
+      },
+      "2025plus": {
+        "n": 922,
+        "n_ep": 374,
+        "mean_net_bps_size_weighted": 59.6,
+        "block_boot_ci95": [
+          -2.52,
+          119.8
+        ]
+      }
+    },
+    {
+      "label": "LONG_CASCADE exhaustion LONG (CONTROL, shadow alpha)",
+      "exhaustion_thr": 2,
+      "n_raw": 5457,
+      "n_episodes_L3": 1645,
+      "mean_net_bps_size_weighted": 16.22,
+      "mean_net_bps_equal_weight_L3": 22.54,
+      "block_boot_ci95_size_weighted": [
+        1.57,
+        31.46
+      ],
+      "block_boot_p_le_0": 0.0147,
+      "naive_iid_ci95": [
+        6.28,
+        26.16
+      ],
+      "pnl_share_top1_episodes": 0.245,
+      "pnl_share_top3_episodes": 0.475,
+      "pnl_share_top5_episodes": 0.622,
+      "pnl_share_top10_episodes": 0.909,
+      "pnl_share_top1pct_episodes": 1.138,
+      "mean_net_bps_size_weighted_ex_top5_episodes": 6.34,
+      "pre2025": {
+        "n": 3677,
+        "n_ep": 1041,
+        "mean_net_bps_size_weighted": 17.67,
+        "block_boot_ci95": [
+          1.14,
+          34.65
+        ]
+      },
+      "2025plus": {
+        "n": 1780,
+        "n_ep": 604,
+        "mean_net_bps_size_weighted": 13.23,
+        "block_boot_ci95": [
+          -14.03,
+          44.76
+        ]
+      }
+    },
+    {
+      "label": "SHORT_SQUEEZE exhaustion LONG (SSE_CONT)",
+      "exhaustion_thr": 3,
+      "n_raw": 1140,
+      "n_episodes_L3": 437,
+      "mean_net_bps_size_weighted": 40.02,
+      "mean_net_bps_equal_weight_L3": -8.65,
+      "block_boot_ci95_size_weighted": [
+        -9.62,
+        91.7
+      ],
+      "block_boot_p_le_0": 0.0629,
+      "naive_iid_ci95": [
+        18.33,
+        61.72
+      ],
+      "pnl_share_top1_episodes": 0.391,
+      "pnl_share_top3_episodes": 1.081,
+      "pnl_share_top5_episodes": 1.304,
+      "pnl_share_top10_episodes": 1.532,
+      "pnl_share_top1pct_episodes": 1.194,
+      "mean_net_bps_size_weighted_ex_top5_episodes": -13.85,
+      "pre2025": {
+        "n": 790,
+        "n_ep": 278,
+        "mean_net_bps_size_weighted": 6.98,
+        "block_boot_ci95": [
+          -40.45,
+          59.9
+        ]
+      },
+      "2025plus": {
+        "n": 350,
+        "n_ep": 159,
+        "mean_net_bps_size_weighted": 114.6,
+        "block_boot_ci95": [
+          3.45,
+          195.44
+        ]
+      }
+    },
+    {
+      "label": "LONG_CASCADE exhaustion LONG (CONTROL, shadow alpha)",
+      "exhaustion_thr": 3,
+      "n_raw": 1988,
+      "n_episodes_L3": 789,
+      "mean_net_bps_size_weighted": 27.07,
+      "mean_net_bps_equal_weight_L3": 25.42,
+      "block_boot_ci95_size_weighted": [
+        4.08,
+        51.05
+      ],
+      "block_boot_p_le_0": 0.0097,
+      "naive_iid_ci95": [
+        10.83,
+        43.31
+      ],
+      "pnl_share_top1_episodes": 0.214,
+      "pnl_share_top3_episodes": 0.488,
+      "pnl_share_top5_episodes": 0.62,
+      "pnl_share_top10_episodes": 0.889,
+      "pnl_share_top1pct_episodes": 0.732,
+      "mean_net_bps_size_weighted_ex_top5_episodes": 10.77,
+      "pre2025": {
+        "n": 1373,
+        "n_ep": 479,
+        "mean_net_bps_size_weighted": 18.96,
+        "block_boot_ci95": [
+          -4.33,
+          45.34
+        ]
+      },
+      "2025plus": {
+        "n": 615,
+        "n_ep": 310,
+        "mean_net_bps_size_weighted": 45.16,
+        "block_boot_ci95": [
+          0.14,
+          92.56
+        ]
+      }
+    }
+  ]
+}

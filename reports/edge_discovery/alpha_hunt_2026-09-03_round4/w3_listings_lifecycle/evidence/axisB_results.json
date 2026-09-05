@@ -1,0 +1,502 @@
+[
+ {
+  "id": "B1_XSEC_AGE_FACTOR_1D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "long quintile le plus vieux / short quintile le plus jeune, equal-weight",
+  "n_raw": 2255,
+  "n_independent_L1": 2255,
+  "n_independent_L2": 2255,
+  "n_independent_L3": 323,
+  "gross_bps": 1.4,
+  "net_bps": -26.6,
+  "net_bps_stress28": -54.6,
+  "t_stat_L2": 0.29,
+  "t_stat_declustered": 0.21,
+  "bootstrap_ci95": [
+   -11.3,
+   13.8
+  ],
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_ep": 32,
+    "mean_bps": 12.6,
+    "t": 0.35
+   },
+   {
+    "year": 2021,
+    "n_ep": 53,
+    "mean_bps": -21.0,
+    "t": -0.93
+   },
+   {
+    "year": 2022,
+    "n_ep": 53,
+    "mean_bps": 16.0,
+    "t": 1.79
+   },
+   {
+    "year": 2023,
+    "n_ep": 53,
+    "mean_bps": -5.3,
+    "t": -0.49
+   },
+   {
+    "year": 2024,
+    "n_ep": 53,
+    "mean_bps": 7.7,
+    "t": 0.61
+   },
+   {
+    "year": 2025,
+    "n_ep": 53,
+    "mean_bps": 15.6,
+    "t": 1.17
+   },
+   {
+    "year": 2026,
+    "n_ep": 31,
+    "mean_bps": -23.7,
+    "t": -1.95
+   }
+  ],
+  "ex_best_year": {
+   "dropped": 2022,
+   "gross_bps": -1.7,
+   "t": -0.23,
+   "n_ep": 272
+  },
+  "years_same_sign": "4/7",
+  "n_required": 221063.1,
+  "event_rate_per_week_6m": 1.006,
+  "eta_forward_confirmation": {
+   "days": 1538940.0,
+   "years": 4213.47
+  },
+  "eta_L3_alt": {
+   "unit": "['_month']",
+   "n_ep": 75,
+   "n_required": 294859.0,
+   "rate_wk": 0.232,
+   "years": 24353.44
+  },
+  "arm_old_bps": 8.2,
+  "arm_young_bps": 6.7,
+  "xs_universe_bps": 7.9,
+  "n_rebalance_dates_overlapping": 2255,
+  "mean_names_per_date": 150.8
+ },
+ {
+  "id": "B1_XSEC_AGE_FACTOR_7D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "long quintile le plus vieux / short quintile le plus jeune, equal-weight",
+  "n_raw": 322,
+  "n_independent_L1": 322,
+  "n_independent_L2": 322,
+  "n_independent_L3": 75,
+  "gross_bps": -34.7,
+  "net_bps": -62.7,
+  "net_bps_stress28": -90.7,
+  "t_stat_L2": -0.45,
+  "t_stat_declustered": -0.6,
+  "bootstrap_ci95": [
+   -145.8,
+   75.1
+  ],
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_ep": 8,
+    "mean_bps": -19.6,
+    "t": -0.08
+   },
+   {
+    "year": 2021,
+    "n_ep": 12,
+    "mean_bps": -248.0,
+    "t": -1.04
+   },
+   {
+    "year": 2022,
+    "n_ep": 12,
+    "mean_bps": 68.1,
+    "t": 1.07
+   },
+   {
+    "year": 2023,
+    "n_ep": 12,
+    "mean_bps": -53.6,
+    "t": -0.52
+   },
+   {
+    "year": 2024,
+    "n_ep": 12,
+    "mean_bps": 62.4,
+    "t": 0.45
+   },
+   {
+    "year": 2025,
+    "n_ep": 12,
+    "mean_bps": 73.7,
+    "t": 0.7
+   },
+   {
+    "year": 2026,
+    "n_ep": 7,
+    "mean_bps": -182.0,
+    "t": -2.6
+   }
+  ],
+  "ex_best_year": {
+   "dropped": 2021,
+   "gross_bps": 6.0,
+   "t": 0.12,
+   "n_ep": 63
+  },
+  "years_same_sign": "4/7",
+  "n_required": 6476.5,
+  "event_rate_per_week_6m": 0.232,
+  "eta_forward_confirmation": {
+   "days": 195375.0,
+   "years": 534.92
+  },
+  "eta_L3_alt": {
+   "unit": "['_quarter']",
+   "n_ep": 26,
+   "n_required": 4266.6,
+   "rate_wk": 0.077,
+   "years": 1057.17
+  },
+  "arm_old_bps": 56.5,
+  "arm_young_bps": 76.5,
+  "xs_universe_bps": 67.5,
+  "n_rebalance_dates_overlapping": 2249,
+  "mean_names_per_date": 150.4
+ },
+ {
+  "id": "B3_AGE_BUCKET_MONOTONICITY_1D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "rendement forward demeane monotone en age ; bras extremes compares entre eux",
+  "n_raw": 342918,
+  "n_independent_L3": 231,
+  "spearman_rho_bucket_rank": 0.543,
+  "bucket_table": [
+   {
+    "bucket": "<30j",
+    "n_obs": 8735,
+    "n_ep_L3": 305,
+    "mean_dm_bps": -11.1,
+    "t": -0.95,
+    "n_symbols": 308,
+    "frac_dead": 0.165
+   },
+   {
+    "bucket": "30-90j",
+    "n_obs": 18472,
+    "n_ep_L3": 334,
+    "mean_dm_bps": -9.1,
+    "t": -1.43,
+    "n_symbols": 310,
+    "frac_dead": 0.169
+   },
+   {
+    "bucket": "90-180j",
+    "n_obs": 27169,
+    "n_ep_L3": 344,
+    "mean_dm_bps": 2.2,
+    "t": 0.55,
+    "n_symbols": 309,
+    "frac_dead": 0.164
+   },
+   {
+    "bucket": "180-365j",
+    "n_obs": 51716,
+    "n_ep_L3": 335,
+    "mean_dm_bps": 5.7,
+    "t": 2.02,
+    "n_symbols": 297,
+    "frac_dead": 0.164
+   },
+   {
+    "bucket": "1-2a",
+    "n_obs": 78351,
+    "n_ep_L3": 308,
+    "mean_dm_bps": 0.0,
+    "t": 0.0,
+    "n_symbols": 255,
+    "frac_dead": 0.16
+   },
+   {
+    "bucket": ">2a",
+    "n_obs": 158475,
+    "n_ep_L3": 256,
+    "mean_dm_bps": 1.1,
+    "t": 0.47,
+    "n_symbols": 186,
+    "frac_dead": 0.113
+   }
+  ],
+  "gross_bps": 8.9,
+  "net_bps": -19.1,
+  "net_bps_stress28": -47.1,
+  "t_stat_declustered": 0.62,
+  "bootstrap_ci95": [
+   -20.4,
+   36.9
+  ],
+  "n_required": 18715.5,
+  "event_rate_per_week_6m": 0.851,
+  "eta_forward_confirmation": {
+   "days": 153978.0,
+   "years": 421.58
+  }
+ },
+ {
+  "id": "B3_AGE_BUCKET_MONOTONICITY_7D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "rendement forward demeane monotone en age ; bras extremes compares entre eux",
+  "n_raw": 341052,
+  "n_independent_L3": 231,
+  "spearman_rho_bucket_rank": 0.486,
+  "bucket_table": [
+   {
+    "bucket": "<30j",
+    "n_obs": 8735,
+    "n_ep_L3": 305,
+    "mean_dm_bps": -16.3,
+    "t": -0.24,
+    "n_symbols": 308,
+    "frac_dead": 0.165
+   },
+   {
+    "bucket": "30-90j",
+    "n_obs": 18455,
+    "n_ep_L3": 333,
+    "mean_dm_bps": -23.5,
+    "t": -0.6,
+    "n_symbols": 310,
+    "frac_dead": 0.169
+   },
+   {
+    "bucket": "90-180j",
+    "n_obs": 27097,
+    "n_ep_L3": 343,
+    "mean_dm_bps": 24.7,
+    "t": 1.0,
+    "n_symbols": 307,
+    "frac_dead": 0.164
+   },
+   {
+    "bucket": "180-365j",
+    "n_obs": 51465,
+    "n_ep_L3": 334,
+    "mean_dm_bps": 35.0,
+    "t": 2.02,
+    "n_symbols": 296,
+    "frac_dead": 0.164
+   },
+   {
+    "bucket": "1-2a",
+    "n_obs": 77941,
+    "n_ep_L3": 307,
+    "mean_dm_bps": -3.5,
+    "t": -0.18,
+    "n_symbols": 253,
+    "frac_dead": 0.16
+   },
+   {
+    "bucket": ">2a",
+    "n_obs": 157359,
+    "n_ep_L3": 255,
+    "mean_dm_bps": 3.4,
+    "t": 0.24,
+    "n_symbols": 186,
+    "frac_dead": 0.113
+   }
+  ],
+  "gross_bps": 5.5,
+  "net_bps": -22.5,
+  "net_bps_stress28": -50.5,
+  "t_stat_declustered": 0.07,
+  "bootstrap_ci95": [
+   -164.2,
+   169.0
+  ],
+  "n_required": 1670039.1,
+  "event_rate_per_week_6m": 0.851,
+  "eta_forward_confirmation": {
+   "days": 13739867.0,
+   "years": 37618.48
+  }
+ },
+ {
+  "id": "B2_XSEC_AGE_RESID_LIQ_1D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "coefficient Fama-MacBeth de log(age) apres controle log(qvol) et Amihud (bps par 1 sigma d'age)",
+  "n_raw": 2220,
+  "n_independent_L1": 2220,
+  "n_independent_L2": 2220,
+  "n_independent_L3": 318,
+  "gross_bps": 0.9,
+  "net_bps": 0.9,
+  "net_bps_stress28": 0.9,
+  "t_stat_L2": 0.55,
+  "t_stat_declustered": 0.47,
+  "bootstrap_ci95": [
+   -2.9,
+   4.9
+  ],
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_ep": 27,
+    "mean_bps": -0.1,
+    "t": -0.01
+   },
+   {
+    "year": 2021,
+    "n_ep": 53,
+    "mean_bps": -3.3,
+    "t": -0.49
+   },
+   {
+    "year": 2022,
+    "n_ep": 53,
+    "mean_bps": 4.1,
+    "t": 1.36
+   },
+   {
+    "year": 2023,
+    "n_ep": 53,
+    "mean_bps": 2.7,
+    "t": 0.66
+   },
+   {
+    "year": 2024,
+    "n_ep": 53,
+    "mean_bps": 2.4,
+    "t": 0.65
+   },
+   {
+    "year": 2025,
+    "n_ep": 53,
+    "mean_bps": 2.8,
+    "t": 0.67
+   },
+   {
+    "year": 2026,
+    "n_ep": 31,
+    "mean_bps": -7.3,
+    "t": -1.79
+   }
+  ],
+  "ex_best_year": {
+   "dropped": 2022,
+   "gross_bps": 0.3,
+   "t": 0.12,
+   "n_ep": 267
+  },
+  "years_same_sign": "4/7",
+  "n_required": 45171.2,
+  "event_rate_per_week_6m": 1.006,
+  "eta_forward_confirmation": {
+   "days": 314461.0,
+   "years": 860.96
+  },
+  "eta_L3_alt": {
+   "unit": "['_month']",
+   "n_ep": 73,
+   "n_required": 14399.5,
+   "rate_wk": 0.232,
+   "years": 1189.31
+  },
+  "univariate_age_coef_bps": 0.2,
+  "univariate_age_t": 0.09,
+  "note": "coefficient de regression, PAS un rendement de livre : cout non applicable (cost_rt=0)"
+ },
+ {
+  "id": "B2_XSEC_AGE_RESID_LIQ_7D",
+  "family": "INSTRUMENT_AGE_FACTOR",
+  "hypothesis": "coefficient Fama-MacBeth de log(age) apres controle log(qvol) et Amihud (bps par 1 sigma d'age)",
+  "n_raw": 317,
+  "n_independent_L1": 317,
+  "n_independent_L2": 317,
+  "n_independent_L3": 73,
+  "gross_bps": -6.0,
+  "net_bps": -6.0,
+  "net_bps_stress28": -6.0,
+  "t_stat_L2": -0.17,
+  "t_stat_declustered": -0.31,
+  "bootstrap_ci95": [
+   -45.9,
+   29.8
+  ],
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_ep": 6,
+    "mean_bps": 0.8,
+    "t": 0.01
+   },
+   {
+    "year": 2021,
+    "n_ep": 12,
+    "mean_bps": -70.4,
+    "t": -0.82
+   },
+   {
+    "year": 2022,
+    "n_ep": 12,
+    "mean_bps": 18.0,
+    "t": 0.79
+   },
+   {
+    "year": 2023,
+    "n_ep": 12,
+    "mean_bps": 15.4,
+    "t": 0.44
+   },
+   {
+    "year": 2024,
+    "n_ep": 12,
+    "mean_bps": 12.7,
+    "t": 0.31
+   },
+   {
+    "year": 2025,
+    "n_ep": 12,
+    "mean_bps": 17.1,
+    "t": 0.55
+   },
+   {
+    "year": 2026,
+    "n_ep": 7,
+    "mean_bps": -51.5,
+    "t": -2.25
+   }
+  ],
+  "ex_best_year": {
+   "dropped": 2021,
+   "gross_bps": 6.6,
+   "t": 0.41,
+   "n_ep": 61
+  },
+  "years_same_sign": "2/7",
+  "n_required": 23425.6,
+  "event_rate_per_week_6m": 0.232,
+  "eta_forward_confirmation": {
+   "days": 706674.0,
+   "years": 1934.81
+  },
+  "eta_L3_alt": {
+   "unit": "['_month']",
+   "n_ep": 73,
+   "n_required": 23425.6,
+   "rate_wk": 0.232,
+   "years": 1934.81
+  },
+  "univariate_age_coef_bps": -8.4,
+  "univariate_age_t": -0.4,
+  "note": "coefficient de regression, PAS un rendement de livre : cout non applicable (cost_rt=0)"
+ }
+]

@@ -1,0 +1,138 @@
+[
+ {
+  "claim_id": "W5_C1_MAKER_COST_LAYER",
+  "n_raw": 154875,
+  "n_independent_L1": 12,
+  "n_independent_L2": 4,
+  "n_independent_L3": 36,
+  "effect_bps": 2.349,
+  "t_stat_declustered": 47.06,
+  "bootstrap_ci95": [
+   2.289,
+   2.399
+  ],
+  "year_by_year": "N/A_COST_LAYER (7 weeks probe / 4 days real books)",
+  "ex_best_year": "N/A_COST_LAYER (same reason)",
+  "n_required_power80_alpha5_haircut50": 1,
+  "event_rate_independent_per_week": 63.0,
+  "eta_forward_confirmation_days": 0.1,
+  "eta_forward_confirmation_years": 0.0002,
+  "statement": "post-only at the touch beats crossing by 2.35 bps one-way CONDITIONAL ON FILL; 1.5-1.8 bps RT on the must-trade policy",
+  "net_bps": null,
+  "net_bps_stress28": null,
+  "verdict": "VALIDATED_FOR_FORWARD",
+  "gate_note": "ETA 1 day. The binding limitation is not power, it is REGIME COVERAGE: 4 calendar days, one volatility regime."
+ },
+ {
+  "claim_id": "W5_C2_URGENCY_MOMENTUM_P999",
+  "n_raw": 3991,
+  "n_independent_L1": 292,
+  "n_independent_L2": 45,
+  "n_independent_L3": 15,
+  "effect_bps": 10.387,
+  "t_stat_declustered": 9.33,
+  "bootstrap_ci95": [
+   5.693,
+   15.384
+  ],
+  "year_by_year": "N/A_COST_LAYER (7 weeks probe / 4 days real books)",
+  "ex_best_year": "N/A_COST_LAYER (same reason)",
+  "n_required_power80_alpha5_haircut50": 106,
+  "event_rate_independent_per_week": 45.4,
+  "eta_forward_confirmation_days": 16.2,
+  "eta_forward_confirmation_years": 0.0445,
+  "statement": "maker round-trip cost rises 10.39 bps when posting on the side the market has ALREADY moved toward (top 0.1% move)",
+  "spread_multiplier": 0.875,
+  "fill_rate_60s": [
+   0.4370285438416511,
+   0.8759398496240601
+  ],
+  "verdict": "VALIDATED_FOR_FORWARD",
+  "gate_note": "measured with the probe's traversal rule + the s10 bridge; the bridge is EXTRAPOLATED above spread 1 bps"
+ },
+ {
+  "claim_id": "W5_C2_URGENCY_MOMENTUM_P99",
+  "n_raw": 39782,
+  "n_independent_L1": 665,
+  "n_independent_L2": 51,
+  "n_independent_L3": 15,
+  "effect_bps": 1.949,
+  "t_stat_declustered": 8.07,
+  "bootstrap_ci95": [
+   1.069,
+   2.802
+  ],
+  "year_by_year": "N/A_COST_LAYER (7 weeks probe / 4 days real books)",
+  "ex_best_year": "N/A_COST_LAYER (same reason)",
+  "n_required_power80_alpha5_haircut50": 321,
+  "event_rate_independent_per_week": 91.3,
+  "eta_forward_confirmation_days": 24.6,
+  "eta_forward_confirmation_years": 0.0673,
+  "statement": "maker round-trip cost rises 1.95 bps when posting on the side the market has ALREADY moved toward (top 1.0% move)",
+  "spread_multiplier": 0.875,
+  "fill_rate_60s": [
+   0.4370285438416511,
+   0.8359728506787331
+  ],
+  "verdict": "PROMISING_NEEDS_VALIDATION",
+  "gate_note": "measured with the probe's traversal rule + the s10 bridge; the bridge is EXTRAPOLATED above spread 1 bps"
+ },
+ {
+  "claim_id": "W5_C3_URGENCY_CONTRARIAN_P999",
+  "n_raw": 3991,
+  "n_independent_L1": 277,
+  "n_independent_L2": 44,
+  "n_independent_L3": 15,
+  "effect_bps": -6.825,
+  "t_stat_declustered": -5.47,
+  "bootstrap_ci95": [
+   -11.333,
+   -2.49
+  ],
+  "year_by_year": "N/A_COST_LAYER (7 weeks probe / 4 days real books)",
+  "ex_best_year": "N/A_COST_LAYER (same reason)",
+  "n_required_power80_alpha5_haircut50": 291,
+  "event_rate_independent_per_week": 44.1,
+  "eta_forward_confirmation_days": 46.2,
+  "eta_forward_confirmation_years": 0.1264,
+  "statement": "posting into a cascade is CHEAPER, not dearer, by 6.8 bps RT",
+  "verdict": "DOUBLE_COUNTING_RISK - NOT USABLE AS A CREDIT",
+  "gate_note": "this improvement IS the post-cascade bounce that the project's cascade alphas already book as their edge. Admissible use is only the negative one: cascade-bounce alphas are NOT penalised by urgency."
+ },
+ {
+  "claim_id": "W5_C4_WIDE_ALT_COST_UNDERSTATED",
+  "statement": "on AR/ADA/FET the true best-mode round-trip cost is 14.98/14.56/16.32 bps, not 14; the convention is too generous by 1.3 bps on average and the error grows 1:1 with the spread into the illiquid tail",
+  "n_raw": 3975968,
+  "n_independent_L1": "51 dates x 15 symbols = 765 symbol-days",
+  "n_independent_L2": 51,
+  "n_independent_L3": 15,
+  "effect_bps": 1.29,
+  "t_stat_declustered": "N/A - identity, not an estimate (cost_taker_rt = spread + 10 exactly); the estimated part is the spread itself",
+  "bootstrap_ci95": null,
+  "year_by_year": "N/A_COST_LAYER",
+  "ex_best_year": "N/A_COST_LAYER",
+  "n_required_power80_alpha5_haircut50": 1,
+  "event_rate_independent_per_week": 105.0,
+  "eta_forward_confirmation_days": 1.0,
+  "eta_forward_confirmation_years": 0.003,
+  "verdict": "VALIDATED_FOR_FORWARD"
+ },
+ {
+  "claim_id": "W5_C5_SPREAD_PROXY_FOR_THE_WIDE_UNIVERSE",
+  "statement": "Corwin-Schultz on 1h bars ranks spreads (Spearman 0.867, n=9) but its LEVELS are unusable (5.81 bps for BTC where the truth is 0.015). Since cost = const + 1.00*spread, the level error is the cost error.",
+  "n_raw": 9,
+  "n_independent_L1": 9,
+  "n_independent_L2": 9,
+  "n_independent_L3": 9,
+  "spearman_corwin_schultz": 0.8666666666666667,
+  "spearman_abdi_ranaldo": -0.237346441585572,
+  "preset_threshold": 0.6,
+  "year_by_year": "N/A_COST_LAYER",
+  "ex_best_year": "N/A_COST_LAYER",
+  "n_required_power80_alpha5_haircut50": null,
+  "event_rate_independent_per_week": null,
+  "eta_forward_confirmation_days": null,
+  "eta_forward_confirmation_years": null,
+  "verdict": "DATA_LIMITED"
+ }
+]

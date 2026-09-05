@@ -1,0 +1,3326 @@
+{
+ "worker": "W2_HYPERLIQUID_FLOW",
+ "round": "alpha_hunt_2026-09-03_round4",
+ "completed": "2026-09-05 (session resumed after an interruption on 2026-09-03)",
+ "preregistration": "PREREGISTRATION.md (hypotheses T1-T11, fixed before any forward return)",
+ "headline": "No mechanism reaches VALIDATED_FOR_FORWARD. The Hyperliquid TWAP tape does carry a real, PIT-clean signed drift, but (a) most of it is a symbol x direction selection effect that a t-7d placebo removes, (b) the aggregate-flow formulation T4 was half leak, and (c) the one population that survives its own controls needs ~6 years of forward data to confirm.",
+ "key_findings": [
+  "T4 LEAK, found and fixed: summing the scheduled-flow matrix FORWARD over [t, t+H) counts TWAPs created inside the window. At a 4h horizon a median 74.4% of that notional does not yet exist at decision time. Correcting it cuts the cross-sectional L/S edge from 26.98 to 13.55 bps gross and the IC from 0.0433 to 0.0198 -> net -0.45 bps, ETA 4.6 y.",
+  "The t-7d placebo (same symbol, same clock, same direction) earns MORE than the event window itself (+17.95 vs +11.88 bps at 24h), so the headline TWAP drift is a coin-selection effect, not an event effect.",
+  "But that placebo is itself contaminated for 90.2% of events (the same coin was already being TWAPed a week earlier), so it over-corrects. On the uncontaminated 9.9% the event edge survives: +29.72 bps gross, +15.72 net, +1.72 under the 28 bps stress, t_L3=3.79.",
+  "That uncontaminated population is NOT 'first touch after a quiet period' (QUIET_24h/72h/7d measured just before t are all dead, t<1). It is an attention-onset population: the coin had no HL TWAP flow a week ago and has flow now.",
+  "Its ETA is 5.3-6.6 years under every daily aggregation scheme tried, and equal-weighting across coins (the natural portfolio) cuts the daily mean from 16.5 to 9.9 bps -> under cost. Verdict UNCONFIRMABLE_IN_HORIZON.",
+  "LISTING AGE was the sharpest control on that candidate. The trigger is 2.2x over-represented in coins under 30 days old (9.3% of its events vs a 4.2% baseline). Applying the project's own ListingAgeGate (>= 30 d) leaves the t-stat untouched (3.79 -> 3.77) but takes net_bps_stress28 from +1.72 to -1.87: the only thing that made the mechanism clear the 28 bps stress was newly listed coins.",
+  "T8: Hyperliquid does NOT lead Binance. The cross-correlation argmax is at -500 to -800 ms, i.e. Binance leads HL, on every symbol and on both the venue clock and our receive clock. OKX (control venue) is synchronous at 0 ms.",
+  "T9: the HL premium over its own multi-venue oracle does mean-revert, very significantly (+1.07 to +2.41 bps, t 4.6-14.2), and is 12-26x too small for a 28 bps two-leg round trip.",
+  "T11: HL top-of-book imbalance predicts the next 5-60 min at +0.5 to +1.0 bps with t up to 14.6 and an ETA of 0.24 y -- the best episode frequency in the whole round -- but the median top-of-book depth is 9,139 USD and the edge is 14-16x under cost. High frequency does not save an edge that is under cost.",
+  "BUG FOUND IN MY OWN EARLIER PASS: run_event_gate.py reported the momentum-residualised series at gross=-0.00 bps and called it a result. OLS residuals are mean-zero by construction; the number was an artefact. Replaced by the intercept/slope and a quintile decomposition, which show the control was simply the wrong one."
+ ],
+ "capacity_note": "Track A executes on Binance USDM, so capacity is 0.5% of Binance quote volume over the holding window: 0.7-4.8 M USD per episode for the 24h mechanisms. Track B executes on Hyperliquid, and there the binding constraint is HL's own book: median top-of-book depth across the 12 HL majors is 9,139 USD.",
+ "declustering": {
+  "L1": "user x coin x calendar day (one wallet's flow on one coin on one day = ONE episode)",
+  "L2": "coin x calendar day",
+  "L3": "calendar day, all coins (primary; t_stat_declustered and the block bootstrap use it)"
+ },
+ "verdict_counts": {
+  "UNCONFIRMABLE_IN_HORIZON": 1,
+  "COST_FRAGILE": 3,
+  "DATA_LIMITED": 23,
+  "WEAK": 12,
+  "DEAD": 12
+ },
+ "mechanisms": [
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "ret_col": "S1440",
+   "n_raw": 23267,
+   "n_independent_L1_user_coin_day": 14559,
+   "n_independent_L2_coin_day": 10058,
+   "n_independent_L3_day": 883,
+   "gross_bps": 29.72,
+   "net_bps": 15.72,
+   "net_bps_stress28": 1.72,
+   "t_stat_declustered_L3day": 3.79,
+   "t_stat_L2_coin_day": 1.4,
+   "bootstrap_ci95": [
+    7.44,
+    49.7
+   ],
+   "sd_day_bps": 233.0,
+   "year_by_year": {
+    "2024": [
+     36.38,
+     3810
+    ],
+    "2025": [
+     23.71,
+     11240
+    ],
+    "2026": [
+     34.86,
+     8217
+    ]
+   },
+   "ex_best_year": 28.42,
+   "ex_best_year_dropped": "2024",
+   "n_required": 1927,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1927.3,
+   "eta_forward_confirmation_years": 5.28,
+   "train_bps": 22.85,
+   "test_bps": 35.45,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 733853,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict_before_override": "UNCONFIRMABLE_IN_HORIZON",
+   "override_applied": true,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "gate_failures": [
+    "eta_forward_confirmation_years = 5.28 (best scheme tried: 6.01) > 3 -- briefing s2 makes this decisive regardless of bps",
+    "LISTING-AGE CONTROL (briefing s8.10): the trigger is 2.2x over-represented in coins less than 30 days old on Binance (9.3% of trigger events vs a 4.2% baseline), and 1% of them fire on the symbol's very first bars. Applying the project's own ListingAgeGate (age >= 30 d) takes gross from 29.72 to 26.13 and, decisively, takes net_bps_stress28 from +1.72 to -1.87. Under the project's own listing policy this mechanism is COST_FRAGILE: its survival of the 28 bps stress was carried by newly listed coins.",
+    "arm contrast against the rest of the TWAP population is +19.82 bps at t_daypaired = 1.16, so the trigger is not demonstrably better than the population it selects from",
+    "the t-7d placebo-adjusted twin is +21.02 bps with CI [-0.89, 41.33], which includes zero",
+    "REFIT: this trigger is not in PREREGISTRATION.md; it was found while auditing the placebo",
+    "equal-weighting across coins (the natural portfolio form) cuts the daily mean from 16.46 to 9.89 bps, i.e. under the 14 bps cost",
+    "eta_forward_confirmation_years=5.28 > 3"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "COINQUIET_1WK_AGO_S1440 :: all trigger events",
+   "ret_col": "S1440",
+   "n_raw": 23267,
+   "n_independent_L1_user_coin_day": 14559,
+   "n_independent_L2_coin_day": 10058,
+   "n_independent_L3_day": 883,
+   "gross_bps": 29.72,
+   "net_bps": 15.72,
+   "net_bps_stress28": 1.72,
+   "t_stat_declustered_L3day": 3.79,
+   "t_stat_L2_coin_day": 1.4,
+   "bootstrap_ci95": [
+    7.44,
+    49.7
+   ],
+   "sd_day_bps": 233.0,
+   "year_by_year": {
+    "2024": [
+     36.38,
+     3810
+    ],
+    "2025": [
+     23.71,
+     11240
+    ],
+    "2026": [
+     34.86,
+     8217
+    ]
+   },
+   "ex_best_year": 28.42,
+   "ex_best_year_dropped": "2024",
+   "n_required": 1927,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1927.3,
+   "eta_forward_confirmation_years": 5.28,
+   "train_bps": 22.85,
+   "test_bps": 35.45,
+   "median_age_days": 428.8,
+   "track": "A_binance_executed",
+   "source_evidence": "listingage_check.json",
+   "robustness_check_of": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "gate_failures": [
+    "eta_forward_confirmation_years=5.28 > 3"
+   ],
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "COINQUIET_1WK_AGO_S1440 :: age >= 90d",
+   "ret_col": "S1440",
+   "n_raw": 19979,
+   "n_independent_L1_user_coin_day": 12787,
+   "n_independent_L2_coin_day": 9098,
+   "n_independent_L3_day": 830,
+   "gross_bps": 26.84,
+   "net_bps": 12.84,
+   "net_bps_stress28": -1.16,
+   "t_stat_declustered_L3day": 3.77,
+   "t_stat_L2_coin_day": 1.88,
+   "bootstrap_ci95": [
+    6.55,
+    47.13
+   ],
+   "sd_day_bps": 205.4,
+   "year_by_year": {
+    "2024": [
+     43.65,
+     3059
+    ],
+    "2025": [
+     17.07,
+     9030
+    ],
+    "2026": [
+     31.51,
+     7890
+    ]
+   },
+   "ex_best_year": 23.8,
+   "ex_best_year_dropped": "2024",
+   "n_required": 1835,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1835.7,
+   "eta_forward_confirmation_years": 5.03,
+   "train_bps": 32.09,
+   "test_bps": 23.05,
+   "median_age_days": 512.0,
+   "track": "A_binance_executed",
+   "source_evidence": "listingage_check.json",
+   "robustness_check_of": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-1.16 <= 0"
+   ],
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "COINQUIET_1WK_AGO_S1440 :: age >= 30d (ListingAgeGate)",
+   "ret_col": "S1440",
+   "n_raw": 21302,
+   "n_independent_L1_user_coin_day": 13567,
+   "n_independent_L2_coin_day": 9709,
+   "n_independent_L3_day": 880,
+   "gross_bps": 26.13,
+   "net_bps": 12.13,
+   "net_bps_stress28": -1.87,
+   "t_stat_declustered_L3day": 3.77,
+   "t_stat_L2_coin_day": 1.52,
+   "bootstrap_ci95": [
+    7.28,
+    44.46
+   ],
+   "sd_day_bps": 205.5,
+   "year_by_year": {
+    "2024": [
+     37.67,
+     3592
+    ],
+    "2025": [
+     18.19,
+     9791
+    ],
+    "2026": [
+     30.71,
+     7919
+    ]
+   },
+   "ex_best_year": 23.79,
+   "ex_best_year_dropped": "2024",
+   "n_required": 1938,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1939.0,
+   "eta_forward_confirmation_years": 5.31,
+   "train_bps": 27.18,
+   "test_bps": 25.29,
+   "median_age_days": 480.3,
+   "track": "A_binance_executed",
+   "source_evidence": "listingage_check.json",
+   "robustness_check_of": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-1.87 <= 0"
+   ],
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "COINQUIET_1WK_AGO_S1440 :: age >= 180d",
+   "ret_col": "S1440",
+   "n_raw": 18119,
+   "n_independent_L1_user_coin_day": 11649,
+   "n_independent_L2_coin_day": 8258,
+   "n_independent_L3_day": 753,
+   "gross_bps": 24.03,
+   "net_bps": 10.03,
+   "net_bps_stress28": -3.97,
+   "t_stat_declustered_L3day": 3.16,
+   "t_stat_L2_coin_day": 1.6,
+   "bootstrap_ci95": [
+    3.83,
+    44.53
+   ],
+   "sd_day_bps": 208.9,
+   "year_by_year": {
+    "2024": [
+     54.85,
+     2314
+    ],
+    "2025": [
+     8.96,
+     8137
+    ],
+    "2026": [
+     30.71,
+     7668
+    ]
+   },
+   "ex_best_year": 19.51,
+   "ex_best_year_dropped": "2024",
+   "n_required": 2370,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2370.9,
+   "eta_forward_confirmation_years": 6.49,
+   "train_bps": 26.98,
+   "test_bps": 22.24,
+   "median_age_days": 550.5,
+   "track": "A_binance_executed",
+   "source_evidence": "listingage_check.json",
+   "robustness_check_of": "HLTWAP_COINQUIET_1WK_AGO_S1440 [REFIT]",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-3.97 <= 0"
+   ],
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S720 [REFIT]",
+   "ret_col": "S720",
+   "n_raw": 23270,
+   "n_independent_L1_user_coin_day": 14561,
+   "n_independent_L2_coin_day": 10058,
+   "n_independent_L3_day": 883,
+   "gross_bps": 22.51,
+   "net_bps": 8.51,
+   "net_bps_stress28": -5.49,
+   "t_stat_declustered_L3day": 3.69,
+   "t_stat_L2_coin_day": 1.36,
+   "bootstrap_ci95": [
+    4.35,
+    40.15
+   ],
+   "sd_day_bps": 181.0,
+   "year_by_year": {
+    "2024": [
+     11.64,
+     3810
+    ],
+    "2025": [
+     22.55,
+     11243
+    ],
+    "2026": [
+     27.49,
+     8217
+    ]
+   },
+   "ex_best_year": 19.79,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2028,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2028.5,
+   "eta_forward_confirmation_years": 5.55,
+   "train_bps": 19.75,
+   "test_bps": 24.81,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 366926,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-5.49 <= 0"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_BUYONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 141259,
+   "n_independent_L1_user_coin_day": 71210,
+   "n_independent_L2_coin_day": 18173,
+   "n_independent_L3_day": 878,
+   "gross_bps": 22.16,
+   "net_bps": 8.16,
+   "net_bps_stress28": -5.84,
+   "t_stat_declustered_L3day": 3.13,
+   "t_stat_L2_coin_day": -4.79,
+   "bootstrap_ci95": [
+    -2.04,
+    44.39
+   ],
+   "sd_day_bps": 210.0,
+   "year_by_year": {
+    "2024": [
+     4.33,
+     6111
+    ],
+    "2025": [
+     11.59,
+     50540
+    ],
+    "2026": [
+     29.77,
+     84608
+    ]
+   },
+   "ex_best_year": 10.81,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2815,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2815.3,
+   "eta_forward_confirmation_years": 7.71,
+   "train_bps": 21.41,
+   "test_bps": 22.38,
+   "median_ntl_planned_usd": 13898,
+   "capacity_usd_estimate": 4166362,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-5.84 <= 0"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T7 HLTWAP_DUR_GE180_h24h",
+   "ret_col": "S1440",
+   "n_raw": 40160,
+   "n_independent_L1_user_coin_day": 26235,
+   "n_independent_L2_coin_day": 9765,
+   "n_independent_L3_day": 803,
+   "gross_bps": 17.8,
+   "net_bps": 3.8,
+   "net_bps_stress28": -10.2,
+   "t_stat_declustered_L3day": 3.25,
+   "t_stat_L2_coin_day": 1.47,
+   "bootstrap_ci95": [
+    0.45,
+    32.75
+   ],
+   "sd_day_bps": 155.1,
+   "year_by_year": {
+    "2024": [
+     -5.46,
+     1596
+    ],
+    "2025": [
+     8.52,
+     13754
+    ],
+    "2026": [
+     24.44,
+     24810
+    ]
+   },
+   "ex_best_year": 7.07,
+   "ex_best_year_dropped": "2026",
+   "n_required": 2382,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2382.3,
+   "eta_forward_confirmation_years": 6.52,
+   "train_bps": 14.5,
+   "test_bps": 18.78,
+   "median_ntl_planned_usd": 42439,
+   "capacity_usd_estimate": 5163435,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "COST_FRAGILE",
+   "gate_failures": [
+    "net_bps_stress28=-10.2 <= 0"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z2_h24h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 399,
+   "n_independent_L1_user_coin_day": 117,
+   "n_independent_L2_coin_day": 117,
+   "n_independent_L3_day": 33,
+   "gross_bps": 45.3,
+   "net_bps": 31.3,
+   "net_bps_stress28": 17.3,
+   "t_stat_declustered_L3day": 1.0,
+   "t_stat_L2_coin_day": 2.26,
+   "bootstrap_ci95": [
+    -53.9,
+    163.58
+   ],
+   "sd_day_bps": 260.6,
+   "year_by_year": {
+    "2026": [
+     45.3,
+     399
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 1037,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 18677.3,
+   "eta_forward_confirmation_years": 51.14,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 337303,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=33 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only",
+   "ret_col": "S1440",
+   "n_raw": 8318,
+   "n_independent_L1_user_coin_day": 4119,
+   "n_independent_L2_coin_day": 2591,
+   "n_independent_L3_day": 332,
+   "gross_bps": 44.81,
+   "net_bps": 30.81,
+   "net_bps_stress28": 16.81,
+   "t_stat_declustered_L3day": 4.2,
+   "t_stat_L2_coin_day": 2.31,
+   "bootstrap_ci95": [
+    18.49,
+    72.85
+   ],
+   "sd_day_bps": 194.4,
+   "year_by_year": {
+    "2025": [
+     42.06,
+     3552
+    ],
+    "2026": [
+     46.87,
+     4766
+    ]
+   },
+   "ex_best_year": 42.06,
+   "ex_best_year_dropped": "2026",
+   "n_required": 589,
+   "event_rate_indep_per_week": 6.96,
+   "eta_forward_confirmation_days": 593.3,
+   "eta_forward_confirmation_years": 1.62,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 48.0,
+   "test_half2_bps": 40.13,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict_before_override": "VALIDATED_FOR_FORWARD",
+   "override_applied": true,
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "PREREGISTRATION.md section 0 disqualified this test IN ADVANCE: the 2,215-wallet list is harvested from the 2026-07/08 live trade tape, so every wallet in it survived to July 2026. A wallet-SKILL study is exactly the case that bias invalidates, and T6 is a wallet-skill study. The gate numbers (gross 44.81, net 30.81, stress 16.81, t_L3 4.20, ETA 1.62 y) are reported for completeness and must NOT be read as an edge.",
+    "arm contrast top-cohort minus bottom-cohort is +39.61 bps at t_daypaired = 0.70: the briefing s1.3 comparison is underpowered, not passed",
+    "the t-7d placebo-adjusted twin falls to +20.47 bps at t_L3 = 1.34, CI [-16.43, 59.75]",
+    "WHAT WOULD BE NEEDED: a point-in-time wallet universe (wallets known to be active as of each historical date), not a universe reconstructed from a later snapshot"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z1_h24h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 1531,
+   "n_independent_L1_user_coin_day": 212,
+   "n_independent_L2_coin_day": 212,
+   "n_independent_L3_day": 37,
+   "gross_bps": 18.26,
+   "net_bps": 4.26,
+   "net_bps_stress28": -9.74,
+   "t_stat_declustered_L3day": 0.66,
+   "t_stat_L2_coin_day": 1.71,
+   "bootstrap_ci95": [
+    -36.7,
+    88.04
+   ],
+   "sd_day_bps": 168.2,
+   "year_by_year": {
+    "2026": [
+     18.26,
+     1531
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 2661,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 47911.7,
+   "eta_forward_confirmation_years": 131.18,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 277680,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z2_h4h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 400,
+   "n_independent_L1_user_coin_day": 118,
+   "n_independent_L2_coin_day": 118,
+   "n_independent_L3_day": 34,
+   "gross_bps": 12.82,
+   "net_bps": -1.18,
+   "net_bps_stress28": -15.18,
+   "t_stat_declustered_L3day": 0.78,
+   "t_stat_L2_coin_day": 1.21,
+   "bootstrap_ci95": [
+    -30.75,
+    58.1
+   ],
+   "sd_day_bps": 96.3,
+   "year_by_year": {
+    "2026": [
+     12.82,
+     400
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 1770,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 31870.4,
+   "eta_forward_confirmation_years": 87.26,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 56217,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=34 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T10 HL_VS_BINANCE_FUNDING_DIVERGENCE_z1_h4h (Binance leg)",
+   "ret_col": "S",
+   "n_raw": 1568,
+   "n_independent_L1_user_coin_day": 214,
+   "n_independent_L2_coin_day": 214,
+   "n_independent_L3_day": 37,
+   "gross_bps": 6.59,
+   "net_bps": -7.41,
+   "net_bps_stress28": -21.41,
+   "t_stat_declustered_L3day": 0.71,
+   "t_stat_L2_coin_day": 2.3,
+   "bootstrap_ci95": [
+    -12.64,
+    26.66
+   ],
+   "sd_day_bps": 56.3,
+   "year_by_year": {
+    "2026": [
+     6.59,
+     1568
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 2288,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 41199.0,
+   "eta_forward_confirmation_years": 112.8,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 46280,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "0.5% of Binance quote volume over the holding window",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h24h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 870,
+   "n_independent_L1_user_coin_day": 234,
+   "n_independent_L2_coin_day": 234,
+   "n_independent_L3_day": 36,
+   "gross_bps": 2.41,
+   "net_bps": -25.59,
+   "net_bps_stress28": -53.59,
+   "t_stat_declustered_L3day": 5.15,
+   "t_stat_L2_coin_day": 15.8,
+   "bootstrap_ci95": [
+    0.97,
+    4.23
+   ],
+   "sd_day_bps": 2.8,
+   "year_by_year": {
+    "2026": [
+     2.41,
+     870
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 42,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 765.1,
+   "eta_forward_confirmation_years": 2.09,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=36 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h4h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": 2.1,
+   "net_bps": -25.9,
+   "net_bps_stress28": -53.9,
+   "t_stat_declustered_L3day": 6.59,
+   "t_stat_L2_coin_day": 17.88,
+   "bootstrap_ci95": [
+    1.09,
+    3.31
+   ],
+   "sd_day_bps": 1.9,
+   "year_by_year": {
+    "2026": [
+     2.1,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 26,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 480.3,
+   "eta_forward_confirmation_years": 1.32,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z2_h1h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.59,
+   "net_bps": -26.41,
+   "net_bps_stress28": -54.41,
+   "t_stat_declustered_L3day": 9.17,
+   "t_stat_L2_coin_day": 18.14,
+   "bootstrap_ci95": [
+    1.16,
+    2.19
+   ],
+   "sd_day_bps": 1.1,
+   "year_by_year": {
+    "2026": [
+     1.59,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 13,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 248.6,
+   "eta_forward_confirmation_years": 0.68,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h24h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3477,
+   "n_independent_L1_user_coin_day": 388,
+   "n_independent_L2_coin_day": 388,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.55,
+   "net_bps": -26.45,
+   "net_bps_stress28": -54.45,
+   "t_stat_declustered_L3day": 4.61,
+   "t_stat_L2_coin_day": 15.76,
+   "bootstrap_ci95": [
+    0.59,
+    2.38
+   ],
+   "sd_day_bps": 2.0,
+   "year_by_year": {
+    "2026": [
+     1.55,
+     3477
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 54,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 981.1,
+   "eta_forward_confirmation_years": 2.69,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h4h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3591,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.34,
+   "net_bps": -26.66,
+   "net_bps_stress28": -54.66,
+   "t_stat_declustered_L3day": 10.02,
+   "t_stat_L2_coin_day": 22.4,
+   "bootstrap_ci95": [
+    0.97,
+    1.64
+   ],
+   "sd_day_bps": 0.8,
+   "year_by_year": {
+    "2026": [
+     1.34,
+     3591
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 11,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 207.9,
+   "eta_forward_confirmation_years": 0.57,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_MEANREVERSION_z1_h1h (spread, not tradable alone)",
+   "ret_col": "D",
+   "n_raw": 3603,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": 1.07,
+   "net_bps": -26.93,
+   "net_bps_stress28": -54.93,
+   "t_stat_declustered_L3day": 14.17,
+   "t_stat_L2_coin_day": 22.12,
+   "bootstrap_ci95": [
+    0.89,
+    1.24
+   ],
+   "sd_day_bps": 0.5,
+   "year_by_year": {
+    "2026": [
+     1.07,
+     3603
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 5,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 104.0,
+   "eta_forward_confirmation_years": 0.28,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "note": "measures whether the dislocation closes at all",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h60min",
+   "ret_col": "S",
+   "n_raw": 239453,
+   "n_independent_L1_user_coin_day": 429,
+   "n_independent_L2_coin_day": 429,
+   "n_independent_L3_day": 39,
+   "gross_bps": 0.99,
+   "net_bps": -13.01,
+   "net_bps_stress28": -27.01,
+   "t_stat_declustered_L3day": 3.01,
+   "t_stat_L2_coin_day": 2.1,
+   "bootstrap_ci95": [
+    0.35,
+    1.64
+   ],
+   "sd_day_bps": 2.1,
+   "year_by_year": {
+    "2026": [
+     0.99,
+     239453
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 134,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 2019.7,
+   "eta_forward_confirmation_years": 5.53,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 60,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=39 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h15min",
+   "ret_col": "S",
+   "n_raw": 239617,
+   "n_independent_L1_user_coin_day": 437,
+   "n_independent_L2_coin_day": 437,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.96,
+   "net_bps": -13.04,
+   "net_bps_stress28": -27.04,
+   "t_stat_declustered_L3day": 7.71,
+   "t_stat_L2_coin_day": 6.51,
+   "bootstrap_ci95": [
+    0.69,
+    1.23
+   ],
+   "sd_day_bps": 0.8,
+   "year_by_year": {
+    "2026": [
+     0.96,
+     239617
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 21,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 316.3,
+   "eta_forward_confirmation_years": 0.87,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 15,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=40 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_strong_h5min",
+   "ret_col": "S",
+   "n_raw": 239651,
+   "n_independent_L1_user_coin_day": 439,
+   "n_independent_L2_coin_day": 439,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.89,
+   "net_bps": -13.11,
+   "net_bps_stress28": -27.11,
+   "t_stat_declustered_L3day": 14.56,
+   "t_stat_L2_coin_day": 12.23,
+   "bootstrap_ci95": [
+    0.76,
+    1.01
+   ],
+   "sd_day_bps": 0.4,
+   "year_by_year": {
+    "2026": [
+     0.89,
+     239651
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 5,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 88.8,
+   "eta_forward_confirmation_years": 0.24,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.5,
+   "horizon_min": 5,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=40 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h60min",
+   "ret_col": "S",
+   "n_raw": 563296,
+   "n_independent_L1_user_coin_day": 429,
+   "n_independent_L2_coin_day": 429,
+   "n_independent_L3_day": 39,
+   "gross_bps": 0.58,
+   "net_bps": -13.42,
+   "net_bps_stress28": -27.42,
+   "t_stat_declustered_L3day": 3.2,
+   "t_stat_L2_coin_day": 2.25,
+   "bootstrap_ci95": [
+    0.24,
+    0.92
+   ],
+   "sd_day_bps": 1.1,
+   "year_by_year": {
+    "2026": [
+     0.58,
+     563296
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 119,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 1792.3,
+   "eta_forward_confirmation_years": 4.91,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 60,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=39 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h15min",
+   "ret_col": "S",
+   "n_raw": 563791,
+   "n_independent_L1_user_coin_day": 440,
+   "n_independent_L2_coin_day": 440,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.55,
+   "net_bps": -13.45,
+   "net_bps_stress28": -27.45,
+   "t_stat_declustered_L3day": 7.32,
+   "t_stat_L2_coin_day": 6.46,
+   "bootstrap_ci95": [
+    0.38,
+    0.7
+   ],
+   "sd_day_bps": 0.5,
+   "year_by_year": {
+    "2026": [
+     0.55,
+     563791
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 23,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 350.8,
+   "eta_forward_confirmation_years": 0.96,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 15,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=40 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T11 HL_L2_IMBALANCE_sign_h5min",
+   "ret_col": "S",
+   "n_raw": 563901,
+   "n_independent_L1_user_coin_day": 440,
+   "n_independent_L2_coin_day": 440,
+   "n_independent_L3_day": 40,
+   "gross_bps": 0.51,
+   "net_bps": -13.49,
+   "net_bps_stress28": -27.49,
+   "t_stat_declustered_L3day": 11.71,
+   "t_stat_L2_coin_day": 11.38,
+   "bootstrap_ci95": [
+    0.43,
+    0.6
+   ],
+   "sd_day_bps": 0.3,
+   "year_by_year": {
+    "2026": [
+     0.51,
+     563901
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 9,
+   "event_rate_indep_per_week": 0.47,
+   "eta_forward_confirmation_days": 137.2,
+   "eta_forward_confirmation_years": 0.38,
+   "cost_convention": "one-leg 14/28 bps",
+   "capacity_usd_estimate": 9139,
+   "track": "B_hyperliquid_native",
+   "imbalance_threshold": 0.0,
+   "horizon_min": 5,
+   "median_top_of_book_depth_usd": 9139,
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=40 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h1h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3603,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": -4.27,
+   "net_bps": -32.27,
+   "net_bps_stress28": -60.27,
+   "t_stat_declustered_L3day": -2.02,
+   "t_stat_L2_coin_day": -0.16,
+   "bootstrap_ci95": [
+    -10.12,
+    0.63
+   ],
+   "sd_day_bps": 12.8,
+   "year_by_year": {
+    "2026": [
+     -4.27,
+     3603
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 283,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 5101.2,
+   "eta_forward_confirmation_years": 13.97,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h1h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": -6.97,
+   "net_bps": -34.97,
+   "net_bps_stress28": -62.97,
+   "t_stat_declustered_L3day": -1.86,
+   "t_stat_L2_coin_day": 1.01,
+   "bootstrap_ci95": [
+    -17.9,
+    6.32
+   ],
+   "sd_day_bps": 22.8,
+   "year_by_year": {
+    "2026": [
+     -6.97,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 336,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 6053.7,
+   "eta_forward_confirmation_years": 16.57,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 1,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h4h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3591,
+   "n_independent_L1_user_coin_day": 396,
+   "n_independent_L2_coin_day": 396,
+   "n_independent_L3_day": 37,
+   "gross_bps": -12.45,
+   "net_bps": -40.45,
+   "net_bps_stress28": -68.45,
+   "t_stat_declustered_L3day": -1.33,
+   "t_stat_L2_coin_day": 0.48,
+   "bootstrap_ci95": [
+    -39.28,
+    10.38
+   ],
+   "sd_day_bps": 57.1,
+   "year_by_year": {
+    "2026": [
+     -12.45,
+     3591
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 659,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 11877.2,
+   "eta_forward_confirmation_years": 32.52,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h4h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 873,
+   "n_independent_L1_user_coin_day": 236,
+   "n_independent_L2_coin_day": 236,
+   "n_independent_L3_day": 37,
+   "gross_bps": -28.0,
+   "net_bps": -56.0,
+   "net_bps_stress28": -84.0,
+   "t_stat_declustered_L3day": -1.85,
+   "t_stat_L2_coin_day": 0.99,
+   "bootstrap_ci95": [
+    -83.25,
+    35.01
+   ],
+   "sd_day_bps": 91.8,
+   "year_by_year": {
+    "2026": [
+     -28.0,
+     873
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 337,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 6073.7,
+   "eta_forward_confirmation_years": 16.63,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 4,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z1_h24h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 3477,
+   "n_independent_L1_user_coin_day": 388,
+   "n_independent_L2_coin_day": 388,
+   "n_independent_L3_day": 37,
+   "gross_bps": -71.48,
+   "net_bps": -99.48,
+   "net_bps_stress28": -127.48,
+   "t_stat_declustered_L3day": -1.98,
+   "t_stat_L2_coin_day": -2.65,
+   "bootstrap_ci95": [
+    -179.24,
+    15.73
+   ],
+   "sd_day_bps": 219.7,
+   "year_by_year": {
+    "2026": [
+     -71.48,
+     3477
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 296,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 5334.8,
+   "eta_forward_confirmation_years": 14.61,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 1.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=37 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T9 HL_PREMIUM_FADE_z2_h24h (HL leg only)",
+   "ret_col": "S",
+   "n_raw": 870,
+   "n_independent_L1_user_coin_day": 234,
+   "n_independent_L2_coin_day": 234,
+   "n_independent_L3_day": 36,
+   "gross_bps": -147.21,
+   "net_bps": -175.21,
+   "net_bps_stress28": -203.21,
+   "t_stat_declustered_L3day": -2.95,
+   "t_stat_L2_coin_day": -1.15,
+   "bootstrap_ci95": [
+    -323.99,
+    51.42
+   ],
+   "sd_day_bps": 299.2,
+   "year_by_year": {
+    "2026": [
+     -147.21,
+     870
+    ]
+   },
+   "ex_best_year": null,
+   "ex_best_year_dropped": null,
+   "n_required": 129,
+   "event_rate_indep_per_week": 0.39,
+   "eta_forward_confirmation_days": 2332.3,
+   "eta_forward_confirmation_years": 6.39,
+   "cost_convention": "two-leg 28/56 bps",
+   "capacity_usd_estimate": 9151,
+   "track": "B_hyperliquid_native",
+   "z_threshold": 2.0,
+   "horizon_h": 24,
+   "capacity_basis": "median HL top-of-book depth (executed on HL)",
+   "source_evidence": "trackb_gate_results.json",
+   "verdict": "DATA_LIMITED",
+   "gate_failures": [
+    "n_independent_L3=36 < 60"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only_PLACEBOADJ2SIDED",
+   "ret_col": "B1440",
+   "n_raw": 8184,
+   "n_independent_L1_user_coin_day": 4036,
+   "n_independent_L2_coin_day": 2548,
+   "n_independent_L3_day": 325,
+   "gross_bps": 24.56,
+   "net_bps": 10.56,
+   "net_bps_stress28": -3.44,
+   "t_stat_declustered_L3day": 1.75,
+   "t_stat_L2_coin_day": 1.49,
+   "bootstrap_ci95": [
+    -16.29,
+    61.61
+   ],
+   "sd_day_bps": 252.7,
+   "year_by_year": {
+    "2025": [
+     25.92,
+     3494
+    ],
+    "2026": [
+     23.54,
+     4690
+    ]
+   },
+   "ex_best_year": 23.54,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3321,
+   "event_rate_indep_per_week": 6.69,
+   "eta_forward_confirmation_days": 3476.4,
+   "eta_forward_confirmation_years": 9.52,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 18.07,
+   "test_half2_bps": 34.19,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=1.75 < 3"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded. The 2-sided variant averages the t-7d and t+7d windows, so it reads the future on purpose. It is a diagnostic only and must never be read as an attainable edge.",
+   "pit_status": "PIT_VIOLATING_BY_DESIGN",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_A1440 [REFIT]",
+   "ret_col": "A1440",
+   "n_raw": 21996,
+   "n_independent_L1_user_coin_day": 13954,
+   "n_independent_L2_coin_day": 9900,
+   "n_independent_L3_day": 881,
+   "gross_bps": 21.02,
+   "net_bps": 7.02,
+   "net_bps_stress28": -6.98,
+   "t_stat_declustered_L3day": 2.41,
+   "t_stat_L2_coin_day": 1.08,
+   "bootstrap_ci95": [
+    -0.89,
+    41.33
+   ],
+   "sd_day_bps": 258.5,
+   "year_by_year": {
+    "2024": [
+     18.41,
+     3699
+    ],
+    "2025": [
+     12.45,
+     10205
+    ],
+    "2026": [
+     33.03,
+     8092
+    ]
+   },
+   "ex_best_year": 14.04,
+   "ex_best_year_dropped": "2026",
+   "n_required": 4741,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 4741.2,
+   "eta_forward_confirmation_years": 12.98,
+   "train_bps": 24.67,
+   "test_bps": 18.07,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 733853,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.41 < 3"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T5 HLTWAP_NONREDUCEONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 203829,
+   "n_independent_L1_user_coin_day": 97195,
+   "n_independent_L2_coin_day": 22154,
+   "n_independent_L3_day": 891,
+   "gross_bps": 13.86,
+   "net_bps": -0.14,
+   "net_bps_stress28": -14.14,
+   "t_stat_declustered_L3day": 4.13,
+   "t_stat_L2_coin_day": -0.1,
+   "bootstrap_ci95": [
+    3.61,
+    23.54
+   ],
+   "sd_day_bps": 100.2,
+   "year_by_year": {
+    "2024": [
+     1.81,
+     7991
+    ],
+    "2025": [
+     10.86,
+     71460
+    ],
+    "2026": [
+     16.37,
+     124378
+    ]
+   },
+   "ex_best_year": 9.95,
+   "ex_best_year_dropped": "2026",
+   "n_required": 1637,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1637.6,
+   "eta_forward_confirmation_years": 4.48,
+   "train_bps": 15.3,
+   "test_bps": 13.47,
+   "median_ntl_planned_usd": 13370,
+   "capacity_usd_estimate": 4837956,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "net_bps=-0.14 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP10PCT_h24h(thr=4.91e-04,TRAIN)",
+   "ret_col": "S1440",
+   "n_raw": 25927,
+   "n_independent_L1_user_coin_day": 15983,
+   "n_independent_L2_coin_day": 9626,
+   "n_independent_L3_day": 726,
+   "gross_bps": 13.73,
+   "net_bps": -0.27,
+   "net_bps_stress28": -14.27,
+   "t_stat_declustered_L3day": 2.63,
+   "t_stat_L2_coin_day": 2.22,
+   "bootstrap_ci95": [
+    0.31,
+    24.86
+   ],
+   "sd_day_bps": 140.6,
+   "year_by_year": {
+    "2024": [
+     -23.0,
+     669
+    ],
+    "2025": [
+     1.78,
+     7428
+    ],
+    "2026": [
+     20.08,
+     17830
+    ]
+   },
+   "ex_best_year": -0.27,
+   "ex_best_year_dropped": "2026",
+   "n_required": 3289,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3289.7,
+   "eta_forward_confirmation_years": 9.01,
+   "train_bps": 9.4,
+   "test_bps": 14.76,
+   "median_ntl_planned_usd": 153375,
+   "capacity_usd_estimate": 490703,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.63 < 3",
+    "net_bps=-0.27 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T4_FLOW_IMBALANCE_XS_LS_4h_v2b_CLEAN_RESIDUAL",
+   "ret_col": "spread_bps",
+   "n_raw": 3409,
+   "n_independent_L1_user_coin_day": 3409,
+   "n_independent_L2_coin_day": 677,
+   "n_independent_L3_day": 677,
+   "gross_bps": 13.55,
+   "net_bps": -0.45,
+   "net_bps_stress28": -14.45,
+   "t_stat_declustered_L3day": 3.64,
+   "t_stat_L2_coin_day": 3.12,
+   "bootstrap_ci95": [
+    6.53,
+    20.93
+   ],
+   "sd_day_bps": 96.7,
+   "year_by_year": {
+    "2024": [
+     -1.94,
+     312
+    ],
+    "2025": [
+     14.64,
+     1880
+    ],
+    "2026": [
+     15.84,
+     1217
+    ]
+   },
+   "ex_best_year": 12.28,
+   "ex_best_year_dropped": "2026",
+   "n_required": 1598,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 1663.3,
+   "eta_forward_confirmation_years": 4.55,
+   "ic_mean": 0.01975,
+   "ic_t_day": 3.13,
+   "ic_test_h1": 0.01616,
+   "ic_test_h2": 0.04003,
+   "long_leg_bps": 14.44,
+   "short_leg_bps": 0.89,
+   "capacity_usd_estimate": 195317,
+   "train_bps": 12.37,
+   "test_bps": 14.47,
+   "n_rebalances": 3409,
+   "track": "A_binance_executed",
+   "source_evidence": "flow_leak_diagnostic.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "net_bps=-0.45 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h",
+   "ret_col": "S1440",
+   "n_raw": 233043,
+   "n_independent_L1_user_coin_day": 108376,
+   "n_independent_L2_coin_day": 24150,
+   "n_independent_L3_day": 895,
+   "gross_bps": 11.88,
+   "net_bps": -2.12,
+   "net_bps_stress28": -16.12,
+   "t_stat_declustered_L3day": 4.28,
+   "t_stat_L2_coin_day": 0.23,
+   "bootstrap_ci95": [
+    3.85,
+    19.35
+   ],
+   "sd_day_bps": 83.1,
+   "year_by_year": {
+    "2024": [
+     3.37,
+     8719
+    ],
+    "2025": [
+     8.39,
+     81017
+    ],
+    "2026": [
+     14.37,
+     143307
+    ]
+   },
+   "ex_best_year": 7.9,
+   "ex_best_year_dropped": "2026",
+   "n_required": 1535,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1535.3,
+   "eta_forward_confirmation_years": 4.2,
+   "train_bps": 11.91,
+   "test_bps": 11.88,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "net_bps=-2.12 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S240 [REFIT]",
+   "ret_col": "S240",
+   "n_raw": 23273,
+   "n_independent_L1_user_coin_day": 14562,
+   "n_independent_L2_coin_day": 10059,
+   "n_independent_L3_day": 883,
+   "gross_bps": 10.04,
+   "net_bps": -3.96,
+   "net_bps_stress28": -17.96,
+   "t_stat_declustered_L3day": 2.97,
+   "t_stat_L2_coin_day": 1.03,
+   "bootstrap_ci95": [
+    0.35,
+    20.01
+   ],
+   "sd_day_bps": 100.5,
+   "year_by_year": {
+    "2024": [
+     -3.18,
+     3810
+    ],
+    "2025": [
+     13.5,
+     11246
+    ],
+    "2026": [
+     11.44,
+     8217
+    ]
+   },
+   "ex_best_year": 6.81,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3137,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3137.1,
+   "eta_forward_confirmation_years": 8.59,
+   "train_bps": 13.35,
+   "test_bps": 7.29,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 122308,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.97 < 3",
+    "net_bps=-3.96 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T7 HLTWAP_DUR_LE15_h24h",
+   "ret_col": "S1440",
+   "n_raw": 81342,
+   "n_independent_L1_user_coin_day": 37024,
+   "n_independent_L2_coin_day": 13173,
+   "n_independent_L3_day": 822,
+   "gross_bps": 9.61,
+   "net_bps": -4.39,
+   "net_bps_stress28": -18.39,
+   "t_stat_declustered_L3day": 2.82,
+   "t_stat_L2_coin_day": 1.88,
+   "bootstrap_ci95": [
+    0.41,
+    18.14
+   ],
+   "sd_day_bps": 97.6,
+   "year_by_year": {
+    "2024": [
+     -19.68,
+     2768
+    ],
+    "2025": [
+     11.36,
+     28612
+    ],
+    "2026": [
+     10.24,
+     49962
+    ]
+   },
+   "ex_best_year": 8.67,
+   "ex_best_year_dropped": "2025",
+   "n_required": 3233,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 3233.7,
+   "eta_forward_confirmation_years": 8.85,
+   "train_bps": 11.66,
+   "test_bps": 9.07,
+   "median_ntl_planned_usd": 9004,
+   "capacity_usd_estimate": 4205936,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.82 < 3",
+    "net_bps=-4.39 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_A240 [REFIT]",
+   "ret_col": "A240",
+   "n_raw": 22007,
+   "n_independent_L1_user_coin_day": 13962,
+   "n_independent_L2_coin_day": 9903,
+   "n_independent_L3_day": 881,
+   "gross_bps": 7.47,
+   "net_bps": -6.53,
+   "net_bps_stress28": -20.53,
+   "t_stat_declustered_L3day": 1.92,
+   "t_stat_L2_coin_day": 0.39,
+   "bootstrap_ci95": [
+    -2.61,
+    17.63
+   ],
+   "sd_day_bps": 115.5,
+   "year_by_year": {
+    "2024": [
+     -6.31,
+     3700
+    ],
+    "2025": [
+     9.47,
+     10215
+    ],
+    "2026": [
+     11.24,
+     8092
+    ]
+   },
+   "ex_best_year": 5.28,
+   "ex_best_year_dropped": "2026",
+   "n_required": 7496,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 7496.3,
+   "eta_forward_confirmation_years": 20.52,
+   "train_bps": 8.95,
+   "test_bps": 6.27,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 122308,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=1.92 < 3",
+    "net_bps=-6.53 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_COINQUIET_1WK_AGO_S60 [REFIT]",
+   "ret_col": "S60",
+   "n_raw": 23273,
+   "n_independent_L1_user_coin_day": 14562,
+   "n_independent_L2_coin_day": 10059,
+   "n_independent_L3_day": 883,
+   "gross_bps": 4.22,
+   "net_bps": -9.78,
+   "net_bps_stress28": -23.78,
+   "t_stat_declustered_L3day": 2.51,
+   "t_stat_L2_coin_day": 0.91,
+   "bootstrap_ci95": [
+    -0.32,
+    8.6
+   ],
+   "sd_day_bps": 50.0,
+   "year_by_year": {
+    "2024": [
+     -2.88,
+     3810
+    ],
+    "2025": [
+     7.07,
+     11246
+    ],
+    "2026": [
+     3.62,
+     8217
+    ]
+   },
+   "ex_best_year": 1.56,
+   "ex_best_year_dropped": "2025",
+   "n_required": 4403,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 4403.1,
+   "eta_forward_confirmation_years": 12.05,
+   "train_bps": 8.7,
+   "test_bps": 0.5,
+   "median_ntl_planned_usd": 10340,
+   "capacity_usd_estimate": 30577,
+   "trigger_share_of_all_twap": 0.0991,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "quietweekago_gate_results.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.51 < 3",
+    "net_bps=-9.78 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h4h",
+   "ret_col": "S240",
+   "n_raw": 233047,
+   "n_independent_L1_user_coin_day": 108378,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 4.02,
+   "net_bps": -9.98,
+   "net_bps_stress28": -23.98,
+   "t_stat_declustered_L3day": 3.84,
+   "t_stat_L2_coin_day": -0.27,
+   "bootstrap_ci95": [
+    1.09,
+    6.65
+   ],
+   "sd_day_bps": 31.4,
+   "year_by_year": {
+    "2024": [
+     -3.62,
+     8719
+    ],
+    "2025": [
+     4.43,
+     81021
+    ],
+    "2026": [
+     4.26,
+     143307
+    ]
+   },
+   "ex_best_year": 3.81,
+   "ex_best_year_dropped": "2025",
+   "n_required": 1905,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 1905.3,
+   "eta_forward_confirmation_years": 5.22,
+   "train_bps": 4.8,
+   "test_bps": 3.81,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 732442,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "net_bps=-9.98 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_hDUR",
+   "ret_col": "SDUR",
+   "n_raw": 233049,
+   "n_independent_L1_user_coin_day": 108379,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 3.42,
+   "net_bps": -10.58,
+   "net_bps_stress28": -24.58,
+   "t_stat_declustered_L3day": 5.42,
+   "t_stat_L2_coin_day": 2.2,
+   "bootstrap_ci95": [
+    1.71,
+    4.99
+   ],
+   "sd_day_bps": 18.9,
+   "year_by_year": {
+    "2024": [
+     -1.02,
+     8719
+    ],
+    "2025": [
+     3.42,
+     81023
+    ],
+    "2026": [
+     3.69,
+     143307
+    ]
+   },
+   "ex_best_year": 2.99,
+   "ex_best_year_dropped": "2026",
+   "n_required": 956,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 956.1,
+   "eta_forward_confirmation_years": 2.62,
+   "train_bps": 3.84,
+   "test_bps": 3.3,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "net_bps=-10.58 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T2 HLTWAP_POSTEND_REVERSION",
+   "ret_col": "SPOST",
+   "n_raw": 233040,
+   "n_independent_L1_user_coin_day": 108380,
+   "n_independent_L2_coin_day": 24151,
+   "n_independent_L3_day": 895,
+   "gross_bps": 1.13,
+   "net_bps": -12.87,
+   "net_bps_stress28": -26.87,
+   "t_stat_declustered_L3day": 2.2,
+   "t_stat_L2_coin_day": -0.45,
+   "bootstrap_ci95": [
+    -0.25,
+    2.35
+   ],
+   "sd_day_bps": 15.3,
+   "year_by_year": {
+    "2024": [
+     0.76,
+     8722
+    ],
+    "2025": [
+     0.51,
+     81037
+    ],
+    "2026": [
+     1.5,
+     143281
+    ]
+   },
+   "ex_best_year": 0.54,
+   "ex_best_year_dropped": "2026",
+   "n_required": 5801,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 5801.6,
+   "eta_forward_confirmation_years": 15.88,
+   "train_bps": 0.59,
+   "test_bps": 1.27,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "WEAK",
+   "gate_failures": [
+    "t_L3=2.2 < 3",
+    "net_bps=-12.87 <= 0 (under the 14bps cost)"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T4_FLOW_IMBALANCE_XS_LS_4h_v1_LEAKY",
+   "ret_col": "spread_bps",
+   "n_raw": 3409,
+   "n_independent_L1_user_coin_day": 3409,
+   "n_independent_L2_coin_day": 677,
+   "n_independent_L3_day": 677,
+   "gross_bps": 26.98,
+   "net_bps": 12.98,
+   "net_bps_stress28": -1.02,
+   "t_stat_declustered_L3day": 6.21,
+   "t_stat_L2_coin_day": 4.79,
+   "bootstrap_ci95": [
+    18.98,
+    35.58
+   ],
+   "sd_day_bps": 113.1,
+   "year_by_year": {
+    "2024": [
+     5.18,
+     312
+    ],
+    "2025": [
+     27.08,
+     1880
+    ],
+    "2026": [
+     32.42,
+     1217
+    ]
+   },
+   "ex_best_year": 23.97,
+   "ex_best_year_dropped": "2026",
+   "n_required": 550,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 572.9,
+   "eta_forward_confirmation_years": 1.57,
+   "ic_mean": 0.04332,
+   "ic_t_day": 6.57,
+   "ic_test_h1": 0.04054,
+   "ic_test_h2": 0.07509,
+   "long_leg_bps": 25.74,
+   "short_leg_bps": -1.24,
+   "capacity_usd_estimate": 150184,
+   "train_bps": 21.19,
+   "test_bps": 31.49,
+   "n_rebalances": 3409,
+   "track": "A_binance_executed",
+   "source_evidence": "flow_leak_diagnostic.json",
+   "verdict_before_override": "COST_FRAGILE",
+   "override_applied": true,
+   "verdict": "DEAD",
+   "gate_failures": [
+    "NOT A MECHANISM. This row is the reproduction of the PIT violation, kept so the leak is auditable. Its signal sums the scheduled-flow matrix forward over [t, t+H), and a median 74.4% of that notional belongs to TWAPs that do not exist yet at t. Any number on this row is unattainable by construction.",
+    "the PIT-legal form of the same idea is T4_FLOW_IMBALANCE_XS_LS_4h_v2b_CLEAN_RESIDUAL: gross 13.55 (from 26.98), IC 0.0198 (from 0.0433), net -0.45 bps",
+    "net_bps_stress28=-1.02 <= 0"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T6 informed-user cohort (TRAIN-scored) @24h TEST-only_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 8256,
+   "n_independent_L1_user_coin_day": 4085,
+   "n_independent_L2_coin_day": 2580,
+   "n_independent_L3_day": 332,
+   "gross_bps": 20.47,
+   "net_bps": 6.47,
+   "net_bps_stress28": -7.53,
+   "t_stat_declustered_L3day": 1.34,
+   "t_stat_L2_coin_day": 1.21,
+   "bootstrap_ci95": [
+    -16.43,
+    59.75
+   ],
+   "sd_day_bps": 277.4,
+   "year_by_year": {
+    "2025": [
+     -4.17,
+     3494
+    ],
+    "2026": [
+     38.56,
+     4762
+    ]
+   },
+   "ex_best_year": -4.17,
+   "ex_best_year_dropped": "2026",
+   "n_required": 5759,
+   "event_rate_indep_per_week": 6.96,
+   "eta_forward_confirmation_days": 5791.3,
+   "eta_forward_confirmation_years": 15.86,
+   "n_users_cohort": 62,
+   "n_users_scored": 309,
+   "test_half1_bps": 11.33,
+   "test_half2_bps": 33.75,
+   "capacity_usd_estimate": 3853114,
+   "median_ntl_planned_usd": 9707,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=20.47 bps, t_L3=1.34"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP1PCT_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 3202,
+   "n_independent_L1_user_coin_day": 2158,
+   "n_independent_L2_coin_day": 1906,
+   "n_independent_L3_day": 462,
+   "gross_bps": 15.82,
+   "net_bps": 1.82,
+   "net_bps_stress28": -12.18,
+   "t_stat_declustered_L3day": 1.2,
+   "t_stat_L2_coin_day": 1.49,
+   "bootstrap_ci95": [
+    -12.5,
+    44.45
+   ],
+   "sd_day_bps": 283.5,
+   "year_by_year": {
+    "2024": [
+     79.3,
+     52
+    ],
+    "2025": [
+     -2.46,
+     859
+    ],
+    "2026": [
+     21.24,
+     2291
+    ]
+   },
+   "ex_best_year": 14.78,
+   "ex_best_year_dropped": "2024",
+   "n_required": 10065,
+   "event_rate_indep_per_week": 6.88,
+   "eta_forward_confirmation_days": 10235.7,
+   "eta_forward_confirmation_years": 28.02,
+   "train_bps": 64.08,
+   "test_bps": 7.19,
+   "median_ntl_planned_usd": 501094,
+   "capacity_usd_estimate": 248355,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=15.82 bps, t_L3=1.2"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T3 HLTWAP_SIZERATIO_TOP1PCT_h24h(thr=5.00e-03,TRAIN)",
+   "ret_col": "S1440",
+   "n_raw": 3216,
+   "n_independent_L1_user_coin_day": 2168,
+   "n_independent_L2_coin_day": 1911,
+   "n_independent_L3_day": 465,
+   "gross_bps": 10.93,
+   "net_bps": -3.07,
+   "net_bps_stress28": -17.07,
+   "t_stat_declustered_L3day": 1.05,
+   "t_stat_L2_coin_day": 2.0,
+   "bootstrap_ci95": [
+    -12.91,
+    33.96
+   ],
+   "sd_day_bps": 224.2,
+   "year_by_year": {
+    "2024": [
+     66.25,
+     53
+    ],
+    "2025": [
+     -27.61,
+     872
+    ],
+    "2026": [
+     24.32,
+     2291
+    ]
+   },
+   "ex_best_year": 10.01,
+   "ex_best_year_dropped": "2024",
+   "n_required": 13184,
+   "event_rate_indep_per_week": 6.88,
+   "eta_forward_confirmation_days": 13407.9,
+   "eta_forward_confirmation_years": 36.71,
+   "train_bps": 22.61,
+   "test_bps": 8.78,
+   "median_ntl_planned_usd": 501094,
+   "capacity_usd_estimate": 248355,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=10.93 bps, t_L3=1.05"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T3 HLTWAP_NTL_GE1M_h24h",
+   "ret_col": "S1440",
+   "n_raw": 6968,
+   "n_independent_L1_user_coin_day": 4060,
+   "n_independent_L2_coin_day": 2304,
+   "n_independent_L3_day": 630,
+   "gross_bps": 9.13,
+   "net_bps": -4.87,
+   "net_bps_stress28": -18.87,
+   "t_stat_declustered_L3day": 1.27,
+   "t_stat_L2_coin_day": 1.87,
+   "bootstrap_ci95": [
+    -6.13,
+    25.51
+   ],
+   "sd_day_bps": 180.6,
+   "year_by_year": {
+    "2024": [
+     -109.61,
+     246
+    ],
+    "2025": [
+     17.05,
+     2750
+    ],
+    "2026": [
+     11.0,
+     3972
+    ]
+   },
+   "ex_best_year": 3.96,
+   "ex_best_year_dropped": "2025",
+   "n_required": 12274,
+   "event_rate_indep_per_week": 6.92,
+   "eta_forward_confirmation_days": 12412.5,
+   "eta_forward_confirmation_years": 33.98,
+   "train_bps": 1.35,
+   "test_bps": 11.48,
+   "median_ntl_planned_usd": 2002289,
+   "capacity_usd_estimate": 33190186,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=9.13 bps, t_L3=1.27"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET72h_FIRSTTOUCH_h24h_raw [REFIT]",
+   "ret_col": "S1440",
+   "n_raw": 5399,
+   "n_independent_L1_user_coin_day": 4653,
+   "n_independent_L2_coin_day": 4511,
+   "n_independent_L3_day": 845,
+   "gross_bps": 7.88,
+   "net_bps": -6.12,
+   "net_bps_stress28": -20.12,
+   "t_stat_declustered_L3day": 0.78,
+   "t_stat_L2_coin_day": 0.51,
+   "bootstrap_ci95": [
+    -15.69,
+    32.01
+   ],
+   "sd_day_bps": 294.4,
+   "year_by_year": {
+    "2024": [
+     -27.36,
+     1131
+    ],
+    "2025": [
+     -2.33,
+     2685
+    ],
+    "2026": [
+     50.36,
+     1583
+    ]
+   },
+   "ex_best_year": -9.74,
+   "ex_best_year_dropped": "2026",
+   "n_required": 43776,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 43776.9,
+   "eta_forward_confirmation_years": 119.85,
+   "train_bps": -17.18,
+   "test_bps": 36.0,
+   "median_ntl_planned_usd": 10556,
+   "capacity_usd_estimate": 321519,
+   "trigger_share_of_all_twap": 0.023,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=7.88 bps, t_L3=0.78"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET7d_FIRSTTOUCH_h4h_raw [REFIT]",
+   "ret_col": "S240",
+   "n_raw": 2670,
+   "n_independent_L1_user_coin_day": 2250,
+   "n_independent_L2_coin_day": 2184,
+   "n_independent_L3_day": 740,
+   "gross_bps": 7.46,
+   "net_bps": -6.54,
+   "net_bps_stress28": -20.54,
+   "t_stat_declustered_L3day": 0.93,
+   "t_stat_L2_coin_day": 1.2,
+   "bootstrap_ci95": [
+    -11.34,
+    27.09
+   ],
+   "sd_day_bps": 218.2,
+   "year_by_year": {
+    "2024": [
+     -20.03,
+     702
+    ],
+    "2025": [
+     18.91,
+     1257
+    ],
+    "2026": [
+     14.36,
+     711
+    ]
+   },
+   "ex_best_year": -2.73,
+   "ex_best_year_dropped": "2025",
+   "n_required": 26838,
+   "event_rate_indep_per_week": 5.91,
+   "eta_forward_confirmation_days": 31782.3,
+   "eta_forward_confirmation_years": 87.02,
+   "train_bps": -0.58,
+   "test_bps": 18.15,
+   "median_ntl_planned_usd": 9982,
+   "capacity_usd_estimate": 45185,
+   "trigger_share_of_all_twap": 0.0115,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=7.46 bps, t_L3=0.93"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET24h_FIRSTTOUCH_h24h_raw [REFIT]",
+   "ret_col": "S1440",
+   "n_raw": 11531,
+   "n_independent_L1_user_coin_day": 10023,
+   "n_independent_L2_coin_day": 9689,
+   "n_independent_L3_day": 880,
+   "gross_bps": 4.99,
+   "net_bps": -9.01,
+   "net_bps_stress28": -23.01,
+   "t_stat_declustered_L3day": 0.79,
+   "t_stat_L2_coin_day": 0.87,
+   "bootstrap_ci95": [
+    -7.79,
+    17.79
+   ],
+   "sd_day_bps": 188.2,
+   "year_by_year": {
+    "2024": [
+     -10.62,
+     1993
+    ],
+    "2025": [
+     -1.76,
+     5715
+    ],
+    "2026": [
+     23.22,
+     3823
+    ]
+   },
+   "ex_best_year": -4.05,
+   "ex_best_year_dropped": "2026",
+   "n_required": 44601,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 44601.2,
+   "eta_forward_confirmation_years": 122.11,
+   "train_bps": -3.23,
+   "test_bps": 12.55,
+   "median_ntl_planned_usd": 11505,
+   "capacity_usd_estimate": 418736,
+   "trigger_share_of_all_twap": 0.0489,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=4.99 bps, t_L3=0.79"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET72h_FIRSTTOUCH_h4h_raw [REFIT]",
+   "ret_col": "S240",
+   "n_raw": 5401,
+   "n_independent_L1_user_coin_day": 4654,
+   "n_independent_L2_coin_day": 4512,
+   "n_independent_L3_day": 846,
+   "gross_bps": 4.46,
+   "net_bps": -9.54,
+   "net_bps_stress28": -23.54,
+   "t_stat_declustered_L3day": 0.89,
+   "t_stat_L2_coin_day": 0.96,
+   "bootstrap_ci95": [
+    -5.72,
+    16.26
+   ],
+   "sd_day_bps": 145.7,
+   "year_by_year": {
+    "2024": [
+     -11.47,
+     1131
+    ],
+    "2025": [
+     9.55,
+     2687
+    ],
+    "2026": [
+     7.19,
+     1583
+    ]
+   },
+   "ex_best_year": -0.59,
+   "ex_best_year_dropped": "2025",
+   "n_required": 33540,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 33540.9,
+   "eta_forward_confirmation_years": 91.83,
+   "train_bps": 1.8,
+   "test_bps": 7.43,
+   "median_ntl_planned_usd": 10556,
+   "capacity_usd_estimate": 53586,
+   "trigger_share_of_all_twap": 0.023,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=4.46 bps, t_L3=0.89"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET24h_FIRSTTOUCH_h4h_raw [REFIT]",
+   "ret_col": "S240",
+   "n_raw": 11533,
+   "n_independent_L1_user_coin_day": 10024,
+   "n_independent_L2_coin_day": 9690,
+   "n_independent_L3_day": 880,
+   "gross_bps": 4.27,
+   "net_bps": -9.73,
+   "net_bps_stress28": -23.73,
+   "t_stat_declustered_L3day": 1.4,
+   "t_stat_L2_coin_day": 1.34,
+   "bootstrap_ci95": [
+    -2.3,
+    10.7
+   ],
+   "sd_day_bps": 90.3,
+   "year_by_year": {
+    "2024": [
+     -5.69,
+     1993
+    ],
+    "2025": [
+     7.63,
+     5717
+    ],
+    "2026": [
+     4.44,
+     3823
+    ]
+   },
+   "ex_best_year": 0.97,
+   "ex_best_year_dropped": "2025",
+   "n_required": 14017,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 14017.1,
+   "eta_forward_confirmation_years": 38.38,
+   "train_bps": 2.41,
+   "test_bps": 5.98,
+   "median_ntl_planned_usd": 11505,
+   "capacity_usd_estimate": 69789,
+   "trigger_share_of_all_twap": 0.0489,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=4.27 bps, t_L3=1.4"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T4_FLOW_IMBALANCE_XS_LS_4h_v2a_CLEAN_TRAILING",
+   "ret_col": "spread_bps",
+   "n_raw": 3409,
+   "n_independent_L1_user_coin_day": 3409,
+   "n_independent_L2_coin_day": 677,
+   "n_independent_L3_day": 677,
+   "gross_bps": 3.49,
+   "net_bps": -10.51,
+   "net_bps_stress28": -24.51,
+   "t_stat_declustered_L3day": 1.06,
+   "t_stat_L2_coin_day": 0.69,
+   "bootstrap_ci95": [
+    -2.74,
+    9.7
+   ],
+   "sd_day_bps": 85.3,
+   "year_by_year": {
+    "2024": [
+     -17.88,
+     312
+    ],
+    "2025": [
+     5.59,
+     1880
+    ],
+    "2026": [
+     5.72,
+     1217
+    ]
+   },
+   "ex_best_year": 2.25,
+   "ex_best_year_dropped": "2026",
+   "n_required": 18770,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 19530.0,
+   "eta_forward_confirmation_years": 53.47,
+   "ic_mean": 0.0011,
+   "ic_t_day": 0.18,
+   "ic_test_h1": 0.00062,
+   "ic_test_h2": 0.01909,
+   "long_leg_bps": 8.52,
+   "short_leg_bps": 5.04,
+   "capacity_usd_estimate": 196829,
+   "train_bps": 2.1,
+   "test_bps": 4.57,
+   "n_rebalances": 3409,
+   "track": "A_binance_executed",
+   "source_evidence": "flow_leak_diagnostic.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=3.49 bps, t_L3=1.06"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h4h_PLACEBOADJ",
+   "ret_col": "A240",
+   "n_raw": 231116,
+   "n_independent_L1_user_coin_day": 107538,
+   "n_independent_L2_coin_day": 23979,
+   "n_independent_L3_day": 893,
+   "gross_bps": 1.26,
+   "net_bps": -12.74,
+   "net_bps_stress28": -26.74,
+   "t_stat_declustered_L3day": 1.06,
+   "t_stat_L2_coin_day": -1.86,
+   "bootstrap_ci95": [
+    -2.44,
+    4.6
+   ],
+   "sd_day_bps": 35.6,
+   "year_by_year": {
+    "2024": [
+     -6.29,
+     8598
+    ],
+    "2025": [
+     -0.11,
+     79336
+    ],
+    "2026": [
+     2.48,
+     143182
+    ]
+   },
+   "ex_best_year": -0.72,
+   "ex_best_year_dropped": "2026",
+   "n_required": 24945,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 24945.5,
+   "eta_forward_confirmation_years": 68.3,
+   "train_bps": 1.57,
+   "test_bps": 1.18,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 732442,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=1.26 bps, t_L3=1.06"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h_PLACEBOADJ2SIDED",
+   "ret_col": "B1440",
+   "n_raw": 224908,
+   "n_independent_L1_user_coin_day": 104640,
+   "n_independent_L2_coin_day": 23597,
+   "n_independent_L3_day": 886,
+   "gross_bps": 1.24,
+   "net_bps": -12.76,
+   "net_bps_stress28": -26.76,
+   "t_stat_declustered_L3day": 0.37,
+   "t_stat_L2_coin_day": -0.98,
+   "bootstrap_ci95": [
+    -9.8,
+    11.26
+   ],
+   "sd_day_bps": 99.3,
+   "year_by_year": {
+    "2024": [
+     6.71,
+     8593
+    ],
+    "2025": [
+     1.83,
+     79285
+    ],
+    "2026": [
+     0.55,
+     137030
+    ]
+   },
+   "ex_best_year": 1.02,
+   "ex_best_year_dropped": "2024",
+   "n_required": 201425,
+   "event_rate_indep_per_week": 6.73,
+   "eta_forward_confirmation_days": 209575.7,
+   "eta_forward_confirmation_years": 573.79,
+   "train_bps": 7.52,
+   "test_bps": -0.5,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=1.24 bps, t_L3=0.37"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded. The 2-sided variant averages the t-7d and t+7d windows, so it reads the future on purpose. It is a diagnostic only and must never be read as an attainable edge.",
+   "pit_status": "PIT_VIOLATING_BY_DESIGN",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_hDUR_PLACEBOADJ",
+   "ret_col": "ADUR",
+   "n_raw": 231115,
+   "n_independent_L1_user_coin_day": 107542,
+   "n_independent_L2_coin_day": 23979,
+   "n_independent_L3_day": 893,
+   "gross_bps": 0.53,
+   "net_bps": -13.47,
+   "net_bps_stress28": -27.47,
+   "t_stat_declustered_L3day": 0.69,
+   "t_stat_L2_coin_day": 0.75,
+   "bootstrap_ci95": [
+    -1.84,
+    2.57
+   ],
+   "sd_day_bps": 22.8,
+   "year_by_year": {
+    "2024": [
+     -2.08,
+     8598
+    ],
+    "2025": [
+     -0.16,
+     79335
+    ],
+    "2026": [
+     1.06,
+     143182
+    ]
+   },
+   "ex_best_year": -0.35,
+   "ex_best_year_dropped": "2026",
+   "n_required": 59044,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 59044.1,
+   "eta_forward_confirmation_years": 161.65,
+   "train_bps": 2.03,
+   "test_bps": 0.12,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 91555,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=0.53 bps, t_L3=0.69"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "HLTWAP_QUIET72h_FIRSTTOUCH_h24h_PLACEBOADJ [REFIT]",
+   "ret_col": "A1440",
+   "n_raw": 5335,
+   "n_independent_L1_user_coin_day": 4619,
+   "n_independent_L2_coin_day": 4485,
+   "n_independent_L3_day": 843,
+   "gross_bps": -0.89,
+   "net_bps": -14.89,
+   "net_bps_stress28": -28.89,
+   "t_stat_declustered_L3day": -0.08,
+   "t_stat_L2_coin_day": 0.07,
+   "bootstrap_ci95": [
+    -25.18,
+    23.74
+   ],
+   "sd_day_bps": 322.7,
+   "year_by_year": {
+    "2024": [
+     -47.35,
+     1112
+    ],
+    "2025": [
+     -10.29,
+     2659
+    ],
+    "2026": [
+     48.12,
+     1564
+    ]
+   },
+   "ex_best_year": -21.22,
+   "ex_best_year_dropped": "2026",
+   "n_required": 4104851,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 4104851.4,
+   "eta_forward_confirmation_years": 11238.47,
+   "train_bps": -24.58,
+   "test_bps": 25.54,
+   "median_ntl_planned_usd": 10556,
+   "capacity_usd_estimate": 321519,
+   "trigger_share_of_all_twap": 0.023,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-0.89 bps, t_L3=-0.08"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T5 HLTWAP_REDUCEONLY_h24h",
+   "ret_col": "S1440",
+   "n_raw": 29214,
+   "n_independent_L1_user_coin_day": 17871,
+   "n_independent_L2_coin_day": 9012,
+   "n_independent_L3_day": 721,
+   "gross_bps": -1.95,
+   "net_bps": -15.95,
+   "net_bps_stress28": -29.95,
+   "t_stat_declustered_L3day": -0.35,
+   "t_stat_L2_coin_day": 0.78,
+   "bootstrap_ci95": [
+    -17.74,
+    12.2
+   ],
+   "sd_day_bps": 150.5,
+   "year_by_year": {
+    "2024": [
+     20.44,
+     728
+    ],
+    "2025": [
+     -10.03,
+     9557
+    ],
+    "2026": [
+     1.26,
+     18929
+    ]
+   },
+   "ex_best_year": -2.52,
+   "ex_best_year_dropped": "2024",
+   "n_required": 186362,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 186362.3,
+   "eta_forward_confirmation_years": 510.23,
+   "train_bps": -13.08,
+   "test_bps": 0.91,
+   "median_ntl_planned_usd": 31669,
+   "capacity_usd_estimate": 2522725,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-1.95 bps, t_L3=-0.35"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "HLTWAP_QUIET7d_FIRSTTOUCH_h24h_raw [REFIT]",
+   "ret_col": "S1440",
+   "n_raw": 2668,
+   "n_independent_L1_user_coin_day": 2249,
+   "n_independent_L2_coin_day": 2183,
+   "n_independent_L3_day": 739,
+   "gross_bps": -4.01,
+   "net_bps": -18.01,
+   "net_bps_stress28": -32.01,
+   "t_stat_declustered_L3day": -0.25,
+   "t_stat_L2_coin_day": -0.47,
+   "bootstrap_ci95": [
+    -39.79,
+    32.08
+   ],
+   "sd_day_bps": 434.1,
+   "year_by_year": {
+    "2024": [
+     -35.59,
+     702
+    ],
+    "2025": [
+     -28.34,
+     1255
+    ],
+    "2026": [
+     70.11,
+     711
+    ]
+   },
+   "ex_best_year": -30.94,
+   "ex_best_year_dropped": "2026",
+   "n_required": 367183,
+   "event_rate_indep_per_week": 5.91,
+   "eta_forward_confirmation_days": 434822.3,
+   "eta_forward_confirmation_years": 1190.48,
+   "train_bps": -40.27,
+   "test_bps": 44.29,
+   "median_ntl_planned_usd": 9982,
+   "capacity_usd_estimate": 271114,
+   "trigger_share_of_all_twap": 0.0115,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-4.01 bps, t_L3=-0.25"
+   ],
+   "counts_as_primary_mechanism": true
+  },
+  {
+   "mechanism": "T1 HLTWAP_ALL_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 231065,
+   "n_independent_L1_user_coin_day": 107512,
+   "n_independent_L2_coin_day": 23975,
+   "n_independent_L3_day": 893,
+   "gross_bps": -6.88,
+   "net_bps": -20.88,
+   "net_bps_stress28": -34.88,
+   "t_stat_declustered_L3day": -1.83,
+   "t_stat_L2_coin_day": -2.26,
+   "bootstrap_ci95": [
+    -19.15,
+    4.02
+   ],
+   "sd_day_bps": 112.4,
+   "year_by_year": {
+    "2024": [
+     -8.57,
+     8597
+    ],
+    "2025": [
+     -8.14,
+     79286
+    ],
+    "2026": [
+     -6.08,
+     143182
+    ]
+   },
+   "ex_best_year": -8.18,
+   "ex_best_year_dropped": "2026",
+   "n_required": 8369,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 8369.6,
+   "eta_forward_confirmation_years": 22.91,
+   "train_bps": 0.39,
+   "test_bps": -8.82,
+   "median_ntl_planned_usd": 15014,
+   "capacity_usd_estimate": 4394654,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-6.88 bps, t_L3=-1.83"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T5 HLTWAP_NONREDUCEONLY_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 202095,
+   "n_independent_L1_user_coin_day": 96395,
+   "n_independent_L2_coin_day": 21982,
+   "n_independent_L3_day": 889,
+   "gross_bps": -9.44,
+   "net_bps": -23.44,
+   "net_bps_stress28": -37.44,
+   "t_stat_declustered_L3day": -2.08,
+   "t_stat_L2_coin_day": -2.78,
+   "bootstrap_ci95": [
+    -24.1,
+    4.53
+   ],
+   "sd_day_bps": 135.6,
+   "year_by_year": {
+    "2024": [
+     -9.6,
+     7882
+    ],
+    "2025": [
+     -9.44,
+     69945
+    ],
+    "2026": [
+     -9.43,
+     124268
+    ]
+   },
+   "ex_best_year": -9.46,
+   "ex_best_year_dropped": "2026",
+   "n_required": 6470,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 6470.9,
+   "eta_forward_confirmation_years": 17.72,
+   "train_bps": 3.86,
+   "test_bps": -13.03,
+   "median_ntl_planned_usd": 13370,
+   "capacity_usd_estimate": 4837956,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-9.44 bps, t_L3=-2.08"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "HLTWAP_QUIET24h_FIRSTTOUCH_h24h_PLACEBOADJ [REFIT]",
+   "ret_col": "A1440",
+   "n_raw": 11432,
+   "n_independent_L1_user_coin_day": 9959,
+   "n_independent_L2_coin_day": 9633,
+   "n_independent_L3_day": 878,
+   "gross_bps": -11.01,
+   "net_bps": -25.01,
+   "net_bps_stress28": -39.01,
+   "t_stat_declustered_L3day": -1.42,
+   "t_stat_L2_coin_day": -0.44,
+   "bootstrap_ci95": [
+    -27.46,
+    5.62
+   ],
+   "sd_day_bps": 230.0,
+   "year_by_year": {
+    "2024": [
+     -38.61,
+     1966
+    ],
+    "2025": [
+     -16.22,
+     5663
+    ],
+    "2026": [
+     11.03,
+     3803
+    ]
+   },
+   "ex_best_year": -21.99,
+   "ex_best_year_dropped": "2026",
+   "n_required": 13690,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 13690.8,
+   "eta_forward_confirmation_years": 37.48,
+   "train_bps": -11.92,
+   "test_bps": -10.18,
+   "median_ntl_planned_usd": 11505,
+   "capacity_usd_estimate": 418736,
+   "trigger_share_of_all_twap": 0.0489,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-11.01 bps, t_L3=-1.42"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "HLTWAP_QUIET7d_FIRSTTOUCH_h24h_PLACEBOADJ [REFIT]",
+   "ret_col": "A1440",
+   "n_raw": 2608,
+   "n_independent_L1_user_coin_day": 2219,
+   "n_independent_L2_coin_day": 2161,
+   "n_independent_L3_day": 734,
+   "gross_bps": -14.3,
+   "net_bps": -28.3,
+   "net_bps_stress28": -42.3,
+   "t_stat_declustered_L3day": -0.91,
+   "t_stat_L2_coin_day": -0.83,
+   "bootstrap_ci95": [
+    -47.88,
+    18.78
+   ],
+   "sd_day_bps": 425.8,
+   "year_by_year": {
+    "2024": [
+     -23.86,
+     684
+    ],
+    "2025": [
+     -34.79,
+     1232
+    ],
+    "2026": [
+     31.64,
+     692
+    ]
+   },
+   "ex_best_year": -30.89,
+   "ex_best_year_dropped": "2026",
+   "n_required": 27819,
+   "event_rate_indep_per_week": 5.91,
+   "eta_forward_confirmation_days": 32944.1,
+   "eta_forward_confirmation_years": 90.2,
+   "train_bps": -23.98,
+   "test_bps": -1.45,
+   "median_ntl_planned_usd": 9982,
+   "capacity_usd_estimate": 271114,
+   "trigger_share_of_all_twap": 0.0115,
+   "refit": true,
+   "track": "A_binance_executed",
+   "source_evidence": "firsttouch_gate_results.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-14.3 bps, t_L3=-0.91"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T1 HLTWAP_BUYONLY_h24h_PLACEBOADJ",
+   "ret_col": "A1440",
+   "n_raw": 140062,
+   "n_independent_L1_user_coin_day": 70613,
+   "n_independent_L2_coin_day": 18024,
+   "n_independent_L3_day": 877,
+   "gross_bps": -35.38,
+   "net_bps": -49.38,
+   "net_bps_stress28": -63.38,
+   "t_stat_declustered_L3day": -3.51,
+   "t_stat_L2_coin_day": -8.23,
+   "bootstrap_ci95": [
+    -69.1,
+    -3.62
+   ],
+   "sd_day_bps": 298.3,
+   "year_by_year": {
+    "2024": [
+     -21.55,
+     6024
+    ],
+    "2025": [
+     -36.97,
+     49497
+    ],
+    "2026": [
+     -35.43,
+     84541
+    ]
+   },
+   "ex_best_year": -36.0,
+   "ex_best_year_dropped": "2024",
+   "n_required": 2229,
+   "event_rate_indep_per_week": 7.0,
+   "eta_forward_confirmation_days": 2229.1,
+   "eta_forward_confirmation_years": 6.1,
+   "train_bps": -16.27,
+   "test_bps": -40.75,
+   "median_ntl_planned_usd": 13898,
+   "capacity_usd_estimate": 4166362,
+   "track": "A_binance_executed",
+   "source_evidence": "event_gate_results_v2.json",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "gross=-35.38 bps, t_L3=-3.51"
+   ],
+   "tradable_series": false,
+   "diagnostic_role": "control variate: raw edge minus the same symbol/direction 7 days earlier. Tests event-specificity, cannot be traded.",
+   "counts_as_primary_mechanism": false
+  },
+  {
+   "mechanism": "T8 HL->BINANCE LEAD-LAG (measurement)",
+   "track": "B_hyperliquid_native",
+   "source_evidence": "leadlag_t8_results.json",
+   "measurement_days": [
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-05"
+   ],
+   "argmax_lag_by_symbol_clock_venue": {
+    "BTCUSDT|event_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -500,
+     "argmax_corr": 0.611,
+     "corr_at_lag0": 0.4549,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "BTCUSDT|event_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8792,
+     "corr_at_lag0": 0.8792,
+     "reading": "synchronous"
+    },
+    "BTCUSDT|receive_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -800,
+     "argmax_corr": 0.5908,
+     "corr_at_lag0": 0.3377,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "BTCUSDT|receive_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8434,
+     "corr_at_lag0": 0.8434,
+     "reading": "synchronous"
+    },
+    "ETHUSDT|event_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -600,
+     "argmax_corr": 0.7203,
+     "corr_at_lag0": 0.3738,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "ETHUSDT|event_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8923,
+     "corr_at_lag0": 0.8923,
+     "reading": "synchronous"
+    },
+    "ETHUSDT|receive_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -900,
+     "argmax_corr": 0.6889,
+     "corr_at_lag0": 0.1948,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "ETHUSDT|receive_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8482,
+     "corr_at_lag0": 0.8482,
+     "reading": "synchronous"
+    },
+    "SOLUSDT|event_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -400,
+     "argmax_corr": 0.7618,
+     "corr_at_lag0": 0.4829,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "SOLUSDT|event_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8611,
+     "corr_at_lag0": 0.8611,
+     "reading": "synchronous"
+    },
+    "SOLUSDT|receive_ts_ns|hyperliquid": {
+     "argmax_lag_ms": -800,
+     "argmax_corr": 0.7338,
+     "corr_at_lag0": 0.2458,
+     "reading": "negative lag = Binance LEADS this venue"
+    },
+    "SOLUSDT|receive_ts_ns|okx": {
+     "argmax_lag_ms": 0,
+     "argmax_corr": 0.8133,
+     "corr_at_lag0": 0.8133,
+     "reading": "synchronous"
+    }
+   },
+   "best_case_tradability_hl_move_then_binance": {
+    "gross_bps": 0.62,
+    "net_bps_14": -13.38,
+    "n_obs_overlapping": 43163,
+    "hit_rate": 0.5137,
+    "symbol": "ETHUSDT",
+    "clock": "receive_ts_ns",
+    "horizon_s": "300"
+   },
+   "cost_convention": "one-leg 14/28 bps",
+   "verdict": "DEAD",
+   "gate_failures": [
+    "the measured lead runs the WRONG WAY: Binance leads Hyperliquid by 400-900 ms (the argmax cross-correlation lag is negative on all 6 symbol x clock combinations, without exception)",
+    "OKX, carried as a control venue, is synchronous with Binance at 0 ms, which shows the negative HL lag is a property of HL and not of the measurement grid",
+    "best-case conditional edge is 0.62 bps gross versus a 14 bps round trip",
+    "even if the sign were favourable, a 0.4-0.9 s horizon is unreachable with this project's stack (5-min bars; the HL TWAP collector polls every ~76 s)"
+   ],
+   "counts_as_primary_mechanism": true
+  }
+ ],
+ "verdict_counts_all_rows": {
+  "UNCONFIRMABLE_IN_HORIZON": 2,
+  "COST_FRAGILE": 6,
+  "DATA_LIMITED": 23,
+  "WEAK": 13,
+  "DEAD": 23
+ },
+ "n_rows_total": 67,
+ "n_primary_mechanisms": 51,
+ "counting_note": "verdict_counts covers the primary mechanisms only. Placebo-adjusted rows are controls (not tradable series) and listing-age rows are re-gates of one mechanism; both are excluded from the tally and carried in verdict_counts_all_rows."
+}

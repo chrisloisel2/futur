@@ -1,0 +1,354 @@
+[
+ {
+  "id": "C1_AGE_VOL_MATURATION",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "la vol realisee decroit avec l'age de l'instrument",
+  "descriptive_only": true,
+  "table": [
+   {
+    "bucket": "<30j",
+    "n_obs": 8735,
+    "n_symbols": 308,
+    "rvol_med_bps": 531.462,
+    "hl_range_med_bps": 1504.196,
+    "qvol_med_musd": 84.954,
+    "n_trades_med": 455042.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.185,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.518,
+    "abs_basis_z7_med": 0.744
+   },
+   {
+    "bucket": "30-90j",
+    "n_obs": 18474,
+    "n_symbols": 310,
+    "rvol_med_bps": 408.897,
+    "hl_range_med_bps": 1109.706,
+    "qvol_med_musd": 38.413,
+    "n_trades_med": 210573.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.514,
+    "abs_basis_z7_med": 0.776
+   },
+   {
+    "bucket": "90-180j",
+    "n_obs": 27181,
+    "n_symbols": 309,
+    "rvol_med_bps": 348.513,
+    "hl_range_med_bps": 967.91,
+    "qvol_med_musd": 30.357,
+    "n_trades_med": 173304.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.506,
+    "abs_basis_z7_med": 0.789
+   },
+   {
+    "bucket": "180-365j",
+    "n_obs": 51757,
+    "n_symbols": 297,
+    "rvol_med_bps": 341.993,
+    "hl_range_med_bps": 926.522,
+    "qvol_med_musd": 35.269,
+    "n_trades_med": 193795.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.474,
+    "abs_basis_z7_med": 0.788
+   },
+   {
+    "bucket": "1-2a",
+    "n_obs": 78421,
+    "n_symbols": 256,
+    "rvol_med_bps": 316.875,
+    "hl_range_med_bps": 821.364,
+    "qvol_med_musd": 33.203,
+    "n_trades_med": 184203.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 2.898,
+    "frac_4h_funding": 0.342,
+    "abs_basis_z7_med": 0.794
+   },
+   {
+    "bucket": ">2a",
+    "n_obs": 158661,
+    "n_symbols": 186,
+    "rvol_med_bps": 244.145,
+    "hl_range_med_bps": 640.02,
+    "qvol_med_musd": 23.061,
+    "n_trades_med": 148905.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 2.484,
+    "frac_4h_funding": 0.116,
+    "abs_basis_z7_med": 0.801
+   }
+  ],
+  "n_raw": 343229,
+  "verdict": "DESCRIPTIVE"
+ },
+ {
+  "id": "C3_AGE_LIQUIDITY_MATURATION",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "volume/nb de trades/Amihud maturent avec l'age (borne de capacite)",
+  "descriptive_only": true,
+  "table": [
+   {
+    "bucket": "<30j",
+    "n_obs": 8735,
+    "n_symbols": 308,
+    "rvol_med_bps": 531.462,
+    "hl_range_med_bps": 1504.196,
+    "qvol_med_musd": 84.954,
+    "n_trades_med": 455042.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.185,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.518,
+    "abs_basis_z7_med": 0.744
+   },
+   {
+    "bucket": "30-90j",
+    "n_obs": 18474,
+    "n_symbols": 310,
+    "rvol_med_bps": 408.897,
+    "hl_range_med_bps": 1109.706,
+    "qvol_med_musd": 38.413,
+    "n_trades_med": 210573.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.514,
+    "abs_basis_z7_med": 0.776
+   },
+   {
+    "bucket": "90-180j",
+    "n_obs": 27181,
+    "n_symbols": 309,
+    "rvol_med_bps": 348.513,
+    "hl_range_med_bps": 967.91,
+    "qvol_med_musd": 30.357,
+    "n_trades_med": 173304.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.506,
+    "abs_basis_z7_med": 0.789
+   },
+   {
+    "bucket": "180-365j",
+    "n_obs": 51757,
+    "n_symbols": 297,
+    "rvol_med_bps": 341.993,
+    "hl_range_med_bps": 926.522,
+    "qvol_med_musd": 35.269,
+    "n_trades_med": 193795.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 3.0,
+    "frac_4h_funding": 0.474,
+    "abs_basis_z7_med": 0.788
+   },
+   {
+    "bucket": "1-2a",
+    "n_obs": 78421,
+    "n_symbols": 256,
+    "rvol_med_bps": 316.875,
+    "hl_range_med_bps": 821.364,
+    "qvol_med_musd": 33.203,
+    "n_trades_med": 184203.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 2.898,
+    "frac_4h_funding": 0.342,
+    "abs_basis_z7_med": 0.794
+   },
+   {
+    "bucket": ">2a",
+    "n_obs": 158661,
+    "n_symbols": 186,
+    "rvol_med_bps": 244.145,
+    "hl_range_med_bps": 640.02,
+    "qvol_med_musd": 23.061,
+    "n_trades_med": 148905.0,
+    "amihud_med": 0.001,
+    "abs_funding_med_bps": 1.0,
+    "funding_paid_med_bps": 2.484,
+    "frac_4h_funding": 0.116,
+    "abs_basis_z7_med": 0.801
+   }
+  ],
+  "n_raw": 343229,
+  "verdict": "DESCRIPTIVE"
+ },
+ {
+  "id": "C2_AGE_FUNDING_CARRY_YOUNG_VS_MATURE",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "short-perp sur jeunes (<90j, funding>0) - short-perp sur matures (>=1a, funding>0), 7j, funding inclus",
+  "paired_episodes": true,
+  "n_raw": 201978,
+  "n_arm_A": 21441,
+  "n_arm_B": 180537,
+  "n_independent_L3": 305,
+  "arm_A_bps": -217.3,
+  "arm_B_bps": -15.0,
+  "gross_bps": -202.4,
+  "net_bps": -230.4,
+  "net_bps_stress28": -258.4,
+  "t_stat_declustered": -2.31,
+  "bootstrap_ci95": [
+   -382.9,
+   -39.0
+  ],
+  "n_required": 1796.6,
+  "event_rate_per_week_6m": 0.967,
+  "eta_forward_confirmation": {
+   "days": 13007.0,
+   "years": 35.61
+  }
+ },
+ {
+  "id": "C2b_AGE_FUNDING_LEVEL_DIFFERENTIAL",
+  "family": "MICROSTRUCTURE_MATURATION",
+  "hypothesis": "funding encaisse sur 7j : jeunes (<90j) - matures (>=1a), flux seul sans le prix",
+  "paired_episodes": true,
+  "n_raw": 201978,
+  "n_arm_A": 21441,
+  "n_arm_B": 180537,
+  "n_independent_L3": 305,
+  "arm_A_bps": 28.8,
+  "arm_B_bps": 22.8,
+  "gross_bps": 2.5,
+  "net_bps": 2.5,
+  "net_bps_stress28": 2.5,
+  "t_stat_declustered": 0.77,
+  "bootstrap_ci95": [
+   -4.4,
+   8.3
+  ],
+  "n_required": 16006.4,
+  "event_rate_per_week_6m": 0.967,
+  "eta_forward_confirmation": {
+   "days": 115886.0,
+   "years": 317.29
+  }
+ },
+ {
+  "id": "A3_LIST_FUNDING_CARRY_YOUNG",
+  "family": "LISTING_EVENT",
+  "hypothesis": "funding cumule sur les 30 premiers jours d'un listing - funding cumule 30j des noms matures, meme semaine",
+  "paired_episodes": true,
+  "n_raw": 230185,
+  "n_arm_A": 518,
+  "n_arm_B": 229667,
+  "n_independent_L3": 152,
+  "arm_A_bps": -310.5,
+  "arm_B_bps": 60.6,
+  "gross_bps": -321.5,
+  "net_bps": -321.5,
+  "net_bps_stress28": -321.5,
+  "t_stat_declustered": -5.74,
+  "bootstrap_ci95": [
+   -438.5,
+   -213.2
+  ],
+  "n_required": 144.8,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 1456.0,
+   "years": 3.99
+  }
+ },
+ {
+  "id": "D1_DELIST_PRE_DRIFT_7d",
+  "family": "DELISTING",
+  "hypothesis": "derive relative negative dans les 7 jours precedant la radiation",
+  "n_raw": 14,
+  "n_symbols": 14,
+  "n_independent_L1": 14,
+  "n_independent_L2": 9,
+  "n_independent_L3": 9,
+  "gross_bps": -809.7,
+  "net_bps": -837.7,
+  "net_bps_stress28": -865.7,
+  "t_stat_declustered": -1.09,
+  "bootstrap_ci95": [
+   -2251.8,
+   452.6
+  ],
+  "n_required": 236.3,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  }
+ },
+ {
+  "id": "D1_DELIST_PRE_DRIFT_30d",
+  "family": "DELISTING",
+  "hypothesis": "derive relative negative dans les 30 jours precedant la radiation",
+  "n_raw": 14,
+  "n_symbols": 14,
+  "n_independent_L1": 14,
+  "n_independent_L2": 9,
+  "n_independent_L3": 9,
+  "gross_bps": -315.5,
+  "net_bps": -343.5,
+  "net_bps_stress28": -371.5,
+  "t_stat_declustered": -0.45,
+  "bootstrap_ci95": [
+   -1615.5,
+   952.2
+  ],
+  "n_required": 1409.7,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  }
+ },
+ {
+  "id": "D1_DELIST_PRE_DRIFT_90d",
+  "family": "DELISTING",
+  "hypothesis": "derive relative negative dans les 90 jours precedant la radiation",
+  "n_raw": 14,
+  "n_symbols": 14,
+  "n_independent_L1": 14,
+  "n_independent_L2": 9,
+  "n_independent_L3": 9,
+  "gross_bps": 268.6,
+  "net_bps": 240.6,
+  "net_bps_stress28": 212.6,
+  "t_stat_declustered": 0.34,
+  "bootstrap_ci95": [
+   -1205.0,
+   1668.2
+  ],
+  "n_required": 2403.7,
+  "event_rate_per_week_6m": 0.0,
+  "eta_forward_confirmation": {
+   "days": null,
+   "years": null
+  }
+ },
+ {
+  "id": "D2_DELIST_FUNDING_BASIS_DISLOCATION",
+  "family": "DELISTING",
+  "hypothesis": "|funding| et |basis_z| deviennent extremes dans les 30 derniers jours (comparaison intra-nom)",
+  "n_raw": 13,
+  "n_symbols": 13,
+  "n_independent_L3": 13,
+  "median_ratio_abs_funding": 1.0,
+  "median_ratio_abs_basis_z": 1.066,
+  "median_ratio_qvol": 0.349,
+  "median_ratio_rvol": 0.265,
+  "t_stat_declustered": -1.92,
+  "note": "ratios fin-de-vie / reste-de-vie du MEME symbole (1.0 = pas de dislocation)"
+ }
+]

@@ -1,0 +1,112 @@
+{
+  "formula": "n_required = (z_a+z_b)^2/haircut^2 * N_indep / t^2 = 24.73 * N / t^2",
+  "conventions": {
+    "alpha": 0.05,
+    "side": "unilateral",
+    "power": 0.8,
+    "haircut": 0.5
+  },
+  "why_it_matters": "n_required ne depend que de (N_independant, t), les deux chiffres que toute decouverte publie deja -> l'ecran ETA est applicable AVANT de depenser un worker de validation.",
+  "rows": [
+    {
+      "label": "POSITIONING_TAKER_FLOW \u2014 grille 7D de la DECOUVERTE (+51.9bps)",
+      "source": "decouverte round3 W3, D-TAKER_LSR-mom-7D (N_indep=224 sur ~6 ans)",
+      "n_independent": 224,
+      "t_stat": 2.16,
+      "independent_episodes_per_year": 37.3,
+      "n_required_haircut50_power80": 1187,
+      "eta_years": 31.8,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "GLOBAL_ACCOUNT_LSR_FADE \u2014 grille 7D de la DECOUVERTE (+51.5bps)",
+      "source": "decouverte round3 W3, D-GLOBAL_LSR-fade-7D (N_indep=239 sur ~6 ans)",
+      "n_independent": 239,
+      "t_stat": 2.05,
+      "independent_episodes_per_year": 39.8,
+      "n_required_haircut50_power80": 1406,
+      "eta_years": 35.3,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "BTC_ETH_CURVE_STEEPNESS \u2014 DECOUVERTE (+77.8bps)",
+      "source": "decouverte round3 W3, D-CURVESHAPE-BTCvsETH-PAIR-7D (N=157)",
+      "n_independent": 157,
+      "t_stat": 1.94,
+      "independent_episodes_per_year": 20.9,
+      "n_required_haircut50_power80": 1032,
+      "eta_years": 49.4,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "CROSS_SECTIONAL_MOMENTUM_CVD \u2014 cote CONFIRMED (tradable), validation",
+      "source": "validation 2026-09, single-anchor +4.5bps",
+      "n_independent": 333,
+      "t_stat": 0.22,
+      "independent_episodes_per_year": 52.0,
+      "n_required_haircut50_power80": 170152,
+      "eta_years": 3272.1,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "CROSS_SECTIONAL_MOMENTUM_CVD \u2014 cote DIVERGENT (filtre), validation",
+      "source": "validation 2026-09, single-anchor -61.4bps",
+      "n_independent": 330,
+      "t_stat": -1.58,
+      "independent_episodes_per_year": 52.0,
+      "n_required_haircut50_power80": 3269,
+      "eta_years": 62.9,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "BTC_ETH_CURVE_STEEPNESS \u2014 PRIMARY_SPEC, validation",
+      "source": "validation 2026-09, +17.1bps",
+      "n_independent": 57,
+      "t_stat": 0.28,
+      "independent_episodes_per_year": 20.9,
+      "n_required_haircut50_power80": 17980,
+      "eta_years": 860.3,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "BTC_ETH_CURVE_STEEPNESS \u2014 piste 'ETH single-asset' signalee par la validation",
+      "source": "validation 2026-09, +259.6bps, 4/4 annees \u2014 MECANISME DIFFERENT, ecran applique pour le clore",
+      "n_independent": 61,
+      "t_stat": 2.35,
+      "independent_episodes_per_year": 20.9,
+      "n_required_haircut50_power80": 273,
+      "eta_years": 13.1,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "GLOBAL_ACCOUNT_LSR_FADE \u2014 miroir momentum (piste signalee, non adoptee)",
+      "source": "validation 2026-09, +19.6bps, t day-clustered 0.64, 63 clusters systemiques en 48j",
+      "n_independent": 63,
+      "t_stat": 0.64,
+      "independent_episodes_per_year": 478.0,
+      "n_required_haircut50_power80": 3804,
+      "eta_years": 8.0,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "[REFERENCE] AMIHUD_ILLIQUIDITY_PREMIUM_V1 \u2014 FROZEN",
+      "source": "registre : validation +105.7bps, ETA publie ~17 ans",
+      "n_independent": 332,
+      "t_stat": 2.92,
+      "independent_episodes_per_year": 52.4,
+      "n_required_haircut50_power80": 963,
+      "eta_years": 18.4,
+      "unconfirmable_in_3y": true
+    },
+    {
+      "label": "[REFERENCE] LIQ_CASCADE_REPEAT exhaustion thr3 \u2014 alpha en shadow",
+      "source": "mesure de ce rapport (t1c), ETA publie 11.0 ans",
+      "n_independent": 789,
+      "t_stat": 2.75,
+      "independent_episodes_per_year": 233.9,
+      "n_required_haircut50_power80": 2580,
+      "eta_years": 11.0,
+      "unconfirmable_in_3y": true
+    }
+  ]
+}

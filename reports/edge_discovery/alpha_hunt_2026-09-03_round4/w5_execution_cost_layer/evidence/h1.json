@@ -1,0 +1,326 @@
+{
+ "h1a_per_symbol": [
+  {
+   "symbol": "ADAUSDT",
+   "n": 264919,
+   "fill_rate": 0.6551,
+   "spread_bps": 5.447,
+   "adv60": -7.6195,
+   "adv300": -7.8644,
+   "spread_filled": 5.3861,
+   "tick_bps": 5.457,
+   "floor_bps": -8.1501,
+   "excess_vs_floor60": 0.5305,
+   "recovery_60_300": -0.2449
+  },
+  {
+   "symbol": "ARUSDT",
+   "n": 264937,
+   "fill_rate": 0.6029,
+   "spread_bps": 5.3968,
+   "adv60": -8.1621,
+   "adv300": -8.2414,
+   "spread_filled": 5.3428,
+   "tick_bps": 5.3348,
+   "floor_bps": -8.0062,
+   "excess_vs_floor60": -0.1559,
+   "recovery_60_300": -0.0794
+  },
+  {
+   "symbol": "AVAXUSDT",
+   "n": 265081,
+   "fill_rate": 0.8412,
+   "spread_bps": 1.4875,
+   "adv60": -2.9527,
+   "adv300": -3.0743,
+   "spread_filled": 1.4843,
+   "tick_bps": 1.5213,
+   "floor_bps": -2.2634,
+   "excess_vs_floor60": -0.6892,
+   "recovery_60_300": -0.1216
+  },
+  {
+   "symbol": "BNBUSDT",
+   "n": 265136,
+   "fill_rate": 0.8919,
+   "spread_bps": 0.1632,
+   "adv60": -1.3443,
+   "adv300": -1.3787,
+   "spread_filled": 0.1629,
+   "tick_bps": 0.1657,
+   "floor_bps": -0.2471,
+   "excess_vs_floor60": -1.0972,
+   "recovery_60_300": -0.0344
+  },
+  {
+   "symbol": "BTCUSDT",
+   "n": 265154,
+   "fill_rate": 0.8987,
+   "spread_bps": 0.0159,
+   "adv60": -1.1873,
+   "adv300": -1.1639,
+   "spread_filled": 0.0159,
+   "tick_bps": 0.0155,
+   "floor_bps": -0.0234,
+   "excess_vs_floor60": -1.1639,
+   "recovery_60_300": 0.0234
+  },
+  {
+   "symbol": "DOGEUSDT",
+   "n": 265072,
+   "fill_rate": 0.8205,
+   "spread_bps": 1.3358,
+   "adv60": -2.7133,
+   "adv300": -2.8435,
+   "spread_filled": 1.3275,
+   "tick_bps": 1.3874,
+   "floor_bps": -2.0512,
+   "excess_vs_floor60": -0.6622,
+   "recovery_60_300": -0.1302
+  },
+  {
+   "symbol": "ETHUSDT",
+   "n": 265170,
+   "fill_rate": 0.9282,
+   "spread_bps": 0.0504,
+   "adv60": -1.1591,
+   "adv300": -1.1473,
+   "spread_filled": 0.0503,
+   "tick_bps": 0.0524,
+   "floor_bps": -0.0776,
+   "excess_vs_floor60": -1.0815,
+   "recovery_60_300": 0.0118
+  },
+  {
+   "symbol": "FETUSDT",
+   "n": 264925,
+   "fill_rate": 0.5891,
+   "spread_bps": 6.8338,
+   "adv60": -9.6313,
+   "adv300": -10.1338,
+   "spread_filled": 6.7543,
+   "tick_bps": 6.6778,
+   "floor_bps": -10.055,
+   "excess_vs_floor60": 0.4236,
+   "recovery_60_300": -0.5025
+  },
+  {
+   "symbol": "LINKUSDT",
+   "n": 265084,
+   "fill_rate": 0.8684,
+   "spread_bps": 1.0829,
+   "adv60": -2.5609,
+   "adv300": -2.6724,
+   "spread_filled": 1.0771,
+   "tick_bps": 1.152,
+   "floor_bps": -1.6905,
+   "excess_vs_floor60": -0.8704,
+   "recovery_60_300": -0.1115
+  },
+  {
+   "symbol": "ORDIUSDT",
+   "n": 265096,
+   "fill_rate": 0.8323,
+   "spread_bps": 2.8454,
+   "adv60": -4.8954,
+   "adv300": -4.9474,
+   "spread_filled": 2.8362,
+   "tick_bps": 2.8086,
+   "floor_bps": -4.2267,
+   "excess_vs_floor60": -0.6687,
+   "recovery_60_300": -0.052
+  },
+  {
+   "symbol": "PYTHUSDT",
+   "n": 265091,
+   "fill_rate": 0.8257,
+   "spread_bps": 2.6375,
+   "adv60": -5.2322,
+   "adv300": -5.2557,
+   "spread_filled": 2.6233,
+   "tick_bps": 2.1794,
+   "floor_bps": -3.491,
+   "excess_vs_floor60": -1.7412,
+   "recovery_60_300": -0.0235
+  },
+  {
+   "symbol": "SOLUSDT",
+   "n": 265071,
+   "fill_rate": 0.8343,
+   "spread_bps": 1.2314,
+   "adv60": -2.5626,
+   "adv300": -2.5979,
+   "spread_filled": 1.2222,
+   "tick_bps": 1.3114,
+   "floor_bps": -1.9225,
+   "excess_vs_floor60": -0.6401,
+   "recovery_60_300": -0.0353
+  },
+  {
+   "symbol": "SUIUSDT",
+   "n": 265084,
+   "fill_rate": 0.8494,
+   "spread_bps": 1.3897,
+   "adv60": -2.8694,
+   "adv300": -2.9389,
+   "spread_filled": 1.3854,
+   "tick_bps": 1.3873,
+   "floor_bps": -2.0799,
+   "excess_vs_floor60": -0.7895,
+   "recovery_60_300": -0.0695
+  },
+  {
+   "symbol": "TIAUSDT",
+   "n": 265065,
+   "fill_rate": 0.799,
+   "spread_bps": 2.9437,
+   "adv60": -5.0206,
+   "adv300": -5.0668,
+   "spread_filled": 2.9275,
+   "tick_bps": 2.9564,
+   "floor_bps": -4.4201,
+   "excess_vs_floor60": -0.6005,
+   "recovery_60_300": -0.0462
+  },
+  {
+   "symbol": "XRPUSDT",
+   "n": 265083,
+   "fill_rate": 0.859,
+   "spread_bps": 0.8761,
+   "adv60": -2.1254,
+   "adv300": -2.1175,
+   "spread_filled": 0.8687,
+   "tick_bps": 0.9192,
+   "floor_bps": -1.3535,
+   "excess_vs_floor60": -0.7719,
+   "recovery_60_300": 0.0079
+  }
+ ],
+ "h1a_spearman_floor": [
+  0.982142857142857,
+  8.15733350897873e-11
+ ],
+ "h1a_spearman_negspread": [
+  0.982142857142857,
+  8.15733350897873e-11
+ ],
+ "h1a_ols_floor": {
+  "intercept": -1.1644324034823674,
+  "slope": 0.8504034418949704,
+  "r2": 0.9833771671127063
+ },
+ "h1b_pooled": {
+  "s": -1.2140050920207477,
+  "i": -1.2825330884297856,
+  "r2": 0.041890227569710344,
+  "n": 3206259.0
+ },
+ "h1b_within_symbol": [
+  {
+   "symbol": "ADAUSDT",
+   "s": -0.6509,
+   "i": -4.1136,
+   "r2": 0.0012,
+   "n": 173559
+  },
+  {
+   "symbol": "ARUSDT",
+   "s": -0.1698,
+   "i": -7.2548,
+   "r2": 0.0001,
+   "n": 159728
+  },
+  {
+   "symbol": "AVAXUSDT",
+   "s": -2.0015,
+   "i": 0.0182,
+   "r2": 0.0006,
+   "n": 222987
+  },
+  {
+   "symbol": "BNBUSDT",
+   "s": -0.2416,
+   "i": -1.305,
+   "r2": 0.0,
+   "n": 236488
+  },
+  {
+   "symbol": "BTCUSDT",
+   "s": -0.8831,
+   "i": -1.1733,
+   "r2": 0.0001,
+   "n": 238284
+  },
+  {
+   "symbol": "DOGEUSDT",
+   "s": -3.2803,
+   "i": 1.6412,
+   "r2": 0.0049,
+   "n": 217491
+  },
+  {
+   "symbol": "ETHUSDT",
+   "s": 0.2123,
+   "i": -1.1698,
+   "r2": 0.0,
+   "n": 246131
+  },
+  {
+   "symbol": "FETUSDT",
+   "s": -1.2637,
+   "i": -1.0961,
+   "r2": 0.0029,
+   "n": 156061
+  },
+  {
+   "symbol": "LINKUSDT",
+   "s": -0.8479,
+   "i": -1.6477,
+   "r2": 0.0002,
+   "n": 230197
+  },
+  {
+   "symbol": "ORDIUSDT",
+   "s": -0.0102,
+   "i": -4.8665,
+   "r2": 0.0,
+   "n": 220634
+  },
+  {
+   "symbol": "PYTHUSDT",
+   "s": -0.2412,
+   "i": -4.5995,
+   "r2": 0.0002,
+   "n": 218895
+  },
+  {
+   "symbol": "SOLUSDT",
+   "s": -0.2806,
+   "i": -2.2196,
+   "r2": 0.0,
+   "n": 221144
+  },
+  {
+   "symbol": "SUIUSDT",
+   "s": 0.5313,
+   "i": -3.6054,
+   "r2": 0.0001,
+   "n": 225165
+  },
+  {
+   "symbol": "TIAUSDT",
+   "s": -0.0623,
+   "i": -4.8383,
+   "r2": 0.0,
+   "n": 211786
+  },
+  {
+   "symbol": "XRPUSDT",
+   "s": 0.3324,
+   "i": -2.4142,
+   "r2": 0.0001,
+   "n": 227709
+  }
+ ],
+ "h1c_ratio_median": 1.3329773627078108
+}

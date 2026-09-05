@@ -1,0 +1,82 @@
+{
+  "n_base": 5457,
+  "top_frac": 0.3,
+  "overlap_with_macro_B0": {
+    "R1": {
+      "jaccard": 0.27,
+      "P(local_ON | macro_ON)": 0.349,
+      "P(local_ON | macro_OFF)": 0.119,
+      "lift": 2.93
+    },
+    "R2": {
+      "jaccard": 0.188,
+      "P(local_ON | macro_ON)": 0.256,
+      "P(local_ON | macro_OFF)": 0.148,
+      "lift": 1.73
+    },
+    "R3": {
+      "jaccard": 0.164,
+      "P(local_ON | macro_ON)": 0.25,
+      "P(local_ON | macro_OFF)": 0.213,
+      "lift": 1.17
+    }
+  },
+  "intra_day_cross_symbol_concordance": {
+    "R1": {
+      "n_days_ge3_symbols": 489,
+      "pct_days_unanimous_state": 0.611,
+      "mean_within_day_state_share": 0.9,
+      "expected_if_independent": 0.814
+    },
+    "R2": {
+      "n_days_ge3_symbols": 489,
+      "pct_days_unanimous_state": 0.481,
+      "mean_within_day_state_share": 0.86,
+      "expected_if_independent": 0.821
+    },
+    "R3": {
+      "n_days_ge3_symbols": 489,
+      "pct_days_unanimous_state": 0.317,
+      "mean_within_day_state_share": 0.81,
+      "expected_if_independent": 0.776
+    }
+  },
+  "eta_on_calendar_day_unit": {
+    "B0": {
+      "n_on_days": 222,
+      "n_off_days": 904,
+      "delta_bps": 20.38,
+      "welch_t": 1.45,
+      "n_required_on_days": 4539,
+      "on_day_rate_per_week_last6m": 1.392,
+      "eta_years": 62.49
+    },
+    "R1": {
+      "n_on_days": 242,
+      "n_off_days": 1006,
+      "delta_bps": 29.35,
+      "welch_t": 1.26,
+      "n_required_on_days": 4572,
+      "on_day_rate_per_week_last6m": 1.624,
+      "eta_years": 53.95
+    },
+    "R2": {
+      "n_on_days": 317,
+      "n_off_days": 1015,
+      "delta_bps": 27.72,
+      "welch_t": 1.5,
+      "n_required_on_days": 4283,
+      "on_day_rate_per_week_last6m": 2.088,
+      "eta_years": 39.31
+    },
+    "R3": {
+      "n_on_days": 469,
+      "n_off_days": 991,
+      "delta_bps": 15.11,
+      "welch_t": 1.14,
+      "n_required_on_days": 11393,
+      "on_day_rate_per_week_last6m": 3.171,
+      "eta_years": 68.85
+    }
+  }
+}

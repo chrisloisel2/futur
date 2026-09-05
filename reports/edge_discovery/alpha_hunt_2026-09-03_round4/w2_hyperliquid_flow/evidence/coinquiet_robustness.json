@@ -1,0 +1,124 @@
+{
+ "trigger": "HLTWAP_COINQUIET_1WK_AGO",
+ "col": "S15",
+ "n_events": 23512,
+ "eta_by_daily_aggregation": {
+  "event_weighted": {
+   "daily_mean_bps": 16.46,
+   "daily_sd_bps": 248.7,
+   "n_required_days": 2195,
+   "eta_years": 6.01,
+   "n_days_observed": 884
+  },
+  "coin_equal": {
+   "daily_mean_bps": 9.89,
+   "daily_sd_bps": 207.7,
+   "n_required_days": 13837,
+   "eta_years": 37.89,
+   "n_days_observed": 883
+  },
+  "coin_capped_5": {
+   "daily_mean_bps": 35.17,
+   "daily_sd_bps": 308.6,
+   "n_required_days": 2415,
+   "eta_years": 6.61,
+   "n_days_observed": 883
+  }
+ },
+ "eta_target_note": "briefing threshold is 3 years; a scheme reaches it only if n_required_days < 1096",
+ "top_coins_by_n": {
+  "kBONK": [
+   -16.54,
+   542
+  ],
+  "ASTER": [
+   182.17,
+   526
+  ],
+  "kPEPE": [
+   122.98,
+   467
+  ],
+  "WIF": [
+   109.54,
+   452
+  ],
+  "TRUMP": [
+   -183.31,
+   413
+  ],
+  "PUMP": [
+   125.03,
+   407
+  ],
+  "SUI": [
+   -5.31,
+   361
+  ],
+  "AAVE": [
+   55.97,
+   358
+  ],
+  "VIRTUAL": [
+   17.87,
+   354
+  ],
+  "TON": [
+   180.03,
+   339
+  ],
+  "KAITO": [
+   -238.22,
+   330
+  ],
+  "WLD": [
+   90.72,
+   325
+  ]
+ },
+ "ex_best_coin": {
+  "coin_dropped": "ZK",
+  "edge_bps": 27.43
+ },
+ "n_coins": 155,
+ "top1_coin_share_of_events": 0.0231,
+ "entry_lag_sensitivity_bps": {
+  "0": 31.18,
+  "5": 31.4,
+  "15": 29.72,
+  "30": 27.25,
+  "60": 25.75
+ },
+ "by_liquidity_tercile": {
+  "high": {
+   "gross_bps": 38.18,
+   "net_bps": 24.18,
+   "net_bps_stress28": 10.18,
+   "t_L3": 2.51,
+   "n_raw": 7835,
+   "median_qvol24h_usd": 775030786,
+   "capacity_usd_estimate": 3875153,
+   "eta_years": 19.75
+  },
+  "low": {
+   "gross_bps": 20.13,
+   "net_bps": 6.13,
+   "net_bps_stress28": -7.87,
+   "t_L3": 2.21,
+   "n_raw": 7595,
+   "median_qvol24h_usd": 25849928,
+   "capacity_usd_estimate": 129249,
+   "eta_years": 12.52
+  },
+  "mid": {
+   "gross_bps": 30.56,
+   "net_bps": 16.56,
+   "net_bps_stress28": 2.56,
+   "t_L3": 2.5,
+   "n_raw": 7837,
+   "median_qvol24h_usd": 142223147,
+   "capacity_usd_estimate": 711115,
+   "eta_years": 12.18
+  }
+ }
+}

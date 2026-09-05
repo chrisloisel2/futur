@@ -1,0 +1,566 @@
+[
+ {
+  "id": "S0_SURVIVORSHIP_AUDIT",
+  "family": "META",
+  "verdict": "DESCRIPTIVE",
+  "hypothesis": "verification explicite que les instruments RADIES sont dans les univers testes",
+  "panel_312": {
+   "n": 312,
+   "by_status": {
+    "TRADING": 259,
+    "SETTLING": 38,
+    "DELISTED": 14,
+    "DELISTED_NO_DATA": 1
+   },
+   "n_dead": 53,
+   "pct_dead": 17.0,
+   "n_dead_with_life_end_inside_window": 15
+  },
+  "listings_universe": {
+   "n": 518,
+   "by_status": {
+    "TRADING": 419,
+    "SETTLING": 95,
+    "DELISTED": 4
+   },
+   "n_dead": 99,
+   "pct_dead": 19.1
+  },
+  "calendar_full": {
+   "n": 683,
+   "by_status": {
+    "TRADING": 530,
+    "SETTLING": 122,
+    "DELISTED": 27,
+    "PENDING_TRADING": 2,
+    "DELISTED_NO_DATA": 2
+   }
+  },
+  "panel_end": "2026-07-31",
+  "known_limitation": "les perps radies AVANT 2023 et absents de fapi/exchangeInfo ne sont pas recuperables (listings_backfill_store.yaml _meta.missing_delisted) : l'axe A est propre sur 2023+ uniquement",
+  "A1_survivorship_counterfactual": [
+   {
+    "delay_h": 24,
+    "horizon_h": 168,
+    "n_all": 488,
+    "n_dead": 87,
+    "pct_dead": 17.8,
+    "fade_bps_all_names": 386.0,
+    "fade_bps_survivors_only": 109.9,
+    "survivorship_inflation_bps": -276.1,
+    "dead_names_fade_bps": 1171.1,
+    "live_names_fade_bps": 67.8
+   },
+   {
+    "delay_h": 24,
+    "horizon_h": 672,
+    "n_all": 483,
+    "n_dead": 87,
+    "pct_dead": 18.0,
+    "fade_bps_all_names": -148.5,
+    "fade_bps_survivors_only": -561.7,
+    "survivorship_inflation_bps": -413.3,
+    "dead_names_fade_bps": 2484.1,
+    "live_names_fade_bps": -2479.2
+   },
+   {
+    "delay_h": 1,
+    "horizon_h": 168,
+    "n_all": 478,
+    "n_dead": 85,
+    "pct_dead": 17.8,
+    "fade_bps_all_names": 422.9,
+    "fade_bps_survivors_only": 164.8,
+    "survivorship_inflation_bps": -258.1,
+    "dead_names_fade_bps": 1318.1,
+    "live_names_fade_bps": 55.5
+   }
+  ]
+ },
+ {
+  "id": "A5_LIST_FADE_NET_OF_FUNDING_d24h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+  "paired_episodes": true,
+  "n_raw": 488,
+  "n_independent_L1": 488,
+  "n_independent_L2": 343,
+  "n_independent_L3": 143,
+  "gross_bps": 230.9,
+  "net_bps": 202.9,
+  "net_bps_stress28": 174.9,
+  "t_stat_declustered": 1.09,
+  "bootstrap_ci95": [
+   -201.1,
+   624.6
+  ],
+  "n_required": 3772.3,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 37932.0,
+   "years": 103.85
+  },
+  "price_only_gross_bps": 386.0,
+  "funding_drag_short_leg_bps": -142.1,
+  "funding_drag_long_leg_bps": -2.0,
+  "total_funding_drag_bps": -144.1,
+  "median_funding_new_listing_bps": 16.0,
+  "n_events": 488,
+  "year_by_year": [
+   {
+    "year": 2023,
+    "n_ep": 31,
+    "mean_bps": 604.4,
+    "t": 2.32
+   },
+   {
+    "year": 2024,
+    "n_ep": 39,
+    "mean_bps": 338.1,
+    "t": 1.06
+   },
+   {
+    "year": 2025,
+    "n_ep": 52,
+    "mean_bps": 172.0,
+    "t": 0.54
+   },
+   {
+    "year": 2026,
+    "n_ep": 22,
+    "mean_bps": -277.9,
+    "t": -0.29
+   }
+  ],
+  "years_same_sign": "3/4",
+  "ex_best_year": {
+   "dropped": 2023,
+   "gross_bps": 127.6,
+   "t": 0.49,
+   "n_ep": 112
+  }
+ },
+ {
+  "id": "A5_LIST_FADE_NET_OF_FUNDING_d24h_h672h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+  "paired_episodes": true,
+  "n_raw": 483,
+  "n_independent_L1": 483,
+  "n_independent_L2": 338,
+  "n_independent_L3": 141,
+  "gross_bps": -425.4,
+  "net_bps": -453.4,
+  "net_bps_stress28": -481.4,
+  "t_stat_declustered": -0.45,
+  "bootstrap_ci95": [
+   -2569.5,
+   906.1
+  ],
+  "n_required": 22192.2,
+  "event_rate_per_week_6m": 0.619,
+  "eta_forward_confirmation": {
+   "days": 251049.0,
+   "years": 687.35
+  },
+  "price_only_gross_bps": -148.5,
+  "funding_drag_short_leg_bps": -232.9,
+  "funding_drag_long_leg_bps": -5.5,
+  "total_funding_drag_bps": -238.4,
+  "median_funding_new_listing_bps": 50.0,
+  "n_events": 483,
+  "year_by_year": [
+   {
+    "year": 2023,
+    "n_ep": 31,
+    "mean_bps": 912.4,
+    "t": 1.51
+   },
+   {
+    "year": 2024,
+    "n_ep": 39,
+    "mean_bps": 701.5,
+    "t": 1.19
+   },
+   {
+    "year": 2025,
+    "n_ep": 52,
+    "mean_bps": -2014.2,
+    "t": -0.81
+   },
+   {
+    "year": 2026,
+    "n_ep": 20,
+    "mean_bps": -467.1,
+    "t": -0.52
+   }
+  ],
+  "years_same_sign": "2/4",
+  "ex_best_year": {
+   "dropped": 2025,
+   "gross_bps": 514.4,
+   "t": 1.34,
+   "n_ep": 90
+  }
+ },
+ {
+  "id": "A5_LIST_FADE_NET_OF_FUNDING_d1h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+  "paired_episodes": true,
+  "n_raw": 478,
+  "n_independent_L1": 478,
+  "n_independent_L2": 334,
+  "n_independent_L3": 138,
+  "gross_bps": 217.1,
+  "net_bps": 189.1,
+  "net_bps_stress28": 161.1,
+  "t_stat_declustered": 0.86,
+  "bootstrap_ci95": [
+   -282.0,
+   698.7
+  ],
+  "n_required": 5812.9,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 58452.0,
+   "years": 160.04
+  },
+  "price_only_gross_bps": 422.9,
+  "funding_drag_short_leg_bps": -195.8,
+  "funding_drag_long_leg_bps": -1.9,
+  "total_funding_drag_bps": -197.7,
+  "median_funding_new_listing_bps": 3.9,
+  "n_events": 478,
+  "year_by_year": [
+   {
+    "year": 2023,
+    "n_ep": 26,
+    "mean_bps": 752.7,
+    "t": 1.89
+   },
+   {
+    "year": 2024,
+    "n_ep": 39,
+    "mean_bps": 330.1,
+    "t": 0.99
+   },
+   {
+    "year": 2025,
+    "n_ep": 52,
+    "mean_bps": 193.9,
+    "t": 0.5
+   },
+   {
+    "year": 2026,
+    "n_ep": 22,
+    "mean_bps": -457.2,
+    "t": -0.43
+   }
+  ],
+  "years_same_sign": "3/4",
+  "ex_best_year": {
+   "dropped": 2023,
+   "gross_bps": 92.7,
+   "t": 0.31,
+   "n_ep": 112
+  }
+ },
+ {
+  "id": "A5_LIST_FADE_NET_OF_FUNDING_d4h_h168h",
+  "family": "LISTING_EVENT",
+  "hypothesis": "fade de listing (short nouveau / long panier) NET du funding effectivement regle sur les DEUX jambes",
+  "paired_episodes": true,
+  "n_raw": 479,
+  "n_independent_L1": 479,
+  "n_independent_L2": 335,
+  "n_independent_L3": 138,
+  "gross_bps": 277.3,
+  "net_bps": 249.3,
+  "net_bps_stress28": 221.3,
+  "t_stat_declustered": 1.17,
+  "bootstrap_ci95": [
+   -198.8,
+   718.4
+  ],
+  "n_required": 3177.8,
+  "event_rate_per_week_6m": 0.696,
+  "eta_forward_confirmation": {
+   "days": 31954.0,
+   "years": 87.49
+  },
+  "price_only_gross_bps": 472.5,
+  "funding_drag_short_leg_bps": -183.5,
+  "funding_drag_long_leg_bps": -1.9,
+  "total_funding_drag_bps": -185.5,
+  "median_funding_new_listing_bps": 10.0,
+  "n_events": 479,
+  "year_by_year": [
+   {
+    "year": 2023,
+    "n_ep": 26,
+    "mean_bps": 776.5,
+    "t": 2.61
+   },
+   {
+    "year": 2024,
+    "n_ep": 39,
+    "mean_bps": 343.4,
+    "t": 1.02
+   },
+   {
+    "year": 2025,
+    "n_ep": 52,
+    "mean_bps": 285.4,
+    "t": 0.77
+   },
+   {
+    "year": 2026,
+    "n_ep": 22,
+    "mean_bps": -334.3,
+    "t": -0.33
+   }
+  ],
+  "years_same_sign": "3/4",
+  "ex_best_year": {
+   "dropped": 2023,
+   "gross_bps": 161.4,
+   "t": 0.57,
+   "n_ep": 112
+  }
+ },
+ {
+  "id": "E1c_LISTING_WAVE_REGIME_SPELL_bask",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement quotidien moyen de panier equal-weight eligible PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+  "paired_episodes": false,
+  "n_raw": 2124,
+  "n_independent_L1": 1466,
+  "n_independent_L2": 49,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 22,
+  "arm_A_bps": 135.2,
+  "arm_B_bps": 244.0,
+  "gross_bps": -108.8,
+  "net_bps": -122.8,
+  "net_bps_stress28": -136.8,
+  "t_stat_declustered": -0.1,
+  "bootstrap_ci95": [
+   -2197.7,
+   2066.7
+  ],
+  "n_required": 54894.5,
+  "event_rate_per_week_6m": 0.155,
+  "eta_forward_confirmation": {
+   "days": 2483976.0,
+   "years": 6800.89
+  },
+  "unit": "bps par 30d de detention continue",
+  "median_spell_days": 21.0,
+  "n_days_HI": 887,
+  "n_days_LO": 579,
+  "mean_spell_cum_bps_HI": 334.7,
+  "mean_spell_cum_bps_LO": 191.0,
+  "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -1999.2
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 3506.9
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -3842.9
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -2756.2
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 2788.7
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 28,
+    "diff_bps": -1387.3
+   }
+  ],
+  "years_same_sign": "4/6",
+  "ex_best_year": {
+   "dropped": 2022,
+   "gross_bps": -548.5
+  }
+ },
+ {
+  "id": "E1c_LISTING_WAVE_REGIME_SPELL_btc",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement quotidien moyen de BTCUSDT PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+  "paired_episodes": false,
+  "n_raw": 2124,
+  "n_independent_L1": 1466,
+  "n_independent_L2": 49,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 22,
+  "arm_A_bps": 341.7,
+  "arm_B_bps": 629.7,
+  "gross_bps": -287.9,
+  "net_bps": -301.9,
+  "net_bps_stress28": -315.9,
+  "t_stat_declustered": -0.39,
+  "bootstrap_ci95": [
+   -1741.5,
+   1081.5
+  ],
+  "n_required": 3549.0,
+  "event_rate_per_week_6m": 0.155,
+  "eta_forward_confirmation": {
+   "days": 160594.0,
+   "years": 439.69
+  },
+  "unit": "bps par 30d de detention continue",
+  "median_spell_days": 21.0,
+  "n_days_HI": 887,
+  "n_days_LO": 579,
+  "mean_spell_cum_bps_HI": 906.4,
+  "mean_spell_cum_bps_LO": 211.9,
+  "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -1260.3
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 1062.0
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -3677.9
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -2469.3
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 1116.9
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 28,
+    "diff_bps": 73.4
+   }
+  ],
+  "years_same_sign": "3/6",
+  "ex_best_year": {
+   "dropped": 2022,
+   "gross_bps": -135.1
+  }
+ },
+ {
+  "id": "E2b_WAVE_COND_XSEC_MOM_SPELL",
+  "family": "LISTING_WAVE_REGIME",
+  "hypothesis": "rendement quotidien moyen de livre momentum transversal 7j (Q5-Q1) PENDANT une plage de regime HAUTE intensite de cotation - PENDANT une plage BASSE (exprime en bps/30d) ; L3 = plage de regime (aucun chevauchement inter-plages)",
+  "paired_episodes": false,
+  "n_raw": 2124,
+  "n_independent_L1": 1466,
+  "n_independent_L2": 49,
+  "n_independent_L3": 17,
+  "n_episodes_A": 17,
+  "n_episodes_B": 22,
+  "arm_A_bps": -613.6,
+  "arm_B_bps": 583.4,
+  "gross_bps": -1197.0,
+  "net_bps": -1225.0,
+  "net_bps_stress28": -1253.0,
+  "t_stat_declustered": -2.29,
+  "bootstrap_ci95": [
+   -2217.0,
+   -246.7
+  ],
+  "n_required": 101.5,
+  "event_rate_per_week_6m": 0.155,
+  "eta_forward_confirmation": {
+   "days": 4593.0,
+   "years": 12.58
+  },
+  "unit": "bps par 30d de detention continue",
+  "median_spell_days": 21.0,
+  "n_days_HI": 887,
+  "n_days_LO": 579,
+  "mean_spell_cum_bps_HI": 22.2,
+  "mean_spell_cum_bps_LO": 119.6,
+  "note": "cible = rendement forward 1 JOUR moyen sur la plage : additif, sans chevauchement entre plages, contrairement a fwd7/fwd30",
+  "year_by_year": [
+   {
+    "year": 2020,
+    "n_hi": 20,
+    "n_lo": 37,
+    "diff_bps": -5300.2
+   },
+   {
+    "year": 2021,
+    "n_hi": 32,
+    "n_lo": 169,
+    "diff_bps": 1615.6
+   },
+   {
+    "year": 2022,
+    "n_hi": 8,
+    "n_lo": 239,
+    "diff_bps": -201.3
+   },
+   {
+    "year": 2023,
+    "n_hi": 227,
+    "n_lo": 51,
+    "diff_bps": -1176.1
+   },
+   {
+    "year": 2024,
+    "n_hi": 218,
+    "n_lo": 66,
+    "diff_bps": 416.5
+   },
+   {
+    "year": 2026,
+    "n_hi": 46,
+    "n_lo": 28,
+    "diff_bps": -294.8
+   }
+  ],
+  "years_same_sign": "4/6",
+  "ex_best_year": {
+   "dropped": 2020,
+   "gross_bps": 76.9
+  }
+ }
+]

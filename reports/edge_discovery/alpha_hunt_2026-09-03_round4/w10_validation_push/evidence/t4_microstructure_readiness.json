@@ -1,0 +1,103 @@
+{
+  "scan_root": "/home/qbee/futur/data/microstructure_reduced/raw",
+  "definition_complete_day": "24h x 3 venues x 3 symbols present on BOTH bbo and trades (=216 slots/stream)",
+  "days": [
+    {
+      "date": "2026-08-31",
+      "bbo_slots": 9,
+      "trades_slots": 9,
+      "expected_slots": 216,
+      "hours_present": 1,
+      "hours": "000000000000000000000001",
+      "bytes": 19580225,
+      "complete": false
+    },
+    {
+      "date": "2026-09-01",
+      "bbo_slots": 216,
+      "trades_slots": 216,
+      "expected_slots": 216,
+      "hours_present": 24,
+      "hours": "111111111111111111111111",
+      "bytes": 1243942097,
+      "complete": true
+    },
+    {
+      "date": "2026-09-02",
+      "bbo_slots": 216,
+      "trades_slots": 216,
+      "expected_slots": 216,
+      "hours_present": 24,
+      "hours": "111111111111111111111111",
+      "bytes": 1192406992,
+      "complete": true
+    },
+    {
+      "date": "2026-09-03",
+      "bbo_slots": 216,
+      "trades_slots": 216,
+      "expected_slots": 216,
+      "hours_present": 24,
+      "hours": "111111111111111111111111",
+      "bytes": 1445082419,
+      "complete": true
+    },
+    {
+      "date": "2026-09-04",
+      "bbo_slots": 81,
+      "trades_slots": 81,
+      "expected_slots": 216,
+      "hours_present": 9,
+      "hours": "111111100000000000000011",
+      "bytes": 314678608,
+      "complete": false
+    },
+    {
+      "date": "2026-09-05",
+      "bbo_slots": 63,
+      "trades_slots": 63,
+      "expected_slots": 216,
+      "hours_present": 7,
+      "hours": "111111100000000000000000",
+      "bytes": 119606704,
+      "complete": false
+    }
+  ],
+  "n_complete_independent_days": 3,
+  "complete_days": [
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03"
+  ],
+  "partial_days": [
+    {
+      "date": "2026-08-31",
+      "hours_present": 1
+    },
+    {
+      "date": "2026-09-04",
+      "hours_present": 9
+    },
+    {
+      "date": "2026-09-05",
+      "hours_present": 7
+    }
+  ],
+  "mean_gib_per_complete_day": 1.205,
+  "collector_footprint_gib": 4.038,
+  "machine_free_gib": 57.1,
+  "observed_complete_day_yield_per_elapsed_day": 0.75,
+  "threshold_complete_days": 60,
+  "days_remaining": 57,
+  "target_date_if_100pct_uptime": "2026-11-01",
+  "target_date_at_observed_yield": "2026-11-20",
+  "disk": {
+    "collector_disk_budget_gb": 12.0,
+    "budget_headroom_gib": 7.96,
+    "days_until_budget_stop": 6.6,
+    "budget_stop_date_estimate": "2026-09-11",
+    "complete_days_reachable_before_budget_stop": 9,
+    "gib_needed_to_reach_threshold": 68.7,
+    "verdict": "UNREACHABLE: le seuil demande 68.7 GiB de plus, au-dela du plafond collecteur (8.0 GiB restants) ET de l'espace libre machine (57.1 GiB)"
+  }
+}

@@ -1,0 +1,292 @@
+{
+ "A_cascade": {
+  "n_raw": 439,
+  "n_ind_L1": 247,
+  "n_used": 204,
+  "n_ind_L2_days": 41,
+  "n_ind_L3_symday": 204,
+  "spread_mult_median": 1.0,
+  "spread_mult_ci95": [
+   0.989741641337386,
+   1.003627130939427
+  ],
+  "dspread_bps_median": 0.0,
+  "dmarkout_buy_bps": -0.6795760998127018
+ },
+ "B_shock_deciles": [
+  {
+   "shock_q": 0.0,
+   "n": 238804,
+   "shock": 0.0,
+   "spread": 1.751,
+   "rvol": 0.0016,
+   "fill_buy": 0.7435,
+   "adv_buy": -4.2573,
+   "adv_sell": -4.1569,
+   "spread_vs_d0": 1.0
+  },
+  {
+   "shock_q": 1.0,
+   "n": 198895,
+   "shock": 2.5439,
+   "spread": 1.435,
+   "rvol": 0.0015,
+   "fill_buy": 0.7732,
+   "adv_buy": -3.6334,
+   "adv_sell": -3.5266,
+   "spread_vs_d0": 0.82
+  },
+  {
+   "shock_q": 2.0,
+   "n": 198850,
+   "shock": 3.9735,
+   "spread": 1.436,
+   "rvol": 0.0015,
+   "fill_buy": 0.7698,
+   "adv_buy": -3.6516,
+   "adv_sell": -3.6296,
+   "spread_vs_d0": 0.82
+  },
+  {
+   "shock_q": 3.0,
+   "n": 198825,
+   "shock": 5.7405,
+   "spread": 1.432,
+   "rvol": 0.0016,
+   "fill_buy": 0.7924,
+   "adv_buy": -3.6152,
+   "adv_sell": -3.6212,
+   "spread_vs_d0": 0.818
+  },
+  {
+   "shock_q": 4.0,
+   "n": 198887,
+   "shock": 7.5884,
+   "spread": 1.426,
+   "rvol": 0.0017,
+   "fill_buy": 0.7948,
+   "adv_buy": -3.6707,
+   "adv_sell": -3.5465,
+   "spread_vs_d0": 0.814
+  },
+  {
+   "shock_q": 5.0,
+   "n": 198765,
+   "shock": 9.7233,
+   "spread": 1.428,
+   "rvol": 0.0018,
+   "fill_buy": 0.8112,
+   "adv_buy": -3.6885,
+   "adv_sell": -3.6375,
+   "spread_vs_d0": 0.816
+  },
+  {
+   "shock_q": 6.0,
+   "n": 198829,
+   "shock": 12.6402,
+   "spread": 1.421,
+   "rvol": 0.002,
+   "fill_buy": 0.8215,
+   "adv_buy": -3.7474,
+   "adv_sell": -3.6726,
+   "spread_vs_d0": 0.812
+  },
+  {
+   "shock_q": 7.0,
+   "n": 198857,
+   "shock": 16.7715,
+   "spread": 1.395,
+   "rvol": 0.0023,
+   "fill_buy": 0.8403,
+   "adv_buy": -3.7851,
+   "adv_sell": -3.7857,
+   "spread_vs_d0": 0.797
+  },
+  {
+   "shock_q": 8.0,
+   "n": 198850,
+   "shock": 24.2407,
+   "spread": 1.381,
+   "rvol": 0.0029,
+   "fill_buy": 0.8673,
+   "adv_buy": -3.7859,
+   "adv_sell": -4.0419,
+   "spread_vs_d0": 0.789
+  },
+  {
+   "shock_q": 9.0,
+   "n": 159115,
+   "shock": 39.6397,
+   "spread": 1.187,
+   "rvol": 0.0037,
+   "fill_buy": 0.9151,
+   "adv_buy": -2.6184,
+   "adv_sell": -3.4922,
+   "spread_vs_d0": 0.678
+  }
+ ],
+ "B_tail_0.99": {
+  "spread_evt": 1.3255,
+  "spread_base": 1.423,
+  "mult": 0.9314827828531271,
+  "n_ind_symday": 584,
+  "t_declustered": 2.5132333343681834,
+  "markout_buy_evt": -3.7237803938827154,
+  "markout_buy_base": -3.6623210223576286
+ },
+ "B_tail_0.995": {
+  "spread_evt": 1.33,
+  "spread_base": 1.423,
+  "mult": 0.9346451159522137,
+  "n_ind_symday": 460,
+  "t_declustered": 3.460646875851696,
+  "markout_buy_evt": -4.736737060947587,
+  "markout_buy_base": -3.656882177568048
+ },
+ "B_tail_0.999": {
+  "spread_evt": 1.45,
+  "spread_base": 1.423,
+  "mult": 1.0189739985945185,
+  "n_ind_symday": 192,
+  "t_declustered": 3.094655811846502,
+  "markout_buy_evt": -16.401348253275106,
+  "markout_buy_base": -3.64849579749847
+ },
+ "B_per_symbol": [
+  {
+   "symbol": "BTCUSDT",
+   "spr_base": 0.015,
+   "spr_evt": 0.014,
+   "mult": 0.9333,
+   "extra_rt_bps": -0.001,
+   "adv_base": -1.1698,
+   "adv_evt": -1.0129
+  },
+  {
+   "symbol": "ETHUSDT",
+   "spr_base": 0.052,
+   "spr_evt": 0.044,
+   "mult": 0.8462,
+   "extra_rt_bps": -0.008,
+   "adv_base": -1.1718,
+   "adv_evt": 0.475
+  },
+  {
+   "symbol": "BNBUSDT",
+   "spr_base": 0.166,
+   "spr_evt": 0.148,
+   "mult": 0.8916,
+   "extra_rt_bps": -0.018,
+   "adv_base": -1.3399,
+   "adv_evt": -1.2715
+  },
+  {
+   "symbol": "XRPUSDT",
+   "spr_base": 0.919,
+   "spr_evt": 0.689,
+   "mult": 0.7497,
+   "extra_rt_bps": -0.23,
+   "adv_base": -2.0993,
+   "adv_evt": -1.4948
+  },
+  {
+   "symbol": "LINKUSDT",
+   "spr_base": 1.154,
+   "spr_evt": 0.8975,
+   "mult": 0.7777,
+   "extra_rt_bps": -0.2565,
+   "adv_base": -2.5433,
+   "adv_evt": -1.052
+  },
+  {
+   "symbol": "SOLUSDT",
+   "spr_base": 1.312,
+   "spr_evt": 1.052,
+   "mult": 0.8018,
+   "extra_rt_bps": -0.26,
+   "adv_base": -2.5575,
+   "adv_evt": -1.5306
+  },
+  {
+   "symbol": "DOGEUSDT",
+   "spr_base": 1.388,
+   "spr_evt": 1.131,
+   "mult": 0.8148,
+   "extra_rt_bps": -0.257,
+   "adv_base": -2.7276,
+   "adv_evt": -2.2173
+  },
+  {
+   "symbol": "SUIUSDT",
+   "spr_base": 1.389,
+   "spr_evt": 1.251,
+   "mult": 0.9006,
+   "extra_rt_bps": -0.138,
+   "adv_base": -2.8842,
+   "adv_evt": -2.3888
+  },
+  {
+   "symbol": "AVAXUSDT",
+   "spr_base": 1.521,
+   "spr_evt": 1.454,
+   "mult": 0.956,
+   "extra_rt_bps": -0.067,
+   "adv_base": -2.953,
+   "adv_evt": -3.4019
+  },
+  {
+   "symbol": "PYTHUSDT",
+   "spr_base": 2.389,
+   "spr_evt": 2.161,
+   "mult": 0.9046,
+   "extra_rt_bps": -0.228,
+   "adv_base": -5.16,
+   "adv_evt": -7.4137
+  },
+  {
+   "symbol": "ORDIUSDT",
+   "spr_base": 2.823,
+   "spr_evt": 2.6625,
+   "mult": 0.9431,
+   "extra_rt_bps": -0.1605,
+   "adv_base": -4.858,
+   "adv_evt": -7.7453
+  },
+  {
+   "symbol": "TIAUSDT",
+   "spr_base": 2.959,
+   "spr_evt": 2.763,
+   "mult": 0.9338,
+   "extra_rt_bps": -0.196,
+   "adv_base": -5.0508,
+   "adv_evt": -3.5988
+  },
+  {
+   "symbol": "ARUSDT",
+   "spr_base": 5.407,
+   "spr_evt": 4.621,
+   "mult": 0.8546,
+   "extra_rt_bps": -0.786,
+   "adv_base": -7.7882,
+   "adv_evt": -9.4014
+  },
+  {
+   "symbol": "ADAUSDT",
+   "spr_base": 5.46,
+   "spr_evt": 4.866,
+   "mult": 0.8912,
+   "extra_rt_bps": -0.594,
+   "adv_base": -7.5337,
+   "adv_evt": -7.0375
+  },
+  {
+   "symbol": "FETUSDT",
+   "spr_base": 6.687,
+   "spr_evt": 6.225,
+   "mult": 0.9309,
+   "extra_rt_bps": -0.462,
+   "adv_base": -9.481,
+   "adv_evt": -8.5813
+  }
+ ]
+}
