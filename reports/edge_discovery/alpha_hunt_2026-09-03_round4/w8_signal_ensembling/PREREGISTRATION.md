@@ -189,3 +189,99 @@ first. Verdicts strictly from the BRIEFING §3 list. `ETA > 3 years` ⟹
 * **Composite turnover** — measured directly, charged directly.
 * **`REFIT` honesty** — anything I decide after seeing a result is stamped `REFIT` in the
   report and is not allowed to change a verdict.
+
+---
+
+# ADDENDUM 2026-09-05 (b) — OUT-OF-SAMPLE TEST OF THE SLEEVE SELECTION (`BESTOFBREED`)
+
+Written **before** any number of this test was computed. Nothing below was chosen after seeing
+a result. The only thing under test is the **selection**, not the assembly.
+
+## A. What is on trial
+
+`BESTOFBREED_corrected` (§9bis of `REPORT.md`) clears the 3-year bar mechanically
+(ETA 2.92 y, SR 3.28, t 5.84) but its Track A sleeve, `A_CONFIDENCE_IC_WF_q80`, was chosen
+**after** I had seen the Track A results. The question, and the only question:
+
+> Applied mechanically on a period that did not serve to make it, does the selection rule
+> still pick a Track A sleeve that pays?
+
+## B. The selection rule, frozen exactly as it was applied
+
+> **RULE-S:** among the four Track A sleeve candidates actually present in the Track C grid —
+> `A_EW_APRIORI_q90`, `A_EW_WALKFORWARD_q90`, `A_EW_WALKFORWARD_q80`,
+> `A_CONFIDENCE_IC_WF_q80`, all in their hour-bar-controlled (`_HOURADJ`) form — pick the one
+> with the **highest annualised Sharpe** measured on the available history.
+
+That is the criterion I actually used (highest SR ⇔ lowest ETA, the ruler of §2). No other
+candidate is added, none is removed, and the rule is applied by argmax with no tie-breaking
+discretion.
+
+## C. Period split, fixed now
+
+* Common window of the basket: **2023-01-02 → 2026-06-26**.
+* **TRAIN = 2023-01-02 → 2025-02-28** (26 months). RULE-S sees this and nothing else.
+* **EVAL = 2025-03-01 → 2026-06-26** (~16 months, ≈ 480 days). Never seen by RULE-S.
+* Split chosen for power, not for outcome: under the measured SR 3.28 the expected EVAL
+  t-statistic is `3.28 × √(480/365) ≈ 3.8`, so the test can resolve a real edge. Under the null
+  it is centred on 0.
+
+Walk-forward machinery is unchanged: the `INVVOL_WF` weights keep their expanding,
+strictly-prior, shifted estimation over the full series (TRAIN data is legitimate prior
+information for an EVAL day); only the *statistics* are computed on EVAL.
+
+## D. Everything that stays frozen (constraint: no new parameter)
+
+Inverse-vol walk-forward weighting with `min_periods = 120`; the two Track B long legs
+`BLO_AMIHUD_30D` and `BLO_MOM_30D`; decile = 10 %; universe filter (30-day trailing median
+quote volume ≥ $1 M, ≥ 60 trailing days, `n_bars ≥ 250`); costs 14 bps / stress 28 bps with
+Track A charged per episode and Track B on measured turnover; hour-bar control by
+(hour_utc × calendar-month) cell. **If any of these has to move for the test to pass, that is a
+negative result, not an adjustment.**
+
+## E. The placebo (mandatory)
+
+RULE-S applied to **random** Track A sleeves, evaluated on the same EVAL period, 400 draws.
+A random score passed through the causal prior-quantile threshold selects, in distribution, a
+random `1−q` share of each month's evaluable events; the placebo therefore draws directly, per
+calendar month, a random 10 % (for a q90 candidate) or 20 % (q80) of that month's evaluable
+events — same declustering, same hour-bar control, same daily aggregation. Each draw builds a
+candidate set mirroring the real one (**two q90 + two q80** sleeves), applies RULE-S on TRAIN,
+and evaluates on EVAL. This distinguishes "the rule selects signal" from "any argmax over four
+noisy series finds something".
+
+## F. Decision rule, written before the result
+
+Primary statistic: the **EVAL `SR_ann` of the Track A sleeve that RULE-S picked on TRAIN**.
+Secondary: the full `BESTOFBREED` basket's EVAL gate.
+
+| condition | must hold |
+|---|---|
+| **C1** the selected sleeve pays out-of-sample | EVAL `net_bps > 0` **and** `t_declustered ≥ 2.0` |
+| **C2** the selection beats noise | EVAL `SR_ann` of the selected sleeve **>** the 90th percentile of the placebo distribution |
+| **C3** the 3-year claim survives | full basket EVAL `eta_forward_confirmation < 3.0 years` |
+| **C4** the clock-mismatch residual is not the edge | under `n_bars ≥ 280` (vs 280/288 of a day), the basket keeps **≥ 50 %** of its `net_bps` |
+
+* **All four hold →** `VALIDATED_FOR_FORWARD`. The post-hoc objection is answered and the
+  mechanical gate was already passed.
+* **C1 fails →** the selection does not survive; verdict `PROMISING_NEEDS_VALIDATION` at best,
+  and I will say the `BESTOFBREED` result was a selection artefact.
+* **C1 holds, C2 fails →** the rule works no better than an argmax over noise:
+  `PROMISING_NEEDS_VALIDATION`, selection unproven.
+* **C1+C2 hold, C3 fails →** the selection is real but the sub-3-year claim does not survive
+  out of sample: `PROMISING_NEEDS_VALIDATION`, and the headline stays the 4.55-year composite.
+* **C4 fails →** `PROMISING_NEEDS_VALIDATION` whatever else holds, with the clock mismatch
+  named as the reason.
+* **If EVAL is too short to resolve** (placebo sd so wide that C2 cannot be decided, or EVAL
+  `n` below the `n_required` implied by the measured EVAL SR) → `DATA_LIMITED`, with the
+  required N stated.
+
+## G. A limitation I declare now rather than discover later
+
+The TRAIN/EVAL split lives **inside** the window on which I originally made the choice: I
+already know the full-sample answer, so this test can establish that **RULE-S is stable**, not
+that my original pick was made blind. The only genuinely untouched data is the recency
+extension declared in §1 of this preregistration (`cascade_dataset.parquet` to 2026-08-27)
+intersected with the Track B panel (ends 2026-07-31) — **≈ 27 days**, against the ≈ 1066 days
+(2.92 y) the ruler demands. That window will therefore be reported as `DATA_LIMITED` with its
+N, not used to claim anything.

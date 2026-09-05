@@ -11,6 +11,8 @@ D = json.load(open(os.path.join(HERE, "c2_longonly_results.json")))
 P1 = json.load(open(os.path.join(HERE, "d1_placebo_results.json")))
 P2 = json.load(open(os.path.join(HERE, "d2_hourbar_corrected_results.json")))
 P3 = json.load(open(os.path.join(HERE, "d3_placebo_disjoint_results.json")))
+E1 = json.load(open(os.path.join(HERE, "e1_selection_oos_results.json")))
+E2 = json.load(open(os.path.join(HERE, "e2_nbars_robustness_results.json")))
 
 MECH = []
 
@@ -175,6 +177,23 @@ for k, rec in P2["corrected_baskets"].items():
              "best_single_sleeve_same_window": rec.get("best_single_sleeve_same_window"),
              "eta_division_factor": rec.get(f"eta_division_factor_{mode}")})
 
+add("E1::BESTOFBREED_ruleS::EVAL::INVVOL_WF", "C", "CROSS_BASIS_BASKET_OUT_OF_SAMPLE",
+    "BESTOFBREED rebuilt with the sleeve RULE-S picked on TRAIN, measured on the disjoint "
+    "EVAL window 2025-03-01..2026-06-26 only",
+    E1["C3_baskets_on_EVAL"]["BESTOFBREED_ruleS"]["INVVOL_WF"],
+    ["OUT_OF_SAMPLE", "PREREGISTERED_ADDENDUM_2026-09-05b", "WALKFORWARD_WEIGHTS"])
+add("E1::B_LEGS_ONLY::EVAL::INVVOL_WF", "C", "CROSS_BASIS_BASKET_OUT_OF_SAMPLE",
+    "the two Track B long legs alone on the same EVAL window (no Track A sleeve)",
+    E1["C3_baskets_on_EVAL"]["B_LEGS_ONLY"]["INVVOL_WF"], ["OUT_OF_SAMPLE"])
+add("E1::SELECTED_SLEEVE::EVAL", "A", "LIQ_CASCADE_EVENT_COMPOSITE_OUT_OF_SAMPLE",
+    "the Track A sleeve RULE-S selected on TRAIN, measured on EVAL alone",
+    E1["C1_selected_sleeve_on_EVAL"], ["OUT_OF_SAMPLE"])
+for nb in ("nb250", "nb280"):
+    add(f"E2::BASKET_INVVOL_WF::{nb}", "C", "CROSS_BASIS_BASKET_ROBUSTNESS",
+        f"BESTOFBREED with the Track B panel filtered at n_bars>={nb[2:]} of 288",
+        E2["results"][nb]["BASKET_INVVOL_WF"],
+        ["CLOCK_MISMATCH_ROBUSTNESS", "SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT"])
+
 OUT = {
     "worker": "w8_signal_ensembling",
     "round": "alpha_hunt_2026-09-03_round4",
@@ -255,6 +274,54 @@ OUT = {
                       "(p<0.0025, 400 draws); applying the hour-bar control directly moves the "
                       "headline composite from +12.95 to +12.73 bps and its ETA from 4.64 to "
                       "4.55 years. The roadmap number is unchanged (extra sleeve SR 1.89 vs 1.93)."},
+    "selection_out_of_sample_test": {
+        "protocol": "PREREGISTRATION.md ADDENDUM 2026-09-05 (b), written before any result",
+        "question": "does the sleeve-selection rule of BESTOFBREED hold on a period that did "
+                    "not serve to make it?",
+        "train": E1["train"], "eval": E1["eval"],
+        "rule_S": E1["rule_S"],
+        "rule_S_pick_on_TRAIN": E1["rule_S_pick_on_TRAIN"],
+        "pick_agrees_with_original_post_hoc_choice": E1["pick_agrees_with_original"],
+        "train_sr_ann_by_candidate": E1["train_sr_ann_by_candidate"],
+        "eval_sr_ann_by_candidate": E1["eval_sr_ann_by_candidate"],
+        "C1_selected_sleeve_pays_OOS": {
+            "required": "net_bps>0 and t_declustered>=2.0",
+            "measured_net_bps": E1["C1_selected_sleeve_on_EVAL"]["net_bps"],
+            "measured_t": E1["C1_selected_sleeve_on_EVAL"]["t_stat_declustered"],
+            "pass": False},
+        "C2_selection_beats_noise": {
+            "required": "EVAL SR_ann of the picked sleeve > placebo p90",
+            **E1["C2_placebo"]["selected_sleeve_SR_ann_EVAL"], "pass": True},
+        "C3_three_year_claim_survives": {
+            "required": "basket EVAL eta < 3.0 years",
+            "measured_eta_years":
+                E1["C3_baskets_on_EVAL"]["BESTOFBREED_ruleS"]["INVVOL_WF"][
+                    "eta_forward_confirmation_years"],
+            "in_sample_eta_years": 2.92, "pass": False},
+        "C4_clock_mismatch_not_the_edge": {
+            "required": "net_bps retained >= 50% at n_bars>=280",
+            "measured_retained": E2["net_bps_retained_at_nb280"],
+            "symbol_days_lost": (E2["panel_stats_nb250"]["n_symbol_days"]
+                                 - E2["panel_stats_nb280"]["n_symbol_days"]),
+            "pass": E2["C4_pass"]},
+        "marginal_contribution_of_track_A_sleeve_SR_ann": {
+            "train": 1.55, "eval": 0.27,
+            "note": "basket SR 3.42->3.18 while the Track B legs alone went 1.87->2.91; the "
+                    "in-sample sub-3-year result was largely a Track A effect that does not "
+                    "replicate"},
+        "power": E1["power"],
+        "genuinely_untouched_window": {
+            "days_available": 27, "days_required": 1066, "status": "DATA_LIMITED"},
+        "verdict": "PROMISING_NEEDS_VALIDATION",
+        "verdict_reason": "NOT VALIDATED_FOR_FORWARD: C3 fails (EVAL eta 3.11y vs 2.92y in "
+                          "sample) and C1 fails on significance (t 1.75 < 2.0). C2 and C4 pass, "
+                          "so this is NOT a selection artefact - the rule reproduces the pick "
+                          "from TRAIN alone, beats a noise argmax at p=0.0075 and ranks best "
+                          "on EVAL too. The edge is real but weaker than discovery suggested, "
+                          "and the 3-year bar is not cleared out of sample.",
+        "declared_departure_from_preregistration": "the prewritten C1-fail branch said I would "
+            "call this a 'selection artefact'; C2, written to adjudicate exactly that, rejects "
+            "the wording. The VERDICT is unchanged under either reading."},
     "mechanisms": MECH,
 }
 with open(os.path.join(ROOT, "RESULTS.json"), "w") as f:

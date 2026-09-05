@@ -2613,6 +2613,86 @@
   },
   "conclusion": "NOT CONTAMINATED. A disjoint placebo matched on hour-of-day and month earns -2.7 bps/day where the real Track A sleeve earns +27.0 (p<0.0025, 400 draws); applying the hour-bar control directly moves the headline composite from +12.95 to +12.73 bps and its ETA from 4.64 to 4.55 years. The roadmap number is unchanged (extra sleeve SR 1.89 vs 1.93)."
  },
+ "selection_out_of_sample_test": {
+  "protocol": "PREREGISTRATION.md ADDENDUM 2026-09-05 (b), written before any result",
+  "question": "does the sleeve-selection rule of BESTOFBREED hold on a period that did not serve to make it?",
+  "train": [
+   "2023-01-02",
+   "2025-02-28"
+  ],
+  "eval": [
+   "2025-03-01",
+   "2026-06-26"
+  ],
+  "rule_S": "argmax SR_ann over the 4 frozen Track A sleeve candidates (_HOURADJ)",
+  "rule_S_pick_on_TRAIN": "A_CONFIDENCE_IC_WF_q80_HOURADJ",
+  "pick_agrees_with_original_post_hoc_choice": true,
+  "train_sr_ann_by_candidate": {
+   "A_EW_APRIORI_q90_HOURADJ": 0.6362969681293982,
+   "A_EW_WALKFORWARD_q90_HOURADJ": 2.0632102991652217,
+   "A_EW_WALKFORWARD_q80_HOURADJ": 1.7411079580703546,
+   "A_CONFIDENCE_IC_WF_q80_HOURADJ": 2.733802763157432
+  },
+  "eval_sr_ann_by_candidate": {
+   "A_EW_APRIORI_q90_HOURADJ": 1.3912578034250003,
+   "A_EW_WALKFORWARD_q90_HOURADJ": 0.0964241997881632,
+   "A_EW_WALKFORWARD_q80_HOURADJ": 1.1429817249212602,
+   "A_CONFIDENCE_IC_WF_q80_HOURADJ": 1.5181043448015767
+  },
+  "C1_selected_sleeve_pays_OOS": {
+   "required": "net_bps>0 and t_declustered>=2.0",
+   "measured_net_bps": 10.020855931687292,
+   "measured_t": 1.7511552300241382,
+   "pass": false
+  },
+  "C2_selection_beats_noise": {
+   "required": "EVAL SR_ann of the picked sleeve > placebo p90",
+   "real": 1.5181043448015767,
+   "placebo_mean": -0.14507263513141314,
+   "placebo_sd": 0.6987604136236168,
+   "placebo_p90": 0.7545431810872143,
+   "placebo_max": 1.7301292020290702,
+   "p_value_one_sided": 0.0075,
+   "pass": true
+  },
+  "C3_three_year_claim_survives": {
+   "required": "basket EVAL eta < 3.0 years",
+   "measured_eta_years": 3.107670424626529,
+   "in_sample_eta_years": 2.92,
+   "pass": false
+  },
+  "C4_clock_mismatch_not_the_edge": {
+   "required": "net_bps retained >= 50% at n_bars>=280",
+   "measured_retained": {
+    "BLO_AMIHUD_30D": 0.9998455741647349,
+    "BLO_MOM_30D": 1.007337217491533,
+    "A_SEL": 1.0,
+    "BASKET_INVVOL_WF": 1.001634228329206,
+    "BASKET_EQUAL_CAPITAL": 1.0024678835679595
+   },
+   "symbol_days_lost": 19,
+   "pass": true
+  },
+  "marginal_contribution_of_track_A_sleeve_SR_ann": {
+   "train": 1.55,
+   "eval": 0.27,
+   "note": "basket SR 3.42->3.18 while the Track B legs alone went 1.87->2.91; the in-sample sub-3-year result was largely a Track A effect that does not replicate"
+  },
+  "power": {
+   "n_eval_days": 486,
+   "eval_sr_ann": 3.1784571118178517,
+   "n_required_days_at_this_SR": 1135.2386309701126,
+   "eval_long_enough": false
+  },
+  "genuinely_untouched_window": {
+   "days_available": 27,
+   "days_required": 1066,
+   "status": "DATA_LIMITED"
+  },
+  "verdict": "PROMISING_NEEDS_VALIDATION",
+  "verdict_reason": "NOT VALIDATED_FOR_FORWARD: C3 fails (EVAL eta 3.11y vs 2.92y in sample) and C1 fails on significance (t 1.75 < 2.0). C2 and C4 pass, so this is NOT a selection artefact - the rule reproduces the pick from TRAIN alone, beats a noise argmax at p=0.0075 and ranks best on EVAL too. The edge is real but weaker than discovery suggested, and the 3-year bar is not cleared out of sample.",
+  "declared_departure_from_preregistration": "the prewritten C1-fail branch said I would call this a 'selection artefact'; C2, written to adjudicate exactly that, rejects the wording. The VERDICT is unchanged under either reading."
+ },
  "mechanisms": [
   {
    "mechanism_id": "A_COMPONENT::n_events_sym_24h",
@@ -12461,6 +12541,260 @@
     "eta_years": 8.65777007625981
    },
    "eta_division_factor": 1.197285424825689
+  },
+  {
+   "mechanism_id": "E1::BESTOFBREED_ruleS::EVAL::INVVOL_WF",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_OUT_OF_SAMPLE",
+   "description": "BESTOFBREED rebuilt with the sleeve RULE-S picked on TRAIN, measured on the disjoint EVAL window 2025-03-01..2026-06-26 only",
+   "n_raw": 491,
+   "n_independent_L1": 491,
+   "n_independent_L2": 491,
+   "n_independent_L3": 17,
+   "gross_bps": null,
+   "net_bps": 15.575817623560992,
+   "net_bps_stress28": 12.20310512598234,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 3.6852078657658,
+   "t_stat_L3_month": 4.043236754429646,
+   "bootstrap_ci95": [
+    8.62732766697769,
+    22.81431433439136
+   ],
+   "year_by_year": {
+    "2025": {
+     "net_bps": 10.391585132307988,
+     "n": 306
+    },
+    "2026": {
+     "net_bps": 24.150818392876765,
+     "n": 185
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 10.391585132307988,
+    "n": 306
+   },
+   "sr_annualised": 3.1784571118178517,
+   "n_required": 1135.0766225948398,
+   "event_rate": 7.000143740117867,
+   "eta_forward_confirmation_years": 3.107670424626529,
+   "eta_forward_confirmation_days": 1135.0766225948398,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "OUT_OF_SAMPLE",
+    "PREREGISTERED_ADDENDUM_2026-09-05b",
+    "WALKFORWARD_WEIGHTS"
+   ]
+  },
+  {
+   "mechanism_id": "E1::B_LEGS_ONLY::EVAL::INVVOL_WF",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_OUT_OF_SAMPLE",
+   "description": "the two Track B long legs alone on the same EVAL window (no Track A sleeve)",
+   "n_raw": 517,
+   "n_independent_L1": 517,
+   "n_independent_L2": 517,
+   "n_independent_L3": 17,
+   "gross_bps": null,
+   "net_bps": 19.652895220262046,
+   "net_bps_stress28": 18.49315696725213,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 3.4663827900593525,
+   "t_stat_L3_month": 4.465225776372155,
+   "bootstrap_ci95": [
+    10.987021844385778,
+    27.96988250981488
+   ],
+   "year_by_year": {
+    "2025": {
+     "net_bps": 14.270726339585217,
+     "n": 306
+    },
+    "2026": {
+     "net_bps": 27.458315492712806,
+     "n": 211
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 14.27072633958522,
+    "n": 306
+   },
+   "sr_annualised": 2.913576064039162,
+   "n_required": 1350.8439108831194,
+   "event_rate": 7.000143740117867,
+   "eta_forward_confirmation_years": 3.6984090647039545,
+   "eta_forward_confirmation_days": 1350.8439108831194,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "OUT_OF_SAMPLE"
+   ]
+  },
+  {
+   "mechanism_id": "E1::SELECTED_SLEEVE::EVAL",
+   "track": "A",
+   "family": "LIQ_CASCADE_EVENT_COMPOSITE_OUT_OF_SAMPLE",
+   "description": "the Track A sleeve RULE-S selected on TRAIN, measured on EVAL alone",
+   "n_raw": 486,
+   "n_independent_L1": 486,
+   "n_independent_L2": 486,
+   "n_independent_L3": 16,
+   "gross_bps": null,
+   "net_bps": 10.020855931687292,
+   "net_bps_stress28": 3.5393744502058126,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 1.7511552300241382,
+   "t_stat_L3_month": 1.6005280810728124,
+   "bootstrap_ci95": [
+    -1.5905147733320026,
+    21.084000392783263
+   ],
+   "year_by_year": {
+    "2025": {
+     "net_bps": 4.887490881260243,
+     "n": 306
+    },
+    "2026": {
+     "net_bps": 18.747576517413275,
+     "n": 180
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 4.887490881260241,
+    "n": 306
+   },
+   "sr_annualised": 1.5181043448015767,
+   "n_required": 4975.705232409875,
+   "event_rate": 7.000143740117867,
+   "eta_forward_confirmation_years": 13.622738487090691,
+   "eta_forward_confirmation_days": 4975.705232409875,
+   "verdict": "WEAK",
+   "flags": [
+    "OUT_OF_SAMPLE"
+   ]
+  },
+  {
+   "mechanism_id": "E2::BASKET_INVVOL_WF::nb250",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_ROBUSTNESS",
+   "description": "BESTOFBREED with the Track B panel filtered at n_bars>=250 of 288",
+   "n_raw": 1160,
+   "n_independent_L1": 1160,
+   "n_independent_L2": 1160,
+   "n_independent_L3": 39,
+   "gross_bps": null,
+   "net_bps": 14.166426993160345,
+   "net_bps_stress28": 10.70871989100724,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.844332520731581,
+   "t_stat_L3_month": 6.147455430742989,
+   "bootstrap_ci95": [
+    9.781505815640516,
+    18.5057027467017
+   ],
+   "year_by_year": {
+    "2023": {
+     "net_bps": 8.880769996640824,
+     "n": 244
+    },
+    "2024": {
+     "net_bps": 16.106956397218042,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 10.693424626908591,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 24.150818392876765,
+     "n": 185
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 12.271952727573128,
+    "n": 975
+   },
+   "sr_annualised": 3.279450162776278,
+   "n_required": 1066.242083991687,
+   "event_rate": 7.000143740117867,
+   "eta_forward_confirmation_years": 2.919211728930012,
+   "eta_forward_confirmation_days": 1066.242083991687,
+   "verdict": "PROMISING_NEEDS_VALIDATION",
+   "flags": [
+    "CLOCK_MISMATCH_ROBUSTNESS",
+    "SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT"
+   ],
+   "verdict_mechanical": "VALIDATED_FOR_FORWARD",
+   "verdict_override_reason": "gate passed (ETA 2.92y) but the sleeve was chosen after seeing the Track A results; a verdict is not allowed to rest on a post-hoc selection. Needs an out-of-sample re-test on a disjoint period before it can be VALIDATED_FOR_FORWARD."
+  },
+  {
+   "mechanism_id": "E2::BASKET_INVVOL_WF::nb280",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_ROBUSTNESS",
+   "description": "BESTOFBREED with the Track B panel filtered at n_bars>=280 of 288",
+   "n_raw": 1160,
+   "n_independent_L1": 1160,
+   "n_independent_L2": 1160,
+   "n_independent_L3": 39,
+   "gross_bps": null,
+   "net_bps": 14.189578169476196,
+   "net_bps_stress28": 10.73232537110924,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.854174368575066,
+   "t_stat_L3_month": 6.156715508039714,
+   "bootstrap_ci95": [
+    9.809553962443008,
+    18.524769089939984
+   ],
+   "year_by_year": {
+    "2023": {
+     "net_bps": 8.991634548962379,
+     "n": 244
+    },
+    "2024": {
+     "net_bps": 16.10104931019484,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 10.696316214607446,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 24.155742598824528,
+     "n": 185
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 12.29856235467677,
+    "n": 975
+   },
+   "sr_annualised": 3.284972752293189,
+   "n_required": 1062.6600344033523,
+   "event_rate": 7.000143740117867,
+   "eta_forward_confirmation_years": 2.909404611645044,
+   "eta_forward_confirmation_days": 1062.6600344033523,
+   "verdict": "PROMISING_NEEDS_VALIDATION",
+   "flags": [
+    "CLOCK_MISMATCH_ROBUSTNESS",
+    "SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT"
+   ],
+   "verdict_mechanical": "VALIDATED_FOR_FORWARD",
+   "verdict_override_reason": "gate passed (ETA 2.92y) but the sleeve was chosen after seeing the Track A results; a verdict is not allowed to rest on a post-hoc selection. Needs an out-of-sample re-test on a disjoint period before it can be VALIDATED_FOR_FORWARD."
   }
  ]
 }

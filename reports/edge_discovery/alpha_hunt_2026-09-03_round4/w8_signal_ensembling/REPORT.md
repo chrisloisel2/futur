@@ -21,7 +21,8 @@ The result is treated as an ETA result, not a bps result.
 | Does the naive equal-weighted composite beat its components? | **Track A yes, Track B no** (§6). On Track B the naive composite is *dead* (ETA 194 y) while its best component is at 8.9 y |
 | Does anything reach `ETA < 3 years`? | **No.** Best parameter-free composite = **4.64 y**; best walk-forward-weighted, selection-flagged variant = **3.02 y** |
 | Is it contaminated by the W9 calendar-day-control bias? | **No** (§9bis, audited 2026-09-05). No day-level control exists anywhere in this worker; a disjoint placebo matched on hour-of-day earns **−2.7 bps/day** where the real sleeve earns +27.0 (p < 0.0025). Applying the hour-bar control anyway moves the headline ETA 4.64 y → **4.55 y** |
-| Is the axis worth continuing? | **Yes, and it is quantified**: the cross-basis correlation is ≈ 0 (median \|ρ\| = **0.035**), so ETA divides cleanly by adding independent sleeves. One more sleeve of `SR_ann ≥ 1.6` takes the project under 3 years |
+| Does the one sub-3-year variant survive an out-of-sample test of its selection? | **No** (§9ter, preregistered). The rule reproduces the pick from TRAIN alone and beats a noise argmax (p = 0.0075), but the basket's ETA is **3.11 y** on the disjoint EVAL window vs 2.92 y in sample. Verdict `PROMISING_NEEDS_VALIDATION`, **not** `VALIDATED_FOR_FORWARD` |
+| Is the axis worth continuing? | **Yes, and it is quantified**: the cross-basis correlation is ≈ 0 (median \|ρ\| = **0.035**), so ETA divides cleanly by adding independent sleeves. One more sleeve of `SR_ann ≥ 1.89` takes the project under 3 years — after §9ter this is the **only** live path, not one option among several |
 
 **Headline verdict of the axis: `PROMISING_NEEDS_VALIDATION`** — the missing gate cell is
 `eta_forward_confirmation`, which stays above 3 years for every composite tested. No composite
@@ -516,6 +517,88 @@ Untested — flagged for whoever validates this composite.
 
 ---
 
+## 9ter. Out-of-sample test of the sleeve SELECTION in `BESTOFBREED` (added 2026-09-05)
+
+`BESTOFBREED_corrected` was the only object in the round to clear the 3-year bar mechanically
+(ETA 2.92 y, SR 3.28, t 5.84), and its Track A sleeve had been chosen **after** I saw the
+Track A results. Protocol frozen in `PREREGISTRATION.md`, **ADDENDUM 2026-09-05 (b)**, written
+before any number below existed: one thing is tested, the **selection**; no parameter moved.
+
+**RULE-S, frozen as applied:** among the four Track A sleeve candidates of the Track C grid
+(`EW_APRIORI_q90`, `EW_WALKFORWARD_q90`, `EW_WALKFORWARD_q80`, `CONFIDENCE_IC_WF_q80`, all
+`_HOURADJ`), take the highest `SR_ann`. **TRAIN = 2023-01-02 → 2025-02-28** (26 months),
+**EVAL = 2025-03-01 → 2026-06-26** (486 days), disjoint. Weights, thresholds, universe, costs
+and the hour-bar control unchanged.
+
+### 9ter.1 The rule reproduces the pick, and ranks correctly out of sample
+
+| Track A candidate (`_HOURADJ`) | `SR_ann` on TRAIN | `SR_ann` on EVAL |
+|---|---|---|
+| `EW_APRIORI_q90` | 0.64 | 1.39 |
+| `EW_WALKFORWARD_q90` | 2.06 | 0.10 |
+| `EW_WALKFORWARD_q80` | 1.74 | 1.14 |
+| **`CONFIDENCE_IC_WF_q80`** | **2.73 ← RULE-S picks this** | **1.52 ← also the best on EVAL** |
+
+RULE-S, seeing only TRAIN, picks **exactly the sleeve I had picked post-hoc**, and that sleeve
+is *also* the best of the four on EVAL. The argmax is reproducible and ranks correctly out of
+sample. That is the strongest thing this test found.
+
+### 9ter.2 The four preregistered conditions
+
+| # | condition | measured | verdict |
+|---|---|---|---|
+| **C1** | selected sleeve pays OOS: `net > 0` **and** `t ≥ 2.0` | EVAL net **+10.02 bps**, stress-28 +3.54, **t = 1.75**, SR 1.52, n = 486 | **FAIL** (on `t`, +0.25 short) |
+| **C2** | selection beats noise: EVAL `SR_ann` > placebo p90 | real **1.52** vs placebo mean −0.15, sd 0.70, **p90 = 0.75**, max 1.73 — **p = 0.0075** (400 draws) | **PASS** |
+| **C3** | 3-year claim survives: basket EVAL `ETA < 3.0 y` | **3.11 y** (net +15.58, stress-28 +12.20, t 3.69, SR 3.18) | **FAIL** (0.11 y short) |
+| **C4** | clock mismatch is not the edge: ≥ 50 % of `net_bps` kept at `n_bars ≥ 280` | **100.2 %** kept | **PASS** |
+
+### 9ter.3 What actually decayed: the attribution, not the basket
+
+| | TRAIN `SR_ann` | EVAL `SR_ann` |
+|---|---|---|
+| full `BESTOFBREED` basket | 3.42 | **3.18** |
+| Track B long legs alone (`AMIHUD30+MOM30`) | 1.87 | **2.91** |
+| **marginal contribution of the Track A sleeve** | **+1.55** | **+0.27** |
+
+The **basket** holds up out of sample (SR 3.42 → 3.18). What does not replicate is the *reason*
+it cleared the bar: in TRAIN the Track A sleeve carried +1.55 of Sharpe, in EVAL it carries
++0.27, while the two Track B legs got *better* on their own (1.87 → 2.91). The in-sample
+sub-3-year result was largely a Track A effect, and that effect is 5× smaller out of sample.
+The sleeve's own Sharpe falls 2.73 → 1.52, a **44 % haircut** — strikingly close to the 50 %
+haircut the project imposes on every discovery, which is a small independent vindication of
+that convention.
+
+### 9ter.4 Power, and what is genuinely untouched
+
+EVAL is **486 days**; at its own measured SR (3.18) the ruler demands **1135 days**. So this
+window can *reject* the sub-3-year claim — which it does — but it could not have *confirmed*
+it at the preregistered power even had everything passed. The only data never used to make the
+choice is the recency extension declared in §1 of the preregistration
+(`cascade_dataset.parquet` to 2026-08-27) intersected with the Track B panel (ends 2026-07-31):
+**≈ 27 days against ≈ 1066 required**. That window is `DATA_LIMITED` and I make no claim on it.
+
+### 9ter.5 Verdict, and one departure from my own prewritten narrative
+
+> **`BESTOFBREED_corrected` is NOT `VALIDATED_FOR_FORWARD`. Verdict: `PROMISING_NEEDS_VALIDATION`.**
+> Reason: **C3 fails — the sub-3-year claim does not survive out of sample (ETA 3.11 y vs 2.92 y
+> in sample)** — and C1 fails on significance (t 1.75). All three preregistered branches that
+> could fire (C1-fail, C3-fail, insufficient power) converge on the same verdict, so the outcome
+> does not depend on which one is read first.
+
+**Departure, declared.** My preregistered C1-fail branch said I would call the result "a
+selection artefact". I am **not** using that wording, because C2 — the test I wrote precisely
+to adjudicate that question — rejects it: the rule's pick beats an argmax over noise at
+p = 0.0075, reproduces the original choice from TRAIN alone, and ranks best on EVAL too. The
+*verdict* is identical under either reading (`PROMISING_NEEDS_VALIDATION`); only the
+explanation changes, and the change is driven by a preregistered measurement rather than by
+the result being disappointing. The honest summary is: **the selection is real, the edge is
+real but weaker than discovery suggested, and the 3-year bar is not cleared out of sample.**
+
+**What would settle it:** 1135 days (3.1 y) of the EVAL-period regime, or an additional
+independent sleeve. The roadmap number from §5.1 is unchanged and is now the *only* live path.
+
+---
+
 ## 10. Verdicts
 
 | mechanism family | best variant | net / net@28 | N_ind L3 | ETA | verdict |
@@ -532,7 +615,8 @@ Untested — flagged for whoever validates this composite.
 | Cross-basis composite, walk-forward risk weights, long-only | same, `INVVOL_WF` | +13.08 / +10.07 | 44 mo | 3.92 y | `UNCONFIRMABLE_IN_HORIZON` |
 | Cross-basis composite, selected sleeves `[REFIT]` | `A_CONF_IC_WF_q80+AMIHUD30+MOM30` | +14.71 / +11.42 | 39 mo | 3.02 y | `UNCONFIRMABLE_IN_HORIZON` |
 | **↳ same, hour-bar controlled (§9bis), param-free** | `A_EW_WF_q90_HOURADJ+AMIHUD30+MOM30` | **+12.73 / +11.89** | **47 mo** | **4.55 y** | **`UNCONFIRMABLE_IN_HORIZON`** |
-| ↳ same, hour-bar controlled, selected sleeves `[REFIT]` | `A_CONF_IC_WF_q80_HOURADJ+…`, `INVVOL_WF` | +14.17 / +13.55 | 39 mo | **2.92 y** | `PROMISING_NEEDS_VALIDATION` (mechanical gate = `VALIDATED_FOR_FORWARD`, **capped**: post-hoc sleeve choice) |
+| ↳ same, hour-bar controlled, selected sleeves `[REFIT]` | `A_CONF_IC_WF_q80_HOURADJ+…`, `INVVOL_WF` | +14.17 / +13.55 | 39 mo | 2.92 y in-sample | `PROMISING_NEEDS_VALIDATION` — **OOS-tested §9ter: ETA 3.11 y on a disjoint EVAL, C3 fails** |
+| ↳ the same basket, measured on the disjoint EVAL window only | 2025-03 → 2026-06, 486 d | +15.58 / +12.20 | 16 mo | **3.11 y** | `UNCONFIRMABLE_IN_HORIZON` |
 | Track B legs alone, no Track A sleeve | `AMIHUD30+MOM30` long legs | +16.76 / +15.43 | 76 mo | 8.39 y | `UNCONFIRMABLE_IN_HORIZON` |
 
 **Axis verdict: `PROMISING_NEEDS_VALIDATION`.** Missing gate cell: `eta_forward_confirmation`.
@@ -541,9 +625,12 @@ strictly positive, stress-28 positive, **every calendar year positive**, no sing
 concentration (`ex_best_year` +11.09 vs +12.73 headline), and the composite survives both a
 random-signal placebo and an hour-of-day-matched disjoint placebo at p < 0.0025 (§9bis). It is
 the closest this project has come to a confirmable alpha, and it is short by a factor of 1.52
-in ETA. **Exactly one variant clears the 3-year bar mechanically (2.92 y) and it is capped at
-`PROMISING_NEEDS_VALIDATION` because its sleeve was chosen post-hoc — re-testing that one
-choice on a disjoint period is the single highest-value follow-up of this worker.**
+in ETA. **The one variant that cleared the 3-year bar in sample (2.92 y) was re-tested on a
+disjoint period (§9ter) and does not hold: ETA 3.11 y out of sample. The selection rule itself
+is sound — it reproduces the pick from TRAIN alone and beats a noise argmax at p = 0.0075 —
+but the Track A sleeve's marginal contribution collapses from +1.55 to +0.27 of Sharpe. Round 4
+therefore ends with `0 VALIDATED_FOR_FORWARD` from this worker, and the roadmap of §5.1 — one
+more independent sleeve of `SR_ann ≥ 1.89` — is the only remaining path.**
 
 ---
 
@@ -554,9 +641,17 @@ choice on a disjoint period is the single highest-value follow-up of this worker
    of 13.5 y, because turnover falls to 3.1 %/day and the cost drag nearly vanishes. The
    registry's weekly convention is costing ~35 % of the ETA.
 3. **Stop hunting for the biggest bps and start hunting for the most *independent* sleeve.**
-   The project needs exactly one more sleeve with `SR_ann ≥ 1.6` at ρ ≈ 0 to break the 3-year
+   The project needs exactly one more sleeve with `SR_ann ≥ 1.89` at ρ ≈ 0 to break the 3-year
    bar. Candidate sources with measured independence from both existing books: the options /
    DVOL family and the Hyperliquid metaorder family (neither is on either basis used here).
+   §9ter closed the alternative path — squeezing the existing sleeves past the bar by choosing
+   the best one does not survive out of sample.
+6. **Note for whoever re-runs §9ter later.** The test rejects on a 486-day EVAL window where
+   1135 days are required; it can reject but not confirm. When ~1100 days of post-2025-03 data
+   exist, re-running `evidence/e1_selection_oos_test.py` unchanged (the split date is a
+   constant) is a one-command re-test — and the Track B legs alone reached `SR_ann` 2.91 on
+   that window, so the composite may clear the bar later for a different reason than it did in
+   sample.
 4. **Do not deploy an equal-weighted composite of the cross-sectional family.** It is measurably
    worse than its best member, and the reason (turnover dilution + inverted signs) is structural.
 5. **Retest the composite of §5 as a portfolio-layer object, not as an alpha.** It is a
@@ -584,7 +679,11 @@ choice on a disjoint period is the single highest-value follow-up of this worker
 * `evidence/d3_placebo_disjoint.py` — the disjoint hour×month placebo (`d3_placebo_disjoint_results.json`).
 * `evidence/d2_hourbar_corrected_composite.py` — hour-bar-controlled composite + re-gate
   (`d2_hourbar_corrected_results.json`).
+* `evidence/e1_selection_oos_test.py` — preregistered TRAIN/EVAL test of RULE-S + placebo
+  (`e1_selection_oos_results.json`).
+* `evidence/e2_nbars_robustness.py` — C4 clock-mismatch robustness
+  (`e2_nbars_robustness_results.json`).
 * `evidence/z_build_results.py` — assembles `RESULTS.json` from the result files.
 
 Re-execution order: `b0` (writes the panel to scratch) → `a1` → `a2` → `b2` → `c0` → `c1` →
-`c2` → `d1` → `d3` → `d2` → `z`. Everything reads `data/`, `data_v2/` and `configs/` read-only.
+`c2` → `d1` → `d3` → `d2` → `e1` → `e2` → `z`. Everything reads `data/`, `data_v2/` and `configs/` read-only.
