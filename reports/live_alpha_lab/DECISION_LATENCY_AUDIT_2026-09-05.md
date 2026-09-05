@@ -86,11 +86,8 @@ Les trois voies honnêtes, par ordre de coût croissant :
 2. **Collecter la vraie source live** — MESURÉ ET VÉRIFIÉ le 2026-09-05, voir §4bis. Binance expose `/futures/data/openInterestHist?period=5m`, qui renvoie exactement `sumOpenInterest` et `sumOpenInterestValue`. Vérification faite : c'est **la même série que l'archive Vision, au bit près**, une fois la convention d'horodatage alignée. Rend la famille exécutable **à spec strictement inchangée**, pour 0,8 Mo/jour.
 3. **Re-figer sur le flux existant.** Accepter `mark_price`, donc de nouveaux `alpha_id`, nouveaux freeze, track record à zéro. Le plus rapide à écrire, mais jette la preuve forward déjà accumulée et rouvre la question de la validation.
 
-**Recommandation : option 2**, parce qu'elle est la seule qui préserve à la fois
-la spec figée et la preuve déjà accumulée — et parce que la mesure du §4bis a
-supprimé la seule objection sérieuse qu'on pouvait lui faire. Elle n'a pas été
-engagée dans cette session : c'est un nouveau service permanent en production,
-la décision revient à l'utilisateur.
+**Option 2 retenue et DÉPLOYÉE** (décision utilisateur du 2026-09-05, commit
+`56031d3`) — voir §6.
 
 ## 4bis. Vérification de l'option 2 (2026-09-05)
 
@@ -142,3 +139,48 @@ série vient d'un autre chemin de collecte.
 - `decision_lag_med_h` et `expired_on_arrival` ajoutés au scoreboard : la mesure est désormais permanente et visible à chaque cycle, plus un constat ponctuel.
 - Angle mort corrigé : `AMIHUD_ILLIQUIDITY_PREMIUM_V1` et `LIQ_CASCADE_REPEAT_SYSTEMIC_V1` étaient absents de `_TIME_COL`/`_SYMBOL_COL` depuis leur déploiement — toutes leurs métriques temporelles sortaient vides, sans erreur. Elles sont maintenant renseignées (67,0 h et 46,0 h d'âge forward).
 - `tests/test_scoreboard_executability.py` : 10 cas verrouillant les deux régressions, dont le fait qu'une latence non mesurable renvoie `None` et jamais `0` (« pas mesuré » ≠ « instantané »).
+
+
+---
+
+## 6. Correctif déployé (2026-09-05, commit `56031d3`)
+
+`scripts/collect_oi_metrics_5m.py` collecte la queue de série depuis les quatre
+endpoints `futures/data`, et `detector.load_metrics` la raccorde derrière
+l'archive Vision. La collecte est l'**étape 0 du cycle** et non un timer séparé,
+pour garantir que les producteurs lisent la série qu'elle vient d'étendre.
+
+**Piège rencontré, à ne pas perdre.** Chaque endpoint a sa propre convention
+d'horodatage : `openInterestHist` et les trois ratios de positionnement sont
+décalés de +5 min par rapport à `create_time`, mais `takerlongshortRatio` est
+déjà aligné. Un décalage uniforme aurait produit une série silencieusement
+fausse — sur l'OI l'erreur médiane serait passée de 0,000000 à 76,2 unités, sur
+le ratio taker de 0,000123 à 0,45. Les décalages sont mesurés (balayage
+−15..+15 min contre l'archive) et verrouillés par un test.
+
+**Priorité à Vision sur le recouvrement.** Une barre déjà servie à un détecteur
+n'est jamais réécrite par une valeur republiée : sinon une décision passée
+cesserait d'être reproductible. Dégradations testées : pas de fichier live,
+parquet tronqué en cours d'écriture, symbole absent → comportement identique à
+l'ancien.
+
+**Effet mesuré.** La série du détecteur passe d'une fin au 2026-09-03 23:55 à une
+fin à ~8 min du présent. `LIQ_CASCADE_REPEAT_V1` a produit 15 événements sur
+2026-09-03..05 qu'il ne voyait pas.
+
+⚠ **Ces 15 décisions portent encore la latence du RATTRAPAGE** (médiane 28,4 h),
+pas celle du régime permanent : ce sont des événements passés que le détecteur
+découvre d'un coup. La latence en régime établi ne se lira que sur les
+événements survenant APRÈS ce déploiement, via les colonnes
+`decision_lag_med_h` / `expired_on_arrival` du scoreboard. Attendu ~15-30 min
+(retard de collecte ~8 min + cadence du cycle 15 min), à confirmer sur données,
+pas à annoncer.
+
+**Couverture : 47/50 symboles.** Les 3 absents (`MKRUSDT`, `PEPEUSDT`,
+`RNDRUSDT`) sont les renommages Binance déjà connus ; l'API renvoie vide et le
+collecteur le signale plutôt que de deviner un mapping de substitution. Ces
+3 symboles gardent donc l'ancien comportement (queue Vision seule).
+
+**Reste ouvert** : `SHORT_COVERING_CONTINUATION_V1` (44 % de décisions périmées,
+lag médian 2,7 h sur un horizon de 4 h) tire sa latence d'une AUTRE source que la
+famille cascade — non diagnostiqué ici.
