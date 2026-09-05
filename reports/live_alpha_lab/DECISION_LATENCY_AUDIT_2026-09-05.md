@@ -83,13 +83,59 @@ raccorder semble évident. Mesuré sur la période de recouvrement (2 784 barres
 Les trois voies honnêtes, par ordre de coût croissant :
 
 1. **Acter le statut.** Ces alphas restent des instruments de preuve de signal, pas des candidats au capital. Coût nul, mais la Validation Factory continuerait d'alimenter une famille non déployable.
-2. **Collecter la vraie source live.** Binance expose `/futures/data/openInterestHist?period=5m`, qui renvoie exactement `sumOpenInterest` et `sumOpenInterestValue` — les deux colonnes dont le détecteur a besoin, à la même granularité et avec la même définition que Vision. Un collecteur dédié supprimerait le décalage sans toucher à la spec figée. C'est la seule option qui rend la famille exécutable **à spec inchangée**. À chiffrer : quota API, volume disque, et une frontière de segment de données à déclarer au basculement.
+2. **Collecter la vraie source live** — MESURÉ ET VÉRIFIÉ le 2026-09-05, voir §4bis. Binance expose `/futures/data/openInterestHist?period=5m`, qui renvoie exactement `sumOpenInterest` et `sumOpenInterestValue`. Vérification faite : c'est **la même série que l'archive Vision, au bit près**, une fois la convention d'horodatage alignée. Rend la famille exécutable **à spec strictement inchangée**, pour 0,8 Mo/jour.
 3. **Re-figer sur le flux existant.** Accepter `mark_price`, donc de nouveaux `alpha_id`, nouveaux freeze, track record à zéro. Le plus rapide à écrire, mais jette la preuve forward déjà accumulée et rouvre la question de la validation.
 
 **Recommandation : option 2**, parce qu'elle est la seule qui préserve à la fois
-la spec figée et la preuve déjà accumulée. Elle n'a pas été engagée dans cette
-session : c'est un nouveau collecteur en production, sur une machine dont le
-disque et la RAM sont déjà contraints — la décision revient à l'utilisateur.
+la spec figée et la preuve déjà accumulée — et parce que la mesure du §4bis a
+supprimé la seule objection sérieuse qu'on pouvait lui faire. Elle n'a pas été
+engagée dans cette session : c'est un nouveau service permanent en production,
+la décision revient à l'utilisateur.
+
+## 4bis. Vérification de l'option 2 (2026-09-05)
+
+Sondage réel de l'endpoint, comparé barre à barre à l'archive Vision.
+
+**Fraîcheur.** Dernier point disponible à **2,2 minutes** du présent, contre 45-48 h
+pour le backfill actuel. `limit=500` couvre 41,7 h d'historique en un appel de
+258 ms : un seul appel par symbole comble tout l'écart, sans logique de rattrapage.
+
+**Convention d'horodatage — le piège.** Comparés à horodatage brut, les deux
+sources semblent diverger (OI médiane 6,7 bps, prix implicite médiane 9,9 bps) —
+un écart du même ordre que `mark_price`, qui aurait conduit à rejeter l'option à
+tort. En réalité les deux conventions diffèrent d'une barre : `create_time` de
+Vision correspond à `timestamp` de l'API **moins 5 minutes**. Balayage de
+décalages de −15 à +15 min : l'écart s'annule exactement et uniquement à −5 min.
+
+| décalage | n | écart OI médian | valeurs identiques |
+|---|---|---|---|
+| −10 min | 134 | 6,70 bps | 0,0 % |
+| **−5 min** | **133** | **0,0000 bps** | **100 %** |
+| 0 min | 132 | 6,70 bps | 0,0 % |
+| +5 min | 131 | 12,15 bps | 0,0 % |
+
+**Identité, sur 8 symboles de l'univers figé** (BTC, ETH, FIL, OP, ARB, ICP, SEI,
+AAVE, 133 barres chacun) : `sumOpenInterest` identique à **100 % partout**.
+`sumOpenInterestValue` diffère sur 13 à 23 % des barres, mais d'un écart relatif
+de **1,2e−16 à 2,2e−16** — l'epsilon du float64, c'est-à-dire l'arrondi de parsing
+de la chaîne, pas une différence de donnée. Conséquence sur le champ qui compte,
+le prix implicite `OIV/OI` du déclencheur figé : **écart médian 0,000000 bps,
+écart maximum 0,000000 bps**.
+
+**Coûts.** ~0,8 Mo/jour pour 50 symboles (288 barres × 50 × ~60 o), soit ~0,3 Go/an
+— à comparer aux 0,89 Go/**jour** du collecteur microstructure. 50 appels par cycle
+de 15 min, ~4 800/jour.
+
+**Portée.** L'endpoint ne retient que ~30 jours : il ne REMPLACE pas Vision pour
+l'historique, il en complète la queue. L'architecture visée est donc un loader qui
+concatène Vision (historique) et cet endpoint (les derniers jours), dédupliqué sur
+`create_time` — et non une substitution de source. Comme les deux séries sont
+identiques sur le recouvrement, la jointure ne crée aucune discontinuité.
+
+**Ce qu'il reste à décider** : c'est un service permanent de plus, et le
+basculement de la source d'alphas FIGÉS mérite une frontière de segment de données
+déclarée, même à identité prouvée — pour qu'un lecteur futur sache que la queue de
+série vient d'un autre chemin de collecte.
 
 ## 5. Ce qui a été fait
 
