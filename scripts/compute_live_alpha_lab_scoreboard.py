@@ -47,6 +47,11 @@ _TIME_COL = {
     "FUNDING_BASIS_DISAGREEMENT_V1": "date", "FUNDING_BASIS_DISAGREEMENT_V2": "date",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time", "VOL_FORECAST_LAYER_V1": "event_time",
+    # Ajoutés 2026-09-05 : absents de cette table depuis leur déploiement, donc
+    # forward_age/last_trigger/actual_freq sortaient VIDES pour eux -- un angle
+    # mort de monitoring sur précisément les deux alphas issus de la validation.
+    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "event_time",
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "event_time",
 }
 # colonne "symbole" par alpha -- pas toujours `symbol` (SHORT_COVERING utilise
 # `asset`, hérité du schéma Opportunity). Jamais deviné, mappé explicitement.
@@ -57,6 +62,7 @@ _SYMBOL_COL = {
     "FUNDING_BASIS_DISAGREEMENT_V1": "symbol", "FUNDING_BASIS_DISAGREEMENT_V2": "symbol",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "symbol",
     "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "symbol", "VOL_FORECAST_LAYER_V1": None,  # univers=BTC seul, pas de decluster multi-symbole
+    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "symbol", "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "symbol",
 }
 
 # item 15 : niveaux de confiance basés sur le NOMBRE d'épisodes indépendants,
@@ -64,6 +70,51 @@ _SYMBOL_COL = {
 _CONFIDENCE_THRESHOLDS = [
     (0, "TOO_EARLY"), (5, "EARLY"), (20, "DEVELOPING"), (50, "MEANINGFUL"), (100, "STRONG"),
 ]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LATENCE DE DÉCISION (ajouté 2026-09-05)
+# ═══════════════════════════════════════════════════════════════════════════
+# Un alpha peut produire des décisions forward impeccables et rester totalement
+# INEXÉCUTABLE si le lab découvre l'événement après l'expiration de son propre
+# horizon de détention. Mesuré ce jour : la famille cascade de liquidation
+# apprend ses événements 45 à 48h après coup pour un horizon de 4h -- 100% des
+# décisions arrivent périmées. `forward_decisions` seul ne le montre PAS : le
+# compteur monte, la confiance monte, et rien n'est traçable comme trade.
+#
+# D'où ces deux colonnes, calculées sur `decided_at - <colonne temps événement>` :
+#   decision_lag_median_h : à quelle distance de l'événement le lab décide
+#   expired_on_arrival    : combien de décisions arrivent déjà au-delà de leur
+#                           horizon (donc capital impossible à engager)
+# C'est une mesure d'EXÉCUTABILITÉ, pas de validité du signal -- les deux sont
+# volontairement séparées, comme scientific_status l'est d'operational_status.
+_HORIZON_HOURS = {
+    "fwd_4h": 4.0, "fwd_24h": 24.0, "24h": 24.0, "fwd_7d": 168.0, "k30d": 720.0,
+}
+
+
+def decision_latency(df, time_col: str, horizon: str) -> tuple:
+    """(lag médian en heures, "n_périmées/total") sur les décisions FORWARD_LIVE.
+
+    Renvoie (None, None) si la mesure n'est pas possible -- jamais une valeur
+    par défaut optimiste : une latence inconnue ne doit pas se lire comme nulle.
+    """
+    if df is None or "provenance" not in df.columns or "decided_at" not in df.columns:
+        return None, None
+    if time_col is None or time_col not in df.columns:
+        return None, None
+    fwd = df[df["provenance"] == "FORWARD_LIVE"]
+    if fwd.empty:
+        return None, None
+    lag_h = (pd.to_datetime(fwd["decided_at"], utc=True, errors="coerce")
+             - pd.to_datetime(fwd[time_col], utc=True, errors="coerce")
+             ).dt.total_seconds() / 3600.0
+    lag_h = lag_h.dropna()
+    if lag_h.empty:
+        return None, None
+    horizon_h = _HORIZON_HOURS.get(horizon)
+    expired = f"{int((lag_h > horizon_h).sum())}/{len(lag_h)}" if horizon_h else "horizon_inconnu"
+    return round(float(lag_h.median()), 1), expired
 
 
 def confidence_level(n_independent_episodes: int) -> str:
@@ -105,6 +156,8 @@ def row_for(entry: dict) -> dict:
                     actual_freq_per_day = round(forward / (forward_age_hours / 24), 3)
     elif df is not None:
         replay = len(df)   # pas encore tagué -- traité comme tout-replay par prudence (fail closed)
+    lag_median_h, expired_on_arrival = decision_latency(
+        df, _TIME_COL.get(alpha_id), entry.get("horizon"))
     return {
         "alpha_id": alpha_id,
         "family": entry.get("family"),
@@ -121,6 +174,8 @@ def row_for(entry: dict) -> dict:
         "forward_trades": 0,
         "forward_independent_episodes": independent_episodes,
         "confidence_level": confidence_level(independent_episodes),
+        "decision_lag_median_h": lag_median_h,
+        "expired_on_arrival": expired_on_arrival,
         # ⚠ PF / net_bps / maxDD / edge_retention nécessitent un LABEL de résultat
         # forward par décision (comme le backfill actual_realized_rv de
         # VOL_FORECAST_LAYER_V1) -- PAS ENCORE CONSTRUIT pour les alphas de
@@ -145,8 +200,12 @@ def main() -> int:
         "`forward_decisions` (event_time > freeze_timestamp) compte comme preuve jamais-vue ;",
         "`replay_decisions` est du backfill historique, pas une preuve forward.",
         "",
-        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | actual_freq/day | risk_bucket |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "⚠ `decision_lag_med_h` / `expired_on_arrival` mesurent l'EXÉCUTABILITÉ, pas la validité :",
+        "un alpha dont le lab découvre les événements après l'expiration de son propre horizon",
+        "accumule des décisions forward correctes mais ne pourra JAMAIS engager de capital.",
+        "",
+        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | actual_freq/day | decision_lag_med_h | expired_on_arrival | risk_bucket |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in sorted(rows, key=lambda r: (r["scientific_status"], r["alpha_id"])):
         lines.append(
@@ -155,7 +214,8 @@ def main() -> int:
             f"{r['replay_decisions']} | **{r['forward_decisions']}** | "
             f"{r['forward_independent_episodes']} | {r['confidence_level']} | "
             f"{r['forward_age_hours']} | {r['time_since_last_trigger_hours']} | "
-            f"{r['actual_freq_per_day']} | {r['risk_bucket']} |"
+            f"{r['actual_freq_per_day']} | {r['decision_lag_median_h']} | "
+            f"{r['expired_on_arrival']} | {r['risk_bucket']} |"
         )
 
     total_forward = sum(r["forward_decisions"] for r in rows)
@@ -169,6 +229,16 @@ def main() -> int:
         "de position (nécessite un label de résultat forward par décision, comme le backfill",
         "`actual_realized_rv` de VOL_FORECAST_LAYER_V1 mais pour chaque alpha directionnel —",
         "pas encore construit, prochaine étape logique une fois plus de forward accumulé).",
+        "",
+        "⚠ **EXÉCUTABILITÉ — constat du 2026-09-05.** La famille cascade de liquidation",
+        "(`LIQ_CASCADE_REPEAT_V1`, `LIQ_CASCADE_REPEAT_SYSTEMIC_V1`, `LIQ_CASCADE_FAR_FROM_LOW_V1`,",
+        "`BTC_LEAD_ALT_CASCADE_V1`) lit `data/derivatives_backfill/binance_vision_metrics/`, un",
+        "backfill d'archives quotidiennes Binance Vision structurellement en retard de 1 à 2 jours.",
+        "Mesuré : **100% de ses décisions forward arrivent 45-48h après l'événement, pour un",
+        "horizon de 4h** — elles sont périmées à l'arrivée et ne peuvent pas recevoir de capital.",
+        "Ce n'est pas un creux de marché, c'est une impossibilité d'architecture. Ces alphas",
+        "accumulent une preuve de SIGNAL valable, pas une preuve de STRATÉGIE exécutable.",
+        "Détail et options de correction : `reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md`.",
         "",
         "**0 signal pendant quelques heures n'est PAS un problème** — les cascades de liquidation,",
         "le funding-basis (~15-18/an/actif) et le screen positioning sont des mécanismes rares par",
