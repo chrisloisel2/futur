@@ -20,6 +20,7 @@ The result is treated as an ETA result, not a bps result.
 | Correlation matrix on a common base, never produced before | **Delivered** (§1): Track A 25×25, Track B 14×14, and the cross-basis matrix |
 | Does the naive equal-weighted composite beat its components? | **Track A yes, Track B no** (§6). On Track B the naive composite is *dead* (ETA 194 y) while its best component is at 8.9 y |
 | Does anything reach `ETA < 3 years`? | **No.** Best parameter-free composite = **4.64 y**; best walk-forward-weighted, selection-flagged variant = **3.02 y** |
+| Is it contaminated by the W9 calendar-day-control bias? | **No** (§9bis, audited 2026-09-05). No day-level control exists anywhere in this worker; a disjoint placebo matched on hour-of-day earns **−2.7 bps/day** where the real sleeve earns +27.0 (p < 0.0025). Applying the hour-bar control anyway moves the headline ETA 4.64 y → **4.55 y** |
 | Is the axis worth continuing? | **Yes, and it is quantified**: the cross-basis correlation is ≈ 0 (median \|ρ\| = **0.035**), so ETA divides cleanly by adding independent sleeves. One more sleeve of `SR_ann ≥ 1.6` takes the project under 3 years |
 
 **Headline verdict of the axis: `PROMISING_NEEDS_VALIDATION`** — the missing gate cell is
@@ -300,7 +301,8 @@ project that forbids standalone directional shorts.
 
 `ETA < 3 y ⟺ SR_ann > 3.24`. The parameter-free composite sits at **2.60**; the
 walk-forward-weighted at **2.83**. With cross-basis ρ ≈ 0, one additional independent sleeve
-of `SR_ann = √(3.24² − 2.60²) = 1.93` (parameter-free) or **1.58** (walk-forward-weighted)
+of `SR_ann = √(3.24² − 2.60²) = 1.93` (parameter-free) or **1.58** (walk-forward-weighted) —
+**1.89 / 1.88 after the hour-bar control of §9bis**
 takes the project **under the 3-year bar**. That is one more AMIHUD-class alpha — not ten.
 **This is the most useful output of this worker**: the ETA bottleneck is now a countable
 distance, not a wall.
@@ -424,6 +426,96 @@ proposals for the coordinator, not edits):
 
 ---
 
+## 9bis. Audit: exposure to the W9 calendar-day-control bias (added 2026-09-05)
+
+W9 found that judging **intraday** observations against a **calendar-day** mean does not
+remove the market factor when the events cluster in particular hours, and that the bias
+*inflates*: on his axis a random signal earned +79.3 bps where the real one earned +82.4, and
+controlling at the hour bar took his mechanism from +42.8 bps (t 8.5) to −4.7 bps (t −0.83).
+Since this worker's composite is the round's only surviving positive result, I audited it.
+
+### 9bis.1 Structural exposure: which of my three sleeves could be affected
+
+| sleeve | observation unit | control used | exposed? |
+|---|---|---|---|
+| Track A (`A_EW_WF_q90`, `A_CONFIDENCE_IC_WF_q80`) | **intraday event**, LONG 4 h from `event_time` | **none at the day level** — the benchmark is the *global unconditional mean* of the same evaluable window (reported throughout as `excess_vs_population_bps`, ≈ net + 0.5 bps) | the exact W9 bias: **no**. A related timing risk: **yes, tested below** |
+| Track B long legs (`BLO_AMIHUD_30D`, `BLO_MOM_30D`) | **calendar-day** bar (close → close) | same-day **cross-section** of the eligible universe, **identical clock interval for every symbol** | **no**, by construction: a random score has an exactly zero expected excess |
+| Track C composite | daily | none beyond the above | inherits Track A's exposure on 1/3 of the capital |
+
+So the mechanism W9 describes — an intraday population judged against a day-level average —
+**does not occur anywhere in this worker**. Track A never subtracts a day mean; Track B's
+control is contemporaneous and clock-matched. But Track A *does* select events at particular
+hours (`ASIA_SESSION` is one of its 25 signals), so the adjacent question is legitimate: **is
+the edge just a hour-of-day drift effect?** That is testable, and I tested it rather than
+arguing it.
+
+### 9bis.2 Three placebos (400 draws each, `evidence/d1_*.py`, `d3_*.py`)
+
+| placebo | what it holds fixed | `A_EW_WF_q90` real = **+26.99 bps/day** | `A_CONFIDENCE_IC_WF_q80` real = **+33.35** |
+|---|---|---|---|
+| **P1** random signal, same population, same causal threshold, same declustering | nothing | **−1.13** (sd 3.59, max +11.11), p < 0.0025 | **+0.54** (sd 3.67, max +12.29), p < 0.0025 |
+| **P3** random events **matched on hour-of-day × month**, drawn **disjointly** from the real selection | the exact timing footprint | **−2.69** (sd 3.70, max +8.09), p < 0.0025 | **−2.87** (sd 3.47, max +8.82), p < 0.0025 |
+| P2 *(discarded, see below)* | same, but drawn from the whole cell | +7.33 | +7.60 |
+
+**P1 is the direct analogue of W9's test and it is the answer to the coordinator's question:
+a random signal on my population earns −1.1 bps/day where mine earns +27.0.** W9's placebo
+captured ~96 % of his edge; mine captures **0 %**. P3 is the harsher test — random events with
+*exactly* the composite's hour-of-day and month footprint — and it earns **negative**: the
+timing footprint is, if anything, a slight headwind, not the source of the edge. The real
+statistic sits ~8 σ beyond the placebo mean and far outside its maximum over 400 draws.
+
+**On P2, which I first ran and then discarded — reported because it briefly looked alarming.**
+P2 matched the hour × month histogram but drew from the *whole* cell. It appeared to reproduce
+23–27 % of the edge. Diagnosis: the (hour × month) cells are small (median 25 events, 5th
+percentile 6), so the "placebo" was partly redrawing the real signal's own episodes — measured
+expected overlap **34 %**. Re-drawn disjointly (P3), it collapses to −2.7. P2 was a flawed
+instrument, not a finding; both JSONs stay in `evidence/` so the correction is auditable.
+
+### 9bis.3 Applying the W9 fix anyway: control at the hour bar
+
+Independently of the placebos, I applied W9's own correction — demean every selected episode
+by the mean net return of its **(hour_utc × calendar-month)** cell over the whole evaluable
+population — and re-ran the full gate (`evidence/d2_hourbar_corrected_composite.py`).
+
+| basket | net14 | net@28 | t_dcl | t_L3 | CI95 | ex-best-yr | SR_ann | ETA | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| **HEADLINE, hour-bar controlled, param-free** | **+12.73** | **+11.89** | **5.19** | **6.11** | [+8.72, +17.03] | +11.09 | **2.63** | **4.55 y** | `UNCONFIRMABLE_IN_HORIZON` |
+| HEADLINE, hour-bar controlled, `INVVOL_WF` | +11.69 | +11.02 | 4.99 | 5.98 | [+7.95, +15.81] | +10.44 | 2.64 | 4.52 y | `UNCONFIRMABLE_IN_HORIZON` |
+| Track B legs only, **no Track A sleeve at all** | +16.76 | +15.43 | 4.85 | 4.73 | [+9.95, +24.26] | +12.89 | 1.93 | 8.39 y | `UNCONFIRMABLE_IN_HORIZON` |
+| `BESTOFBREED` corrected, `INVVOL_WF` **[REFIT]** | +14.17 | +13.55 | 5.84 | 6.15 | [+9.78, +18.51] | +12.27 | 3.28 | **2.92 y** | **`PROMISING_NEEDS_VALIDATION`** ✱ |
+
+✱ this last row passes the mechanical gate (ETA < 3 y, stress-28 positive, no year
+concentration) and is the *only* entry in `RESULTS.json` that does. **Its verdict is
+deliberately capped below `VALIDATED_FOR_FORWARD`** because its Track A sleeve was chosen
+after seeing the Track A results — a verdict is not allowed to rest on a post-hoc selection
+(§9). `RESULTS.json` records both `verdict_mechanical` and the override reason. It needs an
+out-of-sample re-test on a disjoint period before anyone may call it validated.
+
+Sleeve-level effect of the correction: `A_EW_WF_q90` +26.99 → +25.58 bps/active-day
+(−5.2 %), `A_CONFIDENCE_IC_WF_q80` +33.35 → +28.65 (−14.1 %). The composite's `net_bps` falls
+by 1.7 % while its `SR_ann` *rises* slightly (2.60 → 2.63) because the control also removes a
+common variance component. Caveat on this control: the cell means are noisy (median cell 25
+events, sd 107 bps) and contain the selected episodes themselves, so it is a rough instrument.
+**The disjoint placebo (P3) is the cleaner evidence; the hour-bar control is a corroborating
+second opinion, and both point the same way.**
+
+### 9bis.4 Verdict of the audit
+
+**NOT CONTAMINATED.** The headline moves from **4.64 y to 4.55 y** under the hour-bar control
+— a 2 % change, in the *favourable* direction on ETA. The roadmap number the coordinator
+transmitted is essentially unchanged: the extra sleeve needed to break the 3-year bar goes
+from `SR_ann ≥ 1.93` to **`SR_ann ≥ 1.89`** (equal capital) / **1.88** (walk-forward weights).
+Two thirds of the composite's capital sits in Track B legs that are immune by construction,
+and the Track A third survives both placebos with p < 0.0025.
+
+One honest residual, unrelated to W9 and not corrected here: Track B's daily bars are built
+with `n_bars ≥ 250` out of 288, so a symbol's "close" can be up to ~13 % of a day early. That
+is a timing mismatch across the cross-section, and it could correlate with the liquidity
+signals (illiquid names have more gaps). It would affect `AMIHUD_30D` more than the others.
+Untested — flagged for whoever validates this composite.
+
+---
+
 ## 10. Verdicts
 
 | mechanism family | best variant | net / net@28 | N_ind L3 | ETA | verdict |
@@ -439,12 +531,19 @@ proposals for the coordinator, not edits):
 | **Cross-basis composite, parameter-free, long-only** | `A_EW_WF_q90+AMIHUD30+MOM30` | **+12.95 / +9.97** | **47 mo** | **4.64 y** | **`UNCONFIRMABLE_IN_HORIZON`** |
 | Cross-basis composite, walk-forward risk weights, long-only | same, `INVVOL_WF` | +13.08 / +10.07 | 44 mo | 3.92 y | `UNCONFIRMABLE_IN_HORIZON` |
 | Cross-basis composite, selected sleeves `[REFIT]` | `A_CONF_IC_WF_q80+AMIHUD30+MOM30` | +14.71 / +11.42 | 39 mo | 3.02 y | `UNCONFIRMABLE_IN_HORIZON` |
+| **↳ same, hour-bar controlled (§9bis), param-free** | `A_EW_WF_q90_HOURADJ+AMIHUD30+MOM30` | **+12.73 / +11.89** | **47 mo** | **4.55 y** | **`UNCONFIRMABLE_IN_HORIZON`** |
+| ↳ same, hour-bar controlled, selected sleeves `[REFIT]` | `A_CONF_IC_WF_q80_HOURADJ+…`, `INVVOL_WF` | +14.17 / +13.55 | 39 mo | **2.92 y** | `PROMISING_NEEDS_VALIDATION` (mechanical gate = `VALIDATED_FOR_FORWARD`, **capped**: post-hoc sleeve choice) |
+| Track B legs alone, no Track A sleeve | `AMIHUD30+MOM30` long legs | +16.76 / +15.43 | 76 mo | 8.39 y | `UNCONFIRMABLE_IN_HORIZON` |
 
 **Axis verdict: `PROMISING_NEEDS_VALIDATION`.** Missing gate cell: `eta_forward_confirmation`.
-Everything else passes — declustered `t` up to 5.4, month-level `t` up to 5.8, bootstrap CI
+Everything else passes — declustered `t` up to 5.8, month-level `t` up to 6.1, bootstrap CI
 strictly positive, stress-28 positive, **every calendar year positive**, no single-year
-concentration (`ex_best_year` +11.4 vs +12.95 headline). It is the closest this project has
-come to a confirmable alpha, and it is short by a factor of 1.55 in ETA.
+concentration (`ex_best_year` +11.09 vs +12.73 headline), and the composite survives both a
+random-signal placebo and an hour-of-day-matched disjoint placebo at p < 0.0025 (§9bis). It is
+the closest this project has come to a confirmable alpha, and it is short by a factor of 1.52
+in ETA. **Exactly one variant clears the 3-year bar mechanically (2.92 y) and it is capped at
+`PROMISING_NEEDS_VALIDATION` because its sleeve was chosen post-hoc — re-testing that one
+choice on a disjoint period is the single highest-value follow-up of this worker.**
 
 ---
 
@@ -481,7 +580,11 @@ come to a confirmable alpha, and it is short by a factor of 1.55 in ETA.
   (`c1_track_c_results.json`).
 * `evidence/c2_longonly_legs.py` — long legs alone + the policy-compliant baskets
   (`c2_longonly_results.json`).
-* `evidence/z_build_results.py` — assembles `RESULTS.json` from the four result files.
+* `evidence/d1_placebo_hour_stratified.py` — placebos P1/P2 (`d1_placebo_results.json`; P2 discarded, see §9bis.2).
+* `evidence/d3_placebo_disjoint.py` — the disjoint hour×month placebo (`d3_placebo_disjoint_results.json`).
+* `evidence/d2_hourbar_corrected_composite.py` — hour-bar-controlled composite + re-gate
+  (`d2_hourbar_corrected_results.json`).
+* `evidence/z_build_results.py` — assembles `RESULTS.json` from the result files.
 
 Re-execution order: `b0` (writes the panel to scratch) → `a1` → `a2` → `b2` → `c0` → `c1` →
-`c2` → `z`. Everything reads `data/`, `data_v2/` and `configs/` read-only.
+`c2` → `d1` → `d3` → `d2` → `z`. Everything reads `data/`, `data_v2/` and `configs/` read-only.

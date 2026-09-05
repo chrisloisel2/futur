@@ -2552,6 +2552,67 @@
    "ASIA_SESSION": "NO_EDGE_EITHER_WAY"
   }
  },
+ "w9_bias_audit": {
+  "question": "does a calendar-day-level control applied to intraday observations inflate this worker's result, as W9 found on his axis?",
+  "exposure": "NONE by design. Track A uses no day-level control at all (its benchmark is the global unconditional mean of the same evaluable window, reported as excess_vs_population_bps). Track B legs are close-to-close daily returns judged against the SAME-DAY cross-section over an identical clock interval for every symbol, so a random score has exactly zero expected excess by construction.",
+  "placebo_random_signal_same_population": {
+   "EW_WALKFORWARD": {
+    "real_day_net_bps": 26.991039053740284,
+    "placebo_day_net_bps": -1.127740412188754,
+    "p_value_one_sided": 0.0
+   },
+   "CONFIDENCE_IC_WF": {
+    "real_day_net_bps": 33.34705647343137,
+    "placebo_day_net_bps": 0.5409400975933056,
+    "p_value_one_sided": 0.0
+   }
+  },
+  "placebo_hour_x_month_matched_DISJOINT": {
+   "EW_WALKFORWARD": {
+    "real_day_net_bps": 26.991039053740284,
+    "placebo_day_net_bps": -2.686369945700788,
+    "placebo_max_over_400_draws": 8.08787202937769,
+    "share_of_real_edge_explained": -0.09952821528478815,
+    "p_value_one_sided": 0.0
+   },
+   "CONFIDENCE_IC_WF": {
+    "real_day_net_bps": 33.34705647343137,
+    "placebo_day_net_bps": -2.874308381295443,
+    "placebo_max_over_400_draws": 8.820638989742461,
+    "share_of_real_edge_explained": -0.0861937659650858,
+    "p_value_one_sided": 0.0
+   }
+  },
+  "discarded_first_attempt": {
+   "what": "d1 placebo P2 drew from the WHOLE (hour x month) cell and appeared to reproduce 23-27% of the edge",
+   "why_discarded": "measured expected overlap with the real selection = 34% (cells are small: median 25 events) - it was partly redrawing the real signal's own episodes. Superseded by the disjoint placebo in d3.",
+   "kept_in_evidence": "d1_placebo_results.json"
+  },
+  "hourbar_controlled_headline": {
+   "sleeve_diagnostic": {
+    "A_EW_WALKFORWARD_q90": {
+     "raw_day_net_bps": 26.991039053740284,
+     "hourbar_adjusted_day_net_bps": 25.58253712248121,
+     "removed_bps": 1.4085019312590745,
+     "removed_share": 0.05218405739974252,
+     "n_active_days": 655
+    },
+    "A_CONFIDENCE_IC_WF_q80": {
+     "raw_day_net_bps": 33.34705647343137,
+     "hourbar_adjusted_day_net_bps": 28.645900171798214,
+     "removed_bps": 4.701156301633159,
+     "removed_share": 0.1409766497795305,
+     "n_active_days": 603
+    }
+   },
+   "roadmap_after_correction": {
+    "sr_needed_for_eta_3y": 3.2353,
+    "extra_sleeve_sr_needed_equal_capital": 1.8905414560659237,
+    "extra_sleeve_sr_needed_invvol_wf": 1.8762740691414284
+   }
+  },
+  "conclusion": "NOT CONTAMINATED. A disjoint placebo matched on hour-of-day and month earns -2.7 bps/day where the real Track A sleeve earns +27.0 (p<0.0025, 400 draws); applying the hour-bar control directly moves the headline composite from +12.95 to +12.73 bps and its ETA from 4.64 to 4.55 years. The roadmap number is unchanged (extra sleeve SR 1.89 vs 1.93)."
+ },
  "mechanisms": [
   {
    "mechanism_id": "A_COMPONENT::n_events_sym_24h",
@@ -11966,6 +12027,440 @@
     "eta_years": 5.971779176798369
    },
    "eta_division_factor": 1.9778869310944447
+  },
+  {
+   "mechanism_id": "D2::HEADLINE_corrected::EQUAL_CAPITAL",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['A_EW_WALKFORWARD_q90_HOURADJ', 'BLO_AMIHUD_30D', 'BLO_MOM_30D'], EQUAL_CAPITAL, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 1429,
+   "n_independent_L1": 1429,
+   "n_independent_L2": 1429,
+   "n_independent_L3": 47,
+   "gross_bps": null,
+   "net_bps": 12.73498607565916,
+   "net_bps_stress28": 11.89141550744232,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.191271372781516,
+   "t_stat_L3_month": 6.107998414733996,
+   "bootstrap_ci95": [
+    8.724232706315593,
+    17.026648982060436
+   ],
+   "year_by_year": {
+    "2022": {
+     "net_bps": 19.358318554697245,
+     "n": 153
+    },
+    "2023": {
+     "net_bps": 8.56048490750717,
+     "n": 365
+    },
+    "2024": {
+     "net_bps": 11.40461217972938,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 9.826187224912557,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 24.173605428522816,
+     "n": 180
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 11.086506104870162,
+    "n": 1249
+   },
+   "sr_annualised": 2.625455978091451,
+   "n_required": 1664.7630599353613,
+   "event_rate": 7.005045801560526,
+   "eta_forward_confirmation_years": 4.5546832999008915,
+   "eta_forward_confirmation_days": 1663.5980752888006,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "PARAMETER_FREE"
+   ],
+   "pairwise_rho": {
+    "A_EW_WALKFORWARD_q90_HOURADJ~BLO_AMIHUD_30D": 0.01674777318953879,
+    "A_EW_WALKFORWARD_q90_HOURADJ~BLO_MOM_30D": -0.03434644507444802,
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.04854460739732176
+   },
+   "best_single_sleeve_same_window": {
+    "label": "BLO_AMIHUD_30D",
+    "sr_annualised": 1.8630428742675964,
+    "eta_years": 9.045279000906335
+   },
+   "eta_division_factor": 1.985929296358137
+  },
+  {
+   "mechanism_id": "D2::HEADLINE_corrected::INVVOL_WF",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['A_EW_WALKFORWARD_q90_HOURADJ', 'BLO_AMIHUD_30D', 'BLO_MOM_30D'], INVVOL_WF, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 1309,
+   "n_independent_L1": 1309,
+   "n_independent_L2": 1309,
+   "n_independent_L3": 44,
+   "gross_bps": null,
+   "net_bps": 11.690484006280336,
+   "net_bps_stress28": 11.017611730717295,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 4.987855934259811,
+   "t_stat_L3_month": 5.984306758531083,
+   "bootstrap_ci95": [
+    7.95405399836052,
+    15.80549808254507
+   ],
+   "year_by_year": {
+    "2022": {
+     "net_bps": 11.150089073940501,
+     "n": 33
+    },
+    "2023": {
+     "net_bps": 9.760332397689712,
+     "n": 365
+    },
+    "2024": {
+     "net_bps": 12.804721785765226,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 8.684501559541662,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 19.53332253778555,
+     "n": 180
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 10.440075737306964,
+    "n": 1129
+   },
+   "sr_annualised": 2.635671016547298,
+   "n_required": 1651.883861936311,
+   "event_rate": 7.005045801560526,
+   "eta_forward_confirmation_years": 4.51944665304457,
+   "eta_forward_confirmation_days": 1650.7278900245292,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "WALKFORWARD_WEIGHTS"
+   ],
+   "pairwise_rho": {
+    "A_EW_WALKFORWARD_q90_HOURADJ~BLO_AMIHUD_30D": 0.01674777318953879,
+    "A_EW_WALKFORWARD_q90_HOURADJ~BLO_MOM_30D": -0.03434644507444802,
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.04854460739732176
+   },
+   "best_single_sleeve_same_window": {
+    "label": "BLO_AMIHUD_30D",
+    "sr_annualised": 1.8630428742675964,
+    "eta_years": 9.045279000906335
+   },
+   "eta_division_factor": 2.001412937314548
+  },
+  {
+   "mechanism_id": "D2::BESTOFBREED_corrected_REFIT::EQUAL_CAPITAL",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['A_CONFIDENCE_IC_WF_q80_HOURADJ', 'BLO_AMIHUD_30D', 'BLO_MOM_30D'], EQUAL_CAPITAL, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 1280,
+   "n_independent_L1": 1280,
+   "n_independent_L2": 1280,
+   "n_independent_L3": 43,
+   "gross_bps": null,
+   "net_bps": 13.545555015959673,
+   "net_bps_stress28": 12.699263097902502,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.263481827354892,
+   "t_stat_L3_month": 5.406781574687828,
+   "bootstrap_ci95": [
+    8.904685817690353,
+    18.465191149294856
+   ],
+   "year_by_year": {
+    "2023": {
+     "net_bps": 7.580412813574984,
+     "n": 364
+    },
+    "2024": {
+     "net_bps": 13.598237264867494,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 12.114533545691772,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 28.001516611719392,
+     "n": 185
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 11.103223604803922,
+    "n": 1095
+   },
+   "sr_annualised": 2.812761881593207,
+   "n_required": 1450.545580038462,
+   "event_rate": 7.005616878304042,
+   "eta_forward_confirmation_years": 3.968274719518294,
+   "eta_forward_confirmation_days": 1449.4123413040568,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "PARAMETER_FREE",
+    "SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT"
+   ],
+   "pairwise_rho": {
+    "A_CONFIDENCE_IC_WF_q80_HOURADJ~BLO_AMIHUD_30D": 0.03602928719660092,
+    "A_CONFIDENCE_IC_WF_q80_HOURADJ~BLO_MOM_30D": -0.039521283016136985,
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.06746435418973426
+   },
+   "best_single_sleeve_same_window": {
+    "label": "A_CONFIDENCE_IC_WF_q80_HOURADJ",
+    "sr_annualised": 2.2022525598081097,
+    "eta_years": 6.473414542766767
+   },
+   "eta_division_factor": 1.631291934231955
+  },
+  {
+   "mechanism_id": "D2::BESTOFBREED_corrected_REFIT::INVVOL_WF",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['A_CONFIDENCE_IC_WF_q80_HOURADJ', 'BLO_AMIHUD_30D', 'BLO_MOM_30D'], INVVOL_WF, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 1160,
+   "n_independent_L1": 1160,
+   "n_independent_L2": 1160,
+   "n_independent_L3": 39,
+   "gross_bps": null,
+   "net_bps": 14.166426993160345,
+   "net_bps_stress28": 13.545082142756893,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.844332520731581,
+   "t_stat_L3_month": 6.147455430742989,
+   "bootstrap_ci95": [
+    9.781505815640516,
+    18.5057027467017
+   ],
+   "year_by_year": {
+    "2023": {
+     "net_bps": 8.880769996640824,
+     "n": 244
+    },
+    "2024": {
+     "net_bps": 16.106956397218042,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 10.693424626908591,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 24.150818392876765,
+     "n": 185
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2026,
+    "net_bps": 12.271952727573128,
+    "n": 975
+   },
+   "sr_annualised": 3.280731949091697,
+   "n_required": 1066.242083991687,
+   "event_rate": 7.005616878304042,
+   "eta_forward_confirmation_years": 2.9169310947667855,
+   "eta_forward_confirmation_days": 1065.4090823635684,
+   "verdict": "PROMISING_NEEDS_VALIDATION",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "WALKFORWARD_WEIGHTS",
+    "SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT"
+   ],
+   "pairwise_rho": {
+    "A_CONFIDENCE_IC_WF_q80_HOURADJ~BLO_AMIHUD_30D": 0.03602928719660092,
+    "A_CONFIDENCE_IC_WF_q80_HOURADJ~BLO_MOM_30D": -0.039521283016136985,
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.06746435418973426
+   },
+   "best_single_sleeve_same_window": {
+    "label": "A_CONFIDENCE_IC_WF_q80_HOURADJ",
+    "sr_annualised": 2.2022525598081097,
+    "eta_years": 6.473414542766767
+   },
+   "eta_division_factor": 2.219255214626292,
+   "verdict_mechanical": "VALIDATED_FOR_FORWARD",
+   "verdict_override_reason": "gate passed (ETA 2.92y) but the sleeve was chosen after seeing the Track A results; a verdict is not allowed to rest on a post-hoc selection. Needs an out-of-sample re-test on a disjoint period before it can be VALIDATED_FOR_FORWARD."
+  },
+  {
+   "mechanism_id": "D2::B_ONLY_no_track_A::EQUAL_CAPITAL",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['BLO_AMIHUD_30D', 'BLO_MOM_30D'], EQUAL_CAPITAL, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 2298,
+   "n_independent_L1": 2298,
+   "n_independent_L2": 2298,
+   "n_independent_L3": 76,
+   "gross_bps": null,
+   "net_bps": 16.762340731278805,
+   "net_bps_stress28": 15.426359387007958,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 4.851157857926289,
+   "t_stat_L3_month": 4.728657033428061,
+   "bootstrap_ci95": [
+    9.945318584911446,
+    24.263751622219083
+   ],
+   "year_by_year": {
+    "2020": {
+     "net_bps": 21.096050549383413,
+     "n": 261
+    },
+    "2021": {
+     "net_bps": 37.273791646151366,
+     "n": 365
+    },
+    "2022": {
+     "net_bps": 4.994806751772177,
+     "n": 365
+    },
+    "2023": {
+     "net_bps": 5.212238254962282,
+     "n": 365
+    },
+    "2024": {
+     "net_bps": 7.964527803824978,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 17.240375922279,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 30.689715833907734,
+     "n": 211
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": 12.889252482997133,
+    "n": 1933
+   },
+   "sr_annualised": 1.9344611921188424,
+   "n_required": 3065.6803952180044,
+   "event_rate": 7.003191255895019,
+   "eta_forward_confirmation_years": 8.38972301339409,
+   "eta_forward_confirmation_days": 3064.3463306421913,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "PARAMETER_FREE"
+   ],
+   "pairwise_rho": {
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.06484741100024097
+   },
+   "best_single_sleeve_same_window": {
+    "label": "BLO_AMIHUD_30D",
+    "sr_annualised": 1.9042800122521655,
+    "eta_years": 8.65777007625981
+   },
+   "eta_division_factor": 1.0319494532105276
+  },
+  {
+   "mechanism_id": "D2::B_ONLY_no_track_A::INVVOL_WF",
+   "track": "C",
+   "family": "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+   "description": "basket ['BLO_AMIHUD_30D', 'BLO_MOM_30D'], INVVOL_WF, Track A episodes demeaned by their own (hour_utc x month) cell",
+   "n_raw": 2178,
+   "n_independent_L1": 2178,
+   "n_independent_L2": 2178,
+   "n_independent_L3": 72,
+   "gross_bps": null,
+   "net_bps": 16.211780482580462,
+   "net_bps_stress28": 15.045769789308885,
+   "excess_vs_population_bps": null,
+   "mean_turnover": null,
+   "cost_bps_from_turnover": null,
+   "t_stat_declustered": 5.087084687525292,
+   "t_stat_L3_month": 4.312048192328813,
+   "bootstrap_ci95": [
+    9.314573666339564,
+    23.74694459519794
+   ],
+   "year_by_year": {
+    "2020": {
+     "net_bps": 7.735643075907103,
+     "n": 141
+    },
+    "2021": {
+     "net_bps": 37.961716789837176,
+     "n": 365
+    },
+    "2022": {
+     "net_bps": 7.628926328875151,
+     "n": 365
+    },
+    "2023": {
+     "net_bps": 5.928750363789589,
+     "n": 365
+    },
+    "2024": {
+     "net_bps": 9.375578964235556,
+     "n": 366
+    },
+    "2025": {
+     "net_bps": 16.955581168141176,
+     "n": 365
+    },
+    "2026": {
+     "net_bps": 27.458315492712806,
+     "n": 211
+    }
+   },
+   "ex_best_year": {
+    "dropped_year": 2021,
+    "net_bps": 11.83300124808035,
+    "n": 1813
+   },
+   "sr_annualised": 2.0836734441827702,
+   "n_required": 2642.3333500648278,
+   "event_rate": 7.003191255895019,
+   "eta_forward_confirmation_years": 7.231166350764089,
+   "eta_forward_confirmation_days": 2641.1835096165833,
+   "verdict": "UNCONFIRMABLE_IN_HORIZON",
+   "flags": [
+    "HOURBAR_CONTROLLED",
+    "W9_BIAS_AUDIT",
+    "WALKFORWARD_WEIGHTS"
+   ],
+   "pairwise_rho": {
+    "BLO_AMIHUD_30D~BLO_MOM_30D": -0.06484741100024097
+   },
+   "best_single_sleeve_same_window": {
+    "label": "BLO_AMIHUD_30D",
+    "sr_annualised": 1.9042800122521655,
+    "eta_years": 8.65777007625981
+   },
+   "eta_division_factor": 1.197285424825689
   }
  ]
 }

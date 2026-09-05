@@ -1,0 +1,40 @@
+{
+ "EW_WALKFORWARD": {
+  "real_day_net_bps": 26.991039053740284,
+  "real_episode_net_bps": 33.531850811696145,
+  "d1_P2_contamination_expected_overlap_share": 0.34230115561390306,
+  "selection_weighted_cell_mean_bps": 21.98538943440199,
+  "disjoint_placebo_day_net_bps": {
+   "mean": -2.686369945700788,
+   "sd": 3.7030955852473837,
+   "p95": 3.406666925830135,
+   "max": 8.08787202937769
+  },
+  "disjoint_placebo_episode_net_bps": {
+   "mean": -13.083662868781598,
+   "sd": 2.858480452667373
+  },
+  "p_value_one_sided": 0.0,
+  "share_of_real_day_edge_explained": -0.09952821528478815,
+  "cells_short_of_free_events_per_draw": 454.0
+ },
+ "CONFIDENCE_IC_WF": {
+  "real_day_net_bps": 33.34705647343137,
+  "real_episode_net_bps": 35.29252936234572,
+  "d1_P2_contamination_expected_overlap_share": 0.33540158963260386,
+  "selection_weighted_cell_mean_bps": 25.52813009130596,
+  "disjoint_placebo_day_net_bps": {
+   "mean": -2.874308381295443,
+   "sd": 3.4651876357096625,
+   "p95": 2.9806019806093014,
+   "max": 8.820638989742461
+  },
+  "disjoint_placebo_episode_net_bps": {
+   "mean": -11.37661303651319,
+   "sd": 2.791585517045184
+  },
+  "p_value_one_sided": 0.0,
+  "share_of_real_day_edge_explained": -0.0861937659650858,
+  "cells_short_of_free_events_per_draw": 430.0
+ }
+}

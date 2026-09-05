@@ -8,6 +8,9 @@ A = json.load(open(os.path.join(HERE, "a2_track_a_results.json")))
 B = json.load(open(os.path.join(HERE, "b2_track_b_results.json")))
 C = json.load(open(os.path.join(HERE, "c1_track_c_results.json")))
 D = json.load(open(os.path.join(HERE, "c2_longonly_results.json")))
+P1 = json.load(open(os.path.join(HERE, "d1_placebo_results.json")))
+P2 = json.load(open(os.path.join(HERE, "d2_hourbar_corrected_results.json")))
+P3 = json.load(open(os.path.join(HERE, "d3_placebo_disjoint_results.json")))
 
 MECH = []
 
@@ -48,6 +51,17 @@ def add(mid, track, family, desc, g, flags=None, extra=None):
     }
     if extra:
         e.update(extra)
+    # DISCIPLINE: a verdict may never rest on a post-hoc choice (REPORT.md section 9).
+    # Any entry whose sleeve was selected after seeing results is capped below
+    # VALIDATED_FOR_FORWARD, whatever the mechanical gate says.
+    if (e["verdict"] == "VALIDATED_FOR_FORWARD"
+            and any("REFIT" in f for f in e["flags"])):
+        e["verdict_mechanical"] = "VALIDATED_FOR_FORWARD"
+        e["verdict"] = "PROMISING_NEEDS_VALIDATION"
+        e["verdict_override_reason"] = (
+            "gate passed (ETA 2.92y) but the sleeve was chosen after seeing the Track A "
+            "results; a verdict is not allowed to rest on a post-hoc selection. Needs an "
+            "out-of-sample re-test on a disjoint period before it can be VALIDATED_FOR_FORWARD.")
     MECH.append(e)
 
 
@@ -148,6 +162,19 @@ for k, rec in D["C4_longonly_baskets"].items():
              "best_single_sleeve_same_window": rec.get("best_single_sleeve_same_window"),
              "eta_division_factor": rec.get(f"eta_division_factor_{mode}")})
 
+for k, rec in P2["corrected_baskets"].items():
+    for mode in ["EQUAL_CAPITAL", "INVVOL_WF"]:
+        fl = ["HOURBAR_CONTROLLED", "W9_BIAS_AUDIT"]
+        fl.append("PARAMETER_FREE" if mode == "EQUAL_CAPITAL" else "WALKFORWARD_WEIGHTS")
+        if "REFIT" in k:
+            fl.append("SLEEVE_CHOICE_SELECTED_AFTER_SEEING_RESULTS_REFIT")
+        add(f"D2::{k}::{mode}", "C", "CROSS_BASIS_BASKET_HOURBAR_CONTROLLED",
+            f"basket {rec['sleeves']}, {mode}, Track A episodes demeaned by their own "
+            f"(hour_utc x month) cell", rec[mode], fl,
+            {"pairwise_rho": rec["pairwise_rho"],
+             "best_single_sleeve_same_window": rec.get("best_single_sleeve_same_window"),
+             "eta_division_factor": rec.get(f"eta_division_factor_{mode}")})
+
 OUT = {
     "worker": "w8_signal_ensembling",
     "round": "alpha_hunt_2026-09-03_round4",
@@ -191,6 +218,43 @@ OUT = {
     "duplicates_for_portfolio_dedup": {
         "track_B": {k: v["classification"] for k, v in B["daily_E5_orthogonalisation"].items()},
         "track_A": {k: v["classification"] for k, v in A["E5_orthogonalisation"].items()}},
+    "w9_bias_audit": {
+        "question": "does a calendar-day-level control applied to intraday observations "
+                    "inflate this worker's result, as W9 found on his axis?",
+        "exposure": "NONE by design. Track A uses no day-level control at all (its benchmark "
+                    "is the global unconditional mean of the same evaluable window, reported "
+                    "as excess_vs_population_bps). Track B legs are close-to-close daily "
+                    "returns judged against the SAME-DAY cross-section over an identical clock "
+                    "interval for every symbol, so a random score has exactly zero expected "
+                    "excess by construction.",
+        "placebo_random_signal_same_population": {
+            k: {"real_day_net_bps": v["real"]["day_net_bps"],
+                "placebo_day_net_bps": v["placebo_P1_unstratified"]["day_net_bps"]["mean"],
+                "p_value_one_sided": v["placebo_P1_unstratified"]["p_value_one_sided"]}
+            for k, v in P1.items() if isinstance(v, dict) and "real" in v},
+        "placebo_hour_x_month_matched_DISJOINT": {
+            k: {"real_day_net_bps": v["real_day_net_bps"],
+                "placebo_day_net_bps": v["disjoint_placebo_day_net_bps"]["mean"],
+                "placebo_max_over_400_draws": v["disjoint_placebo_day_net_bps"]["max"],
+                "share_of_real_edge_explained": v["share_of_real_day_edge_explained"],
+                "p_value_one_sided": v["p_value_one_sided"]}
+            for k, v in P3.items()},
+        "discarded_first_attempt": {
+            "what": "d1 placebo P2 drew from the WHOLE (hour x month) cell and appeared to "
+                    "reproduce 23-27% of the edge",
+            "why_discarded": "measured expected overlap with the real selection = 34% "
+                             "(cells are small: median 25 events) - it was partly redrawing "
+                             "the real signal's own episodes. Superseded by the disjoint "
+                             "placebo in d3.",
+            "kept_in_evidence": "d1_placebo_results.json"},
+        "hourbar_controlled_headline": {
+            "sleeve_diagnostic": P2["diagnostic_track_A_sleeves"],
+            "roadmap_after_correction": P2["roadmap_after_correction"]},
+        "conclusion": "NOT CONTAMINATED. A disjoint placebo matched on hour-of-day and month "
+                      "earns -2.7 bps/day where the real Track A sleeve earns +27.0 "
+                      "(p<0.0025, 400 draws); applying the hour-bar control directly moves the "
+                      "headline composite from +12.95 to +12.73 bps and its ETA from 4.64 to "
+                      "4.55 years. The roadmap number is unchanged (extra sleeve SR 1.89 vs 1.93)."},
     "mechanisms": MECH,
 }
 with open(os.path.join(ROOT, "RESULTS.json"), "w") as f:

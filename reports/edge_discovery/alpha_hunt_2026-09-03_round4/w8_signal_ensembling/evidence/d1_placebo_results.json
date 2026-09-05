@@ -1,0 +1,104 @@
+{
+ "n_draws": 400,
+ "note": "Track B legs are excluded by construction: same-day cross-section, identical close-to-close clock interval for every symbol, so a random score has exactly zero expected excess. Only Track A is tested.",
+ "EW_WALKFORWARD": {
+  "selection_quantile": 0.9,
+  "real": {
+   "episode_net_bps": 33.531850811696145,
+   "day_net_bps": 26.991039053740284,
+   "n_L1": 4054,
+   "n_days": 655,
+   "t_day": 3.384082366301125
+  },
+  "unconditional_population_net_bps": -0.526708041483591,
+  "placebo_P1_unstratified": {
+   "day_net_bps": {
+    "mean": -1.127740412188754,
+    "sd": 3.5851256026634264,
+    "p05": -6.86427253586404,
+    "p50": -1.089401779436014,
+    "p95": 4.70088780311388,
+    "max": 11.11216373158484
+   },
+   "episode_net_bps": {
+    "mean": -1.0521019316270264,
+    "sd": 4.160936637708645,
+    "p05": -7.993668860594314,
+    "p50": -0.9824878583296968,
+    "p95": 5.571734974073816,
+    "max": 11.803591186253739
+   },
+   "p_value_one_sided": 0.0
+  },
+  "placebo_P2_hour_x_month_stratified": {
+   "day_net_bps": {
+    "mean": 7.3267351391224995,
+    "sd": 4.126971664261912,
+    "p05": 0.6718490556164051,
+    "p50": 7.139849654994011,
+    "p95": 14.191976908114066,
+    "max": 18.384783101148894
+   },
+   "episode_net_bps": {
+    "mean": 10.412676444433854,
+    "sd": 3.7636540102344296,
+    "p05": 4.279259890503508,
+    "p50": 10.475168976538088,
+    "p95": 16.29630624215563,
+    "max": 23.425898745701787
+   },
+   "p_value_one_sided": 0.0,
+   "share_of_real_edge_explained": 0.2714506516231059
+  }
+ },
+ "CONFIDENCE_IC_WF": {
+  "selection_quantile": 0.8,
+  "real": {
+   "episode_net_bps": 35.29252936234572,
+   "day_net_bps": 33.34705647343137,
+   "n_L1": 4149,
+   "n_days": 603,
+   "t_day": 4.323836044788955
+  },
+  "unconditional_population_net_bps": 2.1241667355618574,
+  "placebo_P1_unstratified": {
+   "day_net_bps": {
+    "mean": 0.5409400975933056,
+    "sd": 3.6652431324505073,
+    "p05": -5.317201050613181,
+    "p50": 0.26849781402193795,
+    "p95": 6.564187806285501,
+    "max": 12.286858985533403
+   },
+   "episode_net_bps": {
+    "mean": 1.1638800647670096,
+    "sd": 3.852548195986385,
+    "p05": -4.924862429414143,
+    "p50": 0.9979590359703223,
+    "p95": 7.765702391237122,
+    "max": 13.712996455601653
+   },
+   "p_value_one_sided": 0.0
+  },
+  "placebo_P2_hour_x_month_stratified": {
+   "day_net_bps": {
+    "mean": 7.604178797813054,
+    "sd": 3.910537308000107,
+    "p05": 1.4051376004870673,
+    "p50": 7.530090793397447,
+    "p95": 13.829250319258945,
+    "max": 21.591667455430414
+   },
+   "episode_net_bps": {
+    "mean": 12.512695687500138,
+    "sd": 3.6549075992673874,
+    "p05": 6.772875939235273,
+    "p50": 12.382718543533972,
+    "p95": 18.06780498905674,
+    "max": 22.62727627717506
+   },
+   "p_value_one_sided": 0.0,
+   "share_of_real_edge_explained": 0.22803148469405501
+  }
+ }
+}
