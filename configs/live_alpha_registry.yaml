@@ -112,6 +112,9 @@ alphas:
       1ere occurrence). Distinct de A7-TAIL-E1 (Jaccard overlap=0.116) mais
       RISQUE CORRÉLÉ : même détecteur/flux d'events -> même risk_bucket.
 
+    data_segment_boundaries:
+      post_live_tail_splice: "2026-09-05T06:50:21+00:00"   # la série 5m du détecteur est désormais PROLONGÉE par data/derivatives_live_metrics (scripts/collect_oi_metrics_5m.py, cadence 15 min) au-delà de la fin de l'archive Binance Vision. AVANT cette date, cet alpha découvrait ses événements 45-48h après coup pour un horizon de 4h -- 100%% de ses décisions forward arrivaient périmées et n'ont JAMAIS pu recevoir de capital (voir reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md). La SPEC est inchangée : le déclencheur n'utilise que sum_open_interest et le prix implicite sum_open_interest_value/sum_open_interest, identiques entre les deux sources sur le recouvrement (OI identique à 100%%, prix implicite à 0,000000 bps d'écart médian ET maximum, vérifié sur 8 symboles x 133 barres). Vision reste prioritaire sur le recouvrement -- aucune barre déjà servie n'est réécrite. Frontière déclarée quand même : la queue de série provient d'un autre chemin de collecte, un lecteur futur doit pouvoir le savoir.
+
   - alpha_id: BTC_LEAD_ALT_CASCADE_V1
     family: liquidation
     mechanism: >
@@ -186,6 +189,9 @@ alphas:
       ajustée -- le recalcul n'est donc pas une dérive de spec. Tout changement
       de quantile/fenêtre/min_prior = nouvel alpha_id, nouveau freeze.
 
+    data_segment_boundaries:
+      post_live_tail_splice: "2026-09-05T06:50:21+00:00"   # la série 5m du détecteur est désormais PROLONGÉE par data/derivatives_live_metrics (scripts/collect_oi_metrics_5m.py, cadence 15 min) au-delà de la fin de l'archive Binance Vision. AVANT cette date, cet alpha découvrait ses événements 45-48h après coup pour un horizon de 4h -- 100%% de ses décisions forward arrivaient périmées et n'ont JAMAIS pu recevoir de capital (voir reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md). La SPEC est inchangée : le déclencheur n'utilise que sum_open_interest et le prix implicite sum_open_interest_value/sum_open_interest, identiques entre les deux sources sur le recouvrement (OI identique à 100%%, prix implicite à 0,000000 bps d'écart médian ET maximum, vérifié sur 8 symboles x 133 barres). Vision reste prioritaire sur le recouvrement -- aucune barre déjà servie n'est réécrite. Frontière déclarée quand même : la queue de série provient d'un autre chemin de collecte, un lecteur futur doit pouvoir le savoir.
+
   - alpha_id: LIQ_CASCADE_FAR_FROM_LOW_V1
     family: liquidation
     mechanism: >
@@ -235,6 +241,9 @@ alphas:
       les 6805 décisions déjà écrites (2020-10..2026-08-29) sont toutes
       REPLAY par construction (event_time <= nouveau freeze) ; la vraie
       confirmation forward commence à zéro décision à partir de maintenant.
+
+    data_segment_boundaries:
+      post_live_tail_splice: "2026-09-05T06:50:21+00:00"   # la série 5m du détecteur est désormais PROLONGÉE par data/derivatives_live_metrics (scripts/collect_oi_metrics_5m.py, cadence 15 min) au-delà de la fin de l'archive Binance Vision. AVANT cette date, cet alpha découvrait ses événements 45-48h après coup pour un horizon de 4h -- 100%% de ses décisions forward arrivaient périmées et n'ont JAMAIS pu recevoir de capital (voir reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md). La SPEC est inchangée : le déclencheur n'utilise que sum_open_interest et le prix implicite sum_open_interest_value/sum_open_interest, identiques entre les deux sources sur le recouvrement (OI identique à 100%%, prix implicite à 0,000000 bps d'écart médian ET maximum, vérifié sur 8 symboles x 133 barres). Vision reste prioritaire sur le recouvrement -- aucune barre déjà servie n'est réécrite. Frontière déclarée quand même : la queue de série provient d'un autre chemin de collecte, un lecteur futur doit pouvoir le savoir.
 
   - alpha_id: LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION_V1
     family: liquidation
@@ -426,6 +435,9 @@ alphas:
   # ══════════════════════════════════════════════════════════════════════
   # FAMILLE : positioning / wallet (risk_bucket: POSITIONING_WALLET_FAMILY)
   # ══════════════════════════════════════════════════════════════════════
+
+    data_segment_boundaries:
+      post_live_tail_splice: "2026-09-05T06:50:21+00:00"   # la série 5m du détecteur est désormais PROLONGÉE par data/derivatives_live_metrics (scripts/collect_oi_metrics_5m.py, cadence 15 min) au-delà de la fin de l'archive Binance Vision. AVANT cette date, cet alpha découvrait ses événements 45-48h après coup pour un horizon de 4h -- 100%% de ses décisions forward arrivaient périmées et n'ont JAMAIS pu recevoir de capital (voir reports/live_alpha_lab/DECISION_LATENCY_AUDIT_2026-09-05.md). La SPEC est inchangée : le déclencheur n'utilise que sum_open_interest et le prix implicite sum_open_interest_value/sum_open_interest, identiques entre les deux sources sur le recouvrement (OI identique à 100%%, prix implicite à 0,000000 bps d'écart médian ET maximum, vérifié sur 8 symboles x 133 barres). Vision reste prioritaire sur le recouvrement -- aucune barre déjà servie n'est réécrite. Frontière déclarée quand même : la queue de série provient d'un autre chemin de collecte, un lecteur futur doit pouvoir le savoir.
 
   - alpha_id: WHALE_LSR_SCREEN_V1
     family: positioning

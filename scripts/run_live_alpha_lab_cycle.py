@@ -26,10 +26,18 @@ Ce que ce script ne fait PAS
 
 Ordre d'exécution (imposé, pas cosmétique)
 ──────────────────────────────────────────
+  0. collecte de la queue fraîche (métriques dérivées 5 m)
   1. producteurs de signal  (position + gate + overlay)
   2. étiquetage provenance  (REPLAY vs FORWARD_LIVE)
   3. couche portefeuille    (lit le gate WHALE_LSR + l'overlay VOL_FORECAST)
   4. scoreboards            (lisent les ledgers écrits en 1 et l'état écrit en 3)
+
+L'étape 0 est DANS le cycle et non dans un timer séparé, précisément pour que
+l'ordre soit garanti : les producteurs de la famille cascade lisent la série
+que cette étape vient d'étendre. Deux timers indépendants se croiseraient et
+un producteur pourrait tourner sur une queue vieille d'un cycle. Un échec de
+collecte n'interrompt pas le cycle -- les producteurs retombent alors sur la
+seule archive Vision, c'est-à-dire l'ancien comportement, dégradé mais correct.
 
 Le gate et l'overlay DOIVENT être frais avant l'agrégation de portefeuille,
 sinon le portefeuille filtre sur un screen périmé.
@@ -89,6 +97,7 @@ STATE_PATH = LAB_DIR / "CYCLE_STATE.json"
 LOG_PATH = LAB_DIR / "cycle_log.jsonl"
 LOCK_PATH = LAB_DIR / ".cycle.lock"
 
+COLLECTOR_SCRIPT = "scripts/collect_oi_metrics_5m.py"
 PROVENANCE_SCRIPT = "scripts/apply_provenance_tags.py"
 PORTFOLIO_SCRIPT = "scripts/run_portfolio_shadow.py"
 SCOREBOARD_SCRIPTS = [
@@ -266,6 +275,10 @@ def main() -> int:
     prev_state = load_state()
     last_success = last_success_map(prev_state)
 
+    # Étape 0 — queue fraîche. Toujours avant les producteurs (cf. docstring).
+    # ~200 appels API pour 50 symboles, une centaine de secondes.
+    collector_rec = run_step("COLLECT_OI_METRICS_5M", COLLECTOR_SCRIPT, 900)
+
     steps, skipped = [], []
     for r in runners:
         alpha_id = r["alpha_id"]
@@ -329,6 +342,7 @@ def main() -> int:
         "producers_failed": producers_failed,
         "producers_skipped_cadence": skipped,
         "steps": steps,
+        "collector": collector_rec,
         "provenance_tagging": provenance_rec,
         "portfolio": portfolio_rec,
         "scoreboards": scoreboard_recs,
