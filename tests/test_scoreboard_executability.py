@@ -114,3 +114,35 @@ def test_unknown_horizon_degrades_explicitly():
     lag, expired = sb.decision_latency(df, "event_time", "un_horizon_jamais_vu")
     assert lag == 1.0
     assert expired == "horizon_inconnu"
+
+
+def test_recent_window_excludes_the_historical_backlog():
+    """Le cumul ne redescend JAMAIS après un incident de rattrapage.
+
+    Mesuré le 2026-09-05 : SHORT_COVERING_CONTINUATION_V1 affichait 160/360
+    périmées sur tout son historique -- des décisions nées périmées pendant que
+    le lab tournait à la main et rattrapait plusieurs jours d'un coup -- alors
+    que ses exécutions du jour étaient à ~10 min de latence, 0 périmée. Un
+    indicateur d'exploitation qui ne peut pas redescendre ne dit plus si ça va
+    maintenant : d'où la fenêtre récente, filtrée sur `decided_at`.
+    """
+    now = pd.Timestamp.now(tz="UTC")
+    old = _frame([now - pd.Timedelta(days=5)], [now - pd.Timedelta(days=5) + pd.Timedelta(hours=48)])
+    fresh = _frame([now - pd.Timedelta(hours=1)], [now - pd.Timedelta(minutes=50)])
+    df = pd.concat([old, fresh], ignore_index=True)
+
+    lag_all, expired_all = sb.decision_latency(df, "event_time", "fwd_4h")
+    lag_rec, expired_rec = sb.decision_latency(df, "event_time", "fwd_4h", recent_only=True)
+
+    assert expired_all == "1/2"          # le rattrapage pèse à jamais sur le cumul
+    assert expired_rec == "0/1"          # la fenêtre récente voit un système sain
+    assert lag_rec < lag_all
+
+
+def test_recent_window_returns_none_when_nothing_is_recent():
+    """Aucune décision récente n'est PAS « latence nulle » : c'est « pas mesuré ».
+    Un producteur muet depuis 3 jours ne doit pas s'afficher comme parfait."""
+    old_ts = pd.Timestamp.now(tz="UTC") - pd.Timedelta(days=10)
+    df = _frame([old_ts], [old_ts + pd.Timedelta(hours=1)])
+    assert sb.decision_latency(df, "event_time", "fwd_4h", recent_only=True) == (None, None)
+    assert sb.decision_latency(df, "event_time", "fwd_4h")[0] == 1.0

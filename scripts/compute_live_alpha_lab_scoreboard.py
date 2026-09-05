@@ -93,8 +93,23 @@ _HORIZON_HOURS = {
 }
 
 
-def decision_latency(df, time_col: str, horizon: str) -> tuple:
+# Fenêtre de la mesure « récente ». Le ledger cumule tout depuis le freeze, y
+# compris les périodes où le lab tournait à la main et rattrapait plusieurs
+# jours d'événements d'un coup. Ces décisions-là sont nées périmées et le
+# resteront à jamais dans le cumul : mesuré le 2026-09-05, SHORT_COVERING
+# affichait 160/360 périmées sur tout son historique alors que ses exécutions
+# du jour tournaient à ~10 min de latence. Un indicateur d'exploitation qui ne
+# redescend jamais après un incident ne sert plus à rien -- d'où les deux
+# mesures, cumul ET récent, la seconde étant celle qui dit si ça va MAINTENANT.
+RECENT_WINDOW_HOURS = 24
+
+
+def decision_latency(df, time_col: str, horizon: str, recent_only: bool = False) -> tuple:
     """(lag médian en heures, "n_périmées/total") sur les décisions FORWARD_LIVE.
+
+    `recent_only` : ne garder que les décisions PRISES dans les dernières
+    RECENT_WINDOW_HOURS heures (filtre sur `decided_at`, pas sur l'événement --
+    on veut juger le comportement du système, pas la date des marchés).
 
     Renvoie (None, None) si la mesure n'est pas possible -- jamais une valeur
     par défaut optimiste : une latence inconnue ne doit pas se lire comme nulle.
@@ -104,6 +119,10 @@ def decision_latency(df, time_col: str, horizon: str) -> tuple:
     if time_col is None or time_col not in df.columns:
         return None, None
     fwd = df[df["provenance"] == "FORWARD_LIVE"]
+    if recent_only and not fwd.empty:
+        decided = pd.to_datetime(fwd["decided_at"], utc=True, errors="coerce")
+        cutoff = pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=RECENT_WINDOW_HOURS)
+        fwd = fwd[decided >= cutoff]
     if fwd.empty:
         return None, None
     lag_h = (pd.to_datetime(fwd["decided_at"], utc=True, errors="coerce")
@@ -158,6 +177,8 @@ def row_for(entry: dict) -> dict:
         replay = len(df)   # pas encore tagué -- traité comme tout-replay par prudence (fail closed)
     lag_median_h, expired_on_arrival = decision_latency(
         df, _TIME_COL.get(alpha_id), entry.get("horizon"))
+    lag_recent_h, expired_recent = decision_latency(
+        df, _TIME_COL.get(alpha_id), entry.get("horizon"), recent_only=True)
     return {
         "alpha_id": alpha_id,
         "family": entry.get("family"),
@@ -176,6 +197,8 @@ def row_for(entry: dict) -> dict:
         "confidence_level": confidence_level(independent_episodes),
         "decision_lag_median_h": lag_median_h,
         "expired_on_arrival": expired_on_arrival,
+        "decision_lag_median_h_recent": lag_recent_h,
+        "expired_on_arrival_recent": expired_recent,
         # ⚠ PF / net_bps / maxDD / edge_retention nécessitent un LABEL de résultat
         # forward par décision (comme le backfill actual_realized_rv de
         # VOL_FORECAST_LAYER_V1) -- PAS ENCORE CONSTRUIT pour les alphas de
@@ -200,12 +223,18 @@ def main() -> int:
         "`forward_decisions` (event_time > freeze_timestamp) compte comme preuve jamais-vue ;",
         "`replay_decisions` est du backfill historique, pas une preuve forward.",
         "",
-        "⚠ `decision_lag_med_h` / `expired_on_arrival` mesurent l'EXÉCUTABILITÉ, pas la validité :",
-        "un alpha dont le lab découvre les événements après l'expiration de son propre horizon",
-        "accumule des décisions forward correctes mais ne pourra JAMAIS engager de capital.",
+        "⚠ `lag_med_h` / `périmées` mesurent l'EXÉCUTABILITÉ, pas la validité : un alpha dont le",
+        "lab découvre les événements après l'expiration de son propre horizon accumule des décisions",
+        "forward correctes mais ne pourra JAMAIS engager de capital.",
         "",
-        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | actual_freq/day | decision_lag_med_h | expired_on_arrival | risk_bucket |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "**Lire la colonne (24h), pas le cumul, pour juger l'état COURANT.** Le cumul inclut les",
+        "périodes où le lab tournait à la main et rattrapait plusieurs jours d'événements d'un coup :",
+        "ces décisions sont nées périmées et le restent à jamais dans le total. Exemple mesuré le",
+        "2026-09-05 : SHORT_COVERING_CONTINUATION_V1 affichait 160/360 périmées en cumul alors que",
+        "ses exécutions du jour tournaient à ~10 minutes de latence.",
+        "",
+        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | actual_freq/day | lag_med_h (cumul) | périmées (cumul) | lag_med_h (24h) | périmées (24h) | risk_bucket |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in sorted(rows, key=lambda r: (r["scientific_status"], r["alpha_id"])):
         lines.append(
@@ -215,7 +244,8 @@ def main() -> int:
             f"{r['forward_independent_episodes']} | {r['confidence_level']} | "
             f"{r['forward_age_hours']} | {r['time_since_last_trigger_hours']} | "
             f"{r['actual_freq_per_day']} | {r['decision_lag_median_h']} | "
-            f"{r['expired_on_arrival']} | {r['risk_bucket']} |"
+            f"{r['expired_on_arrival']} | {r['decision_lag_median_h_recent']} | "
+            f"{r['expired_on_arrival_recent']} | {r['risk_bucket']} |"
         )
 
     total_forward = sum(r["forward_decisions"] for r in rows)
