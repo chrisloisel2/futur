@@ -1,0 +1,2 @@
+date,exit_date,hold_days,regime,entry_val,exit_val,side,pnl_bps,capped
+2024-12-01 00:00:00+00:00,2024-12-08 00:00:00+00:00,7,RICH,161.563251096668,123.79906670326513,-1,37.764184393402886,False

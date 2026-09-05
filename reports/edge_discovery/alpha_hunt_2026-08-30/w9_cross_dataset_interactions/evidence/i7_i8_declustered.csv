@@ -1,0 +1,7 @@
+label,n,mean_bps,t,p
+marginal_declustered_1d,2999365,10.78,28.98,0.0
+agree_declustered_1d,1648885,20.648,41.66,0.0
+disagree_declustered_1d,1350480,-1.268,-2.25,0.0242
+marginal_declustered_1d_i7,3051465,11.195,30.32,0.0
+building_declustered_1d,1481922,11.616,21.57,0.0
+unwinding_declustered_1d,1569527,10.798,21.31,0.0

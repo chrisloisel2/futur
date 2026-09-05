@@ -1,0 +1,12 @@
+label,n,mean_bps,t,p
+marginal_fade_1h_RAW,3937352,3.915,39.02,0.0
+marginal_fade_4h_RAW,3937352,4.762,28.37,0.0
+marginal_fade_1d_RAW,3937352,9.759,26.94,0.0
+OI_building_fade_1d_RAW,1979677,7.441,13.85,0.0
+OI_unwinding_fade_1d_RAW,1957541,12.105,24.92,0.0
+agree_fade_1h_RAW,2234536,4.062,30.34,0.0
+disagree_fade_1h_RAW,1702816,3.722,24.57,0.0
+agree_fade_4h_RAW,2234536,5.679,25.68,0.0
+disagree_fade_4h_RAW,1702816,3.558,13.8,0.0
+agree_fade_1d_RAW,2234536,18.498,37.86,0.0
+disagree_fade_1d_RAW,1702816,-1.708,-3.17,0.0015

@@ -1,0 +1,29 @@
+label,n,xs_mean_bps,t,p,h1,h2,stable
+M1a crowd_LSR HIGH (SHORT-dir if neg),1298,-2.84,-1.23,0.2191,2.14,-6.34,False
+M1b crowd_LSR LOW (LONG-dir if pos),1069,12.27,4.45,0.0,4.8,20.93,True
+M2a topAcct_LSR HIGH,1194,-5.24,-2.27,0.0234,0.97,-8.96,False
+M2b topAcct_LSR LOW,1209,9.09,3.36,0.0008,2.1,16.38,True
+M3a topPos_LSR HIGH,2041,-7.72,-4.22,0.0,-6.96,-8.22,True
+M3b topPos_LSR LOW,958,8.33,3.96,0.0001,10.04,6.11,True
+M4a topVsCrowd divergence HIGH,869,-3.24,-1.81,0.0699,-3.18,-3.29,True
+M4b topVsCrowd divergence LOW,1378,8.21,3.14,0.0017,5.05,11.56,True
+M5a whaleVsTopAcct divergence HIGH,1542,0.45,0.18,0.8581,-1.9,1.96,False
+M5b whaleVsTopAcct divergence LOW,951,-3.01,-1.41,0.1591,4.17,-9.47,False
+M6a LSR momentum UP,747,-1.56,-0.51,0.6094,2.38,-4.85,False
+M6b LSR momentum DOWN,744,12.78,4.19,0.0,2.47,21.13,True
+M8a taker buy pressure extreme,695,-0.36,-0.19,0.8461,5.0,-4.88,False
+M8b taker sell pressure extreme,21,-7.39,-0.5,0.624,,-9.03,False
+M1a crowd_LSR HIGH (SHORT-dir if neg),1268,-2.54,-0.45,0.6556,23.32,-21.47,False
+M1b crowd_LSR LOW (LONG-dir if pos),1051,37.93,5.18,0.0,2.53,80.53,True
+M2a topAcct_LSR HIGH,1171,-21.79,-3.93,0.0001,16.23,-45.26,False
+M2b topAcct_LSR LOW,1170,21.42,3.04,0.0024,1.79,43.32,True
+M3a topPos_LSR HIGH,2034,-45.64,-10.87,0.0,-22.08,-61.32,True
+M3b topPos_LSR LOW,896,32.08,6.32,0.0,29.3,36.29,True
+M4a topVsCrowd divergence HIGH,863,-22.7,-4.83,0.0,-7.14,-34.83,True
+M4b topVsCrowd divergence LOW,1361,27.32,4.52,0.0,32.66,21.51,True
+M5a whaleVsTopAcct divergence HIGH,1528,-8.36,-1.43,0.1524,-8.4,-8.34,True
+M5b whaleVsTopAcct divergence LOW,898,-3.49,-0.55,0.5845,36.34,-43.49,False
+M6a LSR momentum UP,704,5.09,0.69,0.4921,50.93,-37.73,False
+M6b LSR momentum DOWN,744,70.98,8.38,0.0,32.83,101.88,True
+M8a taker buy pressure extreme,656,-2.08,-0.43,0.6697,7.95,-11.51,False
+M8b taker sell pressure extreme,16,-38.14,-2.2,0.0439,,-49.53,False

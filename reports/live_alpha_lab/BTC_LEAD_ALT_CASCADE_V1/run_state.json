@@ -1,10 +1,10 @@
 {
   "alpha_id": "BTC_LEAD_ALT_CASCADE_V1",
-  "last_run": "2026-09-04T06:41:18.440628+00:00",
+  "last_run": "2026-09-05T06:57:10.092552+00:00",
   "universe_hash": "d7897e9bb0b7af0f",
   "universe_size": 50,
-  "n_decisions_total": 2493,
-  "n_decisions_new": 6,
+  "n_decisions_total": 2525,
+  "n_decisions_new": 31,
   "mode": "A_SIGNAL_SHADOW",
   "shock_quantile": 0.9,
   "lookback_days": 365,

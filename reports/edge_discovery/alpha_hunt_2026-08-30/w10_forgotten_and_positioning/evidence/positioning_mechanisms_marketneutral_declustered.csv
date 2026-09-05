@@ -1,0 +1,15 @@
+label,n,n_symbols,xs_mean_bps,t,p,h1,h2
+M1b crowd_LSR LOW (LONG-dir),49,47,10.39,1.08,0.2839,5.8,16.51
+M2b topAcct_LSR LOW (LONG-dir),50,47,30.71,1.62,0.1116,13.78,50.59
+M3a topPos_LSR HIGH (avoid/fade-dir),88,47,-12.23,-0.92,0.3603,-8.96,-14.72
+M3b topPos_LSR LOW (LONG-dir),39,46,-6.15,-0.73,0.467,-4.93,-7.59
+M4a topVsCrowd HIGH (avoid/fade-dir),40,47,-1.19,-0.19,0.8486,-12.9,9.41
+M4b topVsCrowd LOW (LONG-dir),61,47,17.84,0.86,0.3955,4.22,31.92
+M6b LSR momentum DOWN (LONG-dir),34,47,0.86,0.1,0.9209,-6.71,6.83
+M1b crowd_LSR LOW (LONG-dir),49,47,47.57,1.37,0.1762,12.62,94.18
+M2b topAcct_LSR LOW (LONG-dir),50,47,48.48,1.35,0.183,28.18,72.32
+M3a topPos_LSR HIGH (avoid/fade-dir),87,47,-57.8,-2.82,0.0059,-19.18,-87.74
+M3b topPos_LSR LOW (LONG-dir),39,46,45.11,1.74,0.0898,24.98,68.59
+M4a topVsCrowd HIGH (avoid/fade-dir),38,47,-0.3,-0.01,0.9884,-10.0,9.4
+M4b topVsCrowd LOW (LONG-dir),61,47,23.44,0.84,0.4019,22.63,24.27
+M6b LSR momentum DOWN (LONG-dir),34,47,45.77,1.5,0.1444,40.63,49.82

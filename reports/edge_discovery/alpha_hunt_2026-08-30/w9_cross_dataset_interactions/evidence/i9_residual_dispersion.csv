@@ -1,0 +1,5 @@
+label,n,mean_bps,t,p
+marginal_1d,1288563,3.138,3.06,0.0022
+high_dispersion_1d,692675,9.49,6.35,0.0
+mid_dispersion_1d,460442,-4.94,-3.07,0.0022
+low_dispersion_1d,135183,-1.87,-0.73,0.4634

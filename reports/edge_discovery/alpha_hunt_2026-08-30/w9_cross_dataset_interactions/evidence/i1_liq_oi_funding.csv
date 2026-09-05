@@ -1,0 +1,15 @@
+label,n,gross_bps,net_bps,pf
+tail_bucket_marginal,3799,37.14,23.14,1.19
+rest_of_population,9877,-5.7,-19.7,0.769
+tail_oi_pctile_hi,1330,24.71,10.71,1.078
+tail_oi_pctile_mid,1614,33.29,19.29,1.161
+tail_oi_pctile_lo,855,63.75,49.75,1.5
+tail_oi_vs_7d_hi,1124,43.11,29.11,1.215
+tail_oi_vs_7d_lo,719,80.45,66.45,1.604
+tail_funding_extreme,203,30.65,16.65,1.195
+tail_funding_normal,409,30.58,16.58,1.186
+tail_funding_subsample_marginal,612,30.6,16.6,1.189
+tail_oi_hi_AND_funding_extreme,53,19.3,5.3,1.053
+tail_oi_lo_AND_funding_normal,279,51.65,37.65,1.458
+rest_oi_pctile_hi,3117,-2.5,-16.5,0.808
+rest_oi_pctile_lo,2352,-12.46,-26.46,0.698
