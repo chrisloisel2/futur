@@ -142,7 +142,17 @@ def load_state() -> dict:
 
 
 def last_success_map(state: dict) -> dict:
-    """alpha_id -> timestamp ISO du dernier run RÉUSSI, cumulé sur les cycles.
+    """alpha_id -> timestamp ISO du DÉBUT DE CYCLE du dernier run réussi.
+
+    Volontairement le début du CYCLE et non celui de l'étape. Mesuré le
+    2026-09-05, après l'ajout de la collecte en étape 0 : celle-ci dure ~136 s
+    et décale d'autant le démarrage des producteurs, qui retombaient alors
+    juste SOUS leur cadence de 15 min au cycle suivant et étaient sautés. Un
+    producteur ne tournait donc plus qu'un cycle sur deux, ce qui doublait son
+    plancher de latence -- l'inverse exact de ce que la collecte fraîche
+    cherchait à obtenir. La cadence exprime « au plus une fois toutes les N
+    minutes », une propriété du rythme du cycle, pas de la durée des étapes qui
+    le précèdent.
 
     Porté d'un cycle à l'autre : un producteur en échec ne doit pas voir sa
     cadence réinitialisée (sinon un alpha cassé serait retenté à chaque cycle
@@ -291,7 +301,7 @@ def main() -> int:
         rec["role"] = r.get("role")
         steps.append(rec)
         if rec["status"] == "OK":
-            last_success[alpha_id] = rec["started_at"]
+            last_success[alpha_id] = cycle_started.isoformat()
 
     if skipped:
         print(f"[cycle] cadence non due, sautés : {', '.join(skipped)}", flush=True)

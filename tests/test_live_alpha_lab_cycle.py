@@ -116,3 +116,21 @@ def test_disk_floor_is_below_collector_floor():
     """
     import scripts.collect_microstructure_reduced as collector
     assert cycle.MIN_FREE_DISK_GB < collector.MIN_FREE_DISK_GB_DEFAULT
+
+
+def test_cadence_is_anchored_on_the_cycle_not_on_the_step():
+    """RÉGRESSION 3 (2026-09-05) : la collecte en étape 0 dure ~136 s et décale
+    d'autant le démarrage des producteurs. Ancrée sur l'heure de l'ÉTAPE, la
+    cadence de 15 min n'était plus atteinte au cycle suivant et les producteurs
+    étaient sautés un cycle sur deux — doublant leur plancher de latence, soit
+    l'inverse de ce que la collecte fraîche visait.
+
+    La cadence dit « au plus une fois toutes les N minutes » : c'est une
+    propriété du rythme du CYCLE, pas de la durée des étapes qui le précèdent.
+    """
+    src = (ROOT / "scripts" / "run_live_alpha_lab_cycle.py").read_text()
+    assert 'last_success[alpha_id] = cycle_started.isoformat()' in src, (
+        "la cadence doit être ancrée sur le début du cycle ; l'ancrer sur "
+        "rec['started_at'] fait dériver les producteurs derrière la collecte."
+    )
+    assert 'last_success[alpha_id] = rec["started_at"]' not in src
