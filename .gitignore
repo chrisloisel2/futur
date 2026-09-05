@@ -75,3 +75,11 @@ reports/parallel_50/parallel_50_backtest.log
 reports/parallel_50/pullback_train.log
 reports/parallel_50/parallel_50_ranked.log
 reports/parallel_50/parallel_50_edge.log
+data/news_raw/
+data/news_backfill/
+data/worldmon_jsonl/
+data/worldmon_features/
+
+# ── Command Center : credentials hachés + secret de session (jamais committés) ──
+configs/command_center_users.json
+state/command_center_secret

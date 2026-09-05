@@ -24,7 +24,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from typing import Dict, Optional
+from typing import List, Dict, Optional
 
 import pandas as pd
 import yaml
@@ -87,18 +87,84 @@ def git_head_sha() -> str:
         return "UNKNOWN_GIT_SHA"
 
 
-def working_tree_dirty() -> bool:
-    """True si l'arbre de travail a des modifications non commitées (n'importe
-    où dans le repo, pas seulement dans les fichiers Live Alpha Lab) --
-    champ explicite, jamais encodé en silence dans code_commit_sha."""
+# ═══════════════════════════════════════════════════════════════════════════
+# 2026-09-05 — PÉRIMÈTRE du stamp `working_tree_dirty` (décision utilisateur)
+# ═══════════════════════════════════════════════════════════════════════════
+# Avant : `git status --porcelain` GLOBAL. Or le dépôt suit 35 fichiers d'état
+# runtime sous reports/ (state.json, cycle_log, scoreboards…) réécrits à chaque
+# cycle de 15 min : l'arbre était sale en permanence, donc TOUTES les décisions
+# portaient dirty=True, y compris juste après un commit propre du code. Un
+# drapeau toujours levé n'informe plus personne -- c'est le contraire de la
+# provenance.
+#
+# Après : le stamp ne regarde que ce qui INFLUENCE RÉELLEMENT une décision :
+#   - src/       : moteurs, live_alpha_lab (portfolio, intents, eligibility…)
+#   - scripts/   : les runners et le cycle
+#   - configs/   : les DEUX registres (alphas + validation) et les runners
+#   - reports/live_alpha_lab/*/freeze_spec.json : la spec figée de chaque alpha
+#   - reports/live_alpha_lab/DEPLOYMENT_DECISIONS_*.md : les décisions de déploiement
+# Vérifié le 2026-09-05 : les runners du lab n'importent AUCUN paquet hors
+# `src` (data_pipeline/, core/, ai/ ne servent qu'au paper trading legacy,
+# arrêté) -- ils sont donc volontairement hors périmètre. reports/ n'est PAS
+# sorti du suivi git : seul le stamp change de périmètre.
+#
+# Le changement de périmètre est lui-même une frontière de segment : chaque
+# décision porte `working_tree_dirty_scope` pour qu'un consommateur sache si
+# un dirty=False ancien (V1, global) et un dirty=False nouveau (V2, périmètre)
+# veulent dire la même chose -- ils ne le veulent pas.
+DECISION_CODE_PATHSPECS = (
+    "src/",
+    "scripts/",
+    "configs/",
+    "reports/live_alpha_lab/*/freeze_spec.json",
+    "reports/live_alpha_lab/DEPLOYMENT_DECISIONS_*.md",
+)
+WORKING_TREE_DIRTY_SCOPE = "DECISION_CODE_V2"      # V1 = porcelain global, < 2026-09-05
+GIT_STATUS_UNAVAILABLE = "<GIT_STATUS_UNAVAILABLE>"
+
+
+def dirty_decision_paths() -> List[str]:
+    """Chemins modifiés / non suivis DANS LE PÉRIMÈTRE DE DÉCISION (voir
+    DECISION_CODE_PATHSPECS). Liste vide = code de décision identique à HEAD.
+
+    `--untracked-files=all` : un nouveau runner non encore `git add` est un
+    changement de code de décision, il doit compter -- et être nommé.
+    Fail closed : si git ne répond pas, on renvoie un marqueur explicite
+    plutôt qu'une liste vide qui se lirait comme « propre »."""
     try:
         out = subprocess.run(
-            ["git", "status", "--porcelain"], cwd=_ROOT, capture_output=True,
-            text=True, timeout=5, check=True,
-        ).stdout.strip()
-        return bool(out)
+            ["git", "status", "--porcelain", "--untracked-files=all", "--",
+             *DECISION_CODE_PATHSPECS],
+            cwd=_ROOT, capture_output=True, text=True, timeout=5, check=True,
+        ).stdout
     except Exception:
-        return True   # fail closed : incapable de vérifier -> traiter comme sale
+        return [GIT_STATUS_UNAVAILABLE]
+    paths = []
+    for line in out.splitlines():
+        if len(line) < 4:
+            continue
+        path = line[3:]
+        if " -> " in path:            # renommage : garder la destination
+            path = path.split(" -> ", 1)[1]
+        paths.append(path.strip())
+    return sorted(paths)
+
+
+def dirty_decision_paths_sha1() -> str:
+    """Empreinte scalaire de la liste ci-dessus, stockable en colonne parquet
+    (les runners diffusent chaque champ de provenance en `df[k] = v` : une
+    liste ne passerait pas). Chaîne vide = propre."""
+    paths = dirty_decision_paths()
+    if not paths:
+        return ""
+    return hashlib.sha1("\n".join(paths).encode()).hexdigest()[:16]
+
+
+def working_tree_dirty() -> bool:
+    """True si le CODE DE DÉCISION diffère de HEAD (périmètre
+    DECISION_CODE_PATHSPECS), champ explicite, jamais encodé en silence dans
+    code_commit_sha. Fail closed : git injoignable -> sale."""
+    return bool(dirty_decision_paths())
 
 
 def tag_provenance(df: pd.DataFrame, time_col: str, freeze_timestamp) -> pd.DataFrame:
@@ -152,9 +218,15 @@ def spec_provenance(alpha_id: str) -> Dict[str, object]:
     code_commit_sha, working_tree_dirty, config_hash, alpha_spec_hash.
     universe_hash reste calculé séparément par chaque runner (dépend de sa
     propre notion d'univers, pas générique)."""
+    dirty_paths = dirty_decision_paths()
     return {
         "code_commit_sha": git_head_sha(),
-        "working_tree_dirty": working_tree_dirty(),
+        "working_tree_dirty": bool(dirty_paths),
+        # 2026-09-05 : périmètre du drapeau + empreinte des chemins sales
+        # (scalaires uniquement -- diffusés en colonne parquet par les runners)
+        "working_tree_dirty_scope": WORKING_TREE_DIRTY_SCOPE,
+        "dirty_decision_paths_sha1": (
+            hashlib.sha1("\n".join(dirty_paths).encode()).hexdigest()[:16] if dirty_paths else ""),
         "config_hash": config_hash(),
         "alpha_spec_hash": alpha_spec_hash(alpha_id),
     }
