@@ -36,6 +36,27 @@ au round de validation). Toute violation invalide ton rapport.
 3. **Comparer les signaux entre eux, pas à zéro.** Ce marché a une dérive inconditionnelle
    forte. Un conditionnement de régime se juge sur `bras_A − bras_B` sur la même
    population, jamais sur « le bras A est positif ».
+
+   ⚠ **CORRECTIF (2026-09-05, après le round 4 — cette consigne était incomplète et a
+   produit de faux positifs).** Dire « comparer les bras entre eux » ne suffit pas : il
+   faut préciser **l'unité d'agrégation du contrôle**. Contrôler par la moyenne du
+   **jour calendaire** ne retire PAS le facteur marché dès que les événements sont
+   concentrés dans le temps à l'intérieur de cette unité. W9 l'a mesuré : un signal
+   ALÉATOIRE obtenait **+79,3 bps** là où son vrai signal obtenait +82,4 ; son mécanisme
+   H2b passait de +42,8 bps (t=8,5, ETA 2,7 ans) à **−4,7 bps (t=−0,83)** une fois le
+   contrôle ramené à la **barre horaire**. Le biais gonfle, il ne déprime pas — il ne
+   peut donc pas créer de faux négatif, mais il fabrique des faux positifs à t=16-20.
+
+   Règle : **contrôler à la granularité de la barre**, pas du jour. Un bras dont les
+   épisodes sont uniformément répartis sur 24 h n'est pas exposé ; un bras déclenché par
+   du stress de marché l'est massivement, parce que c'est exactement la corrélation entre
+   l'heure de déclenchement et le rendement du facteur qui se retrouve dans l'edge.
+
+   **Placebo obligatoire, et lequel** : doubler chaque bras d'un signal aléatoire sur la
+   même population et le même contrôle. La bonne construction est une **permutation
+   cross-symbole à instant égal** — elle conserve le « quand » et ne détruit que le
+   « qui », donc elle isole précisément cette composante. Si le placebo capte une part
+   significative de l'edge, l'edge est le facteur, pas le signal.
 4. **Coûts.** Convention projet : `net_bps = gross_bps − 14` (5bps taker + 2bps slippage,
    aller-retour). Stress obligatoire : `− 28`. Un mécanisme qui ne survit pas au stress
    n'est pas `PROMISING`, il est `COST_FRAGILE`.
