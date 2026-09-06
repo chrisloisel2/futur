@@ -96,13 +96,38 @@ def test_provenance_tagging_knows_every_shadow_alpha():
 def test_every_shadow_alpha_is_routed_by_the_portfolio():
     """Un alpha de position sans adaptateur d'intent fait lever un KeyError au
     portefeuille (fail closed) ; un gate/overlay doit être listé explicitement
-    dans NOT_A_POSITION_ALPHA pour que son absence se lise comme un choix."""
+    dans NOT_A_POSITION_ALPHA pour que son absence se lise comme un choix.
+
+    Troisième cas légitime, ajouté avec le placebo (item D3) : un alpha dont
+    le `scientific_status` est refusé PAR CONSTRUCTION n'atteint jamais la
+    construction d'intents — la porte le refuse avant. Exempter seulement
+    `PLACEBO` et pas les autres motifs de blocage est délibéré : un alpha
+    bloqué faute de validation peut être débloqué demain par une édition du
+    registre, et se retrouverait alors non routé sans que rien ne le signale.
+    `PLACEBO` ne peut pas être débloqué (voir eligibility.BLOCK_PLACEBO)."""
+    from src.institutional.live_alpha_lab.eligibility import PLACEBO_SCIENTIFIC_STATUSES
     known = set(intents.ADAPTERS) | set(intents.NOT_A_POSITION_ALPHA)
-    missing = [a["alpha_id"] for a in _registry_shadow_alphas() if a["alpha_id"] not in known]
+    missing = [a["alpha_id"] for a in _registry_shadow_alphas()
+               if a["alpha_id"] not in known
+               and a.get("scientific_status") not in PLACEBO_SCIENTIFIC_STATUSES]
     assert not missing, (
         f"alphas en shadow inconnus du routage portefeuille : {missing}. "
         "Ajouter dans intents.ADAPTERS, ou dans NOT_A_POSITION_ALPHA si c'est voulu."
     )
+
+
+def test_a_placebo_still_needs_the_provenance_and_label_plumbing():
+    """L'exemption ci-dessus ne dispense de RIEN d'autre : un contrôle qui ne
+    serait pas étiqueté ou pas labellisé ne contrôlerait rien."""
+    from src.institutional.live_alpha_lab.eligibility import PLACEBO_SCIENTIFIC_STATUSES
+    from src.institutional.live_alpha_lab.outcomes import LABELABLE
+    from src.institutional.live_alpha_lab.schema import TIME_COL_BY_ALPHA
+    placebos = [a["alpha_id"] for a in _registry_shadow_alphas()
+                if a.get("scientific_status") in PLACEBO_SCIENTIFIC_STATUSES]
+    assert placebos, "aucun contrôle déclaré — le lab n'a plus de placebo"
+    for alpha_id in placebos:
+        assert alpha_id in TIME_COL_BY_ALPHA, f"{alpha_id} ne serait jamais étiqueté"
+        assert alpha_id in LABELABLE, f"{alpha_id} ne serait jamais labellisé"
 
 
 def test_disk_floor_is_below_collector_floor():

@@ -186,6 +186,12 @@ LABELABLE: Dict[str, LabelSpec] = {
     "BTC_LEAD_ALT_CASCADE_V1": LabelSpec("event_time", "symbol", "direction", "fwd_4h",
                                          cross_sectional=True),
     "SHORT_COVERING_CONTINUATION_V1": LabelSpec("timestamp", "asset", "direction", "fwd_4h"),
+    # Le CONTRÔLE (item D3). Labellisé exactement comme les vrais — même source
+    # de prix, mêmes ancrages, même decluster, même référence de marché, même
+    # modèle de coût. C'est tout l'intérêt : ce qu'il "gagne" en traversant
+    # cette chaîne est un biais de la chaîne, puisqu'il n'a aucun edge par
+    # construction. Voir scripts/run_placebo_random_shadow.py.
+    "PLACEBO_RANDOM_V1": LabelSpec("event_time", "symbol", "direction", "fwd_4h"),
 }
 
 # Hors périmètre, AVEC motif. L'absence de label ici est une propriété de
@@ -228,11 +234,22 @@ def horizon_hours(horizon: str) -> Optional[float]:
     return _HORIZON_HOURS.get(horizon)
 
 
-def label_params_digest() -> str:
-    """Empreinte de la RÈGLE de labellisation. Change dès qu'un ancrage, un
-    seuil de fraîcheur, une fenêtre de scellement ou le modèle de coût bouge —
-    ce qui rend toute dérive de méthode visible dans le ledger lui-même,
-    ligne par ligne, sans dépendre d'un changelog."""
+def label_params_digest(alpha_id: Optional[str] = None) -> str:
+    """Empreinte de la RÈGLE de labellisation POUR UN ALPHA. Change dès qu'un
+    ancrage, un seuil de fraîcheur, une fenêtre de scellement, le modèle de
+    coût ou LA SPEC DE CET ALPHA bouge — ce qui rend toute dérive de méthode
+    visible dans le ledger lui-même, ligne par ligne, sans dépendre d'un
+    changelog.
+
+    Portée par alpha, et pas globale : une empreinte qui inclurait la table
+    LABELABLE entière changerait pour TOUS les alphas dès qu'on en ajoute un
+    seul. Les lignes suivantes de LIQ_CASCADE_REPEAT_V1 porteraient alors une
+    empreinte différente de ses lignes précédentes, ce qui se lirait comme
+    « la règle a changé pour lui » alors que rien de le concernant n'a bougé.
+    Une empreinte qui crie au loup cesse d'être lue.
+
+    `alpha_id=None` renvoie l'empreinte de la règle GLOBALE seule (sans aucune
+    spec d'alpha) — utile pour journaliser l'état du module."""
     payload = {
         "schema_version": LABEL_SCHEMA_VERSION,
         "seal_window_hours": SEAL_WINDOW_HOURS,
@@ -245,7 +262,8 @@ def label_params_digest() -> str:
         "price_source": "derivatives_raw.open_interest.mark_price (MarkSeriesCache)",
         "benchmark_universe_config": BENCHMARK_UNIVERSE_CONFIG.name,
         "benchmark_min_symbols": MIN_BENCHMARK_SYMBOLS,
-        "labelable": {k: asdict(v) for k, v in sorted(LABELABLE.items())},
+        "alpha_id": alpha_id,
+        "alpha_spec": asdict(LABELABLE[alpha_id]) if alpha_id in LABELABLE else None,
     }
     return hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
@@ -599,7 +617,7 @@ def label_alpha(alpha_id: str, decisions: pd.DataFrame, spec: LabelSpec,
     """Labellise toutes les décisions FORWARD_LIVE mûres et non encore scellées."""
     now = now or pd.Timestamp.now(tz="UTC")
     cache = cache if cache is not None else _DEFAULT_CACHE
-    code_sha, params_sha = git_head_sha(), label_params_digest()
+    code_sha, params_sha = git_head_sha(), label_params_digest(alpha_id)
 
     if "provenance" not in decisions.columns:
         return {"alpha_id": alpha_id, "status": "NO_PROVENANCE_COLUMN",

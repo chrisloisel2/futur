@@ -1202,3 +1202,54 @@ alphas:
       PAS sur l'atteinte d'une significativite fraiche (pas realiste a cette
       frequence). 2025 quasi-plat (-0.2bps) est le point a surveiller en
       priorite pour un signal de decroissance.
+
+  # ══════════════════════════════════════════════════════════════════════
+  # CONTRÔLE — signal aléatoire (item D3, ajouté 2026-09-06)
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: PLACEBO_RANDOM_V1
+    family: control
+    mechanism: >
+      AUCUN mécanisme. Tirage uniforme sans remise de 4 symboles du frozen-50
+      par cycle, direction LONG, horizon fwd_4h, ancré sur la dernière barre
+      5 min close. Graine dérivée de l'horodatage de la barre : même barre,
+      même tirage, donc idempotent comme tous les autres runners.
+    version: v1.0
+    scientific_status: PLACEBO           # jamais de capital -- eligibility.BLOCK_PLACEBO
+    operational_status: SIGNAL_SHADOW
+    source_report: "aucun -- c'est le contrôle, pas un candidat"
+    signal_definition: scripts/run_placebo_random_shadow.py::draw
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: []
+    model_family: RANDOM_CONTROL
+    model_hash: null
+    training_window: "aucun -- aucun apprentissage, aucun seuil, aucune donnée d'entrée"
+    freeze_timestamp: "2026-09-06T09:55:26+00:00"
+    entry: "tirage uniforme sans remise sur l'univers figé"
+    exit: fwd_4h (horizon fixe)
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: "identique aux vrais alphas -- c'est le point"
+    risk_bucket: CONTROL_FAMILY
+    correlation_family: CONTROL
+    expected_capacity: "4 décisions/cycle, plafonné à ~50 épisodes indépendants/jour par le decluster (symbole, 24h)"
+    live_start_timestamp: "2026-09-06T09:55:26+00:00"
+    expected_net_bps: null               # un placebo n'a PAS d'espérance à confirmer
+    expected_net_bps_basis: null         # donc pas d'edge_retention -- fail closed
+    expected_n_independent_episodes: null
+    expected_profit_factor: null
+    data_live: true
+    notes: >
+      Pourquoi ce contrôle existe : les chiffres du labelliseur (item A1)
+      reposent sur une chaîne -- source de prix, deux ancrages, decluster en
+      épisodes, référence de marché, modèle de coût, bootstrap. Chaque maillon
+      peut avoir un biais, et AUCUNE statistique sur les alphas réels ne peut
+      le mesurer. Un signal sans edge, oui : tout ce qu'il "gagne" en
+      traversant la même chaîne est un biais de la chaîne.
+      Lecture : si son excess net est significativement non nul, c'est la
+      MESURE qui est biaisée et tous les chiffres du lab sont à relire. S'il
+      est nul avec un intervalle serré, les chiffres des vrais alphas sont
+      lisibles tels quels.
+      Il ne reçoit JAMAIS de capital : `eligibility.BLOCK_PLACEBO` est placée
+      AVANT toute consultation du registre de validation, donc le refus ne
+      dépend d'aucune donnée éditable ailleurs.

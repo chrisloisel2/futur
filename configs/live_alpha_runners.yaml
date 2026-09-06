@@ -106,3 +106,12 @@ runners:
     cadence_minutes: 360
     timeout_sec: 1800
     role: position
+
+  # Contrôle à signal aléatoire (item D3). Même cadence que les alphas
+  # événementiels : il doit être soumis au même rythme de collecte qu'eux,
+  # sinon il contrôlerait un régime d'échantillonnage différent.
+  - alpha_id: PLACEBO_RANDOM_V1
+    script: scripts/run_placebo_random_shadow.py
+    cadence_minutes: 15
+    timeout_sec: 120
+    role: control

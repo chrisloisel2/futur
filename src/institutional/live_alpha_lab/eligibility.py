@@ -107,6 +107,12 @@ NO_CAPITAL_SCIENTIFIC_STATUSES = frozenset(("REJECTED", "INVALIDATED",
 # distincts, jamais un seul fourre-tout.
 UNRESOLVED_SPEC_SCIENTIFIC_STATUSES = frozenset(("RECONSTRUCTED",))
 
+# Le placebo (item D3). Un alpha à signal aléatoire ne doit JAMAIS recevoir de
+# capital, et surtout pas pouvoir être promu par une édition du registre de
+# validation. D'où une porte propre, placée AVANT toute consultation de ce
+# registre : le refus ne dépend d'aucune donnée éditable ailleurs.
+PLACEBO_SCIENTIFIC_STATUSES = frozenset(("PLACEBO",))
+
 # Le seul statut du VALIDATION_REGISTRY qui autorise du capital forward.
 VALIDATED_STATUS = "VALIDATED_FOR_FORWARD"
 
@@ -127,6 +133,7 @@ class EligibilityReason(str, Enum):
     BLOCK_NO_VALIDATION_RECORD = "BLOCK_NO_VALIDATION_RECORD"
     BLOCK_NOT_VALIDATED_FOR_FORWARD = "BLOCK_NOT_VALIDATED_FOR_FORWARD"
     BLOCK_NOT_EXECUTABLE = "BLOCK_NOT_EXECUTABLE"
+    BLOCK_PLACEBO = "BLOCK_PLACEBO"
 
 
 @dataclass(frozen=True)
@@ -279,6 +286,13 @@ def is_forward_eligible(alpha: dict,
         return ForwardEligibility(
             alpha_id, False, EligibilityReason.BLOCK_SCIENTIFIC_STATUS,
             f"scientific_status={sci!r} -> mécanisme mort ou en attente de respec")
+
+    if sci in PLACEBO_SCIENTIFIC_STATUSES:
+        return ForwardEligibility(
+            alpha_id, False, EligibilityReason.BLOCK_PLACEBO,
+            "signal aléatoire (contrôle) : jamais de capital, par construction. "
+            "Il traverse la même chaîne de mesure que les vrais alphas — c'est "
+            "sa raison d'être — mais il ne prend aucune position.")
 
     if sci in UNRESOLVED_SPEC_SCIENTIFIC_STATUSES:
         return ForwardEligibility(
