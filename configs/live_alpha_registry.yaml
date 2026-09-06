@@ -30,6 +30,13 @@
 #
 #   operational_status (où en est le CODE) :
 #     CODE_MISSING | DATA_BLOCKED | SIGNAL_SHADOW | EXECUTION_SHADOW | READY
+#     OFFLINE_INSTRUMENT    -> ce n'est pas un producteur de signal : il est
+#                              reconstruit à la demande depuis l'historique
+#                              scellé, jamais lancé par le cycle. Ajouté
+#                              2026-09-06 pour POSITIVE_CONTROL_ORACLE_V1, qui
+#                              serait absurde en continu -- il choisit ses
+#                              décisions en connaissant leur résultat. Un tel
+#                              alpha n'a donc PAS de runner, et c'est voulu.
 #     MERGED_INTO_<alpha_id> -> ce candidat n'a PAS de code séparé sous son
 #                               propre alpha_id ; son signal est calculé à
 #                               l'intérieur d'un layer partagé -- voir
@@ -1218,6 +1225,63 @@ alphas:
   # ══════════════════════════════════════════════════════════════════════
   # CONTRÔLE — signal aléatoire (item D3, ajouté 2026-09-06)
   # ══════════════════════════════════════════════════════════════════════
+
+  # ══════════════════════════════════════════════════════════════════════
+  # CONTRÔLE POSITIF — edge CONNU, injecté avec look-ahead (item D4)
+  # ══════════════════════════════════════════════════════════════════════
+
+  - alpha_id: POSITIVE_CONTROL_ORACLE_V1
+    family: control
+    mechanism: >
+      AUCUN mécanisme prédictif — l'inverse. À chaque barre, un symbole est
+      tiré uniformément (exactement comme le placebo), puis on sélectionne le
+      symbole dont l'excess réalisé sur [t, t+4h] est le plus proche de
+      (excess du tirage + Δ). Δ est l'edge INJECTÉ, en bps d'excess. C'est du
+      look-ahead délibéré : on choisit en connaissant le résultat, pour savoir
+      combien de cet edge connu ressort à l'autre bout de la chaîne.
+      Quatre niveaux Δ ∈ {0, 10, 29, 60} bps sur des barres disjointes. Δ=0
+      redonne exactement le placebo, ce qui en fait un second contrôle négatif
+      indépendant de PLACEBO_RANDOM_V1.
+    version: v1.0
+    scientific_status: POSITIVE_CONTROL   # jamais de capital -- eligibility.BLOCK_POSITIVE_CONTROL
+    # PAS un producteur : reconstruit à la demande depuis l'historique scellé.
+    # Le lancer en cycle produirait des décisions à look-ahead en continu, ce qui
+    # n'a aucun sens et encombrerait le ledger d'un edge fabriqué.
+    operational_status: OFFLINE_INSTRUMENT
+    source_report: "aucun -- c'est un instrument de mesure, pas un candidat"
+    signal_definition: scripts/run_positive_control_oracle.py::select_for_bar
+    universe: configs/portfolio_v1_1_parallel_50.yaml
+    features: []
+    model_family: ORACLE_CONTROL
+    model_hash: null
+    training_window: "aucun -- aucun apprentissage. La sélection lit le futur, elle ne l'estime pas."
+    entry: "sélection oracle : excess réalisé le plus proche de (excess du tirage uniforme + Δ)"
+    exit: fwd_4h (horizon fixe)
+    horizon: fwd_4h
+    execution_style: TAKER
+    cost_model: "identique aux vrais alphas -- c'est le point"
+    risk_bucket: CONTROL_FAMILY
+    correlation_family: CONTROL
+    expected_capacity: "aucune -- ne prend aucune position"
+    expected_net_bps: null               # l'espérance n'est pas dans le registre :
+    expected_net_bps_basis: null         # elle est injectée par décision et scellée dans le ledger
+    expected_n_independent_episodes: null
+    expected_profit_factor: null
+    data_live: false
+    uses_lookahead: true
+    notes: >
+      Le placebo (D3) mesure ce que la chaîne AJOUTE à un signal sans edge.
+      Celui-ci mesure ce qu'elle RETIRE à un signal qui en a un. Les deux
+      bornent l'appareil, et aucun des deux ne peut être remplacé par de la
+      statistique sur les alphas réels.
+      Lecture : si un edge injecté de +29 bps d'excess ressort à +29, la chaîne
+      de mesure est fidèle et les négatifs de l'item A1 sont de VRAIS négatifs.
+      S'il ressort à +8, la chaîne détruit les deux tiers de tout signal réel
+      et aucun résultat du lab n'est lisible tel quel.
+      Il ne reçoit JAMAIS de capital : `eligibility.BLOCK_POSITIVE_CONTROL` est
+      placée avant toute consultation du registre de validation. Un contrôle
+      positif est plus dangereux qu'un placebo — son rendement simulé est
+      magnifique par construction.
 
   - alpha_id: PLACEBO_RANDOM_V1
     family: control

@@ -113,6 +113,15 @@ UNRESOLVED_SPEC_SCIENTIFIC_STATUSES = frozenset(("RECONSTRUCTED",))
 # registre : le refus ne dépend d'aucune donnée éditable ailleurs.
 PLACEBO_SCIENTIFIC_STATUSES = frozenset(("PLACEBO",))
 
+# Le contrôle POSITIF (item D4). Symétrique du placebo et plus dangereux que
+# lui : un alpha construit AVEC look-ahead affiche par construction un edge
+# magnifique. C'est précisément ce qui doit le rendre inéligible, et la porte
+# est placée au même endroit que celle du placebo -- AVANT toute consultation
+# du registre de validation -- pour la même raison : un contrôle qu'une édition
+# de registre pourrait promouvoir ne serait pas un contrôle, ce serait une
+# bombe à retardement dont le rendement simulé est garanti.
+POSITIVE_CONTROL_SCIENTIFIC_STATUSES = frozenset(("POSITIVE_CONTROL",))
+
 # Le seul statut du VALIDATION_REGISTRY qui autorise du capital forward.
 VALIDATED_STATUS = "VALIDATED_FOR_FORWARD"
 
@@ -134,6 +143,7 @@ class EligibilityReason(str, Enum):
     BLOCK_NOT_VALIDATED_FOR_FORWARD = "BLOCK_NOT_VALIDATED_FOR_FORWARD"
     BLOCK_NOT_EXECUTABLE = "BLOCK_NOT_EXECUTABLE"
     BLOCK_PLACEBO = "BLOCK_PLACEBO"
+    BLOCK_POSITIVE_CONTROL = "BLOCK_POSITIVE_CONTROL"
 
 
 @dataclass(frozen=True)
@@ -350,6 +360,14 @@ def is_forward_eligible(alpha: dict,
             "signal aléatoire (contrôle) : jamais de capital, par construction. "
             "Il traverse la même chaîne de mesure que les vrais alphas — c'est "
             "sa raison d'être — mais il ne prend aucune position.")
+
+    if sci in POSITIVE_CONTROL_SCIENTIFIC_STATUSES:
+        return ForwardEligibility(
+            alpha_id, False, EligibilityReason.BLOCK_POSITIVE_CONTROL,
+            "construit avec look-ahead (contrôle positif) : ses décisions sont "
+            "choisies EN CONNAISSANT leur rendement futur. Il mesure la fidélité "
+            "de la chaîne de mesure, il ne prédit rien. Jamais de capital, et le "
+            "refus ne dépend d'aucune donnée éditable ailleurs.")
 
     if sci in UNRESOLVED_SPEC_SCIENTIFIC_STATUSES:
         return ForwardEligibility(

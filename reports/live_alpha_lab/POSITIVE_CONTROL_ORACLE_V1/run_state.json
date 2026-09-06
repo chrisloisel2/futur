@@ -1,0 +1,37 @@
+{
+  "alpha_id": "POSITIVE_CONTROL_ORACLE_V1",
+  "built_at": "2026-09-06T17:24:31.876698+00:00",
+  "mode": "POSITIVE_CONTROL_NO_CAPITAL",
+  "uses_lookahead": true,
+  "grid_start": "2026-06-29 00:00:00+00:00",
+  "grid_stop": "2026-09-06 00:00:00+00:00",
+  "n_bars": 414,
+  "n_bars_skipped_benchmark": 62,
+  "n_decisions_total": 1408,
+  "universe_hash": "86cde5af4837bf8a",
+  "universe_size": 50,
+  "injection_levels_bps": [
+    0.0,
+    10.0,
+    29.0,
+    60.0
+  ],
+  "injected_measured_by_level": {
+    "0.0": {
+      "n": 360,
+      "mean_bps": 0.0
+    },
+    "10.0": {
+      "n": 352,
+      "mean_bps": 8.717
+    },
+    "29.0": {
+      "n": 344,
+      "mean_bps": 26.121
+    },
+    "60.0": {
+      "n": 352,
+      "mean_bps": 57.141
+    }
+  }
+}

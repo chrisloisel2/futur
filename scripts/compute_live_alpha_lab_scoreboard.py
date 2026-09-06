@@ -384,9 +384,17 @@ def outcomes_section(rows: list, registry: dict) -> list:
         "| alpha_id | n_lab | n_épisodes | scellés/tardifs | anc. | net_gross@14 | net_excess@14 | net_excess@28 | PF | hit | IC95 excess@14 | edge_retention |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
+    # Les contrôles apparaissent dans le tableau -- c'est leur raison d'être --
+    # mais jamais comme des candidats. Le contrôle POSITIF est construit avec
+    # look-ahead : sa ligne est magnifique par construction, et une ligne
+    # magnifique non marquée finit toujours par être citée.
+    controls = {"PLACEBO_RANDOM_V1": "contrôle négatif",
+                "POSITIVE_CONTROL_ORACLE_V1": "contrôle positif — LOOK-AHEAD"}
     excluded = []
     for r in rows:
         alpha_id = r["alpha_id"]
+        display_id = (f"⚙️ {alpha_id} _({controls[alpha_id]})_"
+                      if alpha_id in controls else alpha_id)
         o = outcome_row(alpha_id, registry.get(alpha_id, {}))
         if not o.get("labelable"):
             excluded.append((alpha_id, o["reason"]))
@@ -402,7 +410,7 @@ def outcomes_section(rows: list, registry: dict) -> list:
             # variance observable -- c'est la façon la plus efficace de faire
             # lire une certitude là où il n'y a qu'une observation.
             lines.append(
-                f"| {alpha_id} | {o['dec_excess'].n_labeled if o['dec_excess'] else 0} | "
+                f"| {display_id} | {o['dec_excess'].n_labeled if o['dec_excess'] else 0} | "
                 f"{n_ep} | {o['n_sealed']}/{o['n_late']} | — | "
                 f"INSUFFICIENT_SAMPLE (n_ep={n_ep} < {MIN_EPISODES_FOR_POINT}) | | | | | | |")
             continue
@@ -417,7 +425,7 @@ def outcomes_section(rows: list, registry: dict) -> list:
                 elif o.get("expected_net_bps_basis") is None:
                     ret = "base non déclarée"
             lines.append(
-                f"| {alpha_id if anchor == 'dec' else ''} | {ex.n_labeled} | "
+                f"| {display_id if anchor == 'dec' else ''} | {ex.n_labeled} | "
                 f"{ex.n_episodes} | {o['n_sealed']}/{o['n_late']} | `{anchor}` | "
                 f"{_fmt(gr, 'net_bps_base')} | {_fmt(ex, 'net_bps_base')} | "
                 f"{_fmt(ex, 'net_bps_stress')} | {_fmt(ex, 'profit_factor_base')} | "
@@ -445,6 +453,16 @@ def outcomes_section(rows: list, registry: dict) -> list:
         "  peut le remplacer. Il ne reçoit jamais de capital (`eligibility.BLOCK_PLACEBO`).",
         "  Son compteur forward démarre au 2026-09-06 : sous 20 épisodes il affiche",
         "  `INSUFFICIENT_SAMPLE` comme n'importe quel autre, et il n'est pas encore lisible.",
+        "- **`POSITIVE_CONTROL_ORACLE_V1` est l'autre borne, et sa ligne N'EST PAS un résultat.**",
+        "  Il choisit ses décisions EN CONNAISSANT leur rendement (look-ahead délibéré) pour",
+        "  mesurer ce que la chaîne RETIRE à un edge qui existe — là où le placebo mesure ce",
+        "  qu'elle AJOUTE à un edge qui n'existe pas. Verdict mesuré : la chaîne restitue",
+        "  l'edge injecté au bit près (écart nul par décision, pente 1,03). Elle ne détruit",
+        "  donc aucun signal. Ce qui manque aux alphas réels n'est pas la fidélité de la",
+        "  mesure, c'est le nombre d'épisodes : à σ ≈ 112 bps par épisode, voir +15 bps nets",
+        "  demande ~116 épisodes indépendants, et quatre des cinq alphas en ont moins de 40.",
+        "  Voir `POSITIVE_CONTROL_RECOVERY.md`. Il ne reçoit jamais de capital",
+        "  (`eligibility.BLOCK_POSITIVE_CONTROL`).",
         "- **Les labels `LATE_BACKFILL` ne sont pas des labels scellés à l'échéance.** Le prix",
         "  relevé est honnête (les partitions de `derivatives_raw` ne sont pas réécrites), mais",
         "  rien ne garantit que la règle de labellisation ait été fixée avant d'avoir vu la",

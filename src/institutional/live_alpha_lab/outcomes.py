@@ -192,6 +192,11 @@ LABELABLE: Dict[str, LabelSpec] = {
     # cette chaîne est un biais de la chaîne, puisqu'il n'a aucun edge par
     # construction. Voir scripts/run_placebo_random_shadow.py.
     "PLACEBO_RANDOM_V1": LabelSpec("event_time", "symbol", "direction", "fwd_4h"),
+    # Le CONTRÔLE POSITIF (item D4). Même labelliseur, mêmes ancrages, même
+    # decluster, même modèle de coût que les vrais — sinon il ne contrôlerait
+    # pas la chaîne qu'on veut mesurer, il en contrôlerait une copie.
+    # Voir scripts/run_positive_control_oracle.py.
+    "POSITIVE_CONTROL_ORACLE_V1": LabelSpec("event_time", "symbol", "direction", "fwd_4h"),
 }
 
 # Hors périmètre, AVEC motif. L'absence de label ici est une propriété de

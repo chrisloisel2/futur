@@ -42,6 +42,7 @@ TIME_COL_BY_ALPHA: Dict[str, str] = {
     "VOL_FORECAST_LAYER_V1": "event_time",
     "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "event_time",
     "PLACEBO_RANDOM_V1": "event_time",
+    "POSITIVE_CONTROL_ORACLE_V1": "event_time",
 }
 
 # None = univers mono-symbole (VOL_FORECAST_LAYER_V1, BTC seul) : pas de
@@ -61,4 +62,5 @@ SYMBOL_COL_BY_ALPHA: Dict[str, Optional[str]] = {
     "VOL_FORECAST_LAYER_V1": None,
     "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "symbol",
     "PLACEBO_RANDOM_V1": "symbol",
+    "POSITIVE_CONTROL_ORACLE_V1": "symbol",
 }
