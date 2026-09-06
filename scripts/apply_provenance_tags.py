@@ -32,20 +32,10 @@ LAB_DIR = ROOT / "reports" / "live_alpha_lab"
 
 # Colonne temps de l'ÉVÉNEMENT par alpha_id (PAS decided_at). Explicite, pas
 # devinée : chaque alpha a un schéma différent selon sa famille.
-TIME_COL_BY_ALPHA = {
-    "LIQ_CASCADE_REPEAT_V1": "event_time",
-    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "event_time",
-    "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
-    "BTC_LEAD_ALT_CASCADE_V1": "event_time",
-    "SHORT_COVERING_CONTINUATION_V1": "timestamp",
-    "WHALE_LSR_SCREEN_V1": "timestamp",
-    "FUNDING_BASIS_DISAGREEMENT_V1": "date",
-    "FUNDING_BASIS_DISAGREEMENT_V2": "date",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time",
-    "VOL_FORECAST_LAYER_V1": "event_time",
-    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "event_time",
-}
+# Table canonique -- voir src/institutional/live_alpha_lab/schema.py.
+# (Était une 3e copie indépendante ; toute divergence entre copies faisait
+# disparaître un alpha de la mesure sans le signaler.)
+from src.institutional.live_alpha_lab.schema import TIME_COL_BY_ALPHA
 
 
 def main() -> int:

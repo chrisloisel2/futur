@@ -32,6 +32,10 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
+from src.institutional.live_alpha_lab.schema import (
+    SYMBOL_COL_BY_ALPHA, TIME_COL_BY_ALPHA,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 LAB_DIR = ROOT / "reports" / "live_alpha_lab"
 PORTFOLIOS_DIR = LAB_DIR / "portfolios"
@@ -39,20 +43,12 @@ PORTFOLIOS_DIR = LAB_DIR / "portfolios"
 # mêmes mappings que scripts/compute_live_alpha_lab_scoreboard.py -- colonne
 # "symbole" pas toujours `symbol` (SHORT_COVERING utilise `asset`, hérité du
 # schéma Opportunity), colonne temps pas toujours `event_time`. Jamais deviné.
-_TIME_COL = {
-    "LIQ_CASCADE_REPEAT_V1": "event_time", "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
-    "SHORT_COVERING_CONTINUATION_V1": "timestamp", "WHALE_LSR_SCREEN_V1": "timestamp",
-    "FUNDING_BASIS_DISAGREEMENT_V1": "date", "FUNDING_BASIS_DISAGREEMENT_V2": "date",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time", "VOL_FORECAST_LAYER_V1": "event_time",
-}
-_SYMBOL_COL = {
-    "LIQ_CASCADE_REPEAT_V1": "symbol", "LIQ_CASCADE_FAR_FROM_LOW_V1": "symbol",
-    "SHORT_COVERING_CONTINUATION_V1": "asset", "WHALE_LSR_SCREEN_V1": "symbol",
-    "FUNDING_BASIS_DISAGREEMENT_V1": "symbol", "FUNDING_BASIS_DISAGREEMENT_V2": "symbol",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "symbol",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "symbol", "VOL_FORECAST_LAYER_V1": None,
-}
+# Table canonique -- voir src/institutional/live_alpha_lab/schema.py. Cette
+# copie locale était PÉRIMÉE (9 entrées : BTC_LEAD_ALT_CASCADE_V1,
+# LIQ_CASCADE_REPEAT_SYSTEMIC_V1 et AMIHUD_ILLIQUIDITY_PREMIUM_V1 manquaient),
+# ce qui faisait silencieusement disparaître ces alphas de la trace.
+_TIME_COL = TIME_COL_BY_ALPHA
+_SYMBOL_COL = SYMBOL_COL_BY_ALPHA
 
 
 def _load_state(portfolio_name: str) -> Dict[str, Any]:

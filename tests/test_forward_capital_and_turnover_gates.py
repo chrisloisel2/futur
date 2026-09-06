@@ -75,16 +75,38 @@ def _intent(instrument="BTCUSDT", frac=1.0, ts=None, alpha_id="A1", edge=0.02,
 # ══════════════════════════════════════════════════════════════════════════
 
 def test_1_unvalidated_alpha_gets_no_forward_capital():
-    """Le cas réel : SHORT_COVERING_CONTINUATION_V1, operational_status et
-    scientific_status parfaitement sains, mais validated_for_forward: false."""
+    """La porte de validation, isolée. Le cas réel dont elle vient est
+    SHORT_COVERING_CONTINUATION_V1 (validated_for_forward: false), mais depuis
+    le 2026-09-06 cet alpha est arrêté PLUS TÔT par BLOCK_UNRESOLVED_SPEC
+    (scientific_status=RECONSTRUCTED, item C2) -- voir le test suivant. On
+    teste donc ici la porte de validation sur un alpha dont la spec est
+    établie, sinon on testerait l'autre porte sans le savoir."""
+    alpha = {"alpha_id": "UN_ALPHA_FIGE_V1",
+             "operational_status": "SIGNAL_SHADOW", "scientific_status": "FROZEN"}
+    index = {"UN_ALPHA_FIGE_V1": [
+        ValidationLink("UN_CANDIDAT", "NEEDS_MORE_RESEARCH", False, 2.53)]}
+    v = is_forward_eligible(alpha, index)
+    assert v.eligible is False
+    assert v.reason is EligibilityReason.BLOCK_NOT_VALIDATED_FOR_FORWARD
+    assert not v          # __bool__ : utilisable directement dans un `if`
+
+
+def test_1_reconstructed_short_covering_is_stopped_earlier_still():
+    """Le cas réel, tel qu'il se comporte AUJOURD'HUI : SHORT_COVERING est
+    doublement bloqué, et c'est la porte de spec qui parle en premier. Elle est
+    la plus forte des deux : elle tient même si le registre de validation
+    changeait d'avis demain."""
     alpha = {"alpha_id": "SHORT_COVERING_CONTINUATION_V1",
              "operational_status": "SIGNAL_SHADOW", "scientific_status": "RECONSTRUCTED"}
     index = {"SHORT_COVERING_CONTINUATION_V1": [
         ValidationLink("SHORT_COVERING_CONTINUATION", "NEEDS_MORE_RESEARCH", False, 2.53)]}
     v = is_forward_eligible(alpha, index)
     assert v.eligible is False
-    assert v.reason is EligibilityReason.BLOCK_NOT_VALIDATED_FOR_FORWARD
-    assert not v          # __bool__ : utilisable directement dans un `if`
+    assert v.reason is EligibilityReason.BLOCK_UNRESOLVED_SPEC
+    # et il resterait bloqué même validé -- c'est tout l'intérêt
+    validated = {"SHORT_COVERING_CONTINUATION_V1": [
+        ValidationLink("SHORT_COVERING_CONTINUATION", "VALIDATED_FOR_FORWARD", True, 9.2)]}
+    assert is_forward_eligible(alpha, validated).eligible is False
 
 
 def test_1b_alpha_without_any_validation_record_fails_closed():

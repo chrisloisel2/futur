@@ -738,16 +738,38 @@ def summarize_outcomes(df: Optional[pd.DataFrame], anchor: str = "dec",
     )
 
 
-def edge_retention(forward_net_bps: Optional[float],
-                   expected_net_bps: Optional[float]) -> Optional[float]:
+# Bases possibles de `expected_net_bps` dans le registre. Ajoutées 2026-09-06
+# après avoir constaté que la colonne mélangeait deux grandeurs : 27,1 pour
+# LIQ_CASCADE_REPEAT_V1 est un net ABSOLU (freeze_spec.net_bps_full_sample),
+# 9,2 pour SHORT_COVERING est un EXCESS vs baseline (son net absolu vaut
+# -2,72 full / +2,3 OOS). Les comparer entre eux, ou comparer le mauvais des
+# deux au forward, produit un ratio qui a l'air d'un chiffre sans en être un.
+EXPECTED_BASIS_ABSOLUTE = "ABSOLUTE"
+EXPECTED_BASIS_EXCESS = "EXCESS_VS_BASELINE"
+
+
+def edge_retention(expected_net_bps: Optional[float], basis: Optional[str], *,
+                   gross_net_bps: Optional[float] = None,
+                   excess_net_bps: Optional[float] = None) -> Optional[float]:
     """net_bps forward / net_bps de validation, sur l'ancrage ÉVÉNEMENT — le
     seul comparable, puisque le backtest s'ancre sur la barre de l'événement.
 
-    Un dénominateur nul ou négatif ne produit PAS un ratio : la rétention n'a
-    pas de sens quand la référence n'est pas un edge positif (WHALE_LSR affiche
-    -57,8 bps attendus). None, jamais un chiffre qui se lirait de travers."""
-    if forward_net_bps is None or expected_net_bps is None:
+    `basis` dit LAQUELLE des deux mesures forward est comparable :
+      ABSOLUTE            -> le `gross` forward (rendement du symbole)
+      EXCESS_VS_BASELINE  -> l'`excess` forward (net de l'univers)
+    Une base absente renvoie None. Fail closed délibéré : deviner la base,
+    c'est précisément l'erreur que ce paramètre existe pour rendre impossible,
+    et un ratio faux se cite plus facilement qu'une case vide.
+
+    Un dénominateur nul ou négatif ne produit PAS de ratio non plus : la
+    rétention n'a pas de sens quand la référence n'est pas un edge positif
+    (WHALE_LSR affiche -57,8 bps attendus)."""
+    if expected_net_bps is None or expected_net_bps <= 0:
         return None
-    if expected_net_bps <= 0:
+    if basis == EXPECTED_BASIS_ABSOLUTE:
+        forward = gross_net_bps
+    elif basis == EXPECTED_BASIS_EXCESS:
+        forward = excess_net_bps
+    else:
         return None
-    return round(forward_net_bps / expected_net_bps, 3)
+    return None if forward is None else round(forward / expected_net_bps, 3)

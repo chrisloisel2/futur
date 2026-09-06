@@ -24,8 +24,10 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.institutional.live_alpha_lab.schema import TIME_COL_BY_ALPHA
 from src.institutional.live_alpha_lab.eligibility import (
     NO_CAPITAL_SCIENTIFIC_STATUSES, EligibilityReason, is_forward_eligible,
+    recent_decision_lag_median_h,
     load_validation_index)
 from src.institutional.live_alpha_lab.gate import active_screen_symbols
 from src.institutional.live_alpha_lab.intents import NOT_A_POSITION_ALPHA, build_intents
@@ -67,9 +69,18 @@ def main() -> int:
     eligibility_log = []
     gate_stats = []
     for alpha_id, entry in by_id.items():
+        # item C1 : porte d'EXÉCUTABILITÉ. Le ledger est chargé AVANT le verdict
+        # (et non après, comme auparavant) uniquement pour mesurer la latence
+        # récente et la donner à la porte. Un alpha dont les décisions arrivent
+        # après l'expiration de leur propre horizon ne doit pas ressortir
+        # `eligible: true` -- le système imprimait cette contradiction sans
+        # jamais la refuser.
+        fwd = load_forward_only(alpha_id)
+        lag_h = recent_decision_lag_median_h(fwd, TIME_COL_BY_ALPHA.get(alpha_id, ""))
         verdict = is_forward_eligible(
             entry, validation_index,
-            position_alpha=alpha_id not in NOT_A_POSITION_ALPHA)
+            position_alpha=alpha_id not in NOT_A_POSITION_ALPHA,
+            decision_lag_median_h=lag_h)
         eligibility_log.append(verdict.as_dict())
         if not verdict.eligible:
             # La collecte forward n'est JAMAIS coupée -- seul le capital l'est.
@@ -78,7 +89,6 @@ def main() -> int:
             continue
         if verdict.reason is EligibilityReason.NOT_A_POSITION_ALPHA:
             continue   # gate/overlay : traité plus bas, ne produit pas d'intent
-        fwd = load_forward_only(alpha_id)
         stats: dict = {}
         try:
             intents = build_intents(alpha_id, entry, fwd, stats=stats)

@@ -174,11 +174,38 @@ def test_thin_benchmark_is_none_not_a_fake_market(monkeypatch):
 
 @pytest.mark.parametrize("expected", [None, 0.0, -57.8])
 def test_edge_retention_refuses_a_nonpositive_reference(expected):
-    assert O.edge_retention(20.0, expected) is None
+    assert O.edge_retention(expected, O.EXPECTED_BASIS_ABSOLUTE, gross_net_bps=20.0) is None
 
 
-def test_edge_retention_is_the_plain_ratio():
-    assert O.edge_retention(13.55, 27.1) == 0.5
+def test_edge_retention_refuses_an_undeclared_basis():
+    """La colonne `expected_net_bps` du registre porte DEUX grandeurs : un net
+    absolu pour LIQ_CASCADE_REPEAT_V1 (27,1), un excess vs baseline pour
+    SHORT_COVERING (9,2, dont le net absolu vaut -2,72). Deviner laquelle est
+    exactement l'erreur que ce paramètre rend impossible."""
+    assert O.edge_retention(27.1, None, gross_net_bps=13.55, excess_net_bps=5.0) is None
+    assert O.edge_retention(27.1, "PAS_UNE_BASE", gross_net_bps=13.55) is None
+
+
+def test_edge_retention_picks_the_metric_the_basis_names():
+    assert O.edge_retention(27.1, O.EXPECTED_BASIS_ABSOLUTE,
+                            gross_net_bps=13.55, excess_net_bps=99.0) == 0.5
+    assert O.edge_retention(9.2, O.EXPECTED_BASIS_EXCESS,
+                            gross_net_bps=99.0, excess_net_bps=4.6) == 0.5
+
+
+def test_every_registry_expected_net_bps_declares_its_basis_or_is_unused():
+    """Une entrée avec `expected_net_bps` mais sans base ne produira jamais
+    d'edge_retention — fail closed. Ce test ne l'interdit pas, il rend le
+    manque VISIBLE plutôt que silencieux."""
+    import yaml
+    reg = yaml.safe_load((ROOT / "configs" / "live_alpha_registry.yaml").read_text())
+    undeclared = [a["alpha_id"] for a in reg["alphas"]
+                  if a.get("expected_net_bps") is not None
+                  and a.get("expected_net_bps_basis") is None]
+    # les alphas sans base sont ceux sans décision forward : aucun n'est labellisable
+    assert not (set(undeclared) & set(O.LABELABLE)), (
+        f"alphas labellisables sans expected_net_bps_basis : "
+        f"{sorted(set(undeclared) & set(O.LABELABLE))}")
 
 
 # ── 7. exhaustivité de la classification ─────────────────────────────────────

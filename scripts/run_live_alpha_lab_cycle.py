@@ -240,6 +240,42 @@ def run_step(name: str, script: str, timeout_sec: int) -> dict:
     return record
 
 
+def write_attempt_heartbeat(alpha_id: str, record: dict) -> None:
+    """Trace de TENTATIVE par alpha, écrite quoi qu'il arrive.
+
+    Pourquoi elle existe : les 10 `run_*_shadow.py` n'écrivent leur
+    `run_state.json` QU'APRÈS avoir produit de nouvelles décisions — tous ont
+    un `return 0` anticipé sur « aucun event » / « rien de nouveau »
+    (idempotence) qui précède l'écriture. Son champ `last_run` signifie donc
+    « dernière fois qu'il a produit quelque chose », pas « dernière fois qu'il
+    a tourné ».
+
+    Conséquence mesurée le 2026-09-06 : BTC_LEAD_ALT_CASCADE_V1 affichait
+    `last_run: 2026-09-05T06:57` — 26 h — alors qu'il tournait avec succès à
+    CHAQUE cycle. Un alpha rare (~1,15 épisode/semaine) et un runner mort
+    depuis une semaine produisent exactement le même artefact. C'est
+    précisément l'angle mort qui avait laissé AMIHUD sans aucune décision
+    forward après son freeze.
+
+    Écrite par le CYCLE et non par les runners : un fichier séparé, aucun
+    conflit avec leur propre `run_state.json`, et surtout aucune modification
+    des dix producteurs pour corriger un défaut d'observabilité.
+    """
+    d = LAB_DIR / alpha_id
+    if not d.exists():
+        return
+    (d / "last_attempt.json").write_text(json.dumps({
+        "alpha_id": alpha_id,
+        "attempted_at": record["started_at"],
+        "status": record["status"],
+        "returncode": record["returncode"],
+        "duration_sec": record["duration_sec"],
+        "note": ("écrit par le CYCLE à chaque tentative — à distinguer de "
+                 "run_state.json::last_run, qui n'est écrit que quand le "
+                 "producteur a réellement produit de nouvelles décisions"),
+    }, indent=2, ensure_ascii=False))
+
+
 def registry_drift(runner_ids: set) -> list:
     """Alphas que le registre déclare en shadow mais qu'aucun producteur ne fait
     tourner. C'est le détecteur du cas « validé/figé mais qui ne trade pas » —
@@ -325,6 +361,7 @@ def main() -> int:
         rec = run_step(alpha_id, r["script"], int(r["timeout_sec"]))
         rec["role"] = r.get("role")
         steps.append(rec)
+        write_attempt_heartbeat(alpha_id, rec)
         if rec["status"] == "OK":
             last_success[alpha_id] = cycle_started.isoformat()
 

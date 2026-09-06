@@ -13,6 +13,7 @@ depuis le dernier calcul.
 """
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,6 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.institutional.live_alpha_lab.episodes import summarize as summarize_episodes
+from src.institutional.live_alpha_lab.schema import (
+    SYMBOL_COL_BY_ALPHA, TIME_COL_BY_ALPHA,
+)
 from src.institutional.live_alpha_lab.outcomes import (
     COST_BPS_ROUNDTRIP_BASE, COST_BPS_ROUNDTRIP_STRESS, LABELABLE, NOT_LABELABLE,
     edge_retention, load_outcomes, summarize_outcomes,
@@ -32,6 +36,27 @@ from src.institutional.live_alpha_lab.outcomes import (
 REGISTRY = ROOT / "configs" / "live_alpha_registry.yaml"
 LAB_DIR = ROOT / "reports" / "live_alpha_lab"
 OUT_MD = LAB_DIR / "SCOREBOARD.md"
+
+
+def last_attempt_hours(alpha_id: str):
+    """Heures depuis la dernière TENTATIVE du producteur (écrite par le cycle,
+    cf. run_live_alpha_lab_cycle.write_attempt_heartbeat), et son issue.
+
+    À ne PAS confondre avec `last_trigger_h_ago`, qui mesure la dernière fois
+    que l'alpha a DÉCLENCHÉ. Un alpha rare peut légitimement n'avoir rien
+    déclenché depuis des jours ; un producteur qui n'a pas TENTÉ depuis des
+    jours est une panne. Sans les deux colonnes, les deux cas sont
+    indiscernables — c'est exactement ce qui a masqué 26 h d'apparente
+    inactivité de BTC_LEAD_ALT_CASCADE_V1 alors qu'il tournait à chaque cycle."""
+    p = LAB_DIR / alpha_id / "last_attempt.json"
+    if not p.exists():
+        return None, None
+    try:
+        d = json.loads(p.read_text())
+        ts = pd.to_datetime(d["attempted_at"], utc=True)
+    except (json.JSONDecodeError, KeyError, OSError, ValueError):
+        return None, None
+    return round((pd.Timestamp.now(tz="UTC") - ts).total_seconds() / 3600, 1), d.get("status")
 
 
 def load_decisions(alpha_id: str):
@@ -44,30 +69,11 @@ def load_decisions(alpha_id: str):
 # event_time / timestamp / date -- même mapping que apply_provenance_tags.py
 # (dupliqué ici volontairement : ce script doit pouvoir tourner seul sans
 # dépendre de l'exécution préalable de l'autre pour connaître le nom de colonne).
-_TIME_COL = {
-    "LIQ_CASCADE_REPEAT_V1": "event_time", "LIQ_CASCADE_FAR_FROM_LOW_V1": "event_time",
-    "BTC_LEAD_ALT_CASCADE_V1": "event_time",
-    "SHORT_COVERING_CONTINUATION_V1": "timestamp", "WHALE_LSR_SCREEN_V1": "timestamp",
-    "FUNDING_BASIS_DISAGREEMENT_V1": "date", "FUNDING_BASIS_DISAGREEMENT_V2": "date",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "event_time",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "event_time", "VOL_FORECAST_LAYER_V1": "event_time",
-    # Ajoutés 2026-09-05 : absents de cette table depuis leur déploiement, donc
-    # forward_age/last_trigger/actual_freq sortaient VIDES pour eux -- un angle
-    # mort de monitoring sur précisément les deux alphas issus de la validation.
-    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "event_time",
-    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "event_time",
-}
-# colonne "symbole" par alpha -- pas toujours `symbol` (SHORT_COVERING utilise
-# `asset`, hérité du schéma Opportunity). Jamais deviné, mappé explicitement.
-_SYMBOL_COL = {
-    "LIQ_CASCADE_REPEAT_V1": "symbol", "LIQ_CASCADE_FAR_FROM_LOW_V1": "symbol",
-    "BTC_LEAD_ALT_CASCADE_V1": "symbol",
-    "SHORT_COVERING_CONTINUATION_V1": "asset", "WHALE_LSR_SCREEN_V1": "symbol",
-    "FUNDING_BASIS_DISAGREEMENT_V1": "symbol", "FUNDING_BASIS_DISAGREEMENT_V2": "symbol",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V1": "symbol",
-    "CROSS_SECTIONAL_MOMENTUM_LIVE_V2": "symbol", "VOL_FORECAST_LAYER_V1": None,  # univers=BTC seul, pas de decluster multi-symbole
-    "LIQ_CASCADE_REPEAT_SYSTEMIC_V1": "symbol", "AMIHUD_ILLIQUIDITY_PREMIUM_V1": "symbol",
-}
+# Tables canoniques -- voir src/institutional/live_alpha_lab/schema.py.
+# (Étaient dupliquées ici, dans trade_trace.py et dans
+# apply_provenance_tags.py ; les trois copies avaient divergé.)
+_TIME_COL = TIME_COL_BY_ALPHA
+_SYMBOL_COL = SYMBOL_COL_BY_ALPHA
 
 # item 15 : niveaux de confiance basés sur le NOMBRE d'épisodes indépendants,
 # jamais sur le PnL ("+300bps sur 2 événements" reste TOO_EARLY).
@@ -179,6 +185,7 @@ def row_for(entry: dict) -> dict:
                     actual_freq_per_day = round(forward / (forward_age_hours / 24), 3)
     elif df is not None:
         replay = len(df)   # pas encore tagué -- traité comme tout-replay par prudence (fail closed)
+    last_attempt_h, last_attempt_status = last_attempt_hours(alpha_id)
     lag_median_h, expired_on_arrival = decision_latency(
         df, _TIME_COL.get(alpha_id), entry.get("horizon"))
     lag_recent_h, expired_recent = decision_latency(
@@ -193,6 +200,8 @@ def row_for(entry: dict) -> dict:
         "forward_decisions": forward,
         "forward_age_hours": forward_age_hours,
         "time_since_last_trigger_hours": time_since_last_trigger_hours,
+        "last_attempt_hours": last_attempt_h,
+        "last_attempt_status": last_attempt_status,
         "actual_freq_per_day": actual_freq_per_day,
         "expected_capacity": entry.get("expected_capacity"),
         # Mode A pur partout à ce stade -> pas de fills simulés -> pas de "trades" réels.
@@ -291,10 +300,18 @@ def outcome_row(alpha_id: str, entry: dict) -> dict:
         for metric in ("gross", "excess"):
             out[f"{anchor}_{metric}"] = summarize_outcomes(
                 led, anchor=anchor, metric=metric, cross_sectional=cs)
-    s = out.get("evt_excess")
+    # edge_retention compare le forward à `expected_net_bps` du registre — mais
+    # cette colonne porte DEUX grandeurs différentes selon l'alpha (net absolu
+    # ou excess vs baseline), d'où `expected_net_bps_basis`, qui dit laquelle
+    # des deux mesures forward est comparable. Base absente -> pas de ratio.
+    ex, gr = out.get("evt_excess"), out.get("evt_gross")
+    enough = ex is not None and ex.n_episodes >= MIN_EPISODES_FOR_POINT
+    out["expected_net_bps_basis"] = entry.get("expected_net_bps_basis")
     out["edge_retention"] = (
-        edge_retention(s.net_bps_base, entry.get("expected_net_bps"))
-        if s is not None and s.n_episodes >= MIN_EPISODES_FOR_POINT else None)
+        edge_retention(entry.get("expected_net_bps"), entry.get("expected_net_bps_basis"),
+                       gross_net_bps=gr.net_bps_base if gr else None,
+                       excess_net_bps=ex.net_bps_base if ex else None)
+        if enough else None)
     out["n_sealed"] = int((led["label_timeliness"] == "SEALED_AT_MATURITY").sum())
     out["n_late"] = int((led["label_timeliness"] == "LATE_BACKFILL").sum())
     out["n_refused"] = int((led["dec_status"] != "OK").sum())
@@ -390,8 +407,12 @@ def outcomes_section(rows: list, registry: dict) -> list:
             ex, gr = o[f"{anchor}_excess"], o[f"{anchor}_gross"]
             ci = (f"[{ex.ci95_low_bps:+.1f}, {ex.ci95_high_bps:+.1f}]"
                   if ex and ex.ci95_low_bps is not None else "—")
-            ret = (f"{o['edge_retention']}" if (anchor == "evt" and o.get("edge_retention")
-                                                is not None) else "—")
+            ret = "—"
+            if anchor == "evt":
+                if o.get("edge_retention") is not None:
+                    ret = f"{o['edge_retention']} ({o.get('expected_net_bps_basis')})"
+                elif o.get("expected_net_bps_basis") is None:
+                    ret = "base non déclarée"
             lines.append(
                 f"| {alpha_id if anchor == 'dec' else ''} | {ex.n_labeled} | "
                 f"{ex.n_episodes} | {o['n_sealed']}/{o['n_late']} | `{anchor}` | "
@@ -444,6 +465,13 @@ def main() -> int:
         "`forward_decisions` (event_time > freeze_timestamp) compte comme preuve jamais-vue ;",
         "`replay_decisions` est du backfill historique, pas une preuve forward.",
         "",
+        "⚠ `last_trigger_h_ago` vs `last_attempt_h_ago` : le premier dit quand l'alpha a DÉCLENCHÉ,",
+        "le second quand son producteur a TENTÉ. Un alpha rare peut n'avoir rien déclenché depuis",
+        "des jours sans anomalie ; un producteur qui n'a pas tenté depuis des jours est une panne.",
+        "Sans les deux, les deux cas sont indiscernables — et `run_state.json::last_run` n'est écrit",
+        "QUE quand un producteur a produit quelque chose (les 10 runners ont un `return 0` anticipé",
+        "sur « rien de nouveau » qui précède l'écriture), donc il ne répond pas à la question.",
+        "",
         "⚠ `lag_med_h` / `périmées` mesurent l'EXÉCUTABILITÉ, pas la validité : un alpha dont le",
         "lab découvre les événements après l'expiration de son propre horizon accumule des décisions",
         "forward correctes mais ne pourra JAMAIS engager de capital.",
@@ -454,8 +482,8 @@ def main() -> int:
         "2026-09-05 : SHORT_COVERING_CONTINUATION_V1 affichait 160/360 périmées en cumul alors que",
         "ses exécutions du jour tournaient à ~10 minutes de latence.",
         "",
-        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | actual_freq/day | lag_med_h (cumul) | périmées (cumul) | lag_med_h (24h) | périmées (24h) | risk_bucket |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| alpha_id | family | scientific_status | operational_status | freeze_timestamp | replay | forward | independent_episodes | confidence | forward_age_h | last_trigger_h_ago | last_attempt_h_ago | actual_freq/day | lag_med_h (cumul) | périmées (cumul) | lag_med_h (24h) | périmées (24h) | risk_bucket |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for r in sorted(rows, key=lambda r: (r["scientific_status"], r["alpha_id"])):
         lines.append(
@@ -464,6 +492,7 @@ def main() -> int:
             f"{r['replay_decisions']} | **{r['forward_decisions']}** | "
             f"{r['forward_independent_episodes']} | {r['confidence_level']} | "
             f"{r['forward_age_hours']} | {r['time_since_last_trigger_hours']} | "
+            f"{r['last_attempt_hours']}{'' if not r['last_attempt_status'] else ' ' + r['last_attempt_status']} | "
             f"{r['actual_freq_per_day']} | {r['decision_lag_median_h']} | "
             f"{r['expired_on_arrival']} | {r['decision_lag_median_h_recent']} | "
             f"{r['expired_on_arrival_recent']} | {r['risk_bucket']} |"

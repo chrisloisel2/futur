@@ -103,6 +103,20 @@ alphas:
     correlation_family: LIQ_CASCADE_DETECTOR   # même flux d'events que A7-TAIL-E1, LIQ_CASCADE_FAR_FROM_LOW_V1
     live_start_timestamp: "2026-08-31T00:00:00+00:00"
     expected_net_bps: 27.1        # full-sample ; 45.2 en OOS (voir source_report)
+    # ⚠ AJOUTÉ 2026-09-06 (item A2/C2) : `expected_net_bps` mélangeait DEUX grandeurs
+    # différentes dans la même colonne, et cette colonne est le dénominateur
+    # d'`edge_retention`.
+    #   LIQ_CASCADE_REPEAT_V1  : 27.1  = net ABSOLU (freeze_spec.net_bps_full_sample)
+    #   SHORT_COVERING_...     : 9.2   = EXCESS vs baseline non conditionné
+    #                                    (son net absolu vaut -2.72 full / +2.3 OOS)
+    # Comparer l'un à l'autre, ou comparer le mauvais des deux au forward, produit
+    # un edge_retention qui a l'air d'un chiffre et n'en est pas un. Le commentaire
+    # le disait déjà en toutes lettres sur chaque entrée ; rien ne le lisait, parce
+    # que ce n'était pas un champ. `expected_net_bps_basis` le rend machine-lisible,
+    # et outcomes.edge_retention() REFUSE de calculer un ratio quand il est absent.
+    #   ABSOLUTE            -> à comparer au `gross` forward (rendement du symbole)
+    #   EXCESS_VS_BASELINE  -> à comparer à l'`excess` forward (net de l'univers)
+    expected_net_bps_basis: ABSOLUTE   # freeze_spec.json::expected_stats_at_freeze.net_bps_full_sample=27.1 (net@14, pas un excess)
     expected_n_independent_episodes: 1988   # 615 en OOS
     expected_profit_factor: 1.43   # 1.69 OOS
     data_live: true               # data/derivatives_backfill/binance_vision_metrics, backfillé via topup_data() existant
@@ -158,6 +172,7 @@ alphas:
     correlation_family: LIQ_CASCADE_DETECTOR
     live_start_timestamp: "2026-09-03T16:20:00+00:00"
     expected_net_bps: 46.87
+    expected_net_bps_basis: ABSOLUTE   # validation_registry::BTC_LEAD_ALT_CASCADE.validation_net_bps=46.87 (net14 ; stress28=32.87, écart de 14 = le coût, donc bien un net absolu)
     expected_net_bps_stress28: 32.87
     expected_n_independent_episodes: 259
     expected_bootstrap_p05_bps: 23.70
@@ -223,6 +238,7 @@ alphas:
     correlation_family: LIQ_CASCADE_DETECTOR
     live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
     expected_net_bps: 4.48        # full-sample (far_24h_low_full, evidence L5) ; 17.7 en OOS 2025-26 -- contexte historique, PAS une cible de confirmation forward (seuil reconstruit sur ces mêmes données)
+    expected_net_bps_basis: ABSOLUTE   # full-sample far_24h_low_full (evidence L5), net@14
     expected_n_independent_episodes: 6709   # full-sample ; 2227 en OOS 2025-26
     expected_profit_factor: 1.184  # full ; 1.344 OOS 2025-26
     data_live: true
@@ -330,6 +346,7 @@ alphas:
     correlation_family: OI_STATE_FAMILY
     live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
     expected_net_bps: 9.2        # excess vs baseline, full ; 19.0 OOS -- contexte historique, PAS une cible de confirmation forward (seuil reconstruit sur ces mêmes données)
+    expected_net_bps_basis: EXCESS_VS_BASELINE   # freeze_spec.json::excess_vs_baseline_full_bps=9.2 — le net ABSOLU du même freeze_spec vaut -2.72 (full) / +2.3 (OOS). Ces 9.2 ne sont PAS comparables aux 27.1 de LIQ_CASCADE_REPEAT_V1.
     expected_n_independent_episodes: 23422
     expected_profit_factor: 1.11  # 1.18 OOS
     data_live: true               # data/derivatives_raw, collecteur confirmé actif (process live), fichiers réels à mtime récent vérifiés
@@ -406,6 +423,7 @@ alphas:
     correlation_family: LIQ_CASCADE_DETECTOR
     live_start_timestamp: "2026-09-03T08:18:34+00:00"
     expected_net_bps: 22.12
+    expected_net_bps_basis: ABSOLUTE   # validation_registry::LIQ_REPEAT_DENSITY.validation_net_bps (net@14 déclusterisé)
     expected_n_independent_episodes: 1165
     expected_bootstrap_ci95_bps: "[9.38, 35.88]"
     data_live: true
@@ -472,6 +490,7 @@ alphas:
     correlation_family: POSITIONING_STANDALONE
     live_start_timestamp: "2026-08-31T18:08:39+00:00"   # RÉINITIALISÉ, idem freeze_timestamp
     expected_net_bps: -57.8      # negatif = underperformance relative attendue -- contexte historique (grid-search sur ces memes donnees), PAS une cible de confirmation forward
+    expected_net_bps_basis: EXCESS_VS_BASELINE   # « négatif = underperformance RELATIVE attendue » — grandeur relative, pas un rendement absolu
     expected_n_independent_episodes: 87
     expected_profit_factor: null
     data_live: true              # futur-positioning.timer/.service actifs, verifie 2026-08-31 (dernier run reussi 18:21 CEST, tous les 47 fichiers top_position mis a jour)
@@ -531,6 +550,7 @@ alphas:
     correlation_family: CALENDAR_BASIS_CURVE
     live_start_timestamp: null
     expected_net_bps: 30.3        # ETH k30d net@14bps (conservateur) ; BTC k30d=+33.2 ; net@stress(28bps) : ETH=+16.3, BTC=+19.2
+    expected_net_bps_basis: ABSOLUTE   # ETH k30d net@14bps (conservateur)
     expected_n_independent_episodes: 15   # ETH k30d (plus mince des 2) ; BTC k30d=18
     expected_profit_factor: null
     worst_episode_bps: -111.8    # BTC k30d (pire des 2) ; ETH k30d=-106.6

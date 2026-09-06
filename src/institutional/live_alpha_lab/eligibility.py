@@ -27,6 +27,8 @@ Un alpha ne reçoit du capital forward que si TOUTES ces conditions tiennent :
 
   1. il tourne réellement          (operational_status ∈ CAPITAL_OPERATIONAL_STATUSES)
   2. son mécanisme n'est pas mort  (scientific_status ∉ NO_CAPITAL_SCIENTIFIC_STATUSES)
+  2b. sa spec est établie          (scientific_status ∉ UNRESOLVED_SPEC_SCIENTIFIC_STATUSES)
+  4. il est EXÉCUTABLE             (latence médiane récente <= son propre horizon)
   3. il est relié à ≥1 candidat du VALIDATION_REGISTRY
   4. ≥1 de ces candidats porte `validated_for_forward: true`
      ET `current_status: VALIDATED_FOR_FORWARD`
@@ -72,8 +74,46 @@ CAPITAL_OPERATIONAL_STATUSES = frozenset(("SIGNAL_SHADOW", "EXECUTION_SHADOW"))
 NO_CAPITAL_SCIENTIFIC_STATUSES = frozenset(("REJECTED", "INVALIDATED",
                                             "INVALIDATED_PENDING_RESPEC"))
 
+# scientific_status où la SPEC elle-même n'est pas établie (item C2).
+#
+# RECONSTRUCTED veut dire : un seuil ou une fenêtre a dû être reconstruit
+# faute de constante publiée. Le registre le documente déjà honnêtement, et va
+# jusqu'à écrire que l'`expected_net_bps` correspondant est « un contexte
+# historique, PAS une cible de confirmation forward ». Mais rien n'en tirait
+# la conséquence côté CAPITAL.
+#
+# Le trou, précisément : SHORT_COVERING_CONTINUATION_V1 est RECONSTRUCTED et
+# porte 57 % du PnL attribué. Il ne reçoit aujourd'hui aucun capital -- mais
+# par accident du registre de validation (BLOCK_NOT_VALIDATED_FOR_FORWARD),
+# pas à cause de son statut. Le jour où un candidat le validerait, il
+# recevrait du capital en restant RECONSTRUCTED, et sa preuve forward
+# reposerait sur une spec reconstruite à partir des observations qui servent
+# à la juger.
+#
+# Constaté en creusant (2026-09-06) : aucun commit de
+# engines/short_covering_continuation/{state,infer}.py n'est ANTÉRIEUR à son
+# freeze -- ils sont commités 4 h 25 après, et 45 min après sa première
+# décision forward. `alpha_spec_hash` est bien constant sur les 417 décisions,
+# mais il hache l'ENTRÉE DU REGISTRE, pas le CODE : il prouve que la
+# déclaration n'a pas bougé, pas que l'implémentation n'a pas bougé.
+# `working_tree_dirty` vaut True sur 348/417, et l'empreinte qui saurait dire
+# si ce sont les chemins de décision qui étaient sales
+# (`dirty_decision_paths_sha1`) n'existe que depuis le 2026-09-05 -- nulle sur
+# 336 des 417.
+#
+# Porte SÉPARÉE de NO_CAPITAL_SCIENTIFIC_STATUSES parce que la raison est
+# différente : là le mécanisme est mort, ici il est peut-être bon mais sa
+# spec n'est pas établie. Deux motifs distincts, deux codes de refus
+# distincts, jamais un seul fourre-tout.
+UNRESOLVED_SPEC_SCIENTIFIC_STATUSES = frozenset(("RECONSTRUCTED",))
+
 # Le seul statut du VALIDATION_REGISTRY qui autorise du capital forward.
 VALIDATED_STATUS = "VALIDATED_FOR_FORWARD"
+
+# Horizons connus, en heures — même table que le scoreboard, dupliquée
+# volontairement pour garder cette porte utilisable sans lui.
+_HORIZON_HOURS = {"fwd_4h": 4.0, "fwd_24h": 24.0, "24h": 24.0,
+                  "fwd_7d": 168.0, "k30d": 720.0}
 
 
 class EligibilityReason(str, Enum):
@@ -83,8 +123,10 @@ class EligibilityReason(str, Enum):
     NOT_A_POSITION_ALPHA = "NOT_A_POSITION_ALPHA"
     BLOCK_NOT_OPERATIONAL = "BLOCK_NOT_OPERATIONAL"
     BLOCK_SCIENTIFIC_STATUS = "BLOCK_SCIENTIFIC_STATUS"
+    BLOCK_UNRESOLVED_SPEC = "BLOCK_UNRESOLVED_SPEC"
     BLOCK_NO_VALIDATION_RECORD = "BLOCK_NO_VALIDATION_RECORD"
     BLOCK_NOT_VALIDATED_FOR_FORWARD = "BLOCK_NOT_VALIDATED_FOR_FORWARD"
+    BLOCK_NOT_EXECUTABLE = "BLOCK_NOT_EXECUTABLE"
 
 
 @dataclass(frozen=True)
@@ -159,17 +201,65 @@ def load_validation_index(path: Optional[Path] = None) -> Dict[str, List[Validat
     return index
 
 
+# Fenêtre de la mesure de latence. Même valeur que RECENT_WINDOW_HOURS du
+# scoreboard, et pour la même raison : le CUMUL inclut les rattrapages
+# historiques (des décisions nées périmées lors d'un backfill) et ne redescend
+# jamais. Un indicateur qui ne redescend pas après un incident condamnerait à
+# vie un alpha réparé depuis — l'exact opposé de ce qu'une porte doit faire.
+RECENT_LAG_WINDOW_HOURS = 24.0
+
+
+def recent_decision_lag_median_h(decisions, time_col: str,
+                                 window_hours: float = RECENT_LAG_WINDOW_HOURS,
+                                 now=None) -> Optional[float]:
+    """Latence médiane `decided_at - event_time`, en heures, sur les décisions
+    FORWARD_LIVE PRISES dans la fenêtre récente.
+
+    Fonction de MESURE, pas de décision : elle ne lit aucun fichier, elle prend
+    le DataFrame qu'on lui donne, exactement comme `is_forward_eligible` prend
+    le résultat. Renvoie None quand la mesure est impossible — jamais 0, qui se
+    lirait comme « latence nulle », c'est-à-dire la valeur la plus permissive
+    de toutes."""
+    import pandas as pd
+    if decisions is None or len(decisions) == 0:
+        return None
+    if time_col not in decisions.columns or "decided_at" not in decisions.columns:
+        return None
+    df = decisions
+    if "provenance" in df.columns:
+        df = df[df["provenance"] == "FORWARD_LIVE"]
+    if df.empty:
+        return None
+    decided = pd.to_datetime(df["decided_at"], utc=True, errors="coerce")
+    now = now if now is not None else pd.Timestamp.now(tz="UTC")
+    recent = decided >= (now - pd.Timedelta(hours=window_hours))
+    if not bool(recent.any()):
+        return None
+    lag = ((decided[recent]
+            - pd.to_datetime(df.loc[recent, time_col], utc=True, errors="coerce"))
+           .dt.total_seconds() / 3600.0).dropna()
+    return None if lag.empty else round(float(lag.median()), 2)
+
+
 def is_forward_eligible(alpha: dict,
                         validation_index: Optional[Dict[str, List[ValidationLink]]] = None,
-                        position_alpha: bool = True) -> ForwardEligibility:
+                        position_alpha: bool = True,
+                        decision_lag_median_h: Optional[float] = None) -> ForwardEligibility:
     """Porte CENTRALE : cet alpha a-t-il le droit de recevoir du capital forward ?
 
     `alpha` est une entrée de `configs/live_alpha_registry.yaml`.
     `position_alpha=False` pour un gate/overlay (ne consomme pas de capital).
 
+    `decision_lag_median_h` (item C1) : latence RÉCENTE mesurée entre
+    l'événement et la décision. Passer la mesure sur fenêtre glissante, pas le
+    cumul — le cumul inclut les rattrapages historiques et ne redescend jamais,
+    donc il condamnerait à vie un alpha réparé depuis. Le paramètre est une
+    ENTRÉE et non une lecture de ledger : la fonction reste pure, donc testable
+    et reproductible, et l'appelant reste responsable de la mesure.
+
     Aucun effet de bord : ne lit pas de ledger, n'écrit rien, ne coupe aucune
-    collecte. Pure fonction du registre live + du registre de validation, donc
-    testable et reproductible.
+    collecte. Pure fonction du registre live + du registre de validation + de
+    la latence qu'on lui donne.
     """
     alpha_id = alpha.get("alpha_id", "<sans alpha_id>")
 
@@ -190,6 +280,14 @@ def is_forward_eligible(alpha: dict,
             alpha_id, False, EligibilityReason.BLOCK_SCIENTIFIC_STATUS,
             f"scientific_status={sci!r} -> mécanisme mort ou en attente de respec")
 
+    if sci in UNRESOLVED_SPEC_SCIENTIFIC_STATUSES:
+        return ForwardEligibility(
+            alpha_id, False, EligibilityReason.BLOCK_UNRESOLVED_SPEC,
+            f"scientific_status={sci!r} -> spec reconstruite (seuil/fenêtre non publiés) : "
+            f"pas de capital tant que le statut n'est pas résolu. Un alpha dont la spec a "
+            f"été reconstruite À PARTIR des observations qui servent à le juger ne peut pas "
+            f"produire une preuve forward jamais-vue.")
+
     index = load_validation_index() if validation_index is None else validation_index
     links = tuple(index.get(alpha_id, ()))
 
@@ -209,6 +307,27 @@ def is_forward_eligible(alpha: dict,
             alpha_id, False, EligibilityReason.BLOCK_NOT_VALIDATED_FOR_FORWARD,
             f"aucun candidat validé pour le forward ({summary})", links)
 
+    # ── porte d'EXÉCUTABILITÉ (item C1) ────────────────────────────────────
+    # Un alpha dont la latence médiane dépasse son propre horizon de détention
+    # ne peut PAS recevoir de capital : le temps que la décision arrive, la
+    # position serait déjà à liquider. Le système imprimait jusqu'ici cette
+    # contradiction — `VALIDATED_FOR_FORWARD` + `eligible: true` + 100 % de
+    # décisions périmées à l'arrivée — sans jamais la refuser. Mesurer un
+    # défaut et continuer à allouer dessus, c'est le documenter, pas le
+    # corriger.
+    #
+    # Latence INCONNUE ne bloque pas : au démarrage d'un alpha il n'y a aucune
+    # décision forward, donc aucune latence mesurable, et fail-closed ici
+    # empêcherait tout nouvel alpha de démarrer. Le fail-closed a déjà lieu en
+    # amont (validation) ; celui-ci refuse ce qui est MESURÉ inexécutable.
+    horizon_h = _HORIZON_HOURS.get(alpha.get("horizon"))
+    if decision_lag_median_h is not None and horizon_h and decision_lag_median_h > horizon_h:
+        return ForwardEligibility(
+            alpha_id, False, EligibilityReason.BLOCK_NOT_EXECUTABLE,
+            f"latence médiane récente {decision_lag_median_h:.1f}h > horizon "
+            f"{alpha.get('horizon')} ({horizon_h:.0f}h) : la décision arrive après "
+            f"l'expiration de sa propre position. Validé n'est pas exécutable.", links)
+
     return ForwardEligibility(
         alpha_id, True, EligibilityReason.ELIGIBLE_VALIDATED,
         "validé par " + ", ".join(l.candidate_id for l in granting), links)
@@ -216,12 +335,20 @@ def is_forward_eligible(alpha: dict,
 
 def eligibility_report(registry_path: Optional[Path] = None,
                        validation_path: Optional[Path] = None,
-                       not_position_alphas: frozenset = frozenset()) -> List[ForwardEligibility]:
+                       not_position_alphas: frozenset = frozenset(),
+                       decision_lag_median_h: Optional[Dict[str, float]] = None,
+                       ) -> List[ForwardEligibility]:
     """Verdict pour TOUS les alphas du registre live — utilisé par le runner
-    (log par alpha, jamais un skip silencieux) et par les rapports d'audit."""
+    (log par alpha, jamais un skip silencieux) et par les rapports d'audit.
+
+    `decision_lag_median_h` : alpha_id -> latence récente mesurée. Omis, la
+    porte d'exécutabilité ne s'applique pas (voir is_forward_eligible)."""
     reg = yaml.safe_load(Path(registry_path or LIVE_REGISTRY).read_text()) or {}
     index = load_validation_index(validation_path)
+    lags = decision_lag_median_h or {}
     return [
-        is_forward_eligible(a, index, position_alpha=a.get("alpha_id") not in not_position_alphas)
+        is_forward_eligible(a, index,
+                            position_alpha=a.get("alpha_id") not in not_position_alphas,
+                            decision_lag_median_h=lags.get(a.get("alpha_id")))
         for a in reg.get("alphas", []) or []
     ]
