@@ -43,8 +43,17 @@ import pandas as pd
 from src.institutional.live_alpha_lab.execution_adapter import depth_notional
 from src.institutional.live_alpha_lab.orders import (
     DEPTH_CAP_EFFECTIVE_FROM,
-    MAX_FILL_FRACTION_OF_DEPTH,
+    DEPTH_MULTIPLE,
 )
+
+# Les multiples balayés. Le multiple est une HYPOTHÈSE — combien de fois le
+# premier niveau on suppose traversable à concession acceptable — parce que la
+# profondeur cumulée par prix n'existe pour aucun symbole du frozen-50.
+SWEEP_MULTIPLES = (1.0, 3.0, 6.4, 10.0, 25.0, 50.0)
+
+# Taille cible du programme, pour situer la capacité là où elle compte.
+TARGET_EQUITY_USD = 200_000.0
+TARGET_BASKET_SIDE = 15
 
 PORTFOLIOS = ROOT / "reports" / "live_alpha_lab" / "portfolios"
 OUT = ROOT / "reports" / "live_alpha_lab" / "DEPTH_CAP_IMPACT.md"
@@ -71,7 +80,7 @@ def load_deltas() -> pd.DataFrame:
     out = out[out["notional_usd"] > 0].copy()
     out["alphas"] = out["alpha_intents"].map(alphas_of)
     out["depth_usd"] = out["instrument"].map(depth_notional)
-    out["cap_usd"] = out["depth_usd"] * MAX_FILL_FRACTION_OF_DEPTH
+    out["cap_usd"] = out["depth_usd"] * DEPTH_MULTIPLE
     out["capped"] = out["cap_usd"].notna() & (out["notional_usd"] > out["cap_usd"])
     out["refused_usd"] = np.where(out["capped"], out["notional_usd"] - out["cap_usd"], 0.0)
     return out
@@ -96,8 +105,40 @@ def summarize(df: pd.DataFrame, label: str) -> Dict[str, object]:
     }
 
 
+def sweep_multiples(df: pd.DataFrame) -> List[Dict[str, object]]:
+    """Ce que le report devient pour chaque multiple supposé."""
+    out = []
+    notes = {1.0: "premier niveau seul — trop strict",
+             6.4: "ce qu'il faudrait pour une position de 6 667 $",
+             50.0: "revient au comportement de l'ancien plafond open-interest"}
+    total = float(df["notional_usd"].sum())
+    for multiple in SWEEP_MULTIPLES:
+        cap = df["depth_usd"] * multiple
+        capped = cap.notna() & (df["notional_usd"] > cap)
+        refused = float(np.where(capped, df["notional_usd"] - cap, 0.0).sum())
+        out.append({"multiple": multiple,
+                    "pct_capped": round(100.0 * float(capped.mean()), 1),
+                    "pct_notional_refused": round(100.0 * refused / max(total, 1e-9), 1),
+                    "note": notes.get(multiple, "")})
+    return out
+
+
+def target_capacity(df: pd.DataFrame) -> Dict[str, object]:
+    """La capacité là où elle compte : à la taille cible du programme."""
+    position = TARGET_EQUITY_USD / TARGET_BASKET_SIDE / 2.0
+    median_depth = float(df["depth_usd"].median())
+    ratio = position / median_depth if median_depth > 0 else float("nan")
+    cap = df["depth_usd"] * ratio
+    capped = cap.notna() & (df["notional_usd"] > cap)
+    refused = float(np.where(capped, df["notional_usd"] - cap, 0.0).sum())
+    return {"position_usd": position, "median_depth_usd": median_depth, "ratio": ratio,
+            "pct_notional_at_target": round(
+                100.0 * refused / max(float(df["notional_usd"].sum()), 1e-9), 1)}
+
+
 def render(overall: Dict[str, object], by_alpha: List[Dict[str, object]],
-           by_symbol: List[Dict[str, object]]) -> str:
+           by_symbol: List[Dict[str, object]], sweep: List[Dict[str, object]],
+           target: Dict[str, object]) -> str:
     out: List[str] = []
     out.append("# Ce que le plafond de profondeur refuse")
     out.append("")
@@ -156,6 +197,55 @@ def render(overall: Dict[str, object], by_alpha: List[Dict[str, object]],
     out.append("")
     out.append("_Les 15 symboles au notionnel reporté le plus élevé._")
     out.append("")
+    out.append("## Le multiple est une hypothèse, et voici ce qu'elle porte")
+    out.append("")
+    out.append("Le plafond au **premier niveau seul est trop strict**, et il faut le dire : la")
+    out.append("liquidité traversable n'est pas la meilleure limite. Un ordre valant quelques fois")
+    out.append("le premier niveau ne « dépasse pas le carnet », il traverse quelques niveaux et")
+    out.append("paie quelques bps de plus. Le bon plafond serait la profondeur **cumulée** jusqu'à")
+    out.append("une concession acceptée, la concession étant facturée dans le coût.")
+    out.append("")
+    out.append("**Cette profondeur cumulée n'est mesurable nulle part ici.** Les sondes du")
+    out.append("frozen-50 ne portent que le niveau 1 (`bid_qty`, `ask_qty`, `top_*_notional_usd`).")
+    out.append("`data/hyperliquid/l2` porte bien une profondeur agrégée, mais sur une autre")
+    out.append("plateforme et sans bande de prix déclarée. Le multiple est donc une hypothèse")
+    out.append("déclarée, et voici toute la plage qu'elle commande :")
+    out.append("")
+    out.append("| multiple supposé | ordres plafonnés | notionnel reporté | lecture |")
+    out.append("|---|---|---|---|")
+    for row in sweep:
+        out.append("| ×%.1f | %.1f %% | **%.1f %%** | %s |" % (
+            row["multiple"], row["pct_capped"], row["pct_notional_refused"], row["note"]))
+    out.append("")
+    out.append("**De 63 % à 1 % de report, piloté entièrement par un nombre que je ne peux pas")
+    out.append("mesurer.** Remplacer une mesure trop optimiste (l'open interest, 1,0 %) par une")
+    out.append("mesure trop pessimiste (le premier niveau, 63 %) ne serait pas un progrès — ça")
+    out.append("tuerait des candidats réels. Ce qui est un progrès, c'est que la plage soit")
+    out.append("visible et que l'hypothèse porte un nom.")
+    out.append("")
+    out.append("### Ce qu'il faut collecter pour que ça devienne une mesure")
+    out.append("")
+    out.append("Des instantanés de carnet **par niveau de prix** pour le frozen-50 — pas du BBO.")
+    out.append("Le collecteur microstructure produit déjà du L2 pour BTC, ETH et SOL ; l'étendre")
+    out.append("à l'univers, même à basse cadence, transforme le multiple en profondeur cumulée")
+    out.append("observée. C'est une ligne du plan de collecte, pas une constante à mieux deviner.")
+    out.append("")
+    out.append("### La capacité à la taille cible")
+    out.append("")
+    out.append("| grandeur | valeur |")
+    out.append("|---|---|")
+    out.append("| capital | %s $ |" % f"{TARGET_EQUITY_USD:,.0f}".replace(",", " "))
+    out.append("| panier | %d long / %d short, dollar-neutre |" % (TARGET_BASKET_SIDE, TARGET_BASKET_SIDE))
+    out.append("| notionnel par position | **%s $** |" % f"{target['position_usd']:,.0f}".replace(",", " "))
+    out.append("| profondeur médiane au premier niveau | %s $ |" % f"{target['median_depth_usd']:,.0f}".replace(",", " "))
+    out.append("| **rapport** | **×%.1f** |" % target["ratio"])
+    out.append("")
+    out.append("C'est **la première fois que la capacité s'approche d'être contraignante à la")
+    out.append("taille cible**. Elle ne l'est pas si la profondeur cumulée vaut au moins %.1f fois" % target["ratio"])
+    out.append("le premier niveau — ce qui est plausible et non vérifié. À ×%.1f exactement, %.1f %%" % (
+        target["ratio"], target["pct_notional_at_target"]))
+    out.append("du notionnel serait encore reporté.")
+    out.append("")
     out.append("## Comment lire ça")
     out.append("")
     out.append("**« Reporté », pas « perdu ».** Le plafond rend l'ordre PARTIEL ; le reste se")
@@ -213,10 +303,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         (summarize(g, symbol) for symbol, g in df.groupby("instrument")),
         key=lambda r: -r["refused_usd"])
 
-    OUT.write_text(render(overall, by_alpha, by_symbol), encoding="utf-8")
+    sweep = sweep_multiples(df)
+    target = target_capacity(df)
+    OUT.write_text(render(overall, by_alpha, by_symbol, sweep, target), encoding="utf-8")
     JSON_OUT.write_text(json.dumps({
         "effective_from": DEPTH_CAP_EFFECTIVE_FROM,
-        "depth_fraction": MAX_FILL_FRACTION_OF_DEPTH,
+        "depth_multiple": DEPTH_MULTIPLE, "sweep": sweep, "target_capacity": target,
         "overall": overall, "by_alpha": by_alpha, "by_symbol": by_symbol[:30],
     }, indent=2), encoding="utf-8")
     print(json.dumps(overall, indent=2), flush=True)

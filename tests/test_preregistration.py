@@ -169,3 +169,58 @@ def test_the_ledger_detects_a_threshold_that_no_longer_matches_its_count(tmp_pat
 def test_an_empty_batch_is_not_a_preregistration(tmp_path):
     with pytest.raises(PreregistrationError):
         register_batch("lot1", "f", [], "d", "s", path=tmp_path / "L.jsonl")
+
+
+# ── la contamination : une partition de données, pas un seuil ──────────────
+
+def test_a_contamination_burns_a_period_without_charging_trials(tmp_path):
+    """La multiplicité s'applique aux tests sur les MÊMES données. Des regards
+    sur 2022-2025 n'inflatent pas le taux de faux positifs d'un test mené sur
+    2026. Facturer en plus des essais paierait deux fois la même chose."""
+    from src.institutional.live_alpha_lab.preregistration import (
+        burned_periods, record_contamination)
+    ledger = tmp_path / "PREREG.jsonl"
+    register_batch("lot1", "f", [_h(i) for i in range(3)], "d", "s", path=ledger)
+    before = current_threshold(ledger)["threshold_t"]
+
+    record_contamination(
+        record_id="CONTAM_1", family="residual_reversal_xs",
+        burned_periods=[("2022-03-22", "2025-12-31")],
+        untouched_periods=[("2026-01-01", "2026-08-31")],
+        what_was_measured="IC transversaux et rendements futurs à 1/2/3 j",
+        n_looks=601, path=ledger)
+
+    assert current_threshold(ledger)["threshold_t"] == before
+    assert verify_ledger(ledger)["ok"] is True
+
+
+def test_burned_periods_are_scoped_to_their_family(tmp_path):
+    """Une contamination de F3 ne brûle pas la période pour F1 : ce sont deux
+    questions différentes posées à la même donnée."""
+    from src.institutional.live_alpha_lab.preregistration import (
+        burned_periods, record_contamination)
+    ledger = tmp_path / "PREREG.jsonl"
+    record_contamination(
+        record_id="C1", family="residual_reversal_xs",
+        burned_periods=[("2022-03-22", "2025-12-31")],
+        untouched_periods=[], what_was_measured="IC", n_looks=10, path=ledger)
+    assert burned_periods("residual_reversal_xs", ledger) == [("2022-03-22", "2025-12-31")]
+    assert burned_periods("leverage_crowding", ledger) == []
+
+
+def test_a_contamination_without_a_burned_period_is_refused(tmp_path):
+    from src.institutional.live_alpha_lab.preregistration import record_contamination
+    with pytest.raises(PreregistrationError):
+        record_contamination(record_id="C", family="f", burned_periods=[],
+                             untouched_periods=[], what_was_measured="x", n_looks=1,
+                             path=tmp_path / "L.jsonl")
+
+
+def test_a_contamination_must_say_what_was_measured(tmp_path):
+    """Sans ça, la portée de la contamination est invérifiable."""
+    from src.institutional.live_alpha_lab.preregistration import record_contamination
+    with pytest.raises(PreregistrationError):
+        record_contamination(record_id="C", family="f",
+                             burned_periods=[("2022-01-01", "2025-12-31")],
+                             untouched_periods=[], what_was_measured="  ", n_looks=1,
+                             path=tmp_path / "L.jsonl")

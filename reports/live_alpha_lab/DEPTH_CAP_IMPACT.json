@@ -1,16 +1,60 @@
 {
   "effective_from": "2026-09-07T00:00:00+00:00",
-  "depth_fraction": 1.0,
+  "depth_multiple": 1.0,
+  "sweep": [
+    {
+      "multiple": 1.0,
+      "pct_capped": 19.4,
+      "pct_notional_refused": 63.1,
+      "note": "premier niveau seul \u2014 trop strict"
+    },
+    {
+      "multiple": 3.0,
+      "pct_capped": 12.4,
+      "pct_notional_refused": 47.1,
+      "note": ""
+    },
+    {
+      "multiple": 6.4,
+      "pct_capped": 8.8,
+      "pct_notional_refused": 32.1,
+      "note": "ce qu'il faudrait pour une position de 6 667 $"
+    },
+    {
+      "multiple": 10.0,
+      "pct_capped": 5.8,
+      "pct_notional_refused": 21.6,
+      "note": ""
+    },
+    {
+      "multiple": 25.0,
+      "pct_capped": 1.8,
+      "pct_notional_refused": 6.5,
+      "note": ""
+    },
+    {
+      "multiple": 50.0,
+      "pct_capped": 0.3,
+      "pct_notional_refused": 1.0,
+      "note": "revient au comportement de l'ancien plafond open-interest"
+    }
+  ],
+  "target_capacity": {
+    "position_usd": 6666.666666666667,
+    "median_depth_usd": 797.0644500000001,
+    "ratio": 8.364024598847266,
+    "pct_notional_at_target": 25.5
+  },
   "overall": {
     "scope": "TOTAL",
     "n_orders": 8556,
     "n_measurable": 8556,
     "n_no_probe": 0,
-    "n_capped": 1662,
+    "n_capped": 1658,
     "pct_capped": 19.4,
     "notional_usd": 9851326.0,
-    "refused_usd": 6222594.0,
-    "pct_notional_refused": 63.2,
+    "refused_usd": 6212695.0,
+    "pct_notional_refused": 63.1,
     "median_order_usd": 19.0,
     "median_depth_usd": 797.0
   },
@@ -23,8 +67,8 @@
       "n_capped": 24,
       "pct_capped": 96.0,
       "notional_usd": 250602.0,
-      "refused_usd": 221974.0,
-      "pct_notional_refused": 88.6,
+      "refused_usd": 222198.0,
+      "pct_notional_refused": 88.7,
       "median_order_usd": 6969.0,
       "median_depth_usd": 476.0
     },
@@ -33,11 +77,11 @@
       "n_orders": 1118,
       "n_measurable": 1118,
       "n_no_probe": 0,
-      "n_capped": 400,
-      "pct_capped": 35.8,
+      "n_capped": 396,
+      "pct_capped": 35.4,
       "notional_usd": 2765739.0,
-      "refused_usd": 2274872.0,
-      "pct_notional_refused": 82.3,
+      "refused_usd": 2271423.0,
+      "pct_notional_refused": 82.1,
       "median_order_usd": 77.0,
       "median_depth_usd": 476.0
     },
@@ -59,11 +103,11 @@
       "n_orders": 8371,
       "n_measurable": 8371,
       "n_no_probe": 0,
-      "n_capped": 1527,
+      "n_capped": 1523,
       "pct_capped": 18.2,
       "notional_usd": 8227655.0,
-      "refused_usd": 4996407.0,
-      "pct_notional_refused": 60.7,
+      "refused_usd": 4986713.0,
+      "pct_notional_refused": 60.6,
       "median_order_usd": 17.0,
       "median_depth_usd": 797.0
     }
@@ -90,10 +134,10 @@
       "n_capped": 110,
       "pct_capped": 37.9,
       "notional_usd": 527143.0,
-      "refused_usd": 471953.0,
-      "pct_notional_refused": 89.5,
+      "refused_usd": 470789.0,
+      "pct_notional_refused": 89.3,
       "median_order_usd": 111.0,
-      "median_depth_usd": 402.0
+      "median_depth_usd": 412.0
     },
     {
       "scope": "ALGOUSDT",
@@ -103,10 +147,10 @@
       "n_capped": 127,
       "pct_capped": 32.2,
       "notional_usd": 399726.0,
-      "refused_usd": 369296.0,
-      "pct_notional_refused": 92.4,
+      "refused_usd": 368196.0,
+      "pct_notional_refused": 92.1,
       "median_order_usd": 16.0,
-      "median_depth_usd": 191.0
+      "median_depth_usd": 200.0
     },
     {
       "scope": "IMXUSDT",
@@ -126,13 +170,13 @@
       "n_orders": 195,
       "n_measurable": 195,
       "n_no_probe": 0,
-      "n_capped": 70,
-      "pct_capped": 35.9,
+      "n_capped": 66,
+      "pct_capped": 33.8,
       "notional_usd": 398824.0,
-      "refused_usd": 330664.0,
-      "pct_notional_refused": 82.9,
+      "refused_usd": 328458.0,
+      "pct_notional_refused": 82.4,
       "median_order_usd": 35.0,
-      "median_depth_usd": 835.0
+      "median_depth_usd": 868.0
     },
     {
       "scope": "SEIUSDT",
@@ -194,10 +238,10 @@
       "n_capped": 52,
       "pct_capped": 26.0,
       "notional_usd": 262517.0,
-      "refused_usd": 226543.0,
-      "pct_notional_refused": 86.3,
+      "refused_usd": 225902.0,
+      "pct_notional_refused": 86.1,
       "median_order_usd": 21.0,
-      "median_depth_usd": 546.0
+      "median_depth_usd": 558.0
     },
     {
       "scope": "RUNEUSDT",
@@ -207,10 +251,10 @@
       "n_capped": 73,
       "pct_capped": 35.6,
       "notional_usd": 233105.0,
-      "refused_usd": 214777.0,
-      "pct_notional_refused": 92.1,
+      "refused_usd": 214981.0,
+      "pct_notional_refused": 92.2,
       "median_order_usd": 17.0,
-      "median_depth_usd": 222.0
+      "median_depth_usd": 219.0
     },
     {
       "scope": "SANDUSDT",
@@ -220,10 +264,10 @@
       "n_capped": 64,
       "pct_capped": 38.8,
       "notional_usd": 226284.0,
-      "refused_usd": 202854.0,
-      "pct_notional_refused": 89.6,
+      "refused_usd": 202549.0,
+      "pct_notional_refused": 89.5,
       "median_order_usd": 59.0,
-      "median_depth_usd": 322.0
+      "median_depth_usd": 326.0
     },
     {
       "scope": "TAOUSDT",
@@ -272,10 +316,10 @@
       "n_capped": 61,
       "pct_capped": 27.1,
       "notional_usd": 192292.0,
-      "refused_usd": 180079.0,
-      "pct_notional_refused": 93.6,
+      "refused_usd": 179830.0,
+      "pct_notional_refused": 93.5,
       "median_order_usd": 10.0,
-      "median_depth_usd": 165.0
+      "median_depth_usd": 169.0
     },
     {
       "scope": "DOTUSDT",
@@ -285,10 +329,10 @@
       "n_capped": 36,
       "pct_capped": 36.0,
       "notional_usd": 202829.0,
-      "refused_usd": 179118.0,
-      "pct_notional_refused": 88.3,
+      "refused_usd": 179601.0,
+      "pct_notional_refused": 88.5,
       "median_order_usd": 30.0,
-      "median_depth_usd": 615.0
+      "median_depth_usd": 601.0
     },
     {
       "scope": "ARUSDT",
@@ -311,23 +355,10 @@
       "n_capped": 41,
       "pct_capped": 24.8,
       "notional_usd": 150192.0,
-      "refused_usd": 129329.0,
-      "pct_notional_refused": 86.1,
+      "refused_usd": 128849.0,
+      "pct_notional_refused": 85.8,
       "median_order_usd": 12.0,
-      "median_depth_usd": 373.0
-    },
-    {
-      "scope": "MANAUSDT",
-      "n_orders": 199,
-      "n_measurable": 199,
-      "n_no_probe": 0,
-      "n_capped": 60,
-      "pct_capped": 30.2,
-      "notional_usd": 140384.0,
-      "refused_usd": 127420.0,
-      "pct_notional_refused": 90.8,
-      "median_order_usd": 13.0,
-      "median_depth_usd": 177.0
+      "median_depth_usd": 385.0
     },
     {
       "scope": "PYTHUSDT",
@@ -337,10 +368,23 @@
       "n_capped": 63,
       "pct_capped": 34.1,
       "notional_usd": 143995.0,
-      "refused_usd": 127207.0,
-      "pct_notional_refused": 88.3,
+      "refused_usd": 127062.0,
+      "pct_notional_refused": 88.2,
       "median_order_usd": 19.0,
-      "median_depth_usd": 229.0
+      "median_depth_usd": 231.0
+    },
+    {
+      "scope": "MANAUSDT",
+      "n_orders": 199,
+      "n_measurable": 199,
+      "n_no_probe": 0,
+      "n_capped": 60,
+      "pct_capped": 30.2,
+      "notional_usd": 140384.0,
+      "refused_usd": 127000.0,
+      "pct_notional_refused": 90.5,
+      "median_order_usd": 13.0,
+      "median_depth_usd": 184.0
     },
     {
       "scope": "STXUSDT",
@@ -363,10 +407,10 @@
       "n_capped": 44,
       "pct_capped": 26.7,
       "notional_usd": 129838.0,
-      "refused_usd": 112818.0,
-      "pct_notional_refused": 86.9,
+      "refused_usd": 112405.0,
+      "pct_notional_refused": 86.6,
       "median_order_usd": 35.0,
-      "median_depth_usd": 285.0
+      "median_depth_usd": 295.0
     },
     {
       "scope": "FETUSDT",
@@ -389,10 +433,10 @@
       "n_capped": 34,
       "pct_capped": 28.3,
       "notional_usd": 135096.0,
-      "refused_usd": 92677.0,
-      "pct_notional_refused": 68.6,
+      "refused_usd": 89826.0,
+      "pct_notional_refused": 66.5,
       "median_order_usd": 11.0,
-      "median_depth_usd": 1099.0
+      "median_depth_usd": 1183.0
     },
     {
       "scope": "ENAUSDT",
@@ -428,10 +472,10 @@
       "n_capped": 41,
       "pct_capped": 15.5,
       "notional_usd": 91868.0,
-      "refused_usd": 64371.0,
-      "pct_notional_refused": 70.1,
+      "refused_usd": 64751.0,
+      "pct_notional_refused": 70.5,
       "median_order_usd": 7.0,
-      "median_depth_usd": 443.0
+      "median_depth_usd": 434.0
     },
     {
       "scope": "INJUSDT",

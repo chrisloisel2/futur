@@ -367,6 +367,106 @@ def record_design_decision(decision_id: str, description: str, blind_to_outcome:
     return payload
 
 
+def record_contamination(record_id: str, family: str, burned_periods: Sequence[Tuple[str, str]],
+                         untouched_periods: Sequence[Tuple[str, str]], what_was_measured: str,
+                         n_looks: int, path: Path = LEDGER, notes: str = "") -> Dict[str, object]:
+    """Déclare qu'une période a été REGARDÉE, et pour quelle famille.
+
+    POURQUOI CE TYPE D'ENREGISTREMENT EXISTE
+        Une contamination ne rentre proprement dans aucune des deux branches de
+        `record_design_decision`. Ce n'est pas une décision de conception
+        informée par un résultat ; c'est le constat qu'une période a cessé
+        d'être vierge. Et sa conséquence n'est pas un seuil plus haut, c'est
+        une PARTITION DE DONNÉES : on ne confirme pas sur ce qu'on a déjà
+        regardé.
+
+    POURQUOI ELLE NE FACTURE PAS D'ESSAIS
+        La multiplicité s'applique aux tests menés sur les MÊMES données. Des
+        centaines de regards sur 2022-2025 n'augmentent pas le taux de faux
+        positifs d'un test mené sur 2026, qui n'a pas été vu. Ce qu'ils
+        inflatent, c'est la SÉLECTION — d'où la règle qui compense : peu de
+        finalistes promus, et la promotion se paie sur un échantillon frais.
+
+        Facturer en plus des essais reviendrait à payer deux fois la même
+        chose, et rendrait la confirmation impossible plutôt que rigoureuse.
+
+    CE QUE CET ENREGISTREMENT OBLIGE
+        `burned_periods` est consulté par le scellement : sceller une période
+        déclarée brûlée pour cette famille doit être refusé. Un scellement qui
+        ment est pire que pas de scellement, parce qu'il produit un chiffre
+        auquel on va croire.
+    """
+    if not burned_periods:
+        raise PreregistrationError("%s : aucune période brûlée déclarée — ce n'est pas une "
+                                   "contamination, c'est une note" % record_id)
+    if not str(what_was_measured).strip():
+        raise PreregistrationError("%s : dire CE QUI a été mesuré est obligatoire, sinon la "
+                                   "portée de la contamination est invérifiable" % record_id)
+
+    target = Path(path)
+    previous, total_before = _chain_head(target)
+    if target.is_file():
+        for line in target.read_text(encoding="utf-8").splitlines():
+            if line.strip() and json.loads(line).get("batch_id") == str(record_id):
+                raise PreregistrationError("contamination %r déjà déclarée" % record_id)
+
+    payload: Dict[str, object] = {
+        "batch_id": str(record_id),
+        "record_type": "CONTAMINATION",
+        "family": str(family),
+        "burned_periods": [[str(a), str(b)] for a, b in burned_periods],
+        "untouched_periods": [[str(a), str(b)] for a, b in untouched_periods],
+        "what_was_measured": str(what_was_measured),
+        "n_looks_at_a_tstat": int(n_looks),
+        "trials_charged": 0,
+        "why_zero_trials": (
+            "la multiplicité s'applique aux tests sur les MÊMES données ; ces regards "
+            "n'inflatent pas le taux de faux positifs d'un test mené sur une période "
+            "non vue. Ils inflatent la SÉLECTION, qui se paie en promouvant peu de "
+            "finalistes sur un échantillon frais, pas en relevant le seuil deux fois."),
+        "n_hypotheses": 0,
+        "hypotheses": [],
+        "n_registered_cumulative": total_before,
+        "threshold_t": round(threshold_t(max(1, total_before)), 4),
+        "alpha_family": FAMILY_ALPHA,
+        "one_sided": ONE_SIDED,
+        "correction": "bonferroni_sur_le_compte_cumule",
+        "notes": str(notes),
+        "prev_hash": previous,
+    }
+    payload["record_hash"] = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str
+                   ).encode()).hexdigest()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                                default=str) + "\n")
+    return payload
+
+
+def burned_periods(family: str, path: Path = LEDGER) -> List[Tuple[str, str]]:
+    """Les périodes qu'on ne peut plus sceller comme vierges pour cette famille.
+
+    À consulter par TOUTE fonction de scellement — c'est la porte physique que
+    la Phase 1 doit poser. Sans elle, la déclaration de contamination est un
+    commentaire.
+    """
+    target = Path(path)
+    if not target.is_file():
+        return []
+    out: List[Tuple[str, str]] = []
+    for line in target.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        record = json.loads(line)
+        if record.get("record_type") != "CONTAMINATION":
+            continue
+        if str(record.get("family")) != str(family):
+            continue
+        out.extend((str(a), str(b)) for a, b in record.get("burned_periods", []))
+    return out
+
+
 def verify_ledger(path: Path = LEDGER) -> Dict[str, object]:
     """La chaîne tient-elle, et le seuil de chaque lot est-il celui qu'il devait ?"""
     target = Path(path)

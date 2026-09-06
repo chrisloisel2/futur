@@ -55,10 +55,29 @@ MAX_FILL_FRACTION_OF_LIQUIDITY = 0.002
 #     Le notionnel affiché au meilleur limite est EXACTEMENT la taille pour
 #     laquelle le spread coté a été observé. En deçà, le modèle de coût (mid
 #     moins deux bps) est adossé à une observation ; au-delà, il ne l'est plus.
-#     Le plafond n'est donc pas un choix de prudence à calibrer, c'est la
-#     frontière du domaine de validité du modèle. La rendre plus petite serait
-#     défendable ; la rendre plus grande serait inventer de la liquidité.
-MAX_FILL_FRACTION_OF_DEPTH = 1.0
+#
+# MAIS LE MEILLEUR LIMITE SEUL EST TROP STRICT, ET IL FAUT LE DIRE
+#     La liquidité traversable n'est pas la meilleure limite : un ordre qui vaut
+#     quelques fois le premier niveau ne « dépasse pas le carnet », il traverse
+#     quelques niveaux et paie quelques bps de plus. Le bon plafond serait la
+#     profondeur CUMULÉE jusqu'à une concession de prix acceptée, la concession
+#     étant facturée dans le coût.
+#
+#     Cette profondeur cumulée N'EST PAS MESURABLE ICI. Les sondes du frozen-50
+#     (`slippage.load_probes`) ne portent que le niveau 1 : `bid_qty`, `ask_qty`,
+#     `top_*_notional_usd`. Aucun instantané de carnet par prix n'existe pour ces
+#     symboles ; `data/hyperliquid/l2` porte bien une profondeur agrégée, mais
+#     sur une autre plateforme et sans bande de prix déclarée.
+#
+#     Le multiple ci-dessous est donc une HYPOTHÈSE DÉCLARÉE, pas une mesure :
+#     « la profondeur traversable à concession acceptable vaut N fois le premier
+#     niveau ». `scripts/audit_depth_cap_impact.py --sweep` publie la
+#     sensibilité de tout ce qui en dépend. Le remplacer par une mesure demande
+#     des instantanés L2 du frozen-50, que le collecteur ne produit pas encore —
+#     c'est une ligne du plan de collecte, pas une constante à deviner mieux.
+DEPTH_MULTIPLE = 1.0
+# Rétrocompatibilité : l'ancien nom reste, il vaut le multiple.
+MAX_FILL_FRACTION_OF_DEPTH = DEPTH_MULTIPLE
 
 CAP_POLICY_OPEN_INTEREST = "OPEN_INTEREST"
 CAP_POLICY_TOP_OF_BOOK = "TOP_OF_BOOK"
@@ -142,7 +161,8 @@ def liquidity_cap_quantity(mark) -> Optional[float]:
     return (mark.liquidity_notional * MAX_FILL_FRACTION_OF_LIQUIDITY) / mark.price
 
 
-def depth_cap_quantity(mark, depth_notional_usd: Optional[float]) -> Optional[float]:
+def depth_cap_quantity(mark, depth_notional_usd: Optional[float],
+                       depth_multiple: Optional[float] = None) -> Optional[float]:
     """Quantité max exécutable d'après la PROFONDEUR observée au meilleur limite.
 
     `None` quand aucune sonde n'existe pour ce symbole — fail-open, comme la
@@ -154,7 +174,8 @@ def depth_cap_quantity(mark, depth_notional_usd: Optional[float]) -> Optional[fl
         return None
     if not (depth_notional_usd > 0):
         return None
-    return (float(depth_notional_usd) * MAX_FILL_FRACTION_OF_DEPTH) / mark.price
+    multiple = DEPTH_MULTIPLE if depth_multiple is None else float(depth_multiple)
+    return (float(depth_notional_usd) * multiple) / mark.price
 
 
 def cap_policy_for(as_of) -> str:
