@@ -1,0 +1,43 @@
+{
+  "feature_provenance_digest": "9023f3ad7620e9a03581dd6c9b09804710d270f94887995273f3f8496fece893",
+  "labs": {
+    "A1": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A2": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A3": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A4": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A5": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A6": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A7": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A8": {
+      "max_hypothesis_tests": 8,
+      "support_verdict": "STRONG_SUPPORT"
+    }
+  },
+  "manifest_digest": "02e142a364ecef5e447798f19a4f7f413904cb4ff12120af98be51c498657342",
+  "policy": "hypothesis budget is allocated before any target/IC scan; zero-budget mechanisms may not enter discovery",
+  "support_audit_digest": "b0b6832a2e53ffdcfe7a550555d6d99304a84298c7ab08c86969746634b814a8",
+  "support_policy_digest": "8ffedfe07ba7d9146c7b1d2e5a03b7e0a07d3782b544c8e724c111b63b224590",
+  "target_free": true,
+  "version": 1
+}

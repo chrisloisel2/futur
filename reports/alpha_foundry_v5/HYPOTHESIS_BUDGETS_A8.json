@@ -1,0 +1,15 @@
+{
+  "feature_provenance_digest": "cee692f8cdf0280c20bf561065a51fb80153a44342f568b19c8ede7504d90d01",
+  "labs": {
+    "A8": {
+      "max_hypothesis_tests": 0,
+      "support_verdict": "THIN_SUPPORT"
+    }
+  },
+  "manifest_digest": "f91bbe1256101bb03952e897aca332c4f64d633d6875d6d7842622527f12318a",
+  "policy": "hypothesis budget is allocated before any target/IC scan; zero-budget mechanisms may not enter discovery",
+  "support_audit_digest": "254a83294a93efa7638b1646d1e7511c002a30196529aa51b08e72a0503b379b",
+  "support_policy_digest": "8ffedfe07ba7d9146c7b1d2e5a03b7e0a07d3782b544c8e724c111b63b224590",
+  "target_free": true,
+  "version": 1
+}

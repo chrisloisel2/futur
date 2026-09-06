@@ -81,6 +81,25 @@ class GovernorDecision:
     scale: float                # multiplicateur de gross autorisé
     reasons: Dict               # {limite: valeur observée} des limites touchées
 
+    def __post_init__(self) -> None:
+        if not (0.0 <= self.scale <= 1.0):
+            raise ValueError(
+                f"GovernorDecision.scale must be in [0, 1], got {self.scale!r} "
+                f"(state={self.state!r}) -- a scale outside this range would "
+                f"mean re-inflating or inverting the requested order size, "
+                f"never allowed."
+            )
+
+
+def clamp_scale(scale: float) -> float:
+    """Defense-in-depth for any consumer that takes a bare float instead of
+    a validated GovernorDecision (adapters currently do, to keep decide()'s
+    signature stable) -- clamps to [0, 1] rather than raising, since a
+    caller here is already downstream of GovernorDecision's own hard
+    validation and clamping can only ever shrink an out-of-range value, not
+    inflate it."""
+    return max(0.0, min(1.0, scale))
+
 
 @dataclass
 class SleeveStats:

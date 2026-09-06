@@ -1,0 +1,42 @@
+{
+  "cause": "4 UNEXPLAINED_DIVERGENCE rows",
+  "coverage_counts": {
+    "fee": 14,
+    "funding": 7,
+    "perp_leg_opened": 7,
+    "perp_mark": 80,
+    "reduction_or_close": 14,
+    "spot_leg_opened": 7,
+    "spot_mark": 80,
+    "terminal_close": 4
+  },
+  "differential": {
+    "classification_counts": {
+      "EXPECTED_LEGACY_DIVERGENCE": 1,
+      "MATCH": 487,
+      "UNEXPLAINED_DIVERGENCE": 4
+    },
+    "log_file": "data/manifests/carry_shadow_differential.jsonl",
+    "n_rows": 492
+  },
+  "legacy_identical_shadow_on_vs_off": true,
+  "missing_coverage": [],
+  "n_legacy_events_off": 4,
+  "n_legacy_events_on": 4,
+  "provenance": {
+    "effective_config_sha256": "9a54145d805e2e93bb15f35c7c948c12bef33d80bec5e8de369fa72251fe861d",
+    "historical_experiment_commit": "2fe693b",
+    "registry_config_hash": "9e025f4590c1dd39aec94210",
+    "shadow_execution_commit": "1ae6ea47d5cc6169044ca64b18c1cc9d8154e0c6"
+  },
+  "runner_id": "carry_basis_v12",
+  "schema_version": 2,
+  "venue": "binance_usdm",
+  "verdict": "FAILED_UNEXPLAINED_DIVERGENCE",
+  "window": {
+    "end": "2026-07-28T21:00:00Z",
+    "frozen_decision_doc": "docs/PHASE4D_FROZEN_WINDOW_DECISION.md",
+    "n_decide_calls": 1,
+    "paper_start": "2026-05-29"
+  }
+}

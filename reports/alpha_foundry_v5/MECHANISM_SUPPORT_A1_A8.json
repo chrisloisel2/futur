@@ -1,0 +1,2709 @@
+{
+  "adequate_support_labs": [],
+  "audit_digest": "b0b6832a2e53ffdcfe7a550555d6d99304a84298c7ab08c86969746634b814a8",
+  "cadence_ms": 100,
+  "feature_provenance_digest": "9023f3ad7620e9a03581dd6c9b09804710d270f94887995273f3f8496fece893",
+  "labs": {
+    "A1": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "bybit__price_dislocation_bps",
+          "hyperliquid__price_dislocation_bps",
+          "binance__price_dislocation_bps",
+          "okx__price_dislocation_bps",
+          "bybit__price_spread_bps",
+          "hyperliquid__price_spread_bps",
+          "binance__price_spread_bps",
+          "okx__price_spread_bps"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 579.080697046867,
+            "ess_ratio": 0.0026809912129765368,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 212335
+          },
+          {
+            "ess": 624.1499220367172,
+            "ess_ratio": 0.002889649862435321,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 212460
+          },
+          {
+            "ess": 853.3383268275248,
+            "ess_ratio": 0.003950731854105534,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 209314
+          },
+          {
+            "ess": 577.2661472506429,
+            "ess_ratio": 0.002672602698457563,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 212334
+          },
+          {
+            "ess": 587.4378531452033,
+            "ess_ratio": 0.0027197204208730106,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 212459
+          },
+          {
+            "ess": 1021.5014952974201,
+            "ess_ratio": 0.004729348750404738,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 209313
+          },
+          {
+            "ess": 564.8323288499706,
+            "ess_ratio": 0.002615073446810148,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 212331
+          },
+          {
+            "ess": 620.6802397833159,
+            "ess_ratio": 0.002873679277475211,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 212455
+          },
+          {
+            "ess": 871.6484604467944,
+            "ess_ratio": 0.004035559004253835,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 209313
+          },
+          {
+            "ess": 619.9530162744459,
+            "ess_ratio": 0.0028702990257580057,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 212329
+          },
+          {
+            "ess": 636.2302970524834,
+            "ess_ratio": 0.0029456606449980477,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 212456
+          },
+          {
+            "ess": 808.5766856372808,
+            "ess_ratio": 0.003743618560462992,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 209309
+          },
+          {
+            "ess": 134348.1651887362,
+            "ess_ratio": 0.6219966443146193,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 789
+          },
+          {
+            "ess": 76176.4172895296,
+            "ess_ratio": 0.35267676237658097,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 1722
+          },
+          {
+            "ess": 8066.296312762618,
+            "ess_ratio": 0.0373448288745694,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 668
+          },
+          {
+            "ess": 90406.13447795788,
+            "ess_ratio": 0.41855854550569865,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 444
+          },
+          {
+            "ess": 87571.92078805131,
+            "ess_ratio": 0.40544057552155316,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 549
+          },
+          {
+            "ess": 47252.571283618076,
+            "ess_ratio": 0.21877000668366456,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 1408
+          },
+          {
+            "ess": 161895.70860159598,
+            "ess_ratio": 0.749548400635193,
+            "feature": "binance__price_spread_bps",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 1031
+          },
+          {
+            "ess": 207585.47725629003,
+            "ess_ratio": 0.9610972704793324,
+            "feature": "binance__price_spread_bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 2174
+          },
+          {
+            "ess": 2677.4086873322426,
+            "ess_ratio": 0.012395869695786153,
+            "feature": "binance__price_spread_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 698
+          },
+          {
+            "ess": 191304.25184356802,
+            "ess_ratio": 0.8857129383606018,
+            "feature": "okx__price_spread_bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 820
+          },
+          {
+            "ess": 75263.27961555615,
+            "ess_ratio": 0.34845885492111245,
+            "feature": "okx__price_spread_bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 1875
+          },
+          {
+            "ess": 3707.802922426037,
+            "ess_ratio": 0.017166707976489608,
+            "feature": "okx__price_spread_bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 619
+          }
+        ],
+        "median_ess": 1849.4550913148314,
+        "min_ess": 564.8323288499706,
+        "pair_count": 24,
+        "pairs_ess_ge_200": 24
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 205715,
+          "2": 206765,
+          "3": 207586
+        },
+        "past_10s_down_event_rows": 310416,
+        "past_10s_flat_event_rows": 276,
+        "past_10s_up_event_rows": 309374
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 620066,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.9952959010519566,
+          "effective_venues": 3.486576353320291,
+          "event_rows": 620066,
+          "events_by_symbol": {
+            "BTCUSDT": 485461.0,
+            "ETHUSDT": 489479.0,
+            "SOLUSDT": 447755.0
+          },
+          "events_by_venue": {
+            "binance": 445279.0,
+            "bybit": 499867.0,
+            "hyperliquid": 142955.0,
+            "okx": 334594.0
+          },
+          "events_total": 1422695.0,
+          "kind": "clock_changes",
+          "matched_columns": [
+            "bybit__price_available_ts_ns",
+            "hyperliquid__price_available_ts_ns",
+            "binance__price_available_ts_ns",
+            "okx__price_available_ts_ns"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 3,
+          "name": "price_updates",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A2": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "bybit__price_dislocation_bps",
+          "hyperliquid__price_dislocation_bps",
+          "binance__price_dislocation_bps",
+          "okx__price_dislocation_bps"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 579.080697046867,
+            "ess_ratio": 0.0026809912129765368,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 212335
+          },
+          {
+            "ess": 624.1499220367172,
+            "ess_ratio": 0.002889649862435321,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 212460
+          },
+          {
+            "ess": 853.3383268275248,
+            "ess_ratio": 0.003950731854105534,
+            "feature": "bybit__price_dislocation_bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 209314
+          },
+          {
+            "ess": 577.2661472506429,
+            "ess_ratio": 0.002672602698457563,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 212334
+          },
+          {
+            "ess": 587.4378531452033,
+            "ess_ratio": 0.0027197204208730106,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 212459
+          },
+          {
+            "ess": 1021.5014952974201,
+            "ess_ratio": 0.004729348750404738,
+            "feature": "hyperliquid__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 209313
+          },
+          {
+            "ess": 564.8323288499706,
+            "ess_ratio": 0.002615073446810148,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 212331
+          },
+          {
+            "ess": 620.6802397833159,
+            "ess_ratio": 0.002873679277475211,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 212455
+          },
+          {
+            "ess": 871.6484604467944,
+            "ess_ratio": 0.004035559004253835,
+            "feature": "binance__price_dislocation_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 209313
+          },
+          {
+            "ess": 619.9530162744459,
+            "ess_ratio": 0.0028702990257580057,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 212329
+          },
+          {
+            "ess": 636.2302970524834,
+            "ess_ratio": 0.0029456606449980477,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 212456
+          },
+          {
+            "ess": 808.5766856372808,
+            "ess_ratio": 0.003743618560462992,
+            "feature": "okx__price_dislocation_bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 209309
+          }
+        ],
+        "median_ess": 622.4150809100165,
+        "min_ess": 564.8323288499706,
+        "pair_count": 12,
+        "pairs_ess_ge_200": 12
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 205716,
+          "2": 206766,
+          "3": 207587
+        },
+        "past_10s_down_event_rows": 310417,
+        "past_10s_flat_event_rows": 276,
+        "past_10s_up_event_rows": 309376
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 620069,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.995297325713717,
+          "effective_venues": 3.4866657472528546,
+          "event_rows": 620069,
+          "events_by_symbol": {
+            "BTCUSDT": 485485.0,
+            "ETHUSDT": 489505.0,
+            "SOLUSDT": 447784.0
+          },
+          "events_by_venue": {
+            "binance": 445296.0,
+            "bybit": 499877.0,
+            "hyperliquid": 142982.0,
+            "okx": 334619.0
+          },
+          "events_total": 1422774.0,
+          "kind": "clock_changes",
+          "matched_columns": [
+            "bybit__price_available_ts_ns",
+            "hyperliquid__price_available_ts_ns",
+            "binance__price_available_ts_ns",
+            "okx__price_available_ts_ns"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 3,
+          "name": "price_updates",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A3": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "bybit__price_queue_imbalance_l1",
+          "hyperliquid__price_queue_imbalance_l1",
+          "binance__price_queue_imbalance_l1",
+          "okx__price_queue_imbalance_l1",
+          "bybit__queue_imbalance_l5",
+          "hyperliquid__queue_imbalance_l5",
+          "binance__queue_imbalance_l5",
+          "okx__queue_imbalance_l5",
+          "bybit__depletion_pressure_100ms",
+          "hyperliquid__depletion_pressure_100ms",
+          "binance__depletion_pressure_100ms",
+          "okx__depletion_pressure_100ms"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 681.7529818771046,
+            "ess_ratio": 0.0031563368683400293,
+            "feature": "bybit__price_queue_imbalance_l1",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 79087
+          },
+          {
+            "ess": 948.0462432778054,
+            "ess_ratio": 0.00438920458009586,
+            "feature": "bybit__price_queue_imbalance_l1",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 90622
+          },
+          {
+            "ess": 754.3808115523996,
+            "ess_ratio": 0.0034925846040528698,
+            "feature": "bybit__price_queue_imbalance_l1",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 57406
+          },
+          {
+            "ess": 622.0481668508636,
+            "ess_ratio": 0.002879932622437955,
+            "feature": "hyperliquid__price_queue_imbalance_l1",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 59512
+          },
+          {
+            "ess": 653.4312920684055,
+            "ess_ratio": 0.0030252569172395526,
+            "feature": "hyperliquid__price_queue_imbalance_l1",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 42685
+          },
+          {
+            "ess": 736.8216576303947,
+            "ess_ratio": 0.0034113377237601147,
+            "feature": "hyperliquid__price_queue_imbalance_l1",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 39043
+          },
+          {
+            "ess": 647.250948807696,
+            "ess_ratio": 0.00299665703111563,
+            "feature": "binance__price_queue_imbalance_l1",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 129164
+          },
+          {
+            "ess": 787.5645094143689,
+            "ess_ratio": 0.0036463345621718284,
+            "feature": "binance__price_queue_imbalance_l1",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 151114
+          },
+          {
+            "ess": 823.8622596487622,
+            "ess_ratio": 0.0038143183990553458,
+            "feature": "binance__price_queue_imbalance_l1",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 134520
+          },
+          {
+            "ess": 671.3938629009576,
+            "ess_ratio": 0.0031084632222055644,
+            "feature": "okx__price_queue_imbalance_l1",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 93519
+          },
+          {
+            "ess": 863.8996165921693,
+            "ess_ratio": 0.003999738952410397,
+            "feature": "okx__price_queue_imbalance_l1",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 117210
+          },
+          {
+            "ess": 789.0759350821431,
+            "ess_ratio": 0.0036533322919891065,
+            "feature": "okx__price_queue_imbalance_l1",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 100896
+          },
+          {
+            "ess": 689.3399298618415,
+            "ess_ratio": 0.003191462440620577,
+            "feature": "bybit__queue_imbalance_l5",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 92405
+          },
+          {
+            "ess": 941.9296789654114,
+            "ess_ratio": 0.004360886497212489,
+            "feature": "bybit__queue_imbalance_l5",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 103298
+          },
+          {
+            "ess": 645.7252129392742,
+            "ess_ratio": 0.0029895377806860076,
+            "feature": "bybit__queue_imbalance_l5",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 116753
+          },
+          {
+            "ess": 605.1429938970771,
+            "ess_ratio": 0.0028016657587575447,
+            "feature": "hyperliquid__queue_imbalance_l5",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 4028
+          },
+          {
+            "ess": 604.322381861156,
+            "ess_ratio": 0.0027978924305583357,
+            "feature": "hyperliquid__queue_imbalance_l5",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 4029
+          },
+          {
+            "ess": 691.146194309086,
+            "ess_ratio": 0.0031998694132610744,
+            "feature": "hyperliquid__queue_imbalance_l5",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 4016
+          },
+          {
+            "ess": 642.8529103777785,
+            "ess_ratio": 0.0029763362333915704,
+            "feature": "binance__queue_imbalance_l5",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 139973
+          },
+          {
+            "ess": 773.1817524305783,
+            "ess_ratio": 0.003579744024809611,
+            "feature": "binance__queue_imbalance_l5",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 151841
+          },
+          {
+            "ess": 603.5380730960793,
+            "ess_ratio": 0.002794261236972107,
+            "feature": "binance__queue_imbalance_l5",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 157097
+          },
+          {
+            "ess": 667.9378642766494,
+            "ess_ratio": 0.0030924624137185198,
+            "feature": "okx__queue_imbalance_l5",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 105013
+          },
+          {
+            "ess": 868.8340635526397,
+            "ess_ratio": 0.004022584777709234,
+            "feature": "okx__queue_imbalance_l5",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 133065
+          },
+          {
+            "ess": 650.7337771757394,
+            "ess_ratio": 0.0030128237549111037,
+            "feature": "okx__queue_imbalance_l5",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 147183
+          },
+          {
+            "ess": 6215.887206194065,
+            "ess_ratio": 0.02877792173982761,
+            "feature": "bybit__depletion_pressure_100ms",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 113345
+          },
+          {
+            "ess": 21452.967558285523,
+            "ess_ratio": 0.09932159336227933,
+            "feature": "bybit__depletion_pressure_100ms",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 13309
+          },
+          {
+            "ess": 215995.0,
+            "ess_ratio": 1.0,
+            "feature": "bybit__depletion_pressure_100ms",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 14
+          },
+          {
+            "ess": 215994.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__depletion_pressure_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 215992.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__depletion_pressure_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 215992.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__depletion_pressure_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 7580.822429286529,
+            "ess_ratio": 0.035098350043921554,
+            "feature": "binance__depletion_pressure_100ms",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 152321
+          },
+          {
+            "ess": 124250.69189713696,
+            "ess_ratio": 0.5752666439669656,
+            "feature": "binance__depletion_pressure_100ms",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 106098
+          },
+          {
+            "ess": 198860.4561517825,
+            "ess_ratio": 0.9206843593826739,
+            "feature": "binance__depletion_pressure_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 2213
+          },
+          {
+            "ess": 5649.163946419453,
+            "ess_ratio": 0.026154868749887508,
+            "feature": "okx__depletion_pressure_100ms",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 139437
+          },
+          {
+            "ess": 12407.429981153575,
+            "ess_ratio": 0.05744473089441395,
+            "feature": "okx__depletion_pressure_100ms",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 22818
+          },
+          {
+            "ess": 215988.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__depletion_pressure_100ms",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          }
+        ],
+        "median_ess": 788.320222248256,
+        "min_ess": 603.5380730960793,
+        "pair_count": 36,
+        "pairs_ess_ge_200": 36
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 143690,
+          "2": 145723,
+          "3": 146658
+        },
+        "past_10s_down_event_rows": 217543,
+        "past_10s_flat_event_rows": 191,
+        "past_10s_up_event_rows": 218337
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 436071,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 1.5735744013491788,
+          "effective_venues": 2.7066061557842906,
+          "event_rows": 386240,
+          "events_by_symbol": {
+            "BTCUSDT": 1223801.0,
+            "ETHUSDT": 379222.0,
+            "SOLUSDT": 4163.0
+          },
+          "events_by_venue": {
+            "binance": 766904.0,
+            "bybit": 338992.0,
+            "hyperliquid": 0.0,
+            "okx": 501290.0
+          },
+          "events_total": 1607186.0,
+          "kind": "count_sum",
+          "matched_columns": [
+            "bybit__bid_remove_count_100ms",
+            "bybit__ask_remove_count_100ms",
+            "hyperliquid__bid_remove_count_100ms",
+            "hyperliquid__ask_remove_count_100ms",
+            "binance__bid_remove_count_100ms",
+            "binance__ask_remove_count_100ms",
+            "okx__bid_remove_count_100ms",
+            "okx__ask_remove_count_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 2,
+          "name": "book_depletions",
+          "pass": true
+        },
+        {
+          "effective_symbols": 2.6221138688841967,
+          "effective_venues": 3.3465345823394013,
+          "event_rows": 160003,
+          "events_by_symbol": {
+            "BTCUSDT": 149254.0,
+            "ETHUSDT": 193406.0,
+            "SOLUSDT": 67952.0
+          },
+          "events_by_venue": {
+            "binance": 114756.0,
+            "bybit": 159619.0,
+            "hyperliquid": 33092.0,
+            "okx": 103145.0
+          },
+          "events_total": 410612.0,
+          "kind": "count_sum",
+          "matched_columns": [
+            "hyperliquid__trade_count_100ms",
+            "binance__trade_count_100ms",
+            "okx__trade_count_100ms",
+            "bybit__trade_count_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 3,
+          "name": "trade_events",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A4": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "bybit__replenishment_imbalance_100ms",
+          "hyperliquid__replenishment_imbalance_100ms",
+          "binance__replenishment_imbalance_100ms",
+          "okx__replenishment_imbalance_100ms",
+          "hyperliquid__trades_per_second_100ms",
+          "binance__trades_per_second_100ms",
+          "okx__trades_per_second_100ms",
+          "bybit__trades_per_second_100ms",
+          "bybit__bid_depth_5bps",
+          "hyperliquid__bid_depth_5bps",
+          "binance__bid_depth_5bps",
+          "okx__bid_depth_5bps"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 6215.887206194065,
+            "ess_ratio": 0.02877792173982761,
+            "feature": "bybit__replenishment_imbalance_100ms",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 113345
+          },
+          {
+            "ess": 21452.967558285523,
+            "ess_ratio": 0.09932159336227933,
+            "feature": "bybit__replenishment_imbalance_100ms",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 13309
+          },
+          {
+            "ess": 215995.0,
+            "ess_ratio": 1.0,
+            "feature": "bybit__replenishment_imbalance_100ms",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 14
+          },
+          {
+            "ess": 215994.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__replenishment_imbalance_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 215992.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__replenishment_imbalance_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 215992.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__replenishment_imbalance_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 21398.006592895992,
+            "ess_ratio": 0.09907034924577288,
+            "feature": "binance__replenishment_imbalance_100ms",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 146191
+          },
+          {
+            "ess": 99661.16724886211,
+            "ess_ratio": 0.4614199272592094,
+            "feature": "binance__replenishment_imbalance_100ms",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 109012
+          },
+          {
+            "ess": 191065.8992307762,
+            "ess_ratio": 0.884597111146599,
+            "feature": "binance__replenishment_imbalance_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 3221
+          },
+          {
+            "ess": 5649.163946419453,
+            "ess_ratio": 0.026154868749887508,
+            "feature": "okx__replenishment_imbalance_100ms",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 139437
+          },
+          {
+            "ess": 12407.429981153575,
+            "ess_ratio": 0.05744473089441395,
+            "feature": "okx__replenishment_imbalance_100ms",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 22818
+          },
+          {
+            "ess": 215988.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__replenishment_imbalance_100ms",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 47973.474054409395,
+            "ess_ratio": 0.22210558651818751,
+            "feature": "hyperliquid__trades_per_second_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 18871
+          },
+          {
+            "ess": 213029.28115156593,
+            "ess_ratio": 0.9862832010054351,
+            "feature": "hyperliquid__trades_per_second_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 11851
+          },
+          {
+            "ess": 194097.88018224668,
+            "ess_ratio": 0.8986345799022495,
+            "feature": "hyperliquid__trades_per_second_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 6679
+          },
+          {
+            "ess": 41141.04683726736,
+            "ess_ratio": 0.19048103728160454,
+            "feature": "binance__trades_per_second_100ms",
+            "n": 215985,
+            "symbol": "BTCUSDT",
+            "transition_count": 52246
+          },
+          {
+            "ess": 20361.89326838376,
+            "ess_ratio": 0.09428373834705672,
+            "feature": "binance__trades_per_second_100ms",
+            "n": 215964,
+            "symbol": "ETHUSDT",
+            "transition_count": 60772
+          },
+          {
+            "ess": 23022.637263577744,
+            "ess_ratio": 0.10659862143108112,
+            "feature": "binance__trades_per_second_100ms",
+            "n": 215975,
+            "symbol": "SOLUSDT",
+            "transition_count": 44142
+          },
+          {
+            "ess": 36717.531758660516,
+            "ess_ratio": 0.17001218576033947,
+            "feature": "okx__trades_per_second_100ms",
+            "n": 215970,
+            "symbol": "BTCUSDT",
+            "transition_count": 31031
+          },
+          {
+            "ess": 31552.601161337807,
+            "ess_ratio": 0.1460897077119645,
+            "feature": "okx__trades_per_second_100ms",
+            "n": 215981,
+            "symbol": "ETHUSDT",
+            "transition_count": 34852
+          },
+          {
+            "ess": 53796.29735184899,
+            "ess_ratio": 0.24917344384109694,
+            "feature": "okx__trades_per_second_100ms",
+            "n": 215899,
+            "symbol": "SOLUSDT",
+            "transition_count": 18796
+          },
+          {
+            "ess": 76519.02058737214,
+            "ess_ratio": 0.35429409095164344,
+            "feature": "bybit__trades_per_second_100ms",
+            "n": 215976,
+            "symbol": "BTCUSDT",
+            "transition_count": 18437
+          },
+          {
+            "ess": 26605.664811864477,
+            "ess_ratio": 0.12320460488853505,
+            "feature": "bybit__trades_per_second_100ms",
+            "n": 215947,
+            "symbol": "ETHUSDT",
+            "transition_count": 18489
+          },
+          {
+            "ess": 84345.59014727762,
+            "ess_ratio": 0.39061181366021536,
+            "feature": "bybit__trades_per_second_100ms",
+            "n": 215932,
+            "symbol": "SOLUSDT",
+            "transition_count": 9585
+          },
+          {
+            "ess": 669.9947424896474,
+            "ess_ratio": 0.003101899314751024,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 106370
+          },
+          {
+            "ess": 713.1075686686031,
+            "ess_ratio": 0.003301500352640585,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 98983
+          },
+          {
+            "ess": 657.2211688452948,
+            "ess_ratio": 0.0030427610307891145,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 77279
+          },
+          {
+            "ess": 601.8501771714796,
+            "ess_ratio": 0.002786420813409074,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 4026
+          },
+          {
+            "ess": 609.833978173586,
+            "ess_ratio": 0.0028234100252490187,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 4008
+          },
+          {
+            "ess": 629.1100928474757,
+            "ess_ratio": 0.0029126546022421,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 4024
+          },
+          {
+            "ess": 585.4991112480025,
+            "ess_ratio": 0.0027107946332574147,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 183323
+          },
+          {
+            "ess": 627.7077311615342,
+            "ess_ratio": 0.002906215767364549,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 165997
+          },
+          {
+            "ess": 630.111550567521,
+            "ess_ratio": 0.0029172911522997195,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 119322
+          },
+          {
+            "ess": 629.3586015960863,
+            "ess_ratio": 0.002913845619897709,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 163419
+          },
+          {
+            "ess": 586.6495777009922,
+            "ess_ratio": 0.0027161085874789557,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 138562
+          },
+          {
+            "ess": 648.7835838108697,
+            "ess_ratio": 0.003003794580304784,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 101871
+          }
+        ],
+        "median_ess": 22237.802410931632,
+        "min_ess": 585.4991112480025,
+        "pair_count": 36,
+        "pairs_ess_ge_200": 36
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 142481,
+          "2": 144288,
+          "3": 144696
+        },
+        "past_10s_down_event_rows": 215432,
+        "past_10s_flat_event_rows": 198,
+        "past_10s_up_event_rows": 215835
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 431465,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 1.6505695577563653,
+          "effective_venues": 2.8262443008477773,
+          "event_rows": 380709,
+          "events_by_symbol": {
+            "BTCUSDT": 1082026.0,
+            "ETHUSDT": 391093.0,
+            "SOLUSDT": 5041.0
+          },
+          "events_by_venue": {
+            "binance": 637878.0,
+            "bybit": 338992.0,
+            "hyperliquid": 0.0,
+            "okx": 501290.0
+          },
+          "events_total": 1478160.0,
+          "kind": "count_sum",
+          "matched_columns": [
+            "bybit__bid_add_count_100ms",
+            "bybit__ask_add_count_100ms",
+            "hyperliquid__bid_add_count_100ms",
+            "hyperliquid__ask_add_count_100ms",
+            "binance__bid_add_count_100ms",
+            "binance__ask_add_count_100ms",
+            "okx__bid_add_count_100ms",
+            "okx__ask_add_count_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 2,
+          "name": "book_replenishments",
+          "pass": true
+        },
+        {
+          "effective_symbols": 2.6221138688841967,
+          "effective_venues": 3.3465345823394013,
+          "event_rows": 160003,
+          "events_by_symbol": {
+            "BTCUSDT": 149254.0,
+            "ETHUSDT": 193406.0,
+            "SOLUSDT": 67952.0
+          },
+          "events_by_venue": {
+            "binance": 114756.0,
+            "bybit": 159619.0,
+            "hyperliquid": 33092.0,
+            "okx": 103145.0
+          },
+          "events_total": 410612.0,
+          "kind": "count_sum",
+          "matched_columns": [
+            "hyperliquid__trade_count_100ms",
+            "binance__trade_count_100ms",
+            "okx__trade_count_100ms",
+            "bybit__trade_count_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 3,
+          "name": "trade_events",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A5": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "hyperliquid__flow_imbalance_100ms",
+          "binance__flow_imbalance_100ms",
+          "okx__flow_imbalance_100ms",
+          "bybit__flow_imbalance_100ms",
+          "hyperliquid__impact_bps_100ms",
+          "binance__impact_bps_100ms",
+          "okx__impact_bps_100ms",
+          "bybit__impact_bps_100ms",
+          "hyperliquid__absorption_100ms",
+          "binance__absorption_100ms",
+          "okx__absorption_100ms",
+          "bybit__absorption_100ms"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 130831.39148630366,
+            "ess_ratio": 0.6057177120026652,
+            "feature": "hyperliquid__flow_imbalance_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 18934
+          },
+          {
+            "ess": 211818.77606793115,
+            "ess_ratio": 0.9806788032331343,
+            "feature": "hyperliquid__flow_imbalance_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 11857
+          },
+          {
+            "ess": 203126.09473778712,
+            "ess_ratio": 0.9404334176163336,
+            "feature": "hyperliquid__flow_imbalance_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 6657
+          },
+          {
+            "ess": 215985.0,
+            "ess_ratio": 1.0,
+            "feature": "binance__flow_imbalance_100ms",
+            "n": 215985,
+            "symbol": "BTCUSDT",
+            "transition_count": 54090
+          },
+          {
+            "ess": 215964.0,
+            "ess_ratio": 1.0,
+            "feature": "binance__flow_imbalance_100ms",
+            "n": 215964,
+            "symbol": "ETHUSDT",
+            "transition_count": 62907
+          },
+          {
+            "ess": 215975.0,
+            "ess_ratio": 1.0,
+            "feature": "binance__flow_imbalance_100ms",
+            "n": 215975,
+            "symbol": "SOLUSDT",
+            "transition_count": 45572
+          },
+          {
+            "ess": 16756.69452250184,
+            "ess_ratio": 0.07758806557624595,
+            "feature": "okx__flow_imbalance_100ms",
+            "n": 215970,
+            "symbol": "BTCUSDT",
+            "transition_count": 30326
+          },
+          {
+            "ess": 41191.89545767922,
+            "ess_ratio": 0.19071999600742295,
+            "feature": "okx__flow_imbalance_100ms",
+            "n": 215981,
+            "symbol": "ETHUSDT",
+            "transition_count": 34562
+          },
+          {
+            "ess": 159536.14515243765,
+            "ess_ratio": 0.7389387868977515,
+            "feature": "okx__flow_imbalance_100ms",
+            "n": 215899,
+            "symbol": "SOLUSDT",
+            "transition_count": 18850
+          },
+          {
+            "ess": 34524.61133638686,
+            "ess_ratio": 0.15985392514162156,
+            "feature": "bybit__flow_imbalance_100ms",
+            "n": 215976,
+            "symbol": "BTCUSDT",
+            "transition_count": 17819
+          },
+          {
+            "ess": 75975.32389069484,
+            "ess_ratio": 0.3518239377749857,
+            "feature": "bybit__flow_imbalance_100ms",
+            "n": 215947,
+            "symbol": "ETHUSDT",
+            "transition_count": 17583
+          },
+          {
+            "ess": 64929.07576603625,
+            "ess_ratio": 0.3006922353613001,
+            "feature": "bybit__flow_imbalance_100ms",
+            "n": 215932,
+            "symbol": "SOLUSDT",
+            "transition_count": 9457
+          },
+          {
+            "ess": 208833.33126231362,
+            "ess_ratio": 0.9668478349505709,
+            "feature": "hyperliquid__impact_bps_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 878
+          },
+          {
+            "ess": 203660.677036117,
+            "ess_ratio": 0.9429084273311836,
+            "feature": "hyperliquid__impact_bps_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 439
+          },
+          {
+            "ess": 208477.25744404248,
+            "ess_ratio": 0.9652082366200715,
+            "feature": "hyperliquid__impact_bps_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 777
+          },
+          {
+            "ess": 158452.28804833195,
+            "ess_ratio": 0.7336263539057432,
+            "feature": "binance__impact_bps_100ms",
+            "n": 215985,
+            "symbol": "BTCUSDT",
+            "transition_count": 2038
+          },
+          {
+            "ess": 159497.70441033336,
+            "ess_ratio": 0.738538387927309,
+            "feature": "binance__impact_bps_100ms",
+            "n": 215964,
+            "symbol": "ETHUSDT",
+            "transition_count": 3707
+          },
+          {
+            "ess": 208791.51627712938,
+            "ess_ratio": 0.9667392812924153,
+            "feature": "binance__impact_bps_100ms",
+            "n": 215975,
+            "symbol": "SOLUSDT",
+            "transition_count": 824
+          },
+          {
+            "ess": 117364.40886005244,
+            "ess_ratio": 0.5434292210031599,
+            "feature": "okx__impact_bps_100ms",
+            "n": 215970,
+            "symbol": "BTCUSDT",
+            "transition_count": 2216
+          },
+          {
+            "ess": 144542.54413224003,
+            "ess_ratio": 0.6692373131536572,
+            "feature": "okx__impact_bps_100ms",
+            "n": 215981,
+            "symbol": "ETHUSDT",
+            "transition_count": 4172
+          },
+          {
+            "ess": 202523.47626303727,
+            "ess_ratio": 0.9380473103767839,
+            "feature": "okx__impact_bps_100ms",
+            "n": 215899,
+            "symbol": "SOLUSDT",
+            "transition_count": 684
+          },
+          {
+            "ess": 144046.60766478223,
+            "ess_ratio": 0.6669565491757521,
+            "feature": "bybit__impact_bps_100ms",
+            "n": 215976,
+            "symbol": "BTCUSDT",
+            "transition_count": 1698
+          },
+          {
+            "ess": 159749.0224518323,
+            "ess_ratio": 0.73976032291179,
+            "feature": "bybit__impact_bps_100ms",
+            "n": 215947,
+            "symbol": "ETHUSDT",
+            "transition_count": 3184
+          },
+          {
+            "ess": 191453.18275363554,
+            "ess_ratio": 0.8866364538541557,
+            "feature": "bybit__impact_bps_100ms",
+            "n": 215932,
+            "symbol": "SOLUSDT",
+            "transition_count": 459
+          },
+          {
+            "ess": 76589.00012167882,
+            "ess_ratio": 0.3545885539490857,
+            "feature": "hyperliquid__absorption_100ms",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 19126
+          },
+          {
+            "ess": 215992.0,
+            "ess_ratio": 1.0,
+            "feature": "hyperliquid__absorption_100ms",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 11964
+          },
+          {
+            "ess": 214980.54489100428,
+            "ess_ratio": 0.9953171640199835,
+            "feature": "hyperliquid__absorption_100ms",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 6720
+          },
+          {
+            "ess": 119364.37574183493,
+            "ess_ratio": 0.5526512292142275,
+            "feature": "binance__absorption_100ms",
+            "n": 215985,
+            "symbol": "BTCUSDT",
+            "transition_count": 55401
+          },
+          {
+            "ess": 46187.244519685315,
+            "ess_ratio": 0.21386547998594818,
+            "feature": "binance__absorption_100ms",
+            "n": 215964,
+            "symbol": "ETHUSDT",
+            "transition_count": 64911
+          },
+          {
+            "ess": 143377.59745749747,
+            "ess_ratio": 0.6638620092950456,
+            "feature": "binance__absorption_100ms",
+            "n": 215975,
+            "symbol": "SOLUSDT",
+            "transition_count": 46409
+          },
+          {
+            "ess": 122196.31697617917,
+            "ess_ratio": 0.5658022733536101,
+            "feature": "okx__absorption_100ms",
+            "n": 215970,
+            "symbol": "BTCUSDT",
+            "transition_count": 32224
+          },
+          {
+            "ess": 49770.73386603253,
+            "ess_ratio": 0.23044033440919587,
+            "feature": "okx__absorption_100ms",
+            "n": 215981,
+            "symbol": "ETHUSDT",
+            "transition_count": 36440
+          },
+          {
+            "ess": 178279.7382668294,
+            "ess_ratio": 0.8257552756929369,
+            "feature": "okx__absorption_100ms",
+            "n": 215899,
+            "symbol": "SOLUSDT",
+            "transition_count": 19337
+          },
+          {
+            "ess": 121566.06071574801,
+            "ess_ratio": 0.5628683775778235,
+            "feature": "bybit__absorption_100ms",
+            "n": 215976,
+            "symbol": "BTCUSDT",
+            "transition_count": 18765
+          },
+          {
+            "ess": 53725.50250481646,
+            "ess_ratio": 0.24879022401244963,
+            "feature": "bybit__absorption_100ms",
+            "n": 215947,
+            "symbol": "ETHUSDT",
+            "transition_count": 18725
+          },
+          {
+            "ess": 128542.96498341009,
+            "ess_ratio": 0.5952937266519557,
+            "feature": "bybit__absorption_100ms",
+            "n": 215932,
+            "symbol": "SOLUSDT",
+            "transition_count": 9671
+          }
+        ],
+        "median_ess": 151497.416090286,
+        "min_ess": 16756.69452250184,
+        "pair_count": 36,
+        "pairs_ess_ge_200": 36
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 48716,
+          "2": 57037,
+          "3": 54250
+        },
+        "past_10s_down_event_rows": 78032,
+        "past_10s_flat_event_rows": 57,
+        "past_10s_up_event_rows": 81914
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 160003,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.6221138688841967,
+          "effective_venues": 3.3465345823394013,
+          "event_rows": 160003,
+          "events_by_symbol": {
+            "BTCUSDT": 149254.0,
+            "ETHUSDT": 193406.0,
+            "SOLUSDT": 67952.0
+          },
+          "events_by_venue": {
+            "binance": 114756.0,
+            "bybit": 159619.0,
+            "hyperliquid": 33092.0,
+            "okx": 103145.0
+          },
+          "events_total": 410612.0,
+          "kind": "count_sum",
+          "matched_columns": [
+            "hyperliquid__trade_count_100ms",
+            "binance__trade_count_100ms",
+            "okx__trade_count_100ms",
+            "bybit__trade_count_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 3,
+          "name": "trade_events",
+          "pass": true
+        },
+        {
+          "effective_symbols": 2.3526024876057807,
+          "effective_venues": 3.5030118452599304,
+          "event_rows": 9395,
+          "events_by_symbol": {
+            "BTCUSDT": 3608.0,
+            "ETHUSDT": 6183.0,
+            "SOLUSDT": 1396.0
+          },
+          "events_by_venue": {
+            "binance": 3460.0,
+            "bybit": 2898.0,
+            "hyperliquid": 1055.0,
+            "okx": 3774.0
+          },
+          "events_total": 11187.0,
+          "kind": "nonzero",
+          "matched_columns": [
+            "hyperliquid__impact_bps_100ms",
+            "binance__impact_bps_100ms",
+            "okx__impact_bps_100ms",
+            "bybit__impact_bps_100ms"
+          ],
+          "min_symbols": 2,
+          "min_total": 100,
+          "min_venues": 2,
+          "name": "price_impact_events",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A6": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "bybit__price_spread_bps",
+          "hyperliquid__price_spread_bps",
+          "binance__price_spread_bps",
+          "okx__price_spread_bps",
+          "bybit__bid_depth_5bps",
+          "hyperliquid__bid_depth_5bps",
+          "binance__bid_depth_5bps",
+          "okx__bid_depth_5bps",
+          "bybit__ask_depth_5bps",
+          "hyperliquid__ask_depth_5bps",
+          "binance__ask_depth_5bps",
+          "okx__ask_depth_5bps"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 134348.1651887362,
+            "ess_ratio": 0.6219966443146193,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 789
+          },
+          {
+            "ess": 76176.4172895296,
+            "ess_ratio": 0.35267676237658097,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 1722
+          },
+          {
+            "ess": 8066.296312762618,
+            "ess_ratio": 0.0373448288745694,
+            "feature": "bybit__price_spread_bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 668
+          },
+          {
+            "ess": 90406.13447795788,
+            "ess_ratio": 0.41855854550569865,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 444
+          },
+          {
+            "ess": 87571.92078805131,
+            "ess_ratio": 0.40544057552155316,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 549
+          },
+          {
+            "ess": 47252.571283618076,
+            "ess_ratio": 0.21877000668366456,
+            "feature": "hyperliquid__price_spread_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 1408
+          },
+          {
+            "ess": 161895.70860159598,
+            "ess_ratio": 0.749548400635193,
+            "feature": "binance__price_spread_bps",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 1031
+          },
+          {
+            "ess": 207585.47725629003,
+            "ess_ratio": 0.9610972704793324,
+            "feature": "binance__price_spread_bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 2174
+          },
+          {
+            "ess": 2677.4086873322426,
+            "ess_ratio": 0.012395869695786153,
+            "feature": "binance__price_spread_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 698
+          },
+          {
+            "ess": 191304.25184356802,
+            "ess_ratio": 0.8857129383606018,
+            "feature": "okx__price_spread_bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 820
+          },
+          {
+            "ess": 75263.27961555615,
+            "ess_ratio": 0.34845885492111245,
+            "feature": "okx__price_spread_bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 1875
+          },
+          {
+            "ess": 3707.802922426037,
+            "ess_ratio": 0.017166707976489608,
+            "feature": "okx__price_spread_bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 619
+          },
+          {
+            "ess": 669.9947424896474,
+            "ess_ratio": 0.003101899314751024,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 106370
+          },
+          {
+            "ess": 713.1075686686031,
+            "ess_ratio": 0.003301500352640585,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 98983
+          },
+          {
+            "ess": 657.2211688452948,
+            "ess_ratio": 0.0030427610307891145,
+            "feature": "bybit__bid_depth_5bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 77279
+          },
+          {
+            "ess": 601.8501771714796,
+            "ess_ratio": 0.002786420813409074,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 4026
+          },
+          {
+            "ess": 609.833978173586,
+            "ess_ratio": 0.0028234100252490187,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 4008
+          },
+          {
+            "ess": 629.1100928474757,
+            "ess_ratio": 0.0029126546022421,
+            "feature": "hyperliquid__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 4024
+          },
+          {
+            "ess": 585.4991112480025,
+            "ess_ratio": 0.0027107946332574147,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 183323
+          },
+          {
+            "ess": 627.7077311615342,
+            "ess_ratio": 0.002906215767364549,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 165997
+          },
+          {
+            "ess": 630.111550567521,
+            "ess_ratio": 0.0029172911522997195,
+            "feature": "binance__bid_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 119322
+          },
+          {
+            "ess": 629.3586015960863,
+            "ess_ratio": 0.002913845619897709,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 163419
+          },
+          {
+            "ess": 586.6495777009922,
+            "ess_ratio": 0.0027161085874789557,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 138562
+          },
+          {
+            "ess": 648.7835838108697,
+            "ess_ratio": 0.003003794580304784,
+            "feature": "okx__bid_depth_5bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 101871
+          },
+          {
+            "ess": 643.6597992779989,
+            "ess_ratio": 0.0029799754590522877,
+            "feature": "bybit__ask_depth_5bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 117607
+          },
+          {
+            "ess": 605.3362300481233,
+            "ess_ratio": 0.0028025474203019667,
+            "feature": "bybit__ask_depth_5bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 114171
+          },
+          {
+            "ess": 600.6109546037036,
+            "ess_ratio": 0.0027806706386893382,
+            "feature": "bybit__ask_depth_5bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 70052
+          },
+          {
+            "ess": 598.9323629760369,
+            "ess_ratio": 0.002772912039112368,
+            "feature": "hyperliquid__ask_depth_5bps",
+            "n": 215994,
+            "symbol": "BTCUSDT",
+            "transition_count": 4029
+          },
+          {
+            "ess": 624.6534780455873,
+            "ess_ratio": 0.002892021362113353,
+            "feature": "hyperliquid__ask_depth_5bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 4023
+          },
+          {
+            "ess": 613.890997025714,
+            "ess_ratio": 0.0028421932156085135,
+            "feature": "hyperliquid__ask_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 4025
+          },
+          {
+            "ess": 599.9355205745617,
+            "ess_ratio": 0.00277763357489565,
+            "feature": "binance__ask_depth_5bps",
+            "n": 215988,
+            "symbol": "BTCUSDT",
+            "transition_count": 169523
+          },
+          {
+            "ess": 583.8269063840971,
+            "ess_ratio": 0.0027030525139549286,
+            "feature": "binance__ask_depth_5bps",
+            "n": 215988,
+            "symbol": "ETHUSDT",
+            "transition_count": 154221
+          },
+          {
+            "ess": 598.8786070351449,
+            "ess_ratio": 0.0027726888358603325,
+            "feature": "binance__ask_depth_5bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 112290
+          },
+          {
+            "ess": 583.9374359930976,
+            "ess_ratio": 0.0027035517363990643,
+            "feature": "okx__ask_depth_5bps",
+            "n": 215989,
+            "symbol": "BTCUSDT",
+            "transition_count": 132256
+          },
+          {
+            "ess": 706.5485819279379,
+            "ess_ratio": 0.003271224839820259,
+            "feature": "okx__ask_depth_5bps",
+            "n": 215989,
+            "symbol": "ETHUSDT",
+            "transition_count": 131313
+          },
+          {
+            "ess": 616.841078736999,
+            "ess_ratio": 0.002855904396248861,
+            "feature": "okx__ask_depth_5bps",
+            "n": 215988,
+            "symbol": "SOLUSDT",
+            "transition_count": 100337
+          }
+        ],
+        "median_ess": 636.88567492276,
+        "min_ess": 583.8269063840971,
+        "pair_count": 36,
+        "pairs_ess_ge_200": 36
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 214543,
+          "2": 213963,
+          "3": 214100
+        },
+        "past_10s_down_event_rows": 321252,
+        "past_10s_flat_event_rows": 292,
+        "past_10s_up_event_rows": 321062
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 642606,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.996465226043211,
+          "effective_venues": 3.0245265497033533,
+          "event_rows": 642606,
+          "events_by_symbol": {
+            "BTCUSDT": 580869.0,
+            "ETHUSDT": 575598.0,
+            "SOLUSDT": 537351.0
+          },
+          "events_by_venue": {
+            "binance": 601876.0,
+            "bybit": 499867.0,
+            "hyperliquid": 12148.0,
+            "okx": 579927.0
+          },
+          "events_total": 1693818.0,
+          "kind": "clock_changes",
+          "matched_columns": [
+            "bybit__depth_available_ts_ns",
+            "hyperliquid__depth_available_ts_ns",
+            "binance__depth_available_ts_ns",
+            "okx__depth_available_ts_ns"
+          ],
+          "min_symbols": 2,
+          "min_total": 1000,
+          "min_venues": 2,
+          "name": "depth_updates",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A7": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "binance__liquidation_to_depth_30000ms",
+          "okx__liquidation_to_depth_30000ms",
+          "bybit__liquidation_to_depth_30000ms",
+          "binance__liquidation_notional_30000ms",
+          "okx__liquidation_notional_30000ms",
+          "bybit__liquidation_notional_30000ms",
+          "okx__open_interest_change_pct",
+          "bybit__open_interest_change_pct",
+          "hyperliquid__open_interest_change_pct"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 798.2090505727273,
+            "ess_ratio": 0.003715762954387815,
+            "feature": "binance__liquidation_to_depth_30000ms",
+            "n": 214817,
+            "symbol": "BTCUSDT",
+            "transition_count": 172508
+          },
+          {
+            "ess": 728.4743647703842,
+            "ess_ratio": 0.003413960777999842,
+            "feature": "binance__liquidation_to_depth_30000ms",
+            "n": 213381,
+            "symbol": "ETHUSDT",
+            "transition_count": 9084
+          },
+          {
+            "ess": 661.9875087229431,
+            "ess_ratio": 0.0037554461164036844,
+            "feature": "binance__liquidation_to_depth_30000ms",
+            "n": 176274,
+            "symbol": "SOLUSDT",
+            "transition_count": 3262
+          },
+          {
+            "ess": 668.7325056938251,
+            "ess_ratio": 0.003713756980345452,
+            "feature": "okx__liquidation_to_depth_30000ms",
+            "n": 180069,
+            "symbol": "BTCUSDT",
+            "transition_count": 1600
+          },
+          {
+            "ess": 656.1091707936462,
+            "ess_ratio": 0.0037460699690181117,
+            "feature": "okx__liquidation_to_depth_30000ms",
+            "n": 175146,
+            "symbol": "ETHUSDT",
+            "transition_count": 17194
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__liquidation_to_depth_30000ms",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 659.0804424438911,
+            "ess_ratio": 0.003771410830146381,
+            "feature": "bybit__liquidation_to_depth_30000ms",
+            "n": 174757,
+            "symbol": "BTCUSDT",
+            "transition_count": 1703
+          },
+          {
+            "ess": 633.1242801903102,
+            "ess_ratio": 0.0035910127741810363,
+            "feature": "bybit__liquidation_to_depth_30000ms",
+            "n": 176308,
+            "symbol": "ETHUSDT",
+            "transition_count": 1414
+          },
+          {
+            "ess": 367.1026695350745,
+            "ess_ratio": 0.0037303011811187213,
+            "feature": "bybit__liquidation_to_depth_30000ms",
+            "n": 98411,
+            "symbol": "SOLUSDT",
+            "transition_count": 1130
+          },
+          {
+            "ess": 797.6189216068155,
+            "ess_ratio": 0.003713015830250006,
+            "feature": "binance__liquidation_notional_30000ms",
+            "n": 214817,
+            "symbol": "BTCUSDT",
+            "transition_count": 83
+          },
+          {
+            "ess": 724.927618053303,
+            "ess_ratio": 0.0033973391166659777,
+            "feature": "binance__liquidation_notional_30000ms",
+            "n": 213381,
+            "symbol": "ETHUSDT",
+            "transition_count": 105
+          },
+          {
+            "ess": 660.8682152108557,
+            "ess_ratio": 0.003749096379561681,
+            "feature": "binance__liquidation_notional_30000ms",
+            "n": 176274,
+            "symbol": "SOLUSDT",
+            "transition_count": 27
+          },
+          {
+            "ess": 669.8131089860225,
+            "ess_ratio": 0.0037197580315658026,
+            "feature": "okx__liquidation_notional_30000ms",
+            "n": 180069,
+            "symbol": "BTCUSDT",
+            "transition_count": 13
+          },
+          {
+            "ess": 657.0479656681825,
+            "ess_ratio": 0.003751430039328232,
+            "feature": "okx__liquidation_notional_30000ms",
+            "n": 175146,
+            "symbol": "ETHUSDT",
+            "transition_count": 23
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__liquidation_notional_30000ms",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 653.7849944323282,
+            "ess_ratio": 0.00374110905103846,
+            "feature": "bybit__liquidation_notional_30000ms",
+            "n": 174757,
+            "symbol": "BTCUSDT",
+            "transition_count": 15
+          },
+          {
+            "ess": 635.6300778171345,
+            "ess_ratio": 0.0036052253886218123,
+            "feature": "bybit__liquidation_notional_30000ms",
+            "n": 176308,
+            "symbol": "ETHUSDT",
+            "transition_count": 11
+          },
+          {
+            "ess": 366.1788250653038,
+            "ess_ratio": 0.0037209135672364247,
+            "feature": "bybit__liquidation_notional_30000ms",
+            "n": 98411,
+            "symbol": "SOLUSDT",
+            "transition_count": 11
+          },
+          {
+            "ess": 2293.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2293,
+            "symbol": "BTCUSDT",
+            "transition_count": 5
+          },
+          {
+            "ess": 1914.931879317666,
+            "ess_ratio": 0.8354851131403429,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2292,
+            "symbol": "ETHUSDT",
+            "transition_count": 6
+          },
+          {
+            "ess": 2295.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2295,
+            "symbol": "SOLUSDT",
+            "transition_count": 7
+          },
+          {
+            "ess": 1957.0627629638802,
+            "ess_ratio": 0.9674062100661791,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 2023,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 1590.072956961782,
+            "ess_ratio": 0.787554708747787,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 2019,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 1674.0,
+            "ess_ratio": 1.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 1674,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 10837.661820294443,
+            "ess_ratio": 0.5102717557462424,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21239,
+            "symbol": "BTCUSDT",
+            "transition_count": 7
+          },
+          {
+            "ess": 20966.205191893627,
+            "ess_ratio": 0.9871559485801416,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21239,
+            "symbol": "ETHUSDT",
+            "transition_count": 10
+          },
+          {
+            "ess": 21165.19340791429,
+            "ess_ratio": 0.9966187977545928,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21237,
+            "symbol": "SOLUSDT",
+            "transition_count": 10
+          }
+        ],
+        "median_ess": 669.8131089860225,
+        "min_ess": 0.0,
+        "pair_count": 27,
+        "pairs_ess_ge_200": 25
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 7141,
+          "2": 7434,
+          "3": 6995
+        },
+        "past_10s_down_event_rows": 10512,
+        "past_10s_flat_event_rows": 11,
+        "past_10s_up_event_rows": 11047
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 21570,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.5205983889528194,
+          "effective_venues": 1.7326372409428885,
+          "event_rows": 147,
+          "events_by_symbol": {
+            "BTCUSDT": 57.0,
+            "ETHUSDT": 71.0,
+            "SOLUSDT": 20.0
+          },
+          "events_by_venue": {
+            "binance": 109.0,
+            "bybit": 20.0,
+            "okx": 19.0
+          },
+          "events_total": 148.0,
+          "kind": "clock_changes",
+          "matched_columns": [
+            "binance__liquidation_available_ts_ns",
+            "okx__liquidation_available_ts_ns",
+            "bybit__liquidation_available_ts_ns"
+          ],
+          "min_symbols": 2,
+          "min_total": 10,
+          "min_venues": 2,
+          "name": "liquidation_updates",
+          "pass": true
+        },
+        {
+          "effective_symbols": 2.896021214348966,
+          "effective_venues": 2.7895917932124514,
+          "event_rows": 21432,
+          "events_by_symbol": {
+            "BTCUSDT": 8805.0,
+            "ETHUSDT": 7361.0,
+            "SOLUSDT": 5468.0
+          },
+          "events_by_venue": {
+            "bybit": 5716.0,
+            "hyperliquid": 10010.0,
+            "okx": 5908.0
+          },
+          "events_total": 21634.0,
+          "kind": "nonzero",
+          "matched_columns": [
+            "okx__open_interest_change_pct",
+            "bybit__open_interest_change_pct",
+            "hyperliquid__open_interest_change_pct"
+          ],
+          "min_symbols": 2,
+          "min_total": 100,
+          "min_venues": 2,
+          "name": "oi_economic_changes",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    },
+    "A8": {
+      "anchor_ess_ok": true,
+      "anchors": {
+        "anchor_columns": [
+          "okx__open_interest_change_pct",
+          "bybit__open_interest_change_pct",
+          "hyperliquid__open_interest_change_pct",
+          "bybit__basis_bps",
+          "okx__basis_bps",
+          "hyperliquid__basis_bps",
+          "binance__basis_bps",
+          "bybit__funding",
+          "okx__funding",
+          "hyperliquid__funding",
+          "binance__funding",
+          "deriv__median_oi_change_pct"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 2293.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2293,
+            "symbol": "BTCUSDT",
+            "transition_count": 5
+          },
+          {
+            "ess": 1914.931879317666,
+            "ess_ratio": 0.8354851131403429,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2292,
+            "symbol": "ETHUSDT",
+            "transition_count": 6
+          },
+          {
+            "ess": 2295.0,
+            "ess_ratio": 1.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 2295,
+            "symbol": "SOLUSDT",
+            "transition_count": 7
+          },
+          {
+            "ess": 1957.0627629638802,
+            "ess_ratio": 0.9674062100661791,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 2023,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 1590.072956961782,
+            "ess_ratio": 0.787554708747787,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 2019,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 1674.0,
+            "ess_ratio": 1.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 1674,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 10837.661820294443,
+            "ess_ratio": 0.5102717557462424,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21239,
+            "symbol": "BTCUSDT",
+            "transition_count": 7
+          },
+          {
+            "ess": 20966.205191893627,
+            "ess_ratio": 0.9871559485801416,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21239,
+            "symbol": "ETHUSDT",
+            "transition_count": 10
+          },
+          {
+            "ess": 21165.19340791429,
+            "ess_ratio": 0.9966187977545928,
+            "feature": "hyperliquid__open_interest_change_pct",
+            "n": 21237,
+            "symbol": "SOLUSDT",
+            "transition_count": 10
+          },
+          {
+            "ess": 562.3276590589036,
+            "ess_ratio": 0.0026034290565008617,
+            "feature": "bybit__basis_bps",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 21199
+          },
+          {
+            "ess": 596.9230123632551,
+            "ess_ratio": 0.00276359643678444,
+            "feature": "bybit__basis_bps",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 11387
+          },
+          {
+            "ess": 820.091516237655,
+            "ess_ratio": 0.0037968078716528395,
+            "feature": "bybit__basis_bps",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 15347
+          },
+          {
+            "ess": 552.035954662677,
+            "ess_ratio": 0.002555816672203957,
+            "feature": "okx__basis_bps",
+            "n": 215992,
+            "symbol": "BTCUSDT",
+            "transition_count": 18347
+          },
+          {
+            "ess": 572.648027878253,
+            "ess_ratio": 0.0026512464715278943,
+            "feature": "okx__basis_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 18430
+          },
+          {
+            "ess": 886.1056015688254,
+            "ess_ratio": 0.004102492692177605,
+            "feature": "okx__basis_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 5274
+          },
+          {
+            "ess": 566.2209230382346,
+            "ess_ratio": 0.002621490254445695,
+            "feature": "hyperliquid__basis_bps",
+            "n": 215992,
+            "symbol": "BTCUSDT",
+            "transition_count": 2260
+          },
+          {
+            "ess": 560.4406188500672,
+            "ess_ratio": 0.002594728595735338,
+            "feature": "hyperliquid__basis_bps",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 2115
+          },
+          {
+            "ess": 610.011165154599,
+            "ess_ratio": 0.0028242303657292816,
+            "feature": "hyperliquid__basis_bps",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 2639
+          },
+          {
+            "ess": 567.8056626071403,
+            "ess_ratio": 0.0026288394544547707,
+            "feature": "binance__basis_bps",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 14023
+          },
+          {
+            "ess": 572.7433806235118,
+            "ess_ratio": 0.0026517002126177102,
+            "feature": "binance__basis_bps",
+            "n": 215991,
+            "symbol": "ETHUSDT",
+            "transition_count": 12376
+          },
+          {
+            "ess": 947.7931577156011,
+            "ess_ratio": 0.004388114123808867,
+            "feature": "binance__basis_bps",
+            "n": 215991,
+            "symbol": "SOLUSDT",
+            "transition_count": 18356
+          },
+          {
+            "ess": 543.4187944458668,
+            "ess_ratio": 0.002515885990165822,
+            "feature": "bybit__funding",
+            "n": 215995,
+            "symbol": "BTCUSDT",
+            "transition_count": 202
+          },
+          {
+            "ess": 546.9817608478565,
+            "ess_ratio": 0.0025323815868323646,
+            "feature": "bybit__funding",
+            "n": 215995,
+            "symbol": "ETHUSDT",
+            "transition_count": 179
+          },
+          {
+            "ess": 538.9867668537904,
+            "ess_ratio": 0.002495366868926551,
+            "feature": "bybit__funding",
+            "n": 215995,
+            "symbol": "SOLUSDT",
+            "transition_count": 178
+          },
+          {
+            "ess": 538.6813251765341,
+            "ess_ratio": 0.0024939873938689123,
+            "feature": "okx__funding",
+            "n": 215992,
+            "symbol": "BTCUSDT",
+            "transition_count": 360
+          },
+          {
+            "ess": 538.6616583672329,
+            "ess_ratio": 0.0024938963404535024,
+            "feature": "okx__funding",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 360
+          },
+          {
+            "ess": 538.6728587140706,
+            "ess_ratio": 0.002493948195831654,
+            "feature": "okx__funding",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 360
+          },
+          {
+            "ess": 578.6562678677099,
+            "ess_ratio": 0.002679063427662644,
+            "feature": "hyperliquid__funding",
+            "n": 215992,
+            "symbol": "BTCUSDT",
+            "transition_count": 801
+          },
+          {
+            "ess": 540.8969578196478,
+            "ess_ratio": 0.0025042453323254926,
+            "feature": "hyperliquid__funding",
+            "n": 215992,
+            "symbol": "ETHUSDT",
+            "transition_count": 3449
+          },
+          {
+            "ess": 544.8592926741459,
+            "ess_ratio": 0.0025225901546082536,
+            "feature": "hyperliquid__funding",
+            "n": 215992,
+            "symbol": "SOLUSDT",
+            "transition_count": 2873
+          },
+          {
+            "ess": 538.6891868429198,
+            "ess_ratio": 0.002494035338708186,
+            "feature": "binance__funding",
+            "n": 215991,
+            "symbol": "BTCUSDT",
+            "transition_count": 250
+          },
+          {
+            "ess": 538.6520832039655,
+            "ess_ratio": 0.0024938635554442802,
+            "feature": "binance__funding",
+            "n": 215991,
+            "symbol": "ETHUSDT",
+            "transition_count": 253
+          },
+          {
+            "ess": 538.6412337021007,
+            "ess_ratio": 0.002493813324176011,
+            "feature": "binance__funding",
+            "n": 215991,
+            "symbol": "SOLUSDT",
+            "transition_count": 252
+          },
+          {
+            "ess": 23586.7433621966,
+            "ess_ratio": 0.9368369290303293,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 25177,
+            "symbol": "BTCUSDT",
+            "transition_count": 926
+          },
+          {
+            "ess": 24893.752582971563,
+            "ess_ratio": 0.9930490100116309,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 25068,
+            "symbol": "ETHUSDT",
+            "transition_count": 776
+          },
+          {
+            "ess": 24781.0,
+            "ess_ratio": 1.0,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 24781,
+            "symbol": "SOLUSDT",
+            "transition_count": 770
+          }
+        ],
+        "median_ess": 575.6998242456109,
+        "min_ess": 538.6412337021007,
+        "pair_count": 36,
+        "pairs_ess_ge_200": 36
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 47016,
+          "2": 48457,
+          "3": 48571
+        },
+        "past_10s_down_event_rows": 71722,
+        "past_10s_flat_event_rows": 77,
+        "past_10s_up_event_rows": 72245
+      },
+      "diversity_ok": true,
+      "groups_pass": true,
+      "independent_event_rows": 144044,
+      "recommended_max_hypothesis_tests": 8,
+      "support_groups": [
+        {
+          "effective_symbols": 2.896021214348966,
+          "effective_venues": 2.7895917932124514,
+          "event_rows": 21432,
+          "events_by_symbol": {
+            "BTCUSDT": 8805.0,
+            "ETHUSDT": 7361.0,
+            "SOLUSDT": 5468.0
+          },
+          "events_by_venue": {
+            "bybit": 5716.0,
+            "hyperliquid": 10010.0,
+            "okx": 5908.0
+          },
+          "events_total": 21634.0,
+          "kind": "nonzero",
+          "matched_columns": [
+            "okx__open_interest_change_pct",
+            "bybit__open_interest_change_pct",
+            "hyperliquid__open_interest_change_pct"
+          ],
+          "min_symbols": 2,
+          "min_total": 100,
+          "min_venues": 2,
+          "name": "oi_economic_changes",
+          "pass": true
+        },
+        {
+          "effective_symbols": 2.9497957571087148,
+          "effective_venues": 3.284357388743803,
+          "event_rows": 127430,
+          "events_by_symbol": {
+            "BTCUSDT": 55829.0,
+            "ETHUSDT": 44308.0,
+            "SOLUSDT": 41616.0
+          },
+          "events_by_venue": {
+            "binance": 44755.0,
+            "bybit": 47933.0,
+            "hyperliquid": 7014.0,
+            "okx": 42051.0
+          },
+          "events_total": 141753.0,
+          "kind": "nonzero",
+          "matched_columns": [
+            "bybit__basis_velocity",
+            "okx__basis_velocity",
+            "hyperliquid__basis_velocity",
+            "binance__basis_velocity"
+          ],
+          "min_symbols": 2,
+          "min_total": 50,
+          "min_venues": 2,
+          "name": "basis_economic_changes",
+          "pass": true
+        }
+      ],
+      "support_verdict": "STRONG_SUPPORT"
+    }
+  },
+  "load_report": {
+    "ess_anchor_batch_size": 4,
+    "full_frame_concat": false,
+    "loaded_columns": 659,
+    "logical_columns": 1322,
+    "max_resident_parts": 1,
+    "mode": "parquet_partition_streaming",
+    "parts": 13,
+    "pruned_columns": 663
+  },
+  "pit_proof_level": "FULL_FEATURE_PROVENANCE",
+  "policy_digest": "8ffedfe07ba7d9146c7b1d2e5a03b7e0a07d3782b544c8e724c111b63b224590",
+  "policy_version": "afv5-support-v1",
+  "rows": 648003,
+  "scientific_boundary": "support audit uses no future target and does not constitute alpha evidence; it only caps the amount of subsequent hypothesis testing",
+  "strong_support_labs": [
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8"
+  ],
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ],
+  "target_columns_used": [],
+  "target_free": true,
+  "thin_or_blocked_labs": []
+}

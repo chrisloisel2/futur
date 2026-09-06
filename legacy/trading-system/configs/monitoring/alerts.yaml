@@ -1,6 +1,0 @@
-alerts:
-  rules:
-    perf_drift_crit:
-      severity: CRIT
-      condition: slippage_bps>5
-      cooldown_seconds: 300

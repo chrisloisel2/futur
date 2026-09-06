@@ -1,0 +1,61 @@
+{
+  "capture": {
+    "captured_at_utc": "2026-07-28T21:21:13Z",
+    "note": "quote_ccy recorded as USD (Truth mono-currency scope, see docs/TRUTH_ACCOUNTING.md) -- the venue's own quoteAsset is USDT, preserved verbatim in quote_asset_raw. USDT is treated 1:1 as USD, a documented shadow-only convention (see truth_shadow.mapping module docstring) -- this registry does NOT validate or model USDT depeg risk.",
+    "source_endpoints": [
+      "https://fapi.binance.com/fapi/v1/exchangeInfo",
+      "https://api.binance.com/api/v3/exchangeInfo"
+    ],
+    "source_response_sha256": {
+      "fapi_exchangeInfo.json": "c69e0a1de52ee0e7fe1e6ce42d81c9d97be7438ce33be7c6729e5f2f86dfc666",
+      "spot_exchangeInfo.json": "c7fb9ffa6a6465b5c955d1535fc310dfb3fafd7fe76b7136268d34f849cc779d"
+    }
+  },
+  "schema_version": 1,
+  "specs": [
+    {
+      "base_ccy": "BTC",
+      "lot_size": "0.001",
+      "multiplier": "1",
+      "quote_asset_raw": "USDT",
+      "quote_ccy": "USD",
+      "symbol": "BTCUSDT",
+      "tick_size": "0.10",
+      "type": "LINEAR_PERP",
+      "venue": "binance_usdm"
+    },
+    {
+      "base_ccy": "ETH",
+      "lot_size": "0.001",
+      "multiplier": "1",
+      "quote_asset_raw": "USDT",
+      "quote_ccy": "USD",
+      "symbol": "ETHUSDT",
+      "tick_size": "0.01",
+      "type": "LINEAR_PERP",
+      "venue": "binance_usdm"
+    },
+    {
+      "base_ccy": "BTC",
+      "lot_size": "0.00001000",
+      "multiplier": "1",
+      "quote_asset_raw": "USDT",
+      "quote_ccy": "USD",
+      "symbol": "BTCUSDT",
+      "tick_size": "0.01000000",
+      "type": "SPOT",
+      "venue": "binance_spot"
+    },
+    {
+      "base_ccy": "ETH",
+      "lot_size": "0.00010000",
+      "multiplier": "1",
+      "quote_asset_raw": "USDT",
+      "quote_ccy": "USD",
+      "symbol": "ETHUSDT",
+      "tick_size": "0.01000000",
+      "type": "SPOT",
+      "venue": "binance_spot"
+    }
+  ]
+}

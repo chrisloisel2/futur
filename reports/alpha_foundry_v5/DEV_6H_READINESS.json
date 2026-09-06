@@ -1,0 +1,283 @@
+{
+  "blocked_labs": [
+    "A10",
+    "A11",
+    "A12",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "A3",
+    "A4",
+    "A5",
+    "A7",
+    "A8",
+    "A9"
+  ],
+  "columns": 186,
+  "labs": {
+    "A1": {
+      "coverage": {
+        "*__price_dislocation_bps": 0.9999722223508225,
+        "*__price_mid": 0.9999722223508225
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "ready": true
+    },
+    "A10": {
+      "coverage": {
+        "ANY:*funding*": 0.0,
+        "ANY:*time_to_funding*|*funding_clock*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*funding*"
+        ],
+        [
+          "*time_to_funding*",
+          "*funding_clock*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A11": {
+      "coverage": {
+        "wallet__*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [],
+      "missing_patterns": [
+        "wallet__*"
+      ],
+      "ready": false
+    },
+    "A12": {
+      "coverage": {
+        "ANY:*residual*": 0.0,
+        "ANY:cross_asset__*|*innovation*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "cross_asset__*",
+          "*innovation*"
+        ],
+        [
+          "*residual*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A13": {
+      "coverage": {
+        "ANY:*beta*": 0.0,
+        "ANY:*residual*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*residual*"
+        ],
+        [
+          "*beta*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A14": {
+      "coverage": {
+        "ANY:*iv_*|*skew*|*rr25*": 0.0,
+        "ANY:*option_oi*|*gamma*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*iv_*",
+          "*skew*",
+          "*rr25*"
+        ],
+        [
+          "*option_oi*",
+          "*gamma*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A15": {
+      "coverage": {
+        "ANY:onchain__*|*exchange_netflow*|*stablecoin*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "onchain__*",
+          "*exchange_netflow*",
+          "*stablecoin*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A16": {
+      "coverage": {
+        "ANY:*queue_ahead*|*fill_probability*": 0.0,
+        "ANY:exec__post_fill_markout_bps": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*queue_ahead*",
+          "*fill_probability*"
+        ],
+        [
+          "exec__post_fill_markout_bps"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A2": {
+      "coverage": {
+        "*__price_dislocation_bps": 0.9999722223508225
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "ready": true
+    },
+    "A3": {
+      "coverage": {
+        "ANY:*cancel*|*remove*": 0.0,
+        "ANY:*ofi*|*queue_imbalance*": 0.9999722223508225
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*cancel*",
+          "*remove*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A4": {
+      "coverage": {
+        "ANY:*depth_*|*notional_to_move*": 0.9999722223508225,
+        "ANY:*trades_per_second*|*signed_notional*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*trades_per_second*",
+          "*signed_notional*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A5": {
+      "coverage": {
+        "ANY:*absorption*|*impact_bps*": 0.0,
+        "ANY:*signed_notional*|*flow_imbalance*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*signed_notional*",
+          "*flow_imbalance*"
+        ],
+        [
+          "*absorption*",
+          "*impact_bps*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A6": {
+      "coverage": {
+        "ANY:*depth_*|*notional_to_move*": 0.9999722223508225,
+        "ANY:*spread_bps*": 0.9999722223508225
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [],
+      "missing_patterns": [],
+      "ready": true
+    },
+    "A7": {
+      "coverage": {
+        "ANY:*liquidation*": 0.0,
+        "ANY:*open_interest*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*liquidation*"
+        ],
+        [
+          "*open_interest*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A8": {
+      "coverage": {
+        "ANY:*funding*|*basis*|*premium*": 0.0,
+        "ANY:*open_interest*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*open_interest*"
+        ],
+        [
+          "*funding*",
+          "*basis*",
+          "*premium*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    },
+    "A9": {
+      "coverage": {
+        "ANY:*basis*|*premium*": 0.0,
+        "ANY:*funding*": 0.0
+      },
+      "min_coverage": 0.5,
+      "missing_any_groups": [
+        [
+          "*funding*"
+        ],
+        [
+          "*basis*",
+          "*premium*"
+        ]
+      ],
+      "missing_patterns": [],
+      "ready": false
+    }
+  },
+  "pit": {
+    "checked_availability_columns": [],
+    "duplicate_keys": 0,
+    "future_availability_violations": 0,
+    "nonmonotonic_asof": 0,
+    "rows": 648003
+  },
+  "pit_clean": true,
+  "ready_labs": [
+    "A1",
+    "A2",
+    "A6"
+  ],
+  "rows": 648003
+}

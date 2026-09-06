@@ -1,5 +1,13 @@
 # Piste 1 — Cross-sectional trend (CTREND)
 
+> ## ❌ VERDICT : CTREND_REJECTED (2026-07-17, commit distant `859ebad`)
+>
+> v1 sur univers **point-in-time** (786 perps délistés inclus, top-50
+> par volume médian 30 j décalé) : CAGR −2,1 %, médiane mensuelle
+> −3,4 %. Le v0 positif était du **biais de survivance** — exactement le
+> piège annoncé ci-dessous. Le verdict vaut pour la famille au grain
+> quotidien/hebdo sur cet univers.
+
 Classement de 30–80 cryptos liquides par tendance prix-volume multi-horizon ;
 long top-K, cash si régime défavorable. Horizon : 1–7 jours.
 
@@ -30,5 +38,23 @@ Première passe volontairement simple, pour établir une baseline honnête :
 - Univers point-in-time (supprime le biais de survivance).
 - Neutralisation bêta-BTC et concentration sectorielle.
 - Confirmation par volume (interaction prix-volume du papier).
+- **Grille de fréquences de rebalancement : 6 h / 24 h / hebdo.** Le papier
+  CTREND travaille en hebdo value-weighted ; la littérature intraday
+  Bitcoin (time-series momentum, Reading,
+  https://centaur.reading.ac.uk/100181/) trouve des coûts de breakeven de
+  **3–10 bps** — le 6 h n'est viable que si le turnover reste sous ce
+  plafond. Mesurer le PnL net par fréquence, pas seulement le brut.
 - Walk-forward + DSR/PBO avant toute conclusion — les gates du
   [README parent](../README.md) s'appliquent.
+
+## Références
+
+- Han, Kang, Li & Sim, *A Trend Factor for the Cross Section of
+  Cryptocurrency Returns* (JFQA) — 28 signaux techniques (momentum, MA,
+  volume, vol) sur 3 000+ coins 2015-2022 :
+  https://www.cambridge.org/core/journals/journal-of-financial-and-quantitative-analysis/article/trend-factor-for-the-cross-section-of-cryptocurrency-returns/4C1509ACBA33D5DCAF0AC24379148178
+- Liu, Tsyvinski & Wu, *Common Risk Factors in Cryptocurrency* (JF 2022) —
+  marché/taille/momentum comme benchmark à battre :
+  https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3379131
+- Momentum court terme crypto et bénéfices de diversification :
+  https://eprints.soton.ac.uk/434719/

@@ -1,0 +1,206 @@
+experiment_id: liquidation_relative_reversal_v1
+step: 2/9 -- data inventory (no collector run, no feature, no backtest)
+date: 2026-07-22
+machine: qbee@100.127.59.114, read-only inspection, ~/futur (data dirs are
+  gitignored, independent of the fact that qbee's git checkout does not yet
+  have this piste's own directory -- confirmed, unrelated to the data itself)
+universe_reference: research/edge_factory/cross_sectional_momentum_v1/results/
+  PIT_UNIVERSE_MANIFEST.json -- 311 crypto symbols (delisted retained), reused
+  as-is, not rebuilt
+
+perp_5m_ohlcv:
+  sources_available:
+    daily_only: data/derivatives_backfill/um_klines_1d/ -- 1575 files, DAILY
+      granularity confirmed, not usable for a 5m detector
+    hourly_partial: data/enriched/*_1h_enriched.parquet -- 50 symbols (48 alts
+      + BTC + ETH), 67GB, 1h granularity (not 5m)
+    5m_but_useless_here: data/listings_backfill/binance/klines_5m/ -- 518
+      files, genuine 5m OHLCV but only ~1.5 days AROUND EACH SYMBOL'S LISTING
+      DATE (864 rows each) -- built for a listing event-study, structurally
+      unusable for a general historical cascade detector
+  verified_coverage:
+    enriched_1h: "BTC 2017-08-17 to 2026-07-22 (72089 rows); ETH from
+      2017-08-17; the 48 alts range from 2019-2024 listing starts; only
+      48/311 PIT symbols covered (~15%)"
+  known_defect: >
+    taker_buy_quote_asset_volume/quote_asset_volume == exactly 0.5 for
+    99.99% of rows, taker_buy_base/volume == 0.5 for 93% of rows in
+    data/enriched -- these are qv/2 PLACEHOLDERS, not real taker splits.
+    Confirms and sharpens a prior vague note in project memory ("taker_buy_*
+    = placeholder"). Any aggressive-volume signal built from this store
+    would be measuring nothing.
+  collector_status: >
+    code exists (hedge_fund/hf_crypto_dataset/collectors/binance.py::
+    futures_klines, pulls Binance Vision monthly 1m ZIPs, resamplable to 5m)
+    but has NEVER been run for this universe -- free public API, this is a
+    "run it", not a "build it", but the actual run (312 symbols x years of
+    1m data resampled to 5m) is a real, non-trivial compute/storage cost,
+    not a quick backfill.
+  classification: COLLECTOR_REQUIRED
+
+agg_trades:
+  sources_available: none on disk anywhere (exhaustive parquet search under
+    hf_crypto_dataset/ and data/ returned nothing)
+  collector_status: >
+    code exists (BinanceCollector.binance_vision_daily_agg_trades +
+    read_agg_zip/aggregate_trades_1m, pulls
+    data.binance.vision/data/{market}/daily/aggTrades/...) -- free, no auth,
+    feasible, but zero cached data. Real cost: many small daily zip files x
+    312 symbols x years, CPU-heavy 1m aggregation before any 5m rollup.
+  classification: COLLECTOR_REQUIRED
+
+spot_index_5m:
+  sources_available: none on disk anywhere -- confirmed absent, matches
+    calendar_basis_v1's own finding verbatim ("a true SPOT price series does
+    not exist anywhere on disk", Mac-side finding, not yet propagated to
+    qbee's checkout but the underlying data absence is independent of that)
+  collector_status: a spot_klines() method exists in the same collector
+    module but has never been run. Free (Binance Vision spot archive), needs
+    running.
+  classification: COLLECTOR_REQUIRED
+
+mark_price_5m:
+  sources_available:
+    premium_index_5m_not_mark: data/derivatives_backfill/binance_vision_premium/
+      -- genuine 5m premium-index OHLC (premium_open/high/low/premium
+      columns, values like 0.0007 -- a RATIO, not an absolute price level).
+      49/50 enriched symbols (missing PEPEUSDT), 2021-01-01 to 2026-06-30,
+      verified on BTCUSDT (575688 rows). This is NOT mark price.
+    true_mark_price_8h_only: data/derivatives_backfill/binance/funding/
+      *.parquet has a mark_price column but only at 8h funding-settlement
+      cadence, and only populated from 2023-10-31 onward (NaN before) --
+      already known from an earlier piste's inventory this session,
+      reconfirmed here.
+  gaps: no absolute mark price exists anywhere at 5m granularity for any
+    symbol. The premium series could substitute for a basis-CHANGE signal
+    (perp/spot divergence proxy) since it IS a relative measure at the
+    right granularity, but not for an absolute mark-price level.
+  classification: BLOCKED_BY_REFERENCE_SPOT (no absolute 5m mark/spot level
+    exists at all; the premium series is a usable partial substitute for the
+    relative divergence signal specifically, not a general mark-price feed)
+
+open_interest_5m:
+  sources_available:
+    rest_hourly_thin: data/derivatives_backfill/binance/open_interest_hist/
+      -- 278 files (grew from the "9 majors" found in an earlier piste's
+      inventory), but STILL only 1h granularity and ~30 days lookback --
+      this is Binance's fapi/v1/openInterestHist own retention ceiling
+      (~30 days regardless of requested period/limit), a hard API limit,
+      not a collection gap that more running fixes.
+    vision_5m_the_real_source: data/derivatives_backfill/binance_vision_metrics/
+      -- TRUE 5-minute sum_open_interest, verified on BTCUSDT (583174 rows,
+      2021-01-01 to 2026-07-20, 2985 gaps >5m over the span) and ETHUSDT
+      (487443 rows, from 2021-12-01). Currently ingested for 49/311 PIT
+      symbols only, but the source itself (data.binance.vision
+      futures/um/daily/metrics/) is confirmed via direct curl to serve ALL
+      USDM symbols historically (spot-checked ACTUSDT/AEVOUSDT/XLMUSDT,
+      not yet locally ingested, all return HTTP 200) -- extending coverage
+      is a re-run of the existing collector (scripts/backfill_binance_
+      metrics_vision.py), not new engineering.
+    live_poll_bonus: data/derivatives_raw/exchange=binance/market=usdm/
+      stream=open_interest/ -- 8 symbols only, since 2026-06-28, ~5m48s
+      jittery interval, bundles mark_price/index_price/funding_rate too
+      (useful for the basis-change signal on those 8 symbols specifically).
+  classification: COLLECTOR_REQUIRED (feasible and cheap -- existing
+    collector, free source, just needs to cover the remaining ~262 symbols)
+
+funding:
+  sources_available: data/derivatives_backfill/binance/funding/*.parquet --
+    329 files, 0/311 PIT symbols missing (full coverage, exceeds the target
+    universe)
+  verified_coverage: "BTCUSDT 6084 rows, 2021-01-01 to 2026-07-21, cadence
+    exactly 8h (00:00/08:00/16:00 UTC, confirmed by timestamp-diff
+    histogram)"
+  methodological_note: >
+    funding settles as a DISCRETE lump sum at the three daily marks, it is
+    NOT a continuous 5-minute accrual. A 60-120 minute holding window
+    crosses at most one settlement boundary. Any funding cost model for
+    this piste must apply it as a single lump sum exactly at the crossed
+    mark, not pro-rated per 5m bar -- pro-rating would misstate the timing
+    (though not necessarily the total $ magnitude if no boundary is
+    crossed at all, which will be the common case for a 60m trade).
+  classification: DATA_READY
+
+liquidations_declared:
+  sources_available:
+    binance_vision_cm_only: data/derivatives_backfill/binance_vision_liquidation/
+      -- 45 symbols, 257874 rows, 2023-06-25 to 2024-10-14 EXACTLY (re-verified,
+      unchanged from piste 2's finding). Coin-margined (cm) only, NEVER
+      covered usdm. Re-checked live: cm and um Vision liquidation endpoints
+      for 2025-06/2026-01/2026-07 all return 404 -- publication has NOT
+      resumed.
+    bybit_live_since_2026-07-04: data/derivatives_raw/exchange=bybit/
+      market=linear/stream=force_order/ -- genuine per-event data (timestamp,
+      recv_time, latency_ms, side, price, qty, usd) via Bybit's real
+      allLiquidation v5 websocket (the post-2025-02 500ms-pushed feed cited
+      in the preregistration, confirmed against Bybit's own docs), 47
+      symbols, BTCUSDT 12207 events over 18 days.
+    okx_live_since_2026-07-04_bonus: same window/mechanism, REST-polled,
+      45 symbols, BTCUSDT 18221 events.
+    binance_live_blocked: !forceOrder@arr websocket is coded but
+      NON-FUNCTIONAL -- collector's own docstring records a 2026-07-03
+      diagnostic showing fstream.binance.com accepts the connection but
+      never pushes data from this host (silent geo-block), not a data
+      problem, a network/hosting one.
+    stale_derived_lake: data/events/liquidation/events.parquet -- only 1160
+      rows, 2026-07-04 to 07-05, a one-off run not kept current with the 18
+      days now actually sitting in the raw Bybit/OKX streams.
+  gaps: >
+    Bybit/OKX cover only ~47/311 symbols (the liquid core), not the full
+    PIT universe. Historical Bybit/OKX liquidations BEFORE 2026-07-04 are
+    NOT reproducible for free -- confirmed no public REST historical-
+    liquidation endpoint exists on either exchange; only paid vendors
+    (Tardis.dev since 2020-12-18, Amberdata since 2021-09) hold this
+    history. This is an acquisition-cost gap, not a collection-effort gap.
+  classification: DATA_READY_WITH_INFERRED_LIQUIDATIONS -- consistent with
+    the preregistration's own design (declared liquidations are confirmation
+    only, never a historical detector gate, precisely because of this
+    limitation, anticipated before this inventory ran)
+
+listing_delisting:
+  sources_available: already established and verified genuine by the
+    momentum piste's PIT universe work (787-symbol store, real delistings
+    spot-checked: LUNAUSDT, BTTUSDT, LENDUSDT, MATICUSDT-to-POLUSDT,
+    RNDRUSDT-to-RENDERUSDT, and 24 more -- see cross_sectional_momentum_v1/
+    DATA_INVENTORY.yaml) -- reused as-is, not re-verified here
+  classification: DATA_READY
+
+fees:
+  sources_available: no historical signed snapshots exist anywhere
+    (data/alpha20/cost_snapshots/ does not exist on qbee, confirmed
+    repeatedly across pistes this session). exchangeInfo exposes a
+    per-symbol liquidationFee field (current value only, e.g. checked
+    BTCUSDT) that could inform a liquidation-specific cost assumption, not
+    yet used by any existing cost model.
+  classification: COLLECTOR_REQUIRED for real snapshots (needs signed API
+    keys, out of scope) -- assumed defaults from configs/alpha20.yaml
+    (binance_usdm: maker 2bp, taker 5bp) remain the only usable figures,
+    same limitation as every other piste this session
+
+tick_size_lot_size:
+  sources_available: fapi/v1/exchangeInfo (free, live, no auth) returns
+    CURRENT PRICE_FILTER.tickSize and LOT_SIZE.stepSize per symbol (verified
+    on BTCUSDT: tickSize 0.10, stepSize 0.001) -- but only current values,
+    no historical archive. Tick/lot size can and does change over an
+    instrument's life (price appreciation, exchange adjustments); using
+    today's value for a 2023 event would be an unverified assumption, not a
+    fact.
+  classification: DATA_READY_WITH_CAVEAT (current values only, historical
+    values not reproducible)
+
+overall_bottleneck: >
+  the preregistered 5-minute-bar cascade detector needs perp 5m OHLCV +
+  aggressive volume + 5m OI + basis divergence, simultaneously, across the
+  full 311-symbol PIT universe. As inventoried: perp 5m OHLCV does not
+  exist at all (COLLECTOR_REQUIRED, real build cost, not a quick re-run);
+  aggTrades does not exist at all (COLLECTOR_REQUIRED, same); 5m OI exists
+  for 49/311 symbols today but is cheaply extensible (COLLECTOR_REQUIRED,
+  low cost); true mark/spot at 5m does not exist anywhere
+  (BLOCKED_BY_REFERENCE_SPOT, premium-ratio is a partial substitute for the
+  divergence signal only). Funding and listing/delisting are fully
+  DATA_READY. Liquidations are DATA_READY_WITH_INFERRED_LIQUIDATIONS by
+  design. Net: nothing here is NOT_REPRODUCIBLE, but running the full
+  311-symbol universe today would require building and running two new
+  collectors (perp 5m OHLCV, aggTrades) from scratch, not just re-invoking
+  existing tools -- a materially larger effort than any prior piste's step
+  3 this session, which mostly found existing collectors to re-run.

@@ -15,15 +15,11 @@ class AppPaths:
     strategies_dir: Path
     production_dir: Path
     research_dir: Path
-    legacy_dir: Path
-    config_dir: Path
     data_dir: Path
     runs_dir: Path
     pipeline_runs_dir: Path
     research_runs_dir: Path
-    legacy_runs_dir: Path
     pipeline_1m_runs_dir: Path
-    local_runs_dir: Path
     tests_dir: Path
 
     def resolve(self, value: str | Path) -> Path:
@@ -38,8 +34,6 @@ class AppPaths:
             return self.pipeline_runs_dir
         if normalized in {"1m", "minute", "pipeline_minute", "research"}:
             return self.pipeline_1m_runs_dir
-        if normalized in {"local", "legacy"}:
-            return self.local_runs_dir
         raise KeyError(f"Profil de run inconnu: {profile!r}")
 
 
@@ -70,15 +64,11 @@ def get_settings() -> AppSettings:
         strategies_dir=project_root / "strategies",
         production_dir=project_root / "production",
         research_dir=project_root / "research",
-        legacy_dir=project_root / "legacy",
-        config_dir=project_root / "legacy" / "config",
         data_dir=project_root / "data",
         runs_dir=project_root / "runs",
         pipeline_runs_dir=project_root / "runs" / "pipeline",
         research_runs_dir=project_root / "runs" / "research",
-        legacy_runs_dir=project_root / "runs" / "legacy",
         pipeline_1m_runs_dir=project_root / "runs" / "research" / "pipeline_minute",
-        local_runs_dir=project_root / "runs" / "legacy" / "local",
         tests_dir=project_root / "tests",
     )
     services = ServiceSettings(
@@ -103,15 +93,13 @@ def get_settings() -> AppSettings:
 def configure_project_imports(extra_paths: Optional[Iterable[str | Path]] = None) -> Path:
     settings = get_settings()
     root_str   = str(settings.paths.project_root)
-    legacy_str = str(settings.paths.legacy_dir)
-    models_str = str(settings.paths.legacy_dir / "ai" / "models")
 
     extra_list: list[str] = []
     if extra_paths:
         extra_list = [str(settings.paths.resolve(p)) for p in extra_paths]
 
-    # Legacy paths et extras vont EN FIN de sys.path (fallback seulement).
-    for path_str in [models_str, legacy_str] + extra_list:
+    # Extras vont EN FIN de sys.path (fallback seulement).
+    for path_str in extra_list:
         if path_str not in sys.path:
             sys.path.append(path_str)
 

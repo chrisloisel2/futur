@@ -78,7 +78,8 @@ def _run_one(spec, snapshot, broker: PaperBroker) -> dict:
         venue_unsecured_frac={spec.venue or "n/a":
                               gross / max(account.nav_usdt(), 1.0)})
     adapter = build_adapter(spec)
-    events, new_state = adapter.decide(snapshot, broker, state, decision.state)
+    events, new_state = adapter.decide(snapshot, broker, state, decision.state,
+                                       decision.scale)
     if decision.state != state.get("last_risk_state"):
         from src.alpha20.contracts import LedgerEvent
         events = events + [LedgerEvent(

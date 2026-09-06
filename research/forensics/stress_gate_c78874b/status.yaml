@@ -1,0 +1,32 @@
+# Miroir lisible du registre canonique (configs/alpha20.yaml ->
+# experiment_registry.provenance_blocked -> cross_exchange_stress_gate_h2).
+# Le registre YAML fait foi pour l'application programmatique
+# (guard_new_experiment) ; ce fichier est la référence forensique associée
+# aux artefacts de ce dossier.
+
+hypothesis_id: cross_exchange_stress_gate_h2
+historical_status: VALIDATED_SIGNAL
+current_status: UNVERIFIED_PROVENANCE
+
+blocking_reasons:
+  - source_module_absent_from_all_reachable_git_refs
+  - original_data_manifest_unavailable
+  - original_result_not_reproducible_from_clean_checkout
+  - point_in_time_and_lookahead_properties_not_auditable
+
+allowed_uses:
+  - forensic_recovery
+  - independent_preregistered_reproduction
+
+forbidden_uses:
+  - evidence_for_runner_qualification
+  - portfolio_wiring
+  - active_or_observe_only_runner_creation
+  - risk_allocation_decision
+
+superseded_by_experiment: stress_gate_dispersion_v2_reproduction
+historical_report_mutated: false
+historical_report: reports/BINANCE_BYBIT_FUNDING_EDGE_REPORT.md
+historical_ref: "c78874b"
+canonical_registry_entry: configs/alpha20.yaml -> experiment_registry.provenance_blocked
+canonical_guard: src/alpha20/validation/experiment_registry.py::guard_new_experiment

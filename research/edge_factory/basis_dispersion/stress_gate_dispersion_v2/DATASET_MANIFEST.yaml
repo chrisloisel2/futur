@@ -1,0 +1,60 @@
+# DATASET_MANIFEST.yaml — gel du dataset stress_gate_dispersion_v2_reproduction
+# (opération A + admission au panel primaire, PAS de statistique économique).
+# Généré par scripts/normalize_stress_gate_dispersion_v2.py, reproductible
+# depuis les pages brutes (data/research/stress_gate_dispersion_v2/raw/,
+# gitignored — ce fichier est la référence trackée en git).
+
+frozen_at_utc: "2026-07-21T10:27:00Z"
+last_updated_utc: "2026-07-21T11:05:00Z"   # analysis_input_hash widened to include mark-price bars used (below), before any Phase 2 result
+collector_commit: "1786b74"
+normalize_commit: "ccb3e63"
+
+acquisition:
+  run_ids: [run_20260721_full, "fix bybit/funding/BTCUSDT (collector 1786b74, single-series rerun)"]
+  signal_start_utc: "2022-11-03T00:00:00Z"
+  signal_end_utc: "2026-07-14T00:00:00Z"
+  price_start_utc: "2022-11-03T00:00:00Z"
+  price_end_utc: "2026-07-15T01:00:00Z"
+
+matching_rule: settlement_timestamp_alignment_v1   # tolerance_ms=1000, mutual 1:1, ambiguous/unmatched rejected
+comparability_rule: primary_rate_comparability      # equal observed_interval_hours in {2,4,8}, else rejected
+
+hashes:
+  raw_envelope_manifest_hash: "c71800838d0af5ce1eabe3f56c72307888bef9428b552e49758407be05b89dd7"
+  semantic_raw_content_hash: "7c52506246a260f39e53f5bc853c4843f06d042e88382539d2e3b6bc987cf2bc"
+  normalized_funding_hash: "0d588230b0dc672447d3196526a93e9f75c2ffc62f1ad24b0c799f3aef2270ae"
+  normalized_mark_price_hash: "d92014b144437704859242d519139f1d4496317ab11093567933583efac004c2"
+  cross_venue_intersection_hash: "d809bbbecf14389c2e38ccc9ad4462f8b2a65216a95b2c89e849d39f731c8da5"
+  coverage_report_hash: "d809bbbecf14389c2e38ccc9ad4462f8b2a65216a95b2c89e849d39f731c8da5"
+  cadence_report_hash: "b0841c93d09b91b5aa9df5f20db4bf69b190c2aecea79d21ffe00e338ae38a16"
+  markprice_report_hash: "35fc5477830aaa9c531bf16febf31170d798b1727a4f26a2b2b5376ced7da138"
+  mini_audit_hash: "149b5cbd2b821e03c5ab5e1247f609a3b15e51bd8ed3ca8026d6699891b71837"
+  primary_panel_report_hash: "7d70a95531628b8691b6f2799a932123b16416404b594a7704149efc8a46fc20"
+  mark_price_bars_used_hash: "635a22fbe974d534905da50ab54dd0fe20538e150d4bbdd08204dd2ba8735f19"
+  analysis_input_hash: "49b81eb1d4e4f86c5440eeaaa48bfd721f4d17d49effad428918c28b2ce03180"   # widened: now also commits to mark-price bars used (previous value 829bdc9... covered funding pairs only)
+  preregistration_hash: "c7be37c140ae687f8a9b70f5970dc9c9ca554614bf5d807d0ad55f40a3af8b76"   # PREREGISTRATION.md as of ccb3e63
+
+verified_reproducible_on_rerun: true   # tous les hashes identiques bit-pour-bit sur un second run complet
+
+primary_panel_summary:
+  BTCUSDT: {n_pairs_considered: 4047, n_eligible_primary: 4043,
+           rejections: {incomplete_forward_window: 3, missing_previous_settlement: 1}}
+  ETHUSDT: {n_pairs_considered: 4047, n_eligible_primary: 4043,
+           rejections: {incomplete_forward_window: 3, missing_previous_settlement: 1}}
+  BNBUSDT: {n_pairs_considered: 4047, n_eligible_primary: 4043,
+           rejections: {incomplete_forward_window: 3, missing_previous_settlement: 1}}
+  SOLUSDT: {n_pairs_considered: 4410, n_eligible_primary: 4017,
+           rejections: {unmatched_timestamp: 291, interval_mismatch: 98,
+                        incomplete_forward_window: 3, missing_previous_settlement: 1}}
+
+gate_checklist:
+  sol_excess_rows_factually_attributed: true    # cadence regimes (efec15a) + interval_mismatch rejections
+  no_unresolved_conflicting_duplicate: true     # 0/8 funding series, 0/4 mark-price series
+  cross_venue_joined_without_imputation: true   # mutual 1:1 <=1s, no asof, no forward-fill
+  rate_semantics_comparable_or_explicitly_blocking: true   # equal-interval requirement enforced, mismatches rejected not silently compared
+  mark_price_24h_windows_complete: true         # incomplete windows rejected, never interpolated
+  normalization_reproducible_from_raw_pages: true   # verified: identical hashes on full rerun
+  hashes_frozen: true
+  no_economic_statistic_computed_yet: true      # no quantile, drawdown, NW-t, bootstrap anywhere in this pipeline
+
+status: DATASET_READY_FOR_REVIEW

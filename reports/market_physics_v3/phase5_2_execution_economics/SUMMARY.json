@@ -1,0 +1,138 @@
+{
+  "assumptions": {
+    "capacity": "min across legs of (leg's real ask/bid_depth_5bps in USD / that leg's entry weight) -- the bottleneck leg, not a weighted sum",
+    "delayed_entry_latency_ms": 300,
+    "fill_rate": "min(1.0, capacity_usd / 200000) -- computed from real observed depth, not hardcoded to 1.0",
+    "gross_pnl": "real per-venue price_best_bid/price_best_ask at entry and exit (buy=ask/sell=bid), weighted by FIXED entry-time price_weight throughout the trade -- spread cost is embedded directly via real transacted prices, not a separate half-spread deduction",
+    "sizing": "weighted by venue__price_weight at entry, normalized across binance/bybit/hyperliquid, fixed through exit",
+    "taker_fee_bps": {
+      "binance": 5.0,
+      "bybit": 5.5,
+      "hyperliquid": 3.5
+    },
+    "taker_fee_bps_note": "per fill (one-way) -- net_edge_bps correctly charges this twice for the entry+exit round trip",
+    "top_contributor_trim": 0.05
+  },
+  "dev_pilot_tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786830843094013751-1786852443241777168/cadence=100ms",
+  "entry_thresholds_frozen_from_dev_pilot": {
+    "BTCUSDT": {
+      "hi": 0.7217918627605973,
+      "lo": -0.742304658130896
+    },
+    "ETHUSDT": {
+      "hi": 0.7741686620301849,
+      "lo": -0.6949481613792569
+    },
+    "SOLUSDT": {
+      "hi": 0.2029908706151008,
+      "lo": -0.15503742661101935
+    }
+  },
+  "excluded_venue": "okx",
+  "execution_venues": [
+    "binance",
+    "bybit",
+    "hyperliquid"
+  ],
+  "horizon_ms": 30000,
+  "mechanism": "okx__queue_imbalance_l5",
+  "policy": {
+    "execution_min_capacity_usd": 200000.0,
+    "execution_min_pf": 1.3,
+    "reference_notional_usd": 200000.0
+  },
+  "results": {
+    "BTCUSDT": {
+      "capacity_usd": 3193501.5425682566,
+      "delayed_entry_net_bps": -9.429543302523694,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.624144989004751,
+      "max_drawdown": -0.6425476656636355,
+      "n_trades": 1098,
+      "net_edge_bps": -9.373663136936601,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.0026199102213177684,
+      "realized_slippage_bps": 0.03339303889061698,
+      "recent_period_net_bps": -9.408546750496388,
+      "role": "PRIMARY",
+      "top_contributors_removed_net_bps": -9.686812106185059
+    },
+    "COMBINED": {
+      "capacity_usd": 3133563.1360843377,
+      "delayed_entry_net_bps": -9.306969511125157,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.3833948224996779,
+      "max_drawdown": -0.9407344737196993,
+      "n_trades": 3047,
+      "net_edge_bps": -9.272226563961427,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.004616357278348132,
+      "realized_slippage_bps": 0.20560078013300803,
+      "recent_period_net_bps": -9.219651612416481,
+      "top_contributors_removed_net_bps": -9.67169462327828
+    },
+    "ETHUSDT": {
+      "capacity_usd": 4368926.761605737,
+      "delayed_entry_net_bps": -9.801168648085712,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": 0.4913063821922088,
+      "max_drawdown": -0.6724084082968586,
+      "n_trades": 1149,
+      "net_edge_bps": -9.71629108453064,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.004557295689042616,
+      "realized_slippage_bps": 0.07407343956139222,
+      "recent_period_net_bps": -9.736145459704435,
+      "role": "PRIMARY",
+      "top_contributors_removed_net_bps": -10.112707407739371
+    },
+    "SOLUSDT": {
+      "capacity_usd": 1117811.6153213657,
+      "delayed_entry_net_bps": -8.42894347197106,
+      "fill_rate": 1.0,
+      "gate_failures": [
+        "net_edge",
+        "delayed_entry",
+        "contributors",
+        "recent_period",
+        "profit_factor"
+      ],
+      "gate_passed": false,
+      "gross_edge_bps": -0.10202275863693233,
+      "max_drawdown": -0.4927973452466564,
+      "n_trades": 800,
+      "net_edge_bps": -8.495217199885467,
+      "paper_live_net_bps": NaN,
+      "profit_factor": 0.007721070633481341,
+      "realized_slippage_bps": 0.630862047884173,
+      "recent_period_net_bps": -8.06191808362656,
+      "role": "SUPPORT",
+      "top_contributors_removed_net_bps": -8.954046820000865
+    }
+  },
+  "tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786893798852052322-1786936999002614116/cadence=100ms"
+}

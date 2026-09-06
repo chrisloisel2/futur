@@ -1,0 +1,126 @@
+{
+  "started_at_utc": "2026-07-21T10:20:06.095172+00:00",
+  "frozen_from_phase2_commit": "c34cc9d",
+  "test1_temporal_stability": {
+    "period_1": {
+      "delta": 0.002758230703252651,
+      "ci95_lower": -0.0017590695274401157,
+      "ci95_upper": 0.008217992996138906,
+      "n_valid_resamples": 10000,
+      "n": 7242
+    },
+    "period_2": {
+      "delta": 0.002979748006012004,
+      "ci95_lower": -0.0011300320931999569,
+      "ci95_upper": 0.0066595781381708396,
+      "n_valid_resamples": 10000,
+      "n": 8088
+    },
+    "gate_pass": true
+  },
+  "test2_leave_one_asset_out": {
+    "results": {
+      "BTCUSDT": {
+        "delta": 0.0028612089512044386,
+        "ci95_lower": -0.0002170943665845132,
+        "ci95_upper": 0.006058492189929146,
+        "n_valid_resamples": 10000,
+        "n": 11467
+      },
+      "ETHUSDT": {
+        "delta": 0.0025058576131397753,
+        "ci95_lower": -0.0007802805642168276,
+        "ci95_upper": 0.006065392756158921,
+        "n_valid_resamples": 10000,
+        "n": 11467
+      },
+      "SOLUSDT": {
+        "delta": 0.002496660980345858,
+        "ci95_lower": -2.2943771875817142e-05,
+        "ci95_upper": 0.005124482008089275,
+        "n_valid_resamples": 10000,
+        "n": 11589
+      },
+      "BNBUSDT": {
+        "delta": 0.004137828749977552,
+        "ci95_lower": 0.0006833981965287429,
+        "ci95_upper": 0.007885345191229484,
+        "n_valid_resamples": 10000,
+        "n": 11467
+      }
+    },
+    "gate_pass": true
+  },
+  "test3_leave_one_year_out": {
+    "results": {
+      "2022": {
+        "delta": 0.0029429590471191716,
+        "ci95_lower": 7.86851898549675e-05,
+        "ci95_upper": 0.005976663718225493,
+        "n_valid_resamples": 10000,
+        "n": 15330
+      },
+      "2023": {
+        "delta": 0.0038301413196905124,
+        "ci95_lower": 0.00017668244616937152,
+        "ci95_upper": 0.007592355829049995,
+        "n_valid_resamples": 10000,
+        "n": 11100
+      },
+      "2024": {
+        "delta": 0.0012540892580255418,
+        "ci95_lower": -0.0018509397255184704,
+        "ci95_upper": 0.0043722004938975,
+        "n_valid_resamples": 10000,
+        "n": 10938
+      },
+      "2025": {
+        "delta": 0.0036635483963288334,
+        "ci95_lower": 0.0004705452175688209,
+        "ci95_upper": 0.007181685233958299,
+        "n_valid_resamples": 10000,
+        "n": 10950
+      },
+      "2026": {
+        "delta": 0.0029410419362575733,
+        "ci95_lower": -0.00034210532179008155,
+        "ci95_upper": 0.006501966140666152,
+        "n_valid_resamples": 10000,
+        "n": 13002
+      }
+    },
+    "gate_pass": true
+  },
+  "test4_leave_one_stress_episode_out": {
+    "n_episodes": 264,
+    "median_events_per_episode": 2.0,
+    "min_leave_one_episode_out_delta": 0.0022162766916664044,
+    "episode_with_largest_effect_reduction": {
+      "start_iso": "2025-10-05T16:00:00.009000+00:00",
+      "end_iso": "2025-10-14T00:00:00+00:00",
+      "n_events": 29
+    },
+    "gate_pass": true
+  },
+  "test5_exact_ms_sensitivity": {
+    "delta": 0.0029934965623039274,
+    "ci95_lower": -0.000197449289226874,
+    "ci95_upper": 0.006365107049836628,
+    "n_valid_resamples": 10000,
+    "n": 9927,
+    "gate_pass": true
+  },
+  "test6_incremental_value": {
+    "beta_stress": 0.0013010189422794501,
+    "pvalue": 0.30031716715388157,
+    "nw_lag": 16,
+    "n": 15318,
+    "bootstrap_ci95_lower": -0.0008673060521164576,
+    "n_valid_resamples": 2000,
+    "gate_pass": false
+  },
+  "verdict": "REPRODUCED_NON_INCREMENTAL_RISK_ASSOCIATION",
+  "stability_gates_all_pass": true,
+  "incremental_gate_pass": false,
+  "completed_at_utc": "2026-07-21T10:24:28.403333+00:00"
+}

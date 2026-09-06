@@ -1,0 +1,55 @@
+Collecte forensique LOCALE — 2026-07-21T06:16:06Z
+Repo: /Users/christopher/futur  HEAD=b30a763  branch=main
+But : établir si src/institutional/data/derivatives/features/cross_exchange_features.py
+(et l'ancien src/institutional/data/derivatives/cross_exchange.py) existent
+quelque part dans l'historique Git accessible (local + remote GitHub).
+
+$ git log --all --full-history -- src/institutional/data/derivatives/features/cross_exchange_features.py
+(vide)
+
+$ git rev-list --objects --all | grep 'cross_exchange_features.py$'
+(vide)
+
+$ git log --all --name-status -- '*/cross_exchange_features.py'
+(vide)
+
+$ git log --all --full-history -- src/institutional/data/derivatives/cross_exchange.py
+(vide)
+
+$ git rev-list --objects --all | grep '/cross_exchange.py$'
+(vide)
+
+$ git reflog --all --date=iso
+(60 entrées, HEAD@main uniquement, aucune référence orpheline vers ces chemins)
+
+$ git remote -v
+origin  https://github.com/chrisloisel2/futur.git (fetch)
+origin  https://github.com/chrisloisel2/futur.git (push)
+
+$ git rev-parse main origin/main
+b30a76373c9b15256a982128603d613bc133b53d   (local main, en avance de 2 commits non pushés : 9c410e1, b30a763)
+2fe693bb7d43354cb294db0971169ed9dc1ac60f   (origin/main)
+
+$ git ls-remote --heads --tags origin
+2fe693bb7d43354cb294db0971169ed9dc1ac60f  refs/heads/main
+cc328d50857c498bfc89b5236f6dd7117f714307  refs/heads/feat/free-derivatives-backfill  <-- branche non fusionnée, non fetchée avant ce jour
+
+$ git fetch origin feat/free-derivatives-backfill
+(fetch OK -> FETCH_HEAD)
+
+$ git ls-tree -r cc328d5 --name-only | grep -i cross_exchange
+scripts/report_cross_exchange_funding_edge.py
+scripts/validate_cross_exchange_signals.py
+tests/test_cross_exchange.py
+tests/test_cross_exchange_funding_edge.py
+(PAS de cross_exchange_features.py ni cross_exchange.py sur cette branche non plus)
+
+CONCLUSION : aucun objet Git atteignable par une branche ou un tag (local
+ou distant GitHub, y compris la branche non fusionnée feat/free-derivatives-backfill)
+ne référence cross_exchange_features.py ni cross_exchange.py, à aucun moment
+de l'historique.
+
+Reste non exclu (hors portée Git) : fichier non suivi sur une autre
+machine, worktree, installation editable, conteneur — voir tentative
+qbee@100.127.59.114 dans README.md (bloquée, pas de route réseau depuis
+cet environnement d'exécution).

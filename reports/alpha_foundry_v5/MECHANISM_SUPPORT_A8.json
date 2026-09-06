@@ -1,0 +1,3967 @@
+{
+  "adequate_support_labs": [],
+  "audit_digest": "254a83294a93efa7638b1646d1e7511c002a30196529aa51b08e72a0503b379b",
+  "cadence_ms": 1051,
+  "feature_provenance_digest": "cee692f8cdf0280c20bf561065a51fb80153a44342f568b19c8ede7504d90d01",
+  "labs": {
+    "A8": {
+      "anchor_ess_ok": false,
+      "anchors": {
+        "anchor_columns": [
+          "binance__open_interest_change_pct",
+          "bybit__open_interest_change_pct",
+          "okx__open_interest_change_pct",
+          "binance__basis_bps",
+          "bybit__basis_bps",
+          "okx__basis_bps",
+          "binance__funding",
+          "bybit__funding",
+          "okx__funding",
+          "deriv__median_oi_change_pct"
+        ],
+        "feature_symbol_pairs": [
+          {
+            "ess": 7565.542131829148,
+            "ess_ratio": 0.6005351747760873,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12598,
+            "symbol": "AAVEUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 7852.986666511518,
+            "ess_ratio": 0.6199073781584715,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12668,
+            "symbol": "ADAUSDT",
+            "transition_count": 12667
+          },
+          {
+            "ess": 7558.377261307574,
+            "ess_ratio": 0.600109349845778,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12595,
+            "symbol": "ALGOUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 10235.23086000838,
+            "ess_ratio": 0.8123199095244746,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12600,
+            "symbol": "APTUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 10594.186427234521,
+            "ess_ratio": 0.8414094533583132,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12591,
+            "symbol": "ARBUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 8964.903569682721,
+            "ess_ratio": 0.7115567560665704,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12599,
+            "symbol": "ARUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 12222.463810916734,
+            "ess_ratio": 0.9700368103902169,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12600,
+            "symbol": "ATOMUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 5189.096300173515,
+            "ess_ratio": 0.4096223792369368,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12668,
+            "symbol": "AVAXUSDT",
+            "transition_count": 12667
+          },
+          {
+            "ess": 7723.341311806678,
+            "ess_ratio": 0.6138405111911205,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12582,
+            "symbol": "BCHUSDT",
+            "transition_count": 12581
+          },
+          {
+            "ess": 8065.258071748867,
+            "ess_ratio": 0.6374690224271947,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12652,
+            "symbol": "BNBUSDT",
+            "transition_count": 12651
+          },
+          {
+            "ess": 7773.4081355761855,
+            "ess_ratio": 0.6153742982565061,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12632,
+            "symbol": "BTCUSDT",
+            "transition_count": 12631
+          },
+          {
+            "ess": 9704.337380930747,
+            "ess_ratio": 0.7664747951133991,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12661,
+            "symbol": "DOGEUSDT",
+            "transition_count": 12660
+          },
+          {
+            "ess": 9886.87690234729,
+            "ess_ratio": 0.7852960208377514,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12590,
+            "symbol": "DOTUSDT",
+            "transition_count": 12589
+          },
+          {
+            "ess": 7254.423556477959,
+            "ess_ratio": 0.5756108511051304,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12603,
+            "symbol": "ENAUSDT",
+            "transition_count": 12602
+          },
+          {
+            "ess": 5580.554987198005,
+            "ess_ratio": 0.4430066672380729,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12597,
+            "symbol": "ETCUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 10008.101307020339,
+            "ess_ratio": 0.7915922887780067,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12643,
+            "symbol": "ETHUSDT",
+            "transition_count": 12642
+          },
+          {
+            "ess": 10539.768155960806,
+            "ess_ratio": 0.8362240682291976,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12604,
+            "symbol": "FETUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 7872.243765219824,
+            "ess_ratio": 0.6249300440755596,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12597,
+            "symbol": "FILUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 8525.221860173358,
+            "ess_ratio": 0.6766586126020604,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12599,
+            "symbol": "GRTUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 6902.043888338135,
+            "ess_ratio": 0.5478247391331165,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12599,
+            "symbol": "HBARUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 9971.970210733436,
+            "ess_ratio": 0.7913634005819725,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12601,
+            "symbol": "ICPUSDT",
+            "transition_count": 12600
+          },
+          {
+            "ess": 9379.891878335167,
+            "ess_ratio": 0.7448496687314514,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12593,
+            "symbol": "IMXUSDT",
+            "transition_count": 12592
+          },
+          {
+            "ess": 10667.56518794729,
+            "ess_ratio": 0.8469010152387496,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12596,
+            "symbol": "INJUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 10697.170710640043,
+            "ess_ratio": 0.8489818024317494,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12600,
+            "symbol": "JUPUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 9569.011335873627,
+            "ess_ratio": 0.7599881928261161,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12591,
+            "symbol": "LDOUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 8474.850839646611,
+            "ess_ratio": 0.6693137608313545,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12662,
+            "symbol": "LINKUSDT",
+            "transition_count": 12661
+          },
+          {
+            "ess": 8571.455970096376,
+            "ess_ratio": 0.6807605408701752,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12591,
+            "symbol": "LTCUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 7057.60115170888,
+            "ess_ratio": 0.5603049501197904,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12596,
+            "symbol": "MANAUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 9840.692189131263,
+            "ess_ratio": 0.7818760677841461,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12586,
+            "symbol": "NEARUSDT",
+            "transition_count": 12585
+          },
+          {
+            "ess": 11373.217089011316,
+            "ess_ratio": 0.903209743409412,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12592,
+            "symbol": "OPUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 4620.120137142869,
+            "ess_ratio": 0.36676352600959505,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12597,
+            "symbol": "ORDIUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 7009.244771246675,
+            "ess_ratio": 0.5563334210053714,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12599,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 6921.75005442644,
+            "ess_ratio": 0.5491709024457665,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12604,
+            "symbol": "PYTHUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 9088.983554964769,
+            "ess_ratio": 0.7215769732426778,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12596,
+            "symbol": "RUNEUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 7113.257366223146,
+            "ess_ratio": 0.5647683498390748,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12595,
+            "symbol": "SANDUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 11043.949422556178,
+            "ess_ratio": 0.8763648168986016,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12602,
+            "symbol": "SEIUSDT",
+            "transition_count": 12601
+          },
+          {
+            "ess": 11545.66923246766,
+            "ess_ratio": 0.9127011250962578,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12650,
+            "symbol": "SOLUSDT",
+            "transition_count": 12649
+          },
+          {
+            "ess": 6399.509301909133,
+            "ess_ratio": 0.5080185204341615,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12597,
+            "symbol": "STXUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 7128.917344733499,
+            "ess_ratio": 0.5658769125840212,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12598,
+            "symbol": "SUIUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 7799.799267366215,
+            "ess_ratio": 0.6190316878862075,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12600,
+            "symbol": "TAOUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 11228.293356675587,
+            "ess_ratio": 0.8909929659320416,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12602,
+            "symbol": "TIAUSDT",
+            "transition_count": 12601
+          },
+          {
+            "ess": 6876.274285356226,
+            "ess_ratio": 0.5460827736146939,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12592,
+            "symbol": "TRXUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 5776.8775506524735,
+            "ess_ratio": 0.4585915337502956,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12597,
+            "symbol": "UNIUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 9544.257783444658,
+            "ess_ratio": 0.7575408987574139,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12599,
+            "symbol": "VETUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 8680.873659585555,
+            "ess_ratio": 0.6891770133046646,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12596,
+            "symbol": "WIFUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 9341.312924041118,
+            "ess_ratio": 0.7416683544296243,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12595,
+            "symbol": "WLDUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 5760.379900610334,
+            "ess_ratio": 0.4548985154079076,
+            "feature": "binance__open_interest_change_pct",
+            "n": 12663,
+            "symbol": "XRPUSDT",
+            "transition_count": 12662
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__open_interest_change_pct",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__open_interest_change_pct",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 47.0254505587288,
+            "ess_ratio": 0.003732474843934344,
+            "feature": "binance__basis_bps",
+            "n": 12599,
+            "symbol": "AAVEUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 70.80352601198888,
+            "ess_ratio": 0.005588722552055322,
+            "feature": "binance__basis_bps",
+            "n": 12669,
+            "symbol": "ADAUSDT",
+            "transition_count": 12668
+          },
+          {
+            "ess": 178.79914149234068,
+            "ess_ratio": 0.01419491437697211,
+            "feature": "binance__basis_bps",
+            "n": 12596,
+            "symbol": "ALGOUSDT",
+            "transition_count": 12586
+          },
+          {
+            "ess": 186.4368458064234,
+            "ess_ratio": 0.014795400825841076,
+            "feature": "binance__basis_bps",
+            "n": 12601,
+            "symbol": "APTUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 502.031503254454,
+            "ess_ratio": 0.0398690838035621,
+            "feature": "binance__basis_bps",
+            "n": 12592,
+            "symbol": "ARBUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 121.78406605365547,
+            "ess_ratio": 0.009665402067750434,
+            "feature": "binance__basis_bps",
+            "n": 12600,
+            "symbol": "ARUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 956.3337174108543,
+            "ess_ratio": 0.07589347808990193,
+            "feature": "binance__basis_bps",
+            "n": 12601,
+            "symbol": "ATOMUSDT",
+            "transition_count": 12572
+          },
+          {
+            "ess": 57.36106108923881,
+            "ess_ratio": 0.0045276707782176025,
+            "feature": "binance__basis_bps",
+            "n": 12669,
+            "symbol": "AVAXUSDT",
+            "transition_count": 12667
+          },
+          {
+            "ess": 43.55443429617463,
+            "ess_ratio": 0.0034613712386692068,
+            "feature": "binance__basis_bps",
+            "n": 12583,
+            "symbol": "BCHUSDT",
+            "transition_count": 12582
+          },
+          {
+            "ess": 133.6467979447464,
+            "ess_ratio": 0.010562459333339635,
+            "feature": "binance__basis_bps",
+            "n": 12653,
+            "symbol": "BNBUSDT",
+            "transition_count": 12652
+          },
+          {
+            "ess": 83.81960761675867,
+            "ess_ratio": 0.0066349725019202626,
+            "feature": "binance__basis_bps",
+            "n": 12633,
+            "symbol": "BTCUSDT",
+            "transition_count": 12632
+          },
+          {
+            "ess": 65.31122291864529,
+            "ess_ratio": 0.005158049511818455,
+            "feature": "binance__basis_bps",
+            "n": 12662,
+            "symbol": "DOGEUSDT",
+            "transition_count": 12660
+          },
+          {
+            "ess": 136.72641425807174,
+            "ess_ratio": 0.0108590591897444,
+            "feature": "binance__basis_bps",
+            "n": 12591,
+            "symbol": "DOTUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 79.4715157958769,
+            "ess_ratio": 0.006305261488089249,
+            "feature": "binance__basis_bps",
+            "n": 12604,
+            "symbol": "ENAUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 270.3173699720791,
+            "ess_ratio": 0.021457165420866734,
+            "feature": "binance__basis_bps",
+            "n": 12598,
+            "symbol": "ETCUSDT",
+            "transition_count": 12592
+          },
+          {
+            "ess": 215.67317867715605,
+            "ess_ratio": 0.01705735358092028,
+            "feature": "binance__basis_bps",
+            "n": 12644,
+            "symbol": "ETHUSDT",
+            "transition_count": 12643
+          },
+          {
+            "ess": 100.07302206387759,
+            "ess_ratio": 0.007939152880910558,
+            "feature": "binance__basis_bps",
+            "n": 12605,
+            "symbol": "FETUSDT",
+            "transition_count": 12604
+          },
+          {
+            "ess": 135.87402801749892,
+            "ess_ratio": 0.01078536497995705,
+            "feature": "binance__basis_bps",
+            "n": 12598,
+            "symbol": "FILUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 95.95649739598545,
+            "ess_ratio": 0.007615595031427416,
+            "feature": "binance__basis_bps",
+            "n": 12600,
+            "symbol": "GRTUSDT",
+            "transition_count": 12555
+          },
+          {
+            "ess": 244.2709400895852,
+            "ess_ratio": 0.019386582546792475,
+            "feature": "binance__basis_bps",
+            "n": 12600,
+            "symbol": "HBARUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 179.54618257118813,
+            "ess_ratio": 0.014247435531755922,
+            "feature": "binance__basis_bps",
+            "n": 12602,
+            "symbol": "ICPUSDT",
+            "transition_count": 12601
+          },
+          {
+            "ess": 63.47210062457431,
+            "ess_ratio": 0.005039868240795165,
+            "feature": "binance__basis_bps",
+            "n": 12594,
+            "symbol": "IMXUSDT",
+            "transition_count": 12589
+          },
+          {
+            "ess": 130.9473567926436,
+            "ess_ratio": 0.010395122393636866,
+            "feature": "binance__basis_bps",
+            "n": 12597,
+            "symbol": "INJUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 89.7727844591968,
+            "ess_ratio": 0.007124258746067518,
+            "feature": "binance__basis_bps",
+            "n": 12601,
+            "symbol": "JUPUSDT",
+            "transition_count": 12592
+          },
+          {
+            "ess": 123.71744619403637,
+            "ess_ratio": 0.009825083084024489,
+            "feature": "binance__basis_bps",
+            "n": 12592,
+            "symbol": "LDOUSDT",
+            "transition_count": 12587
+          },
+          {
+            "ess": 64.4009033021452,
+            "ess_ratio": 0.005085754031599558,
+            "feature": "binance__basis_bps",
+            "n": 12663,
+            "symbol": "LINKUSDT",
+            "transition_count": 12662
+          },
+          {
+            "ess": 73.88432056244315,
+            "ess_ratio": 0.005867560400448154,
+            "feature": "binance__basis_bps",
+            "n": 12592,
+            "symbol": "LTCUSDT",
+            "transition_count": 12577
+          },
+          {
+            "ess": 108.2977633975546,
+            "ess_ratio": 0.00859710751746881,
+            "feature": "binance__basis_bps",
+            "n": 12597,
+            "symbol": "MANAUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 174.39345321066153,
+            "ess_ratio": 0.013855045142660009,
+            "feature": "binance__basis_bps",
+            "n": 12587,
+            "symbol": "NEARUSDT",
+            "transition_count": 12584
+          },
+          {
+            "ess": 157.54837853133077,
+            "ess_ratio": 0.012510790004870227,
+            "feature": "binance__basis_bps",
+            "n": 12593,
+            "symbol": "OPUSDT",
+            "transition_count": 12586
+          },
+          {
+            "ess": 154.46712918874925,
+            "ess_ratio": 0.012261242196281096,
+            "feature": "binance__basis_bps",
+            "n": 12598,
+            "symbol": "ORDIUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 177.5131848549813,
+            "ess_ratio": 0.014088348004363595,
+            "feature": "binance__basis_bps",
+            "n": 12600,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 109.30684963725194,
+            "ess_ratio": 0.008671705643574133,
+            "feature": "binance__basis_bps",
+            "n": 12605,
+            "symbol": "PYTHUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 144.30935984538078,
+            "ess_ratio": 0.011455851380914565,
+            "feature": "binance__basis_bps",
+            "n": 12597,
+            "symbol": "RUNEUSDT",
+            "transition_count": 12579
+          },
+          {
+            "ess": 70.37283664509846,
+            "ess_ratio": 0.0055869193906873975,
+            "feature": "binance__basis_bps",
+            "n": 12596,
+            "symbol": "SANDUSDT",
+            "transition_count": 12584
+          },
+          {
+            "ess": 109.2894101864765,
+            "ess_ratio": 0.008671698023206895,
+            "feature": "binance__basis_bps",
+            "n": 12603,
+            "symbol": "SEIUSDT",
+            "transition_count": 12602
+          },
+          {
+            "ess": 56.71881828433872,
+            "ess_ratio": 0.0044833466353915675,
+            "feature": "binance__basis_bps",
+            "n": 12651,
+            "symbol": "SOLUSDT",
+            "transition_count": 12650
+          },
+          {
+            "ess": 222.54471777878956,
+            "ess_ratio": 0.017665083170248418,
+            "feature": "binance__basis_bps",
+            "n": 12598,
+            "symbol": "STXUSDT",
+            "transition_count": 12503
+          },
+          {
+            "ess": 54.43687564271766,
+            "ess_ratio": 0.004320729870840357,
+            "feature": "binance__basis_bps",
+            "n": 12599,
+            "symbol": "SUIUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 101.50994125509752,
+            "ess_ratio": 0.00805570520237263,
+            "feature": "binance__basis_bps",
+            "n": 12601,
+            "symbol": "TAOUSDT",
+            "transition_count": 12600
+          },
+          {
+            "ess": 125.38197998933111,
+            "ess_ratio": 0.009948582082784346,
+            "feature": "binance__basis_bps",
+            "n": 12603,
+            "symbol": "TIAUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 64.79132556202457,
+            "ess_ratio": 0.005145027043756418,
+            "feature": "binance__basis_bps",
+            "n": 12593,
+            "symbol": "TRXUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 59.72071448789913,
+            "ess_ratio": 0.004740491704072006,
+            "feature": "binance__basis_bps",
+            "n": 12598,
+            "symbol": "UNIUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 168.45030952073938,
+            "ess_ratio": 0.013369072184185666,
+            "feature": "binance__basis_bps",
+            "n": 12600,
+            "symbol": "VETUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 72.19921527471062,
+            "ess_ratio": 0.005731461083965279,
+            "feature": "binance__basis_bps",
+            "n": 12597,
+            "symbol": "WIFUSDT",
+            "transition_count": 12580
+          },
+          {
+            "ess": 232.9175839001012,
+            "ess_ratio": 0.018491392815187455,
+            "feature": "binance__basis_bps",
+            "n": 12596,
+            "symbol": "WLDUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 84.04973531819755,
+            "ess_ratio": 0.006636902662523495,
+            "feature": "binance__basis_bps",
+            "n": 12664,
+            "symbol": "XRPUSDT",
+            "transition_count": 12663
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__basis_bps",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__basis_bps",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 62.136929625219715,
+            "ess_ratio": 0.004931893771348497,
+            "feature": "binance__funding",
+            "n": 12599,
+            "symbol": "AAVEUSDT",
+            "transition_count": 10194
+          },
+          {
+            "ess": 53.333566840507395,
+            "ess_ratio": 0.004209769266754077,
+            "feature": "binance__funding",
+            "n": 12669,
+            "symbol": "ADAUSDT",
+            "transition_count": 7017
+          },
+          {
+            "ess": 66.92128816905199,
+            "ess_ratio": 0.005312899981664973,
+            "feature": "binance__funding",
+            "n": 12596,
+            "symbol": "ALGOUSDT",
+            "transition_count": 7694
+          },
+          {
+            "ess": 64.29542378564317,
+            "ess_ratio": 0.005102406458665437,
+            "feature": "binance__funding",
+            "n": 12601,
+            "symbol": "APTUSDT",
+            "transition_count": 9328
+          },
+          {
+            "ess": 115.01471084175773,
+            "ess_ratio": 0.009133950988068434,
+            "feature": "binance__funding",
+            "n": 12592,
+            "symbol": "ARBUSDT",
+            "transition_count": 8931
+          },
+          {
+            "ess": 79.07578336952177,
+            "ess_ratio": 0.006275855822977919,
+            "feature": "binance__funding",
+            "n": 12600,
+            "symbol": "ARUSDT",
+            "transition_count": 4944
+          },
+          {
+            "ess": 67.19603353758984,
+            "ess_ratio": 0.005332595312879124,
+            "feature": "binance__funding",
+            "n": 12601,
+            "symbol": "ATOMUSDT",
+            "transition_count": 11648
+          },
+          {
+            "ess": 69.7903563147707,
+            "ess_ratio": 0.005508750202444605,
+            "feature": "binance__funding",
+            "n": 12669,
+            "symbol": "AVAXUSDT",
+            "transition_count": 9015
+          },
+          {
+            "ess": 43.656161416901064,
+            "ess_ratio": 0.003469455727322663,
+            "feature": "binance__funding",
+            "n": 12583,
+            "symbol": "BCHUSDT",
+            "transition_count": 9570
+          },
+          {
+            "ess": 54.39837518910759,
+            "ess_ratio": 0.004299247229045095,
+            "feature": "binance__funding",
+            "n": 12653,
+            "symbol": "BNBUSDT",
+            "transition_count": 9897
+          },
+          {
+            "ess": 100.18858094282969,
+            "ess_ratio": 0.007930703787131298,
+            "feature": "binance__funding",
+            "n": 12633,
+            "symbol": "BTCUSDT",
+            "transition_count": 9979
+          },
+          {
+            "ess": 80.7027570906837,
+            "ess_ratio": 0.006373618471859399,
+            "feature": "binance__funding",
+            "n": 12662,
+            "symbol": "DOGEUSDT",
+            "transition_count": 7485
+          },
+          {
+            "ess": 67.73931027399117,
+            "ess_ratio": 0.005379978577872382,
+            "feature": "binance__funding",
+            "n": 12591,
+            "symbol": "DOTUSDT",
+            "transition_count": 7761
+          },
+          {
+            "ess": 60.24088763416457,
+            "ess_ratio": 0.004779505524767104,
+            "feature": "binance__funding",
+            "n": 12604,
+            "symbol": "ENAUSDT",
+            "transition_count": 6564
+          },
+          {
+            "ess": 100.62255198203604,
+            "ess_ratio": 0.007987184631055409,
+            "feature": "binance__funding",
+            "n": 12598,
+            "symbol": "ETCUSDT",
+            "transition_count": 7178
+          },
+          {
+            "ess": 63.08942731246333,
+            "ess_ratio": 0.004989673150305547,
+            "feature": "binance__funding",
+            "n": 12644,
+            "symbol": "ETHUSDT",
+            "transition_count": 11036
+          },
+          {
+            "ess": 66.58219400562484,
+            "ess_ratio": 0.005282204998462899,
+            "feature": "binance__funding",
+            "n": 12605,
+            "symbol": "FETUSDT",
+            "transition_count": 8953
+          },
+          {
+            "ess": 58.828400094127,
+            "ess_ratio": 0.004669661858559057,
+            "feature": "binance__funding",
+            "n": 12598,
+            "symbol": "FILUSDT",
+            "transition_count": 6595
+          },
+          {
+            "ess": 68.45661356632827,
+            "ess_ratio": 0.005433064568756212,
+            "feature": "binance__funding",
+            "n": 12600,
+            "symbol": "GRTUSDT",
+            "transition_count": 7801
+          },
+          {
+            "ess": 69.61722167231659,
+            "ess_ratio": 0.00552517632319973,
+            "feature": "binance__funding",
+            "n": 12600,
+            "symbol": "HBARUSDT",
+            "transition_count": 10260
+          },
+          {
+            "ess": 57.20788701758199,
+            "ess_ratio": 0.00453958792394715,
+            "feature": "binance__funding",
+            "n": 12602,
+            "symbol": "ICPUSDT",
+            "transition_count": 8449
+          },
+          {
+            "ess": 76.2057189699775,
+            "ess_ratio": 0.006050954340954224,
+            "feature": "binance__funding",
+            "n": 12594,
+            "symbol": "IMXUSDT",
+            "transition_count": 5733
+          },
+          {
+            "ess": 57.945761458005535,
+            "ess_ratio": 0.004599965186790945,
+            "feature": "binance__funding",
+            "n": 12597,
+            "symbol": "INJUSDT",
+            "transition_count": 10979
+          },
+          {
+            "ess": 78.55112782741348,
+            "ess_ratio": 0.006233721754417386,
+            "feature": "binance__funding",
+            "n": 12601,
+            "symbol": "JUPUSDT",
+            "transition_count": 8258
+          },
+          {
+            "ess": 83.2877561308414,
+            "ess_ratio": 0.006614338955752971,
+            "feature": "binance__funding",
+            "n": 12592,
+            "symbol": "LDOUSDT",
+            "transition_count": 6757
+          },
+          {
+            "ess": 87.00815148809666,
+            "ess_ratio": 0.00687105358035984,
+            "feature": "binance__funding",
+            "n": 12663,
+            "symbol": "LINKUSDT",
+            "transition_count": 7217
+          },
+          {
+            "ess": 80.9479205885207,
+            "ess_ratio": 0.00642851974178214,
+            "feature": "binance__funding",
+            "n": 12592,
+            "symbol": "LTCUSDT",
+            "transition_count": 9461
+          },
+          {
+            "ess": 83.04116662939363,
+            "ess_ratio": 0.006592138336857476,
+            "feature": "binance__funding",
+            "n": 12597,
+            "symbol": "MANAUSDT",
+            "transition_count": 7555
+          },
+          {
+            "ess": 102.707305417594,
+            "ess_ratio": 0.008159792279144673,
+            "feature": "binance__funding",
+            "n": 12587,
+            "symbol": "NEARUSDT",
+            "transition_count": 5933
+          },
+          {
+            "ess": 72.74733645270673,
+            "ess_ratio": 0.005776807468649784,
+            "feature": "binance__funding",
+            "n": 12593,
+            "symbol": "OPUSDT",
+            "transition_count": 6563
+          },
+          {
+            "ess": 78.92185568501237,
+            "ess_ratio": 0.006264633726386123,
+            "feature": "binance__funding",
+            "n": 12598,
+            "symbol": "ORDIUSDT",
+            "transition_count": 5333
+          },
+          {
+            "ess": 109.60134872186362,
+            "ess_ratio": 0.008698519739830445,
+            "feature": "binance__funding",
+            "n": 12600,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 5654
+          },
+          {
+            "ess": 114.2506858329724,
+            "ess_ratio": 0.009063917955808996,
+            "feature": "binance__funding",
+            "n": 12605,
+            "symbol": "PYTHUSDT",
+            "transition_count": 4001
+          },
+          {
+            "ess": 178.2744876788768,
+            "ess_ratio": 0.014152138420169628,
+            "feature": "binance__funding",
+            "n": 12597,
+            "symbol": "RUNEUSDT",
+            "transition_count": 5727
+          },
+          {
+            "ess": 38.09104720920717,
+            "ess_ratio": 0.0030240590035890097,
+            "feature": "binance__funding",
+            "n": 12596,
+            "symbol": "SANDUSDT",
+            "transition_count": 10911
+          },
+          {
+            "ess": 78.48937295546565,
+            "ess_ratio": 0.006227832496664735,
+            "feature": "binance__funding",
+            "n": 12603,
+            "symbol": "SEIUSDT",
+            "transition_count": 10397
+          },
+          {
+            "ess": 68.84157338975068,
+            "ess_ratio": 0.005441591446506259,
+            "feature": "binance__funding",
+            "n": 12651,
+            "symbol": "SOLUSDT",
+            "transition_count": 9213
+          },
+          {
+            "ess": 70.11991266076372,
+            "ess_ratio": 0.005565955918460368,
+            "feature": "binance__funding",
+            "n": 12598,
+            "symbol": "STXUSDT",
+            "transition_count": 5979
+          },
+          {
+            "ess": 69.04272126257852,
+            "ess_ratio": 0.005480015974488334,
+            "feature": "binance__funding",
+            "n": 12599,
+            "symbol": "SUIUSDT",
+            "transition_count": 8544
+          },
+          {
+            "ess": 80.33965647197128,
+            "ess_ratio": 0.0063756572075209334,
+            "feature": "binance__funding",
+            "n": 12601,
+            "symbol": "TAOUSDT",
+            "transition_count": 5065
+          },
+          {
+            "ess": 79.60416552560355,
+            "ess_ratio": 0.00631628703686452,
+            "feature": "binance__funding",
+            "n": 12603,
+            "symbol": "TIAUSDT",
+            "transition_count": 6984
+          },
+          {
+            "ess": 50.09675027053407,
+            "ess_ratio": 0.003978142640398164,
+            "feature": "binance__funding",
+            "n": 12593,
+            "symbol": "TRXUSDT",
+            "transition_count": 10571
+          },
+          {
+            "ess": 77.85106940563718,
+            "ess_ratio": 0.006179637196827844,
+            "feature": "binance__funding",
+            "n": 12598,
+            "symbol": "UNIUSDT",
+            "transition_count": 6723
+          },
+          {
+            "ess": 75.53130836959154,
+            "ess_ratio": 0.005994548283300916,
+            "feature": "binance__funding",
+            "n": 12600,
+            "symbol": "VETUSDT",
+            "transition_count": 6751
+          },
+          {
+            "ess": 88.78278777649412,
+            "ess_ratio": 0.007047931076962302,
+            "feature": "binance__funding",
+            "n": 12597,
+            "symbol": "WIFUSDT",
+            "transition_count": 4683
+          },
+          {
+            "ess": 68.56191532118505,
+            "ess_ratio": 0.005443149834962294,
+            "feature": "binance__funding",
+            "n": 12596,
+            "symbol": "WLDUSDT",
+            "transition_count": 10278
+          },
+          {
+            "ess": 59.28218224316518,
+            "ess_ratio": 0.004681157789258148,
+            "feature": "binance__funding",
+            "n": 12664,
+            "symbol": "XRPUSDT",
+            "transition_count": 9853
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "bybit__funding",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "AAVEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ADAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ALGOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "APTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ARBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ATOMUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "AVAXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "BCHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "BNBUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "BTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "DOGEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "DOTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ENAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ETCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ETHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "FETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "FILUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "GRTUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "HBARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ICPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "IMXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "INJUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "JUPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "LDOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "LINKUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "LTCUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "MANAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "NEARUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "OPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "ORDIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "PYTHUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "RUNEUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "SANDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "SEIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "SOLUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "STXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "SUIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "TAOUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "TIAUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "TRXUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "UNIUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "VETUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "WIFUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "WLDUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 0.0,
+            "ess_ratio": 0.0,
+            "feature": "okx__funding",
+            "n": 0,
+            "symbol": "XRPUSDT",
+            "transition_count": 0
+          },
+          {
+            "ess": 7565.542131829148,
+            "ess_ratio": 0.6005351747760873,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12598,
+            "symbol": "AAVEUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 7852.986666511518,
+            "ess_ratio": 0.6199073781584715,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12668,
+            "symbol": "ADAUSDT",
+            "transition_count": 12667
+          },
+          {
+            "ess": 7558.377261307574,
+            "ess_ratio": 0.600109349845778,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12595,
+            "symbol": "ALGOUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 10235.23086000838,
+            "ess_ratio": 0.8123199095244746,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12600,
+            "symbol": "APTUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 10594.186427234521,
+            "ess_ratio": 0.8414094533583132,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12591,
+            "symbol": "ARBUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 8964.903569682721,
+            "ess_ratio": 0.7115567560665704,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12599,
+            "symbol": "ARUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 12222.463810916734,
+            "ess_ratio": 0.9700368103902169,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12600,
+            "symbol": "ATOMUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 5189.096300173515,
+            "ess_ratio": 0.4096223792369368,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12668,
+            "symbol": "AVAXUSDT",
+            "transition_count": 12667
+          },
+          {
+            "ess": 7723.341311806678,
+            "ess_ratio": 0.6138405111911205,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12582,
+            "symbol": "BCHUSDT",
+            "transition_count": 12581
+          },
+          {
+            "ess": 8065.258071748867,
+            "ess_ratio": 0.6374690224271947,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12652,
+            "symbol": "BNBUSDT",
+            "transition_count": 12651
+          },
+          {
+            "ess": 7773.4081355761855,
+            "ess_ratio": 0.6153742982565061,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12632,
+            "symbol": "BTCUSDT",
+            "transition_count": 12631
+          },
+          {
+            "ess": 9704.337380930747,
+            "ess_ratio": 0.7664747951133991,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12661,
+            "symbol": "DOGEUSDT",
+            "transition_count": 12660
+          },
+          {
+            "ess": 9886.87690234729,
+            "ess_ratio": 0.7852960208377514,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12590,
+            "symbol": "DOTUSDT",
+            "transition_count": 12589
+          },
+          {
+            "ess": 7254.423556477959,
+            "ess_ratio": 0.5756108511051304,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12603,
+            "symbol": "ENAUSDT",
+            "transition_count": 12602
+          },
+          {
+            "ess": 5580.554987198005,
+            "ess_ratio": 0.4430066672380729,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12597,
+            "symbol": "ETCUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 10008.101307020339,
+            "ess_ratio": 0.7915922887780067,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12643,
+            "symbol": "ETHUSDT",
+            "transition_count": 12642
+          },
+          {
+            "ess": 10539.768155960806,
+            "ess_ratio": 0.8362240682291976,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12604,
+            "symbol": "FETUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 7872.243765219824,
+            "ess_ratio": 0.6249300440755596,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12597,
+            "symbol": "FILUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 8525.221860173358,
+            "ess_ratio": 0.6766586126020604,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12599,
+            "symbol": "GRTUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 6902.043888338135,
+            "ess_ratio": 0.5478247391331165,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12599,
+            "symbol": "HBARUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 9971.970210733436,
+            "ess_ratio": 0.7913634005819725,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12601,
+            "symbol": "ICPUSDT",
+            "transition_count": 12600
+          },
+          {
+            "ess": 9379.891878335167,
+            "ess_ratio": 0.7448496687314514,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12593,
+            "symbol": "IMXUSDT",
+            "transition_count": 12592
+          },
+          {
+            "ess": 10667.56518794729,
+            "ess_ratio": 0.8469010152387496,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12596,
+            "symbol": "INJUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 10697.170710640043,
+            "ess_ratio": 0.8489818024317494,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12600,
+            "symbol": "JUPUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 9569.011335873627,
+            "ess_ratio": 0.7599881928261161,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12591,
+            "symbol": "LDOUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 8474.850839646611,
+            "ess_ratio": 0.6693137608313545,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12662,
+            "symbol": "LINKUSDT",
+            "transition_count": 12661
+          },
+          {
+            "ess": 8571.455970096376,
+            "ess_ratio": 0.6807605408701752,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12591,
+            "symbol": "LTCUSDT",
+            "transition_count": 12590
+          },
+          {
+            "ess": 7057.60115170888,
+            "ess_ratio": 0.5603049501197904,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12596,
+            "symbol": "MANAUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 9840.692189131263,
+            "ess_ratio": 0.7818760677841461,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12586,
+            "symbol": "NEARUSDT",
+            "transition_count": 12585
+          },
+          {
+            "ess": 11373.217089011316,
+            "ess_ratio": 0.903209743409412,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12592,
+            "symbol": "OPUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 4620.120137142869,
+            "ess_ratio": 0.36676352600959505,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12597,
+            "symbol": "ORDIUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 7009.244771246675,
+            "ess_ratio": 0.5563334210053714,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12599,
+            "symbol": "PENDLEUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 6921.75005442644,
+            "ess_ratio": 0.5491709024457665,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12604,
+            "symbol": "PYTHUSDT",
+            "transition_count": 12603
+          },
+          {
+            "ess": 9088.983554964769,
+            "ess_ratio": 0.7215769732426778,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12596,
+            "symbol": "RUNEUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 7113.257366223146,
+            "ess_ratio": 0.5647683498390748,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12595,
+            "symbol": "SANDUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 11043.949422556178,
+            "ess_ratio": 0.8763648168986016,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12602,
+            "symbol": "SEIUSDT",
+            "transition_count": 12601
+          },
+          {
+            "ess": 11545.66923246766,
+            "ess_ratio": 0.9127011250962578,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12650,
+            "symbol": "SOLUSDT",
+            "transition_count": 12649
+          },
+          {
+            "ess": 6399.509301909133,
+            "ess_ratio": 0.5080185204341615,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12597,
+            "symbol": "STXUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 7128.917344733499,
+            "ess_ratio": 0.5658769125840212,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12598,
+            "symbol": "SUIUSDT",
+            "transition_count": 12597
+          },
+          {
+            "ess": 7799.799267366215,
+            "ess_ratio": 0.6190316878862075,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12600,
+            "symbol": "TAOUSDT",
+            "transition_count": 12599
+          },
+          {
+            "ess": 11228.293356675587,
+            "ess_ratio": 0.8909929659320416,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12602,
+            "symbol": "TIAUSDT",
+            "transition_count": 12601
+          },
+          {
+            "ess": 6876.274285356226,
+            "ess_ratio": 0.5460827736146939,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12592,
+            "symbol": "TRXUSDT",
+            "transition_count": 12591
+          },
+          {
+            "ess": 5776.8775506524735,
+            "ess_ratio": 0.4585915337502956,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12597,
+            "symbol": "UNIUSDT",
+            "transition_count": 12596
+          },
+          {
+            "ess": 9544.257783444658,
+            "ess_ratio": 0.7575408987574139,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12599,
+            "symbol": "VETUSDT",
+            "transition_count": 12598
+          },
+          {
+            "ess": 8680.873659585555,
+            "ess_ratio": 0.6891770133046646,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12596,
+            "symbol": "WIFUSDT",
+            "transition_count": 12595
+          },
+          {
+            "ess": 9341.312924041118,
+            "ess_ratio": 0.7416683544296243,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12595,
+            "symbol": "WLDUSDT",
+            "transition_count": 12594
+          },
+          {
+            "ess": 5760.379900610334,
+            "ess_ratio": 0.4548985154079076,
+            "feature": "deriv__median_oi_change_pct",
+            "n": 12663,
+            "symbol": "XRPUSDT",
+            "transition_count": 12662
+          }
+        ],
+        "median_ess": 0.0,
+        "min_ess": 0.0,
+        "pair_count": 470,
+        "pairs_ess_ge_200": 101
+      },
+      "data_ready": true,
+      "diversity": {
+        "all_thirds_present": true,
+        "both_direction_regimes_present": true,
+        "chronological_thirds_event_rows": {
+          "1": 194662,
+          "2": 169742,
+          "3": 228126
+        },
+        "past_10s_down_event_rows": 297076,
+        "past_10s_flat_event_rows": 623,
+        "past_10s_up_event_rows": 294831
+      },
+      "diversity_ok": true,
+      "groups_pass": false,
+      "independent_event_rows": 592530,
+      "recommended_max_hypothesis_tests": 0,
+      "support_groups": [
+        {
+          "effective_symbols": 46.9998251201555,
+          "effective_venues": 1.0,
+          "event_rows": 592530,
+          "events_by_symbol": {
+            "AAVEUSDT": 12596.0,
+            "ADAUSDT": 12668.0,
+            "ALGOUSDT": 12595.0,
+            "APTUSDT": 12600.0,
+            "ARBUSDT": 12591.0,
+            "ARUSDT": 12596.0,
+            "ATOMUSDT": 12600.0,
+            "AVAXUSDT": 12667.0,
+            "BCHUSDT": 12582.0,
+            "BNBUSDT": 12649.0,
+            "BTCUSDT": 12630.0,
+            "DOGEUSDT": 12661.0,
+            "DOTUSDT": 12590.0,
+            "ENAUSDT": 12603.0,
+            "ETCUSDT": 12597.0,
+            "ETHUSDT": 12643.0,
+            "FETUSDT": 12604.0,
+            "FILUSDT": 12597.0,
+            "GRTUSDT": 12596.0,
+            "HBARUSDT": 12599.0,
+            "ICPUSDT": 12600.0,
+            "IMXUSDT": 12578.0,
+            "INJUSDT": 12596.0,
+            "JUPUSDT": 12599.0,
+            "LDOUSDT": 12591.0,
+            "LINKUSDT": 12662.0,
+            "LTCUSDT": 12591.0,
+            "MANAUSDT": 12596.0,
+            "NEARUSDT": 12586.0,
+            "OPUSDT": 12592.0,
+            "ORDIUSDT": 12597.0,
+            "PENDLEUSDT": 12598.0,
+            "PYTHUSDT": 12604.0,
+            "RUNEUSDT": 12595.0,
+            "SANDUSDT": 12595.0,
+            "SEIUSDT": 12602.0,
+            "SOLUSDT": 12650.0,
+            "STXUSDT": 12594.0,
+            "SUIUSDT": 12597.0,
+            "TAOUSDT": 12600.0,
+            "TIAUSDT": 12602.0,
+            "TRXUSDT": 12592.0,
+            "UNIUSDT": 12596.0,
+            "VETUSDT": 12599.0,
+            "WIFUSDT": 12596.0,
+            "WLDUSDT": 12595.0,
+            "XRPUSDT": 12663.0
+          },
+          "events_by_venue": {
+            "binance": 592530.0,
+            "bybit": 0.0,
+            "okx": 0.0
+          },
+          "events_total": 592530.0,
+          "kind": "nonzero",
+          "matched_columns": [
+            "binance__open_interest_change_pct",
+            "bybit__open_interest_change_pct",
+            "okx__open_interest_change_pct"
+          ],
+          "min_symbols": 2,
+          "min_total": 100,
+          "min_venues": 2,
+          "name": "oi_economic_changes",
+          "pass": false
+        },
+        {
+          "effective_symbols": 0.0,
+          "effective_venues": 0.0,
+          "event_rows": 0,
+          "events_by_symbol": {},
+          "events_by_venue": {},
+          "events_total": 0.0,
+          "kind": "nonzero",
+          "matched_columns": [],
+          "min_symbols": 2,
+          "min_total": 50,
+          "min_venues": 2,
+          "name": "basis_economic_changes",
+          "pass": false
+        }
+      ],
+      "support_verdict": "THIN_SUPPORT"
+    }
+  },
+  "load_report": {
+    "ess_anchor_batch_size": 4,
+    "full_frame_concat": false,
+    "loaded_columns": 38,
+    "logical_columns": 93,
+    "max_resident_parts": 1,
+    "mode": "parquet_partition_streaming",
+    "parts": 12,
+    "pruned_columns": 55
+  },
+  "pit_proof_level": "FULL_FEATURE_PROVENANCE",
+  "policy_digest": "8ffedfe07ba7d9146c7b1d2e5a03b7e0a07d3782b544c8e724c111b63b224590",
+  "policy_version": "afv5-support-v1",
+  "rows": 592615,
+  "scientific_boundary": "support audit uses no future target and does not constitute alpha evidence; it only caps the amount of subsequent hypothesis testing",
+  "strong_support_labs": [],
+  "symbols": [
+    "AAVEUSDT",
+    "ADAUSDT",
+    "ALGOUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "ARUSDT",
+    "ATOMUSDT",
+    "AVAXUSDT",
+    "BCHUSDT",
+    "BNBUSDT",
+    "BTCUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "ENAUSDT",
+    "ETCUSDT",
+    "ETHUSDT",
+    "FETUSDT",
+    "FILUSDT",
+    "GRTUSDT",
+    "HBARUSDT",
+    "ICPUSDT",
+    "IMXUSDT",
+    "INJUSDT",
+    "JUPUSDT",
+    "LDOUSDT",
+    "LINKUSDT",
+    "LTCUSDT",
+    "MANAUSDT",
+    "NEARUSDT",
+    "OPUSDT",
+    "ORDIUSDT",
+    "PENDLEUSDT",
+    "PYTHUSDT",
+    "RUNEUSDT",
+    "SANDUSDT",
+    "SEIUSDT",
+    "SOLUSDT",
+    "STXUSDT",
+    "SUIUSDT",
+    "TAOUSDT",
+    "TIAUSDT",
+    "TRXUSDT",
+    "UNIUSDT",
+    "VETUSDT",
+    "WIFUSDT",
+    "WLDUSDT",
+    "XRPUSDT"
+  ],
+  "target_columns_used": [],
+  "target_free": true,
+  "thin_or_blocked_labs": [
+    "A8"
+  ]
+}

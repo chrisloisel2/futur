@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "futur"
+version = "0.1.0"
+description = "Canonical Python base for the futur trading system rebuild (Phase 3: packaging only -- no strategy or Truth Engine code lives here yet)."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    # `<3`: pandas 3.0 hard-removed deprecated frequency aliases (e.g. "1H",
+    # "M") this codebase's src/ and tests/ still use throughout (they
+    # emitted FutureWarnings under 2.x, not errors). Found by actually
+    # re-locking and re-running the suite mid-phase, not assumed: a bare
+    # `pandas` re-resolved to 3.0.5 and broke 9 previously-passing tests
+    # across regime_gate/portfolio_os/hedge_governor/etc. with hard
+    # ValueErrors. This codebase has been validated against 2.x throughout
+    # this rebuild program's diagnostic sessions (docs/v2/INTERPRETER.md:
+    # pandas 2.2.3) -- constraining here keeps that validation meaningful
+    # and keeps `uv lock` reproducible across time, not just across
+    # machines. Migrating the alias strings to their 3.x spellings is a
+    # separate, much larger mechanical change spanning src/, tests/,
+    # scripts/, research/ -- out of this packaging phase's scope.
+    "pandas<3",
+    "pyarrow",
+    "pyyaml",
+    "lightgbm",
+    "scikit-learn",
+    "joblib",
+    "pymongo",
+    "websockets>=12,<14",  # market_physics_v3/collectors/runtime.py hard-guards this range
+    # requests: not imported by src/ itself, but transitively required by 2
+    # canonical tests (test_derivatives_positioning.py -> data_pipeline/http.py;
+    # test_paper_xvenue.py -> scripts/run_paper_xvenue_v0.py, loaded
+    # dynamically via importlib) -- found the same way, by actually running
+    # the suite rather than trusting a static src/-only import scan.
+    "requests",
+]
+
+[dependency-groups]
+# uv installs dependency-groups (PEP 735) by default on a bare `uv sync` --
+# unlike [project.optional-dependencies] extras, which need `--extra dev`.
+# The mission's required gate sequence runs `uv sync --frozen` with no
+# extra flags and expects `ruff`/`mypy`/`pytest` to already be available
+# immediately after, so this is the mechanism that actually satisfies it
+# (verified: an earlier version of this file used optional-dependencies
+# and `uv run ruff check .` failed with "No such file or directory" right
+# after a bare `uv sync --frozen` -- caught by actually running the gate
+# sequence, not assumed correct from reading uv's docs).
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff",
+    "mypy",
+    "hypothesis>=6.100",
+]
+
+[project.scripts]
+futur = "futur.cli:main"
+
+# ── package discovery ────────────────────────────────────────────────────
+# Two package roots, deliberately mixed:
+#   - `src` (and everything under it, `src.alpha20`/`src.institutional`/...)
+#     keeps its existing dotted-prefix import path -- renaming it would
+#     touch hundreds of `from src.X import Y` call sites across src/,
+#     tests/, scripts/, research/ for zero behavioral gain in a packaging
+#     phase that must not touch strategies. Documented debt: see
+#     docs/FOUNDATION_AUDIT.md and docs/CLEAN_CLONE.md.
+#   - `futur` is a genuinely new, top-level package (no `src.` prefix,
+#     matching the mission's required `futur.cli:main` entry point) that
+#     physically lives at src/futur/ per the target layout, remapped via
+#     package-dir below. It is the ONLY public CLI surface.
+[tool.setuptools.packages.find]
+where = [".", "src"]
+include = ["src", "src.alpha20", "src.alpha20.*", "src.institutional", "src.institutional.*", "futur", "futur.*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit", "tests/integration", "tests/architecture", "tests/truth"]
+pythonpath = ["."]
+addopts = "-ra --tb=short"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+exclude = ["legacy"]
+# Codebase has never been linted; start from Ruff's own defaults rather
+# than an aspirational strict set that would drown real findings in noise
+# from 1700+ never-linted files outside this phase's scope. `legacy/` is
+# excluded, not just tolerated -- it's a self-declared, non-importable
+# archive (legacy/__init__.py raises on import) that every prior session
+# of this rebuild has deliberately left untouched; it alone accounted for
+# ~72% of this repo's ruff findings (verified: 10,686 of 14,897 before
+# this exclude), none of it relevant to code anyone is meant to maintain.
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+# `python_version = "3.12"`, not the `>=3.11` floor from [project] --
+# matches the actual interpreter (verified: numpy's bundled stubs use PEP
+# 695 `type` alias syntax, which mypy rejects outright under 3.11 rules
+# with a hard syntax error before any real checking can even start).
+# `ignore_missing_imports`: src/ has function-local imports of ai/core/
+# scripts/ (sibling directories, not installed packages -- see
+# docs/FOUNDATION_AUDIT.md) that mypy can't resolve statically. Not
+# `strict`: 1700+ files have never been type-checked; turning strict mode
+# on here would produce a wall of pre-existing findings unrelated to this
+# packaging phase, not a meaningful new signal.

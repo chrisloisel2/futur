@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-08-15 03:15:02.947091+00:00",
+  "symbols_scanned": 312,
+  "min_years_gate": 3,
+  "min_symbols_gate": 100,
+  "min_years_gate_source": "mission section 13 text, verbatim -- no existing threshold found to inherit",
+  "min_symbols_gate_source": "mission section 13 text, verbatim -- no existing threshold found to inherit",
+  "families": {
+    "DELEVERAGING": {
+      "total_pit_rows": 105450197,
+      "eligible_rows": 80796938,
+      "eligible_pct": 0.766209,
+      "eligible_symbols": 309,
+      "years_represented": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "n_years_represented": 7,
+      "rows_rejected_for": {
+        "missing_oi": 18219796,
+        "missing_flow": 4977434,
+        "residual_warmup": 9009721,
+        "causality": 210
+      },
+      "rows_rejected_for_lifecycle": 0,
+      "by_year_eligible_rows": {
+        "2020": 35058,
+        "2021": 993692,
+        "2022": 10639945,
+        "2023": 13736403,
+        "2024": 17806981,
+        "2025": 22136502,
+        "2026": 15448357
+      },
+      "min_years_gate": 3,
+      "min_symbols_gate": 100,
+      "family_data_status": "READY"
+    },
+    "CROWDING": {
+      "total_pit_rows": 105450197,
+      "eligible_rows": 73737440,
+      "eligible_pct": 0.699263,
+      "eligible_symbols": 252,
+      "years_represented": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "n_years_represented": 7,
+      "rows_rejected_for": {
+        "missing_funding": 529195,
+        "missing_basis": 14082047,
+        "missing_oi": 18219796,
+        "missing_flow": 4977434,
+        "funding_warmup": 8595436,
+        "causality": 210
+      },
+      "rows_rejected_for_lifecycle": 0,
+      "by_year_eligible_rows": {
+        "2020": 34988,
+        "2021": 976268,
+        "2022": 11183261,
+        "2023": 13191855,
+        "2024": 16390999,
+        "2025": 19452095,
+        "2026": 12507974
+      },
+      "min_years_gate": 3,
+      "min_symbols_gate": 100,
+      "family_data_status": "READY"
+    },
+    "RELATIVE_VALUE_DISLOCATION": {
+      "total_pit_rows": 105450197,
+      "eligible_rows": 82765040,
+      "eligible_pct": 0.784873,
+      "eligible_symbols": 253,
+      "years_represented": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "n_years_represented": 7,
+      "rows_rejected_for": {
+        "residual_warmup": 9009721,
+        "missing_basis": 14082047,
+        "missing_flow": 4977434,
+        "cross_sectional_minimum": 2168738,
+        "causality": 210
+      },
+      "rows_rejected_for_lifecycle": 0,
+      "by_year_eligible_rows": {
+        "2020": 1088794,
+        "2021": 8969207,
+        "2022": 10574254,
+        "2023": 13297486,
+        "2024": 16857016,
+        "2025": 19467145,
+        "2026": 12511138
+      },
+      "min_years_gate": 3,
+      "min_symbols_gate": 100,
+      "family_data_status": "READY"
+    },
+    "FORCED_FLOW_REVERSAL": {
+      "total_pit_rows": 105450197,
+      "eligible_rows": 83334188,
+      "eligible_pct": 0.790271,
+      "eligible_symbols": 310,
+      "years_represented": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "n_years_represented": 7,
+      "rows_rejected_for": {
+        "missing_oi": 18219796,
+        "missing_flow": 4977434,
+        "causality": 210
+      },
+      "rows_rejected_for_lifecycle": 0,
+      "by_year_eligible_rows": {
+        "2020": 35058,
+        "2021": 1014358,
+        "2022": 11527978,
+        "2023": 14048861,
+        "2024": 18249564,
+        "2025": 22815753,
+        "2026": 15642616
+      },
+      "min_years_gate": 3,
+      "min_symbols_gate": 100,
+      "family_data_status": "READY"
+    }
+  },
+  "economic_results_referenced": false
+}

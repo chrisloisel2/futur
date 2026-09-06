@@ -1,0 +1,32 @@
+{
+  "verdict": "REPRODUCED_CAUSAL_ASSOCIATION",
+  "primary_delta_mean_loss_stress_minus_nonstress": 0.0029429590471191716,
+  "bootstrap": {
+    "resamples": 10000,
+    "block_days": 7,
+    "seed": 20260721,
+    "n_valid_resamples": 10000,
+    "ci95_lower": 7.86851898549675e-05,
+    "ci95_upper": 0.005976663718225493
+  },
+  "hac_supporting": {
+    "coef": 0.002942959047118946,
+    "pvalue": 0.0309513885701236,
+    "nw_lag": 16,
+    "n": 15330,
+    "same_sign_as_primary": true,
+    "supported_p05": true
+  },
+  "n_rows_total": 16146,
+  "n_threshold_available": 15330,
+  "n_stress_classified": 853,
+  "n_rows_by_symbol_interval": {
+    "('BNBUSDT', 8)": 4043,
+    "('BTCUSDT', 8)": 4043,
+    "('ETHUSDT', 8)": 4043,
+    "('SOLUSDT', 2)": 96,
+    "('SOLUSDT', 8)": 3921
+  },
+  "gate_rule": "delta>0 AND bootstrap_ci95_lower>0 AND HAC same sign and p<0.05",
+  "completed_at_utc": "2026-07-21T08:57:08.650670+00:00"
+}

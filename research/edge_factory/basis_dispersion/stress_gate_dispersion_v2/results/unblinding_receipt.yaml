@@ -1,0 +1,8 @@
+experiment_id: stress_gate_dispersion_v2_reproduction
+code_commit: 1ac7da1
+preregistration_commit: ccb3e63
+dataset_manifest_commit: 1ac7da1
+analysis_input_hash: 49b81eb1d4e4f86c5440eeaaa48bfd721f4d17d49effad428918c28b2ce03180
+random_seed: 20260721
+started_at_utc: '2026-07-21T08:55:38.171701+00:00'
+economic_outputs_previously_computed: false

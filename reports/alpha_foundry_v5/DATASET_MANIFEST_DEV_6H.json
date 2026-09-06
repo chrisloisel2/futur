@@ -1,0 +1,89 @@
+{
+  "clock_policy": "exchange event time + local receive time; receive time defines information availability",
+  "code_commit": "87360fa6b46f7fd09e546c6d04e303c3dbbde867",
+  "dataset_name": "alpha_foundry_v5_multimodal_dev_6h",
+  "digest": "c6c80e7c8d5cfdbcc6310daaaeb1b25a66351804c3e74afaefc23a4b52c47ec9",
+  "domains": [
+    "book",
+    "trade",
+    "derivatives"
+  ],
+  "notes": "",
+  "partitions": [
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00000.parquet",
+      "sha256": "1372062705e2fdfc3ca19ad9baa68c2fe2e5c7576f440a77ca2e952e94e6c797",
+      "size_bytes": 89996465
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00001.parquet",
+      "sha256": "81aacefd7cced9dc66cce8a5b3b5decd57679fed0e1e15cd4fec8c5a3a3cfa6b",
+      "size_bytes": 87929496
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00002.parquet",
+      "sha256": "ad63e7d43343f50b0ded32243788b46a3407c93bafeb000e16373fd67e1a66ba",
+      "size_bytes": 91860183
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00003.parquet",
+      "sha256": "f80c543154ca3656cf715946c4cec674370bc5bc50452de537efffee8a671a80",
+      "size_bytes": 90845782
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00004.parquet",
+      "sha256": "167bd71536b55b6da3ced627cb49d9f3a83c9f5f4672771113b1191b1fa6a4a3",
+      "size_bytes": 94175639
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00005.parquet",
+      "sha256": "106f2aac0219ae83a3bd9644d1087fff470e65cf15f33682342d7f2b98e6d206",
+      "size_bytes": 92357031
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00006.parquet",
+      "sha256": "59f843757c038705c74458db269ed13c3c125538d070b75be3903998b35423c0",
+      "size_bytes": 91538253
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00007.parquet",
+      "sha256": "8ebc8f40f9988e8a6faec1c1102283dbdefb90c28d8120c9a6ee6453adeaa3aa",
+      "size_bytes": 96140847
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00008.parquet",
+      "sha256": "45b0a631b063b5c85ae817777260a6b245a826fe30741c9552fbca38977da9fb",
+      "size_bytes": 98327543
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00009.parquet",
+      "sha256": "096e3f07f44437df502480a2aa2d7f6b72e038232ebce0764d769b6bfe96b2e0",
+      "size_bytes": 103138664
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00010.parquet",
+      "sha256": "23aecbef5ec531b7c11e4e3e3593db5843efb1d98ee98c9f9becf31dda23c27a",
+      "size_bytes": 95679910
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00011.parquet",
+      "sha256": "ab6d3519c8ed41c0ed8265b9d04fdc751863b318138b96c096092970506dfc1b",
+      "size_bytes": 90536149
+    },
+    {
+      "path": "/home/qbee/futur-alpha-foundry-v5/data/alpha_foundry_v5/multimodal_tensor/dev_6h/part-00012.parquet",
+      "sha256": "bc8bdc57b7666b74e4d9b5808782c1d5d9c6afd2cfbfb0953c756ededd398df4",
+      "size_bytes": 81869395
+    }
+  ],
+  "pit_policy": "availability_ts<=asof_ts; no future fill",
+  "row_count": 648003,
+  "schema_version": "v5",
+  "sources": [
+    "multimodal_tensor"
+  ],
+  "window": {
+    "start_ns": 1786830843194013751,
+    "stop_ns": 1786852443194013752
+  }
+}

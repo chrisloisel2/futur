@@ -1,5 +1,0 @@
-costs:
-  maker_fee_bps: 1.0
-  taker_fee_bps: 5.0
-  slippage_ref_price: mid
-  compute_impact_proxy: true

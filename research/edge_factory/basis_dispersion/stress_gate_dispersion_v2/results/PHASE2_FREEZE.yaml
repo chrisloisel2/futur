@@ -1,0 +1,41 @@
+# PHASE2_FREEZE.yaml — clôture de la Phase 2, avant préenregistrement Phase 3.
+# Complète unblinding_receipt.yaml/PRIMARY_RESULT.json avec les éléments de
+# traçabilité d'exécution demandés en relecture (commande exacte, hash
+# stdout/stderr, protocol_hash).
+
+experiment_id: stress_gate_dispersion_v2_reproduction
+code_commit: "c34cc9d"
+preregistration_commit: "ccb3e63"
+dataset_manifest_commit: "1ac7da1"
+protocol_hash: "c7be37c140ae687f8a9b70f5970dc9c9ca554614bf5d807d0ad55f40a3af8b76"   # = preregistration_hash, DATASET_MANIFEST.yaml
+analysis_input_hash: "49b81eb1d4e4f86c5440eeaaa48bfd721f4d17d49effad428918c28b2ce03180"
+
+exact_command: "python3 scripts/run_stress_gate_dispersion_v2_primary_test.py"
+seed: 20260721
+bootstrap_configuration:
+  type: moving_calendar_block
+  block_days: 7
+  resamples: 10000
+  resample_all_assets_jointly: true
+
+stdout_sha256: "313b9c651071c1a5e214989a89c8805b88f7c2be6d3e72763b4e37634c1c17d6"
+stderr_sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"   # sha256("") — run propre, aucune sortie d'erreur
+exit_code: 0
+
+result_files:
+  - research/edge_factory/basis_dispersion/stress_gate_dispersion_v2/results/PRIMARY_RESULT.json
+  - research/edge_factory/basis_dispersion/stress_gate_dispersion_v2/results/PRIMARY_RESULT.md
+  - research/edge_factory/basis_dispersion/stress_gate_dispersion_v2/results/unblinding_receipt.yaml
+
+verdict_label_for_external_reports: >
+  REPRODUCED_CAUSALLY_ORDERED_PREDICTIVE_ASSOCIATION — "causal" fait
+  référence à l'horodatage de l'information (pas de donnée future utilisée
+  dans le seuil ou la classification), PAS à une identification d'un effet
+  causal de la dispersion sur le drawdown. Statut interne inchangé
+  (REPRODUCED_CAUSAL_ASSOCIATION) mais cette note doit accompagner toute
+  citation externe du résultat.
+
+phase_3: preregistered_next
+phase_4: conditionally_authorized_if_all_phase_3_gates_pass
+runner_creation: not_authorized
+live_impact: forbidden

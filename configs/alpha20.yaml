@@ -44,6 +44,10 @@ costs:
     binance_usdm: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
     binance_quarterly: {maker_bp: 2.0, taker_bp: 5.0, as_of: "2026-07-19", source: assumed}
     hyperliquid: {maker_bp: 1.0, taker_bp: 3.5, as_of: "2026-07-19", source: assumed}
+    # repris tel quel de reports/FUNDING_XVENUE_PROTOCOL.md (fee_bybit_bp=5.5) --
+    # sans ce défaut, fee_registry.effective_costs("bybit", ...) retombait
+    # silencieusement sur binance_usdm et mal-étiquetait le coût Bybit.
+    bybit: {maker_bp: 2.0, taker_bp: 5.5, as_of: "2026-07-21", source: assumed}
     borrow_ann: {rate: 0.08, as_of: "2026-07-19", source: assumed}
     slippage_bp_default: 2.0
     gas_infra_eur_monthly: 120.0          # serveurs + data ; à remplacer par factures
@@ -124,11 +128,161 @@ experiment_registry:
     - {name: funding_xvenue_v0, verdict: NO_EDGE, ref: "1717fd8",
        note: "JAMAIS recycler sous un autre nom (ordre explicite)"}
     - {name: naive_50_universe, verdict: NO_EDGE, ref: "0c6fd80", note: "churn-fees -39.6%"}
+    - name: cross_sectional_momentum_crypto_v1
+      mechanism: long_short_residual_momentum_7_30_90d_beta_neutral
+      status: CLOSED_NO_EDGE
+      verdict: NO_EDGE
+      ref: "9c7fad5"
+      report: research/edge_factory/cross_sectional_momentum_v1/results/MOMENTUM_CRYPTO_V1_PIT_FINAL_VERDICT_2026-07-22.md
+      report_date: "2026-07-22"
+      final_metrics:
+        cagr_ann_pct: -20.4
+        sharpe: -0.04
+        max_dd_pct: -87.8
+        dsr: 0.46
+      failed_gates: ["cagr > 12%", "sharpe > 1.2", "max_dd < 15%", "costs_x2 positive",
+                    "leave_one_year positive", "dsr >= 0.95"]
+      reactivation_requires:
+        - thèse structurellement différente (pas un retuning de poids/horizon/signe)
+        - nouveau préenregistrement séparé
+      note: "formule gelée définitivement : AUCUN changement de poids, d'horizon ou de
+             signe pour la sauver. Un premier run (univers snapshot du 2026-06-30,
+             exécution close-to-close mal alignée) avait rapporté Sharpe -1.22 et un
+             faux diagnostic de reversal (IC t=-3.18) -- retiré après audit complet
+             (QUARANTINE_2026-07-21.md) : univers PIT réel restauré (311 symboles),
+             exécution open-to-open corrigée (délai réel 2j), poids water-filling,
+             invariants vérifiés à 0 violation. Sur le moteur corrigé : Sharpe -0.04,
+             ni momentum ni reversal détectable, juste du bruit. Le NO_EDGE est
+             confirmé mais le diagnostic 'reversal' de la première version ne l'est
+             plus -- ne pas le citer."
+    - name: carry_solusdt
+      mechanism: carry_v2_delta_neutral
+      verdict: FAIL
+      ref: "659a433"
+      report: reports/PORTFOLIO_OS_STATUS.md
+      report_date: "2026-06-28"
+      return_month: "+0.14%"
+      max_drawdown: "-20%"
+      profit_factor: 0.80
+      failed_gates: ["return_month > 0.30%", "max_drawdown < 1.50%"]
+      reactivation_requires:
+        - nouvelle hypothèse explicite
+        - changement matériel de mécanisme ou d'exécution
+        - nouveau rapport reproductible passant les gates
+      note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
+             sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
+             le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
+    - name: carry_bnbusdt
+      mechanism: carry_v2_delta_neutral
+      verdict: FAIL
+      ref: "659a433"
+      report: reports/PORTFOLIO_OS_STATUS.md
+      report_date: "2026-06-28"
+      return_month: "-0.33%"
+      max_drawdown: "-26%"
+      profit_factor: 0.26
+      failed_gates: ["rendement net positif", "return_month > 0.30%", "max_drawdown < 1.50%"]
+      reactivation_requires:
+        - nouvelle hypothèse explicite
+        - changement matériel de mécanisme ou d'exécution
+        - nouveau rapport reproductible passant les gates
+      note: "activé ACTIVE par erreur le 2026-07-20 (890aa17) comme extension mécanique
+             sans nouvelle thèse, malgré ce verdict antérieur sur le même mécanisme et
+             le même actif ; rétrogradé OBSERVE_ONLY le 2026-07-21"
+    - name: basis_term_v0
+      mechanism: calendar_cash_and_carry_quarterly
+      verdict: FAIL
+      ref: "f27971d"
+      report: research/edge_factory/calendar_basis_v1/results/BASIS_TERM_V0_FALSIFICATION_2026-07-21.md
+      report_date: "2026-07-21"
+      candidate: entry5_size50
+      gates:
+        dsr: {value: 0.9975, threshold: 0.95, passed: true}
+        pbo: {value: 0.47, threshold: 0.10, passed: false}
+        costs_x2: {passed: true}
+        leave_one_year: {passed: true}
+        leave_one_asset: {passed: true}
+        holdout: {passed: true, note: "sous-alimenté, 7 trades, pas un vrai OOS aveugle"}
+      failed_gates: ["pbo <= 0.10"]
+      reactivation_requires:
+        - variante fixée AVANT tout résultat (pas une sélection a posteriori parmi une grille)
+        - nouveau rapport reproductible passant PBO en plus des autres gates
+        - période forward réellement nouvelle, pas déjà incluse dans l'échantillon de sélection
+      note: "primaire entry5_size50 sélectionné a posteriori parmi 6 variantes
+             (entry3/5/8 x size25/50) — PBO (CSCV) = 0.47, indiscernable du hasard.
+             Un seul gate qui échoue suffit à rejeter, malgré DSR/coûts×2/leave-one-year/
+             leave-one-asset qui passent individuellement. Rétrogradé OBSERVE_ONLY le
+             2026-07-21 (configs/alpha20_runners.yaml) ; exécution/télémétrie maintenues
+             pour collecte de forward paper uniquement, exclu de la sélection."
+    - name: stress_gate_dispersion_v2_reproduction
+      status: closed_no_incremental_edge   # PAS NO_EDGE au sens absolu — voir interpretation
+      verdict: NO_INCREMENTAL_EDGE
+      ref: "e863335"
+      report: research/edge_factory/basis_dispersion/stress_gate_dispersion_v2/results/PHASE3_FREEZE.md
+      primary_result:
+        raw_delta_loss: 0.00294
+        raw_bootstrap_ci_95: {lower: 0.000079, upper: 0.00598}
+        raw_hac_pvalue: 0.031
+      stability:
+        temporal_split: pass
+        leave_one_asset_out: pass
+        leave_one_year_out: pass_with_2022_noninformative   # warm-up consomme 2022 : aucune obs n'atteint threshold_available, pas une preuve contre FTX
+        leave_one_episode_out: pass
+        exact_timestamp_panel: pass
+      incremental_test:
+        beta_stress: 0.00130
+        bootstrap_ci_95: {lower: -0.00087}
+        pvalue: 0.30
+        verdict: fail
+      interpretation:
+        - stable descriptive risk association
+        - no demonstrated incremental information beyond trailing drawdown and realized volatility
+        - not qualified for runner or production feature
+      forbidden_reactivation_without_new_thesis:
+        - changing quantile only
+        - changing horizon only
+        - changing warmup only
+        - adding leverage
+        - removing controls
+        - restricting to the best asset or period
   not_testable:
     - {name: onchain_flows, verdict: NOT_TESTABLE, ref: "53d6f70"}
+  # ── Verdicts historiques dont la provenance exécutable n'est plus
+  #    vérifiable : NI falsifiés (pas de NO_EDGE), NI utilisables comme
+  #    preuve. Bloque la qualification de runner / le wiring portefeuille
+  #    tant que superseded_by_experiment n'a pas conclu. ───────────────────
+  provenance_blocked:
+    - name: cross_exchange_stress_gate_h2
+      mechanism: cross_venue_premium_dispersion_as_forward_liquidity_stress_indicator
+      historical_status: VALIDATED_SIGNAL
+      current_status: UNVERIFIED_PROVENANCE
+      historical_ref: "c78874b"
+      historical_report: reports/BINANCE_BYBIT_FUNDING_EDGE_REPORT.md
+      blocking_reasons:
+        - source_module_absent_from_all_reachable_git_refs
+        - original_data_manifest_unavailable
+        - original_result_not_reproducible_from_clean_checkout
+        - point_in_time_and_lookahead_properties_not_auditable
+      allowed_uses: [forensic_recovery, independent_preregistered_reproduction]
+      forbidden_uses:
+        - evidence_for_runner_qualification
+        - portfolio_wiring
+        - active_or_observe_only_runner_creation
+        - risk_allocation_decision
+      superseded_by_experiment: stress_gate_dispersion_v2_reproduction
+      superseding_experiment_status: closed_no_incremental_edge   # concluded 2026-07-21, e863335 — see experiment_registry.closed_no_edge entry of that name
+      historical_report_mutated: false
+      forensic_dir: research/forensics/stress_gate_c78874b/
+      note: "H3 (carry_gate_v2, meme source de donnees) a ete rejete au niveau
+             portefeuille (df3e1e5, reproductible, 9/9 tests) mais cela ne
+             falsifie PAS H2 (mecanisme different : filtre de stress, pas
+             gate de carry) — le blocage ici est UNIQUEMENT une question de
+             provenance executable, pas un verdict de recherche"
   validated_foundations:
     - {name: carry_basis_v12, status: socle, note: "V1.1 +4.8%/an DD1.9% ; aucun levier avant net live + churn guard"}
-    - {name: basis_term, status: a_qualifier, note: "carnets réels, rolls, règlement, contrat dynamique requis"}
+    # basis_term retiré le 2026-07-21 : falsification indépendante FAIL (PBO=0.47),
+    # voir experiment_registry.closed_no_edge.basis_term_v0 — ce n'est plus une
+    # fondation "à qualifier", c'est un mécanisme rejeté (OBSERVE_ONLY, non sélectionnable).
     - {name: mh_events, status: shadow_gele, note: "verdict 2026-08-09 ; sizing 20%/décision = expérience paper"}
     - {name: hl_metaorders, status: collecte, note: "évaluation ≥ 2026-08-17 si ≥30 j ET ≥300 événements éligibles"}
   pending_new_axes:                        # étape 9 uniquement

@@ -1,0 +1,111 @@
+{
+  "git_sha": "06cc146e7af22c23623da52fc532171a8b29817a",
+  "timestamp": "2026-08-14 23:47:02.095274+00:00",
+  "pit_universe_size": 312,
+  "pit_universe_manifest": "data_v2/instruments/instrument_master.parquet",
+  "eligibility_depends_only_on": [
+    "existence historique PIT (listing_ts/delisting_ts)",
+    "disponibilite des features (non-null required columns)",
+    "qualite des sources (Data V2 P0 acquisition, see DATA_V2_ACQUISITION_FREEZE.json)",
+    "causalite (research_available_at)",
+    "warmup (strict-prior, full-window rolling stats)",
+    "absence de corruption"
+  ],
+  "eligibility_explicitly_excludes": [
+    "return",
+    "PF",
+    "win rate",
+    "Sharpe",
+    "PnL",
+    "MFE/MAE",
+    "label",
+    "any economic result"
+  ],
+  "families": {
+    "DELEVERAGING": {
+      "required_columns": [
+        "open",
+        "close",
+        "volume",
+        "oi",
+        "oi_delta_pct_1h",
+        "aggressive_sell_usd",
+        "residual_return_1h",
+        "research_available_at"
+      ],
+      "warmup_rule": "residual_std_30d non-null (strict-prior, full 30-day window, shift(1) so the current bar never judges itself)",
+      "liquidation_feed": "OPTIONAL per protocol -- never required for eligibility",
+      "mask_function": "data_v2.events.eligibility.eligible_deleveraging"
+    },
+    "CROWDING": {
+      "required_columns": [
+        "funding_rate",
+        "funding_rate_percentile_90d",
+        "basis_z_1d",
+        "oi",
+        "oi_delta_pct_1h",
+        "aggressive_buy_usd",
+        "aggressive_sell_usd",
+        "research_available_at"
+      ],
+      "warmup_rule": "funding_settlement_warmup True (>= 90 days elapsed since this symbol's OWN first real settlement -- distinct from funding_rate_percentile_90d's own non-null check, which can be non-null after just 1 prior settlement)",
+      "percentile_semantics": "SETTLEMENT NATIVE, strict prior 90d, causal forward-fill of the rank -- never bar-wise",
+      "mask_function": "data_v2.events.eligibility.eligible_crowding"
+    },
+    "RELATIVE_VALUE_DISLOCATION": {
+      "required_columns": [
+        "residual_return_1h",
+        "basis_z_1d",
+        "signed_volume",
+        "research_available_at"
+      ],
+      "warmup_rule": "residual_std_30d non-null (same rule as DELEVERAGING, shared computation)",
+      "cross_sectional_minimum": 30,
+      "cross_sectional_minimum_rationale": "Structural, pre-registered, NOT derived from any observed PnL: the classic large-sample rule of thumb (Central Limit Theorem convention) for a cross-sectional mean/std/median to be a stable statistic rather than dominated by a handful of symbols. The existing RELATIVE_VALUE_DISLOCATION detector (data_v2/events/detectors.py) had no pre-existing minimum to inherit -- checked first, per mission section 10.",
+      "note": "eligible_rvd_base (per-symbol) AND cross_section_size >= cross_sectional_minimum (computed across all symbols at that exact timestamp) together define eligible_rvd. Symbols with missing flow/basis at a given bar do not participate in that bar's cross-sectional stats or count toward cross_section_size.",
+      "mask_function": "data_v2.events.eligibility.eligible_rvd_base (+ build_event_feature_panel.py's compute_cross_sectional_rvd second pass for the final eligible_rvd)"
+    },
+    "FORCED_FLOW_REVERSAL": {
+      "required_columns": [
+        "residual_return_15m",
+        "oi",
+        "oi_delta_pct_1h",
+        "research_available_at"
+      ],
+      "warmup_rule": "none beyond the required-column non-null check (residual_return_15m already embeds the same 60d beta warmup as residual_return_1h)",
+      "primary_condition": "liq_feed_available OR signed_volume non-null (data AVAILABILITY question -- the P95 liquidation-vs-flow DETECTION threshold is a separate, PnL-blind concern that lives in detectors.py, not here)",
+      "note": "liq_feed_available=False means 'feed down/not wired', never coerced to '0 liquidations'.",
+      "mask_function": "data_v2.events.eligibility.eligible_ffr"
+    }
+  },
+  "schema_required_columns": [
+    "timestamp",
+    "research_available_at",
+    "symbol",
+    "open",
+    "close",
+    "oi",
+    "oi_delta_pct_1h",
+    "aggressive_buy_usd",
+    "aggressive_sell_usd",
+    "signed_volume",
+    "CVD",
+    "funding_rate",
+    "funding_rate_percentile_90d",
+    "basis",
+    "basis_z_1d",
+    "basis_z_7d",
+    "residual_logret_5m",
+    "residual_return_15m",
+    "residual_return_1h",
+    "volume",
+    "liq_feed_available"
+  ],
+  "schema_optional_columns": [
+    "liq_long_usd_5m",
+    "liq_short_usd_5m"
+  ],
+  "eligibility_module_sha256": "571f9ccc06f83354ca6c37ac04bb29e028c802af6aa98cf8b316d1a52303a6ff",
+  "schema_module_sha256": "0f438f288f359a2ca45f9e34058912946639f240fcaea937728a3a430f12c0b0",
+  "economic_results_referenced": false
+}

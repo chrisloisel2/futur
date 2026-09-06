@@ -1,0 +1,161 @@
+{
+  "dev_pilot_tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786830843094013751-1786852443241777168/cadence=100ms",
+  "entry_thresholds_frozen_from_dev_pilot": {
+    "BTCUSDT": {
+      "binance": {
+        "hi": 0.3427024821365024,
+        "lo": -0.8306555930067019
+      },
+      "bybit": {
+        "hi": 0.4126737587236925,
+        "lo": -0.9312883464838355
+      },
+      "hyperliquid": {
+        "hi": 1.6153882267892623,
+        "lo": -0.1210546184280073
+      },
+      "okx": {
+        "hi": 0.16179901946483213,
+        "lo": -0.09135481002199967
+      }
+    },
+    "ETHUSDT": {
+      "binance": {
+        "hi": 0.036439221481461226,
+        "lo": -0.9387579644142041
+      },
+      "bybit": {
+        "hi": 0.7440149959100347,
+        "lo": -0.4794862555857116
+      },
+      "hyperliquid": {
+        "hi": 1.7055197628260956,
+        "lo": -1.1247667120959342
+      },
+      "okx": {
+        "hi": 0.4123144816077992,
+        "lo": -0.098919186065417
+      }
+    },
+    "SOLUSDT": {
+      "binance": {
+        "hi": 0.3439250634920118,
+        "lo": -1.2705400001013816
+      },
+      "bybit": {
+        "hi": 0.43155253017271666,
+        "lo": -1.3391654090473657
+      },
+      "hyperliquid": {
+        "hi": 1.4239981616252397,
+        "lo": 0.1334016813917443
+      },
+      "okx": {
+        "hi": -0.18752688880776797,
+        "lo": -2.0875081519455123
+      }
+    }
+  },
+  "horizon_ms": 2000,
+  "results": {
+    "BTCUSDT": {
+      "capacity_usd": 10201630.480382353,
+      "fill_rate": 1.0,
+      "gross_edge_bps": 9.821693094584027e-05,
+      "latency_sensitivity_net_bps": {
+        "0": -9.961131249557692,
+        "100": -9.963055869601728,
+        "250": -9.964634678306549,
+        "50": -9.961131249557692,
+        "500": -9.970228750427527
+      },
+      "max_drawdown": -0.9999999920776298,
+      "n_trades": 18718,
+      "net_edge_bps": -9.961131249557692,
+      "profit_factor": 0.0,
+      "role": "PRIMARY",
+      "trigger_venue_counts": {
+        "binance": 7573,
+        "bybit": 7356,
+        "hyperliquid": 2795,
+        "okx": 994
+      }
+    },
+    "COMBINED": {
+      "capacity_usd": 4152037.778,
+      "fill_rate": 1.0,
+      "gross_edge_bps": -0.30057882900708344,
+      "latency_sensitivity_net_bps": {
+        "0": -10.06192781845476,
+        "100": -10.065084699805396,
+        "250": -10.068395089250771,
+        "50": -10.06192781845476,
+        "500": -10.074276683595366
+      },
+      "max_drawdown": -1.0,
+      "n_trades": 54578,
+      "net_edge_bps": -10.06192781845476,
+      "profit_factor": 0.0,
+      "trigger_venue_counts": {
+        "binance": 24305,
+        "bybit": 19133,
+        "hyperliquid": 5557,
+        "okx": 5583
+      }
+    },
+    "ETHUSDT": {
+      "capacity_usd": 6521551.09533,
+      "fill_rate": 1.0,
+      "gross_edge_bps": -0.029057190729400637,
+      "latency_sensitivity_net_bps": {
+        "0": -10.059442873377002,
+        "100": -10.064464617331334,
+        "250": -10.071163048090721,
+        "50": -10.059442873377002,
+        "500": -10.081038510031625
+      },
+      "max_drawdown": -0.9999999851986693,
+      "n_trades": 17914,
+      "net_edge_bps": -10.059442873377002,
+      "profit_factor": 0.0,
+      "role": "PRIMARY",
+      "trigger_venue_counts": {
+        "binance": 10025,
+        "bybit": 4853,
+        "hyperliquid": 1635,
+        "okx": 1401
+      }
+    },
+    "SOLUSDT": {
+      "capacity_usd": 1556486.141403366,
+      "fill_rate": 1.0,
+      "gross_edge_bps": -0.885227863553748,
+      "latency_sensitivity_net_bps": {
+        "0": -10.169540962483422,
+        "100": -10.17212157717042,
+        "250": -10.17385603639192,
+        "50": -10.169540962483422,
+        "500": -10.176050775552154
+      },
+      "max_drawdown": -0.9999999882414686,
+      "n_trades": 17946,
+      "net_edge_bps": -10.169540962483422,
+      "profit_factor": 0.0,
+      "role": "SUPPORT",
+      "trigger_venue_counts": {
+        "binance": 6707,
+        "bybit": 6924,
+        "hyperliquid": 1127,
+        "okx": 3188
+      }
+    }
+  },
+  "smoke_test_only": true,
+  "tape": "/home/qbee/futur-data-v2/data/market_physics_v3/state_tape_stream/run=1786893798852052322-1786936999002614116/cadence=100ms",
+  "venues": [
+    "binance",
+    "bybit",
+    "okx",
+    "hyperliquid"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-08-15 03:15:07.094842+00:00",
+  "DATA_V2_FULL_UNIVERSE_READY": false,
+  "DATA_V2_ACQUISITION_EXHAUSTED": true,
+  "EVENT_PANEL_READY": true,
+  "DELEVERAGING_DATA_READY": true,
+  "DELEVERAGING_DATA_READY_status": "READY",
+  "DELEVERAGING_DATA_READY_eligible_rows": 80796938,
+  "DELEVERAGING_DATA_READY_eligible_symbols": 309,
+  "DELEVERAGING_DATA_READY_years_represented": 7,
+  "CROWDING_DATA_READY": true,
+  "CROWDING_DATA_READY_status": "READY",
+  "CROWDING_DATA_READY_eligible_rows": 73737440,
+  "CROWDING_DATA_READY_eligible_symbols": 252,
+  "CROWDING_DATA_READY_years_represented": 7,
+  "RVD_DATA_READY": true,
+  "RVD_DATA_READY_status": "READY",
+  "RVD_DATA_READY_eligible_rows": 82765040,
+  "RVD_DATA_READY_eligible_symbols": 253,
+  "RVD_DATA_READY_years_represented": 7,
+  "FFR_DATA_READY": true,
+  "FFR_DATA_READY_status": "READY",
+  "FFR_DATA_READY_eligible_rows": 83334188,
+  "FFR_DATA_READY_eligible_symbols": 310,
+  "FFR_DATA_READY_years_represented": 7,
+  "source_reports": {
+    "data_v2_readiness_generated_at": "2026-08-14 23:38:47.587889+00:00",
+    "acquisition_freeze_generated_at": "2026-08-14 23:53:17.160623+00:00",
+    "event_panel_readiness_generated_at": "2026-08-15 03:14:18.391530+00:00",
+    "eligibility_report_generated_at": "2026-08-15 03:15:02.947091+00:00"
+  },
+  "note": "A family's *_DATA_READY may be True even while DATA_V2_FULL_UNIVERSE_READY is False -- full-universe readiness requires funding>=99%/OI>=95%/aggTrades>=95% across ALL 312 PIT symbols regardless of whether a given family's detector actually uses a given symbol/period; family readiness requires only that the OBSERVATIONS a family's own eligibility mask actually selects are exhaustively source-qualified, causal, and representative -- a strictly narrower, and independently honest, claim."
+}

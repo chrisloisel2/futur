@@ -16,6 +16,22 @@ Horizon : secondes–15 min.
 - annuler (transition de liquidité imminente) ;
 - phase du quart-d'heure comme timing d'entrée.
 
+## Références microstructure
+
+- Cont, Kukanov & Stoikov, *The Price Impact of Order Book Events*
+  (https://arxiv.org/abs/1011.6402) : l'**OFI** (order flow imbalance
+  cumulant les événements du carnet) a une relation *linéaire* avec les
+  variations de prix haute fréquence et domine les mesures d'imbalance de
+  trades — c'est la feature de base de l'overlay.
+- *Exploring Microstructural Dynamics in Cryptocurrency Limit Order Books*
+  (https://arxiv.org/abs/2506.05764) : **les inputs comptent plus que la
+  profondeur du modèle** — des features carnet/trades bien construites
+  battent l'empilement de couches ; l'importance des features est stable
+  cross-assets (BTC → petites caps). Investir dans les features, pas dans
+  l'architecture.
+- Généralisation de l'OFI multi-niveaux :
+  https://arxiv.org/abs/2112.02947.
+
 ## Prérequis
 
 N'activer cette piste que lorsqu'au moins un edge des pistes 1–5 est passé

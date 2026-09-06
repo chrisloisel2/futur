@@ -1,0 +1,484 @@
+# V2 Execution State
+
+This file is the single source of truth for "where V2 work stands." Update it
+every session. Do not let it drift from what was actually run.
+
+## Current position
+
+- **Commit at session start (HEAD of `main`):** `ecd93adefb89a7194222607cec65105f9ac44981`
+- **Forensic baseline tag:** `forensic-baseline-2026-07-27` → `ecd93adefb89a7194222607cec65105f9ac44981`
+- **Working branch:** `v2/foundation` (created off `main` at the same commit; `main` untouched)
+- **Phase:** Phase 0 (freeze & map) — done for this pass. Phase 1 (foundation rebuild) — **diagnostic only**, no code migrated yet.
+- **Origin sync:** local `main` was up to date with `origin/main` at session start (`git status`: "up to date", "nothing to commit").
+- **Known divergence out of scope for this repo's git state:** per prior-session memory, the deployment host `qbee@100.127.59.114` has diverged from `main` and is unreconciled — not re-verified this session, needs `verify_config_deployment.py` run against that host before any live/deploy action.
+
+## Tasks completed this session
+
+1. Ground-truthed HEAD, branch, remote, tags, worktree cleanliness (Phase 0).
+2. Searched for `Audit.txt` / `Etat-de-l-art.txt` referenced by the master prompt — **not found anywhere on disk** (`mdfind` + `find ~`, both empty). Proceeded using the live repo as ground truth, per the master prompt's own instruction to treat those docs as historical/obsolete.
+3. Inventoried top-level directories: file counts, last-git-touch date, cross-references from active dirs (`src`, `scripts`, `research`, `tests`, `configs`). Built `scripts/v2_inventory.py` as the reproducible regeneration command; output written to `docs/v2/INVENTORY.generated.md`.
+4. Verified two specific "known defects" named in the master prompt against current HEAD (see `MIGRATION.md` for detail):
+   - Clone-from-scratch startup: **confirmed broken**, two independent failures found.
+   - `max_gross_exposure` / `max_net_long_exposure` "declared but not enforced": **not reproduced** in `src/institutional/portfolio/constraints.py` and `src/institutional/backtest/portfolio_backtester.py` — enforcement code exists and is exercised in the backtest path. Live/paper-path wiring **not yet verified** (see open questions below) — do not treat as confirmed-fixed either.
+   - Mock/EMA-fallback endpoints: no hits in `src/institutional`, `production/`, `Server/` for this pass's grep patterns — **absence of evidence, not evidence of absence**; needs a live-endpoint smoke test, not just static grep.
+5. Confirmed real security exposure in `docker-compose.yml`: MongoDB published on `0.0.0.0:27017` with no auth configured anywhere in the compose file or `.env.example`. See `THREAT_MODEL.md`.
+6. Built `reports/registry/experiments.jsonl` (append-only) and `scripts/v2_migrate_experiments_registry.py`, which migrated the 13 entries in `reports/experiments.yaml` into the new schema with unknown V2-required fields (`commit`, `data_manifest_hash`, `config_hash`, `n_trials`, `costs`, `seed`, `artifact_links`) left explicitly `null` rather than fabricated. `reports/experiments.yaml` itself was not modified.
+7. Confirmed no root `pyproject.toml` / `uv.lock` / `requirements*.txt` exists (only `trading-system/pyproject.toml`, and `requirements*.txt` files live only under `legacy/`).
+8. Confirmed 4 different Python interpreters are reachable on this machine and disagree on installed packages (see below) — no single canonical interpreter is currently designated for this project.
+
+## Commands actually executed (with results)
+
+```
+$ git rev-parse HEAD
+ecd93adefb89a7194222607cec65105f9ac44981
+
+$ git status
+On branch main / up to date with origin/main / nothing to commit
+
+$ docker compose config
+ERROR: required variable NGROK_AUTHTOKEN is missing a value (exit interpolation error)
+  → fails on a clean clone with no .env present
+
+$ grep -n "services+=(frontend)" launch.sh
+launch.sh:107:  services+=(frontend)
+  → docker-compose.yml has no service named "frontend" (only mongodb, qdrant,
+    command-center, ngrok) → `docker compose up -d ... frontend` would fail
+    with "no such service" even if the NGROK_AUTHTOKEN interpolation error
+    above were fixed
+
+$ ls requirements-api.txt
+No such file or directory
+  → launch.sh falls back to `pip install -r "$ROOT_DIR/requirements-api.txt"`
+    when required imports (fastapi, uvicorn, pyarrow, yaml, sklearn, pymongo,
+    httpx, dotenv) are missing from the resolved interpreter; that file does
+    not exist at repo root, only under legacy/*, so this path crashes too
+
+$ which -a python3
+/opt/homebrew/bin/python3          (→ /opt/homebrew/opt/python@3.14/bin/python3.14, stdlib only, no pandas/yaml)
+/usr/bin/python3
+/opt/homebrew/Caskroom/miniconda/base/bin/python3   (pandas 2.2.3, yaml 6.0.2, py3.12.2)
+  + conda env "trading" (pandas 2.2.2, py3.10.19)
+  + /opt/homebrew/anaconda3/bin/python3 (pandas 2.2.2, py3.12.4)
+  → 4 interpreters, no lockfile, no documented "use this one"; `python3` on
+    PATH by default is the bare stdlib-only Homebrew build
+
+$ python3 scripts/v2_inventory.py --write
+(ran clean, wrote docs/v2/INVENTORY.generated.md, exit 0)
+
+$ python3 scripts/v2_migrate_experiments_registry.py   (run with the miniconda-base interpreter, which has PyYAML)
+appended 13 migrated record(s) to reports/registry/experiments.jsonl
+total records now in ledger: 13
+legacy source untouched: reports/experiments.yaml (13 entries)
+(exit 0)
+```
+
+No `pytest` run yet this session — there is no root `pyproject.toml`/`pytest.ini` and no confirmed interpreter with the project's actual dependencies installed system-wide; running `tests/` blind against whichever `python3` resolves first would not be a meaningful signal (see finding above) and risks a false BROKEN verdict caused by interpreter choice rather than code. Next session should pin an interpreter first (see Next action).
+
+## Decisions made
+
+- Did **not** attempt to build `src/futur/` or a root `pyproject.toml` in this pass. The master prompt scopes iteration 1 to "Phase 0 + reproducible Phase 1 diagnostic," not Phase 1 execution. With 1734 tracked `.py` files across ~20 top-level directories and an active, disciplined `research/edge_factory` program already mid-flight (do not disrupt it), a real migration needs its own dedicated phase with per-file triage, not a same-session bolt-on.
+- Did not touch `legacy/`, `reports/`, `data/`, or `reports/experiments.yaml` — append-only / non-destructive per the master prompt's hard rules.
+- Classified directories at the top-level-directory granularity, not per-file. This is a first pass; `MIGRATE`/`UNVERIFIED` directories need a second, deeper pass before any file is actually moved into `src/futur/`.
+
+## Open questions / things NOT yet verified (do not assume either way)
+
+- Is `PortfolioConstraints.check()` / `check_portfolio_invariants()` actually called on the **live/paper** order path, or only in `backtest`/`meta_allocator`? Only backtest-path callers were found this pass (`src/institutional/backtest/multileg_backtester.py`, `src/institutional/portfolio/meta_allocator.py`). If ALPHA_20's live/paper runner lives elsewhere (e.g. under `src/alpha20`), it hasn't been checked yet for whether it calls into `src/institutional/portfolio/constraints.py` at all.
+- Whether `production/`, `Server/`, `trading-system/`, `hedge_fund/` are truly dead or reached through a path this session's grep didn't cover (e.g. dynamic imports, subprocess calls, systemd units in `deploy/`).
+- Full git-history secret scan (only a tracked-file-level pass was done this session; `.env` is gitignored but history was not scanned for accidentally-committed secrets).
+- Whether Mongo/qdrant/command-center are currently *running* and reachable from outside `localhost` on this machine or on `qbee@100.127.59.114` — the compose file's binding is a static config finding, not a confirmation of current live exposure.
+
+## Files modified this session
+
+- `scripts/v2_inventory.py` (new)
+- `scripts/v2_migrate_experiments_registry.py` (new)
+- `docs/v2/INVENTORY.generated.md` (new, generated)
+- `docs/v2/EXECUTION_STATE.md` (new, this file)
+- `docs/v2/MIGRATION.md` (new)
+- `docs/v2/THREAT_MODEL.md` (new)
+- `docs/v2/ARCHITECTURE.md` (new)
+- `docs/v2/CONVENTIONS.md` (new)
+- `reports/registry/experiments.jsonl` (new, append-only, 13 migrated records)
+- Git: tag `forensic-baseline-2026-07-27`, branch `v2/foundation`
+
+## Next action (exact)
+
+1. Pin one interpreter for V2 work and record it here (candidate: miniconda base, `/opt/homebrew/Caskroom/miniconda/base/bin/python3`, since it already has pandas/yaml and is what memory says this project has used) — then run `tests/` and `trading-system/tests/` against it and record real pass/fail counts before writing a single line of migration code.
+2. Verify whether `src/alpha20`'s live/paper decision path calls `src/institutional/portfolio/constraints.py` — resolves the open exposure-cap-enforcement question definitively instead of leaving it UNVERIFIED.
+3. Second-pass triage of the five `UNVERIFIED` top-level dirs (`Server`, `production`, `trading-system`, `hedge_fund`, `deploy`) to move them to a real classification before Phase 1 migration starts.
+4. Only after 1–3: draft the root `pyproject.toml` + `uv.lock` and the `futur validate` / `futur replay --fixture smoke` CLI skeleton required by the Phase 1 gate.
+
+---
+
+## 2026-07-27, continued — source document review attempt (addendum)
+
+Asked to review `project_sources/01-Audit.txt` (claimed SHA-256
+`516cee6261e15c8d30d963940d079e968c3ea2149a2304864250c50799bd2b5c`) and
+`project_sources/02-Etat-de-l-art.txt` (claimed SHA-256
+`9fbe135e48afd0ec3b287735098b1890e254d7d752e0c366ad2db6cc8919e00e`) before
+starting Phase 1. **Neither file was found anywhere on this machine** —
+repeated the prior search plus additional bounded searches of
+`~/Downloads`, `~/Desktop`, `~/Documents`, and this session's other working
+directories. Full detail and exact commands in `docs/v2/SOURCE_REVIEW.md`,
+which is created but marked `BLOCKED` — it does not classify any claims,
+since no file content exists to classify without inventing it. Proceeding
+straight to Phase 1 per the master prompt's own "repo is ground truth" rule.
+This is a real, standing blocker (not resolved by working around it) —
+surface it to the user again if source review is asked for later without
+new file-location information.
+
+---
+
+## 2026-07-27, continued — Phase 1 diagnostic
+
+Full detail in `docs/v2/PHASE1_DIAGNOSTIC.md` and `docs/v2/INTERPRETER.md`.
+Summary:
+
+- **Interpreter pinned:** `/opt/homebrew/Caskroom/miniconda/base/bin/python3`
+  (3.12.2) — widest package coverage of the 4 reachable interpreters (11/12
+  required non-stdlib imports; only `lightgbm` missing, not installed this
+  session per the "don't fix before recording" rule).
+- **`tests/` (root):** `9 failed, 361 passed, 21 warnings, 4 errors in
+  14.98s`. Default `pytest tests/` aborts on the 4 collection errors (exit
+  2); re-ran with `--continue-on-collection-errors` for the full picture.
+  4 collection errors + 4 of the 9 failures are genuinely-missing modules
+  under `src/institutional/data/*` (never in git history at these paths, on
+  any branch). 3 failures are the deployment guard correctly refusing to
+  run without an approved manifest (test-fixture gap, not a guard bug). 2
+  failures are missing local enriched parquet data (data-locality, not a
+  code bug — this Mac has no local historical dataset per prior-session
+  memory).
+- **`trading-system/tests/`:** `5 failed, 4 passed, 7 skipped, 4 errors in
+  2.75s` (16 items collected). Confirms `trading-system/`'s `institutional.*`
+  package is a *second, differently-rooted* copy from root `src/institutional/`
+  — both broken on missing submodules, independently.
+- **Live/paper path traced and resolved the prior session's open question:**
+  `src/alpha20`'s live/paper decision path (`orchestrator.run_cycle` →
+  `PaperAccount.evaluate_risk` → `global_governor.evaluate`) does **not**
+  call `src/institutional/portfolio/constraints.py` or `invariants.py` at
+  all — those are backtest-only (sole caller: `meta_allocator.py`). The live
+  path has its own governor with different names/thresholds
+  (`net_delta_cap=0.05`, `margin_used_cap=0.20` off a 10% gross proxy,
+  `venue_unsecured_cap=0.15`). Proven executable in
+  `tests/test_v2_phase1_live_exposure_cap_diagnostic.py`: 150% gross/NAV
+  passes through unblocked; only a 5%-NAV net-delta breach fires. **This
+  upgrades last session's "UNVERIFIED" to a confirmed defect** — see
+  `MIGRATION.md`'s known-defect table, now updated.
+- **ML endpoint probe:** the actually-deployed dashboard
+  (`frontend_pipeline/command_center.py`, via Docker) has no ML/predict
+  endpoints — reads precomputed reports only. `frontend_pipeline/api_server.py`
+  (what `launch.sh` starts as "the API") *does* contain the named
+  EMA-fallback-and-trade defect (`_run_autonomous_trade` → `_fetch_ema_signal`
+  when the ML `PredictionEngine` isn't ready, and still trades on the
+  fallback) — but that file currently **cannot import**
+  (`ModuleNotFoundError: No module named 'mongo_utils'`; its dependencies
+  live only under `legacy/dead_frontend/` or don't exist at all). Net: the
+  defect is real in source but dead-by-breakage today, not silently live.
+  `api_server_paper.py` imports cleanly and mounts a router with an explicit
+  documented anti-mock policy, but its deployment status (is anything
+  actually running it?) is unverified from this repo alone.
+- **No fixes applied this pass** — per instruction, diagnostic recorded
+  first. See `docs/v2/PHASE1_DIAGNOSTIC.md` §"Next minimal modification" for
+  the smallest safe next change (a test fixture for the deployment-manifest
+  guard, and a separate design decision on `api_server.py`'s fate).
+
+### Updated open questions
+
+- Resolved this pass: live-path exposure-cap enforcement (was open,
+  now CONFIRMED-broken with an executable test).
+- Still open: whether `BasisTermAdapter` and `MHEventsAdapter` (2 of the 3
+  runner adapter classes) have the same transitive
+  `check_portfolio_invariants` reachability as `CarryBasisAdapter` — only
+  the latter was traced this session.
+- Still open: everything else listed in the prior session's "Open
+  questions" section above (secret history scan, live reachability of
+  Mongo/qdrant, `production/`/`Server/`/`hedge_fund/`/`deploy/` triage) —
+  none of that was revisited this pass.
+
+### Files modified this session (Phase 1 diagnostic portion)
+
+- `docs/v2/INTERPRETER.md` (new)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (new)
+- `docs/v2/MIGRATION.md` (known-defect table rows updated, not rewritten)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (new, 2 passing
+  diagnostic tests)
+
+### Next action (exact)
+
+1. Land the deployment-manifest test fixture (smallest, safest fix
+   identified — see `PHASE1_DIAGNOSTIC.md` §"Next minimal modification"
+   item 1) as its own commit, separate from any other change.
+2. Get a human decision on `frontend_pipeline/api_server.py`: repair its
+   imports (and, in the same change, remove or explicitly gate the
+   EMA-fallback-and-trade behavior — never repair the import alone) or
+   retire it. Do not bundle this with item 1.
+3. Trace `BasisTermAdapter`/`MHEventsAdapter` the same way `CarryBasisAdapter`
+   was traced, to close the one open question from this pass.
+4. Only after 1–3, and after the still-open items from the prior session are
+   at least triaged: draft the root `pyproject.toml` + `uv.lock`.
+
+---
+
+## 2026-07-27, session 3 — source docs re-verified still blocked; two claims classified via repo evidence instead
+
+Re-searched for `project_sources/01-Audit.txt` /
+`02-Etat-de-l-art.txt` a third time (same methodology as sessions 1-2):
+still zero hits anywhere on this machine. `docs/v2/SOURCE_REVIEW.md`
+rewritten (not appended) to state this plainly and to stop re-searching
+without a new lead — the search has now been run 3 times with an identical
+null result.
+
+However, the two specific claims named this session (seven-layer
+architecture; old SOL/BNB results) turned out to be independently
+verifiable from files already committed in the repo, without needing the
+missing documents:
+
+- **Seven-layer architecture → HISTORICAL_ONLY/SUPERSEDED, confirmed.**
+  `legacy/audit.md:33,67-75` documents the old `ai/models/level_0..7`
+  cascade (NumPy/TensorFlow/PyTorch); that same file already called most
+  levels mocked/disconnected at the time (`:923-929`, `:971`, `:978`).
+  Confirmed physically gone from the live tree — moved to
+  `legacy/ai/models/` (only levels 0,1,2,7 survived even there) — and
+  replaced by a simpler, currently-live `ai/level_0`/`ai/level_2` design
+  ("Couche 0"/"Couche 2" per the newer `legacy/docs/audit.md`).
+- **Old SOL/BNB results → SUPERSEDED, evidence found, exact "+0.3-0.5%/month"
+  figure NOT independently corroborated.** `legacy/dead_reports/BILAN_AVANCEMENT_MAI_2026.md`:
+  SOLUSDT val_PF=999 on n=2 trades (flagged "non significatif" in the
+  document itself — classic small-sample artifact), BNBUSDT val_PF=0.11
+  ("Rejeté val"), explicit recommendation to disable both from live.
+  `reports/experiments.yaml`'s BTC+ETH+BNB+SOL entries all show
+  `pf_oos` 0.0-0.89 (losing OOS) with decision `incubate`/`reject`, never
+  promoted. Grepped for the literal "+0.3–0.5%/mois" figure in every
+  plausible phrasing across `reports/`, `research/`, `legacy/*.md`: no
+  match found. The SUPERSEDED classification stands on the small-sample/
+  rejected/never-promoted evidence above regardless; the specific number
+  may be in the still-missing source documents and can't be cross-checked
+  without them.
+
+### Files modified this session (Commit 1 portion)
+
+- `docs/v2/SOURCE_REVIEW.md` (rewritten, not appended — real classification
+  of the 2 claims that could be evidenced from the repo; still explicitly
+  BLOCKED on the 2 named source files themselves)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+Proceed to Commit 2 (risk-diagnostic correction, see below) and Commit 3
+(orchestrator test repair) in this same session — both are self-contained
+and don't depend on the blocked source files.
+
+---
+
+## 2026-07-27, session 3, continued — Commit 2: risk diagnostic correction
+
+The session-2 exposure-cap test was wrong: it built
+`venue_unsecured_frac={"binance": 0.0}` by hand instead of reproducing
+`orchestrator._run_one()`'s actual call, which derives it from
+`gross_usdt/nav`. That hid a real check and produced a false "150% gross
+passes completely unblocked" conclusion. Corrected this session:
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` rewritten:
+  2 tests → 12 tests, all passing
+  (`python3 -m pytest tests/test_v2_phase1_live_exposure_cap_diagnostic.py -v`
+  → `12 passed in 0.72s`). Now reproduces `_run_one()`'s exact
+  `venue_unsecured_frac` formula, and directly tests `PaperBroker.execute()`
+  under all 4 governor states plus each of the 3 runner adapters
+  individually.
+- **Corrected finding:** 150% gross/NAV on one venue **does** trip
+  `venue_unsecured_cap=0.15` and moves the governor to `state="risk_reduced"`
+  — the governor is real and its state is real, contrary to the session-2
+  claim. The actual gap is one level downstream:
+  `GovernorDecision.scale` (0.5/0.0 for risk_reduced/cash) is **never read**
+  anywhere in `src/alpha20` (pinned via source-inspection test — will fail
+  the moment this changes, which is the intended signal to update these
+  docs). `PaperBroker.execute()` only special-cases the literal string
+  `"kill"`; `risk_reduced`/`cash` fill at full notional, same as `risk_on`.
+- **Per-adapter finding (new this session):** `BasisTermAdapter` and
+  `MHEventsAdapter` both have an explicit `risk_state == "kill"` guard
+  before opening new positions. `CarryBasisAdapter` — the first of the 3 —
+  **never references `risk_state` at all** in its `decide()` body (it
+  doesn't route orders through `PaperBroker`; it computes its own
+  `gross_usdt` from an internal `MultiLegBacktester` replay). So for that
+  specific runner, not even `kill` blocks anything through this mechanism.
+- **Reformulated verdict** (replaces the session-2 "CONFIRMED (defect
+  reproduced)" framing, which was too coarse): named caps not wired (still
+  true) + governor genuinely called and computes real states (corrected —
+  was previously understated) + `scale` computed but never applied (new,
+  precise finding) + `risk_reduced`/`cash` are consultative only, ledger-
+  visible but not order-size-changing (new, precise finding) + only `kill`
+  is an actual execution block, and only where an adapter checks for it
+  (new, precise finding — `CarryBasisAdapter` is the exception).
+  `docs/v2/PHASE1_DIAGNOSTIC.md` §3-4 and `docs/v2/MIGRATION.md`'s
+  known-defect table both rewritten to match.
+
+### Files modified this session (Commit 2 portion)
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (rewritten, 12
+  tests)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (§3, §4, and "Next minimal modification"
+  rewritten)
+- `docs/v2/MIGRATION.md` (known-defect table row rewritten)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+Commit 3: fix the 3 failing `test_alpha20_tournament_orchestrator.py` tests
+by monkeypatching `orchestrator.assert_deployment_matches_approved` to a
+no-op inside the `no_network`-style fixture those tests use — not by
+fabricating a global approved-manifest file, since
+`test_alpha20_deployment_guard.py` already owns testing the fail-closed
+behavior itself. Then re-run both `tests/` and `trading-system/tests/` and
+record the new pass/fail counts.
+
+---
+
+## 2026-07-27, session 3, continued — Commit 3: orchestrator test fix
+
+Added one line to the `no_network` fixture in
+`tests/test_alpha20_tournament_orchestrator.py`:
+`monkeypatch.setattr(orchestrator, "assert_deployment_matches_approved", lambda: None)`,
+with a comment pointing at `test_alpha20_deployment_guard.py` as the real
+owner of that behavior's test coverage. No fake global manifest created.
+
+**Results:**
+
+```
+$ python3 -m pytest tests/test_alpha20_tournament_orchestrator.py -v
+5 passed in 1.50s   (was 2 passed, 3 failed before this fix)
+
+$ python3 -m pytest tests/test_alpha20_deployment_guard.py -v
+4 passed in 0.30s   (unchanged -- confirms the fail-closed behavior is
+                     still independently covered, not weakened)
+
+$ python3 -m pytest tests/ --continue-on-collection-errors -q
+6 failed, 376 passed, 4 errors in 15.91s   (exit 1)
+  -- was 9 failed, 361 passed, 4 errors before this session's Commit 2+3
+  -- delta: -3 failed (the orchestrator fix), +15 passed (+3 from the
+     orchestrator fix, +12 from Commit 2's rewritten diagnostic test file)
+  -- the remaining 6 failed + 4 errors are the same, already-diagnosed,
+     unrelated issues from docs/v2/PHASE1_DIAGNOSTIC.md §1 (genuinely
+     missing src/institutional/data/* modules; missing local enriched
+     parquet data) -- untouched, as expected
+
+$ cd trading-system && python3 -m pytest tests/ --continue-on-collection-errors -q
+5 failed, 4 passed, 7 skipped, 4 errors in 2.34s   (exit 1)
+  -- unchanged from session 2, as expected -- nothing this session touched
+     trading-system/
+```
+
+### Files modified this session (Commit 3 portion)
+
+- `tests/test_alpha20_tournament_orchestrator.py` (`no_network` fixture,
+  +1 line + comment)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Current overall test state (both suites, end of session 3)
+
+- `tests/`: 376 passed / 6 failed / 4 collection errors. All 6 failures and
+  4 errors are previously root-caused (see `PHASE1_DIAGNOSTIC.md` §1) and
+  deliberately not fixed this session — none are new, none are hidden.
+- `trading-system/tests/`: 4 passed / 5 failed / 7 skipped / 4 errors,
+  unchanged, previously root-caused (`PHASE1_DIAGNOSTIC.md` §2).
+
+### Next action (exact)
+
+1. ~~`docs/v2/PHASE1_DIAGNOSTIC.md` §1-2's numbers are now stale~~ **DONE, in
+   Commit 3 itself** (see the diff for `8e03e56` — §1-2 were updated in the
+   same commit as the orchestrator fix, this item was already resolved by
+   the time this list was written).
+2. Remaining known-broken items, still not fixed by design this session:
+   genuinely-missing `src/institutional/data/*` submodules (4 files),
+   missing local enriched parquet data (2 tests), `frontend_pipeline/api_server.py`'s
+   broken imports + EMA-fallback design decision, `trading-system/`'s
+   separately-rooted `institutional.*` package. None of these block further
+   V2 planning work; they block trusting those specific code paths.
+3. ~~Still open from session 2: whether `CarryBasisAdapter`'s internal
+   `MultiLegBacktester` replay enforces any real risk control on that
+   runner's live paper capital, given it ignores `risk_state` entirely.~~
+   **CLOSED, session 4 below.**
+
+---
+
+## 2026-07-28, session 4 — closed the last open Phase 1 question; corrected a session-1 misattribution
+
+Picked up the one remaining non-design-decision item from session 3's next
+action list (items 2 and 3 of `PHASE1_DIAGNOSTIC.md`'s "Next minimal
+modification" are explicit design decisions requiring the user's go-ahead —
+wiring `GovernorDecision.scale` into execution, and repair-vs-retire for
+`api_server.py` — left untouched, as instructed). Full detail in
+`docs/v2/PHASE1_DIAGNOSTIC.md` §6.
+
+**Traced `check_portfolio_invariants()` (`src/institutional/portfolio/invariants.py`),
+the one place it's transitively reachable from the live path (via
+`CarryBasisAdapter`'s internal `MultiLegBacktester` replay), and found two
+stacking defects, both now proven by executable test
+(`tests/test_v2_phase1_live_exposure_cap_diagnostic.py`, 12→14 tests, all
+passing):**
+
+1. `InvariantLimits` declares `max_gross_exposure=1.00` and
+   `max_net_long_exposure=0.75` — the exact pair the master prompt quotes —
+   but `check_portfolio_invariants()` computes both and never compares them
+   to the limits. **This corrects session 1's "not reproduced" verdict**,
+   which checked a different file (`constraints.py::PortfolioConstraints`,
+   genuinely enforced, but reachable only from `meta_allocator.py`, not from
+   `invariants.py` or the live path). Found two more independent
+   gross-exposure definitions while tracing this
+   (`portfolio_backtester.py::PortfolioBacktestConfig`, `risk_engine.py`'s
+   own dataclass — both enforced, both research/backtest-only) — 4
+   non-unified mechanisms total, only the live-reachable one (`invariants.py`)
+   is silently decorative.
+2. Even if it were enforced, it wouldn't matter: `CarryBasisAdapter.decide()`
+   wraps its entire `MultiLegBacktester(...).run()` call in a blanket
+   `except Exception`, so a real `InvariantViolation` (naked short, hedge
+   cap, carry-delta — the checks that *do* fire) gets silently downgraded to
+   an "abstain" ledger event. Proven by monkeypatching an
+   `InvariantViolation` through the actual call path and confirming
+   `decide()` swallows it rather than propagating.
+
+**No production code changed this session** — diagnostic only, consistent
+with sessions 1-3's discipline; the design decision this finding feeds into
+(should `check_portfolio_invariants` actually gate `CarryBasisAdapter`'s
+live marks, and should the 4 gross-exposure mechanisms be unified) belongs
+to Phase 2 (accounting rebuild) per the master prompt's own phase ordering,
+not a same-session patch.
+
+Full suite re-run for the record, unchanged except for the 2 new tests:
+`tests/`: `6 failed, 378 passed, 21 warnings, 4 errors in 15.78s` (was 376
+passed before this session's 2 additions — same 6 failures/4 errors,
+previously root-caused, untouched).
+
+### Files modified this session
+
+- `tests/test_v2_phase1_live_exposure_cap_diagnostic.py` (2 new tests,
+  section 5 — 12 → 14 tests, all passing)
+- `docs/v2/PHASE1_DIAGNOSTIC.md` (new §6; "Next minimal modification" item 4
+  closed)
+- `docs/v2/MIGRATION.md` (known-defect table row rewritten to hold both the
+  session-3 live-path finding and this session's `invariants.py` finding
+  without conflating them)
+- `docs/v2/EXECUTION_STATE.md` (this section)
+
+### Next action (exact)
+
+1. Both remaining Phase 1 items are explicit design decisions, not one-line
+   fixes, and need the user's go-ahead before any code changes (per
+   `PHASE1_DIAGNOSTIC.md`'s "Next minimal modification" items 2-3):
+   - Should `risk_reduced`/`cash` reduce order size (wire
+     `GovernorDecision.scale` into `PaperBroker.execute()` / the 2 adapters
+     that check `risk_state`), and should `CarryBasisAdapter` respect
+     `risk_state` (including `kill`) and its own internal invariant
+     violations, at all?
+   - Repair or retire `frontend_pipeline/api_server.py`?
+2. New item raised by this session's finding: the 4 independent
+   gross-exposure-limit mechanisms (`constraints.py`, `portfolio_backtester.py`,
+   `invariants.py`, `risk_engine.py`) should collapse to one canonical
+   implementation as part of Phase 2 (accounting rebuild), not be patched
+   independently.
+3. Everything else still open from sessions 1-3 and not revisited this
+   pass: secret history scan, live reachability of Mongo/qdrant,
+   `production/`/`Server/`/`hedge_fund/`/`deploy/` triage, `BasisTermAdapter`/
+   `MHEventsAdapter`'s full transitive reachability (only `CarryBasisAdapter`
+   has been traced end-to-end).
+4. Only after 1-2 are resolved with the user: draft the root
+   `pyproject.toml` + `uv.lock` (Phase 1 gate item, still not started).

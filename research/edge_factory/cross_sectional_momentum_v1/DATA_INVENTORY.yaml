@@ -1,0 +1,164 @@
+experiment_id: cross_sectional_momentum_v1
+step: 3 — data inventory (no collector, no feature, no backtest run)
+date: 2026-07-21
+machine: qbee@100.127.59.114, read-only inspection, ~/futur
+
+sources_available:
+  pit_universe_and_price:
+    path: data/derivatives_backfill/um_klines_1d/ — 787 parquet files, Binance USDT-M
+      daily klines, delisted symbols retained
+    reused_by: scripts/backtest_ctrend_v1.py (commit 859ebad, verdict CTREND_REJECTED)
+      via build_membership() — 30d-median-quote-volume shifted t-1, >=$5M, >=31d
+      trailing history
+  liquid_majors_hourly: data/enriched/*_1h_enriched.parquet — 50 symbols, hourly,
+    through current date; no full-universe intraday history exists
+  funding: data/derivatives_backfill/{binance,bybit,okx,hyperliquid}/funding — 9
+    majors only, same store used by funding_relative_value_cross_venue_v1
+  open_interest: data/derivatives_backfill/binance/open_interest_hist — 9 majors,
+    ~3 weeks only
+  borrow_registry: src/alpha20/costs/borrow_registry.py — empty by default; its own
+    docstring states a flat 8%/year assumed default absent a manually saved snapshot
+  listings_backfill_caveat: >
+    data/listings_backfill/ (518 symbols) is NOT delisting/survivorship data despite
+    its name — it is a short window of data around each symbol's LISTING date for
+    scripts/test_perp_listing_event_study.py (a listing event study). Do not confuse
+    it with the PIT universe above.
+
+period_covered:
+  um_klines_1d: 2020-01-01 to 2026-06-30 (per-symbol span bounded by real listing/
+    delisting dates)
+  enriched: through live/current date
+frequency: daily across the full 787-symbol PIT store; hourly only for the 50-symbol
+  liquid-majors enriched store
+universe_pit: >
+  confirmed real, not a proxy — genuine delistings verified on disk: LUNAUSDT ends
+  2022-05-13, BTTUSDT ends 2022-01-26, LENDUSDT ends 2020-11-10; 28/787 symbols end
+  before the 2026-06-30 cutoff; 759/787 still active
+venues: Binance USDT-M perps for the broad 787-symbol store; Bybit/OKX/Hyperliquid
+  funding exist only for the same 9 majors as funding_relative_value_cross_venue_v1
+symbols: 787 total; 287 with >=2yr span; 190 with >=3yr span
+maturities: n/a — perps only
+shortability: >
+  no historical shortable/borrow-eligibility flag exists anywhere in the repo. The
+  structural assumption "any listed USDT-M perp is shortable" (symmetric margin
+  engine, no equity-style locate) is reasonable but UNVERIFIED — exactly the risk
+  flagged in the preregistration. Must remain a stated assumption, not treated as fact,
+  in any downstream result.
+historical_fees: trading fee assumed 15bps/side (reused from ctrend v1); short-financing
+  cost is NOT measured — borrow_registry.py defaults to a flat 8%/year assumption
+timestamp_quality: BTCUSDT daily row count (2373) matches expected calendar days almost
+  exactly, no material gaps for majors; not exhaustively checked across all 787 symbols
+gaps:
+  - funding-rate breadth only 9/787 symbols, far short of the 30-80 needed for a real
+    cross-sectional universe
+  - no shortability ground truth
+  - open-interest history thin (3 weeks) and narrow (9 symbols)
+survivorship_bias: >
+  confirmed avoided — the same build_membership() mechanism was already falsified once
+  on this exact question (CTREND v0 survivorship-biased +110% CAGR vs v1 PIT-corrected
+  -2.1%, reports/ctrend/CTREND_V1.md)
+blocking_missing_data: funding/short-financing history for the ~20-70 additional symbols
+  needed beyond the 9 majors already covered; shortability ground truth (unavailable,
+  must remain a flagged assumption rather than being collected)
+estimated_size: um_klines_1d 52MB/787 files; enriched 67GB/50 symbols; funding ~1.1MB/9
+  symbols
+collection_cost: >
+  funding expansion is LOW cost — Binance's public fapi/v1/fundingRate per-symbol
+  endpoint, identical fetch/cache pattern already exists (ctrend_v0.py,
+  scripts/backfill_multi_exchange_funding_free.py) — hours of engineering, not new
+  architecture. Shortability ground truth has no free source and should be treated as
+  permanently unverifiable, not pursued as a collection task.
+
+classification: COLLECTOR_REQUIRED
+justification: >
+  The hard part — a point-in-time universe with real, verified survivorship-bias removal
+  — is already built and has already survived one honest falsification cycle (CTREND).
+  The remaining gap, funding-cost breadth across a 30-80 name universe, is a small, cheap,
+  well-understood collector task, not a blocker requiring new infrastructure.
+
+next_step: >
+  Backfill funding-rate history for 25-70 additional symbols beyond the current 9 majors
+  (reuse the existing free collector pattern), then proceed to step 4 (event-level net
+  edge test per rebalance period), stating shortability explicitly as a structural
+  assumption rather than a verified fact, and applying the top_traders lesson
+  (leave-one-year check) before any positive verdict.
+
+update_2026-07-21_funding_expansion_and_verification:
+  funding_expansion:
+    method: >
+      scripts/backfill_binance_derivatives_free.py already accepts a --symbols CSV
+      argument — no new code needed, only a bigger symbol list. scripts/backfill_
+      multi_exchange_funding_free.py (checked first) is the Bybit/OKX collector, not
+      this one; confirmed distinct before writing anything.
+    universe: >
+      build_membership() from scripts/backtest_ctrend_v1.py, unmodified, run against
+      the real 787-symbol um_klines_1d panel evaluated at the latest bar (2026-06-30)
+      -> exactly 50 symbols (top-50 by 30d-median-quote-volume shifted t-1, >=$5M)
+    result: 50/50 symbols backfilled, zero errors. 17 legacy majors: full depth
+      (~6084 points, 2021-01-01 to live/current). 33 others: shorter but genuine,
+      listing-bounded spans (e.g. a symbol listed 2026-06-02 has 171 points) — spans
+      match real instrument start dates, not truncation.
+  MAJOR_FINDING_universe_composition: >
+    ~20 of the 50 symbols are NOT crypto perpetuals — they are Binance's tokenized
+    equity/commodity/index perpetuals (NVDAUSDT, MSTRUSDT, INTCUSDT, SKHYNIXUSDT,
+    SNDKUSDT, MRVLUSDT, QQQUSDT, SOXLUSDT, SPCXUSDT, EWYUSDT, XAUUSDT, XAGUSDT,
+    PAXGUSDT, BZUSDT/CLUSDT-oil among them), several listed only weeks-to-months ago.
+    This changes what "30-80 liquid perps" and "BTC-beta / sector neutralization"
+    concretely mean in the preregistration — an equities-linked perp doesn't share
+    crypto's risk factors the way a real altcoin perp does. Needs an explicit decision
+    (crypto-only filter vs. include as a distinct sector to neutralize against) BEFORE
+    step 4 uses this universe. Not decided in this document.
+  verification:
+    delisting_spot_checks: >
+      5 more genuine delistings confirmed beyond LUNA/BTT/LEND: MATICUSDT ends
+      2024-09-11 / POLUSDT starts 2024-09-13 (real MATIC->POL migration); RNDRUSDT
+      ends 2024-07-30 / RENDERUSDT starts 2024-07-26 (real Render/Solana rebrand);
+      BTTUSDT ends 2022-01-26 / 1000BTTCUSDT starts same day (real 1000:1
+      redenomination). 29 total delisted symbols found (up from 3 previously spot-
+      checked), several clustered on shared batch-delisting dates (2024-05-28,
+      2024-07-30, 2024-09-11) consistent with Binance's real scheduled-delisting
+      practice — store remains genuine, not fabricated or truncated.
+    shortability: no change — re-grepped both machines, still no historical
+      shortable/borrow-eligibility record anywhere; prior finding (unverified
+      structural assumption) stands.
+    fees_and_borrow: no change — data/alpha20/cost_snapshots/ still doesn't exist on
+      qbee (no real commissionRate or borrow snapshot); ctrend v1's 15bps/side and
+      borrow_registry.py's flat 8%/year (as_of 2026-07-19) remain the only figures,
+      both explicitly labeled assumed, nothing newer found.
+  updated_blocking_before_step_4: >
+    funding gap is now closed (50/50 symbols). Still open: shortability ground truth
+    (permanently unverifiable, stays a flagged assumption), stale fee/borrow figures
+    (unchanged since step 3), and the newly-surfaced universe-composition question
+    (tokenized equities/commodities mixed into a nominally crypto momentum universe) —
+    this last one is a decision point, not a data gap.
+
+update_2026-07-21_universe_split:
+  decision: >
+    human decision, same day: split into MOMENTUM_CRYPTO_V1 (primary, this
+    experiment going forward) and momentum_tokenized_macro_v1 (separate,
+    deprioritized directory, no data work). Verified via Binance's own
+    /fapi/v1/exchangeInfo underlyingType field for all 50 symbols (COIN vs
+    EQUITY/COMMODITY/KR_EQUITY) plus underlyingSubType (TradFi tag on all
+    17 non-crypto names) -- not guessed from memory.
+  crypto_33: [1000PEPEUSDT, AAVEUSDT, ADAUSDT, ALLOUSDT, AVAXUSDT, BCHUSDT,
+    BEATUSDT, BNBUSDT, BTCUSDT, BTWUSDT, DOGEUSDT, DOTUSDT, ENAUSDT, ETHUSDT,
+    FILUSDT, HUSDT, HYPEUSDT, LABUSDT, LINKUSDT, LTCUSDT, NEARUSDT, ONDOUSDT,
+    PAXGUSDT, SOLUSDT, SUIUSDT, TAOUSDT, TONUSDT, UNIUSDT, VELVETUSDT,
+    WLDUSDT, XLMUSDT, XRPUSDT, ZECUSDT]
+  tokenized_macro_17: [CRCLUSDT, INTCUSDT, MRVLUSDT, MSTRUSDT, MUUSDT,
+    NVDAUSDT, SNDKUSDT, SPCXUSDT, SOXLUSDT, QQQUSDT, EWYUSDT, DRAMUSDT,
+    SKHYNIXUSDT, XAUUSDT, XAGUSDT, BZUSDT, CLUSDT]
+  edge_cases:
+    - "PAXGUSDT: Binance tags it COIN/RWA (a gold-backed redeemable ERC-20
+      token), not COMMODITY like XAUUSDT (a synthetic gold-price perp with
+      no token backing) -- kept in crypto_33 per Binance's own tag, but its
+      economic driver is gold price, not crypto factors; if it ends up a
+      large PnL contributor the 15%-concentration gate should catch it"
+    - "TONUSDT: status=SETTLING (not TRADING) in the live exchangeInfo
+      snapshot as of 2026-07-21 -- excluded from the v1 backtest universe
+      (32 names used, not 33) rather than silently kept; historical data
+      up to now is presumably still valid but 'réellement tradable' going
+      forward is in question"
+  next_step: proceed to step 4 (event-level net edge) on the 32-name
+    crypto-only universe (33 minus TONUSDT), BTC held out as the beta-hedge
+    instrument rather than a ranked candidate (31 names actually ranked).

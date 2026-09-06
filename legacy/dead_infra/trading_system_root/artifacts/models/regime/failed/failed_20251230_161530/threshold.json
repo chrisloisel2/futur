@@ -1,6 +1,0 @@
-{
-  "threshold": 0.1,
-  "calm_recall": 0.9343262361988656,
-  "reversal_recall": 0.8260869565217391,
-  "balanced_accuracy": 0.8802065963603023
-}
