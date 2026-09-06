@@ -26,7 +26,7 @@ Ce que ce script ne fait PAS
 
 Ordre d'exécution (imposé, pas cosmétique)
 ──────────────────────────────────────────
-  0. collecte de la queue fraîche (métriques dérivées 5 m)
+  0. collecte de la queue fraîche (métriques dérivées 5 m) + sonde de spread
   1. producteurs de signal  (position + gate + overlay)
   2. étiquetage provenance  (REPLAY vs FORWARD_LIVE)
   2b. scellement des résultats (label des décisions dont l'horizon vient d'échoir)
@@ -113,6 +113,7 @@ LOG_PATH = LAB_DIR / "cycle_log.jsonl"
 LOCK_PATH = LAB_DIR / ".cycle.lock"
 
 COLLECTOR_SCRIPT = "scripts/collect_oi_metrics_5m.py"
+SPREAD_PROBE_SCRIPT = "scripts/probe_spread_cross_section.py"
 PROVENANCE_SCRIPT = "scripts/apply_provenance_tags.py"
 OUTCOME_LABEL_SCRIPT = "scripts/label_forward_outcomes.py"
 PORTFOLIO_SCRIPT = "scripts/run_portfolio_shadow.py"
@@ -305,6 +306,14 @@ def main() -> int:
     # ~200 appels API pour 50 symboles, une centaine de secondes.
     collector_rec = run_step("COLLECT_OI_METRICS_5M", COLLECTOR_SCRIPT, 900)
 
+    # Sonde de spread — 1 requête REST, ~50 lignes. Le coût d'exécution était
+    # la seule pièce du PnL adossée à aucune observation (FIXED_SLIPPAGE_BPS =
+    # 2,0 bps pour tous les symboles et tous les régimes). Elle accumule la
+    # distribution par symbole qui permettra de remplacer cette constante par
+    # une mesure. Non bloquante : une sonde ratée se rattrape au cycle suivant,
+    # et il vaut mille fois mieux un trou déclaré qu'un spread inventé.
+    spread_rec = run_step("PROBE_SPREAD_CROSS_SECTION", SPREAD_PROBE_SCRIPT, 120)
+
     steps, skipped = [], []
     for r in runners:
         alpha_id = r["alpha_id"]
@@ -377,6 +386,7 @@ def main() -> int:
         "producers_skipped_cadence": skipped,
         "steps": steps,
         "collector": collector_rec,
+        "spread_probe": spread_rec,
         "provenance_tagging": provenance_rec,
         "outcome_labeling": outcome_rec,
         "portfolio": portfolio_rec,
