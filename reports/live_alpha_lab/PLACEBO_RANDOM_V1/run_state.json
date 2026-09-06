@@ -1,0 +1,12 @@
+{
+  "alpha_id": "PLACEBO_RANDOM_V1",
+  "last_run": "2026-09-06T10:10:26.437112+00:00",
+  "bar": "2026-09-06T10:05:00+00:00",
+  "universe_hash": "86cde5af4837bf8a",
+  "universe_size": 50,
+  "n_decisions_total": 8,
+  "n_decisions_new": 4,
+  "decisions_per_cycle": 4,
+  "draw_seed": 1521247490,
+  "mode": "PLACEBO_NO_CAPITAL"
+}
