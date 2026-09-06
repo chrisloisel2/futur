@@ -148,8 +148,20 @@ def threshold_t(n_hypotheses: int, alpha: float = FAMILY_ALPHA,
     return float(NormalDist().inv_cdf(quantile))
 
 
+def _record_trials(record: Mapping[str, object]) -> int:
+    """Ce qu'un enregistrement coûte au budget d'essais.
+
+    Une hypothèse scellée coûte 1. Une DÉCISION DE CONCEPTION coûte ce qu'elle
+    déclare : 0 si elle a été prise en aveugle du résultat, N si un t-stat l'a
+    informée. C'est le mécanisme qui donne des dents à la ligne « ce balayage
+    entre-t-il dans mon budget » — répondre « oui, 27 » relève le seuil de
+    toutes les hypothèses, immédiatement et sans intervention.
+    """
+    return len(record.get("hypotheses", [])) + int(record.get("trials_charged", 0) or 0)
+
+
 def _chain_head(path: Path) -> Tuple[str, int]:
-    """(hachage de tête, nombre d'hypothèses cumulées)."""
+    """(hachage de tête, nombre d'essais cumulés)."""
     if not path.is_file():
         return GENESIS_HASH, 0
     previous, total = GENESIS_HASH, 0
@@ -158,7 +170,7 @@ def _chain_head(path: Path) -> Tuple[str, int]:
             continue
         record = json.loads(line)
         previous = str(record["record_hash"])
-        total += len(record.get("hypotheses", []))
+        total += _record_trials(record)
     return previous, total
 
 
@@ -208,7 +220,7 @@ def retroactive_penalty(path: Path = LEDGER) -> Dict[str, object]:
         if not line.strip():
             continue
         record = json.loads(line)
-        seen += len(record.get("hypotheses", []))
+        seen += _record_trials(record)
         batches.append({
             "batch_id": record["batch_id"],
             "n_hypotheses": len(record.get("hypotheses", [])),
@@ -286,6 +298,75 @@ def register_batch(batch_id: str, family: str, hypotheses: Sequence[Hypothesis],
     return payload
 
 
+def record_design_decision(decision_id: str, description: str, blind_to_outcome: bool,
+                           evidence: str, trials_charged: int = 0,
+                           path: Path = LEDGER, notes: str = "") -> Dict[str, object]:
+    """Scelle une décision de CONCEPTION, et son coût en essais.
+
+    Toute décision prise en regardant la donnée est soit aveugle au résultat —
+    et alors elle est gratuite — soit informée par un t-stat, et alors elle
+    consomme des essais comme n'importe quelle hypothèse.
+
+    `blind_to_outcome=True` exige `trials_charged=0` ET une `evidence` : la
+    preuve que le choix ne pouvait pas dépendre du résultat. Une affirmation
+    d'aveuglement sans preuve vérifiable est une promesse, et les promesses ne
+    tiennent pas six mois. La forme la plus solide d'`evidence` est un test
+    qui perturbe les résultats et montre que le choix ne bouge pas.
+
+    `blind_to_outcome=False` exige `trials_charged >= 1` : une décision
+    informée par un résultat mais facturée zéro est exactement le mécanisme qui
+    fait arriver à 904 essais sans s'en rendre compte.
+    """
+    if blind_to_outcome and int(trials_charged) != 0:
+        raise PreregistrationError(
+            "%s : une décision aveugle au résultat ne peut pas coûter d'essais "
+            "(trials_charged=%d)" % (decision_id, trials_charged))
+    if not blind_to_outcome and int(trials_charged) < 1:
+        raise PreregistrationError(
+            "%s : une décision informée par un résultat coûte au moins un essai. "
+            "En facturer zéro est précisément la façon dont on arrive à 904 sans "
+            "s'en apercevoir." % decision_id)
+    if not str(evidence).strip():
+        raise PreregistrationError(
+            "%s : aucune preuve fournie. Une affirmation d'aveuglement sans preuve "
+            "vérifiable est une promesse, pas un contrôle." % decision_id)
+
+    target = Path(path)
+    previous, total_before = _chain_head(target)
+    if target.is_file():
+        for line in target.read_text(encoding="utf-8").splitlines():
+            if line.strip() and json.loads(line).get("batch_id") == str(decision_id):
+                raise PreregistrationError("décision %r déjà scellée" % decision_id)
+
+    total_after = total_before + int(trials_charged)
+    payload: Dict[str, object] = {
+        "batch_id": str(decision_id),
+        "record_type": "DESIGN_DECISION",
+        "family": "design",
+        "description": str(description),
+        "blind_to_outcome": bool(blind_to_outcome),
+        "evidence": str(evidence),
+        "trials_charged": int(trials_charged),
+        "n_hypotheses": 0,
+        "hypotheses": [],
+        "n_registered_cumulative": total_after,
+        "threshold_t": round(threshold_t(max(1, total_after)), 4),
+        "alpha_family": FAMILY_ALPHA,
+        "one_sided": ONE_SIDED,
+        "correction": "bonferroni_sur_le_compte_cumule",
+        "notes": str(notes),
+        "prev_hash": previous,
+    }
+    payload["record_hash"] = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str
+                   ).encode()).hexdigest()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                                default=str) + "\n")
+    return payload
+
+
 def verify_ledger(path: Path = LEDGER) -> Dict[str, object]:
     """La chaîne tient-elle, et le seuil de chaque lot est-il celui qu'il devait ?"""
     target = Path(path)
@@ -310,7 +391,7 @@ def verify_ledger(path: Path = LEDGER) -> Dict[str, object]:
         # Comparaison à l'arrondi STOCKÉ, pas à la valeur brute : le ledger
         # garde 4 décimales pour rester lisible, et comparer un arrondi à une
         # valeur pleine ferait échouer la vérification sur chaque lot honnête.
-        if abs(float(record["threshold_t"]) - round(threshold_t(seen), 4)) > 1e-9:
+        if abs(float(record["threshold_t"]) - round(threshold_t(max(1, seen)), 4)) > 1e-9:
             return {"ok": False,
                     "error": "lot %d porte un seuil qui ne correspond pas à son compte "
                              "cumulé (%s au lieu de %.4f)"

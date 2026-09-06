@@ -126,6 +126,29 @@ def basket_returns(closes: pd.DataFrame, horizon_days: float, rebalance_days: fl
     }
 
 
+def viable_configs(rows: List[dict]) -> List[dict]:
+    """Les configurations dont le pas dépasse STRICTEMENT la fenêtre de
+    decluster. Critère purement structurel — aucun résultat n'y entre."""
+    return [r for r in rows if r["rebalance_days"] * 24.0 > CLUSTER_WINDOW_HOURS]
+
+
+def select_design(rows: List[dict]) -> Optional[dict]:
+    """La règle de choix du design, isolée pour être TESTABLE.
+
+    Elle ne lit que `mde_preregistered_bps`, lui-même fonction de σ et de n
+    seulement. Elle ne touche jamais `mean_bps` ni aucun t-stat — c'est ce qui
+    rend le choix aveugle au résultat, donc gratuit en budget d'essais.
+
+    `tests/test_episode_budget_blindness.py` le vérifie en permutant les
+    moyennes et en montrant que le choix ne bouge pas. Une affirmation
+    d'aveuglement doit être un test, pas une phrase.
+    """
+    viable = viable_configs(rows)
+    if not viable:
+        return None
+    return min(viable, key=lambda r: r["mde_preregistered_bps"])
+
+
 def render(rows: List[dict], meta: dict) -> str:
     out: List[str] = []
     t_star = threshold_t(N_HYPOTHESES)
@@ -172,9 +195,8 @@ def render(rows: List[dict], meta: dict) -> str:
     out.append("`(t* + 0,84)·σ/√n`. Ce n'est PAS `1,96·σ/√n` : tester cinq hypothèses coûte de")
     out.append("la puissance, et ce coût est déjà compté ici._")
     out.append("")
-    viable = [r for r in rows if r["rebalance_days"] * 24.0 > CLUSTER_WINDOW_HOURS]
-    if viable:
-        best = min(viable, key=lambda r: r["mde_preregistered_bps"])
+    best = select_design(rows)
+    if best is not None:
         out.append("## Ce que ça impose au design")
         out.append("")
         out.append("**Le pas de rééquilibrage doit être ≥ 2 jours.** À un jour, le decluster fond")

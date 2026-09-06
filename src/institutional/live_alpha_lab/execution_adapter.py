@@ -27,7 +27,7 @@ import pandas as pd
 
 from src.institutional.live_alpha_lab.marks import get_mark
 from src.institutional.live_alpha_lab.orders import (
-    ShadowFill, ShadowOrder, liquidity_cap_quantity,
+    ShadowFill, ShadowOrder, cap_policy_for, depth_cap_quantity, liquidity_cap_quantity,
 )
 from src.institutional.live_alpha_lab.portfolio import (
     FIXED_SLIPPAGE_BPS, TAKER_FEE_BPS, shadow_execute,
@@ -62,6 +62,32 @@ class ExecutionAdapter:
 
     def reconcile(self, expected_positions: Dict[str, float]) -> bool:
         raise NotImplementedError
+
+
+_DEPTH_BY_SYMBOL = None
+
+
+def depth_notional(symbol: str):
+    """Profondeur médiane au meilleur limite, en dollars. `None` si aucune
+    sonde n'existe pour ce symbole.
+
+    Chargée une fois : le carnet de sondes est relu à chaque appel sinon, et
+    l'adaptateur est sur le chemin chaud de chaque ordre.
+    """
+    global _DEPTH_BY_SYMBOL
+    if _DEPTH_BY_SYMBOL is None:
+        try:
+            from src.institutional.live_alpha_lab.capacity import liquidity_by_symbol
+            _DEPTH_BY_SYMBOL = {k: v.top_of_book_usd for k, v in liquidity_by_symbol().items()}
+        except Exception:
+            _DEPTH_BY_SYMBOL = {}
+    return _DEPTH_BY_SYMBOL.get(str(symbol))
+
+
+def reset_depth_cache() -> None:
+    """Pour les tests : le carnet de sondes est un état de processus."""
+    global _DEPTH_BY_SYMBOL
+    _DEPTH_BY_SYMBOL = None
 
 
 @dataclass
@@ -125,8 +151,16 @@ class ShadowExecutionAdapter(ExecutionAdapter):
             return order, None
 
         requested_notional = requested_quantity * mark.price
-        cap_qty = liquidity_cap_quantity(mark)
+        # item 0.3 : la politique de plafond dépend de la DATE, pas d'un
+        # réglage — les ordres antérieurs à la frontière de segment gardent la
+        # règle sous laquelle ils ont été produits.
+        policy = cap_policy_for(as_of)
+        if policy == "TOP_OF_BOOK":
+            cap_qty = depth_cap_quantity(mark, depth_notional(symbol))
+        else:
+            cap_qty = liquidity_cap_quantity(mark)
         fillable_quantity = requested_quantity if cap_qty is None else min(requested_quantity, cap_qty)
+        refused_notional = max(0.0, (requested_quantity - fillable_quantity) * mark.price)
         signed_fillable = fillable_quantity if delta_quantity > 0 else -fillable_quantity
 
         fill_record = None
@@ -170,6 +204,9 @@ class ShadowExecutionAdapter(ExecutionAdapter):
             fill_price=fill_price, mark_price_at_decision=mark.price,
             spread_bps=FIXED_SLIPPAGE_BPS * 2, slippage_bps=FIXED_SLIPPAGE_BPS,
             fee_bps=TAKER_FEE_BPS, fee_amount=fee_amount, status=status,
+            cap_policy=policy,
+            cap_notional_usd=(None if cap_qty is None else cap_qty * mark.price),
+            refused_notional_usd=refused_notional,
         )
         self._orders.append(order)
         return order, fill_record

@@ -1,0 +1,313 @@
+{
+  "cluster_window_hours": 24.0,
+  "target_excess_bps": 29.0,
+  "anchor": "dec",
+  "alphas": [
+    {
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 18,
+          "n_decisions": 36,
+          "decisions_per_episode": 2.0,
+          "mean_excess_bps": -19.81,
+          "sigma_bps": 156.8,
+          "ci95": [
+            -92.2,
+            52.6
+          ],
+          "mde80_bps": 103.5,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 20,
+          "n_decisions": 36,
+          "decisions_per_episode": 1.8,
+          "mean_excess_bps": -18.55,
+          "sigma_bps": 150.7,
+          "ci95": [
+            -84.6,
+            47.5
+          ],
+          "mde80_bps": 94.4,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 25,
+          "n_decisions": 36,
+          "decisions_per_episode": 1.44,
+          "mean_excess_bps": -13.97,
+          "sigma_bps": 146.5,
+          "ci95": [
+            -71.4,
+            43.5
+          ],
+          "mde80_bps": 82.1,
+          "excludes_target": false,
+          "insufficient": false
+        }
+      }
+    },
+    {
+      "alpha_id": "LIQ_CASCADE_REPEAT_SYSTEMIC_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 8,
+          "n_decisions": 13,
+          "decisions_per_episode": 1.62,
+          "mean_excess_bps": -27.22,
+          "sigma_bps": 137.3,
+          "ci95": [
+            -122.4,
+            67.9
+          ],
+          "mde80_bps": 136.0,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 8,
+          "n_decisions": 13,
+          "decisions_per_episode": 1.62,
+          "mean_excess_bps": -27.22,
+          "sigma_bps": 137.3,
+          "ci95": [
+            -122.4,
+            67.9
+          ],
+          "mde80_bps": 136.0,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 11,
+          "n_decisions": 13,
+          "decisions_per_episode": 1.18,
+          "mean_excess_bps": -3.6,
+          "sigma_bps": 164.0,
+          "ci95": [
+            -100.5,
+            93.3
+          ],
+          "mde80_bps": 138.6,
+          "excludes_target": false,
+          "insufficient": false
+        }
+      }
+    },
+    {
+      "alpha_id": "LIQ_CASCADE_FAR_FROM_LOW_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 43,
+          "n_decisions": 75,
+          "decisions_per_episode": 1.74,
+          "mean_excess_bps": 4.64,
+          "sigma_bps": 146.0,
+          "ci95": [
+            -39.0,
+            48.3
+          ],
+          "mde80_bps": 62.4,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 45,
+          "n_decisions": 75,
+          "decisions_per_episode": 1.67,
+          "mean_excess_bps": 6.02,
+          "sigma_bps": 180.6,
+          "ci95": [
+            -46.8,
+            58.8
+          ],
+          "mde80_bps": 75.5,
+          "excludes_target": false,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 48,
+          "n_decisions": 75,
+          "decisions_per_episode": 1.56,
+          "mean_excess_bps": 2.24,
+          "sigma_bps": 173.6,
+          "ci95": [
+            -46.9,
+            51.4
+          ],
+          "mde80_bps": 70.2,
+          "excludes_target": false,
+          "insufficient": false
+        }
+      }
+    },
+    {
+      "alpha_id": "BTC_LEAD_ALT_CASCADE_V1",
+      "cross_sectional": true,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 1,
+          "insufficient": true
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 1,
+          "insufficient": true
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 1,
+          "insufficient": true
+        }
+      }
+    },
+    {
+      "alpha_id": "SHORT_COVERING_CONTINUATION_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 104,
+          "n_decisions": 436,
+          "decisions_per_episode": 4.19,
+          "mean_excess_bps": 1.37,
+          "sigma_bps": 90.1,
+          "ci95": [
+            -15.9,
+            18.7
+          ],
+          "mde80_bps": 24.8,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 168,
+          "n_decisions": 436,
+          "decisions_per_episode": 2.6,
+          "mean_excess_bps": -0.64,
+          "sigma_bps": 137.2,
+          "ci95": [
+            -21.4,
+            20.1
+          ],
+          "mde80_bps": 29.7,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 219,
+          "n_decisions": 436,
+          "decisions_per_episode": 1.99,
+          "mean_excess_bps": 1.06,
+          "sigma_bps": 144.7,
+          "ci95": [
+            -18.1,
+            20.2
+          ],
+          "mde80_bps": 27.4,
+          "excludes_target": true,
+          "insufficient": false
+        }
+      }
+    },
+    {
+      "alpha_id": "PLACEBO_RANDOM_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 46,
+          "n_decisions": 131,
+          "decisions_per_episode": 2.85,
+          "mean_excess_bps": -1.06,
+          "sigma_bps": 96.5,
+          "ci95": [
+            -29.0,
+            26.8
+          ],
+          "mde80_bps": 39.9,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 46,
+          "n_decisions": 131,
+          "decisions_per_episode": 2.85,
+          "mean_excess_bps": -1.06,
+          "sigma_bps": 96.5,
+          "ci95": [
+            -29.0,
+            26.8
+          ],
+          "mde80_bps": 39.9,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 46,
+          "n_decisions": 131,
+          "decisions_per_episode": 2.85,
+          "mean_excess_bps": -1.06,
+          "sigma_bps": 96.5,
+          "ci95": [
+            -29.0,
+            26.8
+          ],
+          "mde80_bps": 39.9,
+          "excludes_target": true,
+          "insufficient": false
+        }
+      }
+    },
+    {
+      "alpha_id": "POSITIVE_CONTROL_ORACLE_V1",
+      "cross_sectional": false,
+      "by_version": {
+        "v1_single_linkage": {
+          "n_episodes": 860,
+          "n_decisions": 1408,
+          "decisions_per_episode": 1.64,
+          "mean_excess_bps": 19.81,
+          "sigma_bps": 116.0,
+          "ci95": [
+            12.1,
+            27.6
+          ],
+          "mde80_bps": 11.1,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_complete_linkage": {
+          "n_episodes": 952,
+          "n_decisions": 1408,
+          "decisions_per_episode": 1.48,
+          "mean_excess_bps": 19.44,
+          "sigma_bps": 113.5,
+          "ci95": [
+            12.2,
+            26.6
+          ],
+          "mde80_bps": 10.3,
+          "excludes_target": true,
+          "insufficient": false
+        },
+        "v2_fixed_windows": {
+          "n_episodes": 1153,
+          "n_decisions": 1408,
+          "decisions_per_episode": 1.22,
+          "mean_excess_bps": 19.39,
+          "sigma_bps": 115.7,
+          "ci95": [
+            12.7,
+            26.1
+          ],
+          "mde80_bps": 9.5,
+          "excludes_target": true,
+          "insufficient": false
+        }
+      }
+    }
+  ]
+}
