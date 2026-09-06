@@ -123,3 +123,6 @@ state/command_center_secret
 
 # Verrou du labelliseur de résultats forward (scripts/label_forward_outcomes.py)
 reports/live_alpha_lab/.outcome_label.lock
+
+# Manifeste de sauvegarde : régénéré par scripts/backup_critical_state.py --manifest
+reports/ops/BACKUP_MANIFEST.json
