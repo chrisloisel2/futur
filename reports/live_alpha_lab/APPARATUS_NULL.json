@@ -1,0 +1,139 @@
+{
+  "identity_max_abs_bps": 1.3545665771086165e-13,
+  "n_rows": 265834,
+  "n_bars": 5671,
+  "raw_mean_bps": 1.000726770347591e-16,
+  "episode_mean_bps": 0.0010600859839762474,
+  "episode_sd_bps": 27.235129097433344,
+  "n_episodes": 282,
+  "null_by_n": {
+    "6": {
+      "mean_bps": 0.0373,
+      "sd_bps": 11.115,
+      "ci95": [
+        -22.78,
+        25.5
+      ],
+      "p_below_minus5": 0.2708
+    },
+    "16": {
+      "mean_bps": -0.0339,
+      "sd_bps": 6.847,
+      "ci95": [
+        -14.06,
+        14.79
+      ],
+      "p_below_minus5": 0.1986
+    },
+    "26": {
+      "mean_bps": 0.0291,
+      "sd_bps": 5.334,
+      "ci95": [
+        -10.59,
+        11.18
+      ],
+      "p_below_minus5": 0.156
+    },
+    "40": {
+      "mean_bps": -0.0029,
+      "sd_bps": 4.286,
+      "ci95": [
+        -8.43,
+        8.64
+      ],
+      "p_below_minus5": 0.1128
+    },
+    "99": {
+      "mean_bps": -0.0019,
+      "sd_bps": 2.711,
+      "ci95": [
+        -5.32,
+        5.4
+      ],
+      "p_below_minus5": 0.0318
+    },
+    "200": {
+      "mean_bps": 0.0218,
+      "sd_bps": 1.923,
+      "ci95": [
+        -3.7,
+        3.86
+      ],
+      "p_below_minus5": 0.0049
+    }
+  },
+  "level0_observed_bps": -5.5985656926197125,
+  "level0_n_episodes": 326,
+  "placebo_simulation": {
+    "0.5": {
+      "median_episodes": 46,
+      "null_mean_bps": -0.057,
+      "null_sd_bps": 7.515,
+      "ci95": [
+        -14.94,
+        15.41
+      ]
+    },
+    "1.0": {
+      "median_episodes": 47,
+      "null_mean_bps": 0.137,
+      "null_sd_bps": 6.215,
+      "ci95": [
+        -11.3,
+        11.33
+      ]
+    },
+    "2.0": {
+      "median_episodes": 47,
+      "null_mean_bps": -0.435,
+      "null_sd_bps": 5.417,
+      "ci95": [
+        -10.97,
+        8.65
+      ]
+    },
+    "3.0": {
+      "median_episodes": 47,
+      "null_mean_bps": 0.137,
+      "null_sd_bps": 4.159,
+      "ci95": [
+        -6.87,
+        8.81
+      ]
+    },
+    "4.0": {
+      "median_episodes": 47,
+      "null_mean_bps": 0.263,
+      "null_sd_bps": 3.384,
+      "ci95": [
+        -6.14,
+        6.68
+      ]
+    },
+    "5.0": {
+      "median_episodes": 47,
+      "null_mean_bps": -0.009,
+      "null_sd_bps": 3.114,
+      "ci95": [
+        -5.51,
+        5.98
+      ]
+    },
+    "7.0": {
+      "median_episodes": 48,
+      "null_mean_bps": -0.505,
+      "null_sd_bps": 3.439,
+      "ci95": [
+        -7.58,
+        5.71
+      ]
+    }
+  },
+  "grid_step_hours": 0.25,
+  "decluster_is_single_linkage": true,
+  "placebo_episode_ceiling": "nombre de symboles de l'univers (cha\u00eenage du decluster)",
+  "placebo_decisions": 59,
+  "placebo_episodes": 35,
+  "placebo_symbols": 35,
+  "placebo_asof": "2026-09-06"
+}
