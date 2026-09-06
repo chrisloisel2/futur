@@ -1,6 +1,6 @@
 {
   "engine": "CROWDING_REVERSAL",
-  "events_total": 2274,
+  "events_total": 2282,
   "config": {
     "cost_rt": 0.0014,
     "selection": "top20%_val",
@@ -35,11 +35,11 @@
       },
       "portfolio_sim": {
         "n": 96,
-        "pf": 2.829,
-        "wr": 0.646,
-        "mean_net_bps": 270.6,
-        "roi_sized": 0.2929,
-        "roi_portfolio_style": 0.2929,
+        "pf": 2.804,
+        "wr": 0.656,
+        "mean_net_bps": 264.6,
+        "roi_sized": 0.2856,
+        "roi_portfolio_style": 0.2856,
         "n_taken": 96
       },
       "threshold_ladder": {
@@ -122,11 +122,11 @@
       },
       "portfolio_sim": {
         "n": 31,
-        "pf": 9.868,
+        "pf": 11.001,
         "wr": 0.645,
-        "mean_net_bps": 807.2,
-        "roi_sized": 0.2792,
-        "roi_portfolio_style": 0.2792,
+        "mean_net_bps": 910.3,
+        "roi_sized": 0.3201,
+        "roi_portfolio_style": 0.3201,
         "n_taken": 31
       },
       "threshold_ladder": {
@@ -199,7 +199,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2031,
-      "n_test": 241,
+      "n_test": 248,
       "ml_gated": {
         "n": 42,
         "pf": 0.843,
@@ -218,11 +218,11 @@
       },
       "threshold_ladder": {
         "top30%": {
-          "n": 83,
-          "pf": 0.856,
-          "wr": 0.482,
-          "mean_net_bps": -32.7,
-          "roi_sized": -0.0282
+          "n": 86,
+          "pf": 0.849,
+          "wr": 0.488,
+          "mean_net_bps": -34.2,
+          "roi_sized": -0.0304
         },
         "top20%": {
           "n": 42,
@@ -246,7 +246,7 @@
           "roi_sized": 0.0183
         }
       },
-      "ml_auc_test": 0.5394,
+      "ml_auc_test": 0.5384,
       "top_features": [
         [
           "btc_vol_24h",
@@ -310,11 +310,11 @@
       },
       "portfolio_sim": {
         "n": 127,
-        "pf": 1.619,
+        "pf": 1.535,
         "wr": 0.583,
-        "mean_net_bps": 124.4,
-        "roi_sized": 0.1673,
-        "roi_portfolio_style": 0.1673,
+        "mean_net_bps": 106.9,
+        "roi_sized": 0.1419,
+        "roi_portfolio_style": 0.1419,
         "n_taken": 127
       },
       "threshold_ladder": {
@@ -397,11 +397,11 @@
       },
       "portfolio_sim": {
         "n": 33,
-        "pf": 9.561,
+        "pf": 10.598,
         "wr": 0.606,
-        "mean_net_bps": 800.1,
-        "roi_sized": 0.2969,
-        "roi_portfolio_style": 0.2969,
+        "mean_net_bps": 897.0,
+        "roi_sized": 0.3383,
+        "roi_portfolio_style": 0.3383,
         "n_taken": 33
       },
       "threshold_ladder": {
@@ -474,7 +474,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2031,
-      "n_test": 241,
+      "n_test": 248,
       "ml_gated": {
         "n": 46,
         "pf": 0.96,
@@ -493,11 +493,11 @@
       },
       "threshold_ladder": {
         "top30%": {
-          "n": 77,
-          "pf": 0.903,
-          "wr": 0.468,
-          "mean_net_bps": -23.3,
-          "roi_sized": -0.0193
+          "n": 80,
+          "pf": 0.892,
+          "wr": 0.463,
+          "mean_net_bps": -25.9,
+          "roi_sized": -0.0219
         },
         "top20%": {
           "n": 46,
@@ -521,7 +521,7 @@
           "roi_sized": 0.0174
         }
       },
-      "ml_auc_test": 0.5444,
+      "ml_auc_test": 0.5393,
       "top_features": [
         [
           "btc_vol_24h",
