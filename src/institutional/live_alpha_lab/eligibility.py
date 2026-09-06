@@ -215,6 +215,63 @@ def load_validation_index(path: Optional[Path] = None) -> Dict[str, List[Validat
 # vie un alpha réparé depuis — l'exact opposé de ce qu'une porte doit faire.
 RECENT_LAG_WINDOW_HOURS = 24.0
 
+# ── Hygiène du registre (item C3) ───────────────────────────────────────────
+# operational_status qui signifient « ce candidat ne tourne pas ».
+NOT_RUNNING_OPERATIONAL_STATUSES = frozenset(("CODE_MISSING", "DATA_BLOCKED"))
+
+# Au-delà, un candidat qui ne tourne toujours pas doit avoir été TRANCHÉ :
+# implémenté, ou retiré avec motif. 30 jours, c'est-à-dire largement au-delà
+# du temps d'écrire un runner ; ce n'est pas une contrainte de délai, c'est un
+# garde-fou contre l'oubli.
+#
+# Le mécanisme n'édite PAS le registre tout seul. Une mutation automatique
+# d'un registre scientifique est exactement ce que ce projet évite : elle
+# ferait disparaître une décision humaine dans un cron. À la place, un test
+# ÉCHOUE tant que la décision n'est pas écrite. Un registre qui liste des
+# alphas sans code dilue la lecture du scoreboard ; un test rouge, non.
+STALE_UNIMPLEMENTED_DAYS = 30
+
+# Le statut à écrire quand on tranche pour le retrait. On ne SUPPRIME pas
+# l'entrée -- on la marque, même règle que les 7 labs retirés d'alpha_foundry_v5 :
+# supprimer effacerait la trace qu'un mécanisme a été envisagé et écarté.
+RETIRED_STATUS = "RETIRED_NOT_IMPLEMENTED"
+
+
+def stale_unimplemented(alphas, now=None, threshold_days: int = STALE_UNIMPLEMENTED_DAYS):
+    """Candidats qui ne tournent pas depuis plus de `threshold_days`, et dont
+    le retrait n'a pas été tranché.
+
+    Fonction PURE d'une liste d'entrées de registre. Renvoie une liste de
+    dicts {alpha_id, operational_status, days, since} — vide si tout est en
+    règle. Une entrée sans `operational_status_since` est signalée elle aussi :
+    un état sans date est un état sans durée, donc invisible à ce contrôle,
+    ce qui serait la façon la plus simple de le contourner."""
+    import pandas as pd
+    now = now if now is not None else pd.Timestamp.now(tz="UTC")
+    out = []
+    for a in alphas:
+        op = a.get("operational_status")
+        if op not in NOT_RUNNING_OPERATIONAL_STATUSES:
+            continue
+        if a.get("retirement_decision"):
+            continue          # tranché explicitement : plus rien à signaler
+        since = a.get("operational_status_since")
+        if not since:
+            out.append({"alpha_id": a.get("alpha_id"), "operational_status": op,
+                        "days": None, "since": None,
+                        "detail": "operational_status_since absent — état sans durée, "
+                                  "donc invisible à ce contrôle"})
+            continue
+        days = (now - pd.Timestamp(since)).total_seconds() / 86400.0
+        if days > threshold_days:
+            out.append({"alpha_id": a.get("alpha_id"), "operational_status": op,
+                        "days": round(days, 1), "since": since,
+                        "detail": f"{op} depuis {days:.0f} jours (> {threshold_days}) : "
+                                  f"implémenter, ou écrire `retirement_decision` avec motif "
+                                  f"et passer operational_status à {RETIRED_STATUS}"})
+    return out
+
+
 
 def recent_decision_lag_median_h(decisions, time_col: str,
                                  window_hours: float = RECENT_LAG_WINDOW_HOURS,

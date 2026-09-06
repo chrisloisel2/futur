@@ -169,3 +169,41 @@ def test_every_declared_runner_is_in_the_canonical_table():
 
 def test_both_tables_cover_the_same_alphas():
     assert set(TIME_COL_BY_ALPHA) == set(SYMBOL_COL_BY_ALPHA)
+
+
+# ── C3 : hygiène du registre ────────────────────────────────────────────────
+
+def test_c3_no_candidate_stays_unimplemented_without_a_decision():
+    """LE test qui force la décision. Passé le seuil, il échoue tant que
+    personne n'a tranché — implémenter, ou retirer avec motif. Volontairement
+    un test rouge plutôt qu'une mutation automatique du registre : une
+    décision scientifique ne doit pas disparaître dans un cron."""
+    import yaml
+    from src.institutional.live_alpha_lab.eligibility import stale_unimplemented
+    reg = yaml.safe_load((Path(__file__).parents[1] / "configs"
+                          / "live_alpha_registry.yaml").read_text())
+    stale = stale_unimplemented(reg["alphas"])
+    assert not stale, "\n".join(f"{x['alpha_id']} : {x['detail']}" for x in stale)
+
+
+def test_c3_a_state_without_a_date_is_reported_not_ignored():
+    """Un `operational_status` sans `operational_status_since` est un état sans
+    durée : l'ignorer serait la façon la plus simple de contourner le contrôle."""
+    from src.institutional.live_alpha_lab.eligibility import stale_unimplemented
+    r = stale_unimplemented([{"alpha_id": "X", "operational_status": "CODE_MISSING"}])
+    assert len(r) == 1 and r[0]["days"] is None
+
+
+def test_c3_an_explicit_retirement_closes_the_case():
+    from src.institutional.live_alpha_lab.eligibility import stale_unimplemented
+    old = {"alpha_id": "X", "operational_status": "CODE_MISSING",
+           "operational_status_since": "2020-01-01T00:00:00+00:00"}
+    assert len(stale_unimplemented([old])) == 1
+    tranche = dict(old, retirement_decision="jamais implémenté : mécanisme absorbé par Y")
+    assert stale_unimplemented([tranche]) == []
+
+
+def test_c3_a_running_alpha_is_never_flagged():
+    from src.institutional.live_alpha_lab.eligibility import stale_unimplemented
+    assert stale_unimplemented([{"alpha_id": "X", "operational_status": "SIGNAL_SHADOW",
+                                 "operational_status_since": "2020-01-01T00:00:00+00:00"}]) == []

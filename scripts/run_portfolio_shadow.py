@@ -49,6 +49,29 @@ LAB_DIR = ROOT / "reports" / "live_alpha_lab"
 # et reste ré-exporté ici (import en tête) pour les appelants existants.
 
 
+def overlay_status(config, state) -> str:
+    """Trois états, pas deux (item A3).
+
+    NO_OVERLAY            le portefeuille n'en a pas — rien à dire.
+    OVERLAY_NEVER_BINDING l'overlay est actif mais n'a JAMAIS réduit une taille
+                          depuis que le compteur existe. Ce portefeuille n'est
+                          alors PAS une variante indépendante : le signaler
+                          évite de croire qu'on compare trois hypothèses quand
+                          on en teste une seule en trois exemplaires.
+    OVERLAY_BINDING       il a réellement mordu — avec combien de fois et de
+                          combien, à côté.
+
+    ⚠ Les compteurs démarrent au 2026-09-06 : l'historique antérieur n'est pas
+    reconstructible (le multiplicateur était appliqué puis oublié). Un
+    OVERLAY_NEVER_BINDING au premier jour ne prouve donc rien encore.
+    """
+    if not config.apply_vol_overlay:
+        return "NO_OVERLAY"
+    if state.overlay_steps == 0:
+        return "OVERLAY_NOT_YET_OBSERVED"
+    return "OVERLAY_BINDING" if state.overlay_binding_steps else "OVERLAY_NEVER_BINDING"
+
+
 def load_forward_only(alpha_id: str) -> pd.DataFrame:
     p = LAB_DIR / alpha_id / "decisions.parquet"
     if not p.exists():
@@ -147,6 +170,17 @@ def main() -> int:
             "equity": last.get("equity", config.capital_eur),
             "drawdown": last.get("drawdown", 0),
             "n_equity_points": len(state.equity_curve),
+            # item A3 : la MORSURE de l'overlay, pas seulement sa valeur
+            # courante. `vol_overlay_multiplier: 1.0` au niveau du résumé se
+            # lisait comme « il n'a jamais mordu » alors que ça veut seulement
+            # dire « il ne mord pas maintenant » — 45,3 % des z historiques
+            # sont > 0, donc il mord régulièrement.
+            "overlay_status": overlay_status(config, state),
+            "overlay_steps": state.overlay_steps,
+            "overlay_binding_steps": state.overlay_binding_steps,
+            "overlay_multiplier_min": state.overlay_multiplier_min,
+            "overlay_multiplier_mean": (round(state.overlay_multiplier_sum / state.overlay_steps, 4)
+                                        if state.overlay_steps else None),
         }
 
     (LAB_DIR / "portfolios" / "SUMMARY.json").write_text(json.dumps({

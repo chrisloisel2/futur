@@ -268,6 +268,15 @@ alphas:
     status: BUG_FOUND   # utilisé ici comme "bloqué / ne pas lancer" (pas de statut dédié dans le schéma)
     scientific_status: DISCOVERY         # forensics de signe pas encore menées, voir notes
     operational_status: CODE_MISSING
+    # ⚠ AJOUTÉ 2026-09-06 (item C3) : depuis quand cet alpha est-il dans cet
+    # operational_status. Sans cette date, « CODE_MISSING » est un état sans
+    # durée : personne ne peut dire s'il date d'hier ou de six mois, donc
+    # personne ne décide jamais. Au-delà de
+    # eligibility.STALE_UNIMPLEMENTED_DAYS, un test échoue tant que la décision
+    # n'est pas écrite — implémenter, ou retirer avec motif. On ne supprime
+    # pas, on marque (même règle que les 7 labs retirés d'alpha_foundry_v5).
+    # Valeur = built_at du registre : ces entrées n'ont jamais quitté cet état.
+    operational_status_since: "2026-08-31T00:00:00+00:00"
     source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w2_liquidation_leverage/REPORT.md#rank-3
     signal_definition: NOT_IMPLEMENTED_BLOCKED
     universe: configs/portfolio_v1_1_parallel_50.yaml
@@ -531,6 +540,7 @@ alphas:
     status: REJECTED   # legacy field ; superseded_by: FUNDING_BASIS_DISAGREEMENT_V2, voir notes
     scientific_status: REJECTED          # jamais réellement lancé sous cette identité exacte (jambe stale)
     operational_status: DATA_BLOCKED     # tel que spécifié à l'origine (um_klines_1d stale), pas remplaçable sans changer la spec
+    operational_status_since: "2026-08-31T00:00:00+00:00"
     superseded_by: FUNDING_BASIS_DISAGREEMENT_V2
     source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w4_calendar_basis/REPORT.md#rank-1-m7
     signal_definition: NOT_IMPLEMENTED_UNDER_THIS_EXACT_IDENTITY   # voir FUNDING_BASIS_DISAGREEMENT_V2
@@ -841,6 +851,7 @@ alphas:
     status: DATA_BLOCKED
     scientific_status: DISCOVERY
     operational_status: DATA_BLOCKED     # vrai panel PIT 312-symboles pas live -- voir CROSS_SECTIONAL_MOMENTUM_LIVE_V1 pour le chemin léger
+    operational_status_since: "2026-08-31T00:00:00+00:00"
     source_report: reports/edge_discovery/alpha_hunt_2026-08-30/w1_cross_sectional/REPORT.md
     signal_definition: NOT_YET_IMPLEMENTED
     universe: "data_v2/instruments/instrument_master.parquet (PIT, 312 symboles), filtre liquidite >=1M$"
@@ -1085,6 +1096,7 @@ alphas:
     status: DATA_BLOCKED
     scientific_status: DISCOVERY
     operational_status: CODE_MISSING   # etait DATA_BLOCKED. 2026-09-01 : collecteur reduit
+    operational_status_since: "2026-08-31T00:00:00+00:00"
       # relance (voir data_live/notes ci-dessous) -> DATA_BLOCKED n'est plus exact, la
       # donnee existe desormais. Mais signal_definition reste NOT_YET_IMPLEMENTED : le
       # code OFI/microprice/depth-imbalance lui-meme n'est pas ecrit. Par la progression

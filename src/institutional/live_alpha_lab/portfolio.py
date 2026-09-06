@@ -252,6 +252,12 @@ class AggregationResult:
     # item P0.3 : dénominateur de budget par alpha, à CLIQUET (voir aggregate).
     # Retourné pour être persisté par step() et réinjecté au cycle suivant.
     denominator_high_water: Dict[str, float] = field(default_factory=dict)
+    # item A3 : le multiplicateur RÉELLEMENT appliqué à ce pas. Porté par le
+    # résultat plutôt que redemandé à step(), qui ne le connaît pas -- c'est
+    # aggregate() qui l'applique, donc c'est aggregate() qui sait s'il a mordu.
+    # 1.0 quand le portefeuille n'a pas d'overlay : « pas d'overlay » et
+    # « overlay neutre » se distinguent par config.apply_vol_overlay.
+    vol_overlay_multiplier_applied: float = 1.0
 
 
 def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
@@ -405,7 +411,8 @@ def aggregate(intents: List[PortfolioIntent], config: PortfolioConfig,
     }
     return AggregationResult(dict(target), owner, dict(raw_by_instrument), owner_intent_ts,
                              expired_driven_instruments, intent_signature,
-                             dict(edge_by_instrument), hw)
+                             dict(edge_by_instrument), hw,
+                             vol_overlay_multiplier if config.apply_vol_overlay else 1.0)
 
 
 @dataclass
@@ -490,6 +497,19 @@ class PortfolioState:
     # du temps, donc personne ne pouvait dire si la capacité était contrainte.
     capped_order_count: int = 0
     capped_notional_usd: float = 0.0
+    # item A3 : l'overlay de vol était APPLIQUÉ puis immédiatement OUBLIÉ.
+    # SUMMARY.json ne portait que sa valeur COURANTE (`vol_overlay_multiplier:
+    # 1.0`), ce qui se lit comme « il n'a jamais mordu » alors que c'est juste
+    # « il ne mord pas maintenant ». Mesuré : 45,3 % des `combined_forecast_z`
+    # historiques sont > 0, donc l'overlay MORD régulièrement — et P1_VOL_OVERLAY
+    # diverge bien de P1_CONTROL (+1232 vs +1288 sur SHORT_COVERING). Sans
+    # historique, impossible de dire combien de fois ni de combien, donc
+    # impossible de savoir si les trois variantes P1 testent trois hypothèses
+    # ou une seule en trois exemplaires.
+    overlay_steps: int = 0                    # steps où l'overlay était actif
+    overlay_binding_steps: int = 0            # steps où il a réellement réduit la taille
+    overlay_multiplier_min: float = 1.0       # la morsure la plus forte observée
+    overlay_multiplier_sum: float = 0.0       # pour la moyenne, sans garder l'historique complet
 
 
 def state_path(portfolio_name: str) -> Path:
@@ -894,6 +914,18 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
         "suppressed_order_count": state.suppressed_order_count,
     })
     state.alpha_denominator_high_water = dict(agg.denominator_high_water)
+    # item A3 : trace de la MORSURE de l'overlay, pas seulement de sa valeur
+    # courante. Un portefeuille dont l'overlay n'a jamais mordu doit pouvoir
+    # être signalé comme tel (OVERLAY_NEVER_BINDING) plutôt que rapporté comme
+    # une variante indépendante -- sinon on croit comparer trois hypothèses
+    # alors qu'on en teste une seule en trois exemplaires.
+    if config.apply_vol_overlay:
+        mult = float(agg.vol_overlay_multiplier_applied)
+        state.overlay_steps += 1
+        state.overlay_multiplier_sum += mult
+        if mult < 1.0 - 1e-12:
+            state.overlay_binding_steps += 1
+            state.overlay_multiplier_min = min(state.overlay_multiplier_min, mult)
     state.last_step_ts = as_of.isoformat()
     _append_intent_ledger(portfolio_name, as_of, agg.raw_intents_by_instrument, target, executed_delta)
     save_state(portfolio_name, state)

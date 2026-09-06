@@ -11,12 +11,25 @@ from data_pipeline.derivatives_positioning import (
 )
 
 
+# ⚠ Ces tests étaient figés sur des dates ABSOLUES (2026-07-16) alors que
+# `fetch_positioning_wide` borne son `start` à un plancher de rétention
+# RELATIF à `now` (`now - RETENTION_DAYS`). Passé ce délai, `start` était
+# repoussé au-delà de `end` codé en dur et la fonction retournait un frame vide
+# -- le test échouait donc à partir du 2026-08-15 environ, pour une raison de
+# calendrier et non de code. Un test qui pourrit avec la date échoue ensuite
+# pour toujours et cesse d'être lu ; c'est ainsi qu'une suite passe au rouge
+# permanent. Les repères sont désormais relatifs à `now`.
+_NOW = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+_WINDOW_END = _NOW
+_WINDOW_START = _NOW - timedelta(hours=2)
+
+
 class FakeClient:
     """Renvoie 3 barres 5m par endpoint, quel que soit le chunk demandé."""
 
     def __init__(self):
         self.calls = []
-        base = int(datetime(2026, 7, 16, tzinfo=timezone.utc).timestamp() * 1000)
+        base = int((_WINDOW_START + timedelta(minutes=30)).timestamp() * 1000)
         self._timestamps = [base, base + 300_000, base + 600_000]
 
     def get_json(self, url, params=None):
@@ -36,9 +49,8 @@ class FakeClient:
 
 def test_fetch_positioning_wide_merges_all_endpoints():
     client = FakeClient()
-    end = datetime(2026, 7, 16, 1, tzinfo=timezone.utc)
     frame = fetch_positioning_wide(client, "BTCUSDT", period="5m",
-                                   start=end - timedelta(hours=2), end=end)
+                                   start=_WINDOW_START, end=_WINDOW_END)
 
     assert len(frame) == 3
     assert frame["symbol"].unique().tolist() == ["BTCUSDT"]
@@ -54,7 +66,11 @@ def test_archive_symbol_positioning_writes_and_resumes(tmp_path: Path, monkeypat
     import data_pipeline.derivatives_positioning as mod
 
     client = FakeClient()
-    now = datetime(2026, 7, 16, 1, tzinfo=timezone.utc)
+    # L'horloge gelée doit rester COHÉRENTE avec les barres du FakeClient, qui
+    # sont désormais relatives à `now` (voir la note en tête de fichier) --
+    # sinon le plancher de rétention repousse `start` au-delà de `end` et rien
+    # n'est archivé.
+    now = _WINDOW_END
 
     class FrozenDatetime(datetime):
         @classmethod
@@ -66,13 +82,13 @@ def test_archive_symbol_positioning_writes_and_resumes(tmp_path: Path, monkeypat
     written = archive_symbol_positioning(client, tmp_path, "BTCUSDT", period="5m")
     assert written == 3
 
+    expected_last = pd.Timestamp(_WINDOW_START + timedelta(minutes=40))
     last = latest_stored_timestamp(tmp_path, "BTCUSDT", interval="5m")
-    assert last == pd.Timestamp("2026-07-16 00:10:00", tz="UTC")
+    assert last == expected_last
 
     # Deuxième run : reprend depuis last - 1 barre, dédupe → même nombre de lignes stockées.
     archive_symbol_positioning(client, tmp_path, "BTCUSDT", period="5m")
-    stored = pd.read_parquet(
-        tmp_path / "binance_futures_positioning" / "futures_um" / "BTCUSDT" / "5m"
-        / "year=2026" / "month=07" / "data.parquet"
-    )
+    part = (tmp_path / "binance_futures_positioning" / "futures_um" / "BTCUSDT" / "5m"
+            / f"year={expected_last:%Y}" / f"month={expected_last:%m}" / "data.parquet")
+    stored = pd.read_parquet(part)
     assert len(stored) == 3

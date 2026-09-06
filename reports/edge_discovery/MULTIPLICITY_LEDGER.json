@@ -1,0 +1,256 @@
+{
+  "generated_at": "2026-09-06T10:10:02.875555+00:00",
+  "n_mechanisms_total_LOWER_BOUND": 904,
+  "n_workers_not_extractable": 27,
+  "why_lower_bound": "27 worker(s) n'exposent aucun compte machine-lisible et sont comptés pour ZÉRO. Le vrai total est strictement supérieur, donc le haircut appliqué est sous-estimé et les verdicts ci-dessous sont OPTIMISTES.",
+  "campaigns": [
+    {
+      "campaign": "alpha_hunt_2026-08-29",
+      "n_workers": 6,
+      "n_mechanisms_counted": 0,
+      "n_workers_not_extractable": 6,
+      "workers": [
+        {
+          "worker": "w1_liq_cascade",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w2_microstructure",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w3_derivatives",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w4_residual_rv",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w5_options_wallet_exec",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w6_forgotten_and_bugs",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        }
+      ]
+    },
+    {
+      "campaign": "alpha_hunt_2026-08-30",
+      "n_workers": 10,
+      "n_mechanisms_counted": 0,
+      "n_workers_not_extractable": 10,
+      "workers": [
+        {
+          "worker": "w10_forgotten_and_positioning",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w1_cross_sectional",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w2_liquidation_leverage",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w3_funding_premium_basis",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w4_calendar_basis",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w5_hl_wallets",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w6_options",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w7_microstructure",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w8_execution_probe",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w9_cross_dataset_interactions",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        }
+      ]
+    },
+    {
+      "campaign": "alpha_hunt_2026-09-01_round3",
+      "n_workers": 8,
+      "n_mechanisms_counted": 0,
+      "n_workers_not_extractable": 8,
+      "workers": [
+        {
+          "worker": "w1_event_sequences",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w2_cross_sectional",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w3_relative_value",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w4_regime_conditional",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w5_meta_signals",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w6_microstructure",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w7_event_memory_generalization",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        },
+        {
+          "worker": "w8_cross_asset_interactions",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — pas de RESULTS.json"
+        }
+      ]
+    },
+    {
+      "campaign": "alpha_hunt_2026-09-03_round4",
+      "n_workers": 10,
+      "n_mechanisms_counted": 904,
+      "n_workers_not_extractable": 3,
+      "workers": [
+        {
+          "worker": "w10_validation_push",
+          "n": 8,
+          "method": "longueur de `mechanisms`"
+        },
+        {
+          "worker": "w1_calendar_clock",
+          "n": 332,
+          "method": "clé explicite `n_mechanisms`"
+        },
+        {
+          "worker": "w2_hyperliquid_flow",
+          "n": 67,
+          "method": "longueur de `mechanisms`"
+        },
+        {
+          "worker": "w3_listings_lifecycle",
+          "n": 59,
+          "method": "clé explicite `n_mechanisms`"
+        },
+        {
+          "worker": "w4_news_sentiment",
+          "n": 16,
+          "method": "longueur de `mechanisms`"
+        },
+        {
+          "worker": "w5_execution_cost_layer",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — aucun compte machine-lisible dans ce RESULTS.json"
+        },
+        {
+          "worker": "w6_high_frequency_episodes",
+          "n": 261,
+          "method": "longueur de `mechanisms`"
+        },
+        {
+          "worker": "w7_options_vol_surface",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — aucun compte machine-lisible dans ce RESULTS.json"
+        },
+        {
+          "worker": "w8_signal_ensembling",
+          "n": 161,
+          "method": "longueur de `mechanisms`"
+        },
+        {
+          "worker": "w9_enriched_deep_mine",
+          "n": null,
+          "method": "NON_EXTRACTIBLE — aucun compte machine-lisible dans ce RESULTS.json"
+        }
+      ]
+    }
+  ],
+  "validated_candidates": [
+    {
+      "candidate_id": "AMIHUD_ILLIQUIDITY_PREMIUM",
+      "frozen_alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
+      "validation_net_bps": 105.7,
+      "n_validation_independent": 332,
+      "tstat": null,
+      "tstat_source": "AUCUN t-stat ni IC bootstrap conservé — la déflation est impossible pour ce candidat, ce qui est en soi un défaut de traçabilité, pas une absence de risque",
+      "deflation": null
+    },
+    {
+      "candidate_id": "LIQ_REPEAT_DENSITY",
+      "frozen_alpha_id": null,
+      "validation_net_bps": 22.1,
+      "n_validation_independent": 1165,
+      "tstat": null,
+      "tstat_source": "AUCUN t-stat ni IC bootstrap conservé — la déflation est impossible pour ce candidat, ce qui est en soi un défaut de traçabilité, pas une absence de risque",
+      "deflation": null
+    },
+    {
+      "candidate_id": "LIQ_REPEAT_SKEW_OVERLAY",
+      "frozen_alpha_id": null,
+      "validation_net_bps": null,
+      "n_validation_independent": 579,
+      "tstat": null,
+      "tstat_source": "AUCUN t-stat ni IC bootstrap conservé — la déflation est impossible pour ce candidat, ce qui est en soi un défaut de traçabilité, pas une absence de risque",
+      "deflation": null
+    },
+    {
+      "candidate_id": "BTC_LEAD_ALT_CASCADE",
+      "frozen_alpha_id": "BTC_LEAD_ALT_CASCADE_V1",
+      "validation_net_bps": 46.87,
+      "n_validation_independent": 259,
+      "tstat": 3.315,
+      "tstat_source": "t_stat_declustered (déclaré)",
+      "deflation": {
+        "observed_tstat": 3.315,
+        "n_trials": 904,
+        "expected_max_null_tstat": 3.2263,
+        "deflated_tstat": 0.0887,
+        "p_deflated": 0.5353,
+        "survives": true,
+        "note": "composante MULTIPLICITÉ du DSR seulement — l'asymétrie et l'aplatissement de la série ne sont pas corrigés (le registre ne conserve que des agrégats). Compte d'essais = BORNE BASSE, donc haircut sous-estimé et verdict optimiste."
+      }
+    }
+  ]
+}

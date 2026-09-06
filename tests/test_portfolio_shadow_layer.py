@@ -1439,3 +1439,80 @@ def test_new_equity_points_carry_sizing_rule_and_pre_existing_point_is_left_unto
     reloaded = load_state("T", config.capital_eur)
     assert "sizing_rule" not in reloaded.equity_curve[0]
     assert reloaded.equity_curve[-1]["sizing_rule"] == "PER_ALPHA_BUDGET_CAP_V2"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# items A3 / A4 (audit 2026-09-06)
+# ═══════════════════════════════════════════════════════════════════════════
+
+def test_a3_overlay_reports_three_states_not_two():
+    """`vol_overlay_multiplier: 1.0` au résumé se lisait « il n'a jamais
+    mordu » alors que ça veut dire « il ne mord pas maintenant ». Trois états
+    distincts, parce que « pas d'overlay », « overlay jamais observé » et
+    « overlay actif qui ne mord pas » n'ont pas les mêmes conséquences."""
+    import scripts.run_portfolio_shadow as rps
+    from src.institutional.live_alpha_lab.portfolio import PortfolioState
+    from src.institutional.live_alpha_lab.portfolio_config import P1_CONTROL, P1_VOL_OVERLAY
+
+    st = PortfolioState()
+    assert rps.overlay_status(P1_CONTROL, st) == "NO_OVERLAY"
+    assert rps.overlay_status(P1_VOL_OVERLAY, st) == "OVERLAY_NOT_YET_OBSERVED"
+    st.overlay_steps = 5
+    assert rps.overlay_status(P1_VOL_OVERLAY, st) == "OVERLAY_NEVER_BINDING"
+    st.overlay_binding_steps = 1
+    assert rps.overlay_status(P1_VOL_OVERLAY, st) == "OVERLAY_BINDING"
+
+
+def test_a3_a_binding_overlay_is_counted_and_its_depth_kept():
+    from src.institutional.live_alpha_lab.portfolio_config import P1_VOL_OVERLAY
+    import src.institutional.live_alpha_lab.portfolio as pm
+
+    cfg = PortfolioConfig(name="OVL_TEST", capital_eur=100_000,
+                          family_budget_fraction={"LIQUIDATION_FAMILY": 1.0},
+                          max_gross_exposure_fraction=10.0, max_per_asset_fraction=10.0,
+                          apply_vol_overlay=True)
+    agg = aggregate([_intent()], cfg, set(), vol_overlay_multiplier=0.6,
+                    as_of=_ts("2026-09-01T00:00:00Z"))
+    assert agg.vol_overlay_multiplier_applied == pytest.approx(0.6)
+    # sans overlay le résultat porte 1.0, pas la valeur passée -- « pas
+    # d'overlay » ne doit pas se confondre avec « overlay neutre »
+    agg2 = aggregate([_intent()], _config(), set(),
+                     vol_overlay_multiplier=0.6, as_of=_ts("2026-09-01T00:00:00Z"))
+    assert agg2.vol_overlay_multiplier_applied == pytest.approx(1.0)
+
+
+def test_a4_denominator_is_episode_scoped_and_that_is_deliberate():
+    """L'audit soupçonnait une asymétrie suspecte : `alpha_denominator_high_water`
+    ne contient que LIQ_CASCADE_REPEAT_V1 alors que `cumulative_pnl_by_alpha` a
+    aussi SHORT_COVERING. Vérifié : ce n'est pas une lacune, les deux dicts ont
+    des DURÉES DE VIE différentes. Le dénominateur est un cliquet d'ÉPISODE,
+    remis à zéro quand l'alpha n'a plus d'intent vivant (portfolio.py, « point
+    de reset naturel, pas un paramètre ») ; le PnL est un cumul de VIE.
+    Un alpha privé de capital n'a plus d'intent, donc plus de dénominateur, et
+    garde son PnL historique. Ce test fige l'invariant réel."""
+    ts = _ts("2026-09-01T00:00:00Z")
+    cfg = _config()
+    a1 = _intent(instrument="BTCUSDT", alpha_id="ALPHA_A", ts=ts)
+    agg1 = aggregate([a1], cfg, set(), as_of=ts)
+    assert set(agg1.denominator_high_water) == {"ALPHA_A"}
+
+    # ALPHA_A cesse de produire ; ALPHA_B prend le relais -> A disparaît du
+    # dénominateur, ce qui est le comportement voulu et non un oubli
+    a2 = _intent(instrument="ETHUSDT", alpha_id="ALPHA_B", ts=ts)
+    agg2 = aggregate([a2], cfg, set(), as_of=ts,
+                     denominator_high_water=agg1.denominator_high_water)
+    assert set(agg2.denominator_high_water) == {"ALPHA_B"}
+
+
+def test_a4_every_alpha_in_the_denominator_has_live_intents():
+    """L'invariant testable qui manquait : le dénominateur ne doit JAMAIS
+    contenir un alpha sans intent vivant. L'inverse (un alpha du PnL sans
+    dénominateur) est normal — voir le test précédent."""
+    ts = _ts("2026-09-01T00:00:00Z")
+    cfg = _config()
+    intents_live = [_intent(instrument="BTCUSDT", alpha_id="A", ts=ts),
+                    _intent(instrument="ETHUSDT", alpha_id="B", ts=ts)]
+    stale = {"A": 1.0, "B": 1.0, "C_DISPARU": 3.0}
+    agg = aggregate(intents_live, cfg, set(), as_of=ts, denominator_high_water=stale)
+    assert "C_DISPARU" not in agg.denominator_high_water
+    assert set(agg.denominator_high_water) <= {i.alpha_id for i in intents_live}

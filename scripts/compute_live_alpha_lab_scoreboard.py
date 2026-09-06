@@ -25,6 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.institutional.live_alpha_lab.episodes import summarize as summarize_episodes
+from src.institutional.live_alpha_lab.eligibility import (
+    STALE_UNIMPLEMENTED_DAYS, stale_unimplemented,
+)
 from src.institutional.live_alpha_lab.schema import (
     SYMBOL_COL_BY_ALPHA, TIME_COL_BY_ALPHA,
 )
@@ -534,6 +537,24 @@ def main() -> int:
         "`expected_capacity` (texte libre du registre) le moment venu, pas pour juger après",
         "quelques heures.",
     ]
+
+    # item C3 : candidats qui ne tournent toujours pas. Un registre qui liste
+    # des alphas sans code dilue la lecture ; les signaler ici les remet devant
+    # les yeux au lieu de les laisser sédimenter.
+    stale = stale_unimplemented(reg["alphas"])
+    lines += ["", "---", "",
+              f"## Candidats non implémentés depuis plus de {STALE_UNIMPLEMENTED_DAYS} jours", ""]
+    if stale:
+        lines += [f"- **{x['alpha_id']}** — {x['detail']}" for x in stale]
+        lines += ["", "Ces entrées doivent être TRANCHÉES : implémentées, ou retirées avec "
+                  "motif (`retirement_decision` + `operational_status: RETIRED_NOT_IMPLEMENTED`). "
+                  "On ne supprime pas l'entrée — supprimer effacerait la trace qu'un mécanisme "
+                  "a été envisagé et écarté."]
+    else:
+        not_running = [a["alpha_id"] for a in reg["alphas"]
+                       if a.get("operational_status") in ("CODE_MISSING", "DATA_BLOCKED")]
+        lines += [f"Aucun. ({len(not_running)} candidat(s) ne tournent pas mais sont sous le "
+                  f"seuil : {', '.join(not_running) if not_running else '—'}.)"]
 
     lines += outcomes_section(sorted(rows, key=lambda r: r["alpha_id"]), by_id)
 
