@@ -1,6 +1,6 @@
 # Live Alpha Lab — scoreboard
 
-Généré : 2026-09-06T17:24:49.639467+00:00
+Généré : 2026-09-06T18:10:33.573558+00:00
 
 ⚠ `operational_status=SIGNAL_SHADOW` signifie UNIQUEMENT que le signal tourne réellement.
 Ça ne dit RIEN sur la validité de l'alpha — voir `scientific_status`. Seule la colonne
@@ -32,22 +32,22 @@ ses exécutions du jour tournaient à ~10 minutes de latence.
 | OPTIONS_BLOCK_FLOW_TO_RV_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
 | OPTIONS_FAR_OTM_PUT_SHARE_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
 | OPTIONS_RV_IV_SPREAD_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
-| AMIHUD_ILLIQUIDITY_PREMIUM_V1 | cross_sectional | FROZEN | SIGNAL_SHADOW | 2026-09-02T11:20:10+00:00 | 24530 | **0** | 0 | TOO_EARLY | 102.1 | None | 0.5 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
-| BTC_LEAD_ALT_CASCADE_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T16:20:00+00:00 | 2494 | **31** | 31 | DEVELOPING | 73.1 | 52.7 | 0.3 OK | 10.178 | 18.5 | 31/31 | None | None | LIQUIDATION_FAMILY |
-| FUNDING_BASIS_DISAGREEMENT_V2 | relative_value | FROZEN | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 1 | **0** | 0 | TOO_EARLY | 143.3 | None | 1.0 OK | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
-| LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T08:18:34+00:00 | 3654 | **13** | 8 | EARLY | 81.1 | 2.8 | 0.3 OK | 3.847 | 0.3 | 6/13 | 0.3 | 0/4 | LIQUIDATION_FAMILY |
-| LIQ_CASCADE_REPEAT_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-08-31T00:00:00+00:00 | 5667 | **36** | 18 | EARLY | 161.4 | 2.8 | 0.3 OK | 5.353 | 32.3 | 27/36 | 0.3 | 0/5 | LIQUIDATION_FAMILY |
-| VOL_FORECAST_LAYER_V1 | options_vol_overlay | FROZEN | SIGNAL_SHADOW | 2026-08-31T22:05:00+00:00 | 1325 | **6** | 6 | EARLY | 139.3 | 17.4 | 1.0 OK | 1.034 | 5.2 | 2/6 | 1.5 | 0/1 | VOLATILITY_FAMILY |
-| LIQ_CASCADE_FAR_FROM_LOW_V1 | liquidation | INVALIDATED_PENDING_RESPEC | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 6805 | **75** | 43 | DEVELOPING | 143.3 | 0.7 | 0.3 OK | 12.561 | 28.5 | 42/75 | 0.2 | 0/22 | LIQUIDATION_FAMILY |
-| PLACEBO_RANDOM_V1 | control | PLACEBO | SIGNAL_SHADOW | 2026-09-06T09:55:26+00:00 | 4 | **112** | 47 | DEVELOPING | 7.5 | 0.6 | 0.4 OK | 358.4 | 0.1 | 0/112 | 0.1 | 0/112 | CONTROL_FAMILY |
+| AMIHUD_ILLIQUIDITY_PREMIUM_V1 | cross_sectional | FROZEN | SIGNAL_SHADOW | 2026-09-02T11:20:10+00:00 | 24530 | **0** | 0 | TOO_EARLY | 102.8 | None | 1.2 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
+| BTC_LEAD_ALT_CASCADE_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T16:20:00+00:00 | 2494 | **31** | 31 | DEVELOPING | 73.8 | 53.4 | 0.2 OK | 10.081 | 18.5 | 31/31 | None | None | LIQUIDATION_FAMILY |
+| FUNDING_BASIS_DISAGREEMENT_V2 | relative_value | FROZEN | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 1 | **0** | 0 | TOO_EARLY | 144.0 | None | 0.8 OK | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
+| LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T08:18:34+00:00 | 3654 | **13** | 8 | EARLY | 81.9 | 3.6 | 0.2 OK | 3.81 | 0.3 | 6/13 | 0.3 | 0/4 | LIQUIDATION_FAMILY |
+| LIQ_CASCADE_REPEAT_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-08-31T00:00:00+00:00 | 5667 | **36** | 18 | EARLY | 162.2 | 3.6 | 0.2 OK | 5.327 | 32.3 | 27/36 | 0.3 | 0/5 | LIQUIDATION_FAMILY |
+| VOL_FORECAST_LAYER_V1 | options_vol_overlay | FROZEN | SIGNAL_SHADOW | 2026-08-31T22:05:00+00:00 | 1325 | **6** | 6 | EARLY | 140.1 | 18.2 | 0.8 OK | 1.028 | 5.2 | 2/6 | 1.5 | 0/1 | VOLATILITY_FAMILY |
+| LIQ_CASCADE_FAR_FROM_LOW_V1 | liquidation | INVALIDATED_PENDING_RESPEC | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 6805 | **75** | 43 | DEVELOPING | 144.0 | 1.5 | 0.2 OK | 12.5 | 28.5 | 42/75 | 0.2 | 0/22 | LIQUIDATION_FAMILY |
+| PLACEBO_RANDOM_V1 | control | PLACEBO | SIGNAL_SHADOW | 2026-09-06T09:55:26+00:00 | 4 | **124** | 47 | DEVELOPING | 8.3 | 0.3 | 0.2 OK | 358.554 | 0.1 | 0/124 | 0.1 | 0/124 | CONTROL_FAMILY |
 | POSITIVE_CONTROL_ORACLE_V1 | control | POSITIVE_CONTROL | OFFLINE_INSTRUMENT | None | 0 | **1408** | 860 | STRONG | None | None | None | None | 0.0 | 0/1408 | 0.0 | 0/4 | CONTROL_FAMILY |
-| CROSS_SECTIONAL_MOMENTUM_LIVE_V1 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:30:44+00:00 | 2581 | **0** | 0 | TOO_EARLY | 142.9 | None | 0.5 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
-| CROSS_SECTIONAL_MOMENTUM_LIVE_V2 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-09-01T10:24:15+00:00 | 11217 | **0** | 0 | TOO_EARLY | 127.0 | None | 0.5 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
-| SHORT_COVERING_CONTINUATION_V1 | liquidation | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 189 | **431** | 103 | STRONG | 143.3 | 1.4 | 0.5 OK | 72.184 | 0.7 | 160/431 | 0.2 | 0/48 | LIQUIDATION_FAMILY |
-| WHALE_LSR_SCREEN_V1 | positioning | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 3091 | **362** | 9 | EARLY | 143.3 | 5.4 | 0.5 OK | 60.628 | 5.3 | 52/362 | 2.5 | 0/58 | POSITIONING_WALLET_FAMILY |
+| CROSS_SECTIONAL_MOMENTUM_LIVE_V1 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:30:44+00:00 | 2581 | **0** | 0 | TOO_EARLY | 143.7 | None | 1.3 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
+| CROSS_SECTIONAL_MOMENTUM_LIVE_V2 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-09-01T10:24:15+00:00 | 11217 | **0** | 0 | TOO_EARLY | 127.8 | None | 1.2 OK | None | None | None | None | None | CROSS_SECTIONAL_FAMILY |
+| SHORT_COVERING_CONTINUATION_V1 | liquidation | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 189 | **435** | 104 | STRONG | 144.0 | 1.2 | 0.2 OK | 72.5 | 0.6 | 160/435 | 0.2 | 0/49 | LIQUIDATION_FAMILY |
+| WHALE_LSR_SCREEN_V1 | positioning | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 3091 | **362** | 9 | EARLY | 144.0 | 6.2 | 0.2 OK | 60.333 | 5.3 | 52/362 | 2.5 | 0/58 | POSITIONING_WALLET_FAMILY |
 | FUNDING_BASIS_DISAGREEMENT_V1 | relative_value | REJECTED | DATA_BLOCKED | None | 1 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
 
-**Total forward_decisions toutes familles : 2474**.
+**Total forward_decisions toutes familles : 2490**.
 
 ⚠ **PF / net_bps / maxDD / edge_retention ne sont PAS encore calculés** pour les alphas
 de position (nécessite un label de résultat forward par décision, comme le backfill
@@ -108,12 +108,12 @@ Aucune métrique annualisée n'est produite ici, à aucun `n`.
 | alpha_id | n_lab | n_épisodes | scellés/tardifs | anc. | net_gross@14 | net_excess@14 | net_excess@28 | PF | hit | IC95 excess@14 | edge_retention |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | BTC_LEAD_ALT_CASCADE_V1 | 31 | 1 | 0/31 | — | INSUFFICIENT_SAMPLE (n_ep=1 < 20) | | | | | | |
-| LIQ_CASCADE_FAR_FROM_LOW_V1 | 68 | 40 | 9/59 | `dec` | +27.1 | -7.9 | -21.9 | 0.85 | 0.3 | [-51.0, +40.6] | — |
-|  | 68 | 40 | 9/59 | `evt` | -39.3 | -59.3 | -73.3 | 0.392 | 0.25 | [-108.5, -8.9] | -8.766 (ABSOLUTE) |
+| LIQ_CASCADE_FAR_FROM_LOW_V1 | 70 | 41 | 11/59 | `dec` | +20.9 | -12.5 | -26.5 | 0.778 | 0.293 | [-53.9, +35.0] | — |
+|  | 70 | 41 | 11/59 | `evt` | -46.9 | -64.5 | -78.5 | 0.366 | 0.244 | [-109.7, -13.9] | -10.46 (ABSOLUTE) |
 | LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | 11 | 6 | 2/9 | — | INSUFFICIENT_SAMPLE (n_ep=6 < 20) | | | | | | |
 | LIQ_CASCADE_REPEAT_V1 | 34 | 16 | 3/31 | — | INSUFFICIENT_SAMPLE (n_ep=16 < 20) | | | | | | |
-| ⚙️ PLACEBO_RANDOM_V1 _(contrôle négatif)_ | 47 | 26 | 47/0 | `dec` | -109.3 | -42.1 | -56.1 | 0.311 | 0.269 | [-81.3, +4.0] | — |
-|  | 47 | 26 | 47/0 | `evt` | -109.7 | -39.8 | -53.8 | 0.325 | 0.308 | [-79.1, +5.3] | base non déclarée |
+| ⚙️ PLACEBO_RANDOM_V1 _(contrôle négatif)_ | 59 | 35 | 59/0 | `dec` | -88.7 | -33.2 | -47.2 | 0.414 | 0.314 | [-70.8, +7.8] | — |
+|  | 59 | 35 | 59/0 | `evt` | -84.9 | -31.4 | -45.4 | 0.42 | 0.343 | [-67.1, +6.3] | base non déclarée |
 | ⚙️ POSITIVE_CONTROL_ORACLE_V1 _(contrôle positif — LOOK-AHEAD)_ | 1408 | 860 | 0/1408 | `dec` | +12.4 | +5.8 | -8.2 | 1.191 | 0.492 | [-1.7, +13.6] | — |
 |  | 1408 | 860 | 0/1408 | `evt` | +12.4 | +5.8 | -8.2 | 1.191 | 0.492 | [-1.7, +13.6] | base non déclarée |
 | SHORT_COVERING_CONTINUATION_V1 | 423 | 99 | 13/410 | `dec` | +28.0 | -12.1 | -26.1 | 0.699 | 0.394 | [-30.8, +6.9] | — |
@@ -152,6 +152,14 @@ Aucune métrique annualisée n'est produite ici, à aucun `n`.
   peut le remplacer. Il ne reçoit jamais de capital (`eligibility.BLOCK_PLACEBO`).
   Son compteur forward démarre au 2026-09-06 : sous 20 épisodes il affiche
   `INSUFFICIENT_SAMPLE` comme n'importe quel autre, et il n'est pas encore lisible.
+  **Son nombre d'épisodes plafonne à ~49, et attendre n'en créera pas d'autres.**
+  `episodes.decluster` chaîne par lien simple : il tire ~8 fois par symbole et par
+  jour, donc tous ses tirages d'un même symbole fusionnent en UN épisode. Le plafond
+  est le nombre de symboles de l'univers. Ce qui continue de s'améliorer avec le
+  temps est la DENSITÉ de chaque épisode, donc la largeur de l'intervalle : simulé
+  sur son propre design, son null vaut [−6,9 ; +8,8] bps à trois jours de collecte et
+  [−5,5 ; +6,0] à cinq. C'est à cet intervalle-là qu'il faut le comparer, pas à zéro.
+  Voir `APPARATUS_NULL.md`.
 - **`POSITIVE_CONTROL_ORACLE_V1` est l'autre borne, et sa ligne N'EST PAS un résultat.**
   Il choisit ses décisions EN CONNAISSANT leur rendement (look-ahead délibéré) pour
   mesurer ce que la chaîne RETIRE à un edge qui existe — là où le placebo mesure ce
