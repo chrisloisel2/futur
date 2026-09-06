@@ -478,6 +478,18 @@ class PortfolioState:
     # correction évite (comptabilité honnête : on mesure ce qu'on refuse).
     suppressed_turnover_usd: float = 0.0
     suppressed_order_count: int = 0
+    # item B3 : ce que le PLAFOND DE LIQUIDITÉ refuse, compté au lieu d'être
+    # seulement subi. Même principe que suppressed_turnover_usd (on mesure ce
+    # qu'on refuse), appliqué à l'autre cause de non-exécution.
+    #
+    # Ces deux compteurs ne changent AUCUN fill : ils rendent visible un
+    # comportement déjà présent. Mesuré avant leur ajout, sur 1 634 ordres du
+    # forward : le plafond a mordu 16 fois (1,0 %), pour un plafond adossé à
+    # `open_interest x 0,002` -- un STOCK de positions, pas une profondeur de
+    # carnet. Sans compteur, personne ne pouvait dire s'il mordait 1 % ou 50 %
+    # du temps, donc personne ne pouvait dire si la capacité était contrainte.
+    capped_order_count: int = 0
+    capped_notional_usd: float = 0.0
 
 
 def state_path(portfolio_name: str) -> Path:
@@ -740,6 +752,17 @@ def step(portfolio_name: str, config: PortfolioConfig, agg: AggregationResult,
             # complet la termine, et la bande reprend la main.
             state.converging[instr] = (
                 abs(order.filled_quantity - order.requested_quantity) > 1e-12)
+
+            # Plafond de liquidité effectivement mordu sur CET ordre. Chiffré
+            # au prix de fill quand il existe, au mark sinon (un ordre plafonné
+            # à zéro n'a pas de fill_price -- utiliser 0 le rendrait invisible
+            # dans le notionnel refusé, ce qui est exactement le contraire du
+            # but).
+            unfilled = order.requested_quantity - order.filled_quantity
+            if unfilled > 1e-12:
+                state.capped_order_count += 1
+                px = order.fill_price or order.mark_price_at_decision or 0.0
+                state.capped_notional_usd += unfilled * px
 
             if abs(executed_qty) > 1e-12:
                 state.cumulative_fees_usd += order.fee_amount

@@ -35,7 +35,13 @@ dérive lente entre régimes, pas le pic instantané d'un événement. Pour le p
 seule la vraie bande BBO répond -- et elle n'existe que pour BTC/ETH/SOL
 (data/microstructure_reduced), c'est-à-dire 37 des 548 décisions labellisées.
 
-Coût : 1 requête HTTP et ~50 lignes par cycle (~5 000 lignes/jour, quelques
+Elle porte AUSSI le volume 24 h par symbole (second appel REST), parce que la
+seule série de volume du dépôt -- data/enriched/*_1h_enriched.parquet -- s'est
+arrêtée fin juin 2026 pour 40 des 50 symboles, dont les huit les plus tradés du
+lab. Sans ça, la capacité (item B3) n'est mesurable pour aucun des symboles qui
+comptent.
+
+Coût : 2 requêtes HTTP et ~50 lignes par cycle (~5 000 lignes/jour, quelques
 centaines de Ko par mois). Aucun ordre, aucune écriture hors de son propre
 répertoire.
 """
@@ -57,6 +63,17 @@ import yaml
 UNIVERSE_CONFIG = ROOT / "configs" / "portfolio_v1_1_parallel_50.yaml"
 OUT_ROOT = ROOT / "data" / "spread_probe"
 ENDPOINT = "https://fapi.binance.com/fapi/v1/ticker/bookTicker"
+# Second appel : volume échangé sur 24 h glissantes, par symbole.
+#
+# Pourquoi il a fallu l'ajouter : la capacité (item B3) demande de plafonner la
+# taille par « une fraction du volume observé ». Or la seule série de volume du
+# dépôt, data/enriched/*_1h_enriched.parquet, s'est ARRÊTÉE fin juin 2026 pour
+# 40 des 50 symboles -- elle ne couvre que 106 des 548 décisions labellisées, et
+# aucun des huit symboles les plus tradés par le lab (ARUSDT, ARBUSDT, BCHUSDT,
+# TRXUSDT... dernière barre : 2026-06-28/29). Les flux `metrics_5m`, eux, ne
+# portent que l'open interest et des ratios, jamais de volume.
+# Un seul appel couvre tout l'univers, comme pour le carnet.
+VOLUME_ENDPOINT = "https://fapi.binance.com/fapi/v1/ticker/24hr"
 
 # Un seul appel pour TOUT le carnet de l'exchange, filtré ensuite localement :
 # 50 appels séparés donneraient 50 instants différents, donc une coupe
@@ -71,10 +88,37 @@ def load_universe() -> set:
     return set(yaml.safe_load(UNIVERSE_CONFIG.read_text())["universe"])
 
 
-def probe(universe: set) -> pd.DataFrame:
-    req = urllib.request.Request(ENDPOINT, headers={"User-Agent": "futur-spread-probe"})
+def _get(url: str):
+    req = urllib.request.Request(url, headers={"User-Agent": "futur-spread-probe"})
     with urllib.request.urlopen(req, timeout=TIMEOUT_SEC) as resp:
-        payload = json.loads(resp.read().decode())
+        return json.loads(resp.read().decode())
+
+
+def _volume_map(universe: set) -> dict:
+    """symbole -> (volume quote 24 h, nb de trades 24 h). Vide si l'appel
+    échoue : le carnet reste mesurable sans le volume, on ne perd pas la sonde
+    entière pour ça, et l'absence se lit comme NaN et non comme zéro."""
+    try:
+        payload = _get(VOLUME_ENDPOINT)
+    except Exception as exc:
+        print(f"[spread] ⚠ volume 24h indisponible ({type(exc).__name__}) — "
+              f"colonnes laissées vides", flush=True)
+        return {}
+    out = {}
+    for d in payload:
+        sym = d.get("symbol")
+        if sym not in universe:
+            continue
+        try:
+            out[sym] = (float(d["quoteVolume"]), int(d.get("count", 0)))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
+
+
+def probe(universe: set) -> pd.DataFrame:
+    payload = _get(ENDPOINT)
+    volumes = _volume_map(universe)
     now = datetime.now(timezone.utc)
     rows = []
     for d in payload:
@@ -102,6 +146,11 @@ def probe(universe: set) -> pd.DataFrame:
             # une poussière.
             "top_bid_notional_usd": bid * bid_qty,
             "top_ask_notional_usd": ask * ask_qty,
+            # volume 24 h glissantes -- base de la capacité en % d'ADV.
+            # NaN si l'appel volume a échoué : jamais 0, qui se lirait comme
+            # « symbole illiquide » et déclencherait un plafond à tort.
+            "quote_volume_24h_usd": volumes.get(symbol, (float("nan"), 0))[0],
+            "trade_count_24h": volumes.get(symbol, (float("nan"), 0))[1],
             "venue": "binance_usdm", "source_stream": "rest_bookTicker",
         })
     return pd.DataFrame(rows)
