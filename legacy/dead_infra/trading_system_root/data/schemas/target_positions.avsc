@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "TargetPositionSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "book", "type": "string"},
+    {"name": "symbol", "type": "string"},
+    {"name": "instrument_type", "type": "string"},
+    {"name": "side", "type": "string"},
+    {"name": "notional_usd", "type": "double"},
+    {"name": "leverage", "type": "double"},
+    {"name": "entry_style", "type": "string"},
+    {"name": "risk_hints", "type": "string"},
+    {"name": "cluster_id", "type": "string"},
+    {"name": "expected_utility", "type": "double"},
+    {"name": "cost_estimate_bps", "type": "double"},
+    {"name": "reasons", "type": "string"},
+    {"name": "run_id", "type": "string"}
+  ]
+}

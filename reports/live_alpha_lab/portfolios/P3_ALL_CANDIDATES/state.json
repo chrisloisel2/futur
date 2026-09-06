@@ -2,28 +2,28 @@
   "positions": {
     "GRTUSDT": {
       "instrument": "GRTUSDT",
-      "quantity": 268961.8074233459,
+      "quantity": 246620.8017740914,
       "entry_price": 0.018593718,
-      "realized_pnl": 0.0,
-      "fees_paid": 2.5005,
-      "funding_paid": -0.05041806900875753,
+      "realized_pnl": 37.44949480613203,
+      "fees_paid": 2.7269259268423887,
+      "funding_paid": 0.9273596702013037,
       "owner_alpha": "LIQ_CASCADE_REPEAT_V1"
     }
   },
   "cash": 200000.0,
   "peak_equity": 201689.89726444162,
-  "cumulative_fees_usd": 457.88646052275976,
-  "cumulative_turnover_usd": 915772.921045523,
-  "cumulative_funding_usd": -2.3301562064831813,
-  "cumulative_realized_pnl": 1361.0092141999974,
+  "cumulative_fees_usd": 458.1128864496022,
+  "cumulative_turnover_usd": 916225.7728992078,
+  "cumulative_funding_usd": -1.35237846727312,
+  "cumulative_realized_pnl": 1398.4587090061293,
   "cumulative_cost_by_alpha": {
     "SHORT_COVERING_CONTINUATION_V1": 420.2228775376965,
-    "LIQ_CASCADE_REPEAT_V1": 37.6635829850634
+    "LIQ_CASCADE_REPEAT_V1": 37.89000891190579
   },
   "cumulative_pnl_by_alpha": {
     "UNATTRIBUTED": 0.43990027446421975,
     "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
-    "LIQ_CASCADE_REPEAT_V1": 312.1659701267975
+    "LIQ_CASCADE_REPEAT_V1": 349.6154649329295
   },
   "equity_curve": [
     {
@@ -6325,9 +6325,473 @@
       },
       "suppressed_turnover_usd": 90959.82531367026,
       "suppressed_order_count": 86
+    },
+    {
+      "ts": "2026-09-06T07:36:50.683833+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1361.0092141999974,
+      "unrealized_pnl": 360.43087681549304,
+      "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 672.5968469422905,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 457.88646052275976,
+      "funding": -2.246522941140115,
+      "equity": 201261.30710755158,
+      "drawdown": -0.002124995662663793,
+      "gross_exposure": 5361.430876815493,
+      "net_exposure": 5361.430876815493,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5018.667105938683
+      },
+      "suppressed_turnover_usd": 91321.25619048574,
+      "suppressed_order_count": 87
+    },
+    {
+      "ts": "2026-09-06T07:51:00.300239+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1361.0092141999974,
+      "unrealized_pnl": 380.8988703604094,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 693.0648404872069,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 457.88646052275976,
+      "funding": -2.1669685169772146,
+      "equity": 201281.85465552064,
+      "drawdown": -0.0020231187305628042,
+      "gross_exposure": 5381.89887036041,
+      "net_exposure": 5381.89887036041,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5018.667105938683
+      },
+      "suppressed_turnover_usd": 91703.15506084615,
+      "suppressed_order_count": 88
+    },
+    {
+      "ts": "2026-09-06T08:06:05.629199+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1361.0092141999974,
+      "unrealized_pnl": 416.6976869284569,
+      "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 728.8636570552544,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "UNATTRIBUTED": 0.43990027446421975
+      },
+      "fees": 457.88646052275976,
+      "funding": -2.082602574732044,
+      "equity": 201317.73783803097,
+      "drawdown": -0.0018452060884472767,
+      "gross_exposure": 5417.697686928457,
+      "net_exposure": 5417.697686928457,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5018.667105938683
+      },
+      "suppressed_turnover_usd": 92120.85274777461,
+      "suppressed_order_count": 89
+    },
+    {
+      "ts": "2026-09-06T08:36:17.118006+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 414.4023588786452,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 764.0178238115748,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.9313023750515526,
+      "equity": 201352.81687906012,
+      "drawdown": -0.0016712804654739116,
+      "gross_exposure": 5000.0,
+      "net_exposure": 5000.0,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92120.85274777461,
+      "suppressed_order_count": 89
+    },
+    {
+      "ts": "2026-09-06T08:40:02.100057+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 414.4023588786452,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "LIQ_CASCADE_REPEAT_V1": 764.0178238115748
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.9125112960731516,
+      "equity": 201352.8356701391,
+      "drawdown": -0.0016711872973022626,
+      "gross_exposure": 5000.0,
+      "net_exposure": 5000.0,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92120.85274777461,
+      "suppressed_order_count": 89
+    },
+    {
+      "ts": "2026-09-06T08:55:18.560210+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 444.84029823360333,
+      "pnl_by_alpha": {
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 794.4557631665328
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.8369473035135797,
+      "equity": 201383.3491734866,
+      "drawdown": -0.0015198980965967044,
+      "gross_exposure": 5030.437939354958,
+      "net_exposure": 5030.437939354958,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92151.29068712957,
+      "suppressed_order_count": 90
+    },
+    {
+      "ts": "2026-09-06T09:10:23.826009+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 470.12879524751907,
+      "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 819.7442601804486,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.7640573745446158,
+      "equity": 201408.71056042952,
+      "drawdown": -0.0013941536379654526,
+      "gross_exposure": 5055.726436368874,
+      "net_exposure": 5055.726436368874,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92207.01712349844,
+      "suppressed_order_count": 91
+    },
+    {
+      "ts": "2026-09-06T09:26:13.766107+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 484.92604335396396,
+      "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 834.5415082868935,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.6883533317299273,
+      "equity": 201423.58351257877,
+      "drawdown": -0.0013204119565477202,
+      "gross_exposure": 5070.523684475319,
+      "net_exposure": 5070.523684475319,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92277.54080797377,
+      "suppressed_order_count": 92
+    },
+    {
+      "ts": "2026-09-06T09:38:39.778766+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 422.2449003750609,
+      "pnl_by_alpha": {
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 771.8603653079904
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.6335780881125295,
+      "equity": 201360.95714484347,
+      "drawdown": -0.0016309201604028038,
+      "gross_exposure": 5007.842541496416,
+      "net_exposure": 5007.842541496416,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92285.38334947018,
+      "suppressed_order_count": 93
+    },
+    {
+      "ts": "2026-09-06T09:40:28.179365+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 456.95924443278204,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "LIQ_CASCADE_REPEAT_V1": 806.5747093657116
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.6258375853521971,
+      "equity": 201395.67922940393,
+      "drawdown": -0.001458764365633691,
+      "gross_exposure": 5042.556885554137,
+      "net_exposure": 5042.556885554137,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92327.94023502432,
+      "suppressed_order_count": 94
+    },
+    {
+      "ts": "2026-09-06T09:55:31.729161+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 477.2216095065417,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 826.8370744394713,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.5650172604744104,
+      "equity": 201416.0024148026,
+      "drawdown": -0.001357999847061729,
+      "gross_exposure": 5062.8192506278965,
+      "net_exposure": 5062.8192506278965,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92390.75948565222,
+      "suppressed_order_count": 95
+    },
+    {
+      "ts": "2026-09-06T10:03:17.899468+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 457.79775515881414,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 807.4132200917436,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.5351773054813265,
+      "equity": 201396.60840040987,
+      "drawdown": -0.0014541574367863078,
+      "gross_exposure": 5043.395396280169,
+      "net_exposure": 5043.395396280169,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92434.1548819324,
+      "suppressed_order_count": 96
+    },
+    {
+      "ts": "2026-09-06T10:10:29.849054+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 423.4533423037545,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 773.068807236684,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.508465150613893,
+      "equity": 201362.29069970967,
+      "drawdown": -0.0016243082532905137,
+      "gross_exposure": 5009.05098342511,
+      "net_exposure": 5009.05098342511,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92443.20586535751,
+      "suppressed_order_count": 97
+    },
+    {
+      "ts": "2026-09-06T10:26:21.304373+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 334.4873542717683,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "LIQ_CASCADE_REPEAT_V1": 684.1028192046979
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.4514352814863594,
+      "equity": 201273.3817415468,
+      "drawdown": -0.002065128340804904,
+      "gross_exposure": 4920.084995393123,
+      "net_exposure": 4920.084995393123,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92523.12086996439,
+      "suppressed_order_count": 98
+    },
+    {
+      "ts": "2026-09-06T10:40:30.302618+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 314.75769012984097,
+      "pnl_by_alpha": {
+        "UNATTRIBUTED": 0.43990027446421975,
+        "LIQ_CASCADE_REPEAT_V1": 664.3731550627705,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.4038421181927914,
+      "equity": 201253.69967056817,
+      "drawdown": -0.002162714145773709,
+      "gross_exposure": 4900.355331251196,
+      "net_exposure": 4900.355331251196,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92622.7655387132,
+      "suppressed_order_count": 99
+    },
+    {
+      "ts": "2026-09-06T10:58:18.950020+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 304.8928580588777,
+      "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 654.5083229918073,
+        "UNATTRIBUTED": 0.43990027446421975,
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
+      },
+      "fees": 458.1128864496022,
+      "funding": -1.35237846727312,
+      "equity": 201243.88630214814,
+      "drawdown": -0.002211369871980772,
+      "gross_exposure": 4890.490499180232,
+      "net_exposure": 4890.490499180232,
+      "n_positions": 1,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 40287.14509047696,
+        "ENTRY": 40008.0,
+        "SIGNAL_RESIZE": 5471.5189596234595
+      },
+      "suppressed_turnover_usd": 92732.27503953296,
+      "suppressed_order_count": 100
     }
   ],
-  "last_step_ts": "2026-09-06T07:20:45.067844+00:00",
+  "last_step_ts": "2026-09-06T10:58:18.950020+00:00",
   "initialized": true,
   "orders": [
     {
@@ -45459,6 +45923,32 @@
       "exit_reason": "ALPHA_HORIZON_EXPIRY",
       "turnover_class": "EXIT",
       "no_trade_band_fraction": 1.0
+    },
+    {
+      "order_id": "P3_ALL_CANDIDATES:GRTUSDT:2026-09-06T08:36:17.118006+00:00:1",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:GRTUSDT:2026-09-06T07:45:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:GRTUSDT:2026-09-06T07:45:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp_decision": "2026-09-06T07:45:00+00:00",
+      "timestamp_submit": "2026-09-06T08:36:17.118006+00:00",
+      "timestamp_fill": "2026-09-06T08:36:17.118006+00:00",
+      "symbol": "GRTUSDT",
+      "side": "SELL",
+      "requested_quantity": 22341.00564925451,
+      "filled_quantity": 22341.00564925451,
+      "remaining_quantity": 0.0,
+      "requested_notional": 452.94244217321193,
+      "fill_price": 0.020269985192,
+      "mark_price_at_decision": 0.02027404,
+      "spread_bps": 4.0,
+      "slippage_bps": 2.0,
+      "fee_bps": 5.0,
+      "fee_amount": 0.22642592684238866,
+      "status": "FILLED",
+      "exit_reason": "TARGET_CHANGE",
+      "turnover_class": "SIGNAL_RESIZE",
+      "no_trade_band_fraction": 0.5166051660516605
     }
   ],
   "fills": [
@@ -69896,13 +70386,28 @@
       "fee_usd": 4.958975827459393,
       "mark_source": "DERIVATIVES_RAW_MARK",
       "mark_stale": false
+    },
+    {
+      "fill_id": "P3_ALL_CANDIDATES:GRTUSDT:2026-09-06T08:36:17.118006+00:00:1:F0",
+      "order_id": "P3_ALL_CANDIDATES:GRTUSDT:2026-09-06T08:36:17.118006+00:00:1",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:GRTUSDT:2026-09-06T07:45:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:GRTUSDT:2026-09-06T07:45:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp": "2026-09-06T08:36:17.118006+00:00",
+      "symbol": "GRTUSDT",
+      "quantity": -22341.00564925451,
+      "fill_price": 0.020269985192,
+      "fee_usd": 0.22642592684238866,
+      "mark_source": "DERIVATIVES_RAW_MARK",
+      "mark_stale": false
     }
   ],
   "accepted_target_notional": {
     "GRTUSDT": 5000.0
   },
   "accepted_intent_signature": {
-    "GRTUSDT": "39b2f83f8392e6ad"
+    "GRTUSDT": "f93743e0982e8799"
   },
   "converging": {
     "GRTUSDT": false
@@ -69910,11 +70415,17 @@
   "cumulative_turnover_by_class": {
     "EXIT": 40287.14509047696,
     "ENTRY": 40008.0,
-    "SIGNAL_RESIZE": 5018.667105938683
+    "SIGNAL_RESIZE": 5471.5189596234595
   },
   "alpha_denominator_high_water": {
     "LIQ_CASCADE_REPEAT_V1": 2.0
   },
-  "suppressed_turnover_usd": 90959.82531367026,
-  "suppressed_order_count": 86
+  "suppressed_turnover_usd": 92732.27503953296,
+  "suppressed_order_count": 100,
+  "capped_order_count": 0,
+  "capped_notional_usd": 0.0,
+  "overlay_steps": 0,
+  "overlay_binding_steps": 0,
+  "overlay_multiplier_min": 1.0,
+  "overlay_multiplier_sum": 0.0
 }

@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "OrderEvents",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "event_type", "type": "string"},
+    {"name": "symbol", "type": "string"},
+    {"name": "client_order_id", "type": "string"},
+    {"name": "exchange_order_id", "type": ["string", "null"]},
+    {"name": "details_json", "type": "string"},
+    {"name": "run_id", "type": "string"}
+  ]
+}

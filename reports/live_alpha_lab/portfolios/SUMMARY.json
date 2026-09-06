@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-06T07:20:45.067844+00:00",
-  "n_forward_intents_total": 64,
+  "generated_at": "2026-09-06T10:58:18.950020+00:00",
+  "n_forward_intents_total": 65,
   "screened_symbols": [],
   "vol_overlay_multiplier": 1.0,
   "forward_capital_eligibility": [
@@ -67,16 +67,9 @@
     {
       "alpha_id": "SHORT_COVERING_CONTINUATION_V1",
       "eligible": false,
-      "reason": "BLOCK_NOT_VALIDATED_FOR_FORWARD",
-      "detail": "aucun candidat valid\u00e9 pour le forward (SHORT_COVERING_CONTINUATION=NEEDS_MORE_RESEARCH/validated_for_forward=False)",
-      "validation_candidates": [
-        {
-          "candidate_id": "SHORT_COVERING_CONTINUATION",
-          "current_status": "NEEDS_MORE_RESEARCH",
-          "validated_for_forward": false,
-          "validation_net_bps": 2.53
-        }
-      ]
+      "reason": "BLOCK_UNRESOLVED_SPEC",
+      "detail": "scientific_status='RECONSTRUCTED' -> spec reconstruite (seuil/fen\u00eatre non publi\u00e9s) : pas de capital tant que le statut n'est pas r\u00e9solu. Un alpha dont la spec a \u00e9t\u00e9 reconstruite \u00c0 PARTIR des observations qui servent \u00e0 le juger ne peut pas produire une preuve forward jamais-vue.",
+      "validation_candidates": []
     },
     {
       "alpha_id": "LIQ_CASCADE_REPEAT_SYSTEMIC_V1",
@@ -151,29 +144,16 @@
     {
       "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V1",
       "eligible": false,
-      "reason": "BLOCK_NO_VALIDATION_RECORD",
-      "detail": "aucun candidat du VALIDATION_REGISTRY ne vise cet alpha_id (ni frozen_alpha_id ni existing_live_alpha) -- fail closed : absence de preuve != preuve d'absence de probl\u00e8me",
+      "reason": "BLOCK_UNRESOLVED_SPEC",
+      "detail": "scientific_status='RECONSTRUCTED' -> spec reconstruite (seuil/fen\u00eatre non publi\u00e9s) : pas de capital tant que le statut n'est pas r\u00e9solu. Un alpha dont la spec a \u00e9t\u00e9 reconstruite \u00c0 PARTIR des observations qui servent \u00e0 le juger ne peut pas produire une preuve forward jamais-vue.",
       "validation_candidates": []
     },
     {
       "alpha_id": "CROSS_SECTIONAL_MOMENTUM_LIVE_V2",
       "eligible": false,
-      "reason": "BLOCK_NOT_VALIDATED_FOR_FORWARD",
-      "detail": "aucun candidat valid\u00e9 pour le forward (XSEC_MOMENTUM_HORIZON_EXTENSION=REJECTED/validated_for_forward=False, XSMOM_REGIME_META=VALIDATING/validated_for_forward=None)",
-      "validation_candidates": [
-        {
-          "candidate_id": "XSEC_MOMENTUM_HORIZON_EXTENSION",
-          "current_status": "REJECTED",
-          "validated_for_forward": false,
-          "validation_net_bps": 51.78
-        },
-        {
-          "candidate_id": "XSMOM_REGIME_META",
-          "current_status": "VALIDATING",
-          "validated_for_forward": null,
-          "validation_net_bps": null
-        }
-      ]
+      "reason": "BLOCK_UNRESOLVED_SPEC",
+      "detail": "scientific_status='RECONSTRUCTED' -> spec reconstruite (seuil/fen\u00eatre non publi\u00e9s) : pas de capital tant que le statut n'est pas r\u00e9solu. Un alpha dont la spec a \u00e9t\u00e9 reconstruite \u00c0 PARTIR des observations qui servent \u00e0 le juger ne peut pas produire une preuve forward jamais-vue.",
+      "validation_candidates": []
     },
     {
       "alpha_id": "MICROSTRUCTURE_OFI_CLUSTER_V1",
@@ -195,14 +175,21 @@
           "validation_net_bps": 105.7
         }
       ]
+    },
+    {
+      "alpha_id": "PLACEBO_RANDOM_V1",
+      "eligible": false,
+      "reason": "BLOCK_PLACEBO",
+      "detail": "signal al\u00e9atoire (contr\u00f4le) : jamais de capital, par construction. Il traverse la m\u00eame cha\u00eene de mesure que les vrais alphas \u2014 c'est sa raison d'\u00eatre \u2014 mais il ne prend aucune position.",
+      "validation_candidates": []
     }
   ],
   "negative_expected_value_gate": [
     {
       "alpha_id": "LIQ_CASCADE_REPEAT_V1",
-      "n_decisions_in": 33,
+      "n_decisions_in": 34,
       "n_blocked_negative_ev": 0,
-      "n_decisions_sized": 33,
+      "n_decisions_sized": 34,
       "blocked_reason": "REJECT_NEGATIVE_EXPECTED_VALUE"
     },
     {
@@ -224,122 +211,147 @@
     "P1_EQUAL_RISK": {
       "status": "OK",
       "n_positions": 1,
-      "gross_exposure": 18195.39623967668,
-      "net_exposure": 18195.39623967668,
-      "realized_pnl": 2162.4886112113427,
-      "unrealized_pnl": 1709.894516773646,
-      "total_pnl": 3872.3831279849887,
-      "cumulative_fees_usd": 1057.7950618316595,
-      "cumulative_funding_usd": -7.97447328223406,
-      "cumulative_turnover_usd": 2115590.1236633155,
+      "gross_exposure": 16301.63499726744,
+      "net_exposure": 16301.63499726744,
+      "realized_pnl": 2247.6045640881116,
+      "unrealized_pnl": 876.4919234908002,
+      "total_pnl": 3124.096487578912,
+      "cumulative_fees_usd": 1058.367799132661,
+      "cumulative_funding_usd": -4.731743826470674,
+      "cumulative_turnover_usd": 2116735.5982653187,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.3875152579169,
-        "LIQ_CASCADE_REPEAT_V1": 115.40754657374217
+        "LIQ_CASCADE_REPEAT_V1": 115.98028387474375
       },
       "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 1915.199300948849,
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484,
-        "LIQ_CASCADE_REPEAT_V1": 2663.4859413549257
+        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484
       },
-      "equity": 202806.6135928711,
-      "drawdown": -0.000573976445034606,
-      "n_equity_points": 263
+      "equity": 202060.99694461978,
+      "drawdown": -0.004248357021962594,
+      "n_equity_points": 279,
+      "overlay_status": "NO_OVERLAY",
+      "overlay_steps": 0,
+      "overlay_binding_steps": 0,
+      "overlay_multiplier_min": 1.0,
+      "overlay_multiplier_mean": null
     },
     "P1_CONTROL": {
       "status": "OK",
       "n_positions": 1,
-      "gross_exposure": 18195.39623967668,
-      "net_exposure": 18195.39623967668,
-      "realized_pnl": 2243.593394666112,
-      "unrealized_pnl": 1709.894516773646,
-      "total_pnl": 3953.487911439758,
-      "cumulative_fees_usd": 1057.928300604204,
-      "cumulative_funding_usd": -7.9820746261368285,
-      "cumulative_turnover_usd": 2115856.6012084037,
+      "gross_exposure": 16301.63499726744,
+      "net_exposure": 16301.63499726744,
+      "realized_pnl": 2328.709347542881,
+      "unrealized_pnl": 876.4919234908002,
+      "total_pnl": 3205.201271033681,
+      "cumulative_fees_usd": 1058.5010379052055,
+      "cumulative_funding_usd": -4.739345170373443,
+      "cumulative_turnover_usd": 2117002.075810407,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.5207540304615,
-        "LIQ_CASCADE_REPEAT_V1": 115.40754657374217
+        "LIQ_CASCADE_REPEAT_V1": 115.98028387474375
       },
       "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 1915.199300948849,
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 1288.535635836618,
-        "LIQ_CASCADE_REPEAT_V1": 2663.4859413549257
+        "SHORT_COVERING_CONTINUATION_V1": 1288.535635836618
       },
-      "equity": 202887.57753620943,
-      "drawdown": -0.0005737475264675423,
-      "n_equity_points": 263
+      "equity": 202141.9608879581,
+      "drawdown": -0.004246662653125383,
+      "n_equity_points": 279,
+      "overlay_status": "NO_OVERLAY",
+      "overlay_steps": 0,
+      "overlay_binding_steps": 0,
+      "overlay_multiplier_min": 1.0,
+      "overlay_multiplier_mean": null
     },
     "P1_VOL_OVERLAY": {
       "status": "OK",
       "n_positions": 1,
-      "gross_exposure": 18195.39623967668,
-      "net_exposure": 18195.39623967668,
-      "realized_pnl": 2187.204692073065,
-      "unrealized_pnl": 1709.894516773646,
-      "total_pnl": 3897.099208846711,
-      "cumulative_fees_usd": 1055.4806635210898,
-      "cumulative_funding_usd": -8.106998383868762,
-      "cumulative_turnover_usd": 2110961.327042174,
+      "gross_exposure": 16301.63499726744,
+      "net_exposure": 16301.63499726744,
+      "realized_pnl": 2272.320644949834,
+      "unrealized_pnl": 876.4919234908002,
+      "total_pnl": 3148.812568440634,
+      "cumulative_fees_usd": 1056.0534008220914,
+      "cumulative_funding_usd": -4.864268928105376,
+      "cumulative_turnover_usd": 2112106.801644177,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 940.0731169473472,
-        "LIQ_CASCADE_REPEAT_V1": 115.40754657374217
+        "LIQ_CASCADE_REPEAT_V1": 115.98028387474375
       },
       "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 1915.199300948849,
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 1232.1469332435713,
-        "LIQ_CASCADE_REPEAT_V1": 2663.4859413549257
+        "SHORT_COVERING_CONTINUATION_V1": 1232.1469332435713
       },
-      "equity": 202833.51154694174,
-      "drawdown": -0.0005739003731292245,
-      "n_equity_points": 263
+      "equity": 202087.89489869043,
+      "drawdown": -0.004247793966428305,
+      "n_equity_points": 279,
+      "overlay_status": "OVERLAY_NEVER_BINDING",
+      "overlay_steps": 5,
+      "overlay_binding_steps": 0,
+      "overlay_multiplier_min": 1.0,
+      "overlay_multiplier_mean": 1.0
     },
     "P2_DIVERSIFIED": {
       "status": "OK",
       "n_positions": 1,
-      "gross_exposure": 18195.39623967668,
-      "net_exposure": 18195.39623967668,
-      "realized_pnl": 2242.5534122144063,
-      "unrealized_pnl": 1709.894516773646,
-      "total_pnl": 3952.4479289880524,
-      "cumulative_fees_usd": 1057.9335465458776,
-      "cumulative_funding_usd": -7.979183645896123,
-      "cumulative_turnover_usd": 2115867.093091751,
+      "gross_exposure": 16301.63499726744,
+      "net_exposure": 16301.63499726744,
+      "realized_pnl": 2327.669365091175,
+      "unrealized_pnl": 876.4919234908002,
+      "total_pnl": 3204.1612885819754,
+      "cumulative_fees_usd": 1058.5062838468791,
+      "cumulative_funding_usd": -4.736454190132737,
+      "cumulative_turnover_usd": 2117012.567693754,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.5259999721351,
-        "LIQ_CASCADE_REPEAT_V1": 115.40754657374217
+        "LIQ_CASCADE_REPEAT_V1": 115.98028387474375
       },
       "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 1915.199300948849,
         "UNATTRIBUTED": 1.4663342482140727,
-        "SHORT_COVERING_CONTINUATION_V1": 1287.495653384912,
-        "LIQ_CASCADE_REPEAT_V1": 2663.4859413549257
+        "SHORT_COVERING_CONTINUATION_V1": 1287.495653384912
       },
-      "equity": 202886.53519879628,
-      "drawdown": -0.0005737504724264107,
-      "n_equity_points": 263
+      "equity": 202140.91855054494,
+      "drawdown": -0.004246684458001094,
+      "n_equity_points": 279,
+      "overlay_status": "NO_OVERLAY",
+      "overlay_steps": 0,
+      "overlay_binding_steps": 0,
+      "overlay_multiplier_min": 1.0,
+      "overlay_multiplier_mean": null
     },
     "P3_ALL_CANDIDATES": {
       "status": "OK",
       "n_positions": 1,
-      "gross_exposure": 5570.199031737494,
-      "net_exposure": 5570.199031737494,
-      "realized_pnl": 1361.0092141999974,
-      "unrealized_pnl": 569.1990317374936,
-      "total_pnl": 1930.208245937491,
-      "cumulative_fees_usd": 457.88646052275976,
-      "cumulative_funding_usd": -2.3301562064831813,
-      "cumulative_turnover_usd": 915772.921045523,
+      "gross_exposure": 4890.490499180232,
+      "net_exposure": 4890.490499180232,
+      "realized_pnl": 1398.4587090061293,
+      "unrealized_pnl": 304.8928580588777,
+      "total_pnl": 1703.351567065007,
+      "cumulative_fees_usd": 458.1128864496022,
+      "cumulative_funding_usd": -1.35237846727312,
+      "cumulative_turnover_usd": 916225.7728992078,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 420.2228775376965,
-        "LIQ_CASCADE_REPEAT_V1": 37.6635829850634
+        "LIQ_CASCADE_REPEAT_V1": 37.89000891190579
       },
       "pnl_by_alpha": {
+        "LIQ_CASCADE_REPEAT_V1": 654.5083229918073,
         "UNATTRIBUTED": 0.43990027446421975,
-        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
-        "LIQ_CASCADE_REPEAT_V1": 881.3650018642911
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357
       },
-      "equity": 201469.99162920823,
-      "drawdown": -0.0010903155696740804,
-      "n_equity_points": 263
+      "equity": 201243.88630214814,
+      "drawdown": -0.002211369871980772,
+      "n_equity_points": 279,
+      "overlay_status": "NO_OVERLAY",
+      "overlay_steps": 0,
+      "overlay_binding_steps": 0,
+      "overlay_multiplier_min": 1.0,
+      "overlay_multiplier_mean": null
     }
   }
 }

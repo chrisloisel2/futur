@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "QualityFlags",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "symbol", "type": "string"},
+    {"name": "venue", "type": "string"},
+    {"name": "quality_flags", "type": "long"},
+    {"name": "tradeable", "type": "boolean"},
+    {"name": "data_ok", "type": "boolean"},
+    {"name": "microstructure_ok", "type": "boolean"},
+    {"name": "cross_source_ok", "type": "boolean"},
+    {"name": "stale", "type": "boolean"},
+    {"name": "halted", "type": "boolean"},
+    {"name": "toxic", "type": "boolean"},
+    {"name": "skew_ewma_ms", "type": "long"},
+    {"name": "staleness_ms", "type": "long"},
+    {"name": "gate_run_id", "type": "string"}
+  ]
+}

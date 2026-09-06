@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "AllocSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "scope", "type": "string"},
+    {"name": "model_stack", "type": "string"},
+    {"name": "feature_set", "type": "string"},
+    {"name": "scale", "type": "double"},
+    {"name": "leverage_target", "type": "double"},
+    {"name": "trade_mode", "type": "string"},
+    {"name": "coherence_score", "type": "double"},
+    {"name": "asset_weights", "type": "string"},
+    {"name": "cooldowns", "type": "string"},
+    {"name": "thresholds", "type": "string"},
+    {"name": "reasons", "type": "string"},
+    {"name": "run_id", "type": "string"}
+  ]
+}

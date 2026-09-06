@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "MetaControlStateSnapshot",
+  "namespace": "trading.system",
+  "fields": [
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "coherence_score", "type": "double"},
+    {"name": "scale_raw", "type": "double"},
+    {"name": "scale_smooth", "type": "double"},
+    {"name": "leverage_target", "type": "double"},
+    {"name": "leverage_cap_effective", "type": "double"},
+    {"name": "cooldown_seconds", "type": "int"},
+    {"name": "thresholds_active", "type": "string"},
+    {"name": "router_selected_assets", "type": "string"},
+    {"name": "router_weights", "type": "string"},
+    {"name": "reasons", "type": "string"}
+  ]
+}
