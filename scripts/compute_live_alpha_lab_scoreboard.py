@@ -24,6 +24,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.institutional.live_alpha_lab.episodes import summarize as summarize_episodes
+from src.institutional.live_alpha_lab.outcomes import (
+    COST_BPS_ROUNDTRIP_BASE, COST_BPS_ROUNDTRIP_STRESS, LABELABLE, NOT_LABELABLE,
+    edge_retention, load_outcomes, summarize_outcomes,
+)
 
 REGISTRY = ROOT / "configs" / "live_alpha_registry.yaml"
 LAB_DIR = ROOT / "reports" / "live_alpha_lab"
@@ -199,18 +203,235 @@ def row_for(entry: dict) -> dict:
         "expired_on_arrival": expired_on_arrival,
         "decision_lag_median_h_recent": lag_recent_h,
         "expired_on_arrival_recent": expired_recent,
-        # ⚠ PF / net_bps / maxDD / edge_retention nécessitent un LABEL de résultat
-        # forward par décision (comme le backfill actual_realized_rv de
-        # VOL_FORECAST_LAYER_V1) -- PAS ENCORE CONSTRUIT pour les alphas de
-        # position. Champ explicite "PENDING" plutôt qu'un chiffre inventé.
-        "pf_net_bps_maxdd_edge_retention": "PENDING_outcome_labeling_not_built",
+        # PF / net_bps / edge_retention : désormais CALCULÉS, à partir du ledger
+        # de labels scellés (outcomes.parquet, cf. scripts/label_forward_outcomes.py).
+        # Détail dans la section « RÉSULTATS FORWARD » plus bas — pas dans cette
+        # ligne, parce qu'un edge n'a de sens qu'accompagné de son n, de son
+        # ancrage et de son hypothèse de coût.
+        "pf_net_bps_maxdd_edge_retention": outcome_verdict(alpha_id),
         "risk_bucket": entry.get("risk_bucket"),
         "correlation_family": entry.get("correlation_family"),
     }
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# RÉSULTATS FORWARD (ajouté 2026-09-06)
+# ═══════════════════════════════════════════════════════════════════════════
+# Ce que cette section répond, et que rien ne répondait avant : combien ont
+# rapporté les décisions forward déjà prises. Elle lit `outcomes.parquet`, le
+# ledger de labels SCELLÉS écrit par scripts/label_forward_outcomes.py.
+#
+# Trois précautions structurelles, dans l'ordre où elles changent la lecture :
+#
+# 1. EXCESS, PAS BRUT. Les cinq alphas labellisables sont tous long-only, et
+#    l'univers frozen-50 a pris +10,9 % sur la fenêtre forward. Un rendement
+#    brut ne mesure donc pas un edge, il mesure du bêta. La colonne qui compte
+#    est `net_excess` — le rendement moins celui de l'univers sur exactement la
+#    même fenêtre. Le brut reste affiché à côté, précisément pour que l'écart
+#    entre les deux soit visible plutôt que dissimulé.
+#
+# 2. DEUX ANCRAGES. `dec` part de `decided_at` (ce que le lab pouvait
+#    RÉELLEMENT capturer, latence comprise) ; `evt` part de `event_time` (ce
+#    que le backtest de validation a mesuré). Seul `evt` est comparable à
+#    `expected_net_bps`, donc seul `evt` alimente edge_retention. L'écart entre
+#    les deux est le coût de la latence, mesuré et non supposé.
+#
+# 3. DEUX COÛTS. Base 14 bps (le coût exact du simulateur) et stress 28 bps.
+#    Un résultat qui ne survit pas à sa borne haute est une hypothèse, pas un
+#    résultat -- et le slippage est modélisé par une CONSTANTE alors que ces
+#    alphas tradent précisément pendant les cascades, c'est-à-dire au moment où
+#    les spreads s'écartent le plus.
+#
+# Seuil d'échantillon DÉCLARÉ D'AVANCE (item D1) : sous MIN_EPISODES_FOR_POINT,
+# l'estimation ponctuelle n'est pas imprimée du tout -- seulement l'intervalle
+# et la mention INSUFFICIENT_SAMPLE. Un chiffre absent est plus honnête qu'un
+# chiffre présent accompagné d'un avertissement que personne ne lit. Aucune
+# métrique ANNUALISÉE n'est produite ici, à aucun n : cinq jours et un seul
+# régime ne disent rien d'un Sharpe.
+MIN_EPISODES_FOR_POINT = 20
+
+_outcome_cache = {}
+
+
+def outcome_row(alpha_id: str, entry: dict) -> dict:
+    """Ligne de résultats forward pour un alpha, ou son motif d'exclusion."""
+    if alpha_id in _outcome_cache:
+        return _outcome_cache[alpha_id]
+    if alpha_id in NOT_LABELABLE:
+        out = {"labelable": False, "reason": NOT_LABELABLE[alpha_id]}
+        _outcome_cache[alpha_id] = out
+        return out
+    if alpha_id not in LABELABLE:
+        # Un alpha sans ledger du tout n'est pas une DÉRIVE de classification :
+        # il n'a simplement pas de code qui tourne (CODE_MISSING, DATA_BLOCKED,
+        # MERGED_INTO_*). Confondre les deux ferait crier au loup sur la moitié
+        # du registre et noierait le seul cas qui compte vraiment : un alpha qui
+        # PRODUIT des décisions forward sans qu'on ait décidé quoi en faire.
+        p = LAB_DIR / alpha_id / "decisions.parquet"
+        if not p.exists():
+            out = {"labelable": False,
+                   "reason": f"pas de ledger de décisions — operational_status="
+                             f"{entry.get('operational_status', '?')}"}
+        else:
+            out = {"labelable": False,
+                   "reason": "⚠ UNCLASSIFIED — porte des décisions forward mais n'est ni "
+                             "dans LABELABLE ni dans NOT_LABELABLE (outcomes.py). "
+                             "Dérive à corriger."}
+        _outcome_cache[alpha_id] = out
+        return out
+
+    led = load_outcomes(alpha_id)
+    cs = LABELABLE[alpha_id].cross_sectional
+    out = {"labelable": True, "cross_sectional": cs}
+    if led is None or led.empty:
+        out["reason"] = "aucune décision forward encore arrivée à échéance"
+        _outcome_cache[alpha_id] = out
+        return out
+    for anchor in ("dec", "evt"):
+        for metric in ("gross", "excess"):
+            out[f"{anchor}_{metric}"] = summarize_outcomes(
+                led, anchor=anchor, metric=metric, cross_sectional=cs)
+    s = out.get("evt_excess")
+    out["edge_retention"] = (
+        edge_retention(s.net_bps_base, entry.get("expected_net_bps"))
+        if s is not None and s.n_episodes >= MIN_EPISODES_FOR_POINT else None)
+    out["n_sealed"] = int((led["label_timeliness"] == "SEALED_AT_MATURITY").sum())
+    out["n_late"] = int((led["label_timeliness"] == "LATE_BACKFILL").sum())
+    out["n_refused"] = int((led["dec_status"] != "OK").sum())
+    _outcome_cache[alpha_id] = out
+    return out
+
+
+def outcome_verdict(alpha_id: str) -> str:
+    """Résumé d'une case de tableau -- volontairement court et sans chiffre
+    isolé : un edge sans son n ni son ancrage se fait citer de travers."""
+    o = _outcome_cache.get(alpha_id)
+    if o is None or not o.get("labelable"):
+        return "NOT_LABELABLE (voir section RÉSULTATS FORWARD)"
+    s = o.get("dec_excess")
+    if s is None:
+        return "PAS_ENCORE_D_ÉCHÉANCE"
+    if s.n_episodes < MIN_EPISODES_FOR_POINT:
+        return f"INSUFFICIENT_SAMPLE (n_ep={s.n_episodes})"
+    return f"voir RÉSULTATS FORWARD (n_ep={s.n_episodes})"
+
+
+def _fmt(stats, field: str) -> str:
+    """Aucune suppression conditionnelle ICI : sous le seuil, la ligne entière
+    est remplacée par INSUFFICIENT_SAMPLE en amont. Imprimer certains chiffres
+    et pas d'autres sur la même ligne inviterait à lire ceux qui restent."""
+    if stats is None:
+        return "—"
+    v = getattr(stats, field)
+    if v is None:
+        return "—"
+    return f"{v:+.1f}" if "bps" in field else f"{v}"
+
+
+def outcomes_section(rows: list, registry: dict) -> list:
+    lines = [
+        "",
+        "---",
+        "",
+        "## RÉSULTATS FORWARD — ce que les décisions ont réellement rapporté",
+        "",
+        "Source : `reports/live_alpha_lab/<ALPHA>/outcomes.parquet`, ledger de labels",
+        "**scellés** (append-only, jamais réécrits) écrit par `scripts/label_forward_outcomes.py`",
+        "à chaque cycle, à l'échéance de l'horizon de chaque décision.",
+        "",
+        "⚠ **`net_excess` est le seul chiffre qui mesure un edge.** Les cinq alphas",
+        "labellisables sont long-only et l'univers frozen-50 a pris **+10,9 %** sur la fenêtre",
+        "forward : le rendement BRUT de n'importe quelle position longue y est positif, signal",
+        "ou pas. `net_excess` retranche le rendement de l'univers sur exactement la même",
+        "fenêtre. L'écart entre `net_gross` et `net_excess` EST le bêta.",
+        "",
+        "⚠ **Ancrages.** `dec` = à partir de `decided_at`, ce que le lab pouvait réellement",
+        "capturer. `evt` = à partir de `event_time`, ce que le backtest de validation a mesuré.",
+        "Seul `evt` est comparable à `expected_net_bps`, donc seul `evt` alimente",
+        "`edge_retention`. L'écart entre les deux est le coût de la latence.",
+        "",
+        f"⚠ **Coûts.** `net@{COST_BPS_ROUNDTRIP_BASE:.0f}` = coût exact du simulateur "
+        f"(aller-retour) ; `net@{COST_BPS_ROUNDTRIP_STRESS:.0f}` = borne haute. Le slippage",
+        "est une CONSTANTE de 2 bps alors que ces alphas tradent pendant les cascades,",
+        "c'est-à-dire au moment où les spreads s'écartent le plus. Un résultat qui ne survit",
+        "pas à la borne haute est une hypothèse, pas un résultat.",
+        "",
+        f"⚠ **Seuil d'échantillon déclaré : {MIN_EPISODES_FOR_POINT} épisodes indépendants.**",
+        "En dessous, AUCUN chiffre n'est imprimé — ni moyenne, ni intervalle, ni hit rate.",
+        "Un IC calculé sur un seul épisode a l'air précis parce qu'il n'a pas de largeur.",
+        "Aucune métrique annualisée n'est produite ici, à aucun `n`.",
+        "",
+        "| alpha_id | n_lab | n_épisodes | scellés/tardifs | anc. | net_gross@14 | net_excess@14 | net_excess@28 | PF | hit | IC95 excess@14 | edge_retention |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    excluded = []
+    for r in rows:
+        alpha_id = r["alpha_id"]
+        o = outcome_row(alpha_id, registry.get(alpha_id, {}))
+        if not o.get("labelable"):
+            excluded.append((alpha_id, o["reason"]))
+            continue
+        if "dec_excess" not in o:
+            excluded.append((alpha_id, o.get("reason", "pas de label")))
+            continue
+        n_ep = o["dec_excess"].n_episodes if o["dec_excess"] else 0
+        if n_ep < MIN_EPISODES_FOR_POINT:
+            # Sous le seuil : AUCUN chiffre. Pas de moyenne, pas d'IC, pas de
+            # hit rate. Un IC calculé sur 1 épisode ([-22,5 ; -22,5]) a l'air
+            # d'une mesure précise alors qu'il n'a aucune largeur faute de
+            # variance observable -- c'est la façon la plus efficace de faire
+            # lire une certitude là où il n'y a qu'une observation.
+            lines.append(
+                f"| {alpha_id} | {o['dec_excess'].n_labeled if o['dec_excess'] else 0} | "
+                f"{n_ep} | {o['n_sealed']}/{o['n_late']} | — | "
+                f"INSUFFICIENT_SAMPLE (n_ep={n_ep} < {MIN_EPISODES_FOR_POINT}) | | | | | | |")
+            continue
+        for anchor in ("dec", "evt"):
+            ex, gr = o[f"{anchor}_excess"], o[f"{anchor}_gross"]
+            ci = (f"[{ex.ci95_low_bps:+.1f}, {ex.ci95_high_bps:+.1f}]"
+                  if ex and ex.ci95_low_bps is not None else "—")
+            ret = (f"{o['edge_retention']}" if (anchor == "evt" and o.get("edge_retention")
+                                                is not None) else "—")
+            lines.append(
+                f"| {alpha_id if anchor == 'dec' else ''} | {ex.n_labeled} | "
+                f"{ex.n_episodes} | {o['n_sealed']}/{o['n_late']} | `{anchor}` | "
+                f"{_fmt(gr, 'net_bps_base')} | {_fmt(ex, 'net_bps_base')} | "
+                f"{_fmt(ex, 'net_bps_stress')} | {_fmt(ex, 'profit_factor_base')} | "
+                f"{_fmt(ex, 'hit_rate')} | {ci} | {ret} |")
+    if excluded:
+        lines += ["", "### Hors périmètre du label, avec motif", ""]
+        for alpha_id, reason in excluded:
+            lines.append(f"- **{alpha_id}** — {reason}")
+    lines += [
+        "",
+        "### Ce que ce tableau ne dit pas",
+        "",
+        "- **Il ne dit rien d'un Sharpe.** Cinq jours, un seul régime, un marché qui monte de",
+        "  près de 11 % : la question « quel edge par décision » (n = épisodes, mesurable) et",
+        "  la question « quel Sharpe » (n = 5 jours, non mesurable) n'ont pas la même taille",
+        "  d'échantillon, et la seconde ne se déduit pas de la première.",
+        "- **`net_excess` n'est pas un placebo.** Une référence de marché mesure le bêta, pas",
+        "  le biais de l'infrastructure de simulation. Un alpha à signal aléatoire tournant",
+        "  dans les mêmes portefeuilles, avec le même sizing et les mêmes coûts, reste à faire.",
+        "- **Les labels `LATE_BACKFILL` ne sont pas des labels scellés à l'échéance.** Le prix",
+        "  relevé est honnête (les partitions de `derivatives_raw` ne sont pas réécrites), mais",
+        "  rien ne garantit que la règle de labellisation ait été fixée avant d'avoir vu la",
+        "  donnée. Seule la colonne `scellés` porte cette garantie, et elle ne peut que croître",
+        "  à partir du 2026-09-06.",
+        "- **`edge_retention` contre une référence RECONSTRUCTED ne confirme rien.** Le registre",
+        "  le dit déjà pour SHORT_COVERING et WHALE_LSR : leur `expected_net_bps` vient d'un",
+        "  seuil ajusté sur ces mêmes données, c'est un contexte historique, pas une cible.",
+    ]
+    return lines
+
+
 def main() -> int:
     reg = yaml.safe_load(REGISTRY.read_text())
+    by_id = {a["alpha_id"]: a for a in reg["alphas"]}
+    # Les résultats forward sont calculés AVANT les lignes du tableau principal :
+    # row_for() lit le verdict depuis le cache que ceci remplit.
+    for a in reg["alphas"]:
+        outcome_row(a["alpha_id"], a)
     rows = [row_for(a) for a in reg["alphas"]]
 
     lines = [
@@ -276,6 +497,8 @@ def main() -> int:
         "`expected_capacity` (texte libre du registre) le moment venu, pas pour juger après",
         "quelques heures.",
     ]
+
+    lines += outcomes_section(sorted(rows, key=lambda r: r["alpha_id"]), by_id)
 
     OUT_MD.write_text("\n".join(lines) + "\n")
     print(f"Scoreboard écrit -> {OUT_MD}")

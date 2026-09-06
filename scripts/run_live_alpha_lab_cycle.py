@@ -29,8 +29,10 @@ Ordre d'exécution (imposé, pas cosmétique)
   0. collecte de la queue fraîche (métriques dérivées 5 m)
   1. producteurs de signal  (position + gate + overlay)
   2. étiquetage provenance  (REPLAY vs FORWARD_LIVE)
+  2b. scellement des résultats (label des décisions dont l'horizon vient d'échoir)
   3. couche portefeuille    (lit le gate WHALE_LSR + l'overlay VOL_FORECAST)
-  4. scoreboards            (lisent les ledgers écrits en 1 et l'état écrit en 3)
+  4. scoreboards            (lisent les ledgers écrits en 1, les labels de 2b
+                             et l'état écrit en 3)
 
 L'étape 0 est DANS le cycle et non dans un timer séparé, précisément pour que
 l'ordre soit garanti : les producteurs de la famille cascade lisent la série
@@ -41,6 +43,19 @@ seule archive Vision, c'est-à-dire l'ancien comportement, dégradé mais correc
 
 Le gate et l'overlay DOIVENT être frais avant l'agrégation de portefeuille,
 sinon le portefeuille filtre sur un screen périmé.
+
+L'étape 2b est ce qui rend le forward-test LISIBLE. Jusqu'ici le lab comptait
+862 décisions forward sans savoir ce qu'AUCUNE d'elles avait rapporté (le
+scoreboard imprimait littéralement `PENDING_outcome_labeling_not_built`). Elle
+est DANS le cycle, et pas dans un batch séparé, pour une raison de fond : un
+batch rétrospectif peut être relancé avec d'autres paramètres jusqu'à ce que le
+chiffre plaise, alors qu'un label écrit à l'échéance et refusé à la réécriture
+ne le peut pas. Le passage toutes les 15 min est ce qui permet à la quasi-
+totalité des labels de naître SEALED_AT_MATURITY plutôt que LATE_BACKFILL —
+et cette distinction est portée par la donnée elle-même, donc un labelliseur
+en panne se dénonce tout seul dans le ledger. Elle vient APRÈS l'étiquetage
+de provenance (elle ne labellise que du FORWARD_LIVE) et AVANT le portefeuille
+(qui peut échouer sans devoir emporter la preuve avec lui).
 
 L'étape 2 n'est PAS optionnelle — c'est un bug corrigé en câblant ce cycle.
 Aucun `run_*_shadow.py` ne pose lui-même la colonne `provenance` : elle n'est
@@ -99,6 +114,7 @@ LOCK_PATH = LAB_DIR / ".cycle.lock"
 
 COLLECTOR_SCRIPT = "scripts/collect_oi_metrics_5m.py"
 PROVENANCE_SCRIPT = "scripts/apply_provenance_tags.py"
+OUTCOME_LABEL_SCRIPT = "scripts/label_forward_outcomes.py"
 PORTFOLIO_SCRIPT = "scripts/run_portfolio_shadow.py"
 SCOREBOARD_SCRIPTS = [
     "scripts/compute_live_alpha_lab_scoreboard.py",
@@ -317,6 +333,14 @@ def main() -> int:
     # colonne.
     provenance_rec = run_step("APPLY_PROVENANCE_TAGS", PROVENANCE_SCRIPT, 600)
 
+    # Étape 2b — scellement des résultats. Non bloquante DÉLIBÉRÉMENT : un
+    # labelliseur cassé ne doit pas arrêter le paper trading, et sa panne n'est
+    # pas silencieuse (les labels rattrapés plus tard sortent LATE_BACKFILL,
+    # visible dans outcomes.parquet et au scoreboard). L'inverse — bloquer le
+    # cycle sur la mesure — ferait perdre de la collecte pour sauver de la
+    # lecture, alors que la collecte, elle, ne se rattrape pas.
+    outcome_rec = run_step("LABEL_FORWARD_OUTCOMES", OUTCOME_LABEL_SCRIPT, 900)
+
     portfolio_rec = None
     if not args.skip_portfolio:
         # Le portefeuille tourne MÊME si des producteurs ont échoué : il agrège
@@ -354,6 +378,7 @@ def main() -> int:
         "steps": steps,
         "collector": collector_rec,
         "provenance_tagging": provenance_rec,
+        "outcome_labeling": outcome_rec,
         "portfolio": portfolio_rec,
         "scoreboards": scoreboard_recs,
         "last_success": last_success,

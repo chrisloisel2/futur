@@ -120,3 +120,6 @@ data/worldmon_features/
 # ── Command Center : credentials hachés + secret de session (jamais committés) ──
 configs/command_center_users.json
 state/command_center_secret
+
+# Verrou du labelliseur de résultats forward (scripts/label_forward_outcomes.py)
+reports/live_alpha_lab/.outcome_label.lock
