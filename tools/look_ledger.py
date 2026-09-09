@@ -121,7 +121,8 @@ def prereg_witness(path) -> dict:
             "raison": "" if rc_a == 0 else f"commit {commit[:12]} absent de {upstream}"}
 
 
-def record(kind, window, configs, prereg=None, require_witness=False, note="") -> dict:
+def record(kind, window, configs, prereg=None, require_witness=False, note="",
+           witness_branch=None) -> dict:
     """Inscrit un regard. Leve LedgerError si le regard ne doit pas s'executer.
 
     kind    : "search" | "placebo" | "confirm"
@@ -131,7 +132,9 @@ def record(kind, window, configs, prereg=None, require_witness=False, note="") -
     require_witness : exige que le prereg soit COMMITE ET POUSSE
     """
     verify()                                   # refuse d'ecrire sur une chaine cassee
-    w = prereg_witness(prereg) if prereg else None
+    w = None
+    if prereg:
+        w = witness_orphan(prereg, witness_branch) if witness_branch else prereg_witness(prereg)
     if require_witness:
         if w is None:
             raise LedgerError("regard scelle sans pre-enregistrement : refuse")
@@ -193,6 +196,71 @@ def seal(path) -> dict:
     return w
 
 
+def _git_in(args, stdin):
+    out = subprocess.run(["git", *args], cwd=str(ROOT), capture_output=True, text=True, input=stdin)
+    if out.returncode != 0:
+        raise LedgerError(f"git {' '.join(args)} : {out.stderr.strip()}")
+    return out.stdout.strip()
+
+
+def witness_orphan(path, branch) -> dict:
+    """Le fichier local est-il, octet pour octet, ce que le remote porte sur
+    la branche orpheline `branch` ? On interroge le REMOTE (ls-remote), pas
+    une copie locale : c'est son horodatage qui atteste, pas le notre."""
+    p = Path(path).resolve()
+    ref = f"refs/heads/{branch}"
+    rc, local_blob, _ = _git("hash-object", str(p))
+    rc, out, _ = _git("ls-remote", "origin", ref)
+    if rc != 0 or not out:
+        return {"path": p.name, "branch": branch, "pushed": False,
+                "raison": "la branche n'existe pas sur le remote"}
+    remote_commit = out.split()[0]
+    rc, _, err = _git("fetch", "--quiet", "origin", f"{ref}:refs/remotes/origin/{branch}")
+    if rc != 0:
+        return {"path": p.name, "branch": branch, "pushed": False, "raison": f"fetch : {err}"}
+    rc, remote_blob, _ = _git("rev-parse", f"refs/remotes/origin/{branch}:{p.name}")
+    rc2, parents, _ = _git("rev-list", "--parents", "-n", "1", remote_commit)
+    orphelin = rc2 == 0 and len(parents.split()) == 1
+    rc3, files, _ = _git("ls-tree", "--name-only", "-r", remote_commit)
+    ok = (rc == 0 and remote_blob == local_blob and orphelin and files.strip() == p.name)
+    return {"path": p.name, "branch": branch, "blob": local_blob,
+            "remote_commit": remote_commit, "orphelin": orphelin,
+            "fichiers_sur_la_branche": files.split(), "pushed": ok,
+            "raison": "" if ok else "contenu, parente ou composition de la branche differents"}
+
+
+def seal_orphan(path, branch, message=None) -> dict:
+    """Commit ORPHELIN (aucun parent) contenant CE SEUL fichier, pousse SEUL.
+
+    Pourquoi pas la branche de travail : GIT_COMMITTER_DATE accepte n'importe
+    quelle valeur, seule la date de push est attestee par un tiers. Pousser le
+    pre-enregistrement avec les commits de boucle leur donnerait a tous le MEME
+    horodatage atteste, et un auditeur ne pourrait plus distinguer 'ecrit
+    d'abord' de 'ecrit pour coller'. L'ordre est ce que le temoin existe pour
+    etablir. Rien ici ne touche l'index ni l'arbre de travail."""
+    p = Path(path).resolve()
+    ref = f"refs/heads/{branch}"
+    rc, _, _ = _git("rev-parse", "--verify", "--quiet", ref)
+    if rc == 0:
+        raise LedgerError(f"{branch} existe deja localement : un scellement ne se reecrit pas")
+    rc, out, _ = _git("ls-remote", "origin", ref)
+    if rc == 0 and out:
+        raise LedgerError(f"{branch} existe deja sur le remote : un scellement ne se reecrit pas")
+    blob = _git_in(["hash-object", "-w", "--stdin"], p.read_bytes().decode("utf-8"))
+    tree = _git_in(["mktree"], f"100644 blob {blob}\t{p.name}\n")
+    msg = message or f"prereg: sceller {p.name} (orphelin, fichier unique)"
+    commit = _git_in(["commit-tree", tree, "-m", msg], "")
+    _git_in(["update-ref", ref, commit, ""], "")          # '' : n'ecrase rien
+    rc, out, err = _git("push", "origin", f"{ref}:{ref}")
+    if rc != 0:
+        raise LedgerError(f"push refuse : {err or out}")
+    w = witness_orphan(p, branch)
+    if not w["pushed"]:
+        raise LedgerError(f"pousse mais non verifiable : {w['raison']}")
+    w["commit"] = commit
+    return w
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser(description="verifier, lister ou sceller")
@@ -201,7 +269,20 @@ def main():
     ap.add_argument("--witness", metavar="PATH", help="etat de temoin d'un pre-enregistrement")
     ap.add_argument("--seal", metavar="PATH",
                     help="commiter ET pousser un pre-enregistrement (publie)")
+    ap.add_argument("--seal-orphan", nargs=2, metavar=("PATH", "BRANCH"),
+                    help="commit orphelin a fichier unique, pousse seul (publie)")
+    ap.add_argument("--witness-orphan", nargs=2, metavar=("PATH", "BRANCH"))
     a = ap.parse_args()
+    if a.witness_orphan:
+        print(json.dumps(witness_orphan(*a.witness_orphan), indent=2, ensure_ascii=False)); return 0
+    if a.seal_orphan:
+        try:
+            w = seal_orphan(*a.seal_orphan)
+        except LedgerError as e:
+            print(f"scellement REFUSE : {e}"); return 1
+        print(f"scelle (orphelin) : {w['path']} sur {w['branch']}\n  blob   {w['blob']}\n"
+              f"  commit {w['commit']}\n  remote {w['remote_commit']}  pushed={w['pushed']}")
+        return 0
     if a.witness:
         print(json.dumps(prereg_witness(a.witness), indent=2, ensure_ascii=False))
         return 0
