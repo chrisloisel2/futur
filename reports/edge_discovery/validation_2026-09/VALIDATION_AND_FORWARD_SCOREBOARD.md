@@ -1,6 +1,6 @@
 # VALIDATION_AND_FORWARD_SCOREBOARD
 
-Généré : 2026-09-09T10:30:52.969413+00:00
+Généré : 2026-09-09T11:31:01.147726+00:00
 
 | alpha_id | family | discovery_net_bps | validation_net_bps | N_validation_independent | validated_for_forward | freeze_timestamp | historical_event_rate | recent_event_rate | N_required | minimum_calendar_days | ETA_P50 | ETA_conservative | forward_age_days | forward_N_independent | forward_net_bps | edge_retention | scientific_status | operational_status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -14,8 +14,8 @@ Généré : 2026-09-09T10:30:52.969413+00:00
 | GLOBAL_ACCOUNT_LSR_FADE | positioning | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | REJECTED | CODE_MISSING |
 | OI_CVD_MEMORY_OVERLAP | liquidation | — | — | — | False | 2026-08-31T00:00:00+00:00 | — | — | — | — | — | — | 9.4 | — | — | INSUFFICIENT_EVIDENCE | REJECTED | SIGNAL_SHADOW |
 | LIQ_CASCADE_FAR_FROM_LOW | liquidation | 15.5 | -6.76 | 1620 | False | 2026-08-31T18:08:39+00:00 | — | — | — | — | — | unbounded | 8.4 | — | — | INSUFFICIENT_EVIDENCE | REJECTED | SIGNAL_SHADOW |
-| BTC_LEAD_ALT_CASCADE_V1 | liquidation | 33.0 | 46.87 | 259 | True | 2026-09-03T16:20:00+00:00 | — | — | — | — | — | 3549 days (~9.7 years) | 4.9 | — | — | INSUFFICIENT_EVIDENCE | FROZEN | SIGNAL_SHADOW |
-| XSEC_MOMENTUM_HORIZON_EXTENSION | cross_sectional | 199.3 | 51.78 | 77 | False | 2026-09-01T10:24:15+00:00 | — | — | — | — | — | 78698 days (~215.5 years) | 2.4 | — | — | INSUFFICIENT_EVIDENCE | REJECTED | SIGNAL_SHADOW |
+| BTC_LEAD_ALT_CASCADE_V1 | liquidation | 33.0 | 46.87 | 259 | True | 2026-09-03T16:20:00+00:00 | — | — | — | — | — | 3549 days (~9.7 years) | 5.0 | — | — | INSUFFICIENT_EVIDENCE | FROZEN | SIGNAL_SHADOW |
+| XSEC_MOMENTUM_HORIZON_EXTENSION | cross_sectional | 199.3 | 51.78 | 77 | False | 2026-09-01T10:24:15+00:00 | — | — | — | — | — | 78698 days (~215.5 years) | 2.5 | — | — | INSUFFICIENT_EVIDENCE | REJECTED | SIGNAL_SHADOW |
 | XSEC_RESIDUAL_MOMENTUM_14D | cross_sectional | 64.8 | 31.5 | 77 | False | — | — | — | — | — | — | 145047 days (~397.1 years) | — | — | — | INSUFFICIENT_EVIDENCE | REJECTED | CODE_MISSING |
 | XSEC_RELATIVE_LEVERAGE_14D | cross_sectional | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
 | CROSS_ASSET_OI_BUILDUP_FADE | relative_value | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
@@ -23,15 +23,15 @@ Généré : 2026-09-09T10:30:52.969413+00:00
 | SECTOR_ROTATION | relative_value | 103.0 | 13.29 | 74 | False | — | — | — | — | — | — | 83299 days (~228.1 years) | — | — | — | INSUFFICIENT_EVIDENCE | REJECTED | CODE_MISSING |
 | BASIS_RICHENING_FADE | relative_value | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
 | BASIS_FUNDING_AGREEMENT_FADE | relative_value | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
-| XSMOM_REGIME_META | cross_sectional | — | — | — | False | 2026-09-01T10:24:15+00:00 | — | — | — | — | — | — | 2.4 | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | SIGNAL_SHADOW |
+| XSMOM_REGIME_META | cross_sectional | — | — | — | False | 2026-09-01T10:24:15+00:00 | — | — | — | — | — | — | 2.5 | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | SIGNAL_SHADOW |
 | FUNDING_CARRY_X_DISPERSION | relative_value | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
 | OPTIONS_IV_SHOCK_MEMORY | options_vol_overlay | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
 | SPILLOVER_X_DVOL_STRESS | options_vol_overlay | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | VALIDATING | CODE_MISSING |
-| SHORT_COVERING_CONTINUATION | liquidation | 9.2 | 2.53 | 1582 | False | 2026-08-31T18:08:39+00:00 | — | — | — | — | — | non defini (pas d'edge positif a dimensionner sur le produit) | 8.6 | — | — | INSUFFICIENT_EVIDENCE | NEEDS_MORE_RESEARCH | SIGNAL_SHADOW |
+| SHORT_COVERING_CONTINUATION | liquidation | 9.2 | 2.53 | 1582 | False | 2026-08-31T18:08:39+00:00 | — | — | — | — | — | non defini (pas d'edge positif a dimensionner sur le produit) | 8.7 | — | — | INSUFFICIENT_EVIDENCE | NEEDS_MORE_RESEARCH | SIGNAL_SHADOW |
 | FUNDING_BASIS_DISAGREEMENT | relative_value | — | — | — | False | 2026-08-31T18:08:39+00:00 | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
-| OPTIONS_RV_IV_SPREAD | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.4 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
-| OPTIONS_FAR_OTM_PUT_SHARE | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.4 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
-| OPTIONS_BLOCK_FLOW | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.4 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
+| OPTIONS_RV_IV_SPREAD | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.5 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
+| OPTIONS_FAR_OTM_PUT_SHARE | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.5 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
+| OPTIONS_BLOCK_FLOW | options_vol_overlay | — | — | — | False | 2026-08-31T22:05:00+00:00 | — | — | — | — | — | — | 8.5 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
 | WHALE_LSR | positioning | — | — | — | False | 2026-08-31T18:08:39+00:00 | — | — | — | — | — | — | 8.5 | — | — | INSUFFICIENT_EVIDENCE | ALREADY_LIVE | SIGNAL_SHADOW |
 | LIQ_CASCADE_SHORT_SQUEEZE_EXHAUSTION | liquidation | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | BLOCKED | CODE_MISSING |
 | MICROSTRUCTURE_ALL_ROUND3 | microstructure | — | — | — | False | — | — | — | — | — | — | — | — | — | — | INSUFFICIENT_EVIDENCE | DATA_ACCUMULATION | CODE_MISSING |

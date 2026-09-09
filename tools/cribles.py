@@ -102,6 +102,45 @@ def crible5(D, SIG, ret1, univ, cost_np, cfg):
 
 # ---------------------------------------------------- crible 6 : monotonie
 
+def concentration(x):
+    """Combien d'episodes DISTINCTS produisent le rendement d'une tranche ?
+
+    Un Spearman de 0,9 sur cinq points s'obtient facilement quand deux points
+    portent tout. La bonne question n'est pas "est-ce ordonne" mais "combien de
+    jours font le total". Si vingt jours sur six cents portent la tranche haute,
+    le compte d'episodes effectif du candidat est vingt, pas six cents -- et tout
+    le reste de son evaluation s'effondre.
+
+    N_eff = (somme x)^2 / somme(x^2) sur les contributions POSITIVES : le nombre
+    de jours equivalents si tous contribuaient autant. C'est la meme algebre que
+    le ratio de participation utilise pour les essais effectifs."""
+    x = np.asarray(x, float)
+    x = x[np.isfinite(x)]
+    n = len(x)
+    if n < 10:
+        return None
+    tot = float(x.sum())
+    pos = x[x > 0]
+    n_eff = float(pos.sum() ** 2 / (pos ** 2).sum()) if len(pos) and (pos ** 2).sum() > 0 else np.nan
+    ordre = np.sort(x)[::-1]
+    cum = np.cumsum(ordre)
+    j50 = int(np.searchsorted(cum, 0.5 * tot) + 1) if tot > 0 else None
+    j90 = int(np.searchsorted(cum, 0.9 * tot) + 1) if tot > 0 else None
+    k1 = max(1, int(round(0.01 * n)))
+    k5 = max(1, int(round(0.05 * n)))
+    return {
+        "n_jours": n,
+        "total_bps": round(tot, 2),
+        "moyenne_bps": round(float(x.mean()), 3),
+        "n_episodes_effectifs": None if not np.isfinite(n_eff) else round(n_eff, 1),
+        "jours_pour_50pct": j50,
+        "jours_pour_90pct": j90,
+        "part_du_top_1pct": round(float(ordre[:k1].sum() / tot), 3) if tot > 0 else None,
+        "moyenne_sans_top_1pct": round(float(np.sort(x)[:-k1].mean()), 3),
+        "moyenne_sans_top_5pct": round(float(np.sort(x)[:-k5].mean()), 3),
+    }
+
+
 def crible6(D, SIG, ret1, univ, cfg, n_buckets=5, exec_lag=1):
     """Monotone dans l'intensite du signal, pas seulement au decile extreme.
 
@@ -121,13 +160,17 @@ def crible6(D, SIG, ret1, univ, cfg, n_buckets=5, exec_lag=1):
     fwd = (c.shift(-h - exec_lag) / c.shift(-exec_lag) - 1.0) / h
     fwd = fwd.where(univ)
     exces = fwd.sub(fwd.mean(axis=1), axis=0)
-    moyennes = []
+    moyennes, series = [], []
     for i in range(n_buckets):
         lo, hi = i / n_buckets, (i + 1) / n_buckets
         m = (q > lo) & (q <= hi) if i else (q >= 0) & (q <= hi)
-        moyennes.append(float(exces.where(m).stack().mean() * 1e4))
+        par_jour = exces.where(m).mean(axis=1) * 1e4      # contribution QUOTIDIENNE
+        series.append(par_jour)
+        moyennes.append(float(par_jour.mean()))
     if cfg["dir"] == "INV":
         moyennes = moyennes[::-1]
+        series = series[::-1]
+    conc = [concentration(v.to_numpy()) for v in series]
     r = np.arange(n_buckets, dtype=float)
     v = np.array(moyennes)
     fini = np.isfinite(v)
@@ -135,13 +178,24 @@ def crible6(D, SIG, ret1, univ, cfg, n_buckets=5, exec_lag=1):
     pas = np.diff(v[fini])
     bons = float(np.mean(pas > 0)) if len(pas) else np.nan
     passe = bool(np.isfinite(rho) and rho >= 0.8 and np.isfinite(bons) and bons >= 0.75)
+    # la tranche qui porte le spread : est-elle faite de beaucoup d'episodes ?
+    haut = conc[-1] if conc and conc[-1] else None
+    concentre = bool(haut and haut["n_episodes_effectifs"] is not None
+                     and haut["n_episodes_effectifs"] < 116)
+    if concentre:
+        passe = False
     return {"crible": 6, "passe": passe,
+            "tranche_haute_concentree": concentre,
+            "concentration_par_tranche": conc,
             "rendement_par_tranche_bps": [round(x, 3) for x in moyennes],
             "spearman_tranche_vs_rendement": None if not np.isfinite(rho) else round(rho, 3),
             "fraction_pas_croissants": None if not np.isfinite(bons) else round(bons, 3),
             "seuils": {"spearman": 0.8, "pas_croissants": 0.75},
-            "verdict": ("ordonne dans l'intensite" if passe else
-                        "l'effet n'est pas monotone : concentre aux bords")}
+            "verdict": ("ordonne dans l'intensite, et la tranche haute est faite "
+                        "d'assez d'episodes distincts" if passe else
+                        ("la tranche haute est portee par trop peu d'episodes effectifs"
+                         if concentre else
+                         "l'effet n'est pas monotone : concentre aux bords"))}
 
 
 # --------------------------------------------- crible 7 : robustesse +-30 %
@@ -242,6 +296,13 @@ def main():
     print(f"      tranches (bps) : {r6['rendement_par_tranche_bps']}")
     print(f"      spearman {r6['spearman_tranche_vs_rendement']}  "
           f"pas croissants {r6['fraction_pas_croissants']}")
+    for i, cc in enumerate(r6["concentration_par_tranche"]):
+        if cc is None:
+            continue
+        print(f"      tranche {i+1}: total {cc['total_bps']:+9.1f} bps sur {cc['n_jours']} j  "
+              f"| episodes effectifs {cc['n_episodes_effectifs']}  "
+              f"| 50 % en {cc['jours_pour_50pct']} j  "
+              f"| moyenne sans top 1 % {cc['moyenne_sans_top_1pct']:+.2f}")
 
     r7 = None
     if not a.skip_7:

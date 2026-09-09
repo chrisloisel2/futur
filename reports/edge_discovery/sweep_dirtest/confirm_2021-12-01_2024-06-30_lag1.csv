@@ -1,0 +1,3 @@
+key,signal,neutral,horizon,basket,hold,smooth,state,regime,dir,n_days,n_indep,gross_dly,cost_dly,net_dly,net_per_hold,t,t_dir,t_inv,dir_impose,stab,nw_lag,meff,thr,passes
+lsr_globacct_x|mkt|h3|k8|hd1|sm0|-|-,lsr_globacct_x,mkt,3,8,1,0,-,-,DIR,853,284,35.02749656819301,4.050716838187463,30.976779730005546,92.93033919001664,4.064409216370512,4.064409216370512,-5.135802901211643,DIR,1.0,5,2.0,2.241402727604947,True
+lsr_globacct_x|mkt|h3|k8|hd1|sm0|-|-,lsr_globacct_x,mkt,3,8,1,0,-,-,INV,853,284,35.02749656819301,4.050716838187463,-39.07821340638048,-117.23464021914143,-5.135802901211643,4.064409216370512,-5.135802901211643,INV,0.0,5,2.0,2.241402727604947,False

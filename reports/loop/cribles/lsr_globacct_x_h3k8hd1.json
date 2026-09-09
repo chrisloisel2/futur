@@ -50,12 +50,70 @@
   "crible6": {
     "crible": 6,
     "passe": true,
+    "tranche_haute_concentree": false,
+    "concentration_par_tranche": [
+      {
+        "n_jours": 850,
+        "total_bps": -6993.28,
+        "moyenne_bps": -8.227,
+        "n_episodes_effectifs": 164.6,
+        "jours_pour_50pct": null,
+        "jours_pour_90pct": null,
+        "part_du_top_1pct": null,
+        "moyenne_sans_top_1pct": -10.13,
+        "moyenne_sans_top_5pct": -14.609
+      },
+      {
+        "n_jours": 850,
+        "total_bps": -885.5,
+        "moyenne_bps": -1.042,
+        "n_episodes_effectifs": 210.5,
+        "jours_pour_50pct": null,
+        "jours_pour_90pct": null,
+        "part_du_top_1pct": null,
+        "moyenne_sans_top_1pct": -2.606,
+        "moyenne_sans_top_5pct": -6.213
+      },
+      {
+        "n_jours": 850,
+        "total_bps": 993.09,
+        "moyenne_bps": 1.168,
+        "n_episodes_effectifs": 192.9,
+        "jours_pour_50pct": 2,
+        "jours_pour_90pct": 4,
+        "part_du_top_1pct": 1.576,
+        "moyenne_sans_top_1pct": -0.679,
+        "moyenne_sans_top_5pct": -5.132
+      },
+      {
+        "n_jours": 850,
+        "total_bps": 986.18,
+        "moyenne_bps": 1.16,
+        "n_episodes_effectifs": 130.5,
+        "jours_pour_50pct": 1,
+        "jours_pour_90pct": 1,
+        "part_du_top_1pct": 2.34,
+        "moyenne_sans_top_1pct": -1.57,
+        "moyenne_sans_top_5pct": -6.115
+      },
+      {
+        "n_jours": 850,
+        "total_bps": 11575.69,
+        "moyenne_bps": 13.618,
+        "n_episodes_effectifs": 286.6,
+        "jours_pour_50pct": 33,
+        "jours_pour_90pct": 73,
+        "part_du_top_1pct": 0.155,
+        "moyenne_sans_top_1pct": 11.623,
+        "moyenne_sans_top_5pct": 5.644
+      }
+    ],
     "rendement_par_tranche_bps": [
-      -8.123,
-      -1.096,
-      1.262,
+      -8.227,
+      -1.042,
       1.168,
-      13.718
+      1.16,
+      13.618
     ],
     "spearman_tranche_vs_rendement": 0.9,
     "fraction_pas_croissants": 0.75,
@@ -63,7 +121,7 @@
       "spearman": 0.8,
       "pas_croissants": 0.75
     },
-    "verdict": "ordonne dans l'intensite"
+    "verdict": "ordonne dans l'intensite, et la tranche haute est faite d'assez d'episodes distincts"
   },
   "crible7": null,
   "passe_les_trois": true

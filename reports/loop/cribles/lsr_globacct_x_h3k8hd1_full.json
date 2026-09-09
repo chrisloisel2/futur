@@ -1,0 +1,169 @@
+{
+  "config": {
+    "signal": "lsr_globacct_x",
+    "neutral": "mkt",
+    "horizon": 3,
+    "basket": 8,
+    "hold": 1,
+    "smooth": 0,
+    "dir": "DIR"
+  },
+  "base": {
+    "top_n": 120,
+    "aum": 200000.0,
+    "adv_frac": 0.01,
+    "cost_bps": 14.0,
+    "winsor": 0.5
+  },
+  "fenetre": [
+    "2021-12-01",
+    "2024-06-30"
+  ],
+  "reference": {
+    "net_bps": 30.977,
+    "t": 3.978,
+    "n_jours": 853
+  },
+  "crible5": {
+    "crible": 5,
+    "passe": true,
+    "panier_reduit_a": 4,
+    "detail": {
+      "illiquide": {
+        "net_bps": 18.727,
+        "t": 1.979,
+        "n_jours": 853
+      },
+      "median": {
+        "net_bps": 25.883,
+        "t": 2.497,
+        "n_jours": 853
+      },
+      "liquide": {
+        "net_bps": 24.424,
+        "t": 2.624,
+        "n_jours": 853
+      }
+    },
+    "verdict": "positif aux deux extremes de liquidite"
+  },
+  "crible6": {
+    "crible": 6,
+    "passe": true,
+    "rendement_par_tranche_bps": [
+      -8.123,
+      -1.096,
+      1.262,
+      1.168,
+      13.718
+    ],
+    "spearman_tranche_vs_rendement": 0.9,
+    "fraction_pas_croissants": 0.75,
+    "seuils": {
+      "spearman": 0.8,
+      "pas_croissants": 0.75
+    },
+    "verdict": "ordonne dans l'intensite"
+  },
+  "crible7": {
+    "crible": 7,
+    "passe": true,
+    "echecs": [],
+    "detail": {
+      "top_n": [
+        {
+          "valeur": 84,
+          "net_bps": 22.61,
+          "t": 2.906
+        },
+        {
+          "valeur": 120,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 156,
+          "net_bps": 29.079,
+          "t": 3.799
+        }
+      ],
+      "basket": [
+        {
+          "valeur": 6,
+          "net_bps": 32.637,
+          "t": 3.602
+        },
+        {
+          "valeur": 8,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 10,
+          "net_bps": 26.713,
+          "t": 3.719
+        }
+      ],
+      "hold": [
+        {
+          "valeur": 1,
+          "net_bps": 30.977,
+          "t": 3.978
+        }
+      ],
+      "horizon": [
+        {
+          "valeur": 2,
+          "net_bps": 30.998,
+          "t": 3.821
+        },
+        {
+          "valeur": 3,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 4,
+          "net_bps": 30.214,
+          "t": 4.008
+        }
+      ],
+      "cost_bps": [
+        {
+          "valeur": 9.8,
+          "net_bps": 32.192,
+          "t": 4.135
+        },
+        {
+          "valeur": 14.0,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 18.2,
+          "net_bps": 29.762,
+          "t": 3.821
+        }
+      ],
+      "adv_frac": [
+        {
+          "valeur": 0.007,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 0.01,
+          "net_bps": 30.977,
+          "t": 3.978
+        },
+        {
+          "valeur": 0.013,
+          "net_bps": 30.977,
+          "t": 3.978
+        }
+      ]
+    },
+    "verdict": "net positif partout a +-30 %"
+  },
+  "passe_les_trois": true
+}

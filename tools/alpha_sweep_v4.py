@@ -541,7 +541,7 @@ def run_grid(D, SIG, ST, univ, ret1, COSTP, args, prereg=None, ret_override=None
                         nan=float(np.nanmedian(COSTP.to_numpy(dtype=float))))
     UNV = univ
 
-    def one(sname, prep, nname, hh, kk, hd, sm, state="-", regime="-"):
+    def one(sname, prep, nname, hh, kk, hd, sm, state="-", regime="-", force_dir=None):
         out = backtest(prep, R1np, kk, Cnp, hold=hd, smooth=sm,
                        horizon=hh, exec_lag=args.exec_lag)
         if out is None:
@@ -554,7 +554,19 @@ def run_grid(D, SIG, ST, univ, ret1, COSTP, args, prereg=None, ret_override=None
         t_dir, t_inv = newey_west_t(net_dir, lag), newey_west_t(net_inv, lag)
         if not np.isfinite(t_dir):
             return
-        best_inv = net_inv.mean() > net_dir.mean()
+        # DEFAUT CORRIGE. Choisir le cote sur les donnees qu'on est en train de
+        # juger rend l'essai BILATERAL : on prend le meilleur de deux paris. En
+        # exploration c'est legitime (et le seuil du placebo en tient compte),
+        # mais en phase `confirm` cela ANNULE la direction pre-enregistree et
+        # fait payer 0,22 de seuil (2,7344 -> 2,9552 a n=16) sans rien donner.
+        # Mesure : 2 des 9 lignes du confirm v4 avaient change de cote par
+        # rapport a leur propre pre-enregistrement (amihud_20 DIR->INV,
+        # dd_from_high_10 INV->DIR). Quand une direction est pre-specifiee,
+        # elle est desormais IMPOSEE, et le test redevient unilateral.
+        if force_dir in ("DIR", "INV"):
+            best_inv = (force_dir == "INV")
+        else:
+            best_inv = net_inv.mean() > net_dir.mean()
         d = "INV" if best_inv else "DIR"
         nb, tb = (net_inv, t_inv) if best_inv else (net_dir, t_dir)
         full = np.zeros(n_days_total)
@@ -568,6 +580,7 @@ def run_grid(D, SIG, ST, univ, ret1, COSTP, args, prereg=None, ret_override=None
                          gross_dly=gross[m].mean(), cost_dly=cost[m].mean(),
                          net_dly=nb.mean(), net_per_hold=nb.mean() * hh,
                          t=tb, t_dir=t_dir, t_inv=t_inv,
+                         dir_impose=(force_dir if force_dir in ("DIR", "INV") else ""),
                          stab=sub_stability(nb), nw_lag=lag))
 
     if prereg is not None:
@@ -584,7 +597,8 @@ def run_grid(D, SIG, ST, univ, ret1, COSTP, args, prereg=None, ret_override=None
                                            index=s_.index, columns=s_.columns))
             prep = prepare(s_, UNV, cfg["smooth"])
             one(sname, prep, cfg["neutral"], cfg["horizon"], cfg["basket"],
-                cfg["hold"], cfg["smooth"], cfg.get("state", "-"), cfg.get("regime", "-"))
+                cfg["hold"], cfg["smooth"], cfg.get("state", "-"), cfg.get("regime", "-"),
+                force_dir=cfg.get("dir"))
         return rows, np.array(pnl_rows), keys
 
     HORIZ, BASK, HOLD, SMOOTH = [1, 3, 5, 10], [8, 12], [1, 5], [0, 5]

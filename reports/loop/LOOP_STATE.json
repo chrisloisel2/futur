@@ -1,5 +1,5 @@
 {
-  "iteration": 5,
+  "iteration": 6,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -70,8 +70,8 @@
     }
   ],
   "tests_consumed_lifetime": 16,
-  "current_threshold_t": 2.7344,
-  "threshold_provenance": "src/institutional/live_alpha_lab/preregistration.py::threshold_t(16) = NormalDist().inv_cdf(1 - 0.05/16), unilateral. Jamais saisi.",
+  "current_threshold_t": 2.9552,
+  "threshold_provenance": "BILATERAL a n=16 : inv_cdf(1 - (0.05/16)/2) = 2.9552. Les 16 essais deja consommes ont ete juges par un harnais qui RE-CHOISISSAIT le cote sur les donnees scellees (defaut I13), donc chacun etait de fait un maximum de deux paris. Le 2.7344 precedemment inscrit etait trop bas de 0,22. Depuis le correctif, un essai dont la direction est pre-specifiee redevient unilateral : threshold_t(17) = 2.7543.",
   "instrument_defects_open": [
     {
       "id": "I3",
@@ -84,6 +84,24 @@
       "titre": "le cout de 14 bps est une HYPOTHESE, pas une mesure",
       "detail": "aucune source de profondeur ou de spread n'existe avant juillet 2026. Le point mort du candidat positionnement est a ~124 bps, donc l'hypothese n'est pas critique pour LUI, mais elle l'est pour tout signal a fort churn.",
       "bloquant_pour": "tout candidat dont cout/brut > 30%"
+    },
+    {
+      "id": "I14",
+      "titre": "n_indep ignore le lissage",
+      "detail": "n_indep = n_days / (horizon*hold) ne divise pas par smooth. 1 830 lignes de sweep_v5 ont smooth=5 avec n_indep == n_days. Surestime le filtre n_indep>=100 ; ne gonfle pas le t (Newey-West, lui, integre bien le lissage dans nw_lag).",
+      "bloquant_pour": "le crible 3 (>= 116 episodes independants) sur les configs lissees"
+    },
+    {
+      "id": "I15",
+      "titre": "le Sharpe rapporte est un CAGR compose, pas un Sharpe arithmetique",
+      "detail": "candidate_report.py::describe calcule ann = (equite_finale ** (365.25/jours) - 1) puis divise par la vol annualisee. C'est un Sharpe geometrique, incompatible avec la relation t ~= S*sqrt(T) utilisee pour toute la planification de puissance. Le '3,07' en echantillon vaut ~2,43 en arithmetique, et le '1,95' hors echantillon ~1,66. Toutes les dates de confirmabilite calculees a partir de ces chiffres sont optimistes.",
+      "bloquant_pour": "tout calcul de puissance ou de date de confirmabilite"
+    },
+    {
+      "id": "I16",
+      "titre": "le backfill des klines s'arrete au 2026-06-30",
+      "detail": "um_klines_1d : 30/30 fichiers echantillonnes s'arretent au 2026-06-30, alors que binance_vision_metrics va jusqu'au 2026-09-06 (38/40 au-dela du 2026-08-01). Les klines portent le prix, l'ADV, l'univers et le rendement : sans elles les 68 jours de metriques deja sur disque sont inexploitables. C'est le goulot unique du depot, et le seul gisement RENOUVELABLE.",
+      "bloquant_pour": "toute accumulation de donnee vierge"
     }
   ],
   "instrument_defects_closed": [
@@ -146,6 +164,12 @@
       "titre": "les signaux nommes basis_* ne mesuraient pas le basis",
       "ferme_le": "2026-09-09",
       "preuve": "`basis_x/_z60/_chg7` valaient `mark/close - 1`, l'ecart du dernier echange du perp a son PROPRE prix de marque -- un artefact de microstructure. Sur 40 273 cellules communes : corr de rang avec le vrai basis (perp/spot-1) = -0,11 ; corr de rang avec le funding = -0,058 contre +0,682 pour le vrai basis ; ecart-type 324,6 bps contre 36,9. Renommes `mark_dev_*`, vraie famille ajoutee."
+    },
+    {
+      "id": "I13",
+      "titre": "la phase confirm re-choisissait le cote sur les donnees scellees",
+      "ferme_le": "2026-09-09",
+      "preuve": "one() n'avait aucun parametre de direction et tranchait best_inv = net_inv.mean() > net_dir.mean() sur les donnees qu'il jugeait ; la branche prereg de run_grid ne transmettait jamais cfg['dir']. Preuve que le mecanisme a FIRE : 2 des 9 lignes du confirm v4 contredisent leur propre pre-enregistrement (amihud_20 DIR->INV, dd_from_high_10 INV->DIR). Consequence : chaque essai scelle etait bilatateral, barre operante 2.9552 et non 2.7344. Correctif : force_dir impose la direction pre-enregistree. Verifie hors fenetre scellee : en forcant INV sur lsr_globacct_x|mkt|h3k8hd1sm0 la sortie donne bien INV t=-5.136, et DIR t=+4.064 en forcant DIR."
     }
   ],
   "data_sources_ingested": [
@@ -299,7 +323,7 @@
   "promotion_last": {
     "date": "2026-09-09",
     "promu": null,
-    "raison": "Aucun candidat ne passe les huit cribles. Famille basis : echoue sur le t (2,49 < 2,81 mediane du placebo) ET sur le crible 8 (rho = +0,69 avec lsr_globacct_x). Famille positionnement : echoue sur le crible 1 (aucun payeur ecrit AVANT la mesure) et sur le crible 8 (les 8 signaux sont correles 0,63 a 0,92 entre eux -- une seule sleeve au plus), et ses meilleurs membres ont deja consomme la fenetre scellee."
+    "raison": "REFUS de pre-enregistrer, pour trois raisons mesurees. (1) Le defaut I13 rendait tout essai scelle bilateral : sceller avant de corriger etait une depense volontaire de puissance -- corrige aujourd'hui. (2) EARLY ne peut pas juger l'alpha survivant (positionnement injouable avant 2021-12) et juge le reste a 18-59 % de puissance : un echec ne distinguerait pas 'pas d'alpha' de 'pas assez de donnees'. (3) EARLY est NON RENOUVELABLE, le forward l'est : depenser l'actif irreversible en premier est la seule erreur qu'on ne pourra pas defaire."
   },
   "instrument_coherence": {
     "date": "2026-09-09",
@@ -321,5 +345,46 @@
     "affirmation_recue": "le balayage travaille sur 50 symboles, en passer a 696 multiplierait le t par ~1,8",
     "constat": "FAUX depuis v4. Le balayage tourne sur un panel de 696 symboles ; l'univers TRADABLE est top-120/jour par ADV avec contrainte de capacite. Preuve : l'en-tete de chaque run, '=== panel 943j x 696 symboles ===' puis 'univers median 120/jour (top_n=120)'. Les 50 symboles sont data/enriched, utilise par le live_alpha_lab, PAS par le balayage de recherche.",
     "question_ouverte": "reste-t-il du headroom au-dela de top_n=120 ? mesure en cours."
+  },
+  "threshold_next_test_one_sided": 2.7543,
+  "virgin_data_verdict": {
+    "date": "2026-09-09",
+    "methode": "workflow 9 agents (4 enquetes + 4 refutations adversariales + synthese) ; 3 des 4 enquetes ont ete REFUTEES et corrigees avant synthese",
+    "EARLY_2020-01_2021-11": {
+      "vierge_pour": "le harnais alpha_sweep_v4 et sa bibliotheque",
+      "PAS_vierge_pour": "CTREND v0/v1, hunt round 2 ('ex-2020 t drops to 1.84'), round 3, round 4 (2020-01-01 -> 2026-08-01), Validation Factory. La famille transversale quotidienne y est brulee.",
+      "jours_utilisables": 578,
+      "n_indep_k8_h1_hd5": 115,
+      "bruit": "sigma placebo +32 a +47 % (univers median 58 noms/jour au lieu de 120)",
+      "famille_positionnement": "INJOUABLE -- verifie : 1 seul des 312 fichiers metrics commence avant 2021-12 (BTCUSDT, 2020-09-01)",
+      "puissance_meilleur_candidat_calculable": "funding_cum_20 : 18 % a 59 % selon le seuil et le transport du bruit -- pile ou face"
+    },
+    "apres_2026-06-30": {
+      "lignes_construites": 0,
+      "recuperables": 70,
+      "note": "klines absentes (I16) ; 70 jours = 14 episodes a h1 hd5, puissance ~5 % = le taux de faux positifs. Ce n'est pas un test, c'est le debut d'une collecte."
+    },
+    "forward_live": {
+      "jours_de_decision": 10,
+      "sharpe_requis": 14.5,
+      "valeur": "infrastructure, pas statistique"
+    },
+    "135_symboles_jamais_trades": {
+      "temps_neuf": 0,
+      "correlation_avec_top120": 0.973,
+      "verdict": "coupe redondante sur un calendrier deja brule, pas une fenetre vierge"
+    }
+  },
+  "headroom_verdict": {
+    "date": "2026-09-09",
+    "conclusion": "ZERO. Elargir au-dela de top-120 ne gagne rien -- mais la formulation 'elargir detruit' n'est PAS soutenable (le refutateur l'a cassee).",
+    "faits": [
+      "top_n=696 ne designe jamais 696 symboles : l'univers sature a 145 noms/jour parce que le panel ne compte que 153 symboles VIVANTS par jour sur la fenetre d'exploration. L'elargissement reel vaut +21 %, pas x5,8.",
+      "l'anneau ajoute (rang ADV 120-160) a un brut NUL ou negatif : -2,89 bps/j contre +20,27 pour l'anneau 0-40. On remplace du signal par du bruit.",
+      "le 'maximum interieur a 120' est un artefact de selection : sur 1 640 configurations jamais choisies, top_n=120 est le MINIMUM (t max 2,329 a 120 contre 2,963 a 150).",
+      "la degradation 120->696 n'est pas significative : t apparie +0,68 sur 4 des 5 tetes.",
+      "adv_frac est un bouton MORT : univers rigoureusement identique de 0,005 a 1,0."
+    ],
+    "verdict": "garder top_n=120, non comme optimum demontre mais parce que rien ne se gagne ailleurs sur la surface."
   }
 }

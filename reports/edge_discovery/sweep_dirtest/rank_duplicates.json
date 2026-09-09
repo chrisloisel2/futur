@@ -1,10 +1,13 @@
 {
-  "n_classes": 37,
-  "n_names_folded": 45,
-  "n_signals_kept": 138,
+  "n_classes": 38,
+  "n_names_folded": 46,
+  "n_signals_kept": 154,
   "classes": {
     "ats_z60": [
       "avg_trade_size_z60"
+    ],
+    "basis_vs_univ": [
+      "basis_x"
     ],
     "carry_crowded": [
       "crowding_fund_x_oi"
