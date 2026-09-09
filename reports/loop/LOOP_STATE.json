@@ -1,5 +1,5 @@
 {
-  "iteration": 9,
+  "iteration": 10,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -276,6 +276,14 @@
       "payeur": "aucun -- hypothese de regime, NON promouvable par decision ecrite d'avance",
       "ecrit_le": "2026-09-09",
       "fichier": "reports/loop/hypotheses/H-BASIS.md"
+    },
+    {
+      "id": "FORWARD_CROWD_POSITIONING_V1",
+      "titre": "contrarien positionnement foule, test forward unique",
+      "payeur": "le particulier a levier collectivement le plus long d'un nom, contraint de vendre sur les mouvements adverses",
+      "ecrit_le": "2026-09-09",
+      "fichier": "reports/loop/prereg/FORWARD_CROWD_POSITIONING_V1.md",
+      "scelle": true
     }
   ],
   "finalists_pending": [],
@@ -569,5 +577,32 @@
       "une source EXTERNE jamais telechargee : la donnee n'etait pas sur disque. Jamais mentionnees dans le depot : Binance Vision options (BVOLIndex BTC/ETH, EOHSummary BTC/ETH/BNB/XRP/DOGE), Bitfinex, CME, Coinglass, Bitstamp, Gate, KuCoin, Aave/Compound, Glassnode/CryptoQuant, Polymarket. Coinbase/Kraken/BitMEX/dYdX/GMX n'apparaissent que comme chaines (liste de protocoles DefiLlama), pas comme telechargements."
     ],
     "consequence": "Le raccourci 'historique complet a 1 regard, S >= 1,02' n'existe sur AUCUNE donnee deja sur disque. Il n'existe que pour une source neuve telechargee APRES scellement, et son historique fixe la puissance."
-  }
+  },
+  "preregistrations_sealed": [
+    {
+      "id": "SOURCE_SELECTION_RULE",
+      "branch": "prereg/source-selection-rule",
+      "commit": "e765081105aaf267411d729fa66d87e8ae269d73",
+      "blob": "a3007931c4ad97409ff298831363f5abdf973837",
+      "sha256": "b316600cc4f88f585c1174474b68a680c563f158575fc61fee3ffe6342a965ff",
+      "ledger_seq": 2,
+      "contenu": "regle de selection parmi {CME, Bitfinex}, ecrite AVANT inventaire : historique quotidien libre le plus long, puis 3 conditions, n<=2"
+    },
+    {
+      "id": "FORWARD_CROWD_POSITIONING_V1",
+      "branch": "prereg/forward-crowd-positioning-v1",
+      "commit": "0de75a903a751bcab56bec72cc74b3b70a16ab49",
+      "blob": "69b62e916bfdbb2e5e12eb771d3b809181112ff6",
+      "sha256": "4d9cf45bd2642fa30d2e5d6fa203092a5f1c1b6334761a402695b69ba3ee5215",
+      "ledger_seq": 3,
+      "n": 1,
+      "threshold_one_sided": 1.6449,
+      "window_start": "2026-09-09",
+      "min_days": 819,
+      "test_pas_avant": "2028-12-06",
+      "code_pinne_dans": "commit 1adccc6 / tag local prereg-forward-v1-code",
+      "consigne": "pour executer le test, RESTAURER les 5 fichiers pinnes depuis ce tag ; toute version modifiee est refusee par le script lui-meme",
+      "budget": "debite 1 test a l'execution"
+    }
+  ]
 }
