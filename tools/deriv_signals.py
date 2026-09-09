@@ -143,10 +143,60 @@ def build(D):
             # la foule est longue ET paie pour l'etre
             S["crowd_pays_7"] = -(xr(GA) * xr(F.rolling(7).sum()))
     if ok(MK) and ok(F):
-        basis = (MK / c - 1.0)
-        S["basis_x"] = -xr(basis)
-        S["basis_z60"] = -zs(basis, 60)
-        S["basis_chg7"] = -xr(basis - basis.shift(7))
+        # RENOMME. Ces trois signaux s'appelaient `basis_*` alors qu'ils ne
+        # mesurent PAS le basis : `mark / close - 1` est l'ecart du dernier
+        # echange du perp a son PROPRE prix de marque, un artefact de
+        # microstructure. Mesure sur les 40 273 cellules communes :
+        #     corr de rang avec le vrai basis (perp/spot - 1) : -0,11
+        #     corr de rang avec le funding : -0,058  (le vrai basis : +0,682)
+        #     ecart-type 324,6 bps  (le vrai basis : 36,9 bps)
+        # Le nom promettait une prime, le contenu livrait du bruit neuf fois
+        # plus volatil. La famille basis n'avait donc jamais ete testee.
+        mdev = (MK / c - 1.0)
+        S["mark_dev_x"] = -xr(mdev)
+        S["mark_dev_z60"] = -zs(mdev, 60)
+        S["mark_dev_chg7"] = -xr(mdev - mdev.shift(7))
+
+    # ---- 4bis. BASIS REEL : perp contre spot apparie --------------------
+    # Hypotheses pre-ecrites : reports/loop/hypotheses/H-BASIS.md
+    B = D.get("basis")
+    if ok(B):
+        # H-BASIS-1 : la prime de portage encombree. Le long a levier paie le
+        # cash-and-carry ; on achete ce qui est bon marche a porter.
+        S["basis_x"] = -xr(B)
+        S["basis_z60"] = -zs(B, 60)
+        S["basis_z20"] = -zs(B, 20)
+        S["basis_own_pct"] = -(B.rolling(250, min_periods=90).rank(pct=True) - 0.5)
+        S["basis_vs_univ"] = -(B.sub(B.median(axis=1), axis=0))
+
+        # H-BASIS-3 : la compression du portage. Un desengagement du levier est
+        # mecanique, pas informationnel : ce qui est ferme sous contrainte est
+        # ferme trop bas. On achete ce qui vient de se comprimer.
+        for n in (3, 7, 20):
+            S[f"basis_chg{n}"] = -xr(B - B.shift(n))
+        S["basis_accel"] = -(B.rolling(3).mean() - B.rolling(20).mean())
+        S["basis_vol20"] = -B.rolling(20).std()
+
+        # H-BASIS-2 : le desaccord entre ce qu'on PAIE et comment on est POSITIONNE.
+        # Le basis dit le prix du levier, le ratio long/short dit qui le detient.
+        if ok(GA):
+            S["dis_basis_vs_crowd"] = xr(B) - xr(GA)
+            S["dis_basis_vs_crowd_7"] = xr(B.rolling(7).mean()) - xr(GA.rolling(7).mean())
+        if ok(TP):
+            S["dis_basis_vs_ttpos"] = xr(B) - xr(TP)
+        if ok(F):
+            # basis et funding mesurent la meme prime : leur ecart est ce que
+            # l'un dit et que l'autre ne dit pas.
+            S["dis_basis_vs_fund"] = xr(B) - xr(F)
+        if ok(OI):
+            # portage cher ET stock en construction : l'encombrement, version basis
+            S["basis_crowded"] = -(xr(B) * xr(OI / OI.shift(7) - 1))
+
+        # ce que le spot debloque aussi : ou se fait le volume, perp ou spot ?
+        SQV = D.get("spot_quote_volume")
+        if ok(SQV):
+            S["perp_spot_volratio"] = -xr(qv / (SQV + EPS))
+            S["perp_spot_volratio_chg7"] = -xr((qv / (SQV + EPS)).pct_change(7))
 
     # ---- 5. FLUX PRENEUR ------------------------------------------------
     if ok(TBQ):

@@ -68,6 +68,18 @@ def load_cache(root, start, end):
     out = {}
     for k in meta["fields"]:
         out[k] = pd.DataFrame(z[k][m], index=idx[m], columns=syms).astype(float)
+    # Panel SPOT apparie, dans un fichier separe : `panel_daily.npz` porte des
+    # donnees deja jugees et son empreinte est au ledger. Optionnel : le balayage
+    # tourne sans, la famille basis est simplement absente.
+    sp = cdir / "panel_spot_daily.npz"
+    if sp.exists():
+        smeta = json.load(open(cdir / "panel_spot_daily_meta.json"))
+        if smeta["symbols"] == syms and len(smeta["index"]) == len(idx):
+            zs_ = np.load(sp)
+            for k in smeta["fields"]:
+                out[k] = pd.DataFrame(zs_[k][m], index=idx[m], columns=syms).astype(float)
+        else:
+            print("  !! panel spot desaligne du panel perp -- famille basis ignoree")
     return out
 
 

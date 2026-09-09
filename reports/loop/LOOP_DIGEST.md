@@ -1,6 +1,6 @@
 # Boucle de recherche — digest
 
-*régénéré à l'itération 3 · 2026-09-09*
+*régénéré à l'itération 5 · 2026-09-09*
 
 ## Budget
 
@@ -45,8 +45,9 @@ cribles, et il n'y en a **aucun**.
 | I9 | `taker_imb_z{n}` utilisait une fenêtre `n*3` | 1 |
 | I10 | le dédoublonnage de I8 était incomplet | 3 |
 | I11 | l'unité des horodatages Vision déduite une fois par lot | 2 |
+| I12 | les signaux nommés `basis_*` ne mesuraient pas le basis | 5 |
 
-**Bibliothèque de signaux : 183 noms → 138 essais réels.**
+**Bibliothèque de signaux : 154 noms → 9 080 configurations, 4,55 paris indépendants.**
 
 ## Sources
 
@@ -62,9 +63,24 @@ seulement, contre un panel de 696 USDT-M. Aucun recouvrement utile.
 
 ## Hypothèses, finalistes, sleeves
 
-- hypothèses écrites : **0**
+- hypothèses écrites : **4** — `H-BASIS-1..4`, payeurs dans
+  [hypotheses/H-BASIS.md](hypotheses/H-BASIS.md)
 - finalistes en attente : **0**
 - **sleeves validées : 0**
+
+### Dernière exploration — `sweep_basis`, 2026-09-09
+
+Famille basis mesurée pour la première fois (le spot venait d'être apparié) :
+**aucun edge**. Meilleur `t` de la famille **+2,494** (`dis_basis_vs_crowd`),
+sous la médiane du placebo (2,807), très loin du seuil (4,06). Corrobore le
+prior « funding/basis épuisé par arbitrage 2025-26 ».
+
+**Crible 8 mesuré** : les 14 signaux de tête ne font que **4,55 paris
+indépendants**. `dis_basis_vs_crowd` est corrélé **+0,69** avec
+`lsr_globacct_x` — ce n'est pas une seconde sleeve, c'est le positionnement
+déguisé. Une seule direction forte existe dans l'exploration.
+
+**Aucune promotion.** Le budget de 3 tests reste intact.
 
 ## Contrôles
 
@@ -91,6 +107,9 @@ en se plaçant à `n = 1`. Décision demandée — détail dans
 
 ## Prochaine itération
 
-Budget 3, aucun finaliste, aucun défaut bloquant en tête de file →
-**cas 4 : balayer l'exploration et promouvoir au plus un finaliste**, désormais
-avec la famille basis que le spot vient de débloquer. Gratuit.
+**Cas 1 — défaut d'instrument.** Les cribles **5** (tiers liquide *et*
+illiquide), **6** (monotonie dans l'intensité) et **7** (±30 % sur chaque
+paramètre) ne sont pas calculés par le harnais. Ils n'ont pas bloqué à
+l'itération 5 — les cribles 1 et 8 suffisaient — mais **aucun candidat ne pourra
+jamais être promu tant qu'ils manquent**. C'est le prochain défaut, et il passe
+en tête de file.

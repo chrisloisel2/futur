@@ -1,5 +1,5 @@
 {
-  "iteration": 3,
+  "iteration": 5,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -140,6 +140,12 @@
       "titre": "l'unite des horodatages Vision etait deduite UNE fois par lot",
       "ferme_le": "2026-09-09",
       "preuve": "Binance a bascule de la milliseconde a la microseconde en cours d'historique. `unit = 'us' if open_time.iloc[-1] > 1e14 else 'ms'` lit la derniere ligne d'un concat NON TRIE : un lot mixte datait les lignes de l'autre unite a l'an 57056 (plantage observe sur le spot). Tranche desormais ligne par ligne, dans les deux backfills. um_klines_1d audite : 787 fichiers, 587 609 lignes, bornes 2020-01-01 -> 2026-06-30, zero hors bornes -- le panel scelle n'etait PAS corrompu."
+    },
+    {
+      "id": "I12",
+      "titre": "les signaux nommes basis_* ne mesuraient pas le basis",
+      "ferme_le": "2026-09-09",
+      "preuve": "`basis_x/_z60/_chg7` valaient `mark/close - 1`, l'ecart du dernier echange du perp a son PROPRE prix de marque -- un artefact de microstructure. Sur 40 273 cellules communes : corr de rang avec le vrai basis (perp/spot-1) = -0,11 ; corr de rang avec le funding = -0,058 contre +0,682 pour le vrai basis ; ecart-type 324,6 bps contre 36,9. Renommes `mark_dev_*`, vraie famille ajoutee."
     }
   ],
   "data_sources_ingested": [
@@ -194,7 +200,36 @@
       "etat": "futur-microstructure-reduced.service tourne, ~0,89 Go/j"
     }
   ],
-  "hypotheses_written": [],
+  "hypotheses_written": [
+    {
+      "id": "H-BASIS-1",
+      "titre": "la prime de portage encombree",
+      "payeur": "le particulier a levier, qui paie le funding faute de credit collateralise",
+      "ecrit_le": "2026-09-09",
+      "fichier": "reports/loop/hypotheses/H-BASIS.md"
+    },
+    {
+      "id": "H-BASIS-2",
+      "titre": "desaccord entre ce qu'on paie et comment on est positionne",
+      "payeur": "la foule, quand le desaccord se resout contre elle",
+      "ecrit_le": "2026-09-09",
+      "fichier": "reports/loop/hypotheses/H-BASIS.md"
+    },
+    {
+      "id": "H-BASIS-3",
+      "titre": "la compression du portage",
+      "payeur": "le long a levier appele en marge, qui ferme sans choisir son moment",
+      "ecrit_le": "2026-09-09",
+      "fichier": "reports/loop/hypotheses/H-BASIS.md"
+    },
+    {
+      "id": "H-BASIS-4",
+      "titre": "la dispersion du portage comme regime",
+      "payeur": "aucun -- hypothese de regime, NON promouvable par decision ecrite d'avance",
+      "ecrit_le": "2026-09-09",
+      "fichier": "reports/loop/hypotheses/H-BASIS.md"
+    }
+  ],
   "finalists_pending": [],
   "sleeves_validated": [],
   "manifest_sha256": {
@@ -242,5 +277,28 @@
       "detail": "sweep_v5 a relu la fenetre scellee sur pos_crowd_vs_univ et pos_ttacct_vs_univ, numeriquement identiques (8 decimales) a lsr_globacct_x et lsr_ttacct_x deja lus par sweep_v4. Cause : le dedup ne comparait que les NOMS. Cause fermee par I8.",
       "consequence": "3 lectures non creditees ; le compte d'essais retient 16 candidats distincts"
     }
-  ]
+  ],
+  "exploration_last": {
+    "date": "2026-09-09",
+    "tag": "sweep_basis",
+    "window": "2021-12-01/2024-06-30 (exploration seule)",
+    "n_signals_names": 154,
+    "n_configs": 9080,
+    "meff_participation": 43.4,
+    "meff_liji": 1017.0,
+    "thr_bonferroni_bilateral": 4.06,
+    "famille_basis": {
+      "n_signaux": 16,
+      "meilleur_t": 2.494,
+      "meilleur_signal": "dis_basis_vs_crowd",
+      "verdict": "AUCUN edge. Sous la mediane du placebo (2,807). Corrobore le prior du depot (funding/basis epuise par arbitrage 2025-26)."
+    },
+    "paris_independants": 4.55,
+    "note_artefact": "le |t| max de la famille (4,958 sur basis_z20) est NEGATIF : brut +0,39 bps contre cout 25,33 bps. Ce t mesure la constante de cout, pas une prime inversee."
+  },
+  "promotion_last": {
+    "date": "2026-09-09",
+    "promu": null,
+    "raison": "Aucun candidat ne passe les huit cribles. Famille basis : echoue sur le t (2,49 < 2,81 mediane du placebo) ET sur le crible 8 (rho = +0,69 avec lsr_globacct_x). Famille positionnement : echoue sur le crible 1 (aucun payeur ecrit AVANT la mesure) et sur le crible 8 (les 8 signaux sont correles 0,63 a 0,92 entre eux -- une seule sleeve au plus), et ses meilleurs membres ont deja consomme la fenetre scellee."
+  }
 }
