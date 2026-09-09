@@ -604,5 +604,29 @@
       "consigne": "pour executer le test, RESTAURER les 5 fichiers pinnes depuis ce tag ; toute version modifiee est refusee par le script lui-meme",
       "budget": "debite 1 test a l'execution"
     }
-  ]
+  ],
+  "source_inventory_2026_09_09": {
+    "regle_appliquee": "SOURCE_SELECTION_RULE (branche prereg/source-selection-rule, commit e765081), ecrite AVANT cet inventaire",
+    "bitfinex": {
+      "acces": "libre, sans cle (api-pub.bitfinex.com v2)",
+      "granularite": "1m..1M, quotidien et horaire verifies",
+      "debut": "2016-07-31",
+      "fin": "2026-09-09",
+      "profondeur_ans": 10.1,
+      "nature": "fUSD = pool de pret USD pour la marge spot, serie UNIQUE (pas transversale) ; periodes p2 (2 j) et p30 (30 j)"
+    },
+    "cme": {
+      "acces": "Yahoo BTC=F HTTP 200 mais 457 barres quotidiennes sur 8,7 ans (~21 %) ; Stooq vide ; CME Group 403 (DataMine payant)",
+      "debut_nominal": "2017-12-18",
+      "fin": "2026-09-09",
+      "profondeur_utile": "a etablir : couverture quotidienne incomplete"
+    },
+    "etape_4_designation": "BITFINEX en premier (historique quotidien libre le plus long), conforme au prior declare",
+    "conditions_bitfinex": {
+      "1_acces_libre_quotidien": true,
+      "2_profondeur_T>=2.24_ans_a_n=1": true,
+      "3_mecanisme_jamais_mesure": "EN COURS : hypothese a ecrire AVANT chargement, puis lignee"
+    },
+    "n_sources_examinees": 1
+  }
 }
