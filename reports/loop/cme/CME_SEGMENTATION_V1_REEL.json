@@ -1,0 +1,24 @@
+{
+  "n_days": 1618,
+  "n_days_en_position": 198,
+  "gross_bps": 6.772,
+  "cost_bps": 2.089,
+  "net_bps": 4.683,
+  "t_net_nw": 1.5767,
+  "t_gross_nw": 2.2415,
+  "sharpe_arith": 0.7212,
+  "max_dd_1x": -0.302,
+  "skew_daily": 3.416,
+  "sous_periodes_positives": 3,
+  "net_bps_avant_ETF": 9.253,
+  "net_bps_apres_ETF": -2.789,
+  "part_jours_short": 0.059,
+  "part_jours_long": 0.064,
+  "mode": "REEL",
+  "threshold_one_sided_n2": 1.96,
+  "passe": false,
+  "window": [
+    "2020-01-03",
+    "2026-06-30"
+  ]
+}

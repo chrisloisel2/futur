@@ -1,0 +1,26 @@
+{
+  "fetched_at_utc": "2026-09-09T20:19:12+00:00",
+  "files": {
+    "BTC_F_yahoo_daily.parquet": {
+      "sha256": "f280dc843d78e0cd2059640a3d1e1f9d0d21b97803ac8f2170cb51ab0ba56a01",
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/BTC=F?interval=1d&period1=1512086400&period2=1788985152",
+      "rows": 2195
+    },
+    "BTCUSDT_spot_1h.parquet": {
+      "sha256": "591b01afa6a80132b3d27ae78057476abae8a3cfac611b8bb76fdc1ab6683eb3",
+      "source": "binance vision spot 1h monthly",
+      "rows": 79117,
+      "months_missing": [
+        "2026-09"
+      ]
+    },
+    "BTCUSDT_um_1h.parquet": {
+      "sha256": "2f4ad79e980005212e0e1642ea9ff98e7edf525c81db951fcd34c1f9588e9052",
+      "source": "binance vision um 1h monthly",
+      "rows": 58440,
+      "months_missing": [
+        "2026-09"
+      ]
+    }
+  }
+}

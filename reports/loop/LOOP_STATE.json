@@ -1,8 +1,8 @@
 {
   "iteration": 10,
   "date": "2026-09-09",
-  "budget_tests_remaining": 3,
-  "budget_raw_balance": 3,
+  "budget_tests_remaining": 2,
+  "budget_raw_balance": 2,
   "budget_ledger": [
     {
       "source": "um_klines_1d",
@@ -67,9 +67,17 @@
       "cap": 5,
       "date": "2026-09-09",
       "note": "409/561 perps apparies, 152 sans spot. 12 multiplicateurs (1000X) explicites au registre. Validation economique : corr de rang(basis, funding) = +0,5345, BTC basis median -3,8 bps (p5 -6,4 / p95 +9,0). Zero appariement suspect (|basis median| > 5 %)."
+    },
+    {
+      "source": "__DEBIT__CME_SEGMENTATION_V1",
+      "provenance": "regard unique pre-enregistre (n=2), branche prereg/cme-segmentation-v1, ledger seq 6",
+      "episodes": 0,
+      "credited": -1,
+      "date": "2026-09-09",
+      "note": "t_net 1.5767 < 1.96 : ECHEC. Aucun credit pour la source CME malgre 1 618 jours (floor=4) : la famille est fermee sur cet historique par le protocole, aucune autre hypothese n'y sera testee, un credit serait une fiction."
     }
   ],
-  "tests_consumed_lifetime": 16,
+  "tests_consumed_lifetime": 17,
   "current_threshold_t": 2.9552,
   "threshold_provenance": "BILATERAL a n=16 : inv_cdf(1 - (0.05/16)/2) = 2.9552. Les 16 essais deja consommes ont ete juges par un harnais qui RE-CHOISISSAIT le cote sur les donnees scellees (defaut I13), donc chacun etait de fait un maximum de deux paris. Le 2.7344 precedemment inscrit etait trop bas de 0,22. Depuis le correctif, un essai dont la direction est pre-specifiee redevient unilateral : threshold_t(17) = 2.7543.",
   "instrument_defects_open": [
@@ -221,6 +229,13 @@
       "days": 2330,
       "credited": 5,
       "unlocks": "famille basis (niveau, variation, dispersion) + structure par terme avec binance_vision_quarterly"
+    },
+    {
+      "source": "cme_btc_f_yahoo + binance_1h_spot_um_BTCUSDT",
+      "symbols": 1,
+      "days": 1618,
+      "credited": 0,
+      "note": "acquis APRES scellement ; famille fermee ; manifeste SHA-256 dans reports/loop/cme/MANIFEST_inputs.json"
     }
   ],
   "data_sources_known_unfetched": [
@@ -603,6 +618,18 @@
       "code_pinne_dans": "commit 1adccc6 / tag local prereg-forward-v1-code",
       "consigne": "pour executer le test, RESTAURER les 5 fichiers pinnes depuis ce tag ; toute version modifiee est refusee par le script lui-meme",
       "budget": "debite 1 test a l'execution"
+    },
+    {
+      "id": "CME_SEGMENTATION_V1",
+      "branch": "prereg/cme-segmentation-v1",
+      "commit": "0ddeee41529024494b5c996e9b19a925aef114d7",
+      "blob": "6a7f0268bd3b4f960799a870409dfbae2f480736",
+      "sha256": "4ca688079c106a1652b64c108beec4ba5f9de73b3ef9067c44beee570ee4b8cd",
+      "ledger_seq_seal": 5,
+      "ledger_seq_look": 6,
+      "n": 2,
+      "resultat": "ECHEC t_net 1.5767 < 1.96",
+      "inputs_manifest": "reports/loop/cme/MANIFEST_inputs.json"
     }
   ],
   "source_inventory_2026_09_09": {
@@ -620,7 +647,38 @@
       "debut": "2017-12-18",
       "fin": "2026-09-09",
       "profondeur_ans": 8.7,
-      "nature": "front-month CONTINU (saut au roll, pas de structure par terme par contrat) ; close a l'heure CME, pas 00:00 UTC"
+      "nature": "front-month CONTINU (saut au roll, pas de structure par terme par contrat) ; close a l'heure CME, pas 00:00 UTC",
+      "examen": {
+        "n": 2,
+        "conditions": {
+          "1_acces_libre_quotidien": true,
+          "2_profondeur_T>=2.85": true,
+          "3_mecanisme_jamais_mesure": true
+        },
+        "test": "EXECUTE une fois, ledger seq 6",
+        "verdict": "ECHEC t_net 1.5767 < 1.96",
+        "chiffres": {
+          "n_days": 1618,
+          "n_days_en_position": 198,
+          "gross_bps": 6.772,
+          "cost_bps": 2.089,
+          "net_bps": 4.683,
+          "t_net_nw": 1.5767,
+          "t_gross_nw": 2.2415,
+          "sharpe_arith": 0.7212,
+          "max_dd_1x": -0.302,
+          "skew_daily": 3.416,
+          "sous_periodes_positives": 3,
+          "net_bps_avant_ETF": 9.253,
+          "net_bps_apres_ETF": -2.789
+        },
+        "lecture_honnete": [
+          "le brut passerait (t 2.24) ; le net non (t 1.58) : le critere pre-enregistre etait le NET, il ne passe pas",
+          "prediction secondaire (compression apres les ETF spot 2024-01-11) : COHERENTE, +9.25 bps avant, -2.79 apres -- le mecanisme raconte une histoire plausible qui ne survit pas a son propre critere",
+          "queue : DD -30 % > 25 % autorise, skew +3.4 : non deployable de toute facon"
+        ],
+        "statut": "FERMEE sur cet historique, definitivement. Pas de second regard, pas d'ajustement, pas de seconde implementation."
+      }
     },
     "etape_4_designation": "BITFINEX en premier (historique quotidien libre le plus long), conforme au prior declare",
     "conditions_bitfinex": {
@@ -628,12 +686,14 @@
       "2_profondeur_T>=2.24_ans_a_n=1": true,
       "3_mecanisme_jamais_mesure": "ECHOUE : payeur = le long a levier qui emprunte, mesure en niveau, en ecart cross-venue et en structure par terme (voir EXAMEN_BITFINEX_2026-09-09.md)"
     },
-    "n_sources_examinees": 1,
+    "n_sources_examinees": 2,
     "prochaine": {
       "source": "CME",
       "n": 2,
       "threshold_one_sided": 1.96,
       "T_requis_ans": 2.85
-    }
-  }
+    },
+    "verdict_final": "Les deux sources designees par la regle ont ete examinees (n=2). Aucune ne passe. ARRET. Le calendrier est celui du forward (FORWARD_CROWD_POSITIONING_V1, pas avant 2028-12-06)."
+  },
+  "tests_consumed_note": "16 = fenetre scellee transversale (reconstruction, borne inferieure) ; +1 = CME_SEGMENTATION_V1 (enregistre au moment du regard, ledger seq 6)"
 }

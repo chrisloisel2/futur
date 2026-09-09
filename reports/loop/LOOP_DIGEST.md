@@ -1,10 +1,11 @@
 # Boucle de recherche — digest
 
-*régénéré à l'itération 8 · 2026-09-09*
+*régénéré à l'itération 10 · 2026-09-09*
 
 ## Budget
 
-**3 tests disponibles.** Solde brut +3 (crédité 19, consommé 16).
+**2 tests disponibles.** Solde brut +2 (crédité 19, consommé 17 — le 17ᵉ est `CME_SEGMENTATION_V1`,
+enregistré au moment du regard, ledger seq 6).
 Le backfill du 2026-09-09 a ajouté **62 jours** — `floor(62/400) = 0`, **aucun crédit**.
 
 ## Seuils
@@ -54,9 +55,19 @@ inoffensives tant qu'elles restent propres à un symbole. Vérifié sur LUNA :
 hyperliquid · `stablecoins`. **C'est le seul gisement d'hypothèses vérifiablement
 extérieures aux 138 regards** : le regard y était physiquement impossible.
 
+## Préenregistrements scellés (branches orphelines, fichier unique, poussées seules)
+
+| id | branche | commit | statut |
+|---|---|---|---|
+| `SOURCE_SELECTION_RULE` | `prereg/source-selection-rule` | `e765081` | appliquée : Bitfinex refusée (cond. 3), CME testée |
+| `FORWARD_CROWD_POSITIONING_V1` | `prereg/forward-crowd-positioning-v1` | `0de75a9` | **en attente** — un regard, pas avant 2028-12-06 (819 j) |
+| `CME_SEGMENTATION_V1` | `prereg/cme-segmentation-v1` | `0ddeee4` | **échec** `t_net` 1,577 < 1,960 — fermée |
+
+Ledger des regards : `reports/loop/LOOK_LEDGER.jsonl`, chaîne hachée, 6 entrées, valide.
+
 ## Hypothèses, finalistes, sleeves
 
-- hypothèses écrites : **4** (`H-BASIS-1..4`) — famille **morte**, meilleur `t` +2,494
+- hypothèses écrites : **6** — `H-BASIS-1..4` (famille morte), `FORWARD_CROWD_POSITIONING_V1` (scellée, en attente), `CME_SEGMENTATION_V1` (scellée, testée, échec)
 - finalistes en attente : **0**
 - **sleeves validées : 0**
 
@@ -88,7 +99,8 @@ Ce que la lecture a révélé d'autre :
 
 ## Prochaine itération
 
-**Écrire une hypothèse vérifiablement extérieure aux 138 regards.** Pas sur ma
-parole — sur une famille dont la donnée n'a jamais été dans le panel, donc dont
-le regard était impossible. `options_backfill` est le premier candidat : payeur
-nommable, mécanisme documenté, 586 Mo jamais touchés par un balayage.
+**L'attente a commencé.** Les deux sources de la règle sont examinées, aucune ne passe, aucune
+exception ne sera fabriquée. Le calendrier est celui du forward : `FORWARD_CROWD_POSITIONING_V1`,
+un regard, pas avant le 2028-12-06. Pendant l'attente, les branches gratuites : **I14** en
+premier (tant que `n_indep` ignore le lissage, toute date de confirmabilité est optimiste),
+puis instrument, ingestion, hypothèses — aucune ne consomme de regard.

@@ -1,0 +1,24 @@
+{
+  "n_days": 1497,
+  "n_days_en_position": 479,
+  "gross_bps": -3.488,
+  "cost_bps": 5.411,
+  "net_bps": -8.899,
+  "t_net_nw": -2.1329,
+  "t_gross_nw": -0.838,
+  "sharpe_arith": -1.0636,
+  "max_dd_1x": -0.8103,
+  "skew_daily": -0.184,
+  "sous_periodes_positives": 0,
+  "net_bps_avant_ETF": -9.415,
+  "net_bps_apres_ETF": 18.158,
+  "part_jours_short": 0.16,
+  "part_jours_long": 0.16,
+  "mode": "SYNTHETIQUE",
+  "threshold_one_sided_n2": 1.96,
+  "passe": null,
+  "window": [
+    "2020-01-03",
+    "2024-02-07"
+  ]
+}
