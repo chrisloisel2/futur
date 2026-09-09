@@ -64,6 +64,12 @@ def spot_pair(perp: str) -> tuple[str, float]:
     return perp, 1.0
 
 
+def _shift_months(d: date, k: int) -> date:
+    """La date decalee de k mois, ramenee au 1er."""
+    m = d.month - 1 + k
+    return date(d.year + m // 12, m % 12 + 1, 1)
+
+
 def _months(start: date, end: date):
     y, m = start.year, start.month
     while (y, m) <= (end.year, end.month):
@@ -93,12 +99,23 @@ def _fetch_month(sym: str, ym: str):
         return ym, f"parse_{type(e).__name__}", None
 
 
-def backfill_symbol(sym: str, start: date, end: date, workers: int = 6) -> dict:
+def backfill_symbol(sym: str, start: date, end: date, workers: int = 6,
+                    retry_recent: int = 3) -> dict:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     pq = OUT_DIR / f"{sym}_1d.parquet"
     mf = OUT_DIR / f"{sym}_manifest.json"
     manifest = json.loads(mf.read_text()) if mf.exists() else {"done": [], "missing": []}
-    skip = set(manifest["done"]) | set(manifest["missing"])
+    # Un 404 n'est PAS definitif sur les mois recents. Binance Vision publie
+    # l'archive mensuelle avec du retard : un mois interroge trop tot renvoie 404,
+    # et s'il reste inscrit dans `missing` il n'est PLUS JAMAIS redemande. Le panel
+    # developpe alors un trou PERMANENT sur son bord d'attaque -- exactement la ou
+    # la donnee fraiche s'accumule. Constate le 2026-09-09 : tout juillet 2026
+    # manquait sur les 787 symboles alors que l'archive existait (HTTP 200).
+    # On re-essaie donc systematiquement les `retry_recent` derniers mois.
+    recents = set(_months(_shift_months(end, -retry_recent), end))
+    perimes = set(manifest["missing"]) - recents
+    skip = set(manifest["done"]) | perimes
+    manifest["missing"] = sorted(perimes)
     todo = [ym for ym in _months(start, end) if ym not in skip]
     if not todo:
         return {"symbol": sym, "new": 0, "status": "up_to_date"}
@@ -156,6 +173,8 @@ def main():
     ap.add_argument("--symbols-file", default=None)
     ap.add_argument("--start", default="2019-09-01")
     ap.add_argument("--end", default=None, help="défaut : mois courant")
+    ap.add_argument("--retry-recent", type=int, default=3,
+                    help="mois recents dont le 404 est re-essaye (retard de publication)")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--par-symbols", type=int, default=6)
     args = ap.parse_args()
@@ -182,7 +201,7 @@ def main():
     t0 = time.time()
     reg = {}
     with ThreadPoolExecutor(max_workers=args.par_symbols) as ex:
-        futs = {ex.submit(backfill_symbol, s, start, end, args.workers): s
+        futs = {ex.submit(backfill_symbol, s, start, end, args.workers, args.retry_recent): s
                 for s in to_fetch}
         for i, fut in enumerate(as_completed(futs)):
             r = fut.result()

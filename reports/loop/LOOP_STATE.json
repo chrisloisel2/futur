@@ -1,5 +1,5 @@
 {
-  "iteration": 6,
+  "iteration": 7,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -96,12 +96,6 @@
       "titre": "le Sharpe rapporte est un CAGR compose, pas un Sharpe arithmetique",
       "detail": "candidate_report.py::describe calcule ann = (equite_finale ** (365.25/jours) - 1) puis divise par la vol annualisee. C'est un Sharpe geometrique, incompatible avec la relation t ~= S*sqrt(T) utilisee pour toute la planification de puissance. Le '3,07' en echantillon vaut ~2,43 en arithmetique, et le '1,95' hors echantillon ~1,66. Toutes les dates de confirmabilite calculees a partir de ces chiffres sont optimistes.",
       "bloquant_pour": "tout calcul de puissance ou de date de confirmabilite"
-    },
-    {
-      "id": "I16",
-      "titre": "le backfill des klines s'arrete au 2026-06-30",
-      "detail": "um_klines_1d : 30/30 fichiers echantillonnes s'arretent au 2026-06-30, alors que binance_vision_metrics va jusqu'au 2026-09-06 (38/40 au-dela du 2026-08-01). Les klines portent le prix, l'ADV, l'univers et le rendement : sans elles les 68 jours de metriques deja sur disque sont inexploitables. C'est le goulot unique du depot, et le seul gisement RENOUVELABLE.",
-      "bloquant_pour": "toute accumulation de donnee vierge"
     }
   ],
   "instrument_defects_closed": [
@@ -170,6 +164,12 @@
       "titre": "la phase confirm re-choisissait le cote sur les donnees scellees",
       "ferme_le": "2026-09-09",
       "preuve": "one() n'avait aucun parametre de direction et tranchait best_inv = net_inv.mean() > net_dir.mean() sur les donnees qu'il jugeait ; la branche prereg de run_grid ne transmettait jamais cfg['dir']. Preuve que le mecanisme a FIRE : 2 des 9 lignes du confirm v4 contredisent leur propre pre-enregistrement (amihud_20 DIR->INV, dd_from_high_10 INV->DIR). Consequence : chaque essai scelle etait bilatateral, barre operante 2.9552 et non 2.7344. Correctif : force_dir impose la direction pre-enregistree. Verifie hors fenetre scellee : en forcant INV sur lsr_globacct_x|mkt|h3k8hd1sm0 la sortie donne bien INV t=-5.136, et DIR t=+4.064 en forcant DIR."
+    },
+    {
+      "id": "I17",
+      "titre": "un 404 de Vision devenait PERMANENT, y compris sur les mois recents",
+      "ferme_le": "2026-09-09",
+      "preuve": "Le manifeste par symbole inscrit tout 404 dans `missing`, et `missing` etait exclu du todo pour toujours. Binance Vision publie l'archive mensuelle avec du retard : un mois interroge trop tot renvoie 404 et n'etait PLUS JAMAIS redemande. Constate le 2026-09-09 : tout juillet 2026 manquait sur les 787 symboles alors que l'archive existe (HTTP 200 verifie sur l'URL). Le panel developpait donc un trou PERMANENT sur son bord d'attaque -- la ou la donnee fraiche s'accumule, c'est-a-dire exactement l'actif dont la boucle depend. Un rendement calcule du 2026-06-30 au 2026-08-01 aurait ete etiquete 'un jour'. Correctif : les `retry_recent` derniers mois (defaut 3) sont toujours reessayes, dans les deux backfills (um et spot)."
     }
   ],
   "data_sources_ingested": [
@@ -386,5 +386,30 @@
       "adv_frac est un bouton MORT : univers rigoureusement identique de 0,005 a 1,0."
     ],
     "verdict": "garder top_n=120, non comme optimum demontre mais parce que rien ne se gagne ailleurs sur la surface."
+  },
+  "exploration_looks": [
+    {
+      "date": "2026-09-09",
+      "regard": "balayage de top_n sur {20,30,40,50,60,80,100,120,150,200} pour les 5 configurations de tete, fenetre d'exploration seule",
+      "motivation": "hypothese de RETRECISSEMENT : l'anneau ADV 0-40 a un brut de +20,27 bps/j contre -2,89 pour l'anneau 120-160, donc top_n=40 pourrait battre top_n=120.",
+      "resultat": "REFUTEE. Le t monte de facon monotone de 2,310 (top_n=20) a 4,035 (top_n=120) puis retombe (3,595 a 150, 3,454 a 200). Portefeuille equipondere des 5 tetes : t = 2,543 / 2,416 / 3,118 / 3,638 / 4,137 / 4,545 / 4,113 / 3,994 pour top_n = 20 / 40 / 50 / 80 / 100 / 120 / 150 / 200. Le brut par anneau ne predit pas le t du portefeuille : retrecir prive le panier 8v8 de profondeur de selection, et le sigma monte plus vite que le brut.",
+      "caveat": "la localisation exacte du pic a 120 est PARTIELLEMENT CIRCULAIRE : les 5 tetes ont ete selectionnees par un balayage tourne a top_n=120. Le gradient 20->120 (2,31 -> 4,04) est trop grand pour etre de la seule selection, mais l'ecart 120 vs 100/150 ne doit pas etre lu comme un optimum demontre.",
+      "cout_multiplicite": "aucun candidat promu sur cette base ; le regard est inscrit pour que l'elargissement de la grille (x10 sur top_n) soit compte s'il sert un jour."
+    }
+  ],
+  "data_frontier": {
+    "date": "2026-09-09",
+    "um_klines_1d": {
+      "avant": "2026-06-30",
+      "apres": "2026-08-31",
+      "jours_gagnes": 62,
+      "trou_comble": "juillet 2026 entier (31 jours x 787 symboles), qui manquait a cause de I17",
+      "reste": "2026-09 n'est pas encore publie en mensuel sur Vision ; il sera repris automatiquement grace au correctif I17 (retry_recent=3)"
+    },
+    "binance_vision_metrics": {
+      "borne": "2026-09-06"
+    },
+    "goulot_actuel": "les klines, a 2026-08-31 -- l'archive mensuelle de septembre n'existe pas encore. Le quotidien existe (HTTP 200 verifie) si on veut les 6 derniers jours.",
+    "credit_budget": "AUCUN : floor(62/400) = 0. Ces 62 jours s'accumulent vers un credit futur, ils n'en ouvrent pas. C'est la regle et elle tient."
   }
 }
