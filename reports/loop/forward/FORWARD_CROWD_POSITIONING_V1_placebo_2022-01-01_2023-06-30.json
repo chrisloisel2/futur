@@ -1,0 +1,21 @@
+{
+  "n_days": 525,
+  "gross_bps": -18.156,
+  "cost_bps": 6.995,
+  "net_bps": -25.151,
+  "t_net_nw": -3.4232,
+  "t_gross_nw": -2.4671,
+  "sharpe_arith_1x": -2.8562,
+  "max_dd_1x": -0.5198,
+  "skew_daily": 0.132,
+  "sous_periodes_positives": 1,
+  "univers_median": 117,
+  "k_median": 11,
+  "mode": "PLACEBO (scores permutes)",
+  "window": [
+    "2022-01-01",
+    "2023-06-30"
+  ],
+  "threshold_one_sided_n1": 1.6449,
+  "passe": null
+}
