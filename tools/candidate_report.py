@@ -45,14 +45,24 @@ def describe(df, label, gross_exposure=2.0):
     eq = (1 + n).cumprod()
     ann = (eq.iloc[-1] ** (365.25 / ((df.index[-1] - df.index[0]).days)) - 1)
     vol = n.std() * np.sqrt(365.25)
-    sharpe = ann / vol if vol > 0 else np.nan
+    # DEFAUT CORRIGE (I15). `ann` est un CAGR COMPOSE : il descend de l'equite
+    # cumulee, donc il absorbe la trainee de volatilite (-sigma^2/2) et l'ordre
+    # des rendements. Le diviser par la vol donne un "Sharpe geometrique" qui
+    # N'OBEIT PAS a la relation t ~= S * sqrt(T) -- celle sur laquelle repose
+    # toute la planification de puissance et toutes les dates de confirmabilite.
+    # Mesure : 3,07 geometrique contre 2,43 arithmetique en echantillon, 1,95
+    # contre 1,66 hors echantillon. L'ecart de 26 % allait TOUJOURS dans le sens
+    # optimiste. Le Sharpe arithmetique est desormais le chiffre de tete.
+    sharpe = float(n.mean() / n.std() * np.sqrt(365.25)) if n.std() > 0 else np.nan
+    sharpe_geo = ann / vol if vol > 0 else np.nan
     dd = (eq / eq.cummax() - 1).min()
     mo = n.groupby([df.index.year, df.index.month]).apply(lambda x: (1 + x).prod() - 1)
     print(f"\n=== {label} (brut = {gross_exposure:.0f}x le capital) ===")
     print(f"  jours                  {len(n)}   [{df.index[0].date()} -> {df.index[-1].date()}]")
     print(f"  rendement annualise    {ann:+7.1%}")
     print(f"  volatilite annualisee  {vol:7.1%}")
-    print(f"  Sharpe                 {sharpe:7.2f}")
+    print(f"  Sharpe (arithmetique)  {sharpe:7.2f}   <- celui qui verifie t ~= S*sqrt(T)")
+    print(f"  Sharpe (geometrique)   {sharpe_geo:7.2f}   (CAGR/vol : ne sert PAS a la puissance)")
     print(f"  perte maximale         {dd:+7.1%}")
     print(f"  rendement mensuel      median {mo.median():+.2%}   moyen {mo.mean():+.2%}")
     print(f"  mois positifs          {(mo > 0).sum()}/{len(mo)}  ({(mo>0).mean():.0%})")

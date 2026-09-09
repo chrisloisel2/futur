@@ -46,6 +46,22 @@ for i, p in enumerate(kpaths):
         print(f"  {i+1}/{len(kpaths)}", flush=True)
 
 PX = {k: pd.DataFrame(v).sort_index() for k, v in kacc.items() if v}
+# L'index etait l'UNION des dates observees. Un trou propre a un symbole est alors
+# inoffensif (les autres portent la date, le symbole est NaN, le rendement est NaN).
+# Mais un trou UNIVERSEL -- ce que produit exactement un retard de publication, qui
+# frappe tous les symboles a la fois -- fait SAUTER l'index lui-meme, et
+# `close.shift(-1)` recolle alors les deux bords : un rendement de 31 jours porte
+# comme un rendement d'UN jour. C'est arrive : juillet 2026 manquait sur les 787
+# symboles (voir I17). On force donc un calendrier COMPLET : un trou universel
+# devient une ligne de NaN, visible et inoffensive, au lieu d'un raccord silencieux.
+_obs = PX["close"].index
+_plein = pd.date_range(_obs.min(), _obs.max(), freq="D", tz="UTC")
+_trous = _plein.difference(_obs)
+if len(_trous):
+    print(f"  !! {len(_trous)} dates absentes de TOUS les symboles "
+          f"({_trous.min().date()} -> {_trous.max().date()}) : reindexees en NaN. "
+          f"Verifier le backfill (cf. tools/check_continuity.py).")
+PX = {k: v.reindex(_plein) for k, v in PX.items()}
 idx = PX["close"].index
 syms = list(PX["close"].columns)
 print(f"  panel {len(idx)}j x {len(syms)} symboles  [{idx.min().date()} -> {idx.max().date()}]")

@@ -104,23 +104,38 @@ def backfill_symbol(sym: str, start: date, end: date, workers: int = 6,
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     pq = OUT_DIR / f"{sym}_1d.parquet"
     mf = OUT_DIR / f"{sym}_manifest.json"
-    manifest = json.loads(mf.read_text()) if mf.exists() else {"done": [], "missing": []}
-    # Un 404 n'est PAS definitif sur les mois recents. Binance Vision publie
-    # l'archive mensuelle avec du retard : un mois interroge trop tot renvoie 404,
-    # et s'il reste inscrit dans `missing` il n'est PLUS JAMAIS redemande. Le panel
-    # developpe alors un trou PERMANENT sur son bord d'attaque -- exactement la ou
-    # la donnee fraiche s'accumule. Constate le 2026-09-09 : tout juillet 2026
-    # manquait sur les 787 symboles alors que l'archive existait (HTTP 200).
-    # On re-essaie donc systematiquement les `retry_recent` derniers mois.
+    manifest = json.loads(mf.read_text()) if mf.exists() else {}
+    manifest.setdefault("done", [])
+    # TROIS ETATS, PAS DEUX. La classe de bug est : « absent au moment de
+    # l'interrogation » enregistre comme « absent definitivement ». Toute source
+    # publiee avec retard, interrogee trop tot, cree alors un trou PERMANENT --
+    # et toujours au bord d'attaque, la ou s'accumule le seul actif renouvelable.
+    # Constate le 2026-09-09 : tout juillet 2026 manquait sur les 787 symboles
+    # alors que l'archive existait (HTTP 200 verifie).
+    #
+    #   done    : recupere
+    #   absent  : 404 ANTERIEUR au dernier mois recupere -> le symbole n'etait
+    #             pas liste a cette date. Definitif, jamais redemande.
+    #   pending : 404 POSTERIEUR au dernier mois recupere -> indistinguable d'un
+    #             retard de publication. TOUJOURS redemande.
+    #
+    # L'ancien format a deux etats est migre en placant tout `missing` en
+    # `pending` : on prefere re-interroger pour rien plutot que garder un trou.
+    if "missing" in manifest:
+        manifest.setdefault("pending", [])
+        manifest["pending"] = sorted(set(manifest["pending"]) | set(manifest.pop("missing")))
+    manifest.setdefault("absent", [])
+    manifest.setdefault("pending", [])
+    # filet de securite : les `retry_recent` derniers mois sont toujours repris,
+    # meme s'ils ont ete classes `absent` par une version anterieure.
     recents = set(_months(_shift_months(end, -retry_recent), end))
-    perimes = set(manifest["missing"]) - recents
-    skip = set(manifest["done"]) | perimes
-    manifest["missing"] = sorted(perimes)
+    manifest["absent"] = sorted(set(manifest["absent"]) - recents)
+    skip = set(manifest["done"]) | set(manifest["absent"])
     todo = [ym for ym in _months(start, end) if ym not in skip]
     if not todo:
         return {"symbol": sym, "new": 0, "status": "up_to_date"}
 
-    frames, n404, nerr = [], 0, 0
+    frames, quatre04, nerr = [], [], 0
     with ThreadPoolExecutor(max_workers=workers) as ex:
         futs = {ex.submit(_fetch_month, sym, ym): ym for ym in todo}
         for fut in as_completed(futs):
@@ -129,10 +144,14 @@ def backfill_symbol(sym: str, start: date, end: date, workers: int = 6,
                 frames.append(df)
                 manifest["done"].append(ym)
             elif status == "404":
-                n404 += 1
-                manifest["missing"].append(ym)
+                quatre04.append(ym)
             else:
                 nerr += 1
+    # classification des 404, une fois le dernier mois recupere connu
+    dernier = max(manifest["done"]) if manifest["done"] else ""
+    for ym in quatre04:
+        (manifest["absent"] if ym < dernier else manifest["pending"]).append(ym)
+    n404 = len(quatre04)
 
     if frames:
         new = pd.concat(frames, ignore_index=True)
@@ -161,10 +180,12 @@ def backfill_symbol(sym: str, start: date, end: date, workers: int = 6,
         rows = 0
 
     manifest["done"] = sorted(set(manifest["done"]))
-    manifest["missing"] = sorted(set(manifest["missing"]))
+    manifest["absent"] = sorted(set(manifest["absent"]) - set(manifest["done"]))
+    manifest["pending"] = sorted(set(manifest["pending"]) - set(manifest["done"])
+                                 - set(manifest["absent"]))
     mf.write_text(json.dumps(manifest))
     return {"symbol": sym, "new": len(frames), "n404": n404, "errors": nerr,
-            "rows_total": rows}
+            "pending": len(manifest["pending"]), "rows_total": rows}
 
 
 def main():

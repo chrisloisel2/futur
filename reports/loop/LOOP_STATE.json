@@ -1,5 +1,5 @@
 {
-  "iteration": 7,
+  "iteration": 8,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -90,12 +90,6 @@
       "titre": "n_indep ignore le lissage",
       "detail": "n_indep = n_days / (horizon*hold) ne divise pas par smooth. 1 830 lignes de sweep_v5 ont smooth=5 avec n_indep == n_days. Surestime le filtre n_indep>=100 ; ne gonfle pas le t (Newey-West, lui, integre bien le lissage dans nw_lag).",
       "bloquant_pour": "le crible 3 (>= 116 episodes independants) sur les configs lissees"
-    },
-    {
-      "id": "I15",
-      "titre": "le Sharpe rapporte est un CAGR compose, pas un Sharpe arithmetique",
-      "detail": "candidate_report.py::describe calcule ann = (equite_finale ** (365.25/jours) - 1) puis divise par la vol annualisee. C'est un Sharpe geometrique, incompatible avec la relation t ~= S*sqrt(T) utilisee pour toute la planification de puissance. Le '3,07' en echantillon vaut ~2,43 en arithmetique, et le '1,95' hors echantillon ~1,66. Toutes les dates de confirmabilite calculees a partir de ces chiffres sont optimistes.",
-      "bloquant_pour": "tout calcul de puissance ou de date de confirmabilite"
     }
   ],
   "instrument_defects_closed": [
@@ -170,6 +164,24 @@
       "titre": "un 404 de Vision devenait PERMANENT, y compris sur les mois recents",
       "ferme_le": "2026-09-09",
       "preuve": "Le manifeste par symbole inscrit tout 404 dans `missing`, et `missing` etait exclu du todo pour toujours. Binance Vision publie l'archive mensuelle avec du retard : un mois interroge trop tot renvoie 404 et n'etait PLUS JAMAIS redemande. Constate le 2026-09-09 : tout juillet 2026 manquait sur les 787 symboles alors que l'archive existe (HTTP 200 verifie sur l'URL). Le panel developpait donc un trou PERMANENT sur son bord d'attaque -- la ou la donnee fraiche s'accumule, c'est-a-dire exactement l'actif dont la boucle depend. Un rendement calcule du 2026-06-30 au 2026-08-01 aurait ete etiquete 'un jour'. Correctif : les `retry_recent` derniers mois (defaut 3) sont toujours reessayes, dans les deux backfills (um et spot)."
+    },
+    {
+      "id": "I15",
+      "titre": "le Sharpe rapporte etait un CAGR compose, pas un Sharpe arithmetique",
+      "ferme_le": "2026-09-09",
+      "preuve": "candidate_report.py::describe divisait un CAGR compose (descendu de l'equite cumulee, donc absorbant la trainee de volatilite -sigma^2/2) par la vol annualisee. Verifie sur lsr_globacct_x|mkt|h3k8hd1sm0, 853 jours : Sharpe geometrique 3.0697, ARITHMETIQUE 2.4351. Le t Newey-West mesure vaut 4.0644 ; S_arith*sqrt(T) = 3.7213 et phi_NW = 1.0922, donc 3.7213*1.0922 = 4.0644 EXACTEMENT. S_geo*sqrt(T) donnait 4.6911, incoherent. L'ecart de 26 % allait toujours dans le sens optimiste. Le Sharpe arithmetique est desormais le chiffre de tete."
+    },
+    {
+      "id": "I18",
+      "titre": "'absent au moment de l'interrogation' etait enregistre comme 'absent definitivement'",
+      "ferme_le": "2026-09-09",
+      "preuve": "Generalisation de I17 : la classe de bug depasse Vision. Le manifeste distingue desormais TROIS etats et non deux -- done / absent (404 ANTERIEUR au dernier mois recupere : le symbole n'etait pas liste, definitif) / pending (404 POSTERIEUR : indistinguable d'un retard de publication, toujours redemande). L'ancien format est migre en placant tout `missing` en `pending`."
+    },
+    {
+      "id": "I19",
+      "titre": "un trou UNIVERSEL faisait sauter l'index du panel et recollait les bords",
+      "ferme_le": "2026-09-09",
+      "preuve": "build_daily_cache prenait l'UNION des dates observees comme index. Un trou propre a un symbole est inoffensif (les autres portent la date, le symbole est NaN, le rendement est NaN -- verifie sur LUNAUSDT, 18 jours de suspension en mai 2022 : ret1 = NaN sur tout le trou). Mais un trou UNIVERSEL -- ce que produit exactement un retard de publication, qui frappe tous les symboles a la fois -- faisait SAUTER l'index, et close.shift(-1) recollait le 30 juin au 1er aout : un rendement de 31 jours porte comme un rendement d'UN jour. Correctif : calendrier complet impose par reindex, un trou universel devient une ligne de NaN visible."
     }
   ],
   "data_sources_ingested": [
@@ -411,5 +423,69 @@
     },
     "goulot_actuel": "les klines, a 2026-08-31 -- l'archive mensuelle de septembre n'existe pas encore. Le quotidien existe (HTTP 200 verifie) si on veut les 6 derniers jours.",
     "credit_budget": "AUCUN : floor(62/400) = 0. Ces 62 jours s'accumulent vers un credit futur, ils n'en ouvrent pas. C'est la regle et elle tient."
+  },
+  "continuity_audit": {
+    "date": "2026-09-09",
+    "outil": "tools/check_continuity.py",
+    "rapport": "reports/loop/continuity.json",
+    "um_klines_1d": {
+      "fichiers": 787,
+      "avec_trou_interne": 52,
+      "pires": "TLMUSDT 29 j, ICPUSDT 26 j, BNXUSDT 26 j ; 2022-02-25 -> 2022-03-01 (4 j) sur une dizaine de symboles"
+    },
+    "spot_klines_1d": {
+      "fichiers": 409,
+      "avec_trou_interne": 9,
+      "pires": "FTTUSDT 310 j (effondrement FTX, nov. 2022 -> sept. 2023), CVCUSDT 153 j, LUNAUSDT 17 j (effondrement Terra, mai 2022)"
+    },
+    "verdict": "ces trous sont de VRAIES suspensions de cotation, pas des echecs de telechargement. Ils sont inoffensifs tant qu'ils restent PROPRES A UN SYMBOLE (le panel les absorbe en NaN). Le danger est le trou UNIVERSEL, ferme par I19."
+  },
+  "step1_forensics_lsr_globacct_x": {
+    "date": "2026-09-09",
+    "question": "le 2,40 est-il un maximum d'ordre sur trois regards ?",
+    "reponse": "NON. Il n'y a jamais eu trois t. Deux configurations ont ete lues sur la fenetre scellee, chacune DEUX fois (v4 sous son nom, v5 sous l'alias pos_crowd_vs_univ), et les relectures sont IDENTIQUES a la 6e decimale du t et a la 8e du brut : meme calcul deterministe, memes donnees. Relancer un calcul deterministe n'offre aucune occasion de selectionner.",
+    "les_valeurs": [
+      {
+        "horodatage": "2026-09-07 11:24:55",
+        "source": "sweep_v4",
+        "nom": "lsr_globacct_x",
+        "config": "h3k8hd1sm0 DIR",
+        "t": 2.399433,
+        "brut": 27.46655666,
+        "PREMIER": true
+      },
+      {
+        "horodatage": "2026-09-07 11:24:55",
+        "source": "sweep_v4",
+        "nom": "lsr_globacct_x",
+        "config": "h1k8hd5sm0 DIR",
+        "t": 2.082933,
+        "brut": 23.61277301
+      },
+      {
+        "horodatage": "2026-09-07 12:23:30",
+        "source": "sweep_v5",
+        "nom": "pos_crowd_vs_univ",
+        "config": "h3k8hd1sm0 DIR",
+        "t": 2.399433,
+        "brut": 27.46655666,
+        "relecture_de": 0
+      },
+      {
+        "horodatage": "2026-09-07 12:23:30",
+        "source": "sweep_v5",
+        "nom": "pos_crowd_vs_univ",
+        "config": "h1k8hd5sm0 DIR",
+        "t": 2.082933,
+        "brut": 23.61277301,
+        "relecture_de": 1
+      }
+    ],
+    "ce_que_la_lecture_a_revele_d_autre": [
+      "AUCUN ledger n'a enregistre ces regards au moment ou ils ont eu lieu : MULTIPLICITY_LEDGER.json et PREREGISTRATION_LEDGER.jsonl ont ZERO mention de ce signal. La seule trace est le mtime des artefacts. Il n'y avait pas de ledger a lire.",
+      "prereg.json ecrit a 11:24:45, confirm a 11:24:55 : DIX SECONDES, meme pipeline. Le fichier precede bien le test, mais il n'y a eu AUCUN moment d'engagement -- c'est un artefact, pas une promesse.",
+      "2,399 est le MAX DE 2 configurations du meme signal, toutes deux confirmees ; et les deux sortaient d'un balayage a 10 820 configurations, N effectif 138."
+    ],
+    "verdict": "le candidat n'est pas mort par maximum d'ordre -- ce cadrage etait faux. Il reste INDECIDABLE par la multiplicite du BALAYAGE. Barre defendable 2,9552 (n=16, bilateral) ; meme en ne comptant que la famille v4 (9 configs, bilateral) elle est a 2,7729. Il echoue aux deux. Le seuil de 1,96 supposait un regard unique venu de l'exterieur du balayage : ce n'est pas le cas."
   }
 }
