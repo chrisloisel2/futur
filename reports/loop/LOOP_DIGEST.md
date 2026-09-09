@@ -1,20 +1,22 @@
 # Boucle de recherche — digest
 
-*régénéré à l'itération 1 · 2026-09-09*
+*régénéré à l'itération 3 · 2026-09-09*
 
 ## Budget
 
-**0 test disponible.** Solde brut **−2** (crédité 14, consommé 16).
+**3 tests disponibles.** Solde brut **+3** (crédité 19, consommé 16).
 
 | source | jours | crédit |
 |---|---|---|
 | `um_klines_1d` | 2 330 | +5 *(plafond)* |
 | `binance_vision_metrics` | 1 673 | +4 |
 | `funding_mark` | 2 330 | +5 *(plafond)* |
+| **`spot_klines_1d_vision`** *(itération 2)* | 2 330 | **+5** *(plafond)* |
 | `sweep_v4` confirm | — | −9 |
 | `sweep_v5` confirm | — | −7 |
 
-Pas de donnée nouvelle → pas de test. La boucle travaille, elle ne teste pas.
+La boucle peut tester — mais seulement un finaliste ayant passé les huit
+cribles, et il n'y en a **aucun**.
 
 ## Seuil courant
 
@@ -30,15 +32,33 @@ Pas de donnée nouvelle → pas de test. La boucle travaille, elle ne teste pas.
 | I3 | plafond de capacité adossé à l'ADV, pas à la profondeur | famille illiquidité |
 | I7 | le coût de 14 bps est une hypothèse, pas une mesure | tout signal à fort churn |
 
-**Fermés (7)** — I1, I2, I4, I5 (v4, vérifiés) · I6, I8, I9 (itération 1)
+**Fermés (9)**
+
+| id | défaut | itération |
+|---|---|---|
+| I1 | `effective_tests` échantillonnait l'ordre d'insertion | v4 *(vérifié)* |
+| I2 | l'open interest ne chargeait pas | v4 *(vérifié : 301 215 pts)* |
+| I4 | `roll_spread` contredisait `amihud` | v4 *(vérifié)* |
+| I5 | stabilité des lignes INVERSE inconnue | v4 *(vérifié)* |
+| I6 | `squeeze_setup` et `long_capit` étaient le même signal | 1 |
+| I8 | 24 % de la bibliothèque étaient des doublons de rang | 1 |
+| I9 | `taker_imb_z{n}` utilisait une fenêtre `n*3` | 1 |
+| I10 | le dédoublonnage de I8 était incomplet | 3 |
+| I11 | l'unité des horodatages Vision déduite une fois par lot | 2 |
+
+**Bibliothèque de signaux : 183 noms → 138 essais réels.**
 
 ## Sources
 
-**Ingérées** — `um_klines_1d` (696 symboles), `binance_vision_metrics` (310),
-`funding_mark` (322). Manifeste SHA-256 dans `LOOP_STATE.json`.
+**Ingérées (4)** — `um_klines_1d` (696 symboles) · `binance_vision_metrics` (310)
+· `funding_mark` (322) · **`spot_klines_1d_vision` (409)**.
+Manifeste SHA-256 dans `LOOP_STATE.json`.
 
-**Restantes** — spot apparié · liquidations historiques · univers élargi ·
-historique avant 2020 · collecte forward *(tourne déjà, ~0,89 Go/j)*
+**Restantes** — univers élargi · historique avant 2020 · collecte forward
+*(tourne déjà, ~0,89 Go/j)*
+
+**Impasse vérifiée** — liquidations historiques : 45 symboles *coin-margined*
+seulement, contre un panel de 696 USDT-M. Aucun recouvrement utile.
 
 ## Hypothèses, finalistes, sleeves
 
@@ -51,17 +71,26 @@ historique avant 2020 · collecte forward *(tourne déjà, ~0,89 Go/j)*
 - **contrôle positif** — pente **1,026**, r² 0,9775, du 2026-09-06 (3 jours).
   Dans [0,9 ; 1,1] et moins de 7 jours : **invariant satisfait**.
 - **placebo** — 20 tirages, médiane 2,807, p95 3,878, p99 4,320.
+- **basis vs funding** — corr de rang **+0,5345** : validation économique
+  indépendante de l'appariement spot.
 
 ## Violations enregistrées
 
 1. **2026-09-07 — relecture du même candidat.** `sweep_v5` a rouvert la fenêtre
    scellée sur deux candidats numériquement identiques à des candidats `sweep_v4`
-   déjà jugés. Cause (dédoublonnage par nom) fermée par I8.
+   déjà jugés. Cause (dédoublonnage par nom) fermée par I8, **puis réellement**
+   fermée par I10 — le correctif de I8 n'aurait pas empêché la récidive.
 
 ## Escalade ouverte
 
 **Le candidat « qui survit » ne franchit pas le seuil de sa propre famille** :
-`t = 2,399` hors échantillon contre un seuil à 2,734 pour 16 essais, et
-`passes=False` sur les 19 lignes des CSV `confirm`. Le `RAPPORT.md` de `sweep_v4`
-conclut l'inverse en se plaçant à `n = 1`. Décision demandée — détail dans
+`t = 2,399` hors échantillon contre 2,734 pour 16 essais, et `passes=False` sur
+les 19 lignes des CSV `confirm`. Le `RAPPORT.md` de `sweep_v4` conclut l'inverse
+en se plaçant à `n = 1`. Décision demandée — détail dans
 [itérations/0001.md](iterations/0001.md).
+
+## Prochaine itération
+
+Budget 3, aucun finaliste, aucun défaut bloquant en tête de file →
+**cas 4 : balayer l'exploration et promouvoir au plus un finaliste**, désormais
+avec la famille basis que le spot vient de débloquer. Gratuit.

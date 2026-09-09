@@ -1,8 +1,8 @@
 {
-  "iteration": 1,
+  "iteration": 3,
   "date": "2026-09-09",
-  "budget_tests_remaining": 0,
-  "budget_raw_balance": -2,
+  "budget_tests_remaining": 3,
+  "budget_raw_balance": 3,
   "budget_ledger": [
     {
       "source": "um_klines_1d",
@@ -55,6 +55,18 @@
       "credited": -7,
       "date": "2026-09-07",
       "note": "10 candidats lus, dont 3 numeriquement identiques a des candidats v4 (pos_crowd_vs_univ == lsr_globacct_x, pos_ttacct_vs_univ == lsr_ttacct_x) : 7 nouveaux debites, les 3 relectures sont une VIOLATION enregistree, pas un credit"
+    },
+    {
+      "source": "spot_klines_1d_vision",
+      "provenance": "Binance Vision, klines 1d SPOT, apparie aux perps de l'univers",
+      "fetched": "2026-09-09",
+      "sealed_through": "2026-06-30",
+      "usable_days": 2330,
+      "episodes": 2330,
+      "credited": 5,
+      "cap": 5,
+      "date": "2026-09-09",
+      "note": "409/561 perps apparies, 152 sans spot. 12 multiplicateurs (1000X) explicites au registre. Validation economique : corr de rang(basis, funding) = +0,5345, BTC basis median -3,8 bps (p5 -6,4 / p95 +9,0). Zero appariement suspect (|basis median| > 5 %)."
     }
   ],
   "tests_consumed_lifetime": 16,
@@ -116,6 +128,18 @@
       "titre": "taker_imb_z{n} utilisait une fenetre n*3",
       "ferme_le": "2026-09-09",
       "preuve": "taker_imb_z20 etait un z-score a 60 jours, donc identique a tak_imb_z60. Le nom porte desormais la vraie fenetre."
+    },
+    {
+      "id": "I10",
+      "titre": "le dedoublonnage de rang (I8) etait incomplet",
+      "ferme_le": "2026-09-09",
+      "preuve": "pos_crowd_vs_univ et lsr_globacct_x sont identiques sur les 126 950 cellules qu'ils PARTAGENT et ne different que par la couverture de 19 jours sur 943. L'empreinte exacte les separait (le NaN entre dans le hash), le PnL non : les deux sortaient du balayage avec le meme t. _rank_dedup fait desormais deux etages (empreinte exacte, puis accord sur les cellules communes) : 142 -> 138 essais reels."
+    },
+    {
+      "id": "I11",
+      "titre": "l'unite des horodatages Vision etait deduite UNE fois par lot",
+      "ferme_le": "2026-09-09",
+      "preuve": "Binance a bascule de la milliseconde a la microseconde en cours d'historique. `unit = 'us' if open_time.iloc[-1] > 1e14 else 'ms'` lit la derniere ligne d'un concat NON TRIE : un lot mixte datait les lignes de l'autre unite a l'an 57056 (plantage observe sur le spot). Tranche desormais ligne par ligne, dans les deux backfills. um_klines_1d audite : 787 fichiers, 587 609 lignes, bornes 2020-01-01 -> 2026-06-30, zero hors bornes -- le panel scelle n'etait PAS corrompu."
     }
   ],
   "data_sources_ingested": [
@@ -136,19 +160,22 @@
       "symbols": 322,
       "days": 2330,
       "credited": 5
+    },
+    {
+      "source": "spot_klines_1d_vision",
+      "symbols": 409,
+      "days": 2330,
+      "credited": 5,
+      "unlocks": "famille basis (niveau, variation, dispersion) + structure par terme avec binance_vision_quarterly"
     }
   ],
   "data_sources_known_unfetched": [
     {
-      "source": "spot_apparie",
-      "pourquoi": "debloque le basis et sa structure par terme, famille entiere absente",
-      "gratuit": true
-    },
-    {
       "source": "liquidations_historiques",
       "pourquoi": "payeur le plus net du crypto ; du levier contraint de trader a n'importe quel prix",
       "gratuit": true,
-      "piege_connu": "liquidationSnapshot est cm-only et s'arrete en 2024-10 (voir data_pitfalls)"
+      "piege_connu": "liquidationSnapshot est cm-only et s'arrete en 2024-10 (voir data_pitfalls)",
+      "statut": "VERIFIE IMPASSE le 2026-09-09 : 45 symboles *USD_PERP (coin-margined) seulement, alors que le panel est 696 USDT-M. Aucun recouvrement utile."
     },
     {
       "source": "univers_elargi",
@@ -177,6 +204,15 @@
     },
     "panel_daily_meta.json": {
       "sha256": "369d5ccb8cfa3731af6c507fbf940d5cdb7d4dbdba6f82d814f69490625ae830"
+    },
+    "panel_spot_daily.npz": {
+      "sha256": "42974a3490eb66e402ff9c0a736e954e22b90589609d90b3a47714cef5666171"
+    },
+    "panel_spot_daily_meta.json": {
+      "sha256": "783055604e04e9850130cc1a2e5d9d3c4d315259bf553d02b3244c969cfaafba"
+    },
+    "spot_klines_1d/registry.json": {
+      "sha256": "58e71e3b883f6c8500149ea2010f3777e9cdb2c7daa9aa3b07810be6b5a8de1e"
     }
   },
   "last_positive_control": {

@@ -123,32 +123,82 @@ def garman_klass(o, h, l, c, w):
 
 # ===================================================================  SIGNAUX
 
-def _rank_dedup(S):
+def _rank_dedup(S, sub=40000, agree=0.999, seed=0):
     """Le balayage ne voit JAMAIS un signal brut : il voit `xrank(signal)`, le
     rang transversal jour par jour. Deux signaux monotones l'un de l'autre A
     L'INTERIEUR de chaque journee donnent donc exactement le meme panier, le
     meme PnL et le meme t : c'est UN essai qui porte deux noms.
 
-    Les compter separement gonfle le denominateur de multiplicite et laisse
-    croire que l'espace explore est plus large qu'il ne l'est. Mesure sur la
-    grille v5 : 44 noms sur 183 (24 %) etaient des doublons de rang.
+    Deux etages, parce qu'un seul ne suffit pas :
 
-    On canonicalise donc par le CONTENU du rang, pas par le nom. Representant
-    choisi par ordre alphabetique : deterministe d'un run a l'autre."""
-    seen, out, dupes = {}, {}, {}
-    for k in sorted(S):
-        v = S[k]
-        if v is None:
-            continue
-        a = np.ascontiguousarray(
-            np.nan_to_num(xrank(v).to_numpy(dtype=np.float64), nan=-9.0).round(9))
-        h = hashlib.blake2b(a.tobytes(), digest_size=16).hexdigest()
+    1. empreinte exacte du rang -- replie les doublons parfaits, en O(n).
+    2. accord sur les cellules COMMUNES -- `pos_crowd_vs_univ` et
+       `lsr_globacct_x` sont identiques sur les 126 950 cellules qu'ils
+       partagent et ne different que par la couverture de 19 jours sur 943.
+       L'etage 1 les separe (le NaN entre dans l'empreinte), le PnL non : les
+       deux lignes sortaient du balayage avec le meme t a la 2e decimale.
+       On compare donc par paires, sur un echantillon fixe de cellules.
+
+    Representant : le premier par ordre alphabetique. Deterministe."""
+    names = [k for k in sorted(S) if S[k] is not None]
+    R = {k: xrank(S[k]).to_numpy(dtype=np.float64) for k in names}
+
+    parent = {k: k for k in names}
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:                       # le representant reste le plus petit
+            lo, hi = (ra, rb) if ra < rb else (rb, ra)
+            parent[hi] = lo
+
+    # ---- etage 1 : empreinte exacte
+    seen = {}
+    for k in names:
+        h = hashlib.blake2b(np.ascontiguousarray(
+            np.nan_to_num(R[k], nan=-9.0).round(9)).tobytes(), digest_size=16).hexdigest()
         if h in seen:
-            dupes.setdefault(seen[h], []).append(k)
+            union(seen[h], k)
         else:
             seen[h] = k
-            out[k] = v
-    return out, dupes
+
+    # ---- etage 2 : accord sur les cellules communes, sur un echantillon fixe
+    reps = sorted({find(k) for k in names})
+    if len(reps) > 1:
+        shape = R[reps[0]].shape
+        rng = np.random.default_rng(seed)
+        n_cells = shape[0] * shape[1]
+        pos = (rng.choice(n_cells, size=min(sub, n_cells), replace=False)
+               if n_cells > sub else np.arange(n_cells))
+        V = {k: R[k].reshape(-1)[pos] for k in reps}
+        F = {k: np.isfinite(V[k]) for k in reps}
+        for i, a in enumerate(reps):
+            if find(a) != a:
+                continue
+            for b in reps[i + 1:]:
+                if find(b) != b:
+                    continue
+                both = F[a] & F[b]
+                n = int(both.sum())
+                if n < 500:                # trop peu de recouvrement pour trancher
+                    continue
+                same = np.abs(V[a][both] - V[b][both]) <= 1e-12
+                if same.mean() >= agree:
+                    union(a, b)
+
+    out, dupes = {}, {}
+    for k in names:
+        r = find(k)
+        if r == k:
+            out[k] = S[k]
+        else:
+            dupes.setdefault(r, []).append(k)
+    return out, {k: sorted(v) for k, v in dupes.items()}
 
 
 def _tie_guard(S, thr=0.25):
