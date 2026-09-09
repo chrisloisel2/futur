@@ -616,17 +616,24 @@
       "nature": "fUSD = pool de pret USD pour la marge spot, serie UNIQUE (pas transversale) ; periodes p2 (2 j) et p30 (30 j)"
     },
     "cme": {
-      "acces": "Yahoo BTC=F HTTP 200 mais 457 barres quotidiennes sur 8,7 ans (~21 %) ; Stooq vide ; CME Group 403 (DataMine payant)",
-      "debut_nominal": "2017-12-18",
+      "acces": "libre : Yahoo BTC=F avec period1 explicite -> 2 190 barres quotidiennes completes (251-254/an) ; le '21 %' precedent etait un artefact de la requete range=max (echantillonnage hebdomadaire)",
+      "debut": "2017-12-18",
       "fin": "2026-09-09",
-      "profondeur_utile": "a etablir : couverture quotidienne incomplete"
+      "profondeur_ans": 8.7,
+      "nature": "front-month CONTINU (saut au roll, pas de structure par terme par contrat) ; close a l'heure CME, pas 00:00 UTC"
     },
     "etape_4_designation": "BITFINEX en premier (historique quotidien libre le plus long), conforme au prior declare",
     "conditions_bitfinex": {
       "1_acces_libre_quotidien": true,
       "2_profondeur_T>=2.24_ans_a_n=1": true,
-      "3_mecanisme_jamais_mesure": "EN COURS : hypothese a ecrire AVANT chargement, puis lignee"
+      "3_mecanisme_jamais_mesure": "ECHOUE : payeur = le long a levier qui emprunte, mesure en niveau, en ecart cross-venue et en structure par terme (voir EXAMEN_BITFINEX_2026-09-09.md)"
     },
-    "n_sources_examinees": 1
+    "n_sources_examinees": 1,
+    "prochaine": {
+      "source": "CME",
+      "n": 2,
+      "threshold_one_sided": 1.96,
+      "T_requis_ans": 2.85
+    }
   }
 }
