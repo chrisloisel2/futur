@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-09-09T22:37:28Z",
+  "dataset_id": "microstructure_imbalance_v1",
+  "end": "2026-09-09 20:24:06+00:00",
+  "known_gaps": [],
+  "latency_assumption_ms": 142.50237644999984,
+  "notes": "latency is measured as receive_ts_ns minus event_ts_ns, 95th percentile",
+  "point_in_time": true,
+  "schema_hash": "",
+  "source": "microstructure_reduced/raw/bbo/venue=binance",
+  "start": "2026-08-31 23:33:45+00:00",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ]
+}

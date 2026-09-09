@@ -1,0 +1,69 @@
+{
+  "mechanism_id": "cross_exchange_dislocation_v1",
+  "hypothesis": "When the Binance and OKX perpetual mid prices for the same symbol diverge by an unusual amount, the gap closes within sixty seconds by more than the round trip paid on both legs.",
+  "economic_reason": "Two venues quote the same risk. A gap between them is a local liquidity shock on one of the two, not a change in the value of the asset, so it is mechanically pulled back by anyone holding inventory on both venues. The compensation is paid for supplying that inventory across a fragmented market, and it survives only as long as capital cannot move between venues instantly, which is a real constraint: margin sits on one venue at a time.",
+  "data_sources": [
+    "microstructure_reduced_bbo_binance",
+    "microstructure_reduced_bbo_okx"
+  ],
+  "universe": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+  "timeframe": "1s",
+  "horizon": "60s",
+  "side_mode": "market_neutral",
+  "entry_rule": {
+    "venue_a": "binance",
+    "venue_b": "okx",
+    "dislocation_definition": "mid_b_minus_mid_a_over_mid_a_bps",
+    "zscore_window_seconds": 300,
+    "zscore_min_abs": 3.0,
+    "min_dislocation_bps": 2.0,
+    "max_spread_bps": 2.0,
+    "max_clock_skew_seconds": 1
+  },
+  "exit_rule": {
+    "holding_seconds": 60,
+    "exit_at": "dislocation_mid_to_mid",
+    "mean_reversion_target_fraction": 0.5,
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 0.5,
+    "slippage_bps": 0.5,
+    "adverse_selection_bps": 1.0,
+    "n_legs": 2,
+    "notes": "Both legs are priced. A cross-venue test priced on one leg is not a test. Taker at VIP0 on each venue; no rebate, no cross-margin, no netting assumed."
+  },
+  "validation_window": {
+    "start": "2026-08-31",
+    "end": "2026-09-09",
+    "nature": "the entire two-venue capture available"
+  },
+  "placebo_tests": [
+    "direction_flip",
+    "same_event_random_side",
+    "time_shuffle",
+    "entry_time_randomization"
+  ],
+  "declustering_rule": {
+    "method": "complete_link",
+    "window_seconds": 300,
+    "note": "per symbol; a dislocation that persists is one event, not one per second"
+  },
+  "multiplicity_family": "cross_exchange",
+  "kill_criteria": {
+    "net_edge_bps_lte": 0,
+    "cost_x2_pf_lte": 1.0,
+    "placebo_percentile_lte": 95
+  },
+  "promotion_criteria": {
+    "net_edge_bps_min": 2,
+    "profit_factor_min": 1.2,
+    "cost_x2_profit_factor_min": 1.05,
+    "min_independent_events": 300
+  },
+  "declared_data_latency_ms": 500,
+  "notes": "Displayed quantities are not comparable across the two venues: Binance quotes base units and OKX quotes contracts. This mechanism therefore uses mid prices only, and any sizing question is out of its scope until a contract multiplier table exists. Clock skew between venues is bounded by the entry rule."
+}

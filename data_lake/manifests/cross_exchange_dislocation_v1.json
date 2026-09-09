@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-09-09T22:37:37Z",
+  "dataset_id": "cross_exchange_dislocation_v1",
+  "end": "2026-09-09 21:51:33+00:00",
+  "known_gaps": [],
+  "latency_assumption_ms": 142.50237644999984,
+  "notes": "mid prices only; displayed quantities are not comparable across venues (Binance quotes base units, OKX quotes contracts)",
+  "point_in_time": true,
+  "schema_hash": "",
+  "source": "microstructure_reduced/raw/bbo venues binance and okx",
+  "start": "2026-09-01 00:08:34+00:00",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ]
+}

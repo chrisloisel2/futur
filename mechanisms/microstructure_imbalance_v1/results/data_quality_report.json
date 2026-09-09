@@ -1,0 +1,16 @@
+{
+  "dataset_id": "microstructure_imbalance_v1",
+  "measured_latency_ms": 142.50237644999984,
+  "measured_latency_p95_ms": 142.50237644999984,
+  "n_rows": 1491,
+  "passed": true,
+  "stats": {
+    "coverage_BTCUSDT": 0.8544,
+    "coverage_ETHUSDT": 0.8544,
+    "coverage_SOLUSDT": 0.8544,
+    "median_spread_bps": 0.012563563781233272,
+    "n_decisions": 1491
+  },
+  "violations": [],
+  "warnings": []
+}

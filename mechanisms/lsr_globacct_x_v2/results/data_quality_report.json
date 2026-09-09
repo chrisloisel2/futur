@@ -1,0 +1,19 @@
+{
+  "dataset_id": "lsr_globacct_x_v2",
+  "measured_latency_ms": 600000.0,
+  "measured_latency_p95_ms": null,
+  "n_rows": 25440,
+  "passed": true,
+  "stats": {
+    "live_feed_gap_median_s": 300.0,
+    "live_feed_gap_p95_s": 300.0,
+    "n_rebalances": 848,
+    "n_symbols_ever_screened": 626,
+    "n_symbols_klines": 787,
+    "n_symbols_traded": 307
+  },
+  "violations": [],
+  "warnings": [
+    "314 screened symbols have no vision metrics file (1000000BOBUSDT, 1000BTTCUSDT, 1000CATUSDT, 1000CHEEMSUSDT, 1000XECUSDT...)"
+  ]
+}

@@ -1,0 +1,69 @@
+[
+  {
+    "burned_periods": [
+      [
+        "2020-09-01",
+        "2026-09-10"
+      ]
+    ],
+    "entry_hash": "402293255bca8c12e1ed41ac8558ee421530e47cf27d038737d7d57f66f75951",
+    "family": "crowd_positioning",
+    "index": 0,
+    "kind": "contamination",
+    "prev_hash": "",
+    "reason": "This repository has swept crowd positioning on Binance Vision metrics and on the live positioning archive across the whole span, including an iteration over 86 derived signals in September 2026. Any historical run on this period is a replication and cannot promote; a forward window must start after 2026-09-10.",
+    "recorded_at": "2026-09-10T00:00:00Z"
+  },
+  {
+    "entry_hash": "9e7121928623096a68ebafd558e3587409bee414555185957caf18e714b4dbcb",
+    "family": "crowd_positioning",
+    "index": 1,
+    "kind": "trial",
+    "mechanism_id": "historical_sweep_crowd_positioning_v0",
+    "n_trials": 87,
+    "note": "Seed of trials this family had already spent before the kernel existed: 86 derived positioning signals tested in the second iteration, plus the one contrarian rule that survived. Counted so that the threshold starts where the search actually stands, not at zero.",
+    "prev_hash": "402293255bca8c12e1ed41ac8558ee421530e47cf27d038737d7d57f66f75951",
+    "recorded_at": "2026-09-10T00:00:00Z",
+    "rules_hash": "seed:crowd_positioning:86_derived_signals_plus_survivor",
+    "threshold_at_seal": 3.2511
+  },
+  {
+    "entry_hash": "4196410cecaa5c89f0d7981dd368f477c4b4cba25dd0e434cfae5775097828a4",
+    "family": "crowd_positioning",
+    "index": 2,
+    "kind": "trial",
+    "mechanism_id": "lsr_globacct_x_v2",
+    "n_trials": 1,
+    "note": "first run of lsr_globacct_x_v2",
+    "prev_hash": "9e7121928623096a68ebafd558e3587409bee414555185957caf18e714b4dbcb",
+    "recorded_at": "2026-09-09T22:25:24Z",
+    "rules_hash": "6f4b5a7809ba39d630f60fd404082ec5ac526e5eb2932a42dfac901b4ca451b2",
+    "threshold_at_seal": 3.2544
+  },
+  {
+    "entry_hash": "cceecc75c8ecf4f8280bda8f7ea85ed5e954a638b6a8f0cef35d83be1747a343",
+    "family": "microstructure",
+    "index": 3,
+    "kind": "trial",
+    "mechanism_id": "microstructure_imbalance_v1",
+    "n_trials": 1,
+    "note": "first run of microstructure_imbalance_v1",
+    "prev_hash": "4196410cecaa5c89f0d7981dd368f477c4b4cba25dd0e434cfae5775097828a4",
+    "recorded_at": "2026-09-09T22:37:10Z",
+    "rules_hash": "c019bedcde0a16a43d988f622479f886cc3ea6d5b92d0e5dcf0512feea309751",
+    "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "97445a5936f62fc88fcecbac0a4debfe896c523dafd514d3aa4b56df40d787bf",
+    "family": "cross_exchange",
+    "index": 4,
+    "kind": "trial",
+    "mechanism_id": "cross_exchange_dislocation_v1",
+    "n_trials": 1,
+    "note": "first run of cross_exchange_dislocation_v1",
+    "prev_hash": "cceecc75c8ecf4f8280bda8f7ea85ed5e954a638b6a8f0cef35d83be1747a343",
+    "recorded_at": "2026-09-09T22:37:37Z",
+    "rules_hash": "939325d0b46ae6e837b16e0ca3cdc3ebae253fe0504d3ea543e6a74bad50d1d7",
+    "threshold_at_seal": 1.6449
+  }
+]

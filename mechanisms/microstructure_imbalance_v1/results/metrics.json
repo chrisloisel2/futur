@@ -1,0 +1,78 @@
+{
+  "avg_loss_bps": -12.002312268212215,
+  "avg_win_bps": 0.5976733564606969,
+  "breakeven_capture": 15.993516625912516,
+  "breakeven_capture_note": "null when the gross edge is not positive: there is no fraction of a move to capture",
+  "by_symbol": {
+    "BTCUSDT": {
+      "gross_bps_mean": 0.41808551323877885,
+      "n": 1167,
+      "net_bps_mean": -12.131914486761222,
+      "net_bps_sum": -14157.944206050346
+    },
+    "ETHUSDT": {
+      "gross_bps_mean": 0.9327642174380522,
+      "n": 149,
+      "net_bps_mean": -11.617235782561949,
+      "net_bps_sum": -1730.9681316017304
+    },
+    "SOLUSDT": {
+      "gross_bps_mean": 1.2280840971257598,
+      "n": 175,
+      "net_bps_mean": -11.32191590287424,
+      "net_bps_sum": -1981.3352830029921
+    }
+  },
+  "by_year": {
+    "2026": {
+      "gross_bps_mean": 0.5645891209556892,
+      "n": 1491,
+      "net_bps_mean": -11.985410879044311,
+      "net_bps_sum": -17870.247620655067
+    }
+  },
+  "cost_bps": 12.55,
+  "cost_model": {
+    "adverse_selection_bps": 2.0,
+    "maker_fee_bps": 2.0,
+    "maker_ratio": 0.0,
+    "n_legs": 1,
+    "notes": "Taker in and taker out at Binance USDT-M VIP0. Spread is set near the measured median for these three symbols rather than guessed; fees dominate. A maker-entry variant is a different hypothesis and needs the maker fill probe's measured fill rate before it can be priced.",
+    "round_trip_bps": 12.55,
+    "slippage_bps": 0.5,
+    "spread_bps": 0.05,
+    "taker_fee_bps": 5.0
+  },
+  "declustering_method": "complete_link",
+  "declustering_window_seconds": 300.0,
+  "episodes_per_year": 9555.158629168347,
+  "gross_edge_bps": 0.7846929661277015,
+  "hit_rate": 0.0013413816230717639,
+  "max_drawdown_bps": 17871.407653461134,
+  "min_detectable_edge_bps": 0.29996667821736583,
+  "multiplicity_family_size": 1,
+  "multiplicity_threshold_t": 1.6448536269514715,
+  "n_independent": 232,
+  "n_raw": 1491,
+  "n_symbols": 3,
+  "net_edge_bps": -11.765307033872299,
+  "net_edge_bps_cost_x2": -24.3153070338723,
+  "notes": "Ten days of capture. Whatever the verdict, the window is short.",
+  "profit_factor": 6.688585331939977e-05,
+  "profit_factor_cost_x2": 0.0,
+  "profit_factor_gross": 2.2699544604705846,
+  "return_monthly_bps": -61333.710760731825,
+  "return_note": "bps summed over trades at one unit of notional each, no compounding and no netting of overlapping positions",
+  "return_total_bps": -17870.247620655067,
+  "se_bps": 0.1823667913681269,
+  "sharpe": -414.03062525371564,
+  "sigma_bps": 2.77772821020815,
+  "sortino": -453.40316629203426,
+  "span_end": "2026-09-09 20:24:06+00:00",
+  "span_start": "2026-08-31 23:33:45+00:00",
+  "span_years": 0.024280078332953075,
+  "t_stat": 4.302828164277534,
+  "t_stat_net_artefact": -64.51452561953984,
+  "t_stat_net_artefact_note": "diagnostic only \u2014 a t on a net series with constant cost measures the cost, not the signal",
+  "t_stat_on": "gross"
+}

@@ -103,7 +103,15 @@ data/derivatives_raw/
 data/derivatives_live/
 reports/derivatives_collector.log
 reports/DERIVATIVES_DAILY_*.md
-reports/paper_live/
+reports/paper_live/*
+
+# P0 research kernel: a mechanism's decisions and trades are the evidence
+# behind its verdict and are small, so they are tracked despite the blanket
+# *.parquet rule above. Normalised data caches under data_lake/ are not.
+!mechanisms/*/results/decisions.parquet
+!mechanisms/*/results/trades.parquet
+!reports/paper_live/.gitkeep
+!reports/paper_live/README.md
 reports/paper_v1.log
 data/derivatives_backfill/
 data/events/
