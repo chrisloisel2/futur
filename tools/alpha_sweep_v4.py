@@ -580,7 +580,7 @@ def run_grid(D, SIG, ST, univ, ret1, COSTP, args, prereg=None, ret_override=None
         keys.append(key)
         rows.append(dict(key=key, signal=sname, neutral=nname, horizon=hh, basket=kk,
                          hold=hd, smooth=sm, state=state, regime=regime, dir=d,
-                         n_days=nd, n_indep=int(nd / max(hh * max(hd, 1), 1)),
+                         n_days=nd, n_indep=int(nd / max(hh * max(hd, 1) + sm, 1)),   # I14 : le lissage ewm(span=sm) ajoute ~sm jours de memoire, comme nw_lag le compte deja
                          gross_dly=gross[m].mean(), cost_dly=cost[m].mean(),
                          net_dly=nb.mean(), net_per_hold=nb.mean() * hh,
                          t=tb, t_dir=t_dir, t_inv=t_inv,

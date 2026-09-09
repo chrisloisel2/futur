@@ -92,12 +92,6 @@
       "titre": "le cout de 14 bps est une HYPOTHESE, pas une mesure",
       "detail": "aucune source de profondeur ou de spread n'existe avant juillet 2026. Le point mort du candidat positionnement est a ~124 bps, donc l'hypothese n'est pas critique pour LUI, mais elle l'est pour tout signal a fort churn.",
       "bloquant_pour": "tout candidat dont cout/brut > 30%"
-    },
-    {
-      "id": "I14",
-      "titre": "n_indep ignore le lissage",
-      "detail": "n_indep = n_days / (horizon*hold) ne divise pas par smooth. 1 830 lignes de sweep_v5 ont smooth=5 avec n_indep == n_days. Surestime le filtre n_indep>=100 ; ne gonfle pas le t (Newey-West, lui, integre bien le lissage dans nw_lag).",
-      "bloquant_pour": "le crible 3 (>= 116 episodes independants) sur les configs lissees"
     }
   ],
   "instrument_defects_closed": [
@@ -202,6 +196,13 @@
       "titre": "le pre-enregistrement n'avait aucun temoin exterieur",
       "ferme_le": "2026-09-09",
       "preuve": "prereg.json ecrit a 11:24:45 et confirm lance a 11:24:55, meme pipeline : dix secondes, aucun moment d'engagement. Un fichier local qu'on peut encore modifier n'est pas une promesse. Correctif : hors de la fenetre d'exploration, le harnais EXIGE que le pre-enregistrement soit commite ET pousse sur le remote -- l'horodatage du remote ne peut pas etre antidate. Verifie : un regard scelle avec un prereg non pousse est REFUSE et ne calcule rien. Confirme retroactivement sur reports/edge_discovery/sweep_v4/prereg.json : committed=true, pushed=FALSE."
+    },
+    {
+      "id": "I14",
+      "titre": "n_indep ignorait le lissage",
+      "ferme_le": "2026-09-09",
+      "preuve": "n_indep = n_days/(horizon*hold) ne divisait pas par smooth alors que le lissage ewm(span=sm) ajoute ~sm jours de memoire -- et que nw_lag le comptait deja. Corrige : n_days/(horizon*hold + smooth). Effet mesure sur sweep_v5 (relecture du CSV, aucun recalcul) : 5 410 lignes lissees, 1 830 avaient n_indep == n_days ; le filtre >= 100 en gardait 5 410, il en garde 3 000 ; le crible 3 (>= 116) en gardait 5 360, il en garde 1 730. Le t n'etait pas gonfle (Newey-West integrait deja sm) : c'est le COMPTE d'episodes, donc toute planification de puissance, qui l'etait.",
+      "consequence_pin": "tools/alpha_sweep_v4.py differe desormais de la pin de FORWARD_CROWD_POSITIONING_V1 ; pour le test de 2028, restaurer : git checkout prereg-forward-v1-code -- tools/alpha_sweep_v4.py (le script refuse toute autre version)."
     }
   ],
   "data_sources_ingested": [

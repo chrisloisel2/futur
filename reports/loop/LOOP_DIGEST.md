@@ -19,16 +19,16 @@ Dérivés, jamais saisis (`preregistration.py::threshold_t`).
 
 ## Défauts d'instrument
 
-**Ouverts (3)**
+**Ouverts (2)**
 
 | id | défaut | bloque |
 |---|---|---|
 | I3 | plafond de capacité adossé à l'ADV, pas à la profondeur | famille illiquidité |
 | I7 | le coût de 14 bps est une hypothèse, pas une mesure | tout signal à fort churn |
-| I14 | `n_indep` ignore le lissage | le crible 3 sur les configs lissées |
 
-**Fermés (15)** — I1, I2, I4, I5 *(v4, vérifiés)* · I6, I8, I9 *(it. 1)* · I11 *(it. 2)* ·
-I10 *(it. 3)* · I12 *(it. 5)* · I13 *(it. 6)* · I16, I17 *(it. 7)* · I15, I18, I19 *(it. 8)*
+**Fermés (18)** — I1, I2, I4, I5 *(v4, vérifiés)* · I6, I8, I9 *(it. 1)* · I11 *(it. 2)* ·
+I10 *(it. 3)* · I12 *(it. 5)* · I13 *(it. 6)* · I16, I17 *(it. 7)* · I15, I18, I19 *(it. 8)* ·
+I20, I21 *(it. 9)* · **I14** *(it. 10 : 5 360 → 1 730 lignes lissées au crible 3)*
 
 Les quatre qui produisaient des **chiffres faux**, pas du désordre :
 
@@ -101,6 +101,5 @@ Ce que la lecture a révélé d'autre :
 
 **L'attente a commencé.** Les deux sources de la règle sont examinées, aucune ne passe, aucune
 exception ne sera fabriquée. Le calendrier est celui du forward : `FORWARD_CROWD_POSITIONING_V1`,
-un regard, pas avant le 2028-12-06. Pendant l'attente, les branches gratuites : **I14** en
-premier (tant que `n_indep` ignore le lissage, toute date de confirmabilité est optimiste),
-puis instrument, ingestion, hypothèses — aucune ne consomme de regard.
+un regard, pas avant le 2028-12-06. I14 est fermé. Pendant l'attente, les branches gratuites : instrument (I3, I7), ingestion,
+hypothèses — aucune ne consomme de regard. **Aucun regard sur la fenêtre forward avant la date.**
