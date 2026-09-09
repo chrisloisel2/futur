@@ -1,0 +1,210 @@
+{
+  "iteration": 1,
+  "date": "2026-09-09",
+  "budget_tests_remaining": 0,
+  "budget_raw_balance": -2,
+  "budget_ledger": [
+    {
+      "source": "um_klines_1d",
+      "provenance": "Binance Vision, klines 1d UM futures, 696 symboles",
+      "fetched": "2026-09-07",
+      "sealed_through": "2026-06-30",
+      "usable_days": 2330,
+      "episodes": 2330,
+      "credited": 5,
+      "cap": 5,
+      "date": "2026-09-09",
+      "note": "floor(2330/400)=5, plafond 5 par source"
+    },
+    {
+      "source": "binance_vision_metrics",
+      "provenance": "Binance Vision metrics 5 min : OI + 4 ratios long/short, depuis 2021-12",
+      "fetched": "2026-09-07",
+      "sealed_through": "2026-06-30",
+      "usable_days": 1673,
+      "episodes": 1673,
+      "credited": 4,
+      "cap": 5,
+      "date": "2026-09-09",
+      "note": "floor(1673/400)=4"
+    },
+    {
+      "source": "funding_mark",
+      "provenance": "funding rate + mark price, 322 symboles",
+      "fetched": "2026-09-07",
+      "sealed_through": "2026-06-30",
+      "usable_days": 2330,
+      "episodes": 2330,
+      "credited": 5,
+      "cap": 5,
+      "date": "2026-09-09",
+      "note": "floor(2330/400)=5, plafond 5 par source"
+    },
+    {
+      "source": "__DEBIT__sweep_v4_confirm",
+      "provenance": "lecture de la fenetre scellee 2024-07-01/2026-06-30",
+      "episodes": 0,
+      "credited": -9,
+      "date": "2026-09-07",
+      "note": "9 candidats lus (1 primaire pre-enregistre + 8 secondaires)"
+    },
+    {
+      "source": "__DEBIT__sweep_v5_confirm",
+      "provenance": "lecture de la fenetre scellee 2024-07-01/2026-06-30",
+      "episodes": 0,
+      "credited": -7,
+      "date": "2026-09-07",
+      "note": "10 candidats lus, dont 3 numeriquement identiques a des candidats v4 (pos_crowd_vs_univ == lsr_globacct_x, pos_ttacct_vs_univ == lsr_ttacct_x) : 7 nouveaux debites, les 3 relectures sont une VIOLATION enregistree, pas un credit"
+    }
+  ],
+  "tests_consumed_lifetime": 16,
+  "current_threshold_t": 2.7344,
+  "threshold_provenance": "src/institutional/live_alpha_lab/preregistration.py::threshold_t(16) = NormalDist().inv_cdf(1 - 0.05/16), unilateral. Jamais saisi.",
+  "instrument_defects_open": [
+    {
+      "id": "I3",
+      "titre": "plafond de capacite adosse a l'ADV, pas a la PROFONDEUR",
+      "detail": "causal_universe exclut sur ADV 20j (position <= 1% ADV). La profondeur au meilleur limite (mediane 1 048 $, ARUSDT 53 $) n'entre pas dans le crible. La famille amihud reste ecartee en attendant.",
+      "bloquant_pour": "toute la famille illiquidite"
+    },
+    {
+      "id": "I7",
+      "titre": "le cout de 14 bps est une HYPOTHESE, pas une mesure",
+      "detail": "aucune source de profondeur ou de spread n'existe avant juillet 2026. Le point mort du candidat positionnement est a ~124 bps, donc l'hypothese n'est pas critique pour LUI, mais elle l'est pour tout signal a fort churn.",
+      "bloquant_pour": "tout candidat dont cout/brut > 30%"
+    }
+  ],
+  "instrument_defects_closed": [
+    {
+      "id": "I1",
+      "titre": "effective_tests echantillonnait l'ordre d'insertion",
+      "ferme_le": "2026-09-07",
+      "preuve": "tools/alpha_sweep_v4.py::effective_tests(M) prend toutes les configurations alignees sur l'index complet. Aucun echantillonnage."
+    },
+    {
+      "id": "I2",
+      "titre": "l'open interest ne chargeait pas (0 points, 0 symboles)",
+      "ferme_le": "2026-09-07",
+      "preuve": "met_oi = 301 215 points sur 310 symboles, 2129 jours. La source est binance_vision_metrics, pas open_interest_hist (30 j glissants)."
+    },
+    {
+      "id": "I4",
+      "titre": "roll_spread INVERSE contredisait amihud DIRECT",
+      "ferme_le": "2026-09-07",
+      "preuve": "roll_spread a 26 % de part modale : jambe courte degeneree un jour sur deux. La contradiction n'existait pas. Ecarte par _tie_guard."
+    },
+    {
+      "id": "I5",
+      "titre": "stabilite des lignes INVERSE inconnue (stab_best = NaN)",
+      "ferme_le": "2026-09-07",
+      "preuve": "net_INV = -gross - cost terme a terme ; stab renseigne sur toutes les lignes des CSV confirm (aucun NaN)."
+    },
+    {
+      "id": "I6",
+      "titre": "squeeze_setup et long_capit etaient le MEME signal",
+      "ferme_le": "2026-09-09",
+      "preuve": "produit de termes signes : (-A)(-B)(C) = (A)(-B)(-C) = ABC. Retourner deux facteurs sur trois ne change rien. Corrige en conjonction continue (cmin des rangs centres) : correlation passee de 1.0000 a -0.0745, les deux survivent au garde-fou d'egalites (part modale 0.015)."
+    },
+    {
+      "id": "I8",
+      "titre": "24 % de la bibliotheque etaient des doublons de RANG",
+      "ferme_le": "2026-09-09",
+      "preuve": "le balayage ne voit que xrank(signal) : deux signaux monotones l'un de l'autre dans la journee donnent le meme panier. 183 noms -> 142 essais reels (41 noms replies, 37 classes). _rank_dedup() canonicalise par le contenu du rang."
+    },
+    {
+      "id": "I9",
+      "titre": "taker_imb_z{n} utilisait une fenetre n*3",
+      "ferme_le": "2026-09-09",
+      "preuve": "taker_imb_z20 etait un z-score a 60 jours, donc identique a tak_imb_z60. Le nom porte desormais la vraie fenetre."
+    }
+  ],
+  "data_sources_ingested": [
+    {
+      "source": "um_klines_1d",
+      "symbols": 696,
+      "days": 2330,
+      "credited": 5
+    },
+    {
+      "source": "binance_vision_metrics",
+      "symbols": 310,
+      "days": 1673,
+      "credited": 4
+    },
+    {
+      "source": "funding_mark",
+      "symbols": 322,
+      "days": 2330,
+      "credited": 5
+    }
+  ],
+  "data_sources_known_unfetched": [
+    {
+      "source": "spot_apparie",
+      "pourquoi": "debloque le basis et sa structure par terme, famille entiere absente",
+      "gratuit": true
+    },
+    {
+      "source": "liquidations_historiques",
+      "pourquoi": "payeur le plus net du crypto ; du levier contraint de trader a n'importe quel prix",
+      "gratuit": true,
+      "piege_connu": "liquidationSnapshot est cm-only et s'arrete en 2024-10 (voir data_pitfalls)"
+    },
+    {
+      "source": "univers_elargi",
+      "pourquoi": "au-dela des 310 symboles a metriques ; plus de coupe transversale par jour",
+      "gratuit": true
+    },
+    {
+      "source": "historique_avant_2020",
+      "pourquoi": "le panel commence au 2020-01-01",
+      "gratuit": "partiel"
+    },
+    {
+      "source": "collecte_forward",
+      "pourquoi": "accumule seule et credite au fil de l'eau",
+      "gratuit": true,
+      "etat": "futur-microstructure-reduced.service tourne, ~0,89 Go/j"
+    }
+  ],
+  "hypotheses_written": [],
+  "finalists_pending": [],
+  "sleeves_validated": [],
+  "manifest_sha256": {
+    "panel_daily.npz": {
+      "sha256": "5129fee49305dfcecd597f08611c87d32bebe1fda1e14b3efba54c27b482c9f6",
+      "bytes": 22166233
+    },
+    "panel_daily_meta.json": {
+      "sha256": "369d5ccb8cfa3731af6c507fbf940d5cdb7d4dbdba6f82d814f69490625ae830"
+    }
+  },
+  "last_positive_control": {
+    "slope": 1.026,
+    "r2": 0.9775,
+    "date": "2026-09-06",
+    "source": "reports/live_alpha_lab/POSITIVE_CONTROL_RECOVERY.md",
+    "age_days": 3,
+    "verdict": "pente dans [0,9 ; 1,1], moins de 7 jours : invariant SATISFAIT"
+  },
+  "last_placebo": {
+    "n_reps": 20,
+    "q50": 2.8069,
+    "q95": 3.8783,
+    "q99": 4.3197,
+    "date": "2026-09-07",
+    "source": "reports/edge_discovery/sweep_v4/placebo_2021-12-01_2024-06-30.json",
+    "ci": [
+      2.3171,
+      4.4301
+    ]
+  },
+  "violations_recorded": [
+    {
+      "date": "2026-09-07",
+      "type": "relecture_du_meme_candidat",
+      "detail": "sweep_v5 a relu la fenetre scellee sur pos_crowd_vs_univ et pos_ttacct_vs_univ, numeriquement identiques (8 decimales) a lsr_globacct_x et lsr_ttacct_x deja lus par sweep_v4. Cause : le dedup ne comparait que les NOMS. Cause fermee par I8.",
+      "consequence": "3 lectures non creditees ; le compte d'essais retient 16 candidats distincts"
+    }
+  ]
+}

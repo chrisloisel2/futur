@@ -1,0 +1,25 @@
+{
+  "created": "2021-12-01/2024-06-30",
+  "exec_lag": 0,
+  "aum": 200000.0,
+  "adv_frac": 0.01,
+  "top_n": 120,
+  "cost_bps": 14.0,
+  "winsor": 0.5,
+  "meff": 839.0000000000105,
+  "thr": 4.014409690501416,
+  "placebo_q95": null,
+  "configs": [
+    {
+      "signal": "lsr_globacct_x",
+      "neutral": "mkt",
+      "horizon": 1,
+      "basket": 8,
+      "hold": 5,
+      "smooth": 0,
+      "state": "-",
+      "regime": "-",
+      "dir": "DIR"
+    }
+  ]
+}
