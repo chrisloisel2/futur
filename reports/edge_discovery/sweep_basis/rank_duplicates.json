@@ -1,0 +1,129 @@
+{
+  "n_classes": 38,
+  "n_names_folded": 46,
+  "n_signals_kept": 154,
+  "classes": {
+    "ats_z60": [
+      "avg_trade_size_z60"
+    ],
+    "basis_vs_univ": [
+      "basis_x"
+    ],
+    "carry_crowded": [
+      "crowding_fund_x_oi"
+    ],
+    "carry_crowded_z": [
+      "crowding_z"
+    ],
+    "crowd_moves_alone_7": [
+      "dis_pos_vs_crowd_chg7",
+      "lsr_smart_dumb_chg7"
+    ],
+    "fund_cum20_x": [
+      "funding_cum_20"
+    ],
+    "fund_cum3_x": [
+      "funding_cum_3"
+    ],
+    "fund_cum7_x": [
+      "funding_cum_7"
+    ],
+    "fund_z60": [
+      "funding_z60"
+    ],
+    "dis_pos_vs_crowd": [
+      "lsr_smart_dumb"
+    ],
+    "oi_chg20_x": [
+      "oi_growth_20",
+      "oi_growth_x_20"
+    ],
+    "oi_chg3_x": [
+      "oi_growth_3",
+      "oi_growth_x_3"
+    ],
+    "oi_chg7_x": [
+      "oi_growth_7",
+      "oi_growth_x_7"
+    ],
+    "oi_intraday_5": [
+      "oi_intraday_chg_5"
+    ],
+    "oi_intraday_chg": [
+      "oi_intraday_x"
+    ],
+    "lsr_globacct_chg20": [
+      "pos_crowd_chg20"
+    ],
+    "lsr_globacct_chg3": [
+      "pos_crowd_chg3"
+    ],
+    "lsr_globacct_chg7": [
+      "pos_crowd_chg7"
+    ],
+    "lsr_globacct_x": [
+      "pos_crowd_vs_univ",
+      "pos_crowd_x"
+    ],
+    "lsr_globacct_lvl": [
+      "pos_crowd_z"
+    ],
+    "lsr_takerls_chg20": [
+      "pos_takerls_chg20"
+    ],
+    "lsr_takerls_chg3": [
+      "pos_takerls_chg3"
+    ],
+    "lsr_takerls_chg7": [
+      "pos_takerls_chg7"
+    ],
+    "lsr_takerls_x": [
+      "pos_takerls_vs_univ",
+      "pos_takerls_x"
+    ],
+    "lsr_takerls_lvl": [
+      "pos_takerls_z"
+    ],
+    "lsr_ttacct_chg20": [
+      "pos_ttacct_chg20"
+    ],
+    "lsr_ttacct_chg3": [
+      "pos_ttacct_chg3"
+    ],
+    "lsr_ttacct_chg7": [
+      "pos_ttacct_chg7"
+    ],
+    "lsr_ttacct_x": [
+      "pos_ttacct_vs_univ",
+      "pos_ttacct_x"
+    ],
+    "lsr_ttacct_lvl": [
+      "pos_ttacct_z"
+    ],
+    "lsr_ttpos_chg20": [
+      "pos_ttpos_chg20"
+    ],
+    "lsr_ttpos_chg3": [
+      "pos_ttpos_chg3"
+    ],
+    "lsr_ttpos_chg7": [
+      "pos_ttpos_chg7"
+    ],
+    "lsr_ttpos_x": [
+      "pos_ttpos_vs_univ",
+      "pos_ttpos_x"
+    ],
+    "lsr_ttpos_lvl": [
+      "pos_ttpos_z"
+    ],
+    "tak_imb10_x": [
+      "taker_imb_10"
+    ],
+    "tak_imb20_x": [
+      "taker_imb_20"
+    ],
+    "tak_imb_z60": [
+      "taker_imb_z60"
+    ]
+  }
+}
