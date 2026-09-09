@@ -510,16 +510,64 @@
     "date": "2026-09-09",
     "probleme": "Apres 138 regards, presque rien de ce que je pense est independant de ce que j'ai vu, et ma parole n'est pas auditable.",
     "forme_retenue": "Une hypothese dont la DONNEE n'a jamais ete chargee dans le panel est exterieure aux 138 regards non par promesse mais parce que le regard etait PHYSIQUEMENT IMPOSSIBLE. C'est verifiable apres coup.",
-    "gisements_jamais_charges": [
-      "options_backfill (586 Mo)",
-      "microstructure_reduced (7,1 Go)",
-      "execution_probe (243 Mo)",
-      "derivatives_backfill/bybit",
-      "derivatives_backfill/okx",
-      "derivatives_backfill/hyperliquid",
-      "stablecoins"
-    ],
+    "gisements_jamais_charges": [],
     "multiplicite_a_compter": "7 gisements = 7 regards, PAS 1. Choisir les options parmi sept est une selection, faible mais reelle. Seuil+puissance a n=7 : S requis 1,34 sur 6 ans contre un livre a 1,66 -- la voie survit au compte honnete, pas seulement au compte flatteur.",
-    "fuite_restante": "les FEATURES options seraient neuves, la CIBLE ne l'est pas : rendement forward, univers, horizon et taille de panier ont ete regardes 138 fois. Reprendre top_n=120 / h=1 / 8v8 importerait la selection dont on essaie de sortir -- et 120 est un pic dont j'ai moi-meme ecrit qu'il est partiellement circulaire. La configuration doit etre derivee du MECANISME options (echeance -> horizon ; sous-jacents a chaine liquide -> univers), pas du balayage."
+    "fuite_restante": "les FEATURES options seraient neuves, la CIBLE ne l'est pas : rendement forward, univers, horizon et taille de panier ont ete regardes 138 fois. Reprendre top_n=120 / h=1 / 8v8 importerait la selection dont on essaie de sortir -- et 120 est un pic dont j'ai moi-meme ecrit qu'il est partiellement circulaire. La configuration doit etre derivee du MECANISME options (echeance -> horizon ; sous-jacents a chaine liquide -> univers), pas du balayage.",
+    "CORRECTION_2026_09_09": "FAUX tel qu'ecrit. 'Jamais charges' voulait dire 'jamais dans le panel du balayage' (panel_daily.npz). L'audit de lignee par le CODE montre que les sept ont ete charges par de la recherche : options (4 scripts dont un test PRE-ENREGISTRE 4h et measure_vol_risk_premium.py qui mesure EXACTEMENT DVOL 30j vs RV des 30 jours suivants, variance swap mensuel non chevauchant ; + hunt round 1 w5 a14_options_results.json), microstructure_reduced (12 fichiers de recherche), execution_probe (5), bybit/okx/hyperliquid (funding RV cross-venue : backtest_funding_rv_v1.py, run_a2rv_backtest.py, test_hl_premium_leadlag_scan.py), stablecoins (protocole pre-enregistre STABLECOIN_REGIME v0, 8 features x 4 cibles, verdict ecrit). Le critere 'regard physiquement impossible' ne tient pour AUCUN des sept."
+  },
+  "lineage_audit": {
+    "date": "2026-09-09",
+    "methode": "grep du CODE (scripts/src/research/tools, hors scripts de backfill) et des NOMS de fichiers dans reports/. Aucune sortie ni scoreboard lu. Borne INFERIEURE : le code des workers du hunt round 1 n'est pas dans le depot (0 .py), round 2 partiel (7), round 3 partiel (6) -- ce qui a tourne sans code commite n'est pas detectable.",
+    "touches_par_la_recherche": {
+      "options_backfill": [
+        "scripts/test_options_positioning_signal_scan.py",
+        "scripts/backtest_options_positioning.py",
+        "scripts/test_options_positioning_4h_preregistered.py",
+        "scripts/build_deribit_positioning_features.py",
+        "scripts/measure_vol_risk_premium.py (DVOL vs RV30 : LE candidat VRP)",
+        "src/institutional/engines/vol_forecast_layer/realized_vol.py (DVOL, live lab)",
+        "reports/edge_discovery/alpha_hunt_2026-08-29/w5_options_wallet_exec/evidence/a14_options_results.json"
+      ],
+      "microstructure_reduced": "12 fichiers de recherche",
+      "execution_probe": "5 fichiers",
+      "bybit": [
+        "research/edge_factory/funding_relative_value_cross_venue/backtest_funding_rv_v1.py",
+        "scripts/run_a2rv_backtest.py",
+        "scripts/test_funding_xvenue_v0.py",
+        "scripts/backtest_stress_gate_dispersion_v2.py"
+      ],
+      "okx": [
+        "scripts/run_a2rv_backtest.py",
+        "scripts/validate_cross_exchange_signals.py"
+      ],
+      "hyperliquid": [
+        "scripts/test_hl_premium_leadlag_scan.py",
+        "scripts/backtest_funding_extreme.py",
+        "backtest_funding_rv_v1.py"
+      ],
+      "stablecoins": [
+        "scripts/test_stablecoin_regime_signal.py (protocole pre-enregistre, verdict ecrit)"
+      ],
+      "fundamentals_backfill": [
+        "scripts/backtest_fundamentals_v1.py"
+      ],
+      "listings_backfill": [
+        "event_study_returns.parquet : une etude d'evenement par construction"
+      ],
+      "news_backfill": [
+        "aggregate_news_signals.py"
+      ],
+      "data/events": "datasets cascade/premium/crowding lus par 2 a 5 fichiers sous leurs NOMS ; ignition/spillover 0 lecteur mais DERIVES du panel deja regarde"
+    },
+    "zero_lecteur_de_recherche_detecte": {
+      "news_raw": "brut, 18 Mo ; son agregat news_backfill EST lu -> derive-touche",
+      "worldmon_features/jsonl": "World Monitor (evenements macro/news), 12 Ko de features",
+      "derivatives_live_metrics": "collecteur 5 min collect_oi_metrics_5m.py, depuis 2026-09-05 : FORWARD par construction"
+    },
+    "classes_ou_le_regard_etait_physiquement_impossible": [
+      "la collecte FORWARD : la donnee n'existait pas pendant les regards (seule classe sure, borne comprise)",
+      "une source EXTERNE jamais telechargee : la donnee n'etait pas sur disque. Jamais mentionnees dans le depot : Binance Vision options (BVOLIndex BTC/ETH, EOHSummary BTC/ETH/BNB/XRP/DOGE), Bitfinex, CME, Coinglass, Bitstamp, Gate, KuCoin, Aave/Compound, Glassnode/CryptoQuant, Polymarket. Coinbase/Kraken/BitMEX/dYdX/GMX n'apparaissent que comme chaines (liste de protocoles DefiLlama), pas comme telechargements."
+    ],
+    "consequence": "Le raccourci 'historique complet a 1 regard, S >= 1,02' n'existe sur AUCUNE donnee deja sur disque. Il n'existe que pour une source neuve telechargee APRES scellement, et son historique fixe la puissance."
   }
 }
