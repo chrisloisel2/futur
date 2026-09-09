@@ -300,5 +300,26 @@
     "date": "2026-09-09",
     "promu": null,
     "raison": "Aucun candidat ne passe les huit cribles. Famille basis : echoue sur le t (2,49 < 2,81 mediane du placebo) ET sur le crible 8 (rho = +0,69 avec lsr_globacct_x). Famille positionnement : echoue sur le crible 1 (aucun payeur ecrit AVANT la mesure) et sur le crible 8 (les 8 signaux sont correles 0,63 a 0,92 entre eux -- une seule sleeve au plus), et ses meilleurs membres ont deja consomme la fenetre scellee."
+  },
+  "instrument_coherence": {
+    "date": "2026-09-09",
+    "constat": "Deux methodes INDEPENDANTES donnent le meme nombre d'essais effectifs.",
+    "methode_1_placebo": {
+      "description": "20 tirages, symboles permutes jour par jour (le lien signal->rendement est detruit, la distribution transversale et le rendement de marche sont conserves), grille entiere rejouee, max|t| retenu.",
+      "mediane_max_t": 2.8069,
+      "N_implicite_bilateral": 138,
+      "derivation": "resoudre (2*Phi(2.8069)-1)^N = 0.5"
+    },
+    "methode_2_dedup": {
+      "description": "canonicalisation de la bibliotheque par le CONTENU du rang transversal (_rank_dedup, deux etages), sans aucune reference au placebo.",
+      "N_essais_reels": 138
+    },
+    "verdict": "Les deux coincident a l'unite. L'instrument est coherent : le compte d'essais n'est pas une convention, il est mesurable de deux facons.",
+    "reserve": "Le q95 du placebo (3,8783) implique N=488, pas 138. Ce n'est PAS une contradiction : le q95 est le 19e ordre statistique de 20 tirages, sa couverture reelle est dans [0,784 ; 0,982] a 90 %. La mediane est robuste, le q95 ne l'est pas. Toute conclusion doit s'appuyer sur la mediane."
+  },
+  "fait_corrige_2026_09_09": {
+    "affirmation_recue": "le balayage travaille sur 50 symboles, en passer a 696 multiplierait le t par ~1,8",
+    "constat": "FAUX depuis v4. Le balayage tourne sur un panel de 696 symboles ; l'univers TRADABLE est top-120/jour par ADV avec contrainte de capacite. Preuve : l'en-tete de chaque run, '=== panel 943j x 696 symboles ===' puis 'univers median 120/jour (top_n=120)'. Les 50 symboles sont data/enriched, utilise par le live_alpha_lab, PAS par le balayage de recherche.",
+    "question_ouverte": "reste-t-il du headroom au-dela de top_n=120 ? mesure en cours."
   }
 }

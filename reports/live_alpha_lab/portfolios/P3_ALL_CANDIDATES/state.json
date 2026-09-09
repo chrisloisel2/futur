@@ -2,37 +2,46 @@
   "positions": {
     "ETCUSDT": {
       "instrument": "ETCUSDT",
-      "quantity": 431.9950909024596,
+      "quantity": 400.0906365328002,
       "entry_price": 8.437240168372588,
-      "realized_pnl": 0.0,
-      "fees_paid": 1.8224231667509998,
-      "funding_paid": -0.04293281929644094,
+      "realized_pnl": -3.4284832142040917,
+      "fees_paid": 1.955301697122748,
+      "funding_paid": -0.05401724068532983,
       "owner_alpha": "LIQ_CASCADE_REPEAT_V1"
     },
     "PENDLEUSDT": {
       "instrument": "PENDLEUSDT",
-      "quantity": 51.39406149565884,
-      "entry_price": 2.0851169400000003,
+      "quantity": 102.69500833993587,
+      "entry_price": 2.0870075376064166,
       "realized_pnl": 0.0,
-      "fees_paid": 0.05358131411999999,
-      "funding_paid": -0.00033079534939327223,
+      "fees_paid": 0.10716262823999997,
+      "funding_paid": -0.001044000945805591,
+      "owner_alpha": "LIQ_CASCADE_REPEAT_V1"
+    },
+    "ATOMUSDT": {
+      "instrument": "ATOMUSDT",
+      "quantity": 1702.224928328628,
+      "entry_price": 1.958613074286,
+      "realized_pnl": 0.0,
+      "fees_paid": 1.667,
+      "funding_paid": 0.0067681477000555565,
       "owner_alpha": "LIQ_CASCADE_REPEAT_V1"
     }
   },
   "cash": 200000.0,
   "peak_equity": 201905.95194765585,
-  "cumulative_fees_usd": 515.1149733770081,
-  "cumulative_turnover_usd": 1030229.946754019,
-  "cumulative_funding_usd": -2.3552989112344664,
-  "cumulative_realized_pnl": 2346.303888510854,
+  "cumulative_fees_usd": 516.9684332214999,
+  "cumulative_turnover_usd": 1033936.8664430025,
+  "cumulative_funding_usd": -2.3603283905197125,
+  "cumulative_realized_pnl": 2342.87540529665,
   "cumulative_cost_by_alpha": {
     "SHORT_COVERING_CONTINUATION_V1": 420.2228775376965,
-    "LIQ_CASCADE_REPEAT_V1": 94.89209583931131
+    "LIQ_CASCADE_REPEAT_V1": 96.74555568380306
   },
   "cumulative_pnl_by_alpha": {
     "UNATTRIBUTED": 0.43990027446421975,
     "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
-    "LIQ_CASCADE_REPEAT_V1": 1297.4606444376532
+    "LIQ_CASCADE_REPEAT_V1": 1294.032161223449
   },
   "equity_curve": [
     {
@@ -15337,9 +15346,40 @@
       },
       "suppressed_turnover_usd": 248404.19997113378,
       "suppressed_order_count": 238
+    },
+    {
+      "ts": "2026-09-09T10:30:40.285532+00:00",
+      "status": "OK",
+      "cash": 200000.0,
+      "realized_pnl": 2342.87540529665,
+      "unrealized_pnl": -42.84251091016049,
+      "pnl_by_alpha": {
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "LIQ_CASCADE_REPEAT_V1": 1251.1896503132887,
+        "UNATTRIBUTED": 0.43990027446421975
+      },
+      "fees": 516.9684332214999,
+      "funding": -2.3603283905197125,
+      "equity": 201780.70413277447,
+      "drawdown": -0.0006203275023504657,
+      "gross_exposure": 6881.143535114139,
+      "net_exposure": 6881.143535114139,
+      "n_positions": 3,
+      "skipped_no_mark": [],
+      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
+      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
+      "turnover_by_class": {
+        "EXIT": 98178.88821170272,
+        "ENTRY": 68339.1845368952,
+        "SIGNAL_RESIZE": 5471.5189596234595,
+        "FILL_CONVERGENCE": 30842.129178117248,
+        "MECHANICAL_RESIZE": 646.0367075564288
+      },
+      "suppressed_turnover_usd": 250070.86663780044,
+      "suppressed_order_count": 239
     }
   ],
-  "last_step_ts": "2026-09-09T10:14:42.591524+00:00",
+  "last_step_ts": "2026-09-09T10:30:40.285532+00:00",
   "initialized": true,
   "orders": [
     {
@@ -58072,6 +58112,93 @@
       "refused_notional_usd": 4892.858800000001,
       "turnover_class": "ENTRY",
       "no_trade_band_fraction": 0.5166051660516605
+    },
+    {
+      "order_id": "P3_ALL_CANDIDATES:ATOMUSDT:2026-09-09T10:30:40.285532+00:00:1",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:ATOMUSDT:2026-09-09T10:20:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:ATOMUSDT:2026-09-09T10:20:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp_decision": "2026-09-09T10:20:00+00:00",
+      "timestamp_submit": "2026-09-09T10:30:40.285532+00:00",
+      "timestamp_fill": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "ATOMUSDT",
+      "side": "BUY",
+      "requested_quantity": 1702.224928328628,
+      "filled_quantity": 1702.224928328628,
+      "remaining_quantity": 0.0,
+      "requested_notional": 3333.3333333333335,
+      "fill_price": 1.958613074286,
+      "mark_price_at_decision": 1.95822143,
+      "spread_bps": 4.0,
+      "slippage_bps": 2.0,
+      "fee_bps": 5.0,
+      "fee_amount": 1.667,
+      "status": "FILLED",
+      "exit_reason": null,
+      "cap_policy": "TOP_OF_BOOK",
+      "cap_notional_usd": 6274.9668,
+      "refused_notional_usd": 0.0,
+      "turnover_class": "ENTRY",
+      "no_trade_band_fraction": 0.5166051660516605
+    },
+    {
+      "order_id": "P3_ALL_CANDIDATES:ETCUSDT:2026-09-09T10:30:40.285532+00:00:2",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:ETCUSDT:2026-09-09T08:15:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:ETCUSDT:2026-09-09T08:15:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp_decision": "2026-09-09T08:15:00+00:00",
+      "timestamp_submit": "2026-09-09T10:30:40.285532+00:00",
+      "timestamp_fill": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "ETCUSDT",
+      "side": "SELL",
+      "requested_quantity": 31.90445436965939,
+      "filled_quantity": 31.90445436965939,
+      "remaining_quantity": 0.0,
+      "requested_notional": 265.81022278805403,
+      "fill_price": 8.3297792109,
+      "mark_price_at_decision": 8.3314455,
+      "spread_bps": 4.0,
+      "slippage_bps": 2.0,
+      "fee_bps": 5.0,
+      "fee_amount": 0.13287853037174824,
+      "status": "FILLED",
+      "exit_reason": "TARGET_CHANGE",
+      "cap_policy": "TOP_OF_BOOK",
+      "cap_notional_usd": 524.7430449999999,
+      "refused_notional_usd": 0.0,
+      "turnover_class": "MECHANICAL_RESIZE",
+      "no_trade_band_fraction": 0.5166051660516605
+    },
+    {
+      "order_id": "P3_ALL_CANDIDATES:PENDLEUSDT:2026-09-09T10:30:40.285532+00:00:3",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:PENDLEUSDT:2026-09-09T10:00:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:PENDLEUSDT:2026-09-09T10:00:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp_decision": "2026-09-09T10:00:00+00:00",
+      "timestamp_submit": "2026-09-09T10:30:40.285532+00:00",
+      "timestamp_fill": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "PENDLEUSDT",
+      "side": "BUY",
+      "requested_quantity": 2342.687153026721,
+      "filled_quantity": 51.300946844277036,
+      "remaining_quantity": 2291.386206182444,
+      "requested_notional": 4892.664331552528,
+      "fill_price": 2.088901566774,
+      "mark_price_at_decision": 2.08848387,
+      "spread_bps": 4.0,
+      "slippage_bps": 2.0,
+      "fee_bps": 5.0,
+      "fee_amount": 0.05358131411999999,
+      "status": "PARTIALLY_FILLED",
+      "exit_reason": null,
+      "cap_policy": "TOP_OF_BOOK",
+      "cap_notional_usd": 107.1412,
+      "refused_notional_usd": 4785.523131552529,
+      "turnover_class": "FILL_CONVERGENCE",
+      "no_trade_band_fraction": 0.5166051660516605
     }
   ],
   "fills": [
@@ -84384,34 +84511,82 @@
       "fee_usd": 0.05358131411999999,
       "mark_source": "DERIVATIVES_RAW_MARK",
       "mark_stale": false
+    },
+    {
+      "fill_id": "P3_ALL_CANDIDATES:ATOMUSDT:2026-09-09T10:30:40.285532+00:00:1:F0",
+      "order_id": "P3_ALL_CANDIDATES:ATOMUSDT:2026-09-09T10:30:40.285532+00:00:1",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:ATOMUSDT:2026-09-09T10:20:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:ATOMUSDT:2026-09-09T10:20:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "ATOMUSDT",
+      "quantity": 1702.224928328628,
+      "fill_price": 1.958613074286,
+      "fee_usd": 1.667,
+      "mark_source": "DERIVATIVES_RAW_MARK",
+      "mark_stale": false
+    },
+    {
+      "fill_id": "P3_ALL_CANDIDATES:ETCUSDT:2026-09-09T10:30:40.285532+00:00:2:F0",
+      "order_id": "P3_ALL_CANDIDATES:ETCUSDT:2026-09-09T10:30:40.285532+00:00:2",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:ETCUSDT:2026-09-09T08:15:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:ETCUSDT:2026-09-09T08:15:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "ETCUSDT",
+      "quantity": -31.90445436965939,
+      "fill_price": 8.3297792109,
+      "fee_usd": 0.13287853037174824,
+      "mark_source": "DERIVATIVES_RAW_MARK",
+      "mark_stale": false
+    },
+    {
+      "fill_id": "P3_ALL_CANDIDATES:PENDLEUSDT:2026-09-09T10:30:40.285532+00:00:3:F0",
+      "order_id": "P3_ALL_CANDIDATES:PENDLEUSDT:2026-09-09T10:30:40.285532+00:00:3",
+      "intent_id": "LIQ_CASCADE_REPEAT_V1:PENDLEUSDT:2026-09-09T10:00:00+00:00",
+      "signal_id": "LIQ_CASCADE_REPEAT_V1:PENDLEUSDT:2026-09-09T10:00:00+00:00",
+      "alpha_id": "LIQ_CASCADE_REPEAT_V1",
+      "portfolio_id": "P3_ALL_CANDIDATES",
+      "timestamp": "2026-09-09T10:30:40.285532+00:00",
+      "symbol": "PENDLEUSDT",
+      "quantity": 51.300946844277036,
+      "fill_price": 2.088901566774,
+      "fee_usd": 0.05358131411999999,
+      "mark_source": "DERIVATIVES_RAW_MARK",
+      "mark_stale": false
     }
   ],
   "accepted_target_notional": {
-    "ETCUSDT": 10000.0,
-    "PENDLEUSDT": 5000.0
+    "ETCUSDT": 3333.3333333333335,
+    "PENDLEUSDT": 5000.0,
+    "ATOMUSDT": 3333.3333333333335
   },
   "accepted_intent_signature": {
     "ETCUSDT": "0ba6600d8e23bf05",
-    "PENDLEUSDT": "1c7742a52f02ba35"
+    "PENDLEUSDT": "1c7742a52f02ba35",
+    "ATOMUSDT": "5dbe74c697449d91"
   },
   "converging": {
-    "ETCUSDT": true,
-    "PENDLEUSDT": true
+    "ETCUSDT": false,
+    "PENDLEUSDT": true,
+    "ATOMUSDT": false
   },
   "cumulative_turnover_by_class": {
     "EXIT": 98178.88821170272,
-    "ENTRY": 65005.184536895205,
+    "ENTRY": 68339.1845368952,
     "SIGNAL_RESIZE": 5471.5189596234595,
-    "FILL_CONVERGENCE": 30734.96654987725,
-    "MECHANICAL_RESIZE": 380.27964681293236
+    "FILL_CONVERGENCE": 30842.129178117248,
+    "MECHANICAL_RESIZE": 646.0367075564288
   },
   "alpha_denominator_high_water": {
-    "LIQ_CASCADE_REPEAT_V1": 2.0
+    "LIQ_CASCADE_REPEAT_V1": 3.0
   },
-  "suppressed_turnover_usd": 248404.19997113378,
-  "suppressed_order_count": 238,
-  "capped_order_count": 102,
-  "capped_notional_usd": 379249.8979601174,
+  "suppressed_turnover_usd": 250070.86663780044,
+  "suppressed_order_count": 239,
+  "capped_order_count": 103,
+  "capped_notional_usd": 384036.3781962962,
   "overlay_steps": 0,
   "overlay_binding_steps": 0,
   "overlay_multiplier_min": 1.0,
