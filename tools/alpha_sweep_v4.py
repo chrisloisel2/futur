@@ -55,6 +55,10 @@ from scipy.stats import norm
 warnings.filterwarnings("ignore")
 EPS = 1e-12
 
+# La fenetre d'EXPLORATION : tout confirm en dehors est un regard SCELLE, qui
+# exige un pre-enregistrement pousse sur le remote (cf. tools/look_ledger.py).
+EXPLORATION = ("2021-12-01", "2024-06-30")
+
 
 # =====================================================================  DONNEES
 
@@ -832,6 +836,30 @@ def main():
         prereg = json.load(open(a.prereg))["configs"]
         print(f"=== CONFIRMATION : {len(prereg)} configurations pre-enregistrees, "
               f"aucun reglage ===", flush=True)
+        # PRECONDITION DU REGARD, pas trace du regard. L'audit du 2026-09-09 a
+        # cherche les regards passes sur la fenetre scellee et n'a trouve AUCUN
+        # enregistrement : le compte de 16 essais est une RECONSTRUCTION depuis
+        # les artefacts restes sur disque. Ce qui a tourne sans laisser de fichier
+        # n'est pas compte, donc les seuils sont des bornes inferieures.
+        # Desormais : on ecrit AVANT de calculer, et si on ne peut pas ecrire, on
+        # ne calcule pas. Hors de la fenetre d'exploration, on exige en plus que
+        # le pre-enregistrement soit COMMITE ET POUSSE -- l'horodatage du remote
+        # est le seul temoin qu'on ne peut pas antidater.
+        import look_ledger
+        scelle = not (a.start >= EXPLORATION[0] and a.end <= EXPLORATION[1])
+        try:
+            ent = look_ledger.record(
+                "confirm", (a.start, a.end), prereg, prereg=a.prereg,
+                require_witness=scelle,
+                note=f"tag={a.tag} exec_lag={a.exec_lag} top_n={a.top_n} "
+                     f"cost_bps={a.cost_bps} aum={a.aum}")
+        except look_ledger.LedgerError as e:
+            print(f"\n!! REGARD REFUSE : {e}")
+            print("   Rien n'a ete calcule. La fenetre n'a pas ete ouverte.")
+            return
+        print(f"    ledger : regard seq={ent['seq']} inscrit "
+              f"({'SCELLE, temoin exige' if scelle else 'exploration'}), "
+              f"chaine {ent['hash'][:12]}", flush=True)
 
     rows, M, keys = run_grid(D, SIG, ST, univ, ret1, COSTP, a, prereg=prereg)
     res = pd.DataFrame(rows)

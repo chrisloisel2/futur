@@ -1,5 +1,5 @@
 {
-  "iteration": 8,
+  "iteration": 9,
   "date": "2026-09-09",
   "budget_tests_remaining": 3,
   "budget_raw_balance": 3,
@@ -182,6 +182,18 @@
       "titre": "un trou UNIVERSEL faisait sauter l'index du panel et recollait les bords",
       "ferme_le": "2026-09-09",
       "preuve": "build_daily_cache prenait l'UNION des dates observees comme index. Un trou propre a un symbole est inoffensif (les autres portent la date, le symbole est NaN, le rendement est NaN -- verifie sur LUNAUSDT, 18 jours de suspension en mai 2022 : ret1 = NaN sur tout le trou). Mais un trou UNIVERSEL -- ce que produit exactement un retard de publication, qui frappe tous les symboles a la fois -- faisait SAUTER l'index, et close.shift(-1) recollait le 30 juin au 1er aout : un rendement de 31 jours porte comme un rendement d'UN jour. Correctif : calendrier complet impose par reindex, un trou universel devient une ligne de NaN visible."
+    },
+    {
+      "id": "I20",
+      "titre": "aucun ledger n'etait ecrit AU MOMENT du regard",
+      "ferme_le": "2026-09-09",
+      "preuve": "L'audit du 2026-09-09 a cherche les regards passes sur la fenetre scellee et n'a trouve AUCUN enregistrement : zero mention dans MULTIPLICITY_LEDGER.json et PREREGISTRATION_LEDGER.jsonl. Le compte de 16 essais, et le N=138 qui en decoule, sont des RECONSTRUCTIONS depuis les artefacts restes sur disque. Correctif : tools/look_ledger.py, chaine hachee append-only, ecrite AVANT tout calcul et fail-closed -- un regard qui ne peut pas ecrire au ledger ne s'execute pas. Inviolabilite testee dans les deux sens : reecrire une entree est detecte ('entree reecrite a seq=1'), en retirer une aussi ('chaine rompue')."
+    },
+    {
+      "id": "I21",
+      "titre": "le pre-enregistrement n'avait aucun temoin exterieur",
+      "ferme_le": "2026-09-09",
+      "preuve": "prereg.json ecrit a 11:24:45 et confirm lance a 11:24:55, meme pipeline : dix secondes, aucun moment d'engagement. Un fichier local qu'on peut encore modifier n'est pas une promesse. Correctif : hors de la fenetre d'exploration, le harnais EXIGE que le pre-enregistrement soit commite ET pousse sur le remote -- l'horodatage du remote ne peut pas etre antidate. Verifie : un regard scelle avec un prereg non pousse est REFUSE et ne calcule rien. Confirme retroactivement sur reports/edge_discovery/sweep_v4/prereg.json : committed=true, pushed=FALSE."
     }
   ],
   "data_sources_ingested": [
@@ -487,5 +499,27 @@
       "2,399 est le MAX DE 2 configurations du meme signal, toutes deux confirmees ; et les deux sortaient d'un balayage a 10 820 configurations, N effectif 138."
     ],
     "verdict": "le candidat n'est pas mort par maximum d'ordre -- ce cadrage etait faux. Il reste INDECIDABLE par la multiplicite du BALAYAGE. Barre defendable 2,9552 (n=16, bilateral) ; meme en ne comptant que la famille v4 (9 configs, bilateral) elle est a 2,7729. Il echoue aux deux. Le seuil de 1,96 supposait un regard unique venu de l'exterieur du balayage : ce n'est pas le cas."
+  },
+  "comptes_sont_des_bornes_inferieures": {
+    "date": "2026-09-09",
+    "constat": "Les 16 essais scelles et le N=138 sont des RECONSTRUCTIONS depuis les artefacts sur disque, pas des enregistrements contemporains (I20). Tout regard ayant tourne sans laisser d'artefact n'est pas compte.",
+    "consequence": "Les seuils (2,9552 a n=16 ; 3,5661 a N=138 bilateral) sont des BORNES INFERIEURES. Personne ne sait de combien. Une reconstruction documentee reste defendable, mais elle ne peut pas etre presentee comme un compte exact.",
+    "a_partir_de_maintenant": "le ledger est ecrit au moment du regard, donc le compte devient exact EN AVANT. Il ne le devient pas retroactivement."
+  },
+  "hypothese_exterieure_methode": {
+    "date": "2026-09-09",
+    "probleme": "Apres 138 regards, presque rien de ce que je pense est independant de ce que j'ai vu, et ma parole n'est pas auditable.",
+    "forme_retenue": "Une hypothese dont la DONNEE n'a jamais ete chargee dans le panel est exterieure aux 138 regards non par promesse mais parce que le regard etait PHYSIQUEMENT IMPOSSIBLE. C'est verifiable apres coup.",
+    "gisements_jamais_charges": [
+      "options_backfill (586 Mo)",
+      "microstructure_reduced (7,1 Go)",
+      "execution_probe (243 Mo)",
+      "derivatives_backfill/bybit",
+      "derivatives_backfill/okx",
+      "derivatives_backfill/hyperliquid",
+      "stablecoins"
+    ],
+    "multiplicite_a_compter": "7 gisements = 7 regards, PAS 1. Choisir les options parmi sept est une selection, faible mais reelle. Seuil+puissance a n=7 : S requis 1,34 sur 6 ans contre un livre a 1,66 -- la voie survit au compte honnete, pas seulement au compte flatteur.",
+    "fuite_restante": "les FEATURES options seraient neuves, la CIBLE ne l'est pas : rendement forward, univers, horizon et taille de panier ont ete regardes 138 fois. Reprendre top_n=120 / h=1 / 8v8 importerait la selection dont on essaie de sortir -- et 120 est un pic dont j'ai moi-meme ecrit qu'il est partiellement circulaire. La configuration doit etre derivee du MECANISME options (echeance -> horizon ; sous-jacents a chaine liquide -> univers), pas du balayage."
   }
 }
