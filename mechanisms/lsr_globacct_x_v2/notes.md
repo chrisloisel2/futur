@@ -48,3 +48,13 @@ The validation window declares 2020-09-01, but the first rebalance with enough
 symbols is 2021-12-02: that is when the Vision metrics coverage becomes broad
 enough to rank a cross-section. The verdict reports the real span, not the
 declared one.
+
+## 2026-09-10 — three rules, three statuses
+
+The rebuild brief sets this mechanism to `INDECIDABLE / FORWARD_WATCH_ONLY / NO_LIVE`.
+That is the status of the **mechanism**. This **rule** (top-100, 15v15, open→close, 2-day
+step) is **COST_WALL** by its own verdict and is not re-run. The forward watch is carried
+by a different preregistered rule, `FORWARD_CROWD_POSITIONING_V1`, sealed with an external
+witness (see `sealed_forwards/EXTERNAL_WITNESSES.md`) — one look, not before 2028-12-06.
+The indecidable historical evidence is the sweep rule (`reports/loop/`, sealed-window
+t 2.399 vs 2.955). See `PROJECT_TRUTH.md`.

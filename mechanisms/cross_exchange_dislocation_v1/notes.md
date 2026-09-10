@@ -38,3 +38,9 @@ Displayed quantities are not comparable across the two venues: Binance quotes
 base units and OKX quotes contracts. Nothing in this run says anything about how
 much size the dislocation could absorb, and nothing in it should be quoted as a
 capacity estimate.
+
+## 2026-09-10 — status policy vs measured verdict
+
+The rebuild brief lists this mechanism as `RESEARCH_ONLY`. The measured verdict in
+`results/verdict.json` is **COST_WALL** (gate 2). The verdict stands: a new rule in this
+family is a new mechanism with a new `spec.json` and a new trial; this one is not re-run.

@@ -60,3 +60,19 @@ A mechanism may read files any of the frozen systems produced. That is a file
 read, not an import: no assumption, no horizon and no threshold crosses the
 boundary with the bytes. Every dataset read this way carries a manifest and
 passes gate 0 before anything is computed on it.
+
+## Allowed / Forbidden (2026-09-10, p0-truth-rebuild)
+
+Allowed:
+- read old reports
+- reuse data files after validation (`data_lake/quality_reports/`, `tools/check_continuity.py`)
+- reuse utility functions only after copying and testing them inside the P0 path
+
+Forbidden:
+- importing the old ML stack
+- using old sleeves as live candidates
+- using old dashboard outputs as evidence
+- using mock endpoints
+- trading any old alpha
+- promoting any candidate without a forward seal (`sealed_forwards/active/` or an
+  externally witnessed preregistration listed in `sealed_forwards/EXTERNAL_WITNESSES.md`)

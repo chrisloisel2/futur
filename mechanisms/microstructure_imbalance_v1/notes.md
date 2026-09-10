@@ -36,3 +36,9 @@ The median spread on these symbols is about 0.013 basis points, which is why the
 cost model is dominated entirely by fees. Any future microstructure mechanism
 here should be priced the same way: on this venue set, spread is a rounding
 error and the fee schedule is the whole question.
+
+## 2026-09-10 — status policy vs measured verdict
+
+The rebuild brief lists this mechanism as `RESEARCH_ONLY`. The measured verdict in
+`results/verdict.json` is **COST_WALL** (gate 2). The verdict stands: a new rule in this
+family is a new mechanism with a new `spec.json` and a new trial; this one is not re-run.
