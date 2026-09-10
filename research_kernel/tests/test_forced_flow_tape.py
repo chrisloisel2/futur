@@ -18,6 +18,11 @@ def _rows(limit=5000):
     return read_tape(PART, limit=limit) if PART.exists() else []
 
 
+def test_partitions_are_not_read_as_empty():
+    if PART.exists() and any(PART.rglob("events-*.jsonl.gz")):
+        assert _rows(limit=1), "partitions exist but no record could be read: a green test on an empty tape is a lie"
+
+
 def test_records_carry_both_timestamps_and_enrichment_fields():
     for r in _rows():
         assert REQUIRED <= set(r), REQUIRED - set(r)

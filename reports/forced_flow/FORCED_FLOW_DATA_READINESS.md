@@ -1,6 +1,6 @@
 # FORCED_FLOW_DATA_READINESS — la tape des flux forcés (P2B)
 
-*2026-09-10. Service `futur-forced-flow-tape.service` (systemd utilisateur, `Restart=always`), premier enregistrement à None. Chiffres de la première fenêtre de collecte ; se régénèrent avec `data_lake/collectors/tape_io.read_tape`.*
+*2026-09-10. Service `futur-forced-flow-tape.service` (systemd utilisateur, `Restart=always`), premier enregistrement à 2026-09-10T11:12:50.496138+00:00. Chiffres de la première fenêtre de collecte ; se régénèrent avec `data_lake/collectors/tape_io.read_tape`.*
 
 ## Ce que la tape enregistre
 
@@ -19,14 +19,14 @@ Une ligne par liquidation : `event_ts_exchange` (T de l'ordre forcé), `recv_ts_
 
 | mesure | valeur |
 |---|---|
-| liquidations enregistrées | **0** ({}) |
-| enrichies (spread d'avant non nul) | 0/0 |
-| latence exchange → local, ms (n / min / méd / max) | — |
-| throttle Binance `stream_delay_ms` (n / min / méd / max) | — |
-| âge de la cote d'avant, ms (n / min / méd / max) | — |
-| âge du mark d'avant, ms (n / min / méd / max) | — |
+| liquidations enregistrées | **51** ({'binance': 46, 'bybit': 5}) |
+| enrichies (spread d'avant non nul) | 50/51 |
+| latence exchange → local, ms (n / min / méd / max) | 51 / 105 / 1120 / 1155 |
+| throttle Binance `stream_delay_ms` (n / min / méd / max) | 46 / 437 / 1010 / 1015 |
+| âge de la cote d'avant, ms (n / min / méd / max) | 50 / 0 / 262 / 4771 |
+| âge du mark d'avant, ms (n / min / méd / max) | 50 / 0 / 261 / 758 |
 | notional | — |
-| liquidations ≥ 50 k USD (seuil d'entrée de `forced_liquidation_reaction_v1`) | 0 |
+| liquidations ≥ 50 k USD (seuil d'entrée de `forced_liquidation_reaction_v1`) | 1 |
 
 ## Ce qu'il faut avant le premier regard
 
