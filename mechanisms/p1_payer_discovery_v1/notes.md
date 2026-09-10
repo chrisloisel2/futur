@@ -41,3 +41,11 @@ venues (Binance en unités, OKX en contrats) — les mids le sont.
   seuils sont la condition réelle de toute réouverture et figurent dans la table.
 - **Le run ne relit pas son code** : chaque correction ci-dessus a exigé un nouveau passage ;
   `--recompute` reprend désormais les mesures et ne recalcule que frais, planchers et décision.
+
+## 2026-09-10 — P1.1 Fee Source Audit
+
+Frais chargés depuis `data_lake/manifests/published_fee_schedules_2026-09-10.json` (trois classes séparées).
+Officiel obtenu : OKX (cadre 2025-11-25 + avis 2026-09-09 : VIP8 −0,25/2,0 applicable, −0,5 jusqu'au 09-09),
+Bybit (page 2026-09-02, Pro 5 = 0/1,8), Hyperliquid (docs), Binance VIP0 (FAQ) et 5 500 BNB. Non obtenu :
+table futures VIP Binance → VIP9 en repli tiers, **non final** ; seuil 25 G non confirmé, non corrigé.
+Décision finale = sources officielles seules ; test `test_fee_sources.py`. Voir `FEE_SOURCE_AUDIT.md`.

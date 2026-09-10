@@ -1,7 +1,7 @@
 # p1_payer_discovery — MEASUREMENT
 
-| okx/BTCUSDT/vip0/maker | 15.35 |
-| okx/SOLUSDT/best/taker | 15.98 |
+| hyperliquid/ETHUSDT/best/taker | 17.14 |
+| hyperliquid/SOLUSDT/best/taker | 18.48 |
 | hyperliquid/BTCUSDT/vip0/taker | 28.43 |
 | hyperliquid/ETHUSDT/vip0/taker | 29.74 |
 | hyperliquid/SOLUSDT/vip0/taker | 31.08 |

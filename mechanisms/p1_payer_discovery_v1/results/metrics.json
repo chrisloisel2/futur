@@ -1,5 +1,5 @@
 {
-  "measured_at": "2026-09-10T09:13:03.309296+00:00",
+  "measured_at": "2026-09-10T10:35:50.713571+00:00",
   "dates": [
     "2026-09-07",
     "2026-09-08",
@@ -24,9 +24,9 @@
         "taker": 5.0
       },
       "best": {
-        "maker": 0.8,
+        "maker": -0.25,
         "taker": 2.0,
-        "tier": "VIP8 (sommet du bareme standard)"
+        "tier": "VIP8"
       }
     },
     "bybit": {
@@ -37,7 +37,7 @@
       "best": {
         "maker": 0.0,
         "taker": 1.8,
-        "tier": "Pro 6, top-72 contrats"
+        "tier": "Pro 5"
       }
     },
     "hyperliquid": {
@@ -47,36 +47,32 @@
       },
       "best": {
         "maker": -0.3,
-        "taker": null,
-        "tier": "MM tier 3 (>3 % du volume maker de la plateforme)"
+        "taker": 2.4,
+        "tier": "rebate tier 3 + volume tier 6"
       }
     }
   },
   "fee_tier_thresholds": {
-    "binance": "30 G USD de volume futures sur 30 j ET 5 500 BNB en solde moyen",
-    "okx": "~2 G USDT de volume sur 30 j (VIP8) ; le rebate maker -0,5 bps est un programme market-maker hors bareme, seuil non source",
-    "bybit": "5 G USD de derives par mois (Pro 6)",
-    "hyperliquid": "> 3 % du volume maker total de la plateforme sur 14 j"
+    "binance": "VIP9 : 5 500 BNB (officiel) ; volume futures 30 j NON CONFIRM\u00c9 (officiel : 5\u00d7 spot \u21d2 20 G ; tiers : 25 G / 30 G)",
+    "okx": "VIP8 : \u2265 2 G USD de volume 30 j (officiel, cadre 2025-11-25) ; VIP9 : \u2265 20 G",
+    "bybit": "Pro 5 : \u2265 3 G USD de d\u00e9riv\u00e9s 30 j, volume API > 20 % (officiel) ; Pro 6 : \u2265 5 G",
+    "hyperliquid": "rebate tier 3 : > 3 % du volume maker de la plateforme (14 j) ; tier 6 : > 7 G USD / 14 j (officiel)"
   },
   "fee_sources": {
     "binance": [
       "https://tradersunion.com/brokers/crypto/view/binance/futures-fees/",
-      "https://feeflux.com/en/articles/binance-fees-guide/",
-      "https://www.datawallet.com/crypto/binance-vip-levels-explained",
-      "https://www.binance.com/en/blog/vip/what-is-the-binance-vip-program-2116760164762242990"
+      "https://www.binance.com/en/support/faq/360033544231",
+      "https://www.datawallet.com/crypto/binance-vip-levels-explained"
     ],
     "okx": [
-      "https://www.okx.com/en-us/help/fee-details",
-      "https://www.okx.com/en-us/help/whats-okx-vip-and-how-do-i-qualify-for-it",
-      "https://tradersunion.com/brokers/crypto/view/okex/fees/"
+      "https://www.okx.com/en-us/help/advance-notice-spot-and-futures-trading-fee-adjustment-090926",
+      "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
     ],
     "bybit": [
-      "https://www.bybit.com/en/help-center/article/Trading-Fee-Structure",
-      "https://www.datawallet.com/crypto/bybit-vip-levels-explained"
+      "https://www.bybit.com/en/help-center/article/Trading-Fee-Structure"
     ],
     "hyperliquid": [
-      "https://hyperliquidguide.com/guides/fees/fees-explained",
-      "https://www.datawallet.com/crypto/hyperliquid-fees-explained"
+      "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees"
     ]
   },
   "fees_measured_on_account": false,
@@ -89,6 +85,32 @@
   "floor_needed_bps": {
     "microstructure": 0.26,
     "cross_exchange": 0.6566666666666666
+  },
+  "fee_manifest": {
+    "path": "data_lake/manifests/published_fee_schedules_2026-09-10.json",
+    "sha256": "4f1772107b37fc7af0be29642218d467cbbf15e3e03eb570beabc8f7ed023bf6",
+    "source_class": {
+      "binance": {
+        "vip0": "official",
+        "best": "third_party_fallback",
+        "best_final": false
+      },
+      "okx": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      },
+      "bybit": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      },
+      "hyperliquid": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      }
+    }
   },
   "rows": [
     {
@@ -302,7 +324,7 @@
         },
         "best": {
           "taker_round_trip_bps": 4.552216399547685,
-          "maker_round_trip_bps": 2.715354773531435,
+          "maker_round_trip_bps": 0.6153547735314351,
           "maker_fill_prob_30s": 0.36662071342409097
         }
       }
@@ -356,7 +378,7 @@
         },
         "best": {
           "taker_round_trip_bps": 4.715010336149351,
-          "maker_round_trip_bps": 2.455667718034477,
+          "maker_round_trip_bps": 0.3556677180344766,
           "maker_fill_prob_30s": 0.41129588144063417
         }
       }
@@ -410,7 +432,7 @@
         },
         "best": {
           "taker_round_trip_bps": 5.326277657721629,
-          "maker_round_trip_bps": 1.4080321203838735,
+          "maker_round_trip_bps": -0.6919678796161267,
           "maker_fill_prob_30s": 0.29609684645872825
         }
       }
@@ -463,7 +485,7 @@
           "maker_fill_prob_30s": 0.23608478373255212
         },
         "best": {
-          "taker_round_trip_bps": null,
+          "taker_round_trip_bps": 5.277884011540434,
           "maker_round_trip_bps": -0.010991549478115203,
           "maker_fill_prob_30s": 0.23608478373255212
         }
@@ -517,7 +539,7 @@
           "maker_fill_prob_30s": 0.17439255557470273
         },
         "best": {
-          "taker_round_trip_bps": null,
+          "taker_round_trip_bps": 5.71400020255632,
           "maker_round_trip_bps": 0.061462832178174054,
           "maker_fill_prob_30s": 0.17439255557470273
         }
@@ -571,7 +593,7 @@
           "maker_fill_prob_30s": 0.16039117697742547
         },
         "best": {
-          "taker_round_trip_bps": null,
+          "taker_round_trip_bps": 6.161263356515655,
           "maker_round_trip_bps": -0.5941553597712079,
           "maker_fill_prob_30s": 0.16039117697742547
         }
@@ -581,8 +603,19 @@
   "decision": {
     "microstructure_reopen_vip0": false,
     "microstructure_reopen_best_tier": true,
+    "microstructure_reopen_best_tier_FINAL_official_only": true,
+    "microstructure_reopen_keys_best_final": [
+      "okx/SOLUSDT/best/maker",
+      "hyperliquid/BTCUSDT/best/maker",
+      "hyperliquid/ETHUSDT/best/maker",
+      "hyperliquid/SOLUSDT/best/maker"
+    ],
+    "microstructure_reopen_keys_best_fallback_non_final": [
+      "binance/SOLUSDT/best/maker"
+    ],
     "microstructure_reopen_keys_best": [
       "binance/SOLUSDT/best/maker",
+      "okx/SOLUSDT/best/maker",
       "hyperliquid/BTCUSDT/best/maker",
       "hyperliquid/ETHUSDT/best/maker",
       "hyperliquid/SOLUSDT/best/maker"
@@ -598,22 +631,29 @@
         "drift_loss_bps_30s": 0.1743769065274613
       },
       {
+        "key": "okx/SOLUSDT/best/maker",
+        "tier": "VIP8",
+        "fill_prob_30s_end_of_queue": 0.29609684645872825,
+        "half_spread_earned_bps": 0.4826108615483343,
+        "drift_loss_bps_30s": 0.38662692174027097
+      },
+      {
         "key": "hyperliquid/BTCUSDT/best/maker",
-        "tier": "MM tier 3 (>3 % du volume maker de la plateforme)",
+        "tier": "rebate tier 3 + volume tier 6",
         "fill_prob_30s_end_of_queue": 0.23608478373255212,
         "half_spread_earned_bps": 0.10834827967984578,
         "drift_loss_bps_30s": 0.40285250494078817
       },
       {
         "key": "hyperliquid/ETHUSDT/best/maker",
-        "tier": "MM tier 3 (>3 % du volume maker de la plateforme)",
+        "tier": "rebate tier 3 + volume tier 6",
         "fill_prob_30s_end_of_queue": 0.17439255557470273,
         "half_spread_earned_bps": 0.2568151155098805,
         "drift_loss_bps_30s": 0.5875465315989675
       },
       {
         "key": "hyperliquid/SOLUSDT/best/maker",
-        "tier": "MM tier 3 (>3 % du volume maker de la plateforme)",
+        "tier": "rebate tier 3 + volume tier 6",
         "fill_prob_30s_end_of_queue": 0.16039117697742547,
         "half_spread_earned_bps": 0.5514723266852696,
         "drift_loss_bps_30s": 0.5543946467996657
@@ -682,21 +722,41 @@
       },
       "okx/BTCUSDT/best": {
         "taker_leg_bps": 2.2761081997738426,
-        "maker_leg_bps": 1.3576773867657175,
-        "round_trip_two_legs_bps": 7.26757117307912
+        "maker_leg_bps": 0.30767738676571754,
+        "round_trip_two_legs_bps": 5.1675711730791205
       },
       "okx/ETHUSDT/best": {
         "taker_leg_bps": 2.3575051680746757,
-        "maker_leg_bps": 1.2278338590172384,
-        "round_trip_two_legs_bps": 7.170678054183828
+        "maker_leg_bps": 0.1778338590172383,
+        "round_trip_two_legs_bps": 5.070678054183828
       },
       "okx/SOLUSDT/best": {
         "taker_leg_bps": 2.6631388288608147,
-        "maker_leg_bps": 0.7040160601919367,
-        "round_trip_two_legs_bps": 6.734309778105503
+        "maker_leg_bps": -0.34598393980806336,
+        "round_trip_two_legs_bps": 4.634309778105503
+      },
+      "hyperliquid/BTCUSDT/best": {
+        "taker_leg_bps": 2.638942005770217,
+        "maker_leg_bps": -0.005495774739057602,
+        "round_trip_two_legs_bps": 5.2668924620623185
+      },
+      "hyperliquid/ETHUSDT/best": {
+        "taker_leg_bps": 2.85700010127816,
+        "maker_leg_bps": 0.030731416089087027,
+        "round_trip_two_legs_bps": 5.775463034734494
+      },
+      "hyperliquid/SOLUSDT/best": {
+        "taker_leg_bps": 3.0806316782578276,
+        "maker_leg_bps": -0.29707767988560396,
+        "round_trip_two_legs_bps": 5.567107996744447
       }
     },
     "lowest_maker_round_trip_best_tier": [
+      [
+        -0.6919678796161267,
+        "okx",
+        "SOLUSDT"
+      ],
       [
         -0.6170928452351446,
         "binance",
@@ -706,11 +766,6 @@
         -0.5941553597712079,
         "hyperliquid",
         "SOLUSDT"
-      ],
-      [
-        -0.010991549478115203,
-        "hyperliquid",
-        "BTCUSDT"
       ]
     ]
   },

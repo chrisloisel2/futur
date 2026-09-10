@@ -9,6 +9,7 @@ il n'y a pas de cible, donc pas de regard. Sorties :
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 import time
@@ -33,28 +34,19 @@ AS_WINDOWS = [5, 30]
 STEP = 10                     # echantillonnage des instants de pose, en secondes
 BPS = 1e4
 
-# Baremes PUBLIES (bps par cote), sources dans metrics.json. NON mesures sur un compte.
-FEES = {
-    "binance":     {"vip0": {"maker": 2.0, "taker": 5.0}, "best": {"maker": 0.0, "taker": 1.7, "tier": "VIP9"}},
-    "okx":         {"vip0": {"maker": 2.0, "taker": 5.0}, "best": {"maker": 0.8, "taker": 2.0, "tier": "VIP8 (sommet du bareme standard)"}},
-    "bybit":       {"vip0": {"maker": 2.0, "taker": 5.5}, "best": {"maker": 0.0, "taker": 1.8, "tier": "Pro 6, top-72 contrats"}},
-    "hyperliquid": {"vip0": {"maker": 1.5, "taker": 4.5}, "best": {"maker": -0.3, "taker": None, "tier": "MM tier 3 (>3 % du volume maker de la plateforme)"}},
-}
-# Ce que le meilleur tier EXIGE (sources dans SOURCES) : la condition reelle de toute reouverture.
-THRESHOLDS = {
-    "binance": "30 G USD de volume futures sur 30 j ET 5 500 BNB en solde moyen",
-    "okx": "~2 G USDT de volume sur 30 j (VIP8) ; le rebate maker -0,5 bps est un programme market-maker hors bareme, seuil non source",
-    "bybit": "5 G USD de derives par mois (Pro 6)",
-    "hyperliquid": "> 3 % du volume maker total de la plateforme sur 14 j",
-}
-SOURCES = {
-    "binance": ["https://tradersunion.com/brokers/crypto/view/binance/futures-fees/", "https://feeflux.com/en/articles/binance-fees-guide/",
-                "https://www.datawallet.com/crypto/binance-vip-levels-explained", "https://www.binance.com/en/blog/vip/what-is-the-binance-vip-program-2116760164762242990"],
-    "okx": ["https://www.okx.com/en-us/help/fee-details", "https://www.okx.com/en-us/help/whats-okx-vip-and-how-do-i-qualify-for-it",
-            "https://tradersunion.com/brokers/crypto/view/okex/fees/"],
-    "bybit": ["https://www.bybit.com/en/help-center/article/Trading-Fee-Structure", "https://www.datawallet.com/crypto/bybit-vip-levels-explained"],
-    "hyperliquid": ["https://hyperliquidguide.com/guides/fees/fees-explained", "https://www.datawallet.com/crypto/hyperliquid-fees-explained"],
-}
+# Baremes PUBLIES : charges depuis le manifeste d'audit (P1.1), jamais codes en dur.
+# Trois classes y sont separees : official / account_actual / third_party_fallback.
+FEE_MANIFEST = ROOT / "data_lake" / "manifests" / "published_fee_schedules_2026-09-10.json"
+_MAN = json.loads(FEE_MANIFEST.read_text())
+FEES, THRESHOLDS, SOURCES, FEE_CLASS = {}, {}, {}, {}
+for _v, _d in _MAN["venues"].items():
+    _ps = _d["published_schedule"]
+    FEES[_v] = {"vip0": {"maker": _ps["vip0"]["maker"], "taker": _ps["vip0"]["taker"]},
+                "best": {"maker": _ps["best"]["maker"], "taker": _ps["best"]["taker"], "tier": _ps["best"]["tier"]}}
+    FEE_CLASS[_v] = {"vip0": _ps["vip0"]["source_class"], "best": _ps["best"]["source_class"], "best_final": bool(_ps["best"].get("final"))}
+    _th = _d.get("thresholds", {})
+    THRESHOLDS[_v] = _th.get("summary") or "; ".join(f"{k}: {v.get('value', v) if isinstance(v, dict) else v}" for k, v in _th.items() if k != "source_class")[:220]
+    SOURCES[_v] = sorted({u for blk in (_ps["vip0"], _ps["best"]) for u in blk.get("sources", [])})
 # Les bruts observes par P0 (verdicts COST_WALL), la reference de la decision.
 GROSS_P0 = {"microstructure": 0.78, "cross_exchange": 1.97}
 WALL = 3.0
@@ -255,6 +247,9 @@ def main():
                                           "cross_exchange_one_leg": bool(c <= need["cross_exchange"] / 2)}
     micro_vip0 = [k for k, v in verdict["reopen"].items() if "/vip0/" in k and v["microstructure"]]
     micro_best = [k for k, v in verdict["reopen"].items() if "/best/" in k and v["microstructure"]]
+    # verdict FINAL : seules les venues dont le tier 'best' est de source OFFICIELLE y entrent
+    micro_best_final = [k for k in micro_best if FEE_CLASS[k.split("/")[0]]["best_final"]]
+    micro_best_fallback = [k for k in micro_best if k not in micro_best_final]
     xex_ok = [k for k, v in xex.items() if np.isfinite(v["round_trip_two_legs_bps"]) and v["round_trip_two_legs_bps"] <= GROSS_P0["cross_exchange"] / WALL]
     any_micro, any_xex = bool(micro_best), bool(xex_ok)
     for k in micro_best:
@@ -268,7 +263,12 @@ def main():
                "fees_published_bps": FEES, "fee_tier_thresholds": THRESHOLDS, "fee_sources": SOURCES, "fees_measured_on_account": False,
                "bybit": "no BBO/trades on disk: published fees only, no measured spread/latency",
                "gross_reference_bps": GROSS_P0, "cost_wall_multiple": WALL, "floor_needed_bps": need,
+               "fee_manifest": {"path": str(FEE_MANIFEST.relative_to(ROOT)), "sha256": hashlib.sha256(FEE_MANIFEST.read_bytes()).hexdigest(),
+                                "source_class": FEE_CLASS},
                "rows": rows, "decision": {"microstructure_reopen_vip0": bool(micro_vip0), "microstructure_reopen_best_tier": any_micro,
+                                          "microstructure_reopen_best_tier_FINAL_official_only": bool(micro_best_final),
+                                          "microstructure_reopen_keys_best_final": micro_best_final,
+                                          "microstructure_reopen_keys_best_fallback_non_final": micro_best_fallback,
                                           "microstructure_reopen_keys_best": micro_best, "cross_exchange_reopen": any_xex,
                                           "cross_exchange_reopen_keys": xex_ok, "conditions": verdict["conditions"],
                                           "cross_exchange_two_legs": xex,
@@ -277,7 +277,7 @@ def main():
     (REP / "venue_cost_table.json").write_text(json.dumps(metrics, indent=2, default=float))
     # ---- table markdown
     L = ["# P1 — table des coûts par venue (mesurée sur L1 + trades, 3 jours : 2026-09-07 → 09-09)\n",
-         "Frais : barèmes **publiés** (bps par côté), non mesurés sur un compte. Bybit : frais seuls, aucune donnée sur disque.\n",
+         "Frais : barèmes **publiés** chargés depuis `data_lake/manifests/published_fee_schedules_2026-09-10.json` (bps par côté ; classes official / third_party_fallback ; les frais **réels du compte** ne sont pas encore lus — `scripts/fetch_account_fees.py`). Bybit : frais seuls, aucune donnée sur disque.\n",
          "| venue | symbole | spread coté méd. | lat. méd. | ½-spread eff. exact méd. / moy. | au touch | maker : dérive − ½-spread gagné (30 s) | P(fill 30 s) | RT taker VIP0 / best | RT maker VIP0 / best |",
          "|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
@@ -288,14 +288,15 @@ def main():
                  f"{fmt(r.get('share_trades_at_touch'))} | {fmt(r.get('maker_drift_loss_bps_mean_30s'))} − {fmt(r.get('half_spread_earned_at_fill_bps_mean'))} = {fmt(r.get('maker_net_loss_bps_mean_30s'))} | "
                  f"{fmt(r.get('fill_prob_end_of_queue_30s'))} | {fmt(f0['taker_round_trip_bps'])} / {fmt(f1['taker_round_trip_bps'])} | "
                  f"{fmt(f0['maker_round_trip_bps'])} / {fmt(f1['maker_round_trip_bps'])} |")
-    L += ["", "| venue | maker VIP0 / best | taker VIP0 / best | tier « best » | ce que le tier exige |", "|---|---|---|---|---|"]
+    L += ["", "| venue | maker VIP0 / best | taker VIP0 / best | tier « best » | source VIP0 / best | ce que le tier exige |", "|---|---|---|---|---|---|"]
     for v, f in FEES.items():
-        bt = "—" if f["best"]["taker"] is None else "%.1f" % f["best"]["taker"]
-        L.append(f"| {v} | {f['vip0']['maker']:.1f} / {f['best']['maker']:.1f} | {f['vip0']['taker']:.1f} / {bt} | {f['best']['tier']} | {THRESHOLDS[v]} |")
+        bt = "—" if f["best"]["taker"] is None else "%.2f" % f["best"]["taker"]
+        L.append(f"| {v} | {f['vip0']['maker']:.1f} / {f['best']['maker']:.2f} | {f['vip0']['taker']:.1f} / {bt} | {f['best']['tier']} | {FEE_CLASS[v]['vip0']} / {FEE_CLASS[v]['best']}{'' if FEE_CLASS[v]['best_final'] else ' (NON FINAL)'} | {THRESHOLDS[v]} |")
     L += ["", f"## Décision (mur ×{WALL:.0f}, bruts de référence P0 : microstructure {GROSS_P0['microstructure']} bps, cross-exchange {GROSS_P0['cross_exchange']} bps)", "",
           f"- plancher requis : ≤ **{need['microstructure']:.2f} bps** aller-retour (microstructure), ≤ **{need['cross_exchange']/2:.2f} bps par jambe** (cross-exchange)",
           (f"- **microstructure au VIP0 : NON** — aucun mode, aucune venue ne passe sous {need['microstructure']:.2f} bps à frais publics de base" if not micro_vip0 else f"- microstructure au VIP0 : OUI ({', '.join(micro_vip0)})"),
-          f"- **microstructure au meilleur tier publié : {'OUI' if any_micro else 'NON'}**" + (f" — {', '.join(micro_best)}" if micro_best else ""),
+          f"- **microstructure au meilleur tier publié, verdict FINAL (sources officielles seules) : {'OUI' if micro_best_final else 'NON'}**" + (f" — {', '.join(micro_best_final)}" if micro_best_final else ""),
+          (f"- non final (tier 'best' de source tierce, non confirmé officiellement) : {', '.join(micro_best_fallback)}" if micro_best_fallback else "- aucune configuration de repli tiers en jeu"),
           ("- conditions de la réouverture : maker-only, tiers à rebate (" + "; ".join(f"{c['key']} : {c['tier']}, P(fill 30 s) {_f(c['fill_prob_30s_end_of_queue'])}, ½-spread gagné {_f(c['half_spread_earned_bps'])} bps contre dérive perdue {_f(c['drift_loss_bps_30s'])} bps" for c in verdict["conditions"]) + ")") if verdict["conditions"] else "- conditions : aucune configuration ne rouvre",
           f"- **cross-exchange (jambe disloquée prise en taker + jambe posée en maker) : {'OUI' if any_xex else 'NON'}** — plus bas aller-retour deux jambes : " + ", ".join(f"{k} {v['round_trip_two_legs_bps']:.2f} bps" for k, v in sorted(((k, v) for k, v in xex.items() if np.isfinite(v['round_trip_two_legs_bps'])), key=lambda kv: kv[1]['round_trip_two_legs_bps'])[:3]),
           "- **lecture** : un plancher maker négatif n'est pas un edge, c'est la marge du market maker — le demi-spread gagné au fill — qui n'existe que si l'ordre est servi et n'est disponible qu'aux tiers à rebate ; la réouverture change l'objet testé (exécution passive), elle ne ressuscite pas le signal de P0.",
