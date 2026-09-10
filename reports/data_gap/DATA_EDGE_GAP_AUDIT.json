@@ -1,0 +1,718 @@
+{
+  "generated_at_utc": "2026-09-10T22:35:14+00:00",
+  "branch": "p4-data-edge-gap-audit",
+  "base_commit": "eb0bcc6cc85766af8159d6cc2fbf9ac4a3f84849",
+  "constraints": {
+    "price_look": false,
+    "budget_consumed": 0,
+    "budget_remaining": 0,
+    "verdicts_modified": false,
+    "horizons_modified": false,
+    "new_trading_hypotheses": false
+  },
+  "verdicts_unchanged": {
+    "event_reaction_v1": "REJECTED_NO_GROSS",
+    "event_cross_venue_lag_v1": "REJECTED_NO_GROSS",
+    "event_listing_reversal_v1": "INDECIDABLE",
+    "event_delisting_pressure_v1": "INDECIDABLE",
+    "event_listing_perp_fade_v1": "INDECIDABLE",
+    "forced_liquidation_reaction_v1": "REJECTED_NO_GROSS (branch p3-forced-flow-first-look)",
+    "forced_liquidation_exhaustion_v1": "REJECTED_COST_WALL (branch p3-forced-flow-first-look)",
+    "cross_exchange_dislocation_v1": "COST_WALL",
+    "lsr_globacct_x_v2": "COST_WALL",
+    "microstructure_imbalance_v1": "COST_WALL"
+  },
+  "inventory": {
+    "official_event_tape": {
+      "rows": 7449,
+      "historical_with_publication_ts": 6378,
+      "fields_missing": [
+        "announcement body (hash only)",
+        "exact launch / delisting time inside the body",
+        "trading_start_ts is date-only (I22)",
+        "live latency never populated"
+      ],
+      "source": "data_lake/events/official_event_tape.jsonl"
+    },
+    "forced_flow_tape": {
+      "rows_after_11h": 27593,
+      "binance": 21759,
+      "bybit": 5834,
+      "sessions": 1,
+      "null_share": {
+        "depth_10bps_before": 1.0,
+        "open_interest_binance": 0.987,
+        "open_interest_bybit": 0.871,
+        "stream_delay_bybit": 1.0
+      },
+      "structural": "Binance forceOrder = 1 order / s / symbol (most recent only); Bybit aggregates per second",
+      "source": "data_lake/events/liquidations/"
+    },
+    "binance_vision_um_available_datasets": [
+      "aggTrades",
+      "trades",
+      "bookTicker",
+      "bookDepth (since 2023-01)",
+      "markPriceKlines",
+      "indexPriceKlines",
+      "premiumIndexKlines",
+      "metrics (OI + L/S, 5 min)",
+      "fundingRate (monthly)"
+    ],
+    "binance_vision_um_unavailable": [
+      "liquidationSnapshot (ended 2024-10)"
+    ],
+    "binance_vision_spot_available": [
+      "aggTrades",
+      "trades",
+      "klines"
+    ],
+    "binance_vision_spot_unavailable": [
+      "bookDepth",
+      "bookTicker"
+    ],
+    "vision_coverage_census": {
+      "H2": {
+        "bookDepth": {
+          "ok": 166,
+          "404": 8,
+          "error": 0
+        },
+        "premiumIndexKlines": {
+          "ok": 167,
+          "404": 7,
+          "error": 0
+        },
+        "metrics": {
+          "ok": 174,
+          "404": 0,
+          "error": 0
+        },
+        "aggTrades": {
+          "ok": 174,
+          "404": 0,
+          "error": 0
+        }
+      },
+      "H3": {
+        "bookDepth": {
+          "ok": 41,
+          "404": 5,
+          "error": 0
+        },
+        "metrics": {
+          "ok": 45,
+          "404": 1,
+          "error": 0
+        }
+      },
+      "H3_events_on_perp": 46,
+      "H3_events_on_spot": 10,
+      "H2_events": 174
+    },
+    "exchangeInfo_snapshot": {
+      "current_only": true,
+      "fields": [
+        "status",
+        "onboardDate",
+        "deliveryDate",
+        "liquidationFee",
+        "maintMarginPercent",
+        "marketTakeBound",
+        "maxMoveOrderLimit"
+      ],
+      "history": "none (delisted symbols disappear)"
+    },
+    "local_microstructure": {
+      "microstructure_reduced": "BTC/ETH/SOL BBO + aggTrades since 2026-08-31 (8.7 GB)",
+      "hyperliquid_l2": "L2 snapshots since 2026-07-18 (3.9 GB)",
+      "vision_1m_cache": "2 884 daily files",
+      "aggTrades_cache": "1 891 windows (P3B)"
+    },
+    "cost_measurements_P1": {
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT"
+      ],
+      "days": 3,
+      "account_actual_fees": "not fetched (no key)"
+    },
+    "breadth": {
+      "um_klines_1d_symbols": 696,
+      "spot_daily": "panel_spot_daily",
+      "enriched_1m_symbols": 50,
+      "enriched_stale_since": "2026-06",
+      "vision_metrics_since": "2021-12"
+    },
+    "venue_precedence_H2": {
+      "assets": 174,
+      "okx_bybit_announcement_before_binance_launch": 90,
+      "bybit_perp": 75,
+      "bybit_spot": 44,
+      "okx": 4,
+      "no_trace_in_tape": 84
+    },
+    "forced_flow_burst_stats": {
+      "median_inter_event_gap_s": 0.227,
+      "share_gaps_lt_1s": 0.67,
+      "seconds_with_ge5_liquidations": 513,
+      "max_messages_per_second": 607,
+      "top_5min_window_share": 0.18
+    }
+  },
+  "field_audit": {
+    "H2_listing_perp_fade": [
+      {
+        "field": "exact tradable_start_ts",
+        "status": "PARTIAL",
+        "what_we_have": "first Vision 1-min bar (minute resolution); onboardDate agrees within 5 min for 170/174",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "second-level start from the first aggTrade (Vision aggTrades launch day: 174/174 available)"
+      },
+      {
+        "field": "first_trade_ts",
+        "status": "MISSING",
+        "what_we_have": "not extracted",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "Vision aggTrades, first row of the launch-day file; also gives the opening print and its size"
+      },
+      {
+        "field": "first_orderbook_ts",
+        "status": "MISSING",
+        "what_we_have": "no bookTicker on Vision for new symbols (404 on launch days); no history anywhere public",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "only forward: subscribe depth/bookTicker at announcement time (median 1.7 h before launch)"
+      },
+      {
+        "field": "onboardDate officiel",
+        "status": "HAVE",
+        "what_we_have": "exchangeInfo snapshot 897 symbols (current only; 4/174 had a date-only value)",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "daily exchangeInfo snapshot so delisted symbols keep their onboardDate"
+      },
+      {
+        "field": "announcement_ts",
+        "status": "HAVE",
+        "what_we_have": "CMS releaseDate to the second; the announced launch time is in the body, not stored",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "store the announcement body text (cheap) and parse the announced launch time"
+      },
+      {
+        "field": "symbol status transitions",
+        "status": "MISSING",
+        "what_we_have": "no history of PENDING_TRADING -> TRADING -> SETTLING",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "exchangeInfo snapshot-diff timer (same pattern as Coinbase/HL in the event tape)"
+      },
+      {
+        "field": "L2 order book t0 -> t+6h",
+        "status": "PARTIAL",
+        "what_we_have": "Vision bookDepth (1-min snapshots at % levels) exists on the launch day for 166/174; no tick L2",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "Vision bookDepth for the 166 covered launches; forward tick L2 recorder for future listings; BUY (Tardis) only if tick L2 history is ever required"
+      },
+      {
+        "field": "trades tick-by-tick t0 -> t+6h",
+        "status": "MISSING",
+        "what_we_have": "Vision aggTrades launch day: 174/174",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "entry/exit at the second, volume profile, trade-size distribution for the slippage model"
+      },
+      {
+        "field": "mark price",
+        "status": "MISSING",
+        "what_we_have": "Vision markPriceKlines 1m exists for new symbols on launch day",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "the perpetual's own fair-value line; without it the 6-h move is measured against BTC, which is not the token's reference"
+      },
+      {
+        "field": "index price",
+        "status": "MISSING",
+        "what_we_have": "Vision indexPriceKlines / premiumIndexKlines: 167/174 on launch day",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "the index is Binance's composite of OTHER venues' prices = the external reference the hypothesis is about (overshoot vs outside); 90/174 assets have an OKX/Bybit listing before the Binance launch"
+      },
+      {
+        "field": "funding initial",
+        "status": "MISSING",
+        "what_we_have": "Vision fundingRate monthly",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "first settlement funding = price of the crowding; 8-h resolution"
+      },
+      {
+        "field": "open interest",
+        "status": "MISSING",
+        "what_we_have": "Vision metrics 5-min: 174/174 on launch day; REST openInterestHist only 30 days",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "OI accumulated in the first 15 min = leveraged crowding; reduces variance of the fade estimate"
+      },
+      {
+        "field": "spread / depth 10/25/50 bps",
+        "status": "PARTIAL",
+        "what_we_have": "bookDepth 1-min at % levels (166/174); no spread history for new symbols",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "executability: size a 100 k$ short at +15 min; declared 8 + 6 bps becomes measured"
+      },
+      {
+        "field": "24h volume after launch",
+        "status": "HAVE",
+        "what_we_have": "Vision klines quote volume (median 55 M$ per 6-h window measured in seq 8)",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "already in the results; nothing to add"
+      },
+      {
+        "field": "venue precedence (token already traded where?)",
+        "status": "PARTIAL",
+        "what_we_have": "event tape: 90/174 with an OKX/Bybit announcement before launch; 84 with no trace (DEX, Gate, MEXC, KuCoin, Bitget not covered); Binance Alpha events exist (59) but unlinked",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "extend the event tape to Gate/MEXC/KuCoin/Bitget official listing pages + fapi/v1/constituents (index composition per symbol)"
+      },
+      {
+        "field": "spot Binance existed before perp?",
+        "status": "HAVE",
+        "what_we_have": "Vision spot file existence (21 excluded in seq 8)",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "done; keep the rule"
+      },
+      {
+        "field": "perp was truly first Binance market?",
+        "status": "PARTIAL",
+        "what_we_have": "true vs spot; Binance Alpha (pre-listing venue) not checked",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "link the tape's alpha events to the perp universe"
+      },
+      {
+        "field": "executable short path",
+        "status": "PARTIAL",
+        "what_we_have": "perp exists => short allowed; leverage brackets, marketTakeBound, maxMoveOrderLimit known only for current symbols",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "exchangeInfo snapshot + leverageBracket (read-only key) at launch"
+      },
+      {
+        "field": "taker/maker fee actual",
+        "status": "PARTIAL",
+        "what_we_have": "published VIP0 (P1.1 official manifest); account actual never fetched",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "scripts/fetch_account_fees.py with a read-only key"
+      },
+      {
+        "field": "slippage model",
+        "status": "MISSING",
+        "what_we_have": "declared 6 bps",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "from bookDepth + aggTrades trade-through on the 166 covered launches; no vendor needed"
+      }
+    ],
+    "H3_delisting_pressure": [
+      {
+        "field": "official delisting timestamp",
+        "status": "HAVE",
+        "what_we_have": "CMS releaseDate to the second",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "nothing to add"
+      },
+      {
+        "field": "suspension timestamp",
+        "status": "MISSING",
+        "what_we_have": "in the announcement body (not stored)",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "store the body; parse 'delisting at YYYY-MM-DD HH:MM UTC'"
+      },
+      {
+        "field": "last tradable timestamp",
+        "status": "PARTIAL",
+        "what_we_have": "Vision last daily file = last tradable day (DREP still had klines after the announced date: the day is not the minute)",
+        "decision": "BUILD",
+        "priority": "P1_HIGH_VALUE",
+        "note": "body text + exchangeInfo status transitions (SETTLING) for perps"
+      },
+      {
+        "field": "perp / margin availability at announcement",
+        "status": "PARTIAL",
+        "what_we_have": "perp: Vision existence (46/56 events on a perp); margin availability: no history",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "the tradable share (82 %) rests on perp existence only; margin/borrow status at announcement is unknown and Binance typically suspends borrowing in the notice"
+      },
+      {
+        "field": "borrow availability",
+        "status": "MISSING",
+        "what_we_have": "not in any tape; delisting notices state borrow suspension",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "body text (suspension statement) + daily snapshot of margin pairs (sapi margin allPairs, read-only key)"
+      },
+      {
+        "field": "borrow cost",
+        "status": "MISSING",
+        "what_we_have": "sapi/v1/margin/interestRateHistory (auth, VIP-dependent)",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "small vs a 600 bps move over 60 min; matters only for multi-day holds"
+      },
+      {
+        "field": "funding",
+        "status": "MISSING",
+        "what_we_have": "Vision fundingRate monthly",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "extreme funding on delisting perps is a cost of carry, not a blocker at 60 min"
+      },
+      {
+        "field": "depth before announcement",
+        "status": "PARTIAL",
+        "what_we_have": "Vision bookDepth UM on the announcement day: 41/46 perp events; spot names: no depth anywhere public",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "the forward seal requires MEASURED cost; capacity in micro-caps is the binding constraint (DREP, CVP, BEAM were spot-only: unmeasurable, IGNORE for those)"
+      },
+      {
+        "field": "volume after announcement",
+        "status": "HAVE",
+        "what_we_have": "Vision klines",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "already available"
+      },
+      {
+        "field": "whether short entry was possible after publication",
+        "status": "PARTIAL",
+        "what_we_have": "perp existence yes; borrow no",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "same as borrow availability"
+      },
+      {
+        "field": "capacity estimate",
+        "status": "MISSING",
+        "what_we_have": "no depth used in seq 7",
+        "decision": "BUILD",
+        "priority": "P0_REQUIRED",
+        "note": "bookDepth at announcement minute + realized volume in the first hour"
+      }
+    ],
+    "forced_flow": [
+      {
+        "field": "public liquidation delay",
+        "status": "HAVE",
+        "what_we_have": "measured: stream_delay ~1 010 ms (1/s/symbol throttle), receive latency 480-1 100 ms; entry at +2 s",
+        "decision": "IGNORE",
+        "priority": "P0_REQUIRED",
+        "note": "cannot be reduced with public data: the message is late by construction; a +2 s reader sees -7 bps of 'continuation'"
+      },
+      {
+        "field": "mark / index pre-pressure",
+        "status": "HAVE",
+        "what_we_have": "mark_price, index_price in every Binance record (0 % null)",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "descriptive only; a hypothesis on it would be new (forbidden here)"
+      },
+      {
+        "field": "OI change before liquidation",
+        "status": "MISSING",
+        "what_we_have": "open_interest null 98.7 % (Binance) / 87 % (Bybit): no OI stream exists",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "REST openInterest poll (weight 1) every 5 s for the top-60 = 720 weight/min; only worth it if the family is ever re-funded"
+      },
+      {
+        "field": "L2 imbalance before liquidation",
+        "status": "PARTIAL",
+        "what_we_have": "BBO imbalance only (book_imbalance_before); no depth",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "depth@100ms 20 levels for the top-60 (several GB/day); same condition"
+      },
+      {
+        "field": "estimated liquidation levels",
+        "status": "MISSING",
+        "what_we_have": "requires positions (private); vendors sell heatmaps derived from OI + leverage guesses",
+        "decision": "IGNORE",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "noise by construction; forbidden"
+      },
+      {
+        "field": "burst clustering",
+        "status": "HAVE",
+        "what_we_have": "67 % of inter-event gaps < 1 s; 513 seconds with >= 5 liquidations; 607 messages in the peak second; top 5-min window = 18 % of events",
+        "decision": "BUILD",
+        "priority": "P2_NICE_TO_HAVE",
+        "note": "already in the tape; cluster = 5-min window is the right unit"
+      },
+      {
+        "field": "private vs public latency limitation",
+        "status": "HAVE",
+        "what_we_have": "the engine executes before publishing; public feed throttled AND sampled (1 order/s/symbol): cascade size unobservable",
+        "decision": "IGNORE",
+        "priority": "P0_REQUIRED",
+        "note": "structural; the only earlier position is being the passive counterparty (market making at institutional tier) = the P1 verdict"
+      },
+      {
+        "field": "are public liquidation messages too late?",
+        "status": "HAVE",
+        "what_we_have": "YES for continuation at 5 s / 30 s / 5 min (-1.2 / -7.0 / -10.9 bps after a +2 s entry); the 5-min reversal sign exists (+13.8, 71 % wins) but under the 43 bps wall",
+        "decision": "IGNORE",
+        "priority": "P0_REQUIRED",
+        "note": "measured in seq 9; no data purchase changes the latency"
+      }
+    ]
+  },
+  "data_classes": [
+    {
+      "id": "vision_event_window_state",
+      "name": "Binance Vision derivatives state around each event (indexPrice/markPrice/premiumIndex 1m, metrics OI 5-min, fundingRate, bookDepth 1-min, aggTrades)",
+      "decision": "BUILD",
+      "priority": "P0_REQUIRED",
+      "cost": "free (public archive)",
+      "effort_days": 1.5,
+      "coverage": {
+        "H2_launch_day": {
+          "aggTrades": 174,
+          "metrics": 174,
+          "premiumIndexKlines": 167,
+          "bookDepth": 166
+        },
+        "H3_perp_announcement_day": {
+          "bookDepth": 41,
+          "metrics": 45,
+          "of": 46
+        }
+      },
+      "impact": {
+        "H2": "makes the statistic observable (overshoot vs the external reference instead of vs BTC) and adds the two variance-reducing states (OI, funding); executability from depth",
+        "H3": "measured capacity/cost for the 41 perp names -> the forward seal's cost requirement becomes satisfiable",
+        "forced_flow": "none (latency, not state)"
+      },
+      "why_blocking": "H2 was judged against BTC because no reference price was in the dataset; H3's seal cannot be executed without measured cost. Neither is a new hypothesis: both are the same rules with the right measurement."
+    },
+    {
+      "id": "announcement_body_and_status_snapshots",
+      "name": "Announcement body text + daily exchangeInfo / margin-pairs snapshots (status transitions, borrow suspension, exact launch/delisting times)",
+      "decision": "BUILD",
+      "priority": "P0_REQUIRED",
+      "cost": "free",
+      "effort_days": 0.5,
+      "impact": {
+        "H2": "exact announced launch time; symbol status transitions; closes I22",
+        "H3": "borrow suspension at announcement and last tradable minute: decides the executable short path per event",
+        "forced_flow": "none"
+      },
+      "why_blocking": "the tape stores a hash of the body, not the body; the two timestamps that decide executability for H3 are in the body."
+    },
+    {
+      "id": "live_l2_recorder_at_events",
+      "name": "Forward tick-level L2 + bookTicker recorder armed at announcement time (listings, delistings) until +24 h",
+      "decision": "BUILD",
+      "priority": "P1_HIGH_VALUE",
+      "cost": "free, ~1-3 GB per event",
+      "effort_days": 2,
+      "impact": {
+        "H2": "first_orderbook_ts, spread at +15 min, slippage of a real 100 k$ short on future listings",
+        "H3": "depth at publication for future delistings (feeds the forward seal)",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "account_actual_fees_and_borrow",
+      "name": "Account actual fees (commissionRate), leverage brackets, margin borrow rates via a READ-ONLY key",
+      "decision": "BUILD",
+      "priority": "P1_HIGH_VALUE",
+      "cost": "free (needs a read-only key)",
+      "effort_days": 0.5,
+      "impact": {
+        "H2": "actual taker fee replaces published VIP0",
+        "H3": "borrow cost and availability",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "event_tape_breadth_second_tier_venues",
+      "name": "Event tape extension: Gate / MEXC / KuCoin / Bitget official listing pages + fapi/v1/constituents (index composition)",
+      "decision": "BUILD",
+      "priority": "P1_HIGH_VALUE",
+      "cost": "free",
+      "effort_days": 1,
+      "impact": {
+        "H2": "venue precedence for the 84 assets with no trace; which venues form the index",
+        "H3": "none",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "bybit_public_tick_archives",
+      "name": "Bybit public trading archives (tick trades per symbol-day) for the 75 assets with a Bybit perp before the Binance launch",
+      "decision": "BUILD",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "free",
+      "effort_days": 1,
+      "impact": {
+        "H2": "a second external reference where the Binance index is thin",
+        "H3": "none",
+        "forced_flow": "Bybit liquidations still unmeasurable sub-minute"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "vendor_tick_l2_history",
+      "name": "Vendor tick-level L2 history for Binance futures (Tardis / Kaiko class)",
+      "decision": "BUY",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "paid, per-month subscription",
+      "effort_days": 1,
+      "condition": "only if a preregistered test explicitly needs tick L2 for past listings (the 8/174 launches without Vision bookDepth, or sub-minute spread); not before budget > 0",
+      "impact": {
+        "H2": "closes the 8/174 gap and gives sub-minute spread",
+        "H3": "spot-only names remain uncovered (no vendor has Binance spot depth pre-2024 at tick level either)",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "unthrottled_liquidation_feed",
+      "name": "Un-throttled / complete liquidation data (true cascade size and sequence)",
+      "decision": "IGNORE",
+      "priority": "P0_REQUIRED",
+      "cost": "does not exist publicly",
+      "effort_days": 0,
+      "impact": {
+        "H2": "none",
+        "H3": "none",
+        "forced_flow": "the only thing that would change the verdict, and it is not obtainable: every vendor consumes the same throttled stream"
+      },
+      "why_blocking": "structural"
+    },
+    {
+      "id": "liquidation_level_heatmaps",
+      "name": "Liquidation-level heatmaps / positioning estimates (vendor)",
+      "decision": "IGNORE",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "paid",
+      "effort_days": 0,
+      "impact": {
+        "H2": "none",
+        "H3": "none",
+        "forced_flow": "derived from OI + leverage guesses: noise"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "more_breadth_klines",
+      "name": "More symbols, more venues' klines, longer daily history",
+      "decision": "IGNORE",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "free",
+      "effort_days": 0,
+      "impact": {
+        "H2": "none: the constraint is per-event dispersion, not N",
+        "H3": "none: delistings are rare by nature",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    },
+    {
+      "id": "news_sentiment_ml_features",
+      "name": "News / social / sentiment feeds, ML feature stores",
+      "decision": "IGNORE",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "paid",
+      "effort_days": 0,
+      "impact": {
+        "H2": "none",
+        "H3": "none",
+        "forced_flow": "none"
+      },
+      "why_blocking": "forbidden by the project rules; adds degrees of freedom, not information"
+    },
+    {
+      "id": "onchain_dex_pre_listing",
+      "name": "On-chain / DEX pre-listing prices for the 84 assets with no CEX trace",
+      "decision": "IGNORE",
+      "priority": "P2_NICE_TO_HAVE",
+      "cost": "free but heavy",
+      "effort_days": 3,
+      "impact": {
+        "H2": "a reference for 84 assets, but the Binance index already embeds the venues that matter; DEX prices are manipulable at listing time",
+        "H3": "none",
+        "forced_flow": "none"
+      },
+      "why_blocking": null
+    }
+  ],
+  "top5_obtain_now": [
+    "Vision indexPrice / markPrice / premiumIndex 1-min klines for every H2 launch window (167/174 available) and every future listing",
+    "Vision metrics (OI 5-min) + fundingRate for the same windows (174/174)",
+    "Announcement body text + daily exchangeInfo and margin-pairs snapshots (launch/delisting minute, status transitions, borrow suspension)",
+    "Vision bookDepth 1-min for the 166 H2 launches and the 41 H3 perp announcements (measured depth / capacity / slippage)",
+    "Vision aggTrades for the 174 launch days (first trade, opening print, trade-size distribution) — then the forward tick L2 recorder for future events"
+  ],
+  "top5_ignore": [
+    "Un-throttled or 'complete' liquidation feeds: they do not exist; every vendor reads the same 1/s/symbol stream",
+    "Liquidation-level heatmaps and positioning estimates: OI plus leverage guesses, noise by construction",
+    "More breadth: more symbols, more venues' klines, longer daily history — N is not the constraint anywhere",
+    "News / social / sentiment / ML feature stores — forbidden, and they add degrees of freedom, not information",
+    "Sub-second private or co-located feeds: not purchasable at this tier, and the P1 verdict already closed the market-making route"
+  ],
+  "diagnosis": {
+    "answer": "spectrum",
+    "breadth": "saturated: 696 symbols of daily perp data since 2019, 7 449 official events, ~25 000 liquidations per day, 174 + 56 event universes already frozen; every rejection of the last three looks was a well-measured zero, not a small sample",
+    "quality": "verified: timestamps to the second (publication minute carries the pump; first Vision bar = launch minute; liquidation crash starts in the publication minute), positive controls recover injected effects within 3 %, ledgers hash-chained",
+    "spectrum": "what is missing is the STATE around each event: the external reference price (index), leverage crowding (OI, funding), depth (capacity), and the two body-text timestamps that decide executability. The looks measured returns against BTC with declared costs because the dataset had nothing else. That is a spectrum gap, not a breadth or quality gap."
+  },
+  "minimum_dataset_before_any_new_test": {
+    "name": "event_window_state_v1",
+    "unit": "one row per (event, minute) from t0 - 60 min to t0 + 24 h",
+    "must_have": [
+      "index price 1m",
+      "mark price 1m",
+      "premium 1m",
+      "trades (aggTrades) tick with entry/exit prints",
+      "OI 5-min",
+      "funding at settlements",
+      "bookDepth 1-min at 1/2.5/5 % where Vision has it, else null with a coverage flag",
+      "exact status timestamps (announced launch, first trade, delisting minute, SETTLING)",
+      "borrow/margin status at announcement",
+      "published and actual fees"
+    ],
+    "for_universes": [
+      "event_listing_perp_fade_v1 (174, frozen)",
+      "event_delisting_pressure_v1 (56 + 22 unresolved, frozen) and the forward window",
+      "every future listing/delisting caught by the event-tape timer"
+    ],
+    "rule": "built by pure functions of the frozen universes; hashed; no return computed by the builder; no look without a preregistration and budget > 0"
+  },
+  "forbidden_data": [
+    "any price look on the frozen universes without a new preregistration and budget > 0 (budget is 0)",
+    "re-testing H2 / H3 / forced-flow at another horizon on the same events",
+    "conditioning variables chosen after seeing per-event returns",
+    "vendor heatmaps and sentiment feeds",
+    "more klines breadth as a substitute for state"
+  ],
+  "recommendation": "Build event_window_state_v1 from Binance Vision + the announcement-body/status layer for the two frozen universes and for every future event, before any new alpha research. It costs nothing, it is hashable, and it is the only thing that changes what the existing hypotheses can say. Budget stays 0 until new independent episodes arrive; the H3 forward seal is the only clock running."
+}
