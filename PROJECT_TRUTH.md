@@ -126,3 +126,12 @@ hypotheses, family `news`, threshold_t(4) = 2.2414. Verdicts, once, in `mechanis
 - `event_delisting_pressure_v1` (delisting, 60 min): **INDECIDABLE** — +631 bps mean, 67 median, t 2.44, tradable on the perp, placebo zero, but N_eff 21.6 and five micro-caps carry the mean; declared cost is not the cost of size in those names.
 
 Validated sleeves: 0 (unchanged). Capital deployable: **false.** No forward seal exists for these; candidates in `reports/loop/hypotheses/H-EVENT.md`. Details: `reports/first_look/EVENT_FIRST_LOOK_RESULTS.md`.
+
+
+## Forward seals (2026-09-10)
+
+- `event_delisting_pressure_v1` — **SEALED_FORWARD_ACTIVE** 2026-09-11 → 2028-09-11 (`sealed_forwards/active/`,
+  human copy `sealed_forwards/H3_DELISTING_PRESSURE_FORWARD.json`): only Binance delisting announcements
+  published after the seal; one look at 30 eligible events; promotion needs measured cost, N_eff ≥ 30,
+  top-1 ≤ 20 %, median ≥ 30 bps, ≥ 3 × cost. Waiting for future events; not a short-term result.
+  Validated sleeves: 0. Capital deployable: **false.**
