@@ -36,6 +36,13 @@ OUT = ROOT / "data_lake" / "first_look"
 GATE = {"forced_flow": {"min_events": 300, "min_enriched_ratio": 0.95}, "event_tape": {"min_events": 1}}
 
 
+def _rel(p: Path) -> str:
+    try:
+        return str(p.relative_to(ROOT))
+    except ValueError:          # OUT hors depot (tests) ; Path.is_relative_to n'existe pas en 3.8
+        return str(p)
+
+
 def _git(*a):
     r = subprocess.run(["git", *a], cwd=str(ROOT), capture_output=True, text=True)
     return r.stdout.strip()
@@ -73,12 +80,42 @@ def event_tape_status():
     st["open"] = all(st["criteria"].values()); return st
 
 
+def _dataset(arg: str) -> str:
+    """Accepte un nom ('event_tape', 'forced_flow') ou le chemin du jeu de donnees."""
+    if arg in ("forced_flow", "event_tape"):
+        return arg
+    p = Path(arg)
+    p = p if p.is_absolute() else (ROOT / p)
+    if p.resolve() == EVENT_TAPE.resolve():
+        return "event_tape"
+    if p.resolve() == LIQ.resolve():
+        return "forced_flow"
+    raise SystemExit(f"dataset inconnu : {arg} (attendu event_tape | forced_flow | leur chemin)")
+
+
+def committed_blob_check(path: Path) -> dict:
+    """Un snapshot doit etre reproductible depuis git : le fichier sur disque doit etre
+    exactement le blob de HEAD (le timer d'ingestion peut l'avoir prolonge entre-temps)."""
+    try:
+        rel = str(path.relative_to(ROOT))
+    except ValueError:      # hors depot (tests) : rien a comparer, on le dit
+        return {"path": str(path), "disk_blob": None, "head_blob": None, "identical": True, "note": "outside repo: not checked"}
+    disk = _git("hash-object", rel)
+    head = _git("rev-parse", f"HEAD:{rel}")
+    return {"path": rel, "disk_blob": disk, "head_blob": head, "identical": bool(disk) and disk == head}
+
+
 def freeze(dataset: str, name: str):
-    if dataset not in ("forced_flow", "event_tape"):
-        raise SystemExit(f"dataset inconnu : {dataset}")
+    dataset = _dataset(dataset)
     st = forced_flow_status() if dataset == "forced_flow" else event_tape_status()
     if not st["open"]:
         raise SystemExit(f"REFUS : la porte '{dataset}' n'est pas ouverte : {st['criteria']}")
+    blob = None
+    if dataset == "event_tape":
+        blob = committed_blob_check(EVENT_TAPE)
+        if not blob["identical"]:
+            raise SystemExit(f"REFUS : le tape sur disque n'est pas le blob commite ({blob}). "
+                             "Commiter ou restaurer le tape avant de geler.")
     d = OUT / name; d.mkdir(parents=True, exist_ok=False)
     if dataset == "forced_flow":
         rows = read_tape(LIQ); src = d / "liquidations_frozen.jsonl"
@@ -90,10 +127,10 @@ def freeze(dataset: str, name: str):
         ts = [r["publication_ts_exchange"] for r in rows if r.get("publication_ts_exchange")]
     man = {"dataset": dataset, "name": name,
            "frozen_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-           "input_path": str(src.relative_to(ROOT)) if src.is_relative_to(ROOT) else str(src), "row_count": len(rows),
+           "input_path": _rel(src), "row_count": len(rows),
            "min_event_ts": min(ts) if ts else None, "max_event_ts": max(ts) if ts else None,
            "sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
-           "git_commit": _git("rev-parse", "HEAD"), "working_tree_dirty": bool(_git("status", "--porcelain", "--", "data_lake", "research_kernel", "mechanisms", "tools")),
+           "git_commit": _git("rev-parse", "HEAD"), "committed_blob": blob, "working_tree_dirty": bool(_git("status", "--porcelain", "--", "data_lake", "research_kernel", "mechanisms", "tools")),
            "gate_status": st,
            "TO_BE_FILLED_BY_SEALED_PREREGISTRATION_ONLY": {
                "exact_hypothesis": None, "exact_horizons": None, "exact_cost_model": None,
