@@ -1,0 +1,70 @@
+{
+  "mechanism_id": "lsr_globacct_x_v2",
+  "hypothesis": "Across Binance USDT-M perpetuals, the assets where the retail account base is least long outperform the assets where it is most long over the following day, on a market-neutral basis, by more than the round-trip cost of trading both baskets.",
+  "economic_reason": "The global account ratio counts accounts, not notional, so it is dominated by small retail positions. Those accounts are the ones forced out first: they carry the least margin buffer, they are liquidated into the move rather than out of it, and market makers who absorb their flow require compensation for holding the other side. The compensation is paid to whoever takes the unpopular side, which is what this rule does. It is not arbitraged away instantly because the position is only recoverable over hours to a day and requires balance-sheet on both legs.",
+  "data_sources": [
+    "binance_vision_metrics_5m",
+    "binance_um_klines_1d",
+    "binance_positioning_rest_5m"
+  ],
+  "universe": ["PIT_TOP100_QUOTE_VOLUME_30D"],
+  "timeframe": "1d",
+  "horizon": "1d",
+  "side_mode": "market_neutral",
+  "entry_rule": {
+    "crowd_metric": "count_long_short_ratio",
+    "crowd_lookback_hours": 24,
+    "liquidity_screen_top_n": 100,
+    "liquidity_lookback_days": 30,
+    "basket_size": 15,
+    "rebalance_step_days": 2,
+    "min_symbols_required": 40
+  },
+  "exit_rule": {
+    "holding_days": 1,
+    "exit_at": "close_of_entry_bar",
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 2.0,
+    "slippage_bps": 2.0,
+    "adverse_selection_bps": 2.0,
+    "n_legs": 1,
+    "notes": "Binance USDT-M taker at VIP0, no fee discount assumed. One leg per symbol position; a rebalance holds 30 positions and each pays its own round trip."
+  },
+  "validation_window": {
+    "start": "2020-09-01",
+    "end": "2026-08-31",
+    "nature": "replication on data this family has already examined; cannot promote"
+  },
+  "placebo_tests": [
+    "direction_flip",
+    "same_event_random_side",
+    "time_shuffle",
+    "symbol_shuffle",
+    "entry_time_randomization"
+  ],
+  "declustering_rule": {
+    "method": "fixed_windows",
+    "window_seconds": 86400,
+    "cross_sectional": true,
+    "note": "one rebalance is one episode; the two-day step is strictly greater than the one-day window"
+  },
+  "multiplicity_family": "crowd_positioning",
+  "kill_criteria": {
+    "net_edge_bps_lte": 0,
+    "cost_x2_pf_lte": 1.0,
+    "placebo_percentile_lte": 95
+  },
+  "promotion_criteria": {
+    "net_edge_bps_min": 5,
+    "profit_factor_min": 1.2,
+    "cost_x2_profit_factor_min": 1.05,
+    "min_independent_events": 200
+  },
+  "declared_data_latency_ms": 900000,
+  "notes": "The historical replication reads Binance Vision daily archives, published at T+1. The live path reads the REST endpoint futures/data/globalLongShortAccountRatio, whose freshness is measured from the live archive and is what gate 1 is applied to. A forward seal must run on the live path, not on the archive."
+}

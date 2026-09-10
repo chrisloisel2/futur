@@ -1,0 +1,63 @@
+{
+  "mechanism_id": "microstructure_imbalance_v1",
+  "hypothesis": "On Binance USDT-M perpetuals, when the notional resting at the best bid exceeds the notional at the best ask by an unusual margin, the mid price drifts toward the heavy side over the following sixty seconds, and the drift is larger than the round trip paid to take it.",
+  "economic_reason": "Displayed size at the touch is the visible part of an order flow imbalance that has to clear. A market maker facing a queue that is heavily one-sided is exposed to being run over and widens or steps away on that side, so the mid moves before the imbalance resolves. The compensation exists because taking the other side of a one-sided queue is exactly the risk the maker is refusing, and it decays within seconds, which is why it is not arbitraged away by slower capital.",
+  "data_sources": ["microstructure_reduced_bbo_binance"],
+  "universe": ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+  "timeframe": "1s",
+  "horizon": "60s",
+  "side_mode": "long_short",
+  "entry_rule": {
+    "venue": "binance",
+    "imbalance_definition": "notional_at_touch",
+    "zscore_window_seconds": 300,
+    "zscore_min_abs": 3.0,
+    "max_spread_bps": 1.0,
+    "min_quotes_in_window": 60
+  },
+  "exit_rule": {
+    "holding_seconds": 60,
+    "exit_at": "mid_price",
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 0.05,
+    "slippage_bps": 0.5,
+    "adverse_selection_bps": 2.0,
+    "n_legs": 1,
+    "notes": "Taker in and taker out at Binance USDT-M VIP0. Spread is set near the measured median for these three symbols rather than guessed; fees dominate. A maker-entry variant is a different hypothesis and needs the maker fill probe's measured fill rate before it can be priced."
+  },
+  "validation_window": {
+    "start": "2026-08-31",
+    "end": "2026-09-09",
+    "nature": "the entire capture available; ten days is small and the verdict must say so"
+  },
+  "placebo_tests": [
+    "direction_flip",
+    "same_event_random_side",
+    "time_shuffle",
+    "entry_time_randomization"
+  ],
+  "declustering_rule": {
+    "method": "complete_link",
+    "window_seconds": 300,
+    "note": "per symbol; five minutes is the horizon times five, so two entries inside one window are one bet"
+  },
+  "multiplicity_family": "microstructure",
+  "kill_criteria": {
+    "net_edge_bps_lte": 0,
+    "cost_x2_pf_lte": 1.0,
+    "placebo_percentile_lte": 95
+  },
+  "promotion_criteria": {
+    "net_edge_bps_min": 2,
+    "profit_factor_min": 1.2,
+    "cost_x2_profit_factor_min": 1.05,
+    "min_independent_events": 300
+  },
+  "declared_data_latency_ms": 500,
+  "notes": "Latency is measured from the capture itself as receive_ts_ns minus event_ts_ns. The budget is the horizon over four, i.e. fifteen seconds, which this feed clears by two orders of magnitude."
+}

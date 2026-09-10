@@ -1,0 +1,78 @@
+{
+  "avg_loss_bps": -22.12067353304902,
+  "avg_win_bps": 0.0,
+  "breakeven_capture": 12.154294716972712,
+  "breakeven_capture_note": "null when the gross edge is not positive: there is no fraction of a move to capture",
+  "by_symbol": {
+    "BTCUSDT": {
+      "gross_bps_mean": 1.7192480051762398,
+      "n": 340,
+      "net_bps_mean": -22.28075199482376,
+      "net_bps_sum": -7575.455678240079
+    },
+    "ETHUSDT": {
+      "gross_bps_mean": 1.6408614394990277,
+      "n": 936,
+      "net_bps_mean": -22.359138560500973,
+      "net_bps_sum": -20928.15369262891
+    },
+    "SOLUSDT": {
+      "gross_bps_mean": 2.115808530578271,
+      "n": 1174,
+      "net_bps_mean": -21.88419146942173,
+      "net_bps_sum": -25692.04078510111
+    }
+  },
+  "by_year": {
+    "2026": {
+      "gross_bps_mean": 1.8793264669509806,
+      "n": 2450,
+      "net_bps_mean": -22.12067353304902,
+      "net_bps_sum": -54195.6501559701
+    }
+  },
+  "cost_bps": 24.0,
+  "cost_model": {
+    "adverse_selection_bps": 1.0,
+    "maker_fee_bps": 2.0,
+    "maker_ratio": 0.0,
+    "n_legs": 2,
+    "notes": "Both legs are priced. A cross-venue test priced on one leg is not a test. Taker at VIP0 on each venue; no rebate, no cross-margin, no netting assumed.",
+    "round_trip_bps": 24.0,
+    "slippage_bps": 0.5,
+    "spread_bps": 0.5,
+    "taker_fee_bps": 5.0
+  },
+  "declustering_method": "complete_link",
+  "declustering_window_seconds": 300.0,
+  "episodes_per_year": 38309.85561082379,
+  "gross_edge_bps": 1.9746106671648747,
+  "hit_rate": 0.0,
+  "max_drawdown_bps": 54195.65015597002,
+  "min_detectable_edge_bps": 0.04997605246337612,
+  "multiplicity_family_size": 1,
+  "multiplicity_threshold_t": 1.6448536269514715,
+  "n_independent": 934,
+  "n_raw": 2450,
+  "n_symbols": 3,
+  "net_edge_bps": -22.025389332835125,
+  "net_edge_bps_cost_x2": -46.025389332835125,
+  "notes": "Both legs priced. Ten days of capture on three symbols.",
+  "profit_factor": 0.0,
+  "profit_factor_cost_x2": 0.0,
+  "profit_factor_gross": 585636.4834113044,
+  "return_monthly_bps": -185245.1402756901,
+  "return_note": "bps summed over trades at one unit of notional each, no compounding and no netting of overlapping positions",
+  "return_total_bps": -54195.6501559701,
+  "se_bps": 0.030383282527090525,
+  "sharpe": -4642.701067527627,
+  "sigma_bps": 0.9285560632245197,
+  "sortino": -4642.701067527627,
+  "span_end": "2026-09-09 21:51:33+00:00",
+  "span_start": "2026-09-01 00:08:34+00:00",
+  "span_years": 0.02438014931426978,
+  "t_stat": 64.99003738007112,
+  "t_stat_net_artefact": -724.9180306043863,
+  "t_stat_net_artefact_note": "diagnostic only \u2014 a t on a net series with constant cost measures the cost, not the signal",
+  "t_stat_on": "gross"
+}

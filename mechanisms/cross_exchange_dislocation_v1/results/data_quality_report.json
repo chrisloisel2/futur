@@ -1,0 +1,17 @@
+{
+  "dataset_id": "cross_exchange_dislocation_v1",
+  "measured_latency_ms": 142.50237644999984,
+  "measured_latency_p95_ms": 142.50237644999984,
+  "n_rows": 2450,
+  "passed": true,
+  "stats": {
+    "median_abs_dislocation_bps_BTCUSDT": 0.43927676955976475,
+    "median_abs_dislocation_bps_ETHUSDT": 0.60172816328774,
+    "median_abs_dislocation_bps_SOLUSDT": 0.9643666522002898,
+    "p99_abs_dislocation_bps_BTCUSDT": 1.6004155999882916,
+    "p99_abs_dislocation_bps_ETHUSDT": 2.300882564223447,
+    "p99_abs_dislocation_bps_SOLUSDT": 2.936138977245034
+  },
+  "violations": [],
+  "warnings": []
+}

@@ -1,0 +1,38 @@
+{
+  "code_commit_sha": "29396b3c34f9809697ede0db29d860758916d328",
+  "cost_bps": 24.0,
+  "created_at": "2026-09-09T22:37:37Z",
+  "data_manifests": [
+    "microstructure_reduced_bbo_binance",
+    "microstructure_reduced_bbo_okx"
+  ],
+  "decision": "The signal is under the cost floor: it needs to capture 1215% of the move it predicts.",
+  "failed_gates": [
+    "gate 2 cost: gross 1.97 bps < 3 x cost 24.00 bps"
+  ],
+  "forward_result_id": null,
+  "forward_seal_id": null,
+  "gross_edge_bps": 1.9746106671648747,
+  "kernel_version": "0.1.0",
+  "max_drawdown": 54195.65015597002,
+  "mechanism_id": "cross_exchange_dislocation_v1",
+  "multiplicity_adjusted_threshold": 1.6448536269514715,
+  "multiplicity_family": "cross_exchange",
+  "n_independent": 934,
+  "n_raw": 2450,
+  "net_edge_bps": -22.025389332835125,
+  "net_edge_bps_cost_x2": -46.025389332835125,
+  "paper_days": 0,
+  "passed_gates": [
+    "gate 0 data quality",
+    "gate 1 mechanism and latency (143 ms measured against a 15000 ms budget)"
+  ],
+  "placebo_percentile": null,
+  "profit_factor": 0.0,
+  "profit_factor_cost_x2": 0.0,
+  "rules_hash": "939325d0b46ae6e837b16e0ca3cdc3ebae253fe0504d3ea543e6a74bad50d1d7",
+  "sharpe": -4642.701067527627,
+  "status": "COST_WALL",
+  "t_stat": 64.99003738007112,
+  "warnings": []
+}

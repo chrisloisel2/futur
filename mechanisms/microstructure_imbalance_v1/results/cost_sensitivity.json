@@ -1,0 +1,26 @@
+[
+  {
+    "breakeven_capture": 15.993516625912516,
+    "cost_bps": 12.55,
+    "cost_multiplier": 1.0,
+    "net_edge_bps": -11.765307033872299
+  },
+  {
+    "breakeven_capture": 23.99027493886878,
+    "cost_bps": 18.825000000000003,
+    "cost_multiplier": 1.5,
+    "net_edge_bps": -18.040307033872303
+  },
+  {
+    "breakeven_capture": 31.987033251825032,
+    "cost_bps": 25.1,
+    "cost_multiplier": 2.0,
+    "net_edge_bps": -24.3153070338723
+  },
+  {
+    "breakeven_capture": 47.98054987773756,
+    "cost_bps": 37.650000000000006,
+    "cost_multiplier": 3.0,
+    "net_edge_bps": -36.865307033872305
+  }
+]

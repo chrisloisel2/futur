@@ -1,0 +1,6 @@
+# Generated data stays out of git. Manifests and quality reports are committed:
+# they are the evidence, the bytes are not.
+raw/*
+normalized/*
+!raw/.gitkeep
+!normalized/.gitkeep

@@ -1,0 +1,40 @@
+{
+  "code_commit_sha": "29396b3c34f9809697ede0db29d860758916d328",
+  "cost_bps": 16.0,
+  "created_at": "2026-09-09T22:26:06Z",
+  "data_manifests": [
+    "binance_vision_metrics_5m",
+    "binance_um_klines_1d"
+  ],
+  "decision": "The signal is under the cost floor: it needs to capture 167% of the move it predicts.",
+  "failed_gates": [
+    "gate 2 cost: gross 9.60 bps < 3 x cost 16.00 bps"
+  ],
+  "forward_result_id": null,
+  "forward_seal_id": null,
+  "gross_edge_bps": 9.598771844725434,
+  "kernel_version": "0.1.0",
+  "max_drawdown": 203343.39241250526,
+  "mechanism_id": "lsr_globacct_x_v2",
+  "multiplicity_adjusted_threshold": 3.2543894872943353,
+  "multiplicity_family": "crowd_positioning",
+  "n_independent": 848,
+  "n_raw": 25440,
+  "net_edge_bps": -6.401228155274566,
+  "net_edge_bps_cost_x2": -22.401228155274566,
+  "paper_days": 0,
+  "passed_gates": [
+    "gate 0 data quality",
+    "gate 1 mechanism and latency (600000 ms measured against a 21600000 ms budget)"
+  ],
+  "placebo_percentile": null,
+  "profit_factor": 0.971596819995626,
+  "profit_factor_cost_x2": 0.9042342420470248,
+  "rules_hash": "6f4b5a7809ba39d630f60fd404082ec5ac526e5eb2932a42dfac901b4ca451b2",
+  "sharpe": -0.6268165317362676,
+  "status": "COST_WALL",
+  "t_stat": 2.0361187384567665,
+  "warnings": [
+    "314 screened symbols have no vision metrics file (1000000BOBUSDT, 1000BTTCUSDT, 1000CATUSDT, 1000CHEEMSUSDT, 1000XECUSDT...)"
+  ]
+}
