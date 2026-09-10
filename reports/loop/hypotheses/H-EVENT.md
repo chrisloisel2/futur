@@ -36,3 +36,10 @@ Budget : 2 tests. Chaque hypothèse ci-dessous en consomme 1 à son regard. Aucu
 - H1 et H4 sont morts sur ce tape à ces horizons : la pompe est dans la première minute, le retard
   cross-venue n'existe pas. Ne pas les recycler sous un autre horizon.
 - Re-tester H2 ou H3 sur les mêmes évènements avec un autre horizon = second regard : interdit.
+
+
+## 2026-09-10 soir — H-EVENT-2 exécutée (regard seq 8) : INDECIDABLE
+
+`event_listing_perp_fade_v1` sur 174 listings perp-first : +251 bps moyen, +230 médian, net taker +228,
+capacité 55 M$/fenêtre, mais t 2,12 < 2,3263 (σ 1 546 bps). Tous les autres critères passés. Pas de
+variante sur ces évènements (second regard interdit). Budget 1. La dernière piste du jour = P3B.
