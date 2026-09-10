@@ -1,0 +1,22 @@
+{
+ "mechanism_id": "forced_liquidation_reaction_v1",
+ "status": "REJECTED_NO_GROSS",
+ "reasons": [
+  "gross -7.0 < 10.0"
+ ],
+ "primary": {
+  "n": 368,
+  "n_clusters": 51,
+  "mean_bps": -6.988278916091802,
+  "median_bps": -0.8250412023976275,
+  "se_bps": 4.817504312331138,
+  "t": -1.4506014863763037,
+  "top1_share": 0.05711962905608247,
+  "n_eff": 125.88030907404448,
+  "share_positive": 0.453804347826087,
+  "top_cluster_share": 0.27266904026539496,
+  "win_rate": 0.453804347826087
+ },
+ "ledger_seq": 8,
+ "first_look": true
+}

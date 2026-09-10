@@ -1,0 +1,22 @@
+{
+ "mechanism_id": "forced_liquidation_exhaustion_v1",
+ "status": "REJECTED_COST_WALL",
+ "reasons": [
+  "gross 13.8 < 3.0 x cost 14.4"
+ ],
+ "primary": {
+  "n": 62,
+  "n_clusters": 15,
+  "mean_bps": 13.755990648943131,
+  "median_bps": 10.20979228424121,
+  "se_bps": 11.652505508527435,
+  "t": 1.180517841324026,
+  "top1_share": 0.16800428837381887,
+  "n_eff": 27.78282925523936,
+  "share_positive": 0.7096774193548387,
+  "top_cluster_share": 0.7777937132563281,
+  "win_rate": 0.7096774193548387
+ },
+ "ledger_seq": 8,
+ "first_look": true
+}

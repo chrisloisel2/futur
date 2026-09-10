@@ -65,5 +65,46 @@
     "recorded_at": "2026-09-09T22:37:37Z",
     "rules_hash": "939325d0b46ae6e837b16e0ca3cdc3ebae253fe0504d3ea543e6a74bad50d1d7",
     "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "26e5e555a8fb3356e2c000714f80503a7c573fff12751e8522566d7fa394f7ac",
+    "family": "liquidation",
+    "index": 5,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_reaction_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 8",
+    "prev_hash": "97445a5936f62fc88fcecbac0a4debfe896c523dafd514d3aa4b56df40d787bf",
+    "recorded_at": "2026-09-10T20:01:12+00:00",
+    "rules_hash": "bda1c326126e4c2a4905cfc841ed445b6fb461c1309c65b8a311f0bf7b216ee8",
+    "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "8f24e19239cb58c540c7525159c5af08cccf1fcca2bc010b3d6266aaa74f5da8",
+    "family": "liquidation",
+    "index": 6,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_exhaustion_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 8",
+    "prev_hash": "26e5e555a8fb3356e2c000714f80503a7c573fff12751e8522566d7fa394f7ac",
+    "recorded_at": "2026-09-10T20:01:12+00:00",
+    "rules_hash": "6316b1eedcbbf106f5f6b0333e2dc3cb0d9f7ad03940fcb88deb52b6fd945c22",
+    "threshold_at_seal": 1.96
+  },
+  {
+    "burned_periods": [
+      [
+        "2026-09-10",
+        "2026-09-10"
+      ]
+    ],
+    "entry_hash": "3200182009021c899139a1e98cc339f6eac39915503a8322f24b4acc3f019479",
+    "family": "liquidation",
+    "index": 7,
+    "kind": "contamination",
+    "prev_hash": "8f24e19239cb58c540c7525159c5af08cccf1fcca2bc010b3d6266aaa74f5da8",
+    "reason": "forced-flow first look seq 8 on the frozen liquidation tape",
+    "recorded_at": ""
   }
 ]
