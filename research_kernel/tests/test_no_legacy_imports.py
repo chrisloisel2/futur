@@ -14,7 +14,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-P0_PACKAGES = ("research_kernel", "mechanisms", "paper_engine", "execution_engine")
+P0_PACKAGES = ("research_kernel", "mechanisms", "paper_engine", "execution_engine", "data_lake")   # data_lake : chemin P0 (LEGACY_FREEZE), collecteurs P2 inclus
 
 FORBIDDEN_ROOTS = (
     "ai",

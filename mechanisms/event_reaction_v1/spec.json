@@ -1,0 +1,22 @@
+{
+  "mechanism_id": "event_reaction_v1",
+  "hypothesis": "In the first hour after an officially announced Binance USDS-M perpetual listing starts trading, the listed asset moves by more than 30 bps gross relative to the market, in the direction of the announcement-day drift, because forced index inclusion and leveraged retail entry concentrate order flow that the new book cannot absorb.",
+  "economic_reason": "A listing announcement is a scheduled, public, exogenous demand shock: market makers must build inventory in a book that does not exist yet, index and basket products are obliged to include the new contract, and leveraged retail enters at the open regardless of price. The mispricing is not arbitraged instantly because the perp has no history, its funding is unanchored for the first cycles, and cross-venue hedges are scarce until other venues list. The payer is the participant forced to trade at the open: the obligated buyer and the late leveraged entrant.",
+  "data_sources": ["official_event_tape_binance", "binance_um_klines_1h", "binance_spot_klines_1h", "microstructure_reduced_bbo_binance"],
+  "universe": ["EVENT_TAPE_BINANCE_FUTURES_LISTINGS"],
+  "timeframe": "1m",
+  "horizon": "60m",
+  "side_mode": "long_short",
+  "entry_rule": {"event_type": "futures_listing", "source": "binance", "entry_at": "trading_start_ts", "direction": "sign_of_announcement_day_drift", "min_bps_expected": 30},
+  "exit_rule": {"holding_minutes": 60, "exit_at": "trading_start_ts + 60m", "no_stop": true},
+  "cost_model": {"maker_fee_bps": 2.0, "taker_fee_bps": 5.0, "maker_ratio": 0.0, "spread_bps": 8.0, "slippage_bps": 6.0, "adverse_selection_bps": 4.0, "n_legs": 1,
+                 "notes": "Taker at VIP0 on a brand-new book: spread and slippage declared wide on purpose; the event must clear 3x this or die at gate 2."},
+  "validation_window": {"start": "2021-01-01", "end": "2026-08-31", "nature": "historical, first run not yet executed; the event tape has never been joined to prices in this repository"},
+  "placebo_tests": ["time_shuffle", "symbol_shuffle", "random_entry_same_frequency", "direction_flip"],
+  "declustering_rule": {"method": "fixed_windows", "window_seconds": 86400, "note": "one listing day is one episode even when several contracts launch together"},
+  "multiplicity_family": "news",
+  "kill_criteria": {"net_edge_bps_lte": 0, "cost_x2_pf_lte": 1.0, "placebo_percentile_lte": 95, "gross_bps_lt": 30},
+  "promotion_criteria": {"net_edge_bps_min": 10, "profit_factor_min": 1.3, "cost_x2_profit_factor_min": 1.05, "min_independent_events": 100},
+  "declared_data_latency_ms": 2000,
+  "notes": "RESEARCH_ONLY. Written from the event tape catalog before any price join. Status policy: no run until the tape has trading_start_ts for >= 100 futures listings and 1h klines are backfilled for the listed symbols."
+}
