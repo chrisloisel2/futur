@@ -116,8 +116,9 @@
     },
     {
       "id": "I22",
-      "desc": "trading_start_ts du tape = date du titre a 00:00 ; source correcte exchangeInfo.onboardDate",
-      "opened": "2026-09-10"
+      "titre": "trading_start_ts du tape = date du titre a 00:00, pas l'heure de lancement",
+      "detail": "Pour 115 listings perp Binance le champ precede la publication de 6 a 10 h (date seule parsee dans le titre). Non utilise par le regard seq 7. Source correcte : fapi/v1/exchangeInfo.onboardDate (les perps delistes n'y sont plus).",
+      "bloquant_pour": "toute hypothese d'entree au lancement du perp (H-EVENT-2)"
     }
   ],
   "instrument_defects_closed": [
