@@ -1,0 +1,100 @@
+{
+  "name": "event_listing_perp_fade_v1 first look (H2 executable, perp-first)",
+  "prereg_file": "reports/first_look/event_listing_perp_fade_v1_PREREG.md",
+  "harness": "mechanisms/event_listing_perp_fade_v1/first_look.py",
+  "run_command": "python mechanisms/event_listing_perp_fade_v1/first_look.py --run",
+  "snapshot": {
+    "dataset": "official_event_tape (frozen for regard seq 7)",
+    "input_path": "data_lake/first_look/event_reaction_v1/official_event_tape_frozen.jsonl",
+    "sha256": "6e957851e452395f46a5fd7b725f7634d8e0cc9e2f17218c1658d07c2922e6c7",
+    "git_commit_of_tape": "b0d483b341a8b6949bd2141dcfa2e9ff6819bd75"
+  },
+  "universe": {
+    "path": "reports/first_look/event_listing_perp_fade_v1_UNIVERSE.json",
+    "sha256": "cbb5d9619a01f05c996556ef54c15383b2fbad46d6b2804bf51ca46194caba24",
+    "n_events": 174,
+    "by_launch_year": {
+      "2022": 1,
+      "2023": 11,
+      "2024": 26,
+      "2025": 85,
+      "2026": 51
+    },
+    "exclusion_counts": {
+      "asset_priced_in_h1_h2_spot": 145,
+      "spot_tradable_before_perp": 21,
+      "no_binance_perp_within_7d_of_publication": 4,
+      "no_vision_first_bar": 2,
+      "launch_ts_unreliable": 2,
+      "conversion_not_listing": 3
+    },
+    "launch_ts_sources": {
+      "vision_first_bar (onboardDate agrees)": 170,
+      "vision_first_bar (onboardDate earlier: date-only field)": 4
+    },
+    "exchangeInfo_snapshot_sha256": "9eb76c5d7da7bb26a9201435adbe1bdc6dc4e1bc9ed6d8d766617c746b87fcc7",
+    "built_at_utc": "2026-09-10T19:44:36+00:00"
+  },
+  "hypothesis": {
+    "mechanism_id": "event_listing_perp_fade_v1",
+    "side": "short",
+    "text": "Perp-first Binance listings: the perpetual falls in excess of BTCUSDT between launch+15min and launch+6h; median gross > 30 bps, net >= 3x taker cost.",
+    "direction_informed_by": "regard seq 7 H2 spot (+202 bps, t 3.25) on disjoint events"
+  },
+  "horizons": {
+    "primary": "6h",
+    "entry": "launch+15m",
+    "sensitivities": [
+      "60m",
+      "24h"
+    ],
+    "bar_tolerance_min": 5
+  },
+  "cost_model": {
+    "taker_rt_bps": 24.0,
+    "maker_rt_bps_sensitivity": 18.0,
+    "wall_rule": "net = mean - taker_rt >= 3 x taker_rt (mean >= 96 bps)",
+    "basis": "P1.1 VIP0 official; spread 8 + slippage 6 declared for a new book"
+  },
+  "promotion_criteria": {
+    "n_min": 30,
+    "median_gross_bps_min": 30,
+    "net_over_cost_min": 3.0,
+    "t_min": 2.3263478740408408,
+    "n_eff_min": 30,
+    "top1_share_max": 0.2,
+    "capacity_median_6h_quote_volume_usd_min": 2000000,
+    "verdict": "FORWARD_SEAL_REQUIRED"
+  },
+  "rejection_criteria": {
+    "n_lt_30_or_ts_unreliable_or_capacity_unmeasurable": "INDECIDABLE",
+    "median_gross_lt_30": "REJECTED_NO_GROSS",
+    "net_lt_3x_cost": "REJECTED_COST_WALL",
+    "fails_t_neff_top1_capacity": "INDECIDABLE"
+  },
+  "multiplicity_family": {
+    "kernel_family": "news",
+    "sealed_before": 4,
+    "sealed_now": 5,
+    "threshold_t": 2.3263478740408408
+  },
+  "budget": {
+    "tests_debited_at_run": 1,
+    "balance_before": 2,
+    "balance_after": 1
+  },
+  "pins": {
+    "reports/first_look/event_listing_perp_fade_v1_PREREG.md": "bb7b5681cbadc8fa65981ca31f2445350b4052e5174b7aac17b1aa09effc24f1",
+    "mechanisms/event_listing_perp_fade_v1/first_look.py": "d0ecbdbaf4f5354adf91fbb684595d617feb4b30f801c6d95fabc5b7451fbbc9",
+    "mechanisms/event_listing_perp_fade_v1/spec.json": "8d2141765d86966484ffb47bc435916703792bb07a700e1a931688acbe7ec3ac",
+    "mechanisms/event_reaction_v1/first_look.py": "c6ad33d3c41f20b703f2f7a39e0280e5dc833c56f63509ce16119cecc363b06d",
+    "research_kernel/multiplicity.py": "31ff2ebf3b01230afb17479324537dc1c634e54e5493951efeeaa50cf88904cf",
+    "tools/look_ledger.py": "c9bb473326a812f27fb53f4b261c565a1fa4df1ad6085c165d87d01a5d058b14"
+  },
+  "positive_control": {
+    "recovered_bps": 76.66666666666691,
+    "effect_t": 2.7912088336680267,
+    "null_verdict": "REJECTED_NO_GROSS",
+    "n": 600
+  }
+}

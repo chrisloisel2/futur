@@ -111,3 +111,8 @@ Regard seq 7, quatre hypothèses scellées (seuil 2,2414) : H1 continuation et H
 à 6 h, t 3,25, **non exécutable** (short spot) ; H3 pression de délisting = +631 bps (méd. 67) à
 60 min, t 2,44, **concentré** (N_eff 21,6). 0 promotion, budget 2. Défaut I22 (trading_start_ts =
 minuit du titre). Hypothèses suivantes dans `hypotheses/H-EVENT.md`, aucune scellée. Puis P3B.
+
+
+## Itération 12 (2026-09-10) — H2 exécutable sur perp-first
+
+Regard seq 8 : +251 / +230 bps, t 2,12 < 2,33 → INDECIDABLE (σ 1 546 bps). Budget 1. Pas de variante.

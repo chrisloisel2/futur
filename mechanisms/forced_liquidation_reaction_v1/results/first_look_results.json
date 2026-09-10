@@ -1,6 +1,6 @@
 {
- "ledger_seq": 8,
- "ledger_hash": "a7de6e22cba3b1b63c691aa5a955fc04777b4dbe015f154294e758709bc9e711",
+ "ledger_seq": 9,
+ "ledger_hash": "033b2ab63d900eea14a9c89f8fc84189f0a96fc29e49fdbe10f2ad6498a227ec",
  "threshold_t": 1.9599639845400536,
  "family": "liquidation",
  "started_utc": "2026-09-10T20:01:12+00:00",
@@ -8008,5 +8008,10 @@
    ]
   }
  },
- "finished_utc": "2026-09-10T20:26:25+00:00"
+ "finished_utc": "2026-09-10T20:26:25+00:00",
+ "ledger_rechained": {
+  "branch_local_seq": 8,
+  "branch_local_hash": "a7de6e22cba3b1b63c691aa5a955fc04777b4dbe015f154294e758709bc9e711",
+  "merged_hash": "033b2ab63d900eea14a9c89f8fc84189f0a96fc29e49fdbe10f2ad6498a227ec"
+ }
 }

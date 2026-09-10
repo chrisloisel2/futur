@@ -1,8 +1,8 @@
 {
   "iteration": 11,
   "date": "2026-09-10",
-  "budget_tests_remaining": 1,
-  "budget_raw_balance": 1,
+  "budget_tests_remaining": 0,
+  "budget_raw_balance": 0,
   "budget_ledger": [
     {
       "source": "um_klines_1d",
@@ -98,15 +98,23 @@
       "note": "regard unique event_reaction_v1 : 4 hypotheses (H1-H4), famille news/official_event_reaction"
     },
     {
+      "source": "__DEBIT__EVENT_LISTING_PERP_FADE_V1",
+      "provenance": "regard unique pre-enregistre (n=1), branche p3-h2-perp-first-executable, ledger seq 8",
+      "episodes": 0,
+      "credited": -1,
+      "date": "2026-09-10",
+      "note": "regard unique event_listing_perp_fade_v1 (H2 executable, perp-first), famille news n=5"
+    },
+    {
       "source": "__DEBIT__FORCED_LIQUIDATION_FIRST_LOOK",
-      "provenance": "regard unique pre-enregistre (n=1, 2 hypotheses famille liquidation), branche p3-forced-flow-first-look, ledger seq 8",
+      "provenance": "regard unique pre-enregistre (n=1, 2 hypotheses famille liquidation), branche p3-forced-flow-first-look, ledger seq 9 (branch-local 8, re-chained at merge)",
       "episodes": 0,
       "credited": -1,
       "date": "2026-09-10",
       "note": "regard unique forced-flow : H1 continuation (>= 50 k$), H2 exhaustion (>= 250 k$), famille liquidation n=2"
     }
   ],
-  "tests_consumed_lifetime": 22,
+  "tests_consumed_lifetime": 23,
   "current_threshold_t": 2.9552,
   "threshold_provenance": "BILATERAL a n=16 : inv_cdf(1 - (0.05/16)/2) = 2.9552. Les 16 essais deja consommes ont ete juges par un harnais qui RE-CHOISISSAIT le cote sur les donnees scellees (defaut I13), donc chacun etait de fait un maximum de deux paris. Le 2.7344 precedemment inscrit etait trop bas de 0,22. Depuis le correctif, un essai dont la direction est pre-specifiee redevient unilateral : threshold_t(17) = 2.7543.",
   "instrument_defects_open": [

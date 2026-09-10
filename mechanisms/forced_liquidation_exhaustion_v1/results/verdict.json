@@ -17,6 +17,11 @@
   "top_cluster_share": 0.7777937132563281,
   "win_rate": 0.7096774193548387
  },
- "ledger_seq": 8,
- "first_look": true
+ "ledger_seq": 9,
+ "first_look": true,
+ "ledger_rechained": {
+  "branch_local_seq": 8,
+  "branch_local_hash": "a7de6e22cba3b1b63c691aa5a955fc04777b4dbe015f154294e758709bc9e711",
+  "merged_hash": "033b2ab63d900eea14a9c89f8fc84189f0a96fc29e49fdbe10f2ad6498a227ec"
+ }
 }

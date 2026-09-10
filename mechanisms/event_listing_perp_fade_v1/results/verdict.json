@@ -1,0 +1,26 @@
+{
+ "mechanism_id": "event_listing_perp_fade_v1",
+ "status": "INDECIDABLE",
+ "reasons": [
+  "t 2.12 < threshold 2.3263"
+ ],
+ "primary": {
+  "n": 174,
+  "n_clusters": 161,
+  "mean_bps": 251.45071239939105,
+  "median_bps": 229.89749736717994,
+  "se_bps": 118.57645352889217,
+  "t": 2.1205787904436098,
+  "top1_share": 0.06243513664857718,
+  "n_eff": 92.92440472961987,
+  "share_positive": 0.5689655172413793,
+  "win_rate": 0.5689655172413793,
+  "capacity_median_quote_volume_6h_usd": 55221951.094849974,
+  "range_1m_bps_median": 102.19047168472324,
+  "first15_excess_mean_bps": 227.7035744567116,
+  "net_bps_taker": 227.45071239939105,
+  "net_bps_maker_sensitivity": 233.45071239939105
+ },
+ "ledger_seq": 8,
+ "first_look": true
+}

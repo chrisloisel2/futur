@@ -1,6 +1,6 @@
 # forced-flow first look — verdicts (un seul regard)
 
-ledger seq 8 · threshold_t(2) = 1.9600 · tape b78d1b509b9ceddf
+ledger seq 9 (branch-local 8, re-chained at merge) · threshold_t(2) = 1.9600 · tape b78d1b509b9ceddf
 
 | H | mechanism | n | clusters | gross | median | t | cost wall | verdict | reasons |
 |---|---|---|---|---|---|---|---|---|---|
