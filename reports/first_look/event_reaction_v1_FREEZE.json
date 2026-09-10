@@ -1,0 +1,171 @@
+{
+  "name": "event_reaction_v1 first look (H1-H4)",
+  "prereg_file": "reports/first_look/event_reaction_v1_PREREG.md",
+  "harness": "mechanisms/event_reaction_v1/first_look.py",
+  "run_command": "python mechanisms/event_reaction_v1/first_look.py --run",
+  "snapshot": {
+    "dataset": "event_tape",
+    "name": "event_reaction_v1",
+    "frozen_at_utc": "2026-09-10T13:47:44+00:00",
+    "input_path": "data_lake/first_look/event_reaction_v1/official_event_tape_frozen.jsonl",
+    "row_count": 7449,
+    "min_event_ts": "2017-07-21T00:06:19+00:00",
+    "max_event_ts": "2026-09-10T09:23:52+00:00",
+    "sha256": "6e957851e452395f46a5fd7b725f7634d8e0cc9e2f17218c1658d07c2922e6c7",
+    "git_commit": "b0d483b341a8b6949bd2141dcfa2e9ff6819bd75",
+    "committed_blob": {
+      "path": "data_lake/events/official_event_tape.jsonl",
+      "disk_blob": "02baf00e3df9b246865742c7a0764cf5ec98d165",
+      "head_blob": "02baf00e3df9b246865742c7a0764cf5ec98d165",
+      "identical": true
+    },
+    "working_tree_dirty": true,
+    "gate_status": {
+      "dataset": "event_tape",
+      "n_events": 7449,
+      "n_historical": 6378,
+      "historical_with_publication_ts": 6378,
+      "with_trading_start_ts": 889,
+      "no_price_join": true,
+      "criteria": {
+        "n_events_ge_1": true,
+        "publication_ts_on_all_historical": true,
+        "no_price_join_performed": true
+      },
+      "open": true
+    }
+  },
+  "hypothesis": {
+    "H1": {
+      "mechanism_id": "event_reaction_v1",
+      "text": "After an official Binance USDS-M perpetual listing announcement, the asset's pre-existing Binance spot market rises > 30 bps gross in excess of BTCUSDT over 60 min from pub+60s.",
+      "side": "long"
+    },
+    "H2": {
+      "mechanism_id": "event_listing_reversal_v1",
+      "text": "After the first 15 min of reaction to the same announcement, the spot market gives back > 30 bps gross in excess of BTCUSDT over 6 h from pub+60s+15min.",
+      "side": "short"
+    },
+    "H3": {
+      "mechanism_id": "event_delisting_pressure_v1",
+      "text": "After an official Binance asset delisting announcement, the asset's Binance market (perp if pre-existing, else spot) falls > 30 bps gross in excess of BTCUSDT over 60 min from pub+60s.",
+      "side": "short"
+    },
+    "H4": {
+      "mechanism_id": "event_cross_venue_lag_v1",
+      "text": "After an official OKX/Bybit listing announcement of an asset already traded on Binance, the Binance market rises > 30 bps gross in excess of BTCUSDT over 15 min from pub+60s.",
+      "side": "long"
+    }
+  },
+  "horizons": {
+    "allowed": [
+      "1m",
+      "5m",
+      "15m",
+      "60m",
+      "6h",
+      "24h"
+    ],
+    "primary": {
+      "H1": "60m",
+      "H2": "6h",
+      "H3": "60m",
+      "H4": "15m"
+    },
+    "sensitivities": {
+      "H1": [
+        "15m",
+        "6h"
+      ],
+      "H2": [
+        "60m",
+        "24h"
+      ],
+      "H3": [
+        "6h",
+        "24h"
+      ],
+      "H4": [
+        "5m",
+        "60m"
+      ]
+    },
+    "entry": {
+      "H1": "pub+60s",
+      "H2": "pub+60s+15m",
+      "H3": "pub+60s",
+      "H4": "pub+60s"
+    },
+    "rule": "one primary horizon decides the verdict; sensitivities are descriptive"
+  },
+  "cost_model": {
+    "basis": "P1.1 official fee schedule, VIP0, taker both legs, no institutional tier",
+    "um_perp": {
+      "taker_fee_bps_per_side": 5.0,
+      "spread_bps": 4.0,
+      "slippage_bps": 4.0,
+      "round_trip_bps": 18.0,
+      "wall_3x_bps": 54.0,
+      "source": "data_lake/manifests/published_fee_schedules_2026-09-10.json (official, final)"
+    },
+    "spot": {
+      "taker_fee_bps_per_side": 10.0,
+      "spread_bps": 4.0,
+      "slippage_bps": 4.0,
+      "round_trip_bps": 28.0,
+      "wall_3x_bps": 84.0,
+      "source": "Binance published spot fee schedule VIP0 (official page; not covered by the P1.1 manifest, which is perp-only)"
+    },
+    "per_hypothesis": "event-weighted mean of the markets actually used; H1/H2 spot-only -> wall 84 bps"
+  },
+  "promotion_criteria": {
+    "gross_bps_min": 30,
+    "gross_over_cost_min": 3.0,
+    "t_min": 2.2414027276049464,
+    "t_rule": "one-sided, cluster-robust SE by UTC publication day",
+    "n_eff_min": 30,
+    "top1_share_max": 0.1,
+    "tradable_share_min": 0.8,
+    "pre_publication_drift_lt_gross": true,
+    "placebo_minus_48h_lt_gross": true,
+    "verdict": "FORWARD_SEAL_REQUIRED"
+  },
+  "rejection_criteria": {
+    "gross_lt_30": "REJECTED_NO_GROSS",
+    "gross_lt_3x_cost": "REJECTED_COST_WALL",
+    "fails_t_or_concentration_or_tradability_or_leak_or_placebo": "INDECIDABLE",
+    "events_without_publication_ts": "excluded by selection",
+    "ambiguous_mapping": "excluded before measurement, counted"
+  },
+  "multiplicity_family": {
+    "kernel_family": "news",
+    "subfamily": "official_event_reaction",
+    "sealed_before": 0,
+    "sealed_now": 4,
+    "threshold_t": 2.2414027276049464,
+    "loop_lifetime_bar_reported_not_applied": "threshold_t(21) after this look"
+  },
+  "budget": {
+    "tests_debited_at_run": 4,
+    "balance_before": 6,
+    "balance_after": 2,
+    "credit_source": "official_event_tape (+4, floor(1795/400))"
+  },
+  "pins": {
+    "reports/first_look/event_reaction_v1_PREREG.md": "17c2142ba3d6409d0737addf8babcee35f5b8bf2902583fc5d836df3434a32ee",
+    "mechanisms/event_reaction_v1/first_look.py": "c6ad33d3c41f20b703f2f7a39e0280e5dc833c56f63509ce16119cecc363b06d",
+    "mechanisms/event_reaction_v1/spec.json": "2c1e0fef0ec121a940ab6ffecb23a428b1d23156cc941dadb9a3856c42fb9b3d",
+    "mechanisms/event_listing_reversal_v1/spec.json": "13f83e693b069b2f9a846b6b402acec73a2feb3b80b4c1c42de704d869871251",
+    "mechanisms/event_delisting_pressure_v1/spec.json": "48d2872b41e7bb89cb726bef7f48e1484a32e98a09aab4e6a62b069884af2b6f",
+    "mechanisms/event_cross_venue_lag_v1/spec.json": "a32716c4ee91726eb0df3a06eaa70eb4669a8d20ce55cc90cf9184abd6878de4",
+    "data_lake/collectors/first_look_gate.py": "026738ba0fa63254765ae8e0d2d71c9062fdacff381f85e6c730981e1cf41ebc",
+    "research_kernel/multiplicity.py": "31ff2ebf3b01230afb17479324537dc1c634e54e5493951efeeaa50cf88904cf",
+    "tools/look_ledger.py": "c9bb473326a812f27fb53f4b261c565a1fa4df1ad6085c165d87d01a5d058b14"
+  },
+  "positive_control_recovered_bps": {
+    "H1": 79.35533333333342,
+    "H2": 79.88562962962955,
+    "H3": 79.3533333333335,
+    "H4": 77.4631111111113
+  }
+}
