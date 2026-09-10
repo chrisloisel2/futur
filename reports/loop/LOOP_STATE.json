@@ -1,8 +1,8 @@
 {
-  "iteration": 11,
-  "date": "2026-09-10",
-  "budget_tests_remaining": 6,
-  "budget_raw_balance": 6,
+  "iteration": 10,
+  "date": "2026-09-09",
+  "budget_tests_remaining": 2,
+  "budget_raw_balance": 2,
   "budget_ledger": [
     {
       "source": "um_klines_1d",
@@ -75,19 +75,6 @@
       "credited": -1,
       "date": "2026-09-09",
       "note": "t_net 1.5767 < 1.96 : ECHEC. Aucun credit pour la source CME malgre 1 618 jours (floor=4) : la famille est fermee sur cet historique par le protocole, aucune autre hypothese n'y sera testee, un credit serait une fiction."
-    },
-    {
-      "source": "official_event_tape",
-      "provenance": "annonces officielles binance CMS / okx / bybit + snapshots coinbase / hyperliquid (P2A, 2026-09-10)",
-      "fetched": "2026-09-10",
-      "sealed_through": "2026-09-10",
-      "usable_days": 1795,
-      "episodes": 1795,
-      "credited": 4,
-      "cap": 5,
-      "date": "2026-09-10",
-      "sha256": "6e957851e452395f46a5fd7b725f7634d8e0cc9e2f17218c1658d07c2922e6c7",
-      "note": "1 795 jours de publication distincts (union des 3 sources historiques) -> floor(1795/400) = 4. Jamais joint aux prix : aucun regard. Le forward de liquidations ne credite rien (0 jour)."
     }
   ],
   "tests_consumed_lifetime": 17,
@@ -250,21 +237,6 @@
       "days": 1618,
       "credited": 0,
       "note": "acquis APRES scellement ; famille fermee ; manifeste SHA-256 dans reports/loop/cme/MANIFEST_inputs.json"
-    },
-    {
-      "source": "official_event_tape",
-      "symbols": null,
-      "days": 1795,
-      "credited": 4,
-      "records": 7449,
-      "unlocks": "famille news/events : listings, delistings, listings perp (mechanisms/event_reaction_v1, RESEARCH_ONLY)"
-    },
-    {
-      "source": "forced_flow_liquidation_tape",
-      "symbols": "binance all + bybit top-60",
-      "days": 0,
-      "credited": 0,
-      "unlocks": "famille liquidation en DIRECT (la famille cascade est morte de latence) ; mechanisms/forced_liquidation_reaction_v1, RESEARCH_ONLY ; service futur-forced-flow-tape"
     }
   ],
   "data_sources_known_unfetched": [
@@ -348,9 +320,6 @@
     },
     "spot_klines_1d/registry.json": {
       "sha256": "58e71e3b883f6c8500149ea2010f3777e9cdb2c7daa9aa3b07810be6b5a8de1e"
-    },
-    "official_event_tape.jsonl": {
-      "sha256": "6e957851e452395f46a5fd7b725f7634d8e0cc9e2f17218c1658d07c2922e6c7"
     }
   },
   "last_positive_control": {
