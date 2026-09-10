@@ -1,6 +1,6 @@
 # Live Alpha Lab — scoreboard
 
-Généré : 2026-09-10T07:34:36.125168+00:00
+Généré : 2026-09-10T09:19:06.910745+00:00
 
 ⚠ `operational_status=SIGNAL_SHADOW` signifie UNIQUEMENT que le signal tourne réellement.
 Ça ne dit RIEN sur la validité de l'alpha — voir `scientific_status`. Seule la colonne
@@ -32,22 +32,22 @@ ses exécutions du jour tournaient à ~10 minutes de latence.
 | OPTIONS_BLOCK_FLOW_TO_RV_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
 | OPTIONS_FAR_OTM_PUT_SHARE_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
 | OPTIONS_RV_IV_SPREAD_V1 | options_vol_overlay | DISCOVERY | MERGED_INTO_VOL_FORECAST_LAYER_V1 | None | 0 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | VOLATILITY_FAMILY |
-| AMIHUD_ILLIQUIDITY_PREMIUM_V1 | cross_sectional | FROZEN | SIGNAL_SHADOW | 2026-09-02T11:20:10+00:00 | 24530 | **166** | 166 | STRONG | 188.2 | 31.6 | 5.8 OK | 21.169 | 25.9 | 0/166 | 25.9 | 0/166 | CROSS_SECTIONAL_FAMILY |
-| BTC_LEAD_ALT_CASCADE_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T16:20:00+00:00 | 2494 | **31** | 31 | DEVELOPING | 159.2 | 138.8 | 0.1 OK | 4.673 | 18.5 | 31/31 | None | None | LIQUIDATION_FAMILY |
-| FUNDING_BASIS_DISAGREEMENT_V2 | relative_value | FROZEN | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 1 | **0** | 0 | TOO_EARLY | 229.4 | None | 0.1 OK | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
-| LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T08:18:34+00:00 | 3654 | **28** | 18 | EARLY | 167.3 | 9.5 | 0.1 OK | 4.017 | 0.3 | 10/28 | 0.2 | 1/7 | LIQUIDATION_FAMILY |
-| LIQ_CASCADE_REPEAT_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-08-31T00:00:00+00:00 | 5667 | **59** | 30 | DEVELOPING | 247.6 | 9.5 | 0.1 OK | 5.719 | 16.1 | 34/59 | 0.3 | 2/9 | LIQUIDATION_FAMILY |
-| VOL_FORECAST_LAYER_V1 | options_vol_overlay | FROZEN | SIGNAL_SHADOW | 2026-08-31T22:05:00+00:00 | 1325 | **10** | 10 | EARLY | 225.5 | 7.6 | 0.1 OK | 1.064 | 2.2 | 3/10 | 13.5 | 1/2 | VOLATILITY_FAMILY |
-| LIQ_CASCADE_FAR_FROM_LOW_V1 | liquidation | INVALIDATED_PENDING_RESPEC | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 6805 | **108** | 60 | MEANINGFUL | 229.4 | 20.2 | 0.1 OK | 11.299 | 0.5 | 51/108 | 5.8 | 7/10 | LIQUIDATION_FAMILY |
-| PLACEBO_RANDOM_V1 | control | PLACEBO | SIGNAL_SHADOW | 2026-09-06T09:55:26+00:00 | 4 | **1452** | 50 | MEANINGFUL | 93.7 | 0.2 | 0.1 OK | 371.91 | 0.1 | 0/1452 | 0.1 | 0/384 | CONTROL_FAMILY |
+| AMIHUD_ILLIQUIDITY_PREMIUM_V1 | cross_sectional | FROZEN | SIGNAL_SHADOW | 2026-09-02T11:20:10+00:00 | 24530 | **166** | 166 | STRONG | 190.0 | 33.3 | 1.5 OK | 20.968 | 25.9 | 0/166 | 25.9 | 0/166 | CROSS_SECTIONAL_FAMILY |
+| BTC_LEAD_ALT_CASCADE_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T16:20:00+00:00 | 2494 | **31** | 31 | DEVELOPING | 161.0 | 140.6 | 0.1 OK | 4.621 | 18.5 | 31/31 | None | None | LIQUIDATION_FAMILY |
+| FUNDING_BASIS_DISAGREEMENT_V2 | relative_value | FROZEN | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 1 | **0** | 0 | TOO_EARLY | 231.2 | None | 0.8 OK | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
+| LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-09-03T08:18:34+00:00 | 3654 | **28** | 18 | EARLY | 169.0 | 11.2 | 0.1 OK | 3.976 | 0.3 | 10/28 | 0.2 | 1/7 | LIQUIDATION_FAMILY |
+| LIQ_CASCADE_REPEAT_V1 | liquidation | FROZEN | SIGNAL_SHADOW | 2026-08-31T00:00:00+00:00 | 5667 | **59** | 30 | DEVELOPING | 249.3 | 11.2 | 0.1 OK | 5.68 | 16.1 | 34/59 | 0.3 | 2/8 | LIQUIDATION_FAMILY |
+| VOL_FORECAST_LAYER_V1 | options_vol_overlay | FROZEN | SIGNAL_SHADOW | 2026-08-31T22:05:00+00:00 | 1325 | **10** | 10 | EARLY | 227.2 | 9.3 | 0.8 OK | 1.056 | 2.2 | 3/10 | 13.5 | 1/2 | VOLATILITY_FAMILY |
+| LIQ_CASCADE_FAR_FROM_LOW_V1 | liquidation | INVALIDATED_PENDING_RESPEC | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 6805 | **108** | 60 | MEANINGFUL | 231.2 | 21.9 | 0.1 OK | 11.211 | 0.5 | 51/108 | 19.8 | 2/4 | LIQUIDATION_FAMILY |
+| PLACEBO_RANDOM_V1 | control | PLACEBO | SIGNAL_SHADOW | 2026-09-06T09:55:26+00:00 | 4 | **1480** | 50 | MEANINGFUL | 95.4 | 0.2 | 0.1 OK | 372.327 | 0.1 | 0/1480 | 0.1 | 0/384 | CONTROL_FAMILY |
 | POSITIVE_CONTROL_ORACLE_V1 | control | POSITIVE_CONTROL | OFFLINE_INSTRUMENT | None | 0 | **1408** | 860 | STRONG | None | None | None | None | 0.0 | 0/1408 | None | None | CONTROL_FAMILY |
-| CROSS_SECTIONAL_MOMENTUM_LIVE_V1 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:30:44+00:00 | 2581 | **10** | 10 | EARLY | 229.1 | 79.6 | 5.8 OK | 1.048 | 29.5 | 0/10 | None | None | CROSS_SECTIONAL_FAMILY |
-| CROSS_SECTIONAL_MOMENTUM_LIVE_V2 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-09-01T10:24:15+00:00 | 11217 | **53** | 53 | MEANINGFUL | 213.2 | 79.6 | 5.8 OK | 5.966 | 29.6 | 0/53 | None | None | CROSS_SECTIONAL_FAMILY |
-| SHORT_COVERING_CONTINUATION_V1 | liquidation | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 189 | **650** | 160 | STRONG | 229.4 | 1.6 | 0.1 OK | 68.003 | 0.2 | 160/650 | 0.2 | 0/57 | LIQUIDATION_FAMILY |
-| WHALE_LSR_SCREEN_V1 | positioning | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 3091 | **617** | 13 | EARLY | 229.4 | 9.7 | 0.1 OK | 64.551 | 4.2 | 52/617 | 3.5 | 0/252 | POSITIONING_WALLET_FAMILY |
+| CROSS_SECTIONAL_MOMENTUM_LIVE_V1 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:30:44+00:00 | 2581 | **10** | 10 | EARLY | 230.8 | 81.3 | 1.6 OK | 1.04 | 29.5 | 0/10 | None | None | CROSS_SECTIONAL_FAMILY |
+| CROSS_SECTIONAL_MOMENTUM_LIVE_V2 | cross_sectional | RECONSTRUCTED | SIGNAL_SHADOW | 2026-09-01T10:24:15+00:00 | 11217 | **53** | 53 | MEANINGFUL | 214.9 | 81.3 | 1.6 OK | 5.919 | 29.6 | 0/53 | None | None | CROSS_SECTIONAL_FAMILY |
+| SHORT_COVERING_CONTINUATION_V1 | liquidation | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 189 | **650** | 160 | STRONG | 231.2 | 3.3 | 0.1 OK | 67.474 | 0.2 | 160/650 | 0.2 | 0/48 | LIQUIDATION_FAMILY |
+| WHALE_LSR_SCREEN_V1 | positioning | RECONSTRUCTED | SIGNAL_SHADOW | 2026-08-31T18:08:39+00:00 | 3091 | **617** | 13 | EARLY | 231.2 | 11.5 | 0.1 OK | 64.048 | 4.2 | 52/617 | 3.5 | 0/252 | POSITIONING_WALLET_FAMILY |
 | FUNDING_BASIS_DISAGREEMENT_V1 | relative_value | REJECTED | DATA_BLOCKED | None | 1 | **0** | 0 | TOO_EARLY | None | None | None | None | None | None | None | None | RELATIVE_VALUE_FAMILY |
 
-**Total forward_decisions toutes familles : 4592**.
+**Total forward_decisions toutes familles : 4620**.
 
 ⚠ **PF / net_bps / maxDD / edge_retention ne sont PAS encore calculés** pour les alphas
 de position (nécessite un label de résultat forward par décision, comme le backfill
@@ -113,12 +113,12 @@ Aucune métrique annualisée n'est produite ici, à aucun `n`.
 | LIQ_CASCADE_REPEAT_SYSTEMIC_V1 | 26 | 16 | 17/9 | — | INSUFFICIENT_SAMPLE (n_ep=16 < 20) | | | | | | |
 | LIQ_CASCADE_REPEAT_V1 | 55 | 29 | 24/31 | `dec` | +18.8 | -13.8 | -27.8 | 0.815 | 0.345 | [-80.1, +73.4] | — |
 |  | 52 | 28 | 24/31 | `evt` | -30.3 | -29.6 | -43.6 | 0.637 | 0.25 | [-95.9, +61.2] | -1.118 (ABSOLUTE) |
-| ⚙️ PLACEBO_RANDOM_V1 _(contrôle négatif)_ | 1039 | 75 | 1039/17 | `dec` | -40.2 | -9.8 | -23.8 | 0.649 | 0.373 | [-23.3, +4.1] | — |
-|  | 1039 | 75 | 1039/17 | `evt` | -40.7 | -10.2 | -24.2 | 0.63 | 0.347 | [-23.3, +4.1] | base non déclarée |
+| ⚙️ PLACEBO_RANDOM_V1 _(contrôle négatif)_ | 1065 | 75 | 1065/19 | `dec` | -40.9 | -9.6 | -23.6 | 0.66 | 0.36 | [-23.3, +4.7] | — |
+|  | 1065 | 75 | 1065/19 | `evt` | -41.0 | -10.1 | -24.1 | 0.639 | 0.333 | [-23.3, +4.2] | base non déclarée |
 | ⚙️ POSITIVE_CONTROL_ORACLE_V1 _(contrôle positif — LOOK-AHEAD)_ | 1408 | 860 | 0/1408 | `dec` | +12.4 | +5.8 | -8.2 | 1.191 | 0.492 | [-1.7, +13.6] | — |
 |  | 1408 | 860 | 0/1408 | `evt` | +12.4 | +5.8 | -8.2 | 1.191 | 0.492 | [-1.7, +13.6] | base non déclarée |
-| SHORT_COVERING_CONTINUATION_V1 | 618 | 160 | 208/410 | `dec` | -6.6 | -7.2 | -21.1 | 0.804 | 0.388 | [-23.4, +11.7] | — |
-|  | 618 | 160 | 208/410 | `evt` | +0.3 | -4.5 | -18.6 | 0.873 | 0.394 | [-19.6, +12.9] | -0.495 (EXCESS_VS_BASELINE) |
+| SHORT_COVERING_CONTINUATION_V1 | 620 | 161 | 210/410 | `dec` | -7.2 | -7.4 | -21.4 | 0.797 | 0.379 | [-22.8, +10.9] | — |
+|  | 620 | 161 | 210/410 | `evt` | -0.5 | -5.0 | -18.9 | 0.862 | 0.391 | [-20.2, +12.1] | -0.538 (EXCESS_VS_BASELINE) |
 
 ### Hors périmètre du label, avec motif
 
