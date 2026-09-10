@@ -1,0 +1,18 @@
+[Unit]
+Description=futur market_state_tape — lightweight 24/7 watch (exchangeInfo diffs, lifecycle, mark/index/funding/OI, liquidation bursts) with triggered microstructure captures. No orders, no signals.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python -m data_lake.collectors.market_state_tape --mode lightweight_watch
+Restart=always
+RestartSec=10
+Nice=10
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=append:/home/qbee/futur/data_lake/market_state/watch.log
+StandardError=append:/home/qbee/futur/data_lake/market_state/watch.log
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,7 @@
+[Unit]
+Description=futur market_state_tape — readiness report (reports/data_gap/MARKET_STATE_TAPE_READINESS.md)
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python -m data_lake.collectors.market_state_tape --mode readiness

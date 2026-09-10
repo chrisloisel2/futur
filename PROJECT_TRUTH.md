@@ -134,3 +134,14 @@ Validated sleeves: 0 (unchanged). Capital deployable: **false.** No forward seal
 listings never priced before (universe frozen from metadata, prereg pushed). Mean +251 bps, median +230,
 net taker +228, capacity 55 M$ per window, N_eff 93 — **INDECIDABLE**: t 2.12 < threshold_t(5) 2.3263,
 because the per-event dispersion is 1 546 bps. No promotion, no seal. Validated sleeves: 0. Capital deployable: **false.**
+
+
+## P4 — market_state_tape (2026-09-11): a data source, not an alpha
+
+P4 builds the missing link `event -> market state -> executable decision`, not a strategy. `data_lake/collectors/market_state_tape.py`
+watches exchangeInfo (USDS-M every 5 s, spot every 60 s) and turns every diff into a `symbol_lifecycle_event` (birth, status
+transition, onboardDate, shortability, death); it polls mark/index/funding (all symbols), open interest and 24 h tickers as light
+`market_state_snapshot`s; on a trigger (new perp, status change, delisting, OI spike, funding extreme, liquidation burst, manual) it
+captures the microstructure of one market (L2, trades, bookTicker, mark/index, OI, funding, latency) from t0 − 30 min when anticipated
+to t0 + 6 h, with a hashed `triggered_window_manifest`. Everything is append-only; no signal, no verdict, no order, no join to any
+result. Validated sleeves: 0. Capital deployable: **false.** Budget: 0. The tape does not credit budget (no new independent episodes).

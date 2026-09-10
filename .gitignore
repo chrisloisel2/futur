@@ -146,3 +146,6 @@ reports/live_alpha_lab/OUTCOME_LABELING_STATE.json
 data_lake/events/liquidations/
 data_lake/events/liquidations.jsonl
 data_lake/events/snapshots/
+
+# P4 market_state_tape (donnees, append-only, non versionnees)
+data_lake/market_state/

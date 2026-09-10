@@ -1,0 +1,10 @@
+[Unit]
+Description=futur market_state_tape — readiness report every 30 minutes (what the tape contains; no price join)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=30min
+Unit=futur-market-state-readiness.service
+
+[Install]
+WantedBy=timers.target
