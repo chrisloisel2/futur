@@ -103,3 +103,11 @@ Ce que la lecture a révélé d'autre :
 exception ne sera fabriquée. Le calendrier est celui du forward : `FORWARD_CROWD_POSITIONING_V1`,
 un regard, pas avant le 2028-12-06. I14 est fermé. Pendant l'attente, les branches gratuites : instrument (I3, I7), ingestion,
 hypothèses — aucune ne consomme de regard. **Aucun regard sur la fenêtre forward avant la date.**
+
+## Itération 11 (2026-09-10) — premier regard event tape
+
+Regard seq 7, quatre hypothèses scellées (seuil 2,2414) : H1 continuation et H4 retard cross-venue
+= zéros propres (la pompe est dans la première minute) ; H2 fade après annonce de listing = +202 bps
+à 6 h, t 3,25, **non exécutable** (short spot) ; H3 pression de délisting = +631 bps (méd. 67) à
+60 min, t 2,44, **concentré** (N_eff 21,6). 0 promotion, budget 2. Défaut I22 (trading_start_ts =
+minuit du titre). Hypothèses suivantes dans `hypotheses/H-EVENT.md`, aucune scellée. Puis P3B.

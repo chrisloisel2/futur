@@ -113,3 +113,16 @@ fee source audit (`reports/mechanisms/p1_payer_discovery/FEE_SOURCE_AUDIT.md`).
 
 **Verdict: no terrain reopens for a 200 k$ account.** The cost door opens only at institutional
 rebate tiers, in maker-only mode, on wide-tick instruments — and what it opens is market making.
+
+
+## P3A — event first look (2026-09-10): the fast part is arbitraged, the slow part needs a short
+
+One sealed look (LOOK_LEDGER seq 7) on the frozen official event tape, four preregistered
+hypotheses, family `news`, threshold_t(4) = 2.2414. Verdicts, once, in `mechanisms/<id>/results/verdict.json`:
+
+- `event_reaction_v1` (listing continuation, 60 min): **REJECTED_NO_GROSS** (−2 bps). The pump is inside the publication minute.
+- `event_cross_venue_lag_v1` (OKX/Bybit → Binance, 15 min): **REJECTED_NO_GROSS** (−0.3 bps, SE 9.6).
+- `event_listing_reversal_v1` (fade +15 min → 6 h): **INDECIDABLE** — +202 bps, t 3.25, broad and consistent since 2023, but a short on spot; not executable as specified.
+- `event_delisting_pressure_v1` (delisting, 60 min): **INDECIDABLE** — +631 bps mean, 67 median, t 2.44, tradable on the perp, placebo zero, but N_eff 21.6 and five micro-caps carry the mean; declared cost is not the cost of size in those names.
+
+Validated sleeves: 0 (unchanged). Capital deployable: **false.** No forward seal exists for these; candidates in `reports/loop/hypotheses/H-EVENT.md`. Details: `reports/first_look/EVENT_FIRST_LOOK_RESULTS.md`.

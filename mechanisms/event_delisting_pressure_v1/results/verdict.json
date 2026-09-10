@@ -1,0 +1,21 @@
+{
+ "mechanism_id": "event_delisting_pressure_v1",
+ "status": "INDECIDABLE",
+ "reasons": [
+  "n_eff 21.6 < 30",
+  "top1_share 0.13 > 0.1"
+ ],
+ "primary": {
+  "n": 56,
+  "n_clusters": 56,
+  "mean_bps": 630.838370579784,
+  "median_bps": 67.43291741422632,
+  "se_bps": 258.750583440325,
+  "t": 2.438017190887891,
+  "top1_share": 0.12980104293747044,
+  "n_eff": 21.567838067104812,
+  "share_positive": 0.6071428571428571
+ },
+ "ledger_seq": 7,
+ "first_look": true
+}
