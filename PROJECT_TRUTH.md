@@ -62,6 +62,11 @@ restarts the count) and on the crowd-positioning burn. One declared overlap: the
 burns the family through 2026-09-10; the forward seal starts 2026-09-09. Two days of 819,
 for which no return was computable at seal time. Declared, not re-sealed.
 
+**Operational rule for 2028-12-06:** the single look on `FORWARD_CROWD_POSITIONING_V1` is
+recorded in **both** ledgers — `tools/look_ledger.py` (before the computation, witness
+required) and `MultiplicityLedger.record_trial('crowd_positioning', ...)` with the forward
+window as the data it was run on. One look, two records, one truth.
+
 ## Current project asset
 
 Validation infrastructure (`research_kernel/`, 200 tests, gates G0–G8), the look ledger
