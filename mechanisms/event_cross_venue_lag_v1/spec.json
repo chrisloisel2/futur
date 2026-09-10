@@ -1,0 +1,78 @@
+{
+  "mechanism_id": "event_cross_venue_lag_v1",
+  "hypothesis": "In the 15 minutes after OKX or Bybit publishes a spot or perpetual listing announcement for an asset that already trades on Binance, the asset's Binance market rises by more than 30 bps gross in excess of BTCUSDT, measured from the open of the first 1-minute bar at least 60 seconds after the official publication timestamp, because the announcement is read first on the announcing venue and the demand reaches Binance with a lag.",
+  "economic_reason": "Listing news on a second-tier venue is public and official but not watched as closely as Binance's own feed; the asset already trades on Binance, so the new demand (new venue's users, cross-listing momentum) arrives on Binance after the announcing venue has repriced. The payer is the Binance participant who does not read OKX or Bybit announcements. If Binance reprices within 60 seconds the lag is gone and the verdict is REJECTED_NO_GROSS.",
+  "data_sources": [
+    "official_event_tape_okx",
+    "official_event_tape_bybit",
+    "binance_vision_um_klines_1m",
+    "binance_vision_spot_klines_1m",
+    "binance_vision_spot_klines_1m_btcusdt"
+  ],
+  "universe": [
+    "EVENT_TAPE_OKX_BYBIT_LISTINGS_OF_BINANCE_TRADED_ASSETS"
+  ],
+  "timeframe": "1m",
+  "horizon": "15m",
+  "side_mode": "long",
+  "entry_rule": {
+    "event_selection": "source in (okx, bybit), event_type in (listing, futures_listing), order-book listings only (promotions, Convert, Savings, Pre-Market, Launchpool excluded), asset parsed by the tape",
+    "entry_at": "publication_ts_exchange + 60s",
+    "price": "open of the first 1m bar whose open_time >= entry time (tolerance 2 min, else excluded)",
+    "market": "Binance USDS-M perp <ASSET>USDT if existing >= 24h before publication, else Binance spot <ASSET>USDT",
+    "benchmark": "BTCUSDT spot same bars",
+    "direction": "long",
+    "min_bps_expected": 30
+  },
+  "exit_rule": {
+    "exit_at": "entry bar + 15m (open)",
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 4.0,
+    "slippage_bps": 4.0,
+    "adverse_selection_bps": 0.0,
+    "n_legs": 1,
+    "notes": "USDS-M perp VIP0 official (P1.1 manifest) 5 bps taker per side; round trip 18 bps; wall 54 bps. Spot events use the spot model (28 / 84)."
+  },
+  "validation_window": {
+    "start": "2019-09-01",
+    "end": "2026-09-10",
+    "nature": "historical first look on the frozen official event tape (reports/first_look/event_reaction_v1_FREEZE.json); one look, then forward seal or death"
+  },
+  "placebo_tests": [
+    "same_event_shifted_minus_48h"
+  ],
+  "declustering_rule": {
+    "method": "cluster_by_publication_day",
+    "window_seconds": 86400,
+    "note": "cluster-robust standard error by UTC publication day: several assets announced together are one cluster"
+  },
+  "multiplicity_family": "news",
+  "kill_criteria": {
+    "gross_bps_lt": 30,
+    "gross_lt_cost_x": 3.0,
+    "placebo_gte_gross": true,
+    "pre_publication_drift_gte_gross": true
+  },
+  "promotion_criteria": {
+    "gross_bps_min": 30,
+    "gross_over_cost_min": 3.0,
+    "t_min_one_sided_family_bonferroni": 2.2414,
+    "n_eff_min": 30,
+    "top1_share_max": 0.1,
+    "tradable_share_min": 0.8,
+    "verdict_if_all_met": "FORWARD_SEAL_REQUIRED"
+  },
+  "sensitivities": {
+    "horizon": [
+      "5m",
+      "60m"
+    ]
+  },
+  "declared_data_latency_ms": 60000,
+  "notes": "RESEARCH_ONLY. First-look hypothesis H4 of reports/first_look/event_reaction_v1_PREREG.md. Largest sample (941 candidates before market resolution); best powered of the four."
+}

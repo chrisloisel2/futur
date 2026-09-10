@@ -1,7 +1,7 @@
 {
-  "mechanism_id": "event_reaction_v1",
-  "hypothesis": "In the 60 minutes after Binance publishes a USDS-M perpetual listing announcement, the announced asset's pre-existing Binance spot market rises by more than 30 bps gross in excess of BTCUSDT, measured from the open of the first 1-minute bar at least 60 seconds after the official publication timestamp, because the announcement is an exogenous public demand shock that leveraged and index-driven buyers cannot absorb instantly.",
-  "economic_reason": "A perpetual listing announcement is scheduled, official and public: it commits Binance to a new leveraged market, brings the asset to a much larger leveraged audience, forces index and basket products to prepare inclusion, and signals exchange endorsement. If the spot market does not fully reprice within 60 seconds, the remainder of the move is earned by whoever buys first after publication. The payer is the late reader of the announcement and the obligated buyer at trading start.",
+  "mechanism_id": "event_listing_reversal_v1",
+  "hypothesis": "After the first 15 minutes of reaction to a Binance USDS-M perpetual listing announcement, the announced asset's pre-existing Binance spot market gives back more than 30 bps gross in excess of BTCUSDT over the following 6 hours, measured from the open of the first 1-minute bar at least 15 minutes and 60 seconds after the official publication timestamp, because the initial reaction is dominated by momentum buyers who overshoot.",
+  "economic_reason": "The first reaction to a listing headline is bought by the fastest, least informed participants (bots on keywords, retail on push notifications). If they overshoot, the overshoot is sold back by holders and market makers once the headline is digested. The payer is the momentum buyer of the first quarter hour; the seller after 15 minutes earns the reversal, if there is one.",
   "data_sources": [
     "official_event_tape_binance",
     "binance_vision_spot_klines_1m",
@@ -11,19 +11,19 @@
     "EVENT_TAPE_BINANCE_FUTURES_LISTINGS_WITH_PREEXISTING_SPOT"
   ],
   "timeframe": "1m",
-  "horizon": "60m",
-  "side_mode": "long",
+  "horizon": "6h",
+  "side_mode": "short",
   "entry_rule": {
-    "event_selection": "source=binance, event_type=futures_listing, market_type=perp, single-asset title, USDS-margined, crypto only",
-    "entry_at": "publication_ts_exchange + 60s",
+    "event_selection": "same as event_reaction_v1",
+    "entry_at": "publication_ts_exchange + 60s + 15m",
     "price": "open of the first 1m bar whose open_time >= entry time (tolerance 2 min, else excluded)",
     "market": "Binance spot <ASSET>USDT existing >= 24h before publication",
     "benchmark": "BTCUSDT spot same bars",
-    "direction": "long",
+    "direction": "short",
     "min_bps_expected": 30
   },
   "exit_rule": {
-    "exit_at": "entry bar + 60m (open)",
+    "exit_at": "entry bar + 6h (open)",
     "no_stop": true
   },
   "cost_model": {
@@ -67,10 +67,10 @@
   },
   "sensitivities": {
     "horizon": [
-      "15m",
-      "6h"
+      "60m",
+      "24h"
     ]
   },
   "declared_data_latency_ms": 60000,
-  "notes": "RESEARCH_ONLY. First-look hypothesis H1 of reports/first_look/event_reaction_v1_PREREG.md, sealed with H2-H4 (threshold_t(4) = 2.2414 one-sided). Harness mechanisms/event_reaction_v1/first_look.py is pinned by sha256 in the FREEZE. No price join before the sealed look."
+  "notes": "RESEARCH_ONLY. First-look hypothesis H2 of reports/first_look/event_reaction_v1_PREREG.md. Short on spot is not executable without borrow: tradable_share is expected to fail on spot-only events; a positive result on spot can only be a SELL signal for holders, and the verdict says so."
 }
