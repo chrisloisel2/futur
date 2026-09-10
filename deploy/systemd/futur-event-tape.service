@@ -1,0 +1,9 @@
+[Unit]
+Description=Futur P2A official event tape (announcements binance/okx/bybit + snapshots coinbase/hyperliquid), incremental
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python -m data_lake.collectors.official_event_tape --incremental
+StandardOutput=append:/home/qbee/futur/reports/event_edges/collector.log
+StandardError=append:/home/qbee/futur/reports/event_edges/collector.log
+TimeoutStartSec=600

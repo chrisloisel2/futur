@@ -320,7 +320,15 @@ def manifest():
          "backfilled_share": round(sum(1 for r in rows if r.get("backfilled")) / max(1, len(rows)), 3),
          "schema_version": SCHEMA_VERSION}
     MAN.mkdir(parents=True, exist_ok=True)
-    p = MAN / f"official_event_tape_{m['generated_at_utc'][:10]}.json"; p.write_text(json.dumps(m, indent=2, ensure_ascii=False))
+    p = MAN / f"official_event_tape_{m['generated_at_utc'][:10]}.json"
+    if p.exists():  # fichier suivi par git : ne pas le reecrire (horodatage seul) si le tape est inchange
+        try:
+            old = json.loads(p.read_text(encoding="utf-8"))
+            if old.get("sha256") == m["sha256"] and old.get("n_records") == m["n_records"]:
+                print(f"-> {p}  inchange ({len(rows)} enregistrements, sha256 identique)"); return old
+        except (OSError, ValueError):
+            pass
+    p.write_text(json.dumps(m, indent=2, ensure_ascii=False))
     print(f"-> {p}  ({len(rows)} enregistrements)"); return m
 
 
