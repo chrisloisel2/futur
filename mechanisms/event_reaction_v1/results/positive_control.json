@@ -1,0 +1,111 @@
+{
+ "effect_injected": {
+  "H1": {
+   "verdict": "REJECTED_COST_WALL",
+   "reasons": [
+    "gross 83.1 < 3.0 x cost 28.0"
+   ],
+   "n": 200,
+   "gross_bps": 83.10462051899641,
+   "t": 8.542716954748952,
+   "placebo_mean_bps": 1.1826512527012716,
+   "threshold_t": 2.2414027276049464
+  },
+  "H2": {
+   "verdict": "REJECTED_COST_WALL",
+   "reasons": [
+    "gross 70.0 < 3.0 x cost 28.0"
+   ],
+   "n": 200,
+   "gross_bps": 69.97329557450519,
+   "t": 3.0616130399146875,
+   "placebo_mean_bps": -6.816813105443252,
+   "threshold_t": 2.2414027276049464
+  },
+  "H3": {
+   "verdict": "FORWARD_SEAL_REQUIRED",
+   "reasons": [
+    "all criteria met"
+   ],
+   "n": 200,
+   "gross_bps": 72.57822533557928,
+   "t": 8.187047346353125,
+   "placebo_mean_bps": 11.50707268819218,
+   "threshold_t": 2.2414027276049464
+  },
+  "H4": {
+   "verdict": "FORWARD_SEAL_REQUIRED",
+   "reasons": [
+    "all criteria met"
+   ],
+   "n": 200,
+   "gross_bps": 70.93187916854453,
+   "t": 15.56283378240064,
+   "placebo_mean_bps": 4.644072074450618,
+   "threshold_t": 2.2414027276049464
+  }
+ },
+ "null": {
+  "H1": {
+   "verdict": "REJECTED_NO_GROSS",
+   "reasons": [
+    "gross 3.7 < 30.0"
+   ],
+   "n": 200,
+   "gross_bps": 3.749287185662999,
+   "t": 0.38532613377793523,
+   "placebo_mean_bps": 1.1826512527012716,
+   "threshold_t": 2.2414027276049464
+  },
+  "H2": {
+   "verdict": "REJECTED_NO_GROSS",
+   "reasons": [
+    "gross -9.9 < 30.0"
+   ],
+   "n": 200,
+   "gross_bps": -9.912334055124367,
+   "t": -0.4337015015469541,
+   "placebo_mean_bps": -6.816813105443252,
+   "threshold_t": 2.2414027276049464
+  },
+  "H3": {
+   "verdict": "REJECTED_NO_GROSS",
+   "reasons": [
+    "gross -6.8 < 30.0"
+   ],
+   "n": 200,
+   "gross_bps": -6.775107997754214,
+   "t": -0.7647272477576269,
+   "placebo_mean_bps": 11.50707268819218,
+   "threshold_t": 2.2414027276049464
+  },
+  "H4": {
+   "verdict": "REJECTED_NO_GROSS",
+   "reasons": [
+    "gross -6.5 < 30.0"
+   ],
+   "n": 200,
+   "gross_bps": -6.531231942566773,
+   "t": -1.436471111717496,
+   "placebo_mean_bps": 4.644072074450618,
+   "threshold_t": 2.2414027276049464
+  }
+ },
+ "recovered_bps": {
+  "H1": 79.35533333333342,
+  "H2": 79.88562962962955,
+  "H3": 79.3533333333335,
+  "H4": 77.4631111111113
+ },
+ "expected": {
+  "recovery": "effect - null within [0.75, 1.15] x 80.0 bps for every hypothesis (chain fidelity, slope ~ 1)",
+  "effect_injected": "t >= threshold for every hypothesis",
+  "null": "never FORWARD_SEAL_REQUIRED"
+ },
+ "passed": true,
+ "params": {
+  "n_per_hypothesis": 200,
+  "effect_bps": 80.0,
+  "seed": 11
+ }
+}

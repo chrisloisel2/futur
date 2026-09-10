@@ -1,0 +1,77 @@
+{
+  "mechanism_id": "event_delisting_pressure_v1",
+  "hypothesis": "In the 60 minutes after Binance publishes an asset delisting announcement (spot 'Binance Will Delist' or USDS-M 'Binance Futures Will Delist'), the asset's Binance market falls by more than 30 bps gross in excess of BTCUSDT, measured from the open of the first 1-minute bar at least 60 seconds after the official publication timestamp, because holders are forced to exit before the delisting date and no natural buyer steps in.",
+  "economic_reason": "A delisting is a forced-flow event: spot holders must sell or withdraw, leveraged positions will be closed by the exchange, market makers withdraw liquidity, and the asset loses its largest venue. The selling is obligatory and time-bound while buying is optional; the payer is the holder who reads the notice late. If the market has not fully repriced 60 seconds after publication, the short after publication earns the remainder.",
+  "data_sources": [
+    "official_event_tape_binance",
+    "binance_vision_um_klines_1m",
+    "binance_vision_spot_klines_1m",
+    "binance_vision_spot_klines_1m_btcusdt"
+  ],
+  "universe": [
+    "EVENT_TAPE_BINANCE_ASSET_DELISTINGS"
+  ],
+  "timeframe": "1m",
+  "horizon": "60m",
+  "side_mode": "short",
+  "entry_rule": {
+    "event_selection": "source=binance and (event_type=delisting with title starting 'Binance Will Delist' or event_type=futures_delisting with title starting 'Binance Futures Will Delist'); trading-pair removal notices excluded",
+    "entry_at": "publication_ts_exchange + 60s",
+    "price": "open of the first 1m bar whose open_time >= entry time (tolerance 2 min, else excluded)",
+    "market": "Binance USDS-M perp <ASSET>USDT if existing >= 24h before publication, else Binance spot <ASSET>USDT",
+    "benchmark": "BTCUSDT spot same bars",
+    "direction": "short",
+    "min_bps_expected": 30
+  },
+  "exit_rule": {
+    "exit_at": "entry bar + 60m (open)",
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 4.0,
+    "slippage_bps": 4.0,
+    "adverse_selection_bps": 0.0,
+    "n_legs": 1,
+    "notes": "USDS-M perp VIP0 official (P1.1 manifest) 5 bps taker per side; round trip 18 bps; wall 54 bps. Spot events use the spot model (28 / 84)."
+  },
+  "validation_window": {
+    "start": "2019-09-01",
+    "end": "2026-09-10",
+    "nature": "historical first look on the frozen official event tape (reports/first_look/event_reaction_v1_FREEZE.json); one look, then forward seal or death"
+  },
+  "placebo_tests": [
+    "same_event_shifted_minus_48h"
+  ],
+  "declustering_rule": {
+    "method": "cluster_by_publication_day",
+    "window_seconds": 86400,
+    "note": "cluster-robust standard error by UTC publication day: several assets announced together are one cluster"
+  },
+  "multiplicity_family": "news",
+  "kill_criteria": {
+    "gross_bps_lt": 30,
+    "gross_lt_cost_x": 3.0,
+    "placebo_gte_gross": true,
+    "pre_publication_drift_gte_gross": true
+  },
+  "promotion_criteria": {
+    "gross_bps_min": 30,
+    "gross_over_cost_min": 3.0,
+    "t_min_one_sided_family_bonferroni": 2.2414,
+    "n_eff_min": 30,
+    "top1_share_max": 0.1,
+    "tradable_share_min": 0.8,
+    "verdict_if_all_met": "FORWARD_SEAL_REQUIRED"
+  },
+  "sensitivities": {
+    "horizon": [
+      "6h",
+      "24h"
+    ]
+  },
+  "declared_data_latency_ms": 60000,
+  "notes": "RESEARCH_ONLY. First-look hypothesis H3 of reports/first_look/event_reaction_v1_PREREG.md. Expected sample is small (79 candidates before market resolution): the minimum detectable effect is declared in the PREREG."
+}

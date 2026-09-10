@@ -1,0 +1,20 @@
+{
+ "mechanism_id": "event_listing_reversal_v1",
+ "status": "INDECIDABLE",
+ "reasons": [
+  "tradable_share 0.00 < 0.8"
+ ],
+ "primary": {
+  "n": 141,
+  "n_clusters": 136,
+  "mean_bps": 202.3670642071644,
+  "median_bps": 169.06615362806974,
+  "se_bps": 62.32393196582944,
+  "t": 3.2470201706483617,
+  "top1_share": 0.07029464388724035,
+  "n_eff": 64.11624201101132,
+  "share_positive": 0.7021276595744681
+ },
+ "ledger_seq": 7,
+ "first_look": true
+}

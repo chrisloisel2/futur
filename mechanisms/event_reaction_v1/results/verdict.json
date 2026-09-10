@@ -1,0 +1,20 @@
+{
+ "mechanism_id": "event_reaction_v1",
+ "status": "REJECTED_NO_GROSS",
+ "reasons": [
+  "gross -2.5 < 30.0"
+ ],
+ "primary": {
+  "n": 142,
+  "n_clusters": 137,
+  "mean_bps": -2.5153453730235125,
+  "median_bps": 14.149551892382725,
+  "se_bps": 59.64574443236639,
+  "t": -0.04217141385293158,
+  "top1_share": 0.16885511144743465,
+  "n_eff": 50.60283807284552,
+  "share_positive": 0.5140845070422535
+ },
+ "ledger_seq": 7,
+ "first_look": true
+}

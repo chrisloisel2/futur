@@ -1,0 +1,20 @@
+{
+ "mechanism_id": "event_cross_venue_lag_v1",
+ "status": "REJECTED_NO_GROSS",
+ "reasons": [
+  "gross -0.3 < 30.0"
+ ],
+ "primary": {
+  "n": 272,
+  "n_clusters": 156,
+  "mean_bps": -0.2605876467497363,
+  "median_bps": 1.4241283953927575,
+  "se_bps": 9.639509431770092,
+  "t": -0.027033289255455905,
+  "top1_share": 0.0921252480479139,
+  "n_eff": 80.97368050202415,
+  "share_positive": 0.5220588235294118
+ },
+ "ledger_seq": 7,
+ "first_look": true
+}
