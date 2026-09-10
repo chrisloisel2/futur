@@ -81,3 +81,32 @@ A structural edge. An executable alpha. A deployable sleeve.
 Until that changes: **no live, no leverage, no ML, no dashboard, no optimisation.**
 The question is no longer "which signal works" but "which structural advantage exists
 before costs, survives costs, placebo, multiplicity, then the forward."
+
+## P1 — payer discovery (2026-09-10): where does real cost get low enough?
+
+Measured on L1 quotes + trades, Binance / OKX / Hyperliquid, BTC/ETH/SOL, 2026-09-07 → 09-09
+(`mechanisms/p1_payer_discovery_v1/`, `reports/mechanisms/p1_payer_discovery/venue_cost_table.md`).
+Fees are published schedules, not measured on an account. Bybit has no data on disk: fees only.
+
+| mode | round trip at VIP0 | at best published tier | gross needed (×3 wall) |
+|---|---|---|---|
+| taker | 9.5 – 11.3 bps | 4.2 – 5.3 bps | 12.5 – 34 bps |
+| maker (end of queue, 30 s) | 3.0 – 5.1 bps | −0.6 – +2.7 bps | −1.9 – 8 bps |
+
+**Microstructure: NO at VIP0, on every venue and mode.** The only configurations under the
+0.26 bps floor are maker-only on wide-tick instruments — Binance SOL at VIP9 (−0.62 bps, P(fill 30 s)
+0.41) and Hyperliquid at its market-maker tier 3 (P(fill) 0.16–0.24). Those tiers require
+**30 G USD of 30-day futures volume plus 5,500 BNB**, or **> 3 % of the platform's maker volume**.
+A negative maker floor there is not an edge: it is the half-tick a market maker earns *if filled*,
+which is a liquidity-provision business, not the P0 signal.
+**Cross-exchange: NO at any tier** — the dislocated leg is taken, and the cheapest two-leg round
+trip is 4.09 bps against 0.66 needed.
+
+Method findings that changed the numbers: the 1-second-grid "effective spread" overstated the
+true effective half-spread ×7 (calibrated against exact prevailing quotes: 0.07 bps median,
+0.45 mean on Binance BTC); the passive-side loss must be decomposed into drift lost minus half-spread
+earned; the OKX "−0.5 bps maker rebate" is an off-schedule market-maker program — the standard top is
+VIP8 at +0.8 bps.
+
+**Verdict: no terrain reopens for a 200 k$ account.** The cost door opens only at institutional
+rebate tiers, in maker-only mode, on wide-tick instruments — and what it opens is market making.

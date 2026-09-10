@@ -1,0 +1,74 @@
+{
+  "mechanism_id": "p1_payer_discovery_v1",
+  "hypothesis": "There exists at least one venue and execution mode (maker-only or taker) on which the measured round-trip cost of trading BTC, ETH or SOL perpetuals is low enough that a gross edge of the size P0 observed (0.78 bps microstructure, 1.97 bps cross-exchange) clears the three-times cost wall.",
+  "economic_reason": "This is a cost measurement, not a return hypothesis. The agent is the liquidity taker or provider on each venue; the constraint is the published fee schedule plus the spread, the adverse selection borne by a resting order and the probability that it fills before the quote moves. Nothing here predicts a return, so nothing here is a look at a target, and no multiplicity trial is charged: the family field names the terrain being measured.",
+  "data_sources": [
+    "microstructure_reduced_bbo_binance",
+    "microstructure_reduced_bbo_okx",
+    "microstructure_reduced_bbo_hyperliquid",
+    "microstructure_reduced_trades_binance",
+    "microstructure_reduced_trades_okx",
+    "microstructure_reduced_trades_hyperliquid",
+    "published_fee_schedules_2026"
+  ],
+  "universe": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT"
+  ],
+  "timeframe": "1s",
+  "horizon": "30s",
+  "side_mode": "market_neutral",
+  "entry_rule": {
+    "measurement": "resting order at the best bid or ask, end of queue",
+    "grid_seconds": 1,
+    "fill_window_seconds": 30,
+    "adverse_selection_window_seconds": 30,
+    "sample_step_seconds": 10
+  },
+  "exit_rule": {
+    "measurement": "mid price after the adverse-selection window",
+    "no_position_is_held": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 0.0,
+    "slippage_bps": 0.0,
+    "adverse_selection_bps": 0.0,
+    "n_legs": 1,
+    "notes": "Placeholders required by the schema. This mechanism MEASURES these quantities per venue; it does not consume them."
+  },
+  "validation_window": {
+    "start": "2026-09-07",
+    "end": "2026-09-09",
+    "nature": "measurement window: three full days of L1 quotes and trades; no target, no look"
+  },
+  "placebo_tests": [
+    "none_no_target"
+  ],
+  "declustering_rule": {
+    "method": "fixed_windows",
+    "window_seconds": 30,
+    "note": "not used: there is no event series to decluster"
+  },
+  "multiplicity_family": "microstructure",
+  "kill_criteria": {
+    "reopen_requires_floor_bps_lte_gross_over_3": true
+  },
+  "promotion_criteria": {
+    "none": "a measurement is never promoted"
+  },
+  "declared_data_latency_ms": 200,
+  "notes": "Standalone measurement. run.py is NOT executed through research_kernel.run_mechanism and records no trial in any family. Bybit is not collected on disk: only its published fees appear, no measured spread or latency. L1 only: slippage beyond the touch is not measurable, only the notional available at the touch.",
+  "sensitivities": {
+    "fill_window_seconds": [
+      5,
+      60
+    ],
+    "adverse_selection_window_seconds": [
+      5
+    ]
+  }
+}
