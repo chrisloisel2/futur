@@ -1,0 +1,304 @@
+{
+  "as_of": "2026-09-10",
+  "fetched_at_utc": "2026-09-10T22:30:00Z",
+  "unit": "bps par cote (0.01 % = 1 bps)",
+  "source_classes": {
+    "official": "page ou document publie par la venue elle-meme, lu le jour meme (URL citee)",
+    "account_actual": "frais reels d'un compte, lus sur l'endpoint compte (scripts/fetch_account_fees.py) ; jamais dans ce fichier",
+    "third_party_fallback": "source tierce ; admise seulement quand aucune source officielle n'a pu etre lue, et jamais dans un verdict final",
+    "unconfirmed": "valeur dont aucune source officielle n'a pu etre lue et dont les sources tierces se contredisent"
+  },
+  "rule": "un verdict FINAL de bareme ne peut reposer que sur des entrees source_class == official ; tout le reste est marque non final",
+  "venues": {
+    "binance": {
+      "product": "USDS-M perpetual",
+      "published_schedule": {
+        "vip0": {
+          "maker": 2.0,
+          "taker": 5.0,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.binance.com/en/support/faq/360033544231"
+          ],
+          "note": "FAQ officielle : maker 0,02 % / taker 0,05 % pour un utilisateur regulier ; remise BNB 10 %"
+        },
+        "best": {
+          "tier": "VIP9",
+          "maker": 0.0,
+          "taker": 1.7,
+          "source_class": "third_party_fallback",
+          "final": false,
+          "sources": [
+            "https://tradersunion.com/brokers/crypto/view/binance/futures-fees/",
+            "https://www.datawallet.com/crypto/binance-vip-levels-explained"
+          ],
+          "official_confirmation": "NON OBTENUE : /en/fee/futureFee rendu cote client (curl : taille 0), page VIP institutionnelle 'No records found', 4 endpoints bapi 404"
+        },
+        "bnb_discount_pct": {
+          "value": 10,
+          "source_class": "official",
+          "sources": [
+            "https://www.binance.com/en/support/faq/360033544231"
+          ]
+        }
+      },
+      "thresholds": {
+        "vip9_bnb_balance": {
+          "value": 5500,
+          "source_class": "official",
+          "sources": [
+            "https://www.binance.com/en/fee/vip"
+          ]
+        },
+        "vip9_futures_volume_30d_usd": {
+          "value": null,
+          "source_class": "unconfirmed",
+          "candidates": {
+            "official_faq_rule_5x_spot": 20000000000,
+            "third_party_30G": 30000000000,
+            "third_party_25G": 25000000000
+          },
+          "note": "la FAQ officielle dit 'volumes futures = 5x spot' et la page VIP officielle donne VIP9 spot >= 4 G USD ; la table futures elle-meme n'a pas pu etre lue. Non corrige a 25 G (item 6) : aucune source officielle ne le confirme."
+        },
+        "vip9_spot_volume_30d_usd": {
+          "value": 4000000000,
+          "source_class": "official",
+          "sources": [
+            "https://www.binance.com/en/fee/vip"
+          ]
+        },
+        "summary": "VIP9 : 5 500 BNB (officiel) ; volume futures 30 j NON CONFIRMÉ (officiel : 5× spot ⇒ 20 G ; tiers : 25 G / 30 G)"
+      },
+      "account_actual": {
+        "endpoint": "GET https://fapi.binance.com/fapi/v1/commissionRate?symbol=",
+        "auth": "HMAC-SHA256, X-MBX-APIKEY",
+        "status": "not_fetched (aucune cle dans l'environnement)",
+        "script": "scripts/fetch_account_fees.py"
+      }
+    },
+    "okx": {
+      "product": "USDT-margined perpetual swap",
+      "published_schedule": {
+        "vip0": {
+          "maker": 2.0,
+          "taker": 5.0,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
+          ],
+          "note": "cadre global effectif 2025-11-25 : regular 0,020 % / 0,050 %"
+        },
+        "best": {
+          "tier": "VIP8",
+          "maker": -0.25,
+          "taker": 2.0,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.okx.com/en-us/help/advance-notice-spot-and-futures-trading-fee-adjustment-090926",
+            "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
+          ],
+          "effective": "2026-09-09 15:00-17:00 UTC+8",
+          "history": {
+            "until_2026-09-09": {
+              "maker": -0.5,
+              "taker": 2.0
+            },
+            "from_2026-09-09": {
+              "maker": -0.25,
+              "taker": 2.0
+            }
+          },
+          "note": "item 7 : la source officielle confirme un maker NEGATIF a VIP8, mais la valeur APPLICABLE le 2026-09-10 est -0,0025 % (avis du 2026-09-09), pas -0,005 %. On remplace 0,8 par -0,25, pas par -0,5."
+        },
+        "vip9": {
+          "tier": "VIP9",
+          "maker": -0.5,
+          "taker": 1.5,
+          "threshold_30d_volume_usd": 20000000000,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
+          ],
+          "note": "cadre 2025-11-25 ; l'avis du 2026-09-09 ne mentionne pas VIP9"
+        }
+      },
+      "thresholds": {
+        "vip8_30d_volume_usd": {
+          "value": 2000000000,
+          "source_class": "official",
+          "sources": [
+            "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
+          ],
+          "note": "l'avis du 2026-09-09 exprime la bande VIP8 en SGD : 2 500 000 001 - 25 000 000 000 SGD de volume 30 j ou 320 000 001 - 625 000 000 SGD d'actifs"
+        },
+        "summary": "VIP8 : ≥ 2 G USD de volume 30 j (officiel, cadre 2025-11-25) ; VIP9 : ≥ 20 G"
+      },
+      "account_actual": {
+        "endpoint": "GET https://www.okx.com/api/v5/account/trade-fee?instType=SWAP",
+        "auth": "HMAC-SHA256 base64 + passphrase",
+        "status": "not_fetched",
+        "script": "scripts/fetch_account_fees.py"
+      }
+    },
+    "bybit": {
+      "product": "USDT perpetual",
+      "published_schedule": {
+        "vip0": {
+          "maker": 2.0,
+          "taker": 5.5,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.bybit.com/en/help-center/article/Trading-Fee-Structure"
+          ],
+          "note": "page officielle 'Last updated 2026-09-02' : taker 0,0550 % / maker 0,0200 %"
+        },
+        "vip_ladder": {
+          "VIP1": {
+            "taker": 4.0,
+            "maker": 1.8
+          },
+          "VIP2": {
+            "taker": 3.75,
+            "maker": 1.6
+          },
+          "VIP3": {
+            "taker": 3.5,
+            "maker": 1.4
+          },
+          "VIP4": {
+            "taker": 3.2,
+            "maker": 1.2
+          },
+          "VIP5": {
+            "taker": 3.2,
+            "maker": 1.0
+          },
+          "source_class": "official"
+        },
+        "best": {
+          "tier": "Pro 5",
+          "maker": 0.0,
+          "taker": 1.8,
+          "threshold": ">= 3,000M USD derives 30 j (API > 20 %)",
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://www.bybit.com/en/help-center/article/Trading-Fee-Structure"
+          ],
+          "note": "onglet Pro / Market Makers de la page officielle ; ligne Pro 5 de la table derives lue dans le HTML officiel decode ; ligne Pro 6 (>= 5,000M) non capturee proprement"
+        }
+      },
+      "thresholds": {
+        "derivatives_30d_volume_usd": {
+          "VIP1": 10000000,
+          "VIP2": 25000000,
+          "VIP3": 50000000,
+          "VIP4": 100000000,
+          "VIP5": 250000000,
+          "Supreme": 500000000,
+          "source_class": "official",
+          "note": "VIP4+ : volume API <= 20 % ; Pro : volume API > 20 %"
+        },
+        "summary": "Pro 5 : ≥ 3 G USD de dérivés 30 j, volume API > 20 % (officiel) ; Pro 6 : ≥ 5 G"
+      },
+      "account_actual": {
+        "endpoint": "GET https://api.bybit.com/v5/account/fee-rate?category=linear",
+        "auth": "HMAC-SHA256 v5",
+        "status": "not_fetched",
+        "script": "scripts/fetch_account_fees.py"
+      },
+      "measured_market_data": false
+    },
+    "hyperliquid": {
+      "product": "perpetual",
+      "published_schedule": {
+        "vip0": {
+          "maker": 1.5,
+          "taker": 4.5,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees"
+          ]
+        },
+        "volume_tiers_14d": {
+          "1": {
+            ">": 5000000.0,
+            "taker": 4.0,
+            "maker": 1.2
+          },
+          "2": {
+            ">": 25000000.0,
+            "taker": 3.5,
+            "maker": 0.8
+          },
+          "3": {
+            ">": 100000000.0,
+            "taker": 3.0,
+            "maker": 0.4
+          },
+          "4": {
+            ">": 500000000.0,
+            "taker": 2.8,
+            "maker": 0.0
+          },
+          "5": {
+            ">": 2000000000.0,
+            "taker": 2.6,
+            "maker": 0.0
+          },
+          "6": {
+            ">": 7000000000.0,
+            "taker": 2.4,
+            "maker": 0.0
+          },
+          "source_class": "official"
+        },
+        "maker_rebate_tiers": {
+          "1": {
+            "share_gt": 0.005,
+            "maker": -0.1
+          },
+          "2": {
+            "share_gt": 0.015,
+            "maker": -0.2
+          },
+          "3": {
+            "share_gt": 0.03,
+            "maker": -0.3
+          },
+          "source_class": "official"
+        },
+        "best": {
+          "tier": "rebate tier 3 + volume tier 6",
+          "maker": -0.3,
+          "taker": 2.4,
+          "source_class": "official",
+          "final": true,
+          "sources": [
+            "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees"
+          ],
+          "note": "rebate : > 3 % du volume maker de la plateforme sur 14 j ; taker : tier 6 > 7 G USD sur 14 j"
+        }
+      },
+      "thresholds": {
+        "best": {
+          "value": "> 3 % du volume maker total (rebate) ; > 7 G USD / 14 j (tier 6)",
+          "source_class": "official"
+        },
+        "summary": "rebate tier 3 : > 3 % du volume maker de la plateforme (14 j) ; tier 6 : > 7 G USD / 14 j (officiel)"
+      },
+      "account_actual": {
+        "endpoint": "POST https://api.hyperliquid.xyz/info {type: userFees, user: <addr>}",
+        "auth": "aucune (adresse)",
+        "status": "not_fetched",
+        "script": "scripts/fetch_account_fees.py"
+      }
+    }
+  }
+}

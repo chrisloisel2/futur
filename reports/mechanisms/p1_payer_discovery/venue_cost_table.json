@@ -1,0 +1,773 @@
+{
+  "measured_at": "2026-09-10T10:35:50.713571+00:00",
+  "dates": [
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09"
+  ],
+  "step_seconds": 10,
+  "fees_published_bps": {
+    "binance": {
+      "vip0": {
+        "maker": 2.0,
+        "taker": 5.0
+      },
+      "best": {
+        "maker": 0.0,
+        "taker": 1.7,
+        "tier": "VIP9"
+      }
+    },
+    "okx": {
+      "vip0": {
+        "maker": 2.0,
+        "taker": 5.0
+      },
+      "best": {
+        "maker": -0.25,
+        "taker": 2.0,
+        "tier": "VIP8"
+      }
+    },
+    "bybit": {
+      "vip0": {
+        "maker": 2.0,
+        "taker": 5.5
+      },
+      "best": {
+        "maker": 0.0,
+        "taker": 1.8,
+        "tier": "Pro 5"
+      }
+    },
+    "hyperliquid": {
+      "vip0": {
+        "maker": 1.5,
+        "taker": 4.5
+      },
+      "best": {
+        "maker": -0.3,
+        "taker": 2.4,
+        "tier": "rebate tier 3 + volume tier 6"
+      }
+    }
+  },
+  "fee_tier_thresholds": {
+    "binance": "VIP9 : 5 500 BNB (officiel) ; volume futures 30 j NON CONFIRM\u00c9 (officiel : 5\u00d7 spot \u21d2 20 G ; tiers : 25 G / 30 G)",
+    "okx": "VIP8 : \u2265 2 G USD de volume 30 j (officiel, cadre 2025-11-25) ; VIP9 : \u2265 20 G",
+    "bybit": "Pro 5 : \u2265 3 G USD de d\u00e9riv\u00e9s 30 j, volume API > 20 % (officiel) ; Pro 6 : \u2265 5 G",
+    "hyperliquid": "rebate tier 3 : > 3 % du volume maker de la plateforme (14 j) ; tier 6 : > 7 G USD / 14 j (officiel)"
+  },
+  "fee_sources": {
+    "binance": [
+      "https://tradersunion.com/brokers/crypto/view/binance/futures-fees/",
+      "https://www.binance.com/en/support/faq/360033544231",
+      "https://www.datawallet.com/crypto/binance-vip-levels-explained"
+    ],
+    "okx": [
+      "https://www.okx.com/en-us/help/advance-notice-spot-and-futures-trading-fee-adjustment-090926",
+      "https://www.okx.com/en-us/help/updates-to-global-fee-framework"
+    ],
+    "bybit": [
+      "https://www.bybit.com/en/help-center/article/Trading-Fee-Structure"
+    ],
+    "hyperliquid": [
+      "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees"
+    ]
+  },
+  "fees_measured_on_account": false,
+  "bybit": "no BBO/trades on disk: published fees only, no measured spread/latency",
+  "gross_reference_bps": {
+    "microstructure": 0.78,
+    "cross_exchange": 1.97
+  },
+  "cost_wall_multiple": 3.0,
+  "floor_needed_bps": {
+    "microstructure": 0.26,
+    "cross_exchange": 0.6566666666666666
+  },
+  "fee_manifest": {
+    "path": "data_lake/manifests/published_fee_schedules_2026-09-10.json",
+    "sha256": "4f1772107b37fc7af0be29642218d467cbbf15e3e03eb570beabc8f7ed023bf6",
+    "source_class": {
+      "binance": {
+        "vip0": "official",
+        "best": "third_party_fallback",
+        "best_final": false
+      },
+      "okx": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      },
+      "bybit": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      },
+      "hyperliquid": {
+        "vip0": "official",
+        "best": "official",
+        "best_final": true
+      }
+    }
+  },
+  "rows": [
+    {
+      "venue": "binance",
+      "symbol": "BTCUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203059,
+      "spread_bps_median": 0.012651029573150565,
+      "spread_bps_p95": 0.012795553288203698,
+      "latency_ms_median": 111.437998,
+      "latency_ms_p95": 164.33597399999994,
+      "top_notional_usd_median": 603114.1857500001,
+      "size_unit": "coin",
+      "n_trades": 2484123,
+      "effective_half_spread_bps_median": 0.34963945814783903,
+      "effective_half_spread_bps_mean": 0.7539217417624647,
+      "maker_net_loss_bps_mean_5s": 0.4926069396164565,
+      "maker_drift_loss_bps_mean_5s": 0.5006779416648702,
+      "adverse_selection_bps_mean_5s": 0.4926069396164565,
+      "maker_net_loss_bps_mean_30s": 0.523178069074578,
+      "maker_drift_loss_bps_mean_30s": 0.5312490711229917,
+      "adverse_selection_bps_mean_30s": 0.523178069074578,
+      "half_spread_earned_at_fill_bps_mean": 0.008071002048413711,
+      "fill_prob_end_of_queue_5s": 0.1342839910391177,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.40987420299844907,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.5332155781492331,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 355833,
+      "quoted_half_spread_bps_median": 0.006385700118954148,
+      "effective_half_spread_exact_bps_median": 0.056739341356749816,
+      "effective_half_spread_exact_bps_mean": 0.38458687369980044,
+      "effective_half_spread_exact_bps_p90": 0.6613437490730459,
+      "share_trades_at_touch": 0.6266226010516169,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 10.7691737473996,
+          "maker_round_trip_bps": 5.0463561381491555,
+          "maker_fill_prob_30s": 0.40987420299844907
+        },
+        "best": {
+          "taker_round_trip_bps": 4.169173747399601,
+          "maker_round_trip_bps": 1.046356138149156,
+          "maker_fill_prob_30s": 0.40987420299844907
+        }
+      }
+    },
+    {
+      "venue": "binance",
+      "symbol": "ETHUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203059,
+      "spread_bps_median": 0.04017217795376396,
+      "spread_bps_p95": 0.04058911034662504,
+      "latency_ms_median": 111.333748,
+      "latency_ms_p95": 164.44336589999997,
+      "top_notional_usd_median": 303325.63196,
+      "size_unit": "coin",
+      "n_trades": 2376398,
+      "effective_half_spread_bps_median": 0.3811059695227547,
+      "effective_half_spread_bps_mean": 0.8455782776388165,
+      "maker_net_loss_bps_mean_5s": 0.464664063906196,
+      "maker_drift_loss_bps_mean_5s": 0.4857710575545519,
+      "adverse_selection_bps_mean_5s": 0.464664063906196,
+      "maker_net_loss_bps_mean_30s": 0.5168261248746279,
+      "maker_drift_loss_bps_mean_30s": 0.5379331185229842,
+      "adverse_selection_bps_mean_30s": 0.5168261248746279,
+      "half_spread_earned_at_fill_bps_mean": 0.02110699364835633,
+      "fill_prob_end_of_queue_5s": 0.19645011201102877,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.4881957608133724,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.6019300361881785,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 325166,
+      "quoted_half_spread_bps_median": 0.020221588163532547,
+      "effective_half_spread_exact_bps_median": 0.060048879788548046,
+      "effective_half_spread_exact_bps_mean": 0.458481886492683,
+      "effective_half_spread_exact_bps_p90": 0.7116120860185595,
+      "share_trades_at_touch": 0.6258126618404138,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 10.916963772985365,
+          "maker_round_trip_bps": 5.033652249749256,
+          "maker_fill_prob_30s": 0.4881957608133724
+        },
+        "best": {
+          "taker_round_trip_bps": 4.316963772985366,
+          "maker_round_trip_bps": 1.0336522497492557,
+          "maker_fill_prob_30s": 0.4881957608133724
+        }
+      }
+    },
+    {
+      "venue": "binance",
+      "symbol": "SOLUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203059,
+      "spread_bps_median": 0.9635303752955742,
+      "spread_bps_p95": 0.9785214540833814,
+      "latency_ms_median": 111.420429,
+      "latency_ms_p95": 166.62175999999954,
+      "top_notional_usd_median": 101924.40900000001,
+      "size_unit": "coin",
+      "n_trades": 612152,
+      "effective_half_spread_bps_median": 0.4829284782919257,
+      "effective_half_spread_bps_mean": 0.8508513215209031,
+      "maker_net_loss_bps_mean_5s": -0.3008838860426668,
+      "maker_drift_loss_bps_mean_5s": 0.18203944310236667,
+      "adverse_selection_bps_mean_5s": -0.3008838860426668,
+      "maker_net_loss_bps_mean_30s": -0.3085464226175723,
+      "maker_drift_loss_bps_mean_30s": 0.1743769065274613,
+      "adverse_selection_bps_mean_30s": -0.3085464226175723,
+      "half_spread_earned_at_fill_bps_mean": 0.4829233291450336,
+      "fill_prob_end_of_queue_5s": 0.11183870411855937,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.41073582629674305,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.5582888161295881,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 74041,
+      "quoted_half_spread_bps_median": 0.47940936765860803,
+      "effective_half_spread_exact_bps_median": 0.47940936765860803,
+      "effective_half_spread_exact_bps_mean": 0.6524748037763317,
+      "effective_half_spread_exact_bps_p90": 0.490268176692205,
+      "share_trades_at_touch": 0.9523102065072054,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 11.304949607552663,
+          "maker_round_trip_bps": 3.3829071547648555,
+          "maker_fill_prob_30s": 0.41073582629674305
+        },
+        "best": {
+          "taker_round_trip_bps": 4.704949607552663,
+          "maker_round_trip_bps": -0.6170928452351446,
+          "maker_fill_prob_30s": 0.41073582629674305
+        }
+      }
+    },
+    {
+      "venue": "okx",
+      "symbol": "BTCUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203355,
+      "spread_bps_median": 0.012651733825969172,
+      "spread_bps_p95": 0.012795929869509517,
+      "latency_ms_median": 120.238714,
+      "latency_ms_p95": 139.79509389999998,
+      "top_notional_usd_median": 368734.16435000004,
+      "size_unit": "contracts x ctVal",
+      "n_trades": 2536244,
+      "effective_half_spread_bps_median": 0.33850565719521614,
+      "effective_half_spread_bps_mean": 0.6851816894248252,
+      "maker_net_loss_bps_mean_5s": 0.5657076112977392,
+      "maker_drift_loss_bps_mean_5s": 0.5734569488197355,
+      "adverse_selection_bps_mean_5s": 0.5657076112977392,
+      "maker_net_loss_bps_mean_30s": 0.5576773867657175,
+      "maker_drift_loss_bps_mean_30s": 0.5654267242877133,
+      "adverse_selection_bps_mean_30s": 0.5576773867657175,
+      "half_spread_earned_at_fill_bps_mean": 0.007749337521995803,
+      "fill_prob_end_of_queue_5s": 0.127649491642254,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.36662071342409097,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.49022057556436327,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 358976,
+      "quoted_half_spread_bps_median": 0.006372336920190231,
+      "effective_half_spread_exact_bps_median": 0.1007460877713956,
+      "effective_half_spread_exact_bps_mean": 0.2761081997738425,
+      "effective_half_spread_exact_bps_p90": 0.7372414329097216,
+      "share_trades_at_touch": 0.5030224861829203,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 10.552216399547685,
+          "maker_round_trip_bps": 5.115354773531435,
+          "maker_fill_prob_30s": 0.36662071342409097
+        },
+        "best": {
+          "taker_round_trip_bps": 4.552216399547685,
+          "maker_round_trip_bps": 0.6153547735314351,
+          "maker_fill_prob_30s": 0.36662071342409097
+        }
+      }
+    },
+    {
+      "venue": "okx",
+      "symbol": "ETHUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203400,
+      "spread_bps_median": 0.04017217795376396,
+      "spread_bps_p95": 0.040590263614353035,
+      "latency_ms_median": 120.1620035,
+      "latency_ms_p95": 139.63779484999995,
+      "top_notional_usd_median": 319143.63123249996,
+      "size_unit": "contracts x ctVal",
+      "n_trades": 2836704,
+      "effective_half_spread_bps_median": 0.37501899767301616,
+      "effective_half_spread_bps_mean": 0.7805583584654046,
+      "maker_net_loss_bps_mean_5s": 0.4207493742578771,
+      "maker_drift_loss_bps_mean_5s": 0.4415214898130517,
+      "adverse_selection_bps_mean_5s": 0.4207493742578771,
+      "maker_net_loss_bps_mean_30s": 0.4278338590172383,
+      "maker_drift_loss_bps_mean_30s": 0.44860597457241247,
+      "adverse_selection_bps_mean_30s": 0.4278338590172383,
+      "half_spread_earned_at_fill_bps_mean": 0.020772115555174164,
+      "fill_prob_end_of_queue_5s": 0.14802688264690678,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.41129588144063417,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.5358435292090298,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 397945,
+      "quoted_half_spread_bps_median": 0.020022946295982256,
+      "effective_half_spread_exact_bps_median": 0.060041188256453604,
+      "effective_half_spread_exact_bps_mean": 0.35750516807467564,
+      "effective_half_spread_exact_bps_p90": 0.9410211962352211,
+      "share_trades_at_touch": 0.5596778449283193,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 10.715010336149351,
+          "maker_round_trip_bps": 4.855667718034477,
+          "maker_fill_prob_30s": 0.41129588144063417
+        },
+        "best": {
+          "taker_round_trip_bps": 4.715010336149351,
+          "maker_round_trip_bps": 0.3556677180344766,
+          "maker_fill_prob_30s": 0.41129588144063417
+        }
+      }
+    },
+    {
+      "venue": "okx",
+      "symbol": "SOLUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 203397,
+      "spread_bps_median": 0.9637160892392334,
+      "spread_bps_p95": 0.978617213875902,
+      "latency_ms_median": 120.407546,
+      "latency_ms_p95": 140.0497176,
+      "top_notional_usd_median": 95905.88155,
+      "size_unit": "contracts x ctVal",
+      "n_trades": 538369,
+      "effective_half_spread_bps_median": 0.48405053487540084,
+      "effective_half_spread_bps_mean": 0.9962367536056709,
+      "maker_net_loss_bps_mean_5s": -0.01413779378106641,
+      "maker_drift_loss_bps_mean_5s": 0.4684730677672678,
+      "adverse_selection_bps_mean_5s": -0.01413779378106641,
+      "maker_net_loss_bps_mean_30s": -0.09598393980806334,
+      "maker_drift_loss_bps_mean_30s": 0.38662692174027097,
+      "adverse_selection_bps_mean_30s": -0.09598393980806334,
+      "half_spread_earned_at_fill_bps_mean": 0.4826108615483343,
+      "fill_prob_end_of_queue_5s": 0.0849991383767017,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.29609684645872825,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.43688609339996554,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 66177,
+      "quoted_half_spread_bps_median": 0.4811161895600248,
+      "effective_half_spread_exact_bps_median": 0.4820438659927369,
+      "effective_half_spread_exact_bps_mean": 0.6631388288608144,
+      "effective_half_spread_exact_bps_p90": 0.4913280597450452,
+      "share_trades_at_touch": 0.9181437659609835,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 11.32627765772163,
+          "maker_round_trip_bps": 3.8080321203838734,
+          "maker_fill_prob_30s": 0.29609684645872825
+        },
+        "best": {
+          "taker_round_trip_bps": 5.326277657721629,
+          "maker_round_trip_bps": -0.6919678796161267,
+          "maker_fill_prob_30s": 0.29609684645872825
+        }
+      }
+    },
+    {
+      "venue": "hyperliquid",
+      "symbol": "BTCUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 201450,
+      "spread_bps_median": 0.1265414328286439,
+      "spread_bps_p95": 0.1280729503525208,
+      "latency_ms_median": 331.82859099999996,
+      "latency_ms_p95": 514.9525357499999,
+      "top_notional_usd_median": 427113.9091675,
+      "size_unit": "coin",
+      "n_trades": 710345,
+      "effective_half_spread_bps_median": 0.06388347653879324,
+      "effective_half_spread_bps_mean": 0.4496207374514637,
+      "maker_net_loss_bps_mean_5s": 0.3201881736281621,
+      "maker_drift_loss_bps_mean_5s": 0.4285364533080077,
+      "adverse_selection_bps_mean_5s": 0.3201881736281621,
+      "maker_net_loss_bps_mean_30s": 0.2945042252609424,
+      "maker_drift_loss_bps_mean_30s": 0.40285250494078817,
+      "adverse_selection_bps_mean_30s": 0.2945042252609424,
+      "half_spread_earned_at_fill_bps_mean": 0.10834827967984578,
+      "fill_prob_end_of_queue_5s": 0.09529553679131483,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.23608478373255212,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.323927278993624,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 94414,
+      "quoted_half_spread_bps_median": 0.06405534381705794,
+      "effective_half_spread_exact_bps_median": 0.06400696395767859,
+      "effective_half_spread_exact_bps_mean": 0.2389420057702168,
+      "effective_half_spread_exact_bps_p90": 0.6907942249602793,
+      "share_trades_at_touch": 0.6436863177071197,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 9.477884011540434,
+          "maker_round_trip_bps": 3.589008450521885,
+          "maker_fill_prob_30s": 0.23608478373255212
+        },
+        "best": {
+          "taker_round_trip_bps": 5.277884011540434,
+          "maker_round_trip_bps": -0.010991549478115203,
+          "maker_fill_prob_30s": 0.23608478373255212
+        }
+      }
+    },
+    {
+      "venue": "hyperliquid",
+      "symbol": "ETHUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 197966,
+      "spread_bps_median": 0.40166288434080716,
+      "spread_bps_p95": 0.4065619092143559,
+      "latency_ms_median": 333.02992900000004,
+      "latency_ms_p95": 517.6565322499999,
+      "top_notional_usd_median": 277201.89215749997,
+      "size_unit": "coin",
+      "n_trades": 365207,
+      "effective_half_spread_bps_median": 0.20165762568201476,
+      "effective_half_spread_bps_mean": 0.6575054812984812,
+      "maker_net_loss_bps_mean_5s": 0.27271338139954465,
+      "maker_drift_loss_bps_mean_5s": 0.529528496909425,
+      "adverse_selection_bps_mean_5s": 0.27271338139954465,
+      "maker_net_loss_bps_mean_30s": 0.330731416089087,
+      "maker_drift_loss_bps_mean_30s": 0.5875465315989675,
+      "adverse_selection_bps_mean_30s": 0.330731416089087,
+      "half_spread_earned_at_fill_bps_mean": 0.2568151155098805,
+      "fill_prob_end_of_queue_5s": 0.0672496984318456,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.17439255557470273,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.2512493537825263,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 43811,
+      "quoted_half_spread_bps_median": 0.20242505212426679,
+      "effective_half_spread_exact_bps_median": 0.20226128112369043,
+      "effective_half_spread_exact_bps_mean": 0.45700010127815993,
+      "effective_half_spread_exact_bps_p90": 1.1976526009029578,
+      "share_trades_at_touch": 0.6773641322955423,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 9.91400020255632,
+          "maker_round_trip_bps": 3.661462832178174,
+          "maker_fill_prob_30s": 0.17439255557470273
+        },
+        "best": {
+          "taker_round_trip_bps": 5.71400020255632,
+          "maker_round_trip_bps": 0.061462832178174054,
+          "maker_fill_prob_30s": 0.17439255557470273
+        }
+      }
+    },
+    {
+      "venue": "hyperliquid",
+      "symbol": "SOLUSDT",
+      "dates": [
+        "2026-09-07",
+        "2026-09-08",
+        "2026-09-09"
+      ],
+      "grid_rows": 193974,
+      "spread_bps_median": 0.9637160892392334,
+      "spread_bps_p95": 0.9808248737179055,
+      "latency_ms_median": 333.39153650000003,
+      "latency_ms_p95": 517.8682457,
+      "top_notional_usd_median": 70343.393375,
+      "size_unit": "coin",
+      "n_trades": 174209,
+      "effective_half_spread_bps_median": 0.4845195988187086,
+      "effective_half_spread_bps_mean": 1.0321591490623707,
+      "maker_net_loss_bps_mean_5s": 0.04542041716508801,
+      "maker_drift_loss_bps_mean_5s": 0.5968927438503576,
+      "adverse_selection_bps_mean_5s": 0.04542041716508801,
+      "maker_net_loss_bps_mean_30s": 0.002922320114396054,
+      "maker_drift_loss_bps_mean_30s": 0.5543946467996657,
+      "adverse_selection_bps_mean_30s": 0.002922320114396054,
+      "half_spread_earned_at_fill_bps_mean": 0.5514723266852696,
+      "fill_prob_end_of_queue_5s": 0.05790108564535585,
+      "n_samples_fill_5s": 23212,
+      "fill_prob_end_of_queue_30s": 0.16039117697742547,
+      "n_samples_fill_30s": 23212,
+      "fill_prob_end_of_queue_60s": 0.22712390143029468,
+      "n_samples_fill_60s": 23212,
+      "exact_sample_hours": [
+        12,
+        13
+      ],
+      "exact_n_trades": 19667,
+      "quoted_half_spread_bps_median": 0.48635766742887576,
+      "effective_half_spread_exact_bps_median": 0.4810698994559535,
+      "effective_half_spread_exact_bps_mean": 0.6806316782578277,
+      "effective_half_spread_exact_bps_p90": 1.4487854348771496,
+      "share_trades_at_touch": 0.7123099608481213,
+      "floors": {
+        "vip0": {
+          "taker_round_trip_bps": 10.361263356515655,
+          "maker_round_trip_bps": 3.005844640228792,
+          "maker_fill_prob_30s": 0.16039117697742547
+        },
+        "best": {
+          "taker_round_trip_bps": 6.161263356515655,
+          "maker_round_trip_bps": -0.5941553597712079,
+          "maker_fill_prob_30s": 0.16039117697742547
+        }
+      }
+    }
+  ],
+  "decision": {
+    "microstructure_reopen_vip0": false,
+    "microstructure_reopen_best_tier": true,
+    "microstructure_reopen_best_tier_FINAL_official_only": true,
+    "microstructure_reopen_keys_best_final": [
+      "okx/SOLUSDT/best/maker",
+      "hyperliquid/BTCUSDT/best/maker",
+      "hyperliquid/ETHUSDT/best/maker",
+      "hyperliquid/SOLUSDT/best/maker"
+    ],
+    "microstructure_reopen_keys_best_fallback_non_final": [
+      "binance/SOLUSDT/best/maker"
+    ],
+    "microstructure_reopen_keys_best": [
+      "binance/SOLUSDT/best/maker",
+      "okx/SOLUSDT/best/maker",
+      "hyperliquid/BTCUSDT/best/maker",
+      "hyperliquid/ETHUSDT/best/maker",
+      "hyperliquid/SOLUSDT/best/maker"
+    ],
+    "cross_exchange_reopen": false,
+    "cross_exchange_reopen_keys": [],
+    "conditions": [
+      {
+        "key": "binance/SOLUSDT/best/maker",
+        "tier": "VIP9",
+        "fill_prob_30s_end_of_queue": 0.41073582629674305,
+        "half_spread_earned_bps": 0.4829233291450336,
+        "drift_loss_bps_30s": 0.1743769065274613
+      },
+      {
+        "key": "okx/SOLUSDT/best/maker",
+        "tier": "VIP8",
+        "fill_prob_30s_end_of_queue": 0.29609684645872825,
+        "half_spread_earned_bps": 0.4826108615483343,
+        "drift_loss_bps_30s": 0.38662692174027097
+      },
+      {
+        "key": "hyperliquid/BTCUSDT/best/maker",
+        "tier": "rebate tier 3 + volume tier 6",
+        "fill_prob_30s_end_of_queue": 0.23608478373255212,
+        "half_spread_earned_bps": 0.10834827967984578,
+        "drift_loss_bps_30s": 0.40285250494078817
+      },
+      {
+        "key": "hyperliquid/ETHUSDT/best/maker",
+        "tier": "rebate tier 3 + volume tier 6",
+        "fill_prob_30s_end_of_queue": 0.17439255557470273,
+        "half_spread_earned_bps": 0.2568151155098805,
+        "drift_loss_bps_30s": 0.5875465315989675
+      },
+      {
+        "key": "hyperliquid/SOLUSDT/best/maker",
+        "tier": "rebate tier 3 + volume tier 6",
+        "fill_prob_30s_end_of_queue": 0.16039117697742547,
+        "half_spread_earned_bps": 0.5514723266852696,
+        "drift_loss_bps_30s": 0.5543946467996657
+      }
+    ],
+    "cross_exchange_two_legs": {
+      "binance/BTCUSDT/vip0": {
+        "taker_leg_bps": 5.3845868736998,
+        "maker_leg_bps": 2.5231780690745778,
+        "round_trip_two_legs_bps": 15.815529885548756
+      },
+      "binance/ETHUSDT/vip0": {
+        "taker_leg_bps": 5.458481886492683,
+        "maker_leg_bps": 2.516826124874628,
+        "round_trip_two_legs_bps": 15.950616022734621
+      },
+      "binance/SOLUSDT/vip0": {
+        "taker_leg_bps": 5.6524748037763315,
+        "maker_leg_bps": 1.6914535773824277,
+        "round_trip_two_legs_bps": 14.68785676231752
+      },
+      "okx/BTCUSDT/vip0": {
+        "taker_leg_bps": 5.276108199773843,
+        "maker_leg_bps": 2.5576773867657177,
+        "round_trip_two_legs_bps": 15.667571173079121
+      },
+      "okx/ETHUSDT/vip0": {
+        "taker_leg_bps": 5.357505168074676,
+        "maker_leg_bps": 2.4278338590172384,
+        "round_trip_two_legs_bps": 15.570678054183828
+      },
+      "okx/SOLUSDT/vip0": {
+        "taker_leg_bps": 5.663138828860815,
+        "maker_leg_bps": 1.9040160601919367,
+        "round_trip_two_legs_bps": 15.134309778105504
+      },
+      "hyperliquid/BTCUSDT/vip0": {
+        "taker_leg_bps": 4.738942005770217,
+        "maker_leg_bps": 1.7945042252609424,
+        "round_trip_two_legs_bps": 13.066892462062318
+      },
+      "hyperliquid/ETHUSDT/vip0": {
+        "taker_leg_bps": 4.95700010127816,
+        "maker_leg_bps": 1.830731416089087,
+        "round_trip_two_legs_bps": 13.575463034734494
+      },
+      "hyperliquid/SOLUSDT/vip0": {
+        "taker_leg_bps": 5.180631678257828,
+        "maker_leg_bps": 1.502922320114396,
+        "round_trip_two_legs_bps": 13.367107996744448
+      },
+      "binance/BTCUSDT/best": {
+        "taker_leg_bps": 2.0845868736998003,
+        "maker_leg_bps": 0.523178069074578,
+        "round_trip_two_legs_bps": 5.215529885548756
+      },
+      "binance/ETHUSDT/best": {
+        "taker_leg_bps": 2.158481886492683,
+        "maker_leg_bps": 0.5168261248746279,
+        "round_trip_two_legs_bps": 5.350616022734622
+      },
+      "binance/SOLUSDT/best": {
+        "taker_leg_bps": 2.3524748037763317,
+        "maker_leg_bps": -0.3085464226175723,
+        "round_trip_two_legs_bps": 4.087856762317519
+      },
+      "okx/BTCUSDT/best": {
+        "taker_leg_bps": 2.2761081997738426,
+        "maker_leg_bps": 0.30767738676571754,
+        "round_trip_two_legs_bps": 5.1675711730791205
+      },
+      "okx/ETHUSDT/best": {
+        "taker_leg_bps": 2.3575051680746757,
+        "maker_leg_bps": 0.1778338590172383,
+        "round_trip_two_legs_bps": 5.070678054183828
+      },
+      "okx/SOLUSDT/best": {
+        "taker_leg_bps": 2.6631388288608147,
+        "maker_leg_bps": -0.34598393980806336,
+        "round_trip_two_legs_bps": 4.634309778105503
+      },
+      "hyperliquid/BTCUSDT/best": {
+        "taker_leg_bps": 2.638942005770217,
+        "maker_leg_bps": -0.005495774739057602,
+        "round_trip_two_legs_bps": 5.2668924620623185
+      },
+      "hyperliquid/ETHUSDT/best": {
+        "taker_leg_bps": 2.85700010127816,
+        "maker_leg_bps": 0.030731416089087027,
+        "round_trip_two_legs_bps": 5.775463034734494
+      },
+      "hyperliquid/SOLUSDT/best": {
+        "taker_leg_bps": 3.0806316782578276,
+        "maker_leg_bps": -0.29707767988560396,
+        "round_trip_two_legs_bps": 5.567107996744447
+      }
+    },
+    "lowest_maker_round_trip_best_tier": [
+      [
+        -0.6919678796161267,
+        "okx",
+        "SOLUSDT"
+      ],
+      [
+        -0.6170928452351446,
+        "binance",
+        "SOLUSDT"
+      ],
+      [
+        -0.5941553597712079,
+        "hyperliquid",
+        "SOLUSDT"
+      ]
+    ]
+  },
+  "elapsed_s": 0
+}
