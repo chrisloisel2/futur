@@ -1,0 +1,77 @@
+{
+  "mechanism_id": "event_listing_perp_fade_v1",
+  "hypothesis": "On Binance USDS-M perpetual listings where the perpetual is the first Binance market actually tradable (no Binance spot before launch), the perpetual falls by more than 30 bps gross (median) in excess of BTCUSDT between 15 minutes and 6 hours after the first traded minute, and the mean fade exceeds 3x the taker cost, because the opening is bought by leveraged momentum participants who overshoot and are unwound over the following hours.",
+  "economic_reason": "A new perpetual opens without inventory, hedges or history; the first quarter hour is dominated by leveraged buyers chasing the listing headline and by market makers who must build a book. Once the headline is digested, the overshoot is sold back by holders on other venues and by market makers rebalancing. The payer is the leveraged buyer of the first minutes. The direction (short) is informed by the sealed spot result of H2 (regard seq 7: +202 bps, t 3.25, on assets with a pre-existing spot market); this test is on disjoint events (assets never priced) and a different market (the perpetual itself), executable as a short at VIP0.",
+  "data_sources": [
+    "official_event_tape_binance_frozen_6e957851",
+    "binance_fapi_exchangeInfo_onboardDate",
+    "binance_vision_um_klines_1m",
+    "binance_vision_spot_klines_1m_btcusdt"
+  ],
+  "universe": [
+    "EVENT_TAPE_BINANCE_PERP_FIRST_LISTINGS_FROZEN"
+  ],
+  "timeframe": "1m",
+  "horizon": "6h",
+  "side_mode": "short",
+  "entry_rule": {
+    "event_selection": "frozen universe reports/first_look/event_listing_perp_fade_v1_UNIVERSE.json (174 events): Binance perp listing announcements, asset not priced in H1/H2, no Binance spot before the perp's first traded minute, launch = first Vision 1m bar within [pub-1h, pub+7d], one event per asset",
+    "entry_at": "tradable_start + 15 min",
+    "price": "open of the first 1m bar whose open_time >= entry time (tolerance 5 min, else excluded)",
+    "market": "the new Binance USDS-M perpetual",
+    "benchmark": "BTCUSDT spot same bars",
+    "direction": "short",
+    "min_bps_expected": 30
+  },
+  "exit_rule": {
+    "exit_at": "tradable_start + 6h (open of the first bar >= exit time, tolerance 5 min)",
+    "no_stop": true
+  },
+  "cost_model": {
+    "maker_fee_bps": 2.0,
+    "taker_fee_bps": 5.0,
+    "maker_ratio": 0.0,
+    "spread_bps": 8.0,
+    "slippage_bps": 6.0,
+    "adverse_selection_bps": 0.0,
+    "n_legs": 1,
+    "notes": "VIP0 USDS-M taker (P1.1 manifest, official) on a brand-new book: spread and slippage declared wide (8 + 6), round trip 24 bps; maker sensitivity 18 bps reported, promotion on the taker path only. Wall: net = mean - 24 >= 3 x 24 (mean >= 96 bps)."
+  },
+  "validation_window": {
+    "start": "2022-09-01",
+    "end": "2026-09-10",
+    "nature": "historical first look on the frozen universe; one look, sealed by reports/first_look/event_listing_perp_fade_v1_FREEZE.json"
+  },
+  "placebo_tests": [
+    "synthetic_positive_control_80bps"
+  ],
+  "declustering_rule": {
+    "method": "cluster_by_launch_day",
+    "window_seconds": 86400,
+    "note": "cluster-robust SE by UTC launch day"
+  },
+  "multiplicity_family": "news",
+  "kill_criteria": {
+    "median_gross_bps_lt": 30,
+    "net_lt_cost_x": 3.0,
+    "n_lt": 30
+  },
+  "promotion_criteria": {
+    "n_min": 30,
+    "median_gross_bps_min": 30,
+    "net_over_cost_min": 3.0,
+    "t_min_one_sided_family_bonferroni": 2.3263,
+    "n_eff_min": 30,
+    "top1_share_max": 0.2,
+    "capacity_median_6h_quote_volume_usd_min": 2000000,
+    "verdict_if_all_met": "FORWARD_SEAL_REQUIRED"
+  },
+  "sensitivities": {
+    "horizon": [
+      "60m",
+      "24h"
+    ]
+  },
+  "declared_data_latency_ms": 60000,
+  "notes": "RESEARCH_ONLY. Fifth sealed hypothesis of family news -> threshold_t(5) = 2.3263 one-sided. Harness mechanisms/event_listing_perp_fade_v1/first_look.py pinned in the FREEZE; universe built from metadata only (HEAD requests and first-bar timestamps), no return computed before the sealed look."
+}

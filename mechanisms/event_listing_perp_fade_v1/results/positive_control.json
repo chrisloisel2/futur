@@ -1,0 +1,25 @@
+{
+ "effect_injected": {
+  "n": 600,
+  "mean_bps": 41.01107856236147,
+  "median_bps": 41.85944050177418,
+  "t": 2.7912088336680267,
+  "verdict": "REJECTED_COST_WALL",
+  "reasons": [
+   "net 17.0 (mean 41.0 - cost 24.0) < 3.0 x cost"
+  ]
+ },
+ "null": {
+  "n": 600,
+  "mean_bps": -35.65558810430544,
+  "median_bps": -34.80722616489212,
+  "t": -2.4267148286537368,
+  "verdict": "REJECTED_NO_GROSS",
+  "reasons": [
+   "median gross -34.8 < 30.0"
+  ]
+ },
+ "recovered_bps": 76.66666666666691,
+ "threshold_t": 2.3263478740408408,
+ "passed": true
+}
