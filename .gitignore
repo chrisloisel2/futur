@@ -141,3 +141,8 @@ reports/ops/BACKUP_MANIFEST.json
 # par *.parquet, et il est de toute façon append-only sur disque.
 reports/live_alpha_lab/*/last_attempt.json
 reports/live_alpha_lab/OUTCOME_LABELING_STATE.json
+
+# P2 — tapes de flux : partitions volumineuses et regenerables, jamais dans le depot
+data_lake/events/liquidations/
+data_lake/events/liquidations.jsonl
+data_lake/events/snapshots/

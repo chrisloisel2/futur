@@ -1,0 +1,22 @@
+{
+  "mechanism_id": "forced_liquidation_reaction_v1",
+  "hypothesis": "After a liquidation whose notional exceeds the quoted depth at the touch, the mid price continues in the direction of the forced order for the next thirty seconds by more than 10 bps gross on the same venue, because the liquidation engine keeps hitting the book until the position is closed and other venues have not yet repriced.",
+  "economic_reason": "The payer is the liquidated trader, whose position is closed by the exchange engine at any price within a fixed time budget: the timing and the side are not chosen, only the size is known. Market makers absorbing that flow widen and step back, so the same size moves the mid further than a voluntary order would, and the move is visible in the tape before it is visible on venues where the liquidation did not happen. It is not arbitraged instantly because the engine's remaining size is unknown to everyone but the engine.",
+  "data_sources": ["forced_flow_tape_binance", "forced_flow_tape_bybit", "microstructure_reduced_bbo_binance", "microstructure_reduced_trades_binance"],
+  "universe": ["FORCED_FLOW_TAPE_SYMBOLS_WITH_BBO"],
+  "timeframe": "1s",
+  "horizon": "30s",
+  "side_mode": "long_short",
+  "entry_rule": {"trigger": "liquidation event", "min_notional_usd": 50000, "direction": "same_as_forced_order_side", "entry_at": "recv_ts_local + 1s", "require_bbo_age_ms_lte": 2000},
+  "exit_rule": {"holding_seconds": 30, "exit_at": "mid 30s after entry", "no_stop": true},
+  "cost_model": {"maker_fee_bps": 2.0, "taker_fee_bps": 5.0, "maker_ratio": 0.0, "spread_bps": 2.0, "slippage_bps": 3.0, "adverse_selection_bps": 3.0, "n_legs": 1,
+                 "notes": "Taker at VIP0 (P1: 9.5-11.3 bps round trip measured); the event must clear 3x this or die at gate 2. This is the only reason a 10+ bps gross target is required."},
+  "validation_window": {"start": "2026-09-10", "end": "2026-12-31", "nature": "forward-collected tape only: the family's historical cascade data is burned (Vision backfill, 45-48h lag) and is not used"},
+  "placebo_tests": ["time_shuffle", "symbol_shuffle", "random_entry_same_frequency", "direction_flip"],
+  "declustering_rule": {"method": "complete_link", "window_seconds": 300, "note": "liquidations cluster in cascades; five minutes is ten horizons, a cascade is one bet"},
+  "multiplicity_family": "liquidation",
+  "kill_criteria": {"net_edge_bps_lte": 0, "cost_x2_pf_lte": 1.0, "placebo_percentile_lte": 95, "gross_bps_lt": 10},
+  "promotion_criteria": {"net_edge_bps_min": 5, "profit_factor_min": 1.3, "cost_x2_profit_factor_min": 1.05, "min_independent_events": 300},
+  "declared_data_latency_ms": 1500,
+  "notes": "RESEARCH_ONLY. Written before any return is joined. Known caps declared in the tape: Binance pushes at most one liquidation per symbol per second (notional is a lower bound), depth_10bps_before is null (BBO only). No run before >= 300 independent events with bbo_age_ms >= 0."
+}

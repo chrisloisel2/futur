@@ -1,0 +1,8 @@
+[Unit]
+Description=Futur P2A event tape, every 20 minutes
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=20min
+Persistent=true
+[Install]
+WantedBy=timers.target

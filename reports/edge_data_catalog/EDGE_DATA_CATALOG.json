@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-09-10",
+  "branch": "p2-edge-data-acquisition",
+  "rule": "a dataset that cannot produce 3x cost is rejected before any model; every record carries source, exchange ts, local ts, raw hash",
+  "top3": [
+    {
+      "rank": 1,
+      "dataset": "official_event_tape",
+      "path": "data_lake/events/official_event_tape.jsonl",
+      "records": 7449,
+      "sources": [
+        "binance",
+        "okx",
+        "bybit",
+        "coinbase",
+        "hyperliquid"
+      ],
+      "property": [
+        "forced_constraint",
+        "arrives_before_part_of_market"
+      ],
+      "gross_target_bps": 30,
+      "status": "collected_historical_no_price_join_yet",
+      "mechanism": "mechanisms/event_reaction_v1"
+    },
+    {
+      "rank": 2,
+      "dataset": "forced_flow_liquidation_tape",
+      "path": "data_lake/events/liquidations/",
+      "sources": [
+        "binance",
+        "bybit"
+      ],
+      "property": [
+        "forced_flow",
+        "latency_fixed_vs_dead_cascade_family"
+      ],
+      "gross_target_bps": 10,
+      "status": "collector_validated_service_pending",
+      "known_caps": [
+        "binance 1 liquidation/symbol/second (notional lower bound)",
+        "bybit aggregated per second",
+        "depth_10bps_before null (BBO only)"
+      ],
+      "mechanism": "mechanisms/forced_liquidation_reaction_v1"
+    },
+    {
+      "rank": 3,
+      "dataset": "account_actual_execution",
+      "path": "reports/execution/ACCOUNT_EXECUTION_CAPABILITY.md",
+      "property": [
+        "account_specific"
+      ],
+      "gross_target_bps": null,
+      "status": "readers_implemented_read_only_no_keys",
+      "scripts": [
+        "scripts/fetch_account_fees.py",
+        "scripts/fetch_account_execution.py"
+      ]
+    }
+  ],
+  "next": [
+    "l2_queue_tick_large",
+    "stablecoin_stress_tape"
+  ],
+  "hard_rejection": {
+    "ohlcv_and_candle_features": "138 effective trials, nothing above noise median 2.81",
+    "funding_alone": "level, cross-venue, term structure: nothing",
+    "long_short_ratio_alone": "88 trials, t 2.399 vs 2.955, sealed forward 2028-12-06",
+    "bbo_majors_alone": "P0 cost walls x16 / x12",
+    "basis": "best t 2.49, rho 0.69 with positioning; CME t_net 1.58 < 1.96",
+    "ml_without_new_data": "forbidden by LEGACY_FREEZE"
+  }
+}
