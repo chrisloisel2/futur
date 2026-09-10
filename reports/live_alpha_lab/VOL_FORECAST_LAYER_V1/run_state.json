@@ -1,10 +1,10 @@
 {
   "alpha_id": "VOL_FORECAST_LAYER_V1",
-  "last_run": "2026-09-08T01:22:12.970685+00:00",
+  "last_run": "2026-09-10T01:30:19.925556+00:00",
   "universe_hash": "19aa16aed07f38e9",
   "universe_size": 1,
-  "n_decisions_total": 1333,
-  "n_decisions_new": 1,
+  "n_decisions_total": 1335,
+  "n_decisions_new": 2,
   "mode": "A_SIGNAL_SHADOW",
-  "n_pending_actual_realized_rv": 10
+  "n_pending_actual_realized_rv": 12
 }

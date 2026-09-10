@@ -1,7 +1,7 @@
 {
-  "n_classes": 38,
-  "n_names_folded": 46,
-  "n_signals_kept": 154,
+  "n_classes": 39,
+  "n_names_folded": 48,
+  "n_signals_kept": 155,
   "classes": {
     "ats_z60": [
       "avg_trade_size_z60"
@@ -27,6 +27,10 @@
     ],
     "fund_cum7_x": [
       "funding_cum_7"
+    ],
+    "fund_lvl_x": [
+      "funding_disp",
+      "funding_level"
     ],
     "fund_z60": [
       "funding_z60"
