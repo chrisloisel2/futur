@@ -1,0 +1,167 @@
+{
+ "generated_at_utc": "2026-09-11T22:59:43+00:00",
+ "parser_version": 1,
+ "store": "data/announcement_bodies",
+ "records": 230,
+ "h2": {
+  "urls": 174,
+  "archived": 174,
+  "with_body": 174,
+  "median_body_chars": 2913,
+  "trading_start_ts": 174,
+  "delisting_ts": 0,
+  "suspension_ts": 0,
+  "explicit_time_on_start": 173,
+  "errors": {}
+ },
+ "h3": {
+  "urls": 56,
+  "archived": 56,
+  "with_body": 56,
+  "median_body_chars": 4226,
+  "trading_start_ts": 44,
+  "delisting_ts": 56,
+  "suspension_ts": 23,
+  "explicit_time_on_start": 44,
+  "errors": {}
+ },
+ "announced_vs_first_bar": {
+  "events_compared": 174,
+  "within_5_min": 162,
+  "largest_gaps": [
+   {
+    "symbol": "DOLOUSDT",
+    "delta_min": 870,
+    "announced": "2025-04-30T12:30:00+00:00",
+    "first_bar": "2025-05-01T03:00:00+00:00"
+   },
+   {
+    "symbol": "GPROUSDT",
+    "delta_min": 825,
+    "announced": "2026-09-03T00:00:00+00:00",
+    "first_bar": "2026-09-03T13:45:00+00:00"
+   },
+   {
+    "symbol": "LUNA2USDT",
+    "delta_min": 180,
+    "announced": "2022-09-10T00:00:00+00:00",
+    "first_bar": "2022-09-10T03:00:00+00:00"
+   },
+   {
+    "symbol": "ARKUSDT",
+    "delta_min": 93,
+    "announced": "2023-09-19T14:30:00+00:00",
+    "first_bar": "2023-09-19T16:03:00+00:00"
+   },
+   {
+    "symbol": "SPXUSDT",
+    "delta_min": 45,
+    "announced": "2024-12-10T12:00:00+00:00",
+    "first_bar": "2024-12-10T12:45:00+00:00"
+   },
+   {
+    "symbol": "SWARMSUSDT",
+    "delta_min": 45,
+    "announced": "2025-01-07T11:30:00+00:00",
+    "first_bar": "2025-01-07T12:15:00+00:00"
+   },
+   {
+    "symbol": "SWELLUSDT",
+    "delta_min": 30,
+    "announced": "2024-11-08T15:30:00+00:00",
+    "first_bar": "2024-11-08T16:00:00+00:00"
+   },
+   {
+    "symbol": "KMNOUSDT",
+    "delta_min": 30,
+    "announced": "2024-12-20T18:30:00+00:00",
+    "first_bar": "2024-12-20T19:00:00+00:00"
+   },
+   {
+    "symbol": "AI16ZUSDT",
+    "delta_min": 15,
+    "announced": "2025-01-02T13:30:00+00:00",
+    "first_bar": "2025-01-02T13:45:00+00:00"
+   },
+   {
+    "symbol": "VELVETUSDT",
+    "delta_min": 15,
+    "announced": "2025-07-15T09:00:00+00:00",
+    "first_bar": "2025-07-15T09:15:00+00:00"
+   },
+   {
+    "symbol": "GUAUSDT",
+    "delta_min": 15,
+    "announced": "2025-12-21T10:00:00+00:00",
+    "first_bar": "2025-12-21T10:15:00+00:00"
+   },
+   {
+    "symbol": "BZUSDT",
+    "delta_min": 10,
+    "announced": "2026-04-01T09:00:00+00:00",
+    "first_bar": "2026-04-01T09:10:00+00:00"
+   }
+  ]
+ },
+ "no_alpha_test": true,
+ "no_price_join": true,
+ "matrix_summary": {
+  "n_events": 174,
+  "buckets_now": {
+   "partial": 5,
+   "near_usable": 169
+  },
+  "buckets_after_free": {
+   "partial": 5,
+   "clean": 85,
+   "near_usable": 84
+  },
+  "score_now": {
+   "min": 66,
+   "median": 84,
+   "max": 89
+  },
+  "score_after_free": {
+   "min": 66,
+   "median": 87,
+   "max": 92
+  },
+  "clean_after_free_and_key": 87,
+  "near_usable_or_better_after_free": 169,
+  "dominant_missing_now": {
+   "actual_fee_present": 174,
+   "capacity_present": 174,
+   "other_venue_existed_before": 84,
+   "first_orderbook_ts_present": 8,
+   "l2_t0_t6h_present": 8,
+   "funding_present": 3,
+   "first_index_ts_present": 1
+  },
+  "missing_p0_now": {
+   "first_index_ts_present": 1
+  },
+  "actions": {
+   "buy": 8,
+   "wait": 165,
+   "collect": 1
+  },
+  "backfill_source": {
+   "paid": 5,
+   "free": 169
+  },
+  "vision_missing": {
+   "bookDepth": 8,
+   "indexPriceKlines": 30,
+   "premiumIndexKlines": 7,
+   "fundingRate": 3
+  },
+  "other_venue_known": 90,
+  "by_year": {
+   "2022": 1,
+   "2023": 11,
+   "2024": 26,
+   "2025": 85,
+   "2026": 51
+  }
+ }
+}
