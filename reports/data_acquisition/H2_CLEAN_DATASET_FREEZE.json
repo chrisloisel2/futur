@@ -1,0 +1,4922 @@
+{
+ "frozen_at_utc": "2026-09-11T23:15:17+00:00",
+ "git_commit": "1f55ec3f03b2bdd2459cd66c70867a8993bf373e",
+ "min_clean_threshold": 80,
+ "require_actual_fees": true,
+ "inputs": {
+  "universe": "reports/first_look/event_listing_perp_fade_v1_UNIVERSE.json",
+  "vision_manifests": 174,
+  "bodies": 230,
+  "precedence": 174,
+  "coverage_rows": 174,
+  "execution_report": true
+ },
+ "execution": {
+  "actual_taker_fee_bps": null,
+  "actual_maker_fee_bps": null,
+  "actual_fee_known": false,
+  "cost_assumptions": {
+   "H2": "unknown",
+   "H3": "unknown"
+  },
+  "remaining_theoretical": [
+   "every account figure: no read-only API key in the environment (BINANCE_READONLY_API_KEY or BINANCE_API_KEY)",
+   "spread and slippage in both cost chains are the values declared in the specs; P6 depth archives can measure them, this phase does not",
+   "borrow availability and borrow cost for spot delisting shorts (sapi margin endpoints, key required)"
+  ],
+  "report_present": true
+ },
+ "summary": {
+  "n": 174,
+  "by_class": {
+   "BAD_TIMESTAMP": 8,
+   "PROVIDER_NEEDED": 7,
+   "INSUFFICIENT_EXECUTION_DATA": 159
+  },
+  "eligible": 0,
+  "blocked": 174,
+  "dominant_blocker": "INSUFFICIENT_EXECUTION_DATA"
+ },
+ "projection": {
+  "if_fee_and_capacity_resolved": {
+   "n": 174,
+   "by_class": {
+    "BAD_TIMESTAMP": 8,
+    "PROVIDER_NEEDED": 7,
+    "UNKNOWN_PRECEDENCE": 30,
+    "OTHER_VENUE_FIRST": 123,
+    "TRUE_BINANCE_PERP_FIRST": 6
+   },
+   "eligible": 129,
+   "blocked": 45,
+   "dominant_blocker": "UNKNOWN_PRECEDENCE"
+  },
+  "structural_classes": {
+   "OTHER_VENUE_FIRST": 123,
+   "TRUE_BINANCE_PERP_FIRST": 6
+  }
+ },
+ "decision": {
+  "decision": "NO_TEST",
+  "clean_events": 0,
+  "threshold": 80,
+  "blockers": [
+   "only 0 clean events (threshold 80)",
+   "execution cost is unknown: no read-only API key, so the fee actually charged on this account was never read"
+  ],
+  "dominant_blocker": "INSUFFICIENT_EXECUTION_DATA",
+  "would_be_clean_if_unblocked": 129,
+  "budget_reopen_requested": false
+ },
+ "eligible_event_ids": [],
+ "excluded": [
+  {
+   "event_id": "e3fdaf3c4fc6fe49ad83a2b2",
+   "symbol": "LUNA2USDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +180 min"
+   ]
+  },
+  {
+   "event_id": "27b63ec2126b71570873365d",
+   "symbol": "BLURUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "771eb47c3fcc81c52c724335",
+   "symbol": "1000PEPEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8f9346145d6137459b8f23c9",
+   "symbol": "ARKUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +93 min"
+   ]
+  },
+  {
+   "event_id": "6c20de43f56e37f8ca8be6d0",
+   "symbol": "BIGTIMEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "525708299058a330fb701cef",
+   "symbol": "ORBSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b6b050a77e7ba560ac45accb",
+   "symbol": "BSVUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0203a2e2313bf3decb1ca01a",
+   "symbol": "TOKENUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3c3028d3750531b66a53cf7c",
+   "symbol": "KASUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b4883000a6fb5da32096f7b6",
+   "symbol": "ETHWUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "bd02f81f806b61964ad28fa1",
+   "symbol": "1000SATSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8c5cf6e313e24b24e0ae548e",
+   "symbol": "1000RATSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "7f4b196e58663442894e9aef",
+   "symbol": "WIFUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "7ae90f464d9d3ad74c14c360",
+   "symbol": "ONDOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "d588cda01954d01fe6318c95",
+   "symbol": "ZETAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3996d75d68d7fe9f1b79b94a",
+   "symbol": "TONUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "16d2301813546604bccc72c1",
+   "symbol": "MYROUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "f43f9a7538849c554a17a309",
+   "symbol": "BOMEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "37579a9fb49ede269bf8f628",
+   "symbol": "MEWUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "4504cb146c6018bec3d3d9ec",
+   "symbol": "BRETTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "9101807195e525fff9bdf472",
+   "symbol": "NEIROETHUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "e0a50e3cea619eac2465defc",
+   "symbol": "UXLINKUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ad82dcce37e5348b048e282d",
+   "symbol": "1000CATUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "700d4e731095fcaedaac26c5",
+   "symbol": "GOATUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c2b91bfbec0ed43aabcdb74f",
+   "symbol": "MOODENGUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a95a9d746860bc6de0bd1040",
+   "symbol": "SAFEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "2bf17446b8052a2980d08b2c",
+   "symbol": "PONKEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "125e6fdf0008d975a343c942",
+   "symbol": "1000000MOGUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "aab29a722c1f1f70858d4380",
+   "symbol": "SWELLUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +30 min"
+   ]
+  },
+  {
+   "event_id": "de0cd69adb47be97865353eb",
+   "symbol": "HIPPOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a145fa44534b876ab3762b4b",
+   "symbol": "DEGENUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "551e7c68db4a708957037745",
+   "symbol": "BANUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "e4c2c21b562ca8d7a3bc69f4",
+   "symbol": "SLERFUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "5b96299e3ac21d97d9913488",
+   "symbol": "1000WHYUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "4d8c383224e3a76f6fc58997",
+   "symbol": "MORPHOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a7150d1cd6602cc674f27ab1",
+   "symbol": "SPXUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +45 min"
+   ]
+  },
+  {
+   "event_id": "99b90c668ff8d07f9a62c71c",
+   "symbol": "MOCAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ada0dad89ba8db72db34e5e1",
+   "symbol": "KMNOUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +30 min"
+   ]
+  },
+  {
+   "event_id": "bf08b1b7b1db53a4adabf00b",
+   "symbol": "AI16ZUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "f736f1ca447ec854a82c39e1",
+   "symbol": "SWARMSUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +45 min"
+   ]
+  },
+  {
+   "event_id": "98bb20f584caad1487773629",
+   "symbol": "SONICUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "e392222f24c675106459b5d8",
+   "symbol": "ARCUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3fb6ffd8390e7119ddfa4168",
+   "symbol": "TRUMPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0e44ae278bb97bca471915f5",
+   "symbol": "MELANIAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "86c2b231d2e88deccfa3bbeb",
+   "symbol": "VINEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "4c12d6c81d3645194cab5045",
+   "symbol": "VVVUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "07816b67a3eae3aa4efe314e",
+   "symbol": "B3USDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b314ec3e632f7dbb1c28286c",
+   "symbol": "IPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "9e036098bc3802c199459a35",
+   "symbol": "GPSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a877b9f75fd6bd4c38ca74e9",
+   "symbol": "BMTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "5f11d51c9603a090e9575f24",
+   "symbol": "BRUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "2a65ffaad5c0eaf54699e7ff",
+   "symbol": "JELLYJELLYUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b9f87ac1de1e70c5257f0432",
+   "symbol": "WALUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "43408296c17706df4a86d951",
+   "symbol": "ATHUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "21b9a77d7a9b2edd78dfed6d",
+   "symbol": "BABYUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "15c018b7135b044e02a49b73",
+   "symbol": "PROMPTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "4e5a0baaefd2c0a105b0deaf",
+   "symbol": "XCNUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c1986e1b2f5a7b124976006e",
+   "symbol": "INITUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c72a30dd9ceee1d5a3a54cd4",
+   "symbol": "DOLOUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +870 min"
+   ]
+  },
+  {
+   "event_id": "6928291d20158e0e89802202",
+   "symbol": "AGTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a5e6b9745184ea43b217f98e",
+   "symbol": "BUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "13940e90ab91469eb9b664f4",
+   "symbol": "SOONUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "7325b4ba98bea4bbe1ca4641",
+   "symbol": "MERLUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "af59f00dfd69336d12ec1c53",
+   "symbol": "HYPEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "08023a4da5978961cbb0404e",
+   "symbol": "PUFFERUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "f0fcaaf1a618875ba94d873f",
+   "symbol": "1000000BOBUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "67e2964924cdb0798db5f65b",
+   "symbol": "LAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "46bb94c3367a45d68af8fa6c",
+   "symbol": "TAIKOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8bd8e43b5c14441cddf6f1c6",
+   "symbol": "MYXUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "f7b0c338e560be7ce661550d",
+   "symbol": "NEWTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "328be11039a0daaa62c9402d",
+   "symbol": "OLUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "082d13846fce53f88460dd42",
+   "symbol": "BULLAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8e2b353b5b359cd0f03050b7",
+   "symbol": "MUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "e1946a92d433af36002d432b",
+   "symbol": "CROSSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "9fd6bbd5031f385d60646936",
+   "symbol": "VELVETUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "d6e5c362b920f0f1eeebe797",
+   "symbol": "ZORAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "53d80c0d3c0486a54c69473e",
+   "symbol": "ZRCUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "6cc0825d4097ef67aec30426",
+   "symbol": "YALAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "d434dc6ba47a473e1c50859d",
+   "symbol": "AIOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "eb9dec0bc5cac2d2255f22ad",
+   "symbol": "USELESSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3ab4b81b6217c55a265126f3",
+   "symbol": "CUDISUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ad7fac75381979219a635a4c",
+   "symbol": "XPLUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "248014c02180967fd21952b9",
+   "symbol": "SOMIUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "35baa8d370bba89af695913f",
+   "symbol": "BASUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "87d2cc62a3d3cc1511a49aa7",
+   "symbol": "LINEAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0e15ffddde62fa7a295cbb6d",
+   "symbol": "ARIAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "4a229f7de4c92b2cf15eae11",
+   "symbol": "FLOCKUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "1e02599c7e7dff4bc7bae2db",
+   "symbol": "XPINUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "7e52b13d33a0a106da32a993",
+   "symbol": "TOSHIUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "85a8379a95e4b088606b6ca3",
+   "symbol": "0GUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "354d589ae37b402ecc4e73f7",
+   "symbol": "ASTERUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c0f0baa61eef4a5603702a44",
+   "symbol": "FLUIDUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ccb44efc1570ecea59ac4e78",
+   "symbol": "AKEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b5f18715adc950cb700816f1",
+   "symbol": "4USDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c08091058dd948d22d55c054",
+   "symbol": "GIGGLEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0dc977ad3cfa07b0ca5cb79a",
+   "symbol": "MONUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "fc7c14a24b9efda762f5ebe6",
+   "symbol": "YBUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "373ad2eaf2fe234af0752a45",
+   "symbol": "METUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "cd6794154b527f204b81a81c",
+   "symbol": "LABUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a1d2ccd3fc62843b613f65d4",
+   "symbol": "ATUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "836da07cfc7720b44b314d9b",
+   "symbol": "KITEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8943396b63414fd5204926ea",
+   "symbol": "CCUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ff2c05cb1e517e68b481697b",
+   "symbol": "STABLEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "28bdb9c69e08176d20be77eb",
+   "symbol": "CLANKERUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "02db53cfca1b429e8af53a04",
+   "symbol": "SENTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "362be738f0907a9bd73fb3ac",
+   "symbol": "BOBUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "16eae9c262c564b7f77e1c46",
+   "symbol": "IRYSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "1450c463b79e24c601a172ff",
+   "symbol": "RLSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c9fd590ebdf9b49aef7a4c3c",
+   "symbol": "POWERUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a24c655fa10e4404e78232ae",
+   "symbol": "WETUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b6bf7597d3931b0f488abc54",
+   "symbol": "NIGHTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3277a7bb4fc7bf6a8a7c77f4",
+   "symbol": "USUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "41ae58dd0b0e0e0417f6e585",
+   "symbol": "RAVEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "d36f75c5038388444182fb27",
+   "symbol": "GUAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0c7145de6321e6291d22c352",
+   "symbol": "LITUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3be3d929d343489f969e5605",
+   "symbol": "BREVUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b10b4d2e924f842ca4c3d42f",
+   "symbol": "COLLECTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "518fadb11e8948d1644b8898",
+   "symbol": "XAGUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "763c46556515bd213eeffec5",
+   "symbol": "ZAMAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "701f9793a5920437c54aab4c",
+   "symbol": "FOGOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "1e56bc144c18fcd108d7e157",
+   "symbol": "SPORTFUNUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3e941568d54f2776e7028bbd",
+   "symbol": "AIAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "5abc76df6e2d2a1b0c63b0a0",
+   "symbol": "ACUUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "5ee5dcd51b181f0ba234947b",
+   "symbol": "ELSAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ee0ff8e2e0adb92d34d183f6",
+   "symbol": "SKRUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "2df79d1ad5aba75fcb77f422",
+   "symbol": "SPACEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "aeb53715c4b9a92a0aaee948",
+   "symbol": "BIRBUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c5dff8660134fc9e4ef8fb2d",
+   "symbol": "XPTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "62ac4b9ad3859d53823e2e50",
+   "symbol": "MEGAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8ff1068f61ea68e265c0dc5d",
+   "symbol": "INXUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8580bf0f45e76926710e6d66",
+   "symbol": "TRIAUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "39e53c142c32db3562f9c32a",
+   "symbol": "ESPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "f3a8cfdbd0cf490022078019",
+   "symbol": "AZTECUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "b58ff253b57614c58da55ec0",
+   "symbol": "OPNUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ffe0e6ccd0ef9616e1269051",
+   "symbol": "ROBOUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "3e5ba01473f71c2c24066d67",
+   "symbol": "KATUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "a8187d0cf993805cfd2c093e",
+   "symbol": "COPPERUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "552172d058d82a30ea33b8c5",
+   "symbol": "EDGEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "33d1502c53913a216cd2cd0b",
+   "symbol": "BSBUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "26ab833409026c6833e35671",
+   "symbol": "BASEDUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "2db85afffb39035b368afd91",
+   "symbol": "BZUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "522a952ef9eba0157e549954",
+   "symbol": "PRLUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "6c0f1dc85db6d011c883ed91",
+   "symbol": "GENIUSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "0c2309bd4c1d478508f92129",
+   "symbol": "CHIPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ccb83aab3b96f19dedf813f2",
+   "symbol": "OPGUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "aa14e742e8cfb1efff510dc4",
+   "symbol": "AIGENSYNUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "742251cb77d37722f13a482f",
+   "symbol": "BILLUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "56f2f342b29eec0adafc21d9",
+   "symbol": "PHAROSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "976b92e9c98390bef992d712",
+   "symbol": "OPENAIUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "572cd83f5720bcd5d1c2187c",
+   "symbol": "CTRUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "71e4da15c6c4a9bb54da9834",
+   "symbol": "QNTXUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "03ba3fbc3b60d01293ced6b8",
+   "symbol": "SLXUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "d913e3b032076ea0acc1c625",
+   "symbol": "ANTHROPICUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "baf507f943c3234dd3349b17",
+   "symbol": "ZESTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ace902e11e083aed89453fd5",
+   "symbol": "ARXUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "dda6f21f5273653ecc988770",
+   "symbol": "OUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "c5b864cf4dd397c1d6ef3939",
+   "symbol": "CAPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "230ce5a85a2127398ae882db",
+   "symbol": "DATAIPUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "ebcb069f413d87e3ef9e100d",
+   "symbol": "SKHYUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "da994df5057188e2584557f8",
+   "symbol": "POPMARTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "236fa99f5592a4897da47982",
+   "symbol": "GRVTUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "43f2c0248b765f05f8838aac",
+   "symbol": "GIGADEVUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "59e06472fc86d6593e4f1ec7",
+   "symbol": "DOSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "8e5439011d436434070c3559",
+   "symbol": "UNITREEUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "52458484e807a05d5e6a8195",
+   "symbol": "MARSCOINUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  },
+  {
+   "event_id": "9d284c44285f781ea3153bc1",
+   "symbol": "GPROUSDT",
+   "classification": "BAD_TIMESTAMP",
+   "reasons": [
+    "announced time and first traded bar disagree by +825 min"
+   ]
+  },
+  {
+   "event_id": "266efa4370e672325fa7860d",
+   "symbol": "PONSUSDT",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ]
+  }
+ ],
+ "provider_needed": [
+  {
+   "event_id": "50ffc09f83fd6ca0dca09d81",
+   "symbol": "BANKUSDT",
+   "missing": [
+    "bookDepth"
+   ]
+  },
+  {
+   "event_id": "42c04e023e48f228ac3ef798",
+   "symbol": "DEEPUSDT",
+   "missing": [
+    "bookDepth"
+   ]
+  },
+  {
+   "event_id": "c7564458f482113c1dd5003a",
+   "symbol": "MEMEFIUSDT",
+   "missing": [
+    "bookDepth"
+   ]
+  },
+  {
+   "event_id": "7a8d8a45af279b70fdcddf83",
+   "symbol": "SXTUSDT",
+   "missing": [
+    "bookDepth",
+    "indexPriceKlines"
+   ]
+  },
+  {
+   "event_id": "8edc2be39041ef3ca1dac762",
+   "symbol": "B2USDT",
+   "missing": [
+    "bookDepth"
+   ]
+  },
+  {
+   "event_id": "e76d044fd3d672f736245075",
+   "symbol": "ZKJUSDT",
+   "missing": [
+    "bookDepth"
+   ]
+  },
+  {
+   "event_id": "1a859f85a0722b921770c970",
+   "symbol": "SPCXUSDT",
+   "missing": [
+    "indexPriceKlines",
+    "premiumIndexKlines"
+   ]
+  }
+ ],
+ "source_manifests": {
+  "e3fdaf3c4fc6fe49ad83a2b2": {
+   "vision_manifest_sha256": "4276e96b866c8e447e54bb949f25f1f41caead4caa71f192c7b63b6ebd745299",
+   "body_raw_hash": "ea748211f553f61086a5d31a777f3497c4ebe5ccd0f7f485cbc6eda02437086d"
+  },
+  "27b63ec2126b71570873365d": {
+   "vision_manifest_sha256": "20ac7083cac08b70c95f4b63da0b9a6591f8c8b62d17fa27076177ac9f665680",
+   "body_raw_hash": "f90b0afff635b6f5abf0f41f4e434d95a2bf8dc10101aad6c9d19d668a60de07"
+  },
+  "771eb47c3fcc81c52c724335": {
+   "vision_manifest_sha256": "60990a817b3f33d62939fdbae7e9d7d187545c23e6b791ef5793b76b1820e6db",
+   "body_raw_hash": "be6af0087c63d50a55ecdd146f245756efaadebc30ce395f12f23f5fc3c4bd1b"
+  },
+  "8f9346145d6137459b8f23c9": {
+   "vision_manifest_sha256": "f79acc70e09ade435b82912c4bb64ff1a59ebcaab242ca688e362062581d5374",
+   "body_raw_hash": "efb21249ff2c76ce24e9b69ae67e8057d91f54e606ebf0a5dc02effeb237adf5"
+  },
+  "6c20de43f56e37f8ca8be6d0": {
+   "vision_manifest_sha256": "a2454a2070cc4399f3f35a365cc54da0f0c287c32b344085c69a55caace1c1a3",
+   "body_raw_hash": "c8778539964d55539a71d4320c0743368630a04586b0d0c36d42f081b1d0eca4"
+  },
+  "525708299058a330fb701cef": {
+   "vision_manifest_sha256": "beda7a74dec4aae357c565bdbd4b398101f9d3d01f2d7e303afeeb3fc1c17b4d",
+   "body_raw_hash": "6887c3e71a0d707ce4c5a96bf0a78aad34d810978bd76020ccd75ed11d5ab2e4"
+  },
+  "b6b050a77e7ba560ac45accb": {
+   "vision_manifest_sha256": "aadba914440279461ba6bea79b91938862d5ce4526eac800364c4261fd8c7972",
+   "body_raw_hash": "e1ec6a98a13fe3cbc56421ec9d2464d8fbadb722482f9eced64cd3538e02b8fb"
+  },
+  "0203a2e2313bf3decb1ca01a": {
+   "vision_manifest_sha256": "8801943b28c3561b94837f405ea345f7b35825831cd6934e47c4960f0a0ecffc",
+   "body_raw_hash": "f8c72182df125be7b8167a5f9a83a407f394b169c61b977d73aec741b3fd1523"
+  },
+  "3c3028d3750531b66a53cf7c": {
+   "vision_manifest_sha256": "b49bbd586109e09d861bddf58ea84ea26bf569d7869d35356e54be9aef37ccd7",
+   "body_raw_hash": "1a977aa438f3058e385b818ab710f2ab0217972d3b44a10c375f4f4d0ca1ca51"
+  },
+  "b4883000a6fb5da32096f7b6": {
+   "vision_manifest_sha256": "e37274a43d33dec03fbc3a75a1e982ea7567604e6ca7c04e6f8194678e3d8bdc",
+   "body_raw_hash": "af1af7a4277ac87131322c9828c8c9d062c3dda44730dd7ceacb7c19fabb401b"
+  },
+  "bd02f81f806b61964ad28fa1": {
+   "vision_manifest_sha256": "6abe9782ab2456910b93e847d1bfbb68e1568412381b938a0cd3fdef0427a072",
+   "body_raw_hash": "150a21de5af158d00d51fdbb4e6b98497ef27fde932e1d97dd8c215738a149ad"
+  },
+  "8c5cf6e313e24b24e0ae548e": {
+   "vision_manifest_sha256": "d7e5b43025276a7cf1ce042533395fb9246ced9bf1edc10a15af1b54a5675233",
+   "body_raw_hash": "4f8ecc3601b0beec7c2027b26bed0d68bdd786a66f7c6cb27137eca44548322f"
+  },
+  "7f4b196e58663442894e9aef": {
+   "vision_manifest_sha256": "e15d58cebfc37b9bd6d0798dc0db453098f3448bffa5eb8787877998b34160c8",
+   "body_raw_hash": "15c448d2ce0f4c1bde2ae360975a4a560712e9ab1bef437b129ff9e29bb9d51c"
+  },
+  "7ae90f464d9d3ad74c14c360": {
+   "vision_manifest_sha256": "c33ebd09b98e2278c3c5631d884050365fa045cf4f62d5fb0aeaae671ceee572",
+   "body_raw_hash": "d659d940f7f81be684e193cae5ff764710e0e270e2e836be7e4f4533f76799a3"
+  },
+  "d588cda01954d01fe6318c95": {
+   "vision_manifest_sha256": "d77791ec1054a78a5832ffc080ebf50af802a5871419503e9b16c87b9e86e579",
+   "body_raw_hash": "35c8255d9405ef050b7afdf799a1a476f74e4ae62fd2ce2603eb8faa1f73a4cb"
+  },
+  "3996d75d68d7fe9f1b79b94a": {
+   "vision_manifest_sha256": "bacad56a10426fd4d36ef9f6e50a6bd5157f6cf5c7deb6a052f8400600df5782",
+   "body_raw_hash": "890d1a3c5b9e3f51981dd790a080ce993e64c0f910cf137df2c06322ea57e7a4"
+  },
+  "16d2301813546604bccc72c1": {
+   "vision_manifest_sha256": "69863b1827160ebe07e4209e4780244b773608c646c32d12f65a612c13239084",
+   "body_raw_hash": "9a04c625176289249915fd7073fbd7fcf75c78943fb92c44d99b779f60c52714"
+  },
+  "f43f9a7538849c554a17a309": {
+   "vision_manifest_sha256": "45835589e5c77627bcb984c67ed10864e9a2257f566ceec0b1a33fa375ea11c1",
+   "body_raw_hash": "3a6bfda259185c5c64e326c194182991362558df680fba19e2f91eca4ae35ddf"
+  },
+  "37579a9fb49ede269bf8f628": {
+   "vision_manifest_sha256": "b5751e9cc2a0b8243929579282653ddeea7267f11c86446acb6da49a6a965652",
+   "body_raw_hash": "80f11a5b6c5d4a22292437337dc01ad19dc9142484d144f150fa02f6508b6485"
+  },
+  "4504cb146c6018bec3d3d9ec": {
+   "vision_manifest_sha256": "3976b842835cd7e53d31d4a12d541bea081a3cc347c67796f4b70b13306df1e3",
+   "body_raw_hash": "8292c5e229b0900c6c16fa8365c011fe1e761ea114d876364a35f9990fcb9402"
+  },
+  "9101807195e525fff9bdf472": {
+   "vision_manifest_sha256": "8fad75685650180df109420f7f0747cd879abd294059d6a392caf8b0b62a7a44",
+   "body_raw_hash": "2e8fe1bacd67ff44a940108f8c01494b15a716986d22338d5042964c057d20f8"
+  },
+  "e0a50e3cea619eac2465defc": {
+   "vision_manifest_sha256": "1c8ba1b4100b102628cc2fff0b36f1ac3ffbe677ba08a8796486c352b8d29f50",
+   "body_raw_hash": "5b5f3a2d0f6097b1f6f29a3c419e3303eeb99d8229b7f80d34f5b95e15dcb5e7"
+  },
+  "ad82dcce37e5348b048e282d": {
+   "vision_manifest_sha256": "643f5c0b2406e5eecd7ba20f01cdd726e641f53b315a00e46ef626f82a270161",
+   "body_raw_hash": "b5af5d0cb71cb81245ad40ebcdc88f9c7ab0f4d24ba4a215f3460bf9a34ef08f"
+  },
+  "700d4e731095fcaedaac26c5": {
+   "vision_manifest_sha256": "d25f87be555cf1dbb71f134f086907e323678235be6754027dcf7c808da9180b",
+   "body_raw_hash": "b6a610ddbdcb86ac0c352a11b4d995933381770afd8ad2de3e3aafdda2c20802"
+  },
+  "c2b91bfbec0ed43aabcdb74f": {
+   "vision_manifest_sha256": "fd5fae092098fcfcaed7e03af68ec1cdd091144013d25c0c16e92130fb67245a",
+   "body_raw_hash": "c267311d111020bb7961f3b1d38184fb0e9cf64647c02620798dca435d6dadc6"
+  },
+  "a95a9d746860bc6de0bd1040": {
+   "vision_manifest_sha256": "43bdb8bbaa1b6e3ad5f3d282c4035725c1f8208aa5d92b280d489544915163fd",
+   "body_raw_hash": "7b18675107bfe015d55becd537a5f34fdc8e4a1cce41043f8413b19192dfff85"
+  },
+  "2bf17446b8052a2980d08b2c": {
+   "vision_manifest_sha256": "6b3229fb444baaf343a528e0890743922bbc06195b687b5cdc5395d98426873e",
+   "body_raw_hash": "44077c400927dfe0926eac009cae5b424e72ba37c00483d16b5b6b1965e0630a"
+  },
+  "125e6fdf0008d975a343c942": {
+   "vision_manifest_sha256": "dbd580d652b801eb6b91bbfe8e71c1421d7fa89f2a05ef4f805342dbf6493683",
+   "body_raw_hash": "6fc1305303d2c65c3fb3df9ce73832d0f83c0fb108012c7fdc070ce535859d54"
+  },
+  "aab29a722c1f1f70858d4380": {
+   "vision_manifest_sha256": "7eae2647bdd2ff4207a30f4b5d73d8a580b8a05be1a26c941c42c5116372dbaf",
+   "body_raw_hash": "be19b195097456790e3987e68d77d77f0fe86a5ab316488a445b056e18adc8ab"
+  },
+  "de0cd69adb47be97865353eb": {
+   "vision_manifest_sha256": "9e5d46f4ed76f427f8d458f4f0bb09b418202b23bbb9f24ed47b7a36417d890c",
+   "body_raw_hash": "67376c07517ca5be56807ea6c66490596518e306373dd7a0ba66d817e1410f01"
+  },
+  "a145fa44534b876ab3762b4b": {
+   "vision_manifest_sha256": "56d51e18128d46cc796d13c81548fd3d004dc38ad3d9241a6cffa6384af03f04",
+   "body_raw_hash": "3aa29769e8904b1948946264462d2eb7a6d4082246d1b5b850a153f19ab267d0"
+  },
+  "551e7c68db4a708957037745": {
+   "vision_manifest_sha256": "e4de936bf6940429796eede854f3453162b418c5a402ee60fc41f3ce91f3f7a5",
+   "body_raw_hash": "9c483e69f8d8fa804986288e25f5f51569a271963aba1ab3ddb4a78525a1d852"
+  },
+  "e4c2c21b562ca8d7a3bc69f4": {
+   "vision_manifest_sha256": "b2d73a220347bf0a1eb0e873e6acaf64ab9a6f092bd7fde6d1e15c0e940007e9",
+   "body_raw_hash": "e99129c9ab6b6b98cd15cee606e793d435984ef302b5abea6d06df9ba8ec9812"
+  },
+  "5b96299e3ac21d97d9913488": {
+   "vision_manifest_sha256": "b44c9bad9341ace283cb19e0c79378b237633b5460bdc58ce91d513a0074ea9e",
+   "body_raw_hash": "73b8b741e5e800e12da9e046c03b43355d1b7535c263551f42a4901c9e343ca7"
+  },
+  "4d8c383224e3a76f6fc58997": {
+   "vision_manifest_sha256": "8e0ff90cbb62c726ea758cfcba66cb38dabeb67a56e537d41431cee76abb252e",
+   "body_raw_hash": "b0b977afec9ac65eaa11ebfd10cdaa4f0f8e4a364b4babc71850cd8c11ced584"
+  },
+  "a7150d1cd6602cc674f27ab1": {
+   "vision_manifest_sha256": "5a09ff48114f8701185a25935e992caf1e2e0910dfb567f770dea95a2d6f48db",
+   "body_raw_hash": "9c58c5a22ad765ce1d3d8bdd8e9c02d4ff7a34dbef8d467147d487b1eef2643e"
+  },
+  "99b90c668ff8d07f9a62c71c": {
+   "vision_manifest_sha256": "50a5d79b953616e8d80be1521ffd0232f8f54d797739536cd01d4aa791559f10",
+   "body_raw_hash": "7099515599ff50af87440ab184a01a0cb4b6a9261f63ab91513efac7e9c8675d"
+  },
+  "ada0dad89ba8db72db34e5e1": {
+   "vision_manifest_sha256": "b027e2f862215521baefd85a1b973b3f5cbc69c4e3ee98381f54ef42b3fa283f",
+   "body_raw_hash": "b6494fec9b0d9acfb424395af5792e473e07e135c464e60eb961234542848132"
+  },
+  "bf08b1b7b1db53a4adabf00b": {
+   "vision_manifest_sha256": "5e7a3dd8cae4cf733b32e37d7a41443b037fc65395e41e3302a39ea576b86b12",
+   "body_raw_hash": "85ee8b8c80e95a94be239aff6aa20ceeaad8a2c59d446b097fede93dfcc026b0"
+  },
+  "f736f1ca447ec854a82c39e1": {
+   "vision_manifest_sha256": "9d19ad5b4bef1b87086c6437be085a0b955f298d86e5007bd193d025a498a2d7",
+   "body_raw_hash": "93d2f01594ea5fa6ebeb12980ede332fcad894fe27edbff5815fdc9c64d88cbe"
+  },
+  "98bb20f584caad1487773629": {
+   "vision_manifest_sha256": "e7352717a7224cde879310fd1cfc0d2b25b6c2d1afd30022834cf5eff76fd43a",
+   "body_raw_hash": "1f1546a08557bcc37ea89ed595282fd8efd904f4a224008e7b58efdf02f2dc8e"
+  },
+  "e392222f24c675106459b5d8": {
+   "vision_manifest_sha256": "2a5eab559f5e7021777e498962baa1e55d4f04d1e249564bf93755601db304ac",
+   "body_raw_hash": "1ea82573fdac3196e2f4498a905cab14e169a1012ce2d6df04e1fdda8fce94e3"
+  },
+  "3fb6ffd8390e7119ddfa4168": {
+   "vision_manifest_sha256": "4cd31f248b343b99688a81ab25aaace848c687963fa8d4a61ac441cce023e7a6",
+   "body_raw_hash": "c29a4e2af9f26d10e8bfe015256f901092f9ce8a849349037a0f8136d08bfbc8"
+  },
+  "0e44ae278bb97bca471915f5": {
+   "vision_manifest_sha256": "82bf57970a8a075222f1cd4090c6f0e62f703e8b293b8f292759364cd601c616",
+   "body_raw_hash": "f38d85333ddbb7b7ae779dad77896b370c998af25d166099846ca615b65f2d84"
+  },
+  "86c2b231d2e88deccfa3bbeb": {
+   "vision_manifest_sha256": "57fb395e92aa6d28b8fb88fdda184c857ea5b755a7d925476ebfd2eda24adb7a",
+   "body_raw_hash": "cc83024c26b8989326c48bcfdda4a3a29423f4b6d97f2add1c8340ccb63f543d"
+  },
+  "4c12d6c81d3645194cab5045": {
+   "vision_manifest_sha256": "d03e9d55c4d662f5f068ee4119c13dc058930cc29cb89fb884a77f2528f350be",
+   "body_raw_hash": "12f1940d009a014e3ddb1485131c4e57f27b456f71d6989636180991aafb70f9"
+  },
+  "07816b67a3eae3aa4efe314e": {
+   "vision_manifest_sha256": "f533b6645303b4c0ab454c2865dd0a1f29b940f35509a6bbaf8996d68b42f223",
+   "body_raw_hash": "4283348ae37aec15eeb9bcc3ded2c0aea6cfdb65258c201a4fe880d07ebad802"
+  },
+  "b314ec3e632f7dbb1c28286c": {
+   "vision_manifest_sha256": "7a9dfe60df6f87022a07cd1f620935b9cbd15d66183dabf0089f05815588cef7",
+   "body_raw_hash": "517d0bcd56fe517d19ce6a4b4463e78a029713927ced02f05eac5c665a8fd4bf"
+  },
+  "9e036098bc3802c199459a35": {
+   "vision_manifest_sha256": "4d5705adefe83ca3d8fc8d65fa567fc83b62cc3d24fd6feeb90c6fcc2fd5ea0d",
+   "body_raw_hash": "b777b5bde11ba1aeb7959dacd76e77461a9b349a8f1b1352fdcfb37525e71af1"
+  },
+  "a877b9f75fd6bd4c38ca74e9": {
+   "vision_manifest_sha256": "7b5a575d8dfc6b28cf8ed6d4b227e09b6e803ce4e66d8cbf01901bdfa8a0d66d",
+   "body_raw_hash": "ba7ccc942a776d8ad4b6f8384ad1df4108f2cb53b9c6983ab2ae3c0c9e98eb20"
+  },
+  "5f11d51c9603a090e9575f24": {
+   "vision_manifest_sha256": "727396c41cee178df5215f62114f0647082a361747a574aceca420f574b83ecc",
+   "body_raw_hash": "9acde9807af4d20dbb22c543515c2a15c31b6471959f4bcfc4d5c72463b72093"
+  },
+  "2a65ffaad5c0eaf54699e7ff": {
+   "vision_manifest_sha256": "a18f989c7bebf63765db6daf52496df328893b4e3ef1d9be009531a2c5945ac1",
+   "body_raw_hash": "d67fc63a4e72a331c0dd3b54506e6f9548e2c0f4fb3ac7e9a18d9d1ae5120a1f"
+  },
+  "b9f87ac1de1e70c5257f0432": {
+   "vision_manifest_sha256": "50aa4a78fb2a29fcb4bafcc7917b4599dadcebd0e852951377824850f7ed0c3e",
+   "body_raw_hash": "a0088ed5914707063e4e6267b1b2dd32bc8414aeebedd7ce27a97603771c28c2"
+  },
+  "43408296c17706df4a86d951": {
+   "vision_manifest_sha256": "bd3eaa60d4c9b9849bea487f6b878b03b20d0d912780b9d27f76472b991072f5",
+   "body_raw_hash": "19c49aa21f1dee0a29d7353e6ac936f80649d23993005d949629ee6b8ed8f1a0"
+  },
+  "21b9a77d7a9b2edd78dfed6d": {
+   "vision_manifest_sha256": "5c187e3b522646c375505faf79444e6ae43643f9188e9d9aad7e6ac5210dbffc",
+   "body_raw_hash": "8834264e99f2c0bda1d9a5e53df0c2814b40c68666df0835dbb27b9ba4a5f9f1"
+  },
+  "15c018b7135b044e02a49b73": {
+   "vision_manifest_sha256": "ef4697eeb94a08dbd5a6f9f2802d52f2481d85917da05a5abd0787265139bc06",
+   "body_raw_hash": "b6a8de067c5bfd8dff86dc0a6fa24eb9cdb5c5f3f382a47819577c1326d1a9b2"
+  },
+  "4e5a0baaefd2c0a105b0deaf": {
+   "vision_manifest_sha256": "b12c813c5937ae2f962a5da29a2d35b0994f1c8b1d1066651bddd5bab108b0ae",
+   "body_raw_hash": "a180c0bf3fbbdee66904e301c9584348c78915d44bc61c18d64b7d8ef88abdc7"
+  },
+  "c1986e1b2f5a7b124976006e": {
+   "vision_manifest_sha256": "55071842a3ee645c8f6d01a1d5bc525abdc0c102024858b2935a1a4d9ae6ed20",
+   "body_raw_hash": "a4d58ac9e99567252b76137de10938c4f883cc212f994adee1979c47c024df3f"
+  },
+  "50ffc09f83fd6ca0dca09d81": {
+   "vision_manifest_sha256": "8b98a85f5195caaddea2e05fdb88f1f0279b52514229eff6fba03212b9ec941f",
+   "body_raw_hash": "dfb2f8c3e6b44d49214c69686e17c4fb30d4f16076d1a8cce7be06690d4103b4"
+  },
+  "42c04e023e48f228ac3ef798": {
+   "vision_manifest_sha256": "bbef1cf31135e03dd8ee8c75a00c953017ce73a1962777d9aaa6ff13f093a534",
+   "body_raw_hash": "59657a090ce3d66f0cb82eda1dc4cad555d4b1ca56a924a3e51f04ef51664f53"
+  },
+  "c7564458f482113c1dd5003a": {
+   "vision_manifest_sha256": "5e51be056c20cb57d00138fb1877fe162ace519f7b411388c0f8b8be61d31cb4",
+   "body_raw_hash": "0a2b0079db0d229984d244f52217ce8b67efa7ad6912f86e20c4d2fc2c28176b"
+  },
+  "c72a30dd9ceee1d5a3a54cd4": {
+   "vision_manifest_sha256": "b621c89726c4bcd4525933fbfbd6d99b1bfaa0aae026132cb8e2faff001ad0cc",
+   "body_raw_hash": "a55583030684a808137c69c9943de7aa8744fa2f1a04aff88a873f08264ce76f"
+  },
+  "7a8d8a45af279b70fdcddf83": {
+   "vision_manifest_sha256": "3d920803f904b8f317532b30a0bc221f6ef7c449af888cbae5f11a783a9ee334",
+   "body_raw_hash": "1151aa4abaa04da2f238304b4b1064744e2c7e0a170e93001107dbae0ac81fab"
+  },
+  "8edc2be39041ef3ca1dac762": {
+   "vision_manifest_sha256": "a616d12b135e6c20f88c2dc25c8db453b7fdb3b117967fb3bc64f1effa5cd1be",
+   "body_raw_hash": "bb8ce50deb0810dd595c3bd96ca4d185befc6d5c2ceebcc119b22c96e46ab676"
+  },
+  "e76d044fd3d672f736245075": {
+   "vision_manifest_sha256": "d46b0bcc7a43f246498c7c899144311cbd66f3f38ca41806f2ab23e9a70654cf",
+   "body_raw_hash": "ae5c6067540f2d5807c745282c4742507b7c8f56f45c340ba3f4cb4105c215b9"
+  },
+  "6928291d20158e0e89802202": {
+   "vision_manifest_sha256": "54dc1996771e52e99271edd44d18d92e5734a796b5571c0cbead0f7d181743ff",
+   "body_raw_hash": "7a2e41acf9dc547ff3420cc853931de4c65ac3ab43074c4f2222a1c801fb2a70"
+  },
+  "a5e6b9745184ea43b217f98e": {
+   "vision_manifest_sha256": "bbb527dccfa19add9185ff3a3d9783085cc2684ad250fba07c9d79481c7c25ab",
+   "body_raw_hash": "115ea8aebcbc25f1f9c70b05353b10cd76f62d1ec129c0758c315571d4dca443"
+  },
+  "13940e90ab91469eb9b664f4": {
+   "vision_manifest_sha256": "237c6a673aabe280d685534791722d46d7206bb6b79f21e9617da84a8164685f",
+   "body_raw_hash": "32a0bd40a289253390d1e4f946c73435ad228cbe5d0b36d27914b858daff4567"
+  },
+  "7325b4ba98bea4bbe1ca4641": {
+   "vision_manifest_sha256": "0d292511177baa223bb3c6c52d1c0ef6e4bdc9e721d160cbdf3d1067e1197bc3",
+   "body_raw_hash": "f052a8c11b088a621dc2eaa392eb8f8d4d88c6c4a1603a3e0f5833c0a6cfe754"
+  },
+  "af59f00dfd69336d12ec1c53": {
+   "vision_manifest_sha256": "0060253eaede6084824c90cbe4e1ae2d187c93856281288b52b522c8f89b28a1",
+   "body_raw_hash": "00ee36ed899620ac11fb9439a288d9bbb6150a9c05807e1edd2dc029b41839d2"
+  },
+  "08023a4da5978961cbb0404e": {
+   "vision_manifest_sha256": "ffe4c2fce72bc1e8eadba8fee2a271dd7cb4620ee0520c59921e6a68635af430",
+   "body_raw_hash": "e092bfc290891a9f76497127f6455caa6983786b56b56d90a78c73845bbda980"
+  },
+  "f0fcaaf1a618875ba94d873f": {
+   "vision_manifest_sha256": "8c897ef6332721b2924e4b04e706ba714c6e6901941bccad4e4b3fad46753cc6",
+   "body_raw_hash": "4078475b018bb99abe379d0007139261960c535b7fa22fbe56116fc9a0d4c888"
+  },
+  "67e2964924cdb0798db5f65b": {
+   "vision_manifest_sha256": "f20ecf1d6f23b5811682e8ef60f1cd8337f8d1b3defad9c4d2b8f6cf3e2c5a57",
+   "body_raw_hash": "4e6a7d3a47bb1b3125d421871d6868c8930d4f28d90b25fe892bb611243a3dd3"
+  },
+  "46bb94c3367a45d68af8fa6c": {
+   "vision_manifest_sha256": "4abdf66ec005714be4701cc8943faf1bf67a322dae6336d7ad6c5d59de28a59d",
+   "body_raw_hash": "807d7112d41479be6647c6acf90499d87b0054815c44f28b350f41f0ba1ce48d"
+  },
+  "8bd8e43b5c14441cddf6f1c6": {
+   "vision_manifest_sha256": "fec17757e2158c9ec421c36069adcb492f073bc659668f13dd5d3fb7d25aa53d",
+   "body_raw_hash": "f61038b69f3b92afbc8af81252c62c80bbd3ee5cb8c11c82f1fd2f1a7fbfb656"
+  },
+  "f7b0c338e560be7ce661550d": {
+   "vision_manifest_sha256": "1e45ad8a957097a57c06ce5a470e93834044852f18bca837215d62573f4b8a65",
+   "body_raw_hash": "8badd7a255924a0ea3aa5205fe7dca0ad540924e4496238b5a4711e4145cab85"
+  },
+  "328be11039a0daaa62c9402d": {
+   "vision_manifest_sha256": "b7badff363c3f2fa8ebf3e886e93e0be276c3c6d49e50c73bcc9533ab8cca779",
+   "body_raw_hash": "1c4d458becce963cfacf3ad92376e6f916399009ce160a8d93c84bc59d9fee8e"
+  },
+  "082d13846fce53f88460dd42": {
+   "vision_manifest_sha256": "3cc5b5892cb9a199f297dcecda78b23f864de57861beb8ccf6b6f42da7d723b0",
+   "body_raw_hash": "6ba69fa7d881d43268faa7652ef60335ee9b17620cfb366daacea042b80f1414"
+  },
+  "8e2b353b5b359cd0f03050b7": {
+   "vision_manifest_sha256": "661bb233d2d2716b560bb70e538753fa571fa9fc635fe6a9b47e488abe31c04d",
+   "body_raw_hash": "4c1da1adedc7b436206d05eb2c9bda8b0f81c02cb2d4257ca3ae3cd6c1fa3c3a"
+  },
+  "e1946a92d433af36002d432b": {
+   "vision_manifest_sha256": "b00b027c6c797904c20fb032252a30a0d1abbac38ed2b95ff178c99e54505655",
+   "body_raw_hash": "78cdb47b1111c2becf61ec34d1347f5de8408b37ee61c884fc93785c6e22e702"
+  },
+  "9fd6bbd5031f385d60646936": {
+   "vision_manifest_sha256": "1173712671890e4fd196f9cc5615cc9cb2e93df221184013a0e24d5e681920f2",
+   "body_raw_hash": "5d76f92c7a3dc8ca26d4d6f080f31a6696c6db63483c23c4d23605abf94c6a43"
+  },
+  "d6e5c362b920f0f1eeebe797": {
+   "vision_manifest_sha256": "950b2a3e0ae053014783814f1f29db5dea9194c44e2f5323dcaba64f3bdaaa45",
+   "body_raw_hash": "00565ec1f43fa3e5a69b389f1e4718abeba6ce2d3987167b23f036e522cf6c37"
+  },
+  "53d80c0d3c0486a54c69473e": {
+   "vision_manifest_sha256": "74c50495f4c7781ca2e3bfcc64694ac1fcd6c85f31aa4d3b073182765f46cd65",
+   "body_raw_hash": "29b9e9ead82399077fcc058fb3d49ab9b18ab1a7f49de40534382ecb2fea9e57"
+  },
+  "6cc0825d4097ef67aec30426": {
+   "vision_manifest_sha256": "f0e92136252275356bc0ad2e12369f545fb26b2d5f259e233d75dfab4d1e539a",
+   "body_raw_hash": "21dd6d2ee59a125dbc980c5bfb417942fe8a0271dc704b3f0da46672a79b772c"
+  },
+  "d434dc6ba47a473e1c50859d": {
+   "vision_manifest_sha256": "0568afe9f5ff00d4206c775ef4de1101bc923e32304339effab7ebd51f939704",
+   "body_raw_hash": "ca1d752b6edb825de675b464450285a98537ad94f2d622b08e11f72239592399"
+  },
+  "eb9dec0bc5cac2d2255f22ad": {
+   "vision_manifest_sha256": "3d6942a1a1cc64469a96df74a84ea3d49b241a20e36dd763d51aeb012f3c5b97",
+   "body_raw_hash": "957af47c1df810ce9072d0163ec879448b3d5d5e52badc2ca43aa86b8672a7be"
+  },
+  "3ab4b81b6217c55a265126f3": {
+   "vision_manifest_sha256": "65ddff7d0a9bcc1477ae1e81146461b61a9f1c8579c93f13c20f1a354a73457a",
+   "body_raw_hash": "dcdddb69d5adde14c1599e3f9451d52eb8125d68457e96865a7764f3bf57b332"
+  },
+  "ad7fac75381979219a635a4c": {
+   "vision_manifest_sha256": "7161da941ee225c4d5270093425900574079a9ea72e11b467433be95004fa343",
+   "body_raw_hash": "8fd001792bbe51579c2713a5df6519685cfce88e8c7b354922339478ff61c091"
+  },
+  "248014c02180967fd21952b9": {
+   "vision_manifest_sha256": "6985908837e58f1f2a4dc84e298fe4263e11ee47298e829d9d2018ec39e07929",
+   "body_raw_hash": "320207dcd99716c50c01988f7f6af77ec8cb8b3ae66074ea1dd6cee604c57a2c"
+  },
+  "35baa8d370bba89af695913f": {
+   "vision_manifest_sha256": "256b50b7dbb2dce6c2b7dd95c4a45ee8f3b8dd299211bbf5ba0d8e431fa6624f",
+   "body_raw_hash": "a65fc3d9d4e114a6e4f77c77b79a068c9a916e122662322790ec45480b4738ef"
+  },
+  "87d2cc62a3d3cc1511a49aa7": {
+   "vision_manifest_sha256": "23dc14683d261dd3997ad05bfb9d98ba85bc8cab48c626ebae15c42b1415e77a",
+   "body_raw_hash": "a9d1649d5312aa24316dcedd5a19eb8e91ef655854d3dfac70f012856e0e60bd"
+  },
+  "0e15ffddde62fa7a295cbb6d": {
+   "vision_manifest_sha256": "a3f84bcda404c2c75cd8c24804f6331650f7702027ed7943a474613c0c353164",
+   "body_raw_hash": "5dd40cd2937001e008a0d8051f34fe06126b14dceadbd0da65a5f1696c53e10f"
+  },
+  "4a229f7de4c92b2cf15eae11": {
+   "vision_manifest_sha256": "af5d83ca31d6f0c7ec7ea20ee309165d5bf7cbc782a049ed716d07f7ecc12274",
+   "body_raw_hash": "25e353a09f9ad0a260e7fb43b8b76bb3fb104b1b0979767901eabbaf96763a72"
+  },
+  "1e02599c7e7dff4bc7bae2db": {
+   "vision_manifest_sha256": "a8fef81319dd4f13e3e3a37944dc184c8935a88a8376dbfd8bf7fc5d38b3b249",
+   "body_raw_hash": "c794a96be89c32f380736bbcbb194e59ba67fddf2036e5205f8057420bbfeba5"
+  },
+  "7e52b13d33a0a106da32a993": {
+   "vision_manifest_sha256": "4e09cc7c7a5f8718354c5c2b28e16b2bfd5708ef5ef46f24adb91c3db870adea",
+   "body_raw_hash": "0f761cd50cfb58a54cb34515621bb58f8db9c8361b80a13de94d353c28afbba7"
+  },
+  "85a8379a95e4b088606b6ca3": {
+   "vision_manifest_sha256": "0bcde7c930fc9846bcf10664f6ce963bc4d0f958269552504f6bee3b9d364d7d",
+   "body_raw_hash": "ed200c36429a5ae93b14c4090253d1cc9ccb301c189d52642539cd871e462ce5"
+  },
+  "354d589ae37b402ecc4e73f7": {
+   "vision_manifest_sha256": "428a4130aff983468b5c1c335a5c447c2c50e5c4dce77563e99e2c5e5a16910e",
+   "body_raw_hash": "1b87dd4cde1bfb6a3171bd37141c2fb02874363c2f582ce02fe541eca958a02d"
+  },
+  "c0f0baa61eef4a5603702a44": {
+   "vision_manifest_sha256": "730664b42fa1416de00b9769d3e665629f458a1d9c888ebb527fc8971ed76a08",
+   "body_raw_hash": "469846051332d2559cab15f23fafee9f3129ffc0de1fc8866aa8653d8e1ebe29"
+  },
+  "ccb44efc1570ecea59ac4e78": {
+   "vision_manifest_sha256": "649bc0d34827f040def9a01597d595a524b8dc987f96e16bde9e0d0c40e05102",
+   "body_raw_hash": "3dd5ce3f7a180f0915c955586d5eaf1aad89848c16f11044b6d36bf793d35ab4"
+  },
+  "b5f18715adc950cb700816f1": {
+   "vision_manifest_sha256": "849e684fd22001106692ddb9b6175e6235e6f47f6fb16b3f00985b9c78f05676",
+   "body_raw_hash": "edd9eed25e4064a291cadd51b6b56744c9aa23a69c1adc8fc0d2a004c4cf444e"
+  },
+  "c08091058dd948d22d55c054": {
+   "vision_manifest_sha256": "d0cf8bbecb352d5cbd3865f1a2dd0d203aee2d55c03f0f64fff0c8bdcdb8a86a",
+   "body_raw_hash": "d88a8f20ee9d648c2f1287c291c12e0256c883c2ccdd51bda3c8c71650e90f6a"
+  },
+  "0dc977ad3cfa07b0ca5cb79a": {
+   "vision_manifest_sha256": "bfd7b5d8e63fd0896b9e33096b618d2dcf53f0672e4ee0312052813444c8b121",
+   "body_raw_hash": "18dbfc9a0d4ea67138f3e2ac5bf271b6d8e89479d70447b1c07caeb24b6118b7"
+  },
+  "fc7c14a24b9efda762f5ebe6": {
+   "vision_manifest_sha256": "8d33aa4ce9c27a5c0e776abae1b1a85bb07b73eb01dbe10658b2f38a69422e9a",
+   "body_raw_hash": "4e812228b62b6c62a621c173a14468aad1c9305136c8ae2a3aff60a78330672d"
+  },
+  "373ad2eaf2fe234af0752a45": {
+   "vision_manifest_sha256": "e8378c2135a4c1f9b23ab61780e0d55e314d1f6f058e82beb3b41ccb4708bd5e",
+   "body_raw_hash": "48c8b18f5af98032e0ab072f4d41af08b99748d1735590a33d98267026a157f7"
+  },
+  "cd6794154b527f204b81a81c": {
+   "vision_manifest_sha256": "ea61bed02b243174e3989af58bb702706f84349fdf688093e2be0df8907d3f55",
+   "body_raw_hash": "eec6f4e85fc057e25e41e844c557830b1472c9e441a8fa6f9be71cacca59f064"
+  },
+  "a1d2ccd3fc62843b613f65d4": {
+   "vision_manifest_sha256": "09896ac174737a25ce98289cfe51ca73e85e148bd57cf9a7749051ac0d4b889e",
+   "body_raw_hash": "232cd11c0339d70149a8229ab0c48bd574695b6be1d4e6410f863ebf6fa9476f"
+  },
+  "836da07cfc7720b44b314d9b": {
+   "vision_manifest_sha256": "708908b61918534c50029b0b03df499d3d2e4a63caeab1d391c3b5f614cab2b0",
+   "body_raw_hash": "1de8483caa5d02152efb8ec7fc998be397008e2f13291757f9dc028a13ae2017"
+  },
+  "8943396b63414fd5204926ea": {
+   "vision_manifest_sha256": "f309469f00c567dc520e9f1280eea5a0916ba8122fc802b5781a8742587faadc",
+   "body_raw_hash": "e5a78564c4d6fe46f1c0cbb48594394c4f2b61918ab9ad9aeba628a6780605a4"
+  },
+  "ff2c05cb1e517e68b481697b": {
+   "vision_manifest_sha256": "db9d634a005f316e1fecde9f27a749e2311e11a18e34d8c1046572b5e6ee421b",
+   "body_raw_hash": "f9596ab725795f26a82e266ce3f9f27df2c1c74e883babc42aedcbcf61b6ca08"
+  },
+  "28bdb9c69e08176d20be77eb": {
+   "vision_manifest_sha256": "691f6bb46471a5168b255910fff04a09a5ad761288d34812b100237cbeb90c57",
+   "body_raw_hash": "3ca093be173482541599d0b9a1b90d27b0113b60bcbd098889d951d4010936ba"
+  },
+  "02db53cfca1b429e8af53a04": {
+   "vision_manifest_sha256": "e6f59780c64d9c10bfbbb794a1f6e468fc9eab40c5af82474ed34c83da6e25b5",
+   "body_raw_hash": "648b63ebbb9582906a98dda513edf26eb286c69c43233abbf77d8b7e2dbf28ca"
+  },
+  "362be738f0907a9bd73fb3ac": {
+   "vision_manifest_sha256": "357b9784982987fa902420a335999006cc30e178a8476ada46af76aa11a4fae1",
+   "body_raw_hash": "25ec283f5612586f29d6c0bd370e6ef83cc6c963ebdfe5e478d1fafd3605f99c"
+  },
+  "16eae9c262c564b7f77e1c46": {
+   "vision_manifest_sha256": "fcbd3ffe210668683e74a4b6921dee87c9f809b99c244e9f742864f676fd68f0",
+   "body_raw_hash": "b17ff44a30eabe91df9628b2243fc0bfe16913346aa3f1d274bfdfaad9776ec5"
+  },
+  "1450c463b79e24c601a172ff": {
+   "vision_manifest_sha256": "be376327afd3def4e758666efdb9c275aa977fcb54fb409c63a90d983599975f",
+   "body_raw_hash": "a837a5e4b0cc369140a109aac8fc7d4f2f94f384408a6e6e6d36c564c53d418c"
+  },
+  "c9fd590ebdf9b49aef7a4c3c": {
+   "vision_manifest_sha256": "191f8b774ef98e2ee807c5a8acc6cf0753aa28c87766f901970c3cf1ba195618",
+   "body_raw_hash": "ab9849b51cb3b72b7ef4cb12306e88bf2af4cda44185fc98b38976b4120cac1f"
+  },
+  "a24c655fa10e4404e78232ae": {
+   "vision_manifest_sha256": "f1b19e90ec0224151ec5e5b24af687513c7c82d02c2f94d443068b035091a8e2",
+   "body_raw_hash": "68eb02f8c2b560f9e5e4d61618dca9510adbcb7277ea8af87e33c2a22236d79d"
+  },
+  "b6bf7597d3931b0f488abc54": {
+   "vision_manifest_sha256": "118d1af2de6941bebcdd0bed14993168c40b3ccea04018f23ad0c520c9fb7f41",
+   "body_raw_hash": "8f59b3efa2a866adb251e2ae1ef2755fce5fbc9d27bb392efc2ab55425b670e6"
+  },
+  "3277a7bb4fc7bf6a8a7c77f4": {
+   "vision_manifest_sha256": "a18a7f6de2e0cb2ab3ec7b7df4148245f547fc89e3d4f8c7149849ba6cf223b3",
+   "body_raw_hash": "167930a85bf06c54768b154abefbbd845da2b381e16b1113e2347f40fe95c567"
+  },
+  "41ae58dd0b0e0e0417f6e585": {
+   "vision_manifest_sha256": "9c68ee45f4b0d33f2570008c44d5b3d826f6d865329fb8e70435bdd1f3850982",
+   "body_raw_hash": "fc3e0914b4624de4a7641940408f4636f5a871aaa98a5aa3e4d81d2e093ddd11"
+  },
+  "d36f75c5038388444182fb27": {
+   "vision_manifest_sha256": "122bb93ec75d830b6e91df9fb441c1c4d7e80075f88dd5540127e5582545117d",
+   "body_raw_hash": "5612883e6a649d88357d5af7a700bd88fbea600720b1aad891087897b578186c"
+  },
+  "0c7145de6321e6291d22c352": {
+   "vision_manifest_sha256": "afc24d377acffc5e2902f3344ef24fb8f5907c5d95495539a4b50e0093f37558",
+   "body_raw_hash": "eb90601a2fe16fa125cf798884ddefac692f95c09c057aea91a63251f76d945a"
+  },
+  "3be3d929d343489f969e5605": {
+   "vision_manifest_sha256": "f669246caf701b8826c0c0df24a3233ac6bf25b4f3456dc1648a72962aac3d46",
+   "body_raw_hash": "c9dfc5934764718274f54490cc39e26a12fc584e49e218123e69eae3ffddc2f3"
+  },
+  "b10b4d2e924f842ca4c3d42f": {
+   "vision_manifest_sha256": "592e11e8ade58f9d00ad0ca1ee2ca181483ad7e26d29fb651904f77c7ec19698",
+   "body_raw_hash": "62d8c10857851fb45a5e1a88872667694fa2e9e40ef6e6882290b59dbeebdfc8"
+  },
+  "518fadb11e8948d1644b8898": {
+   "vision_manifest_sha256": "2e8494e556f13e10290312727302c8fd7f025c26b80b5e0e7295f80522636f50",
+   "body_raw_hash": "09841272f52adc48449a5c73baa8c5606dcb3f242a8ebd9a371a69b5fc01f250"
+  },
+  "763c46556515bd213eeffec5": {
+   "vision_manifest_sha256": "e15648c746ac1d3b102b4b1859b288e4b5da76618469d5c9b1edda18219aba84",
+   "body_raw_hash": "2f29a5c5b2807977ec23d9804bce8a8916ba47e1d164fb8208cce7ce030948c8"
+  },
+  "701f9793a5920437c54aab4c": {
+   "vision_manifest_sha256": "79415035051bd71350f0afcaea5ad1069db1d4f60d468df22402cca2352ce2e1",
+   "body_raw_hash": "9fc2df9ffd54e12554f8dc9ba8e17afc2926d727013b80cf7b01df257caaf452"
+  },
+  "1e56bc144c18fcd108d7e157": {
+   "vision_manifest_sha256": "37bc8b8f783b9c0e72b336d0db595d89f25ee56d0d106e4b0eb7170af72bb44e",
+   "body_raw_hash": "24147c064cdb6a816cf7440f0fdd668c6ab9236f1e199899438e5e51c93216d8"
+  },
+  "3e941568d54f2776e7028bbd": {
+   "vision_manifest_sha256": "461374fd4798b8c7080f414572f0397840c0ca63c4af50edb15f33f5fc9f32c5",
+   "body_raw_hash": "7e5880764bece1313368b1ff3a0bc97c8837e7761d9b940a4a4f401feb4299cc"
+  },
+  "5abc76df6e2d2a1b0c63b0a0": {
+   "vision_manifest_sha256": "59cb220eedf72f53494048983b552477288e923037a0e3257a68c67e3ce4e768",
+   "body_raw_hash": "5a8314f95f5319bef483399944b1da95c1abda2de5de1395d6148cc9b762cf94"
+  },
+  "5ee5dcd51b181f0ba234947b": {
+   "vision_manifest_sha256": "ac613df5a83755296a5980e19b55f89480f1b07734d0d710b9f5e268d5f8ded6",
+   "body_raw_hash": "f5e8850f4582aeec97b185ebe025cd4bdb99afb00addd574e806227e57983ed0"
+  },
+  "ee0ff8e2e0adb92d34d183f6": {
+   "vision_manifest_sha256": "9904356ebb0e06a1c6359e4d77cc0c9668d0187182d018d45175575e52d50434",
+   "body_raw_hash": "8d4f915ec0a221b6bec5aef877550b9b736fd1edc73ef154840ddfedccf14fb6"
+  },
+  "2df79d1ad5aba75fcb77f422": {
+   "vision_manifest_sha256": "9306cf46ab798e175775edea04804ee05fedd993c02d0c753ada3bb3f9f59311",
+   "body_raw_hash": "017e96db18733cdd2b4960865cb57f603e8075df5571ead6b4a4bc79ef02def8"
+  },
+  "aeb53715c4b9a92a0aaee948": {
+   "vision_manifest_sha256": "dce7aba37e88618f703d2003fb248f19cde027916a855fd41eaa9b90d467101f",
+   "body_raw_hash": "a51186ac99b47dbbf6815a2305ef3ba7c101fd484d0b38462e75ea61bda83bca"
+  },
+  "c5dff8660134fc9e4ef8fb2d": {
+   "vision_manifest_sha256": "0108ea1c8db688891585b47dbd6259220eba0f89d93505386339876bcb930e77",
+   "body_raw_hash": "260808506bd1c91442cd8ad105c198faf27e0208f590d21cdae075731c20841f"
+  },
+  "62ac4b9ad3859d53823e2e50": {
+   "vision_manifest_sha256": "189c0eb22ea6e59640012f0a4bda91b6a31e5c068e06e4b2e22dca3124166b0a",
+   "body_raw_hash": "d536127a43466c537ee0fa1ea94d2a301d335e0d23b1bb30f6a114d778f983ec"
+  },
+  "8ff1068f61ea68e265c0dc5d": {
+   "vision_manifest_sha256": "ea4b7198058a193eb1ee44f8713bb29d4b91d363c10eb071bdbf5e49bc7fff61",
+   "body_raw_hash": "d328f0cba92ffec95cf2de0344d1a55cfb33c0dfe74f22c75a8aa48e8005196b"
+  },
+  "8580bf0f45e76926710e6d66": {
+   "vision_manifest_sha256": "efbbb52a615bda44f4d56a154e094da5bb85d0e317266e8681676a64188f7030",
+   "body_raw_hash": "3e6f839fa5e326894112027d00be8e7c672d2aefc16f6da2b4673a9211bee911"
+  },
+  "39e53c142c32db3562f9c32a": {
+   "vision_manifest_sha256": "517e59b49ef514588eaccc94036e493bbe3f1e994ff9bc2ccd009eaf080f8bc7",
+   "body_raw_hash": "b368ee9ad6d69ea9cc47c1777161f41b9febb64c2516435bfe2a0405ee922c9b"
+  },
+  "f3a8cfdbd0cf490022078019": {
+   "vision_manifest_sha256": "908e37845e76f5514eb28c29f1b4b6e50e1b6db5043090f36c5e64a6e1998698",
+   "body_raw_hash": "ec84e2fae292e8c7d9f4079baf81f4a8b194138082d9874edf456575eca7def1"
+  },
+  "b58ff253b57614c58da55ec0": {
+   "vision_manifest_sha256": "9007865889694e232fcd0e3ca4772e8971bd85f8fa0b0781b6c2104ab05d99f7",
+   "body_raw_hash": "5594734cb58370b7dffbc4290403afe9d17c72725f22cadc6c8441ac7340dc79"
+  },
+  "ffe0e6ccd0ef9616e1269051": {
+   "vision_manifest_sha256": "4a84911b67be7be4655ac797552cd6614f6e1283c64e664c3cd65ee4cd8a504e",
+   "body_raw_hash": "8e8fdf76c9e0b1b97ad41c1db651e595ccedc6e65c3767bd413e5c0358d0b2e0"
+  },
+  "3e5ba01473f71c2c24066d67": {
+   "vision_manifest_sha256": "72c441701ef5a3f98d3f50ec7e0e50da6cca89f76d186ab87e8c19d91917deb7",
+   "body_raw_hash": "5608d028da61189c4f5bc3ae59238abc83cd83a49acfcd4e8fd48d84addcbb08"
+  },
+  "a8187d0cf993805cfd2c093e": {
+   "vision_manifest_sha256": "8809230e2931db24b75a4a15dd4782acd603064e1dfa21f94a85d94415a609ea",
+   "body_raw_hash": "278c4628ffb5ce74294f5e50e7750c5ec8d0412b5cb0bad76a2a74da1f830ae4"
+  },
+  "552172d058d82a30ea33b8c5": {
+   "vision_manifest_sha256": "1f1a4b5e6381e3ceb07ac5b3e0446ce4eb5c4320a5b3c058c0938be42ad6e8ab",
+   "body_raw_hash": "3d5814a6f807e4ca1107248ab735d891a47c27b74a2a555091595a71ac8c9379"
+  },
+  "33d1502c53913a216cd2cd0b": {
+   "vision_manifest_sha256": "e35e81fa81a5fda23d21f23a5ad47da76b257eb7dd5fad0da286fd417856abf4",
+   "body_raw_hash": "feee21597e8d1c74412bb02b1169da074d38719430a827d2c4065133fdfbe938"
+  },
+  "26ab833409026c6833e35671": {
+   "vision_manifest_sha256": "dd1ec27f9d8be3e89dd52a2b21e83ce6d431e80e70ed5d9ee06fe4fb353848b4",
+   "body_raw_hash": "2adfcee21d5e66ea2ef9902309c81468205582d703d6832c018ce3c1ed59e39b"
+  },
+  "2db85afffb39035b368afd91": {
+   "vision_manifest_sha256": "60a3bd698019a7406d288d14cac563cf62bc2a8795f9eb8106f754e5a1c9f78e",
+   "body_raw_hash": "6dec120b1eb5c2ab2bd538307e48f4167b256f1ea68a0bcf42468dc8b2d4fbd0"
+  },
+  "522a952ef9eba0157e549954": {
+   "vision_manifest_sha256": "be6eb8ad3fc47ada350086de50f05d1b6707de4905d8843b4bd4c7af9fa41cbf",
+   "body_raw_hash": "f6513306c250dcac90e440c16b16f5c1fabd43f890fa78a123a3ca3693e82e99"
+  },
+  "6c0f1dc85db6d011c883ed91": {
+   "vision_manifest_sha256": "6133e64513961b5ac4b824c0fe398ddd800645c084e7587b97faab89f9d45793",
+   "body_raw_hash": "b87f8b347296856d8fd226228f768049a68923f04665d1937e06b080403b7135"
+  },
+  "0c2309bd4c1d478508f92129": {
+   "vision_manifest_sha256": "96d5c9e6d5548fa299c0bb88f969656af9a818fffe78afcf51cb1928031191ce",
+   "body_raw_hash": "c30955bced009a73fa77d306ff25d7767efcbc49701bf56b18391c1532356d48"
+  },
+  "ccb83aab3b96f19dedf813f2": {
+   "vision_manifest_sha256": "0e0c134cbb3d628cb7eedb8e5be3d554a0af7e9816714927f7c968f9068504d8",
+   "body_raw_hash": "de3fa2b3d63f125398b7801612e2733bed35a0e6a35f410bd1e6d719e0b1f594"
+  },
+  "aa14e742e8cfb1efff510dc4": {
+   "vision_manifest_sha256": "12f559c8c9e0d6cc15a188fd5d297e15300159ac5612d9ac6a8c1436ea0fcf94",
+   "body_raw_hash": "304baac523c1d075a1c75ee3ce346bb6e8d512c397faee3a4c7345b67ee5382f"
+  },
+  "742251cb77d37722f13a482f": {
+   "vision_manifest_sha256": "6864d4737f0772aef2acf3fe94af196b9bc4d5208dfd162561ad6b38feb4424f",
+   "body_raw_hash": "6162b5a208e318ce4791cf8df684f174b45731b78f1ac13f91b0a1a46f22d91e"
+  },
+  "56f2f342b29eec0adafc21d9": {
+   "vision_manifest_sha256": "67dbe9c6fdeaca3d813489c15eef5430a22cd34d379c208cadb1fe8492a27eb4",
+   "body_raw_hash": "70587baa9fd2fb4e48f4e13b47d81a561cf34b3dd43ebea854d2604118241c6c"
+  },
+  "1a859f85a0722b921770c970": {
+   "vision_manifest_sha256": "7e844f99423ba3b089489bcdd94b86bf92e60e9c02df73e8f14b76dfcead2e74",
+   "body_raw_hash": "9a501bc7a89b008c126524efbb9785b77c92985959a725fa92f27e28cf80fd91"
+  },
+  "976b92e9c98390bef992d712": {
+   "vision_manifest_sha256": "87241a199f8beba06a2194e5d5adb2f3992fd30d2945403eb7b37b8c33c18358",
+   "body_raw_hash": "47869a90f6b1ac9db6e3688e25fd34d69163f16ebc460df642c56dc851c73c3a"
+  },
+  "572cd83f5720bcd5d1c2187c": {
+   "vision_manifest_sha256": "67874e3d668c838e7648453d75b4f4475d3a9fef21ab3f5844eb2863c46791bc",
+   "body_raw_hash": "51cefadc2d7631e2d6307a614e5bce4425d03a7a7319ebcae73be9606892e909"
+  },
+  "71e4da15c6c4a9bb54da9834": {
+   "vision_manifest_sha256": "3c219bc22c26dcccf0bcb39bfc1476be05285c1d212aef4b080b63516c1b4ef6",
+   "body_raw_hash": "626eee70bc5fbcaf0291b0c4d05371b1821adfb44ce495e8cadca38b75eadb45"
+  },
+  "03ba3fbc3b60d01293ced6b8": {
+   "vision_manifest_sha256": "a0bc471f7f1e839241acbffc4e2329a50707b27a6f9b66cfae13b7e124586b6a",
+   "body_raw_hash": "9d34583e9014dcbefe63520151abdc8a9f7c42cd35f5e26476a7d86a32d4696c"
+  },
+  "d913e3b032076ea0acc1c625": {
+   "vision_manifest_sha256": "2391a7ab1d2803ed0e0ff517615d506aceba6288cf5cb39b86ffe036f28ea6f5",
+   "body_raw_hash": "30aff63163cbac2bea23c564427f9099b1a71da81968490c58251a6f4397edfb"
+  },
+  "baf507f943c3234dd3349b17": {
+   "vision_manifest_sha256": "e71b50ee5dde63f1a47fc9008fde1db98bf012441b5bdfe7c582c370a1a412dd",
+   "body_raw_hash": "d37dbd561cad45ce1e16027db0232101592a6d408dc94ebca73660d6247669ae"
+  },
+  "ace902e11e083aed89453fd5": {
+   "vision_manifest_sha256": "7d5111390dd6ac2475ba3a04655ec2faf8ce306caecfb0e992776d3ca2b3fd87",
+   "body_raw_hash": "04ed7dc5596e63f3730298437d32a9a69aea77d65eed0077ddc1316fdb626edf"
+  },
+  "dda6f21f5273653ecc988770": {
+   "vision_manifest_sha256": "d241a824984c18f0dbe82553d5fb84ea17753592e2bf20a6ea9cd4a1c20287e9",
+   "body_raw_hash": "0014ff5c43088a880dd4bb4a8c114b4274d1f6b5a992140816c61be2bcd40eb8"
+  },
+  "c5b864cf4dd397c1d6ef3939": {
+   "vision_manifest_sha256": "aeb2c2eb3d06de1cd2b6f4333ed809a5e15de07115de49625621f4435f759a9d",
+   "body_raw_hash": "1d4890bb1a378597452f0f86a301dc5809a292616a1b86f5b9cb4032cc54198a"
+  },
+  "230ce5a85a2127398ae882db": {
+   "vision_manifest_sha256": "005efb02923b79c6c6daac0f43357a92cd74b69107f23c0f5fe17915a4030170",
+   "body_raw_hash": "bbd347ba43e8a76b279fc214fff97080ccc97d7e978e7604a4c209400b56cc5f"
+  },
+  "ebcb069f413d87e3ef9e100d": {
+   "vision_manifest_sha256": "88baa44186e2863b4578cea1949554d605e695a6ceb1fb9596b0dd36dd1403fb",
+   "body_raw_hash": "b3aecf232089bdfc2bda76f1854eab10ffae32400b6f4daf9299c8dbc0809618"
+  },
+  "da994df5057188e2584557f8": {
+   "vision_manifest_sha256": "23c30cd66a7818a19be62617cf0f5fe2960c863310ab37485c740bed8e3a0431",
+   "body_raw_hash": "c3d0b5397b1c9f80ddcb3ae80c35a6f4bff0b340b52112cc3a9732b6b9655aa0"
+  },
+  "236fa99f5592a4897da47982": {
+   "vision_manifest_sha256": "cafd18efda71609a4c1b352c8fbf3305c7850716f59c8121fe45c5590e6dde58",
+   "body_raw_hash": "a04200c7f9b932267102b9556dbbdd44e9fa4ba63646696cb92a3c0fb1321501"
+  },
+  "43f2c0248b765f05f8838aac": {
+   "vision_manifest_sha256": "bcaad1250ab96a618d10f176de22cd717877cd8f1dcc02f2d9373086fe4c5abe",
+   "body_raw_hash": "873843214dde48544b461a26811266f05549b100bdb9aba49e6605645e027de0"
+  },
+  "59e06472fc86d6593e4f1ec7": {
+   "vision_manifest_sha256": "c275c66dace6e10694fc156cff6891b543c267b62dd07b8cf9aebb9c4e01c2c4",
+   "body_raw_hash": "65d822be0d1a16a61958964bad0e1ddf1ee3285659d7c2f8802d547971c3c7f0"
+  },
+  "8e5439011d436434070c3559": {
+   "vision_manifest_sha256": "586d01b195c398f84be7626f75d4841484dc2229b65dbb1ec7f98011104436ac",
+   "body_raw_hash": "488792993979dedac94f582d7cd7c393924312a30b68117c49f0bc61d95a9dcd"
+  },
+  "52458484e807a05d5e6a8195": {
+   "vision_manifest_sha256": "f0ffc3de18c1375bc961096b42843a149cbbe0f4c5bf3b957b04f6e1d304edee",
+   "body_raw_hash": "4e4f096e75962674964c0a4e6a26482f3620bf92ad4a6b0604848d5c1a05d532"
+  },
+  "9d284c44285f781ea3153bc1": {
+   "vision_manifest_sha256": "02864246816f363d1e17db5c5e7d0d67f881931d2cd501ee454390d696c20bc6",
+   "body_raw_hash": "243aa62ae789af3f846a0d22939e3ad0ac41ccf57b7047c15c5594c482482844"
+  },
+  "266efa4370e672325fa7860d": {
+   "vision_manifest_sha256": "f3f0434a353a9bff7714633f60c235ee5c6b04feace3a2a610006476c3db9e31",
+   "body_raw_hash": "24b5e330a53e90f35b6c1986192a378e3e2099d5f153a9bd5cc49566836e29d6"
+  }
+ },
+ "classified": [
+  {
+   "event_id": "e3fdaf3c4fc6fe49ad83a2b2",
+   "symbol": "LUNA2USDT",
+   "asset": "LUNA2",
+   "launch_ts": "2022-09-10T03:00:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +180 min"
+   ],
+   "timestamp_gap_min": 180.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "27b63ec2126b71570873365d",
+   "symbol": "BLURUSDT",
+   "asset": "BLUR",
+   "launch_ts": "2023-04-28T12:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "771eb47c3fcc81c52c724335",
+   "symbol": "1000PEPEUSDT",
+   "asset": "1000PEPE",
+   "launch_ts": "2023-05-05T16:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8f9346145d6137459b8f23c9",
+   "symbol": "ARKUSDT",
+   "asset": "ARK",
+   "launch_ts": "2023-09-19T16:03:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +93 min"
+   ],
+   "timestamp_gap_min": 93.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "6c20de43f56e37f8ca8be6d0",
+   "symbol": "BIGTIMEUSDT",
+   "asset": "BIGTIME",
+   "launch_ts": "2023-10-12T14:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "525708299058a330fb701cef",
+   "symbol": "ORBSUSDT",
+   "asset": "ORBS",
+   "launch_ts": "2023-10-17T06:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b6b050a77e7ba560ac45accb",
+   "symbol": "BSVUSDT",
+   "asset": "BSV",
+   "launch_ts": "2023-10-20T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "0203a2e2313bf3decb1ca01a",
+   "symbol": "TOKENUSDT",
+   "asset": "TOKEN",
+   "launch_ts": "2023-11-03T15:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3c3028d3750531b66a53cf7c",
+   "symbol": "KASUSDT",
+   "asset": "KAS",
+   "launch_ts": "2023-11-17T02:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b4883000a6fb5da32096f7b6",
+   "symbol": "ETHWUSDT",
+   "asset": "ETHW",
+   "launch_ts": "2023-11-28T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "bd02f81f806b61964ad28fa1",
+   "symbol": "1000SATSUSDT",
+   "asset": "1000SATS",
+   "launch_ts": "2023-12-12T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8c5cf6e313e24b24e0ae548e",
+   "symbol": "1000RATSUSDT",
+   "asset": "1000RATS",
+   "launch_ts": "2023-12-15T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "7f4b196e58663442894e9aef",
+   "symbol": "WIFUSDT",
+   "asset": "WIF",
+   "launch_ts": "2024-01-18T14:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "7ae90f464d9d3ad74c14c360",
+   "symbol": "ONDOUSDT",
+   "asset": "ONDO",
+   "launch_ts": "2024-01-20T13:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "d588cda01954d01fe6318c95",
+   "symbol": "ZETAUSDT",
+   "asset": "ZETA",
+   "launch_ts": "2024-02-02T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3996d75d68d7fe9f1b79b94a",
+   "symbol": "TONUSDT",
+   "asset": "TON",
+   "launch_ts": "2024-03-01T12:31:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 1.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "16d2301813546604bccc72c1",
+   "symbol": "MYROUSDT",
+   "asset": "MYRO",
+   "launch_ts": "2024-03-05T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "f43f9a7538849c554a17a309",
+   "symbol": "BOMEUSDT",
+   "asset": "BOME",
+   "launch_ts": "2024-03-16T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "37579a9fb49ede269bf8f628",
+   "symbol": "MEWUSDT",
+   "asset": "MEW",
+   "launch_ts": "2024-06-17T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "4504cb146c6018bec3d3d9ec",
+   "symbol": "BRETTUSDT",
+   "asset": "BRETT",
+   "launch_ts": "2024-08-20T10:35:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "9101807195e525fff9bdf472",
+   "symbol": "NEIROETHUSDT",
+   "asset": "NEIROETH",
+   "launch_ts": "2024-09-06T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "e0a50e3cea619eac2465defc",
+   "symbol": "UXLINKUSDT",
+   "asset": "UXLINK",
+   "launch_ts": "2024-09-15T15:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "ad82dcce37e5348b048e282d",
+   "symbol": "1000CATUSDT",
+   "asset": "1000CAT",
+   "launch_ts": "2024-10-21T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "700d4e731095fcaedaac26c5",
+   "symbol": "GOATUSDT",
+   "asset": "GOAT",
+   "launch_ts": "2024-10-24T13:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c2b91bfbec0ed43aabcdb74f",
+   "symbol": "MOODENGUSDT",
+   "asset": "MOODENG",
+   "launch_ts": "2024-10-25T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a95a9d746860bc6de0bd1040",
+   "symbol": "SAFEUSDT",
+   "asset": "SAFE",
+   "launch_ts": "2024-10-25T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "2bf17446b8052a2980d08b2c",
+   "symbol": "PONKEUSDT",
+   "asset": "PONKE",
+   "launch_ts": "2024-11-04T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "125e6fdf0008d975a343c942",
+   "symbol": "1000000MOGUSDT",
+   "asset": "1000000MOG",
+   "launch_ts": "2024-11-07T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "aab29a722c1f1f70858d4380",
+   "symbol": "SWELLUSDT",
+   "asset": "SWELL",
+   "launch_ts": "2024-11-08T16:00:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +30 min"
+   ],
+   "timestamp_gap_min": 30.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "de0cd69adb47be97865353eb",
+   "symbol": "HIPPOUSDT",
+   "asset": "HIPPO",
+   "launch_ts": "2024-11-13T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a145fa44534b876ab3762b4b",
+   "symbol": "DEGENUSDT",
+   "asset": "DEGEN",
+   "launch_ts": "2024-11-15T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "551e7c68db4a708957037745",
+   "symbol": "BANUSDT",
+   "asset": "BAN",
+   "launch_ts": "2024-11-18T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "e4c2c21b562ca8d7a3bc69f4",
+   "symbol": "SLERFUSDT",
+   "asset": "SLERF",
+   "launch_ts": "2024-11-21T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "5b96299e3ac21d97d9913488",
+   "symbol": "1000WHYUSDT",
+   "asset": "1000WHY",
+   "launch_ts": "2024-11-25T11:31:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 1.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "4d8c383224e3a76f6fc58997",
+   "symbol": "MORPHOUSDT",
+   "asset": "MORPHO",
+   "launch_ts": "2024-11-27T14:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a7150d1cd6602cc674f27ab1",
+   "symbol": "SPXUSDT",
+   "asset": "SPX",
+   "launch_ts": "2024-12-10T12:45:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +45 min"
+   ],
+   "timestamp_gap_min": 45.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "99b90c668ff8d07f9a62c71c",
+   "symbol": "MOCAUSDT",
+   "asset": "MOCA",
+   "launch_ts": "2024-12-16T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ada0dad89ba8db72db34e5e1",
+   "symbol": "KMNOUSDT",
+   "asset": "KMNO",
+   "launch_ts": "2024-12-20T19:00:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +30 min"
+   ],
+   "timestamp_gap_min": 30.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "bf08b1b7b1db53a4adabf00b",
+   "symbol": "AI16ZUSDT",
+   "asset": "AI16Z",
+   "launch_ts": "2025-01-02T13:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 15.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "f736f1ca447ec854a82c39e1",
+   "symbol": "SWARMSUSDT",
+   "asset": "SWARMS",
+   "launch_ts": "2025-01-07T12:15:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +45 min"
+   ],
+   "timestamp_gap_min": 45.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "98bb20f584caad1487773629",
+   "symbol": "SONICUSDT",
+   "asset": "SONIC",
+   "launch_ts": "2025-01-08T07:01:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 1.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "e392222f24c675106459b5d8",
+   "symbol": "ARCUSDT",
+   "asset": "ARC",
+   "launch_ts": "2025-01-17T13:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3fb6ffd8390e7119ddfa4168",
+   "symbol": "TRUMPUSDT",
+   "asset": "TRUMP",
+   "launch_ts": "2025-01-18T13:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "0e44ae278bb97bca471915f5",
+   "symbol": "MELANIAUSDT",
+   "asset": "MELANIA",
+   "launch_ts": "2025-01-20T09:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "86c2b231d2e88deccfa3bbeb",
+   "symbol": "VINEUSDT",
+   "asset": "VINE",
+   "launch_ts": "2025-01-24T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "4c12d6c81d3645194cab5045",
+   "symbol": "VVVUSDT",
+   "asset": "VVV",
+   "launch_ts": "2025-01-29T08:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "07816b67a3eae3aa4efe314e",
+   "symbol": "B3USDT",
+   "asset": "B3",
+   "launch_ts": "2025-02-13T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b314ec3e632f7dbb1c28286c",
+   "symbol": "IPUSDT",
+   "asset": "IP",
+   "launch_ts": "2025-02-13T17:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "9e036098bc3802c199459a35",
+   "symbol": "GPSUSDT",
+   "asset": "GPS",
+   "launch_ts": "2025-02-17T17:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a877b9f75fd6bd4c38ca74e9",
+   "symbol": "BMTUSDT",
+   "asset": "BMT",
+   "launch_ts": "2025-03-17T13:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "5f11d51c9603a090e9575f24",
+   "symbol": "BRUSDT",
+   "asset": "BR",
+   "launch_ts": "2025-03-21T12:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "2a65ffaad5c0eaf54699e7ff",
+   "symbol": "JELLYJELLYUSDT",
+   "asset": "JELLYJELLY",
+   "launch_ts": "2025-03-26T16:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b9f87ac1de1e70c5257f0432",
+   "symbol": "WALUSDT",
+   "asset": "WAL",
+   "launch_ts": "2025-03-27T15:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "43408296c17706df4a86d951",
+   "symbol": "ATHUSDT",
+   "asset": "ATH",
+   "launch_ts": "2025-04-02T15:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "21b9a77d7a9b2edd78dfed6d",
+   "symbol": "BABYUSDT",
+   "asset": "BABY",
+   "launch_ts": "2025-04-05T13:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "15c018b7135b044e02a49b73",
+   "symbol": "PROMPTUSDT",
+   "asset": "PROMPT",
+   "launch_ts": "2025-04-11T06:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "4e5a0baaefd2c0a105b0deaf",
+   "symbol": "XCNUSDT",
+   "asset": "XCN",
+   "launch_ts": "2025-04-11T15:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c1986e1b2f5a7b124976006e",
+   "symbol": "INITUSDT",
+   "asset": "INIT",
+   "launch_ts": "2025-04-16T06:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "50ffc09f83fd6ca0dca09d81",
+   "symbol": "BANKUSDT",
+   "asset": "BANK",
+   "launch_ts": "2025-04-18T18:30:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "42c04e023e48f228ac3ef798",
+   "symbol": "DEEPUSDT",
+   "asset": "DEEP",
+   "launch_ts": "2025-04-22T08:30:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c7564458f482113c1dd5003a",
+   "symbol": "MEMEFIUSDT",
+   "asset": "MEMEFI",
+   "launch_ts": "2025-04-25T07:15:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 66,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "c72a30dd9ceee1d5a3a54cd4",
+   "symbol": "DOLOUSDT",
+   "asset": "DOLO",
+   "launch_ts": "2025-05-01T03:00:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +870 min"
+   ],
+   "timestamp_gap_min": 870.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "7a8d8a45af279b70fdcddf83",
+   "symbol": "SXTUSDT",
+   "asset": "SXT",
+   "launch_ts": "2025-05-02T08:30:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8edc2be39041ef3ca1dac762",
+   "symbol": "B2USDT",
+   "asset": "B2",
+   "launch_ts": "2025-05-06T13:30:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "e76d044fd3d672f736245075",
+   "symbol": "ZKJUSDT",
+   "asset": "ZKJ",
+   "launch_ts": "2025-05-13T09:30:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "depth or index reference for this window is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 76,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "6928291d20158e0e89802202",
+   "symbol": "AGTUSDT",
+   "asset": "AGT",
+   "launch_ts": "2025-05-20T10:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a5e6b9745184ea43b217f98e",
+   "symbol": "BUSDT",
+   "asset": "BUSDT",
+   "launch_ts": "2025-05-22T16:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "13940e90ab91469eb9b664f4",
+   "symbol": "SOONUSDT",
+   "asset": "SOON",
+   "launch_ts": "2025-05-23T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "7325b4ba98bea4bbe1ca4641",
+   "symbol": "MERLUSDT",
+   "asset": "MERL",
+   "launch_ts": "2025-05-29T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "af59f00dfd69336d12ec1c53",
+   "symbol": "HYPEUSDT",
+   "asset": "HYPE",
+   "launch_ts": "2025-05-30T10:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "08023a4da5978961cbb0404e",
+   "symbol": "PUFFERUSDT",
+   "asset": "PUFFER",
+   "launch_ts": "2025-06-04T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "f0fcaaf1a618875ba94d873f",
+   "symbol": "1000000BOBUSDT",
+   "asset": "1000000BOB",
+   "launch_ts": "2025-06-05T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "67e2964924cdb0798db5f65b",
+   "symbol": "LAUSDT",
+   "asset": "LA",
+   "launch_ts": "2025-06-05T09:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "46bb94c3367a45d68af8fa6c",
+   "symbol": "TAIKOUSDT",
+   "asset": "TAIKO",
+   "launch_ts": "2025-06-11T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8bd8e43b5c14441cddf6f1c6",
+   "symbol": "MYXUSDT",
+   "asset": "MYX",
+   "launch_ts": "2025-06-18T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "f7b0c338e560be7ce661550d",
+   "symbol": "NEWTUSDT",
+   "asset": "NEWT",
+   "launch_ts": "2025-06-19T14:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "328be11039a0daaa62c9402d",
+   "symbol": "OLUSDT",
+   "asset": "OL",
+   "launch_ts": "2025-06-25T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "082d13846fce53f88460dd42",
+   "symbol": "BULLAUSDT",
+   "asset": "BULLA",
+   "launch_ts": "2025-07-04T09:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8e2b353b5b359cd0f03050b7",
+   "symbol": "MUSDT",
+   "asset": "MUSDT",
+   "launch_ts": "2025-07-07T09:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "e1946a92d433af36002d432b",
+   "symbol": "CROSSUSDT",
+   "asset": "CROSS",
+   "launch_ts": "2025-07-10T10:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "9fd6bbd5031f385d60646936",
+   "symbol": "VELVETUSDT",
+   "asset": "VELVET",
+   "launch_ts": "2025-07-15T09:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 15.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "d6e5c362b920f0f1eeebe797",
+   "symbol": "ZORAUSDT",
+   "asset": "ZORA",
+   "launch_ts": "2025-07-25T11:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "53d80c0d3c0486a54c69473e",
+   "symbol": "ZRCUSDT",
+   "asset": "ZRC",
+   "launch_ts": "2025-07-29T09:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "6cc0825d4097ef67aec30426",
+   "symbol": "YALAUSDT",
+   "asset": "YALA",
+   "launch_ts": "2025-08-07T16:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "d434dc6ba47a473e1c50859d",
+   "symbol": "AIOUSDT",
+   "asset": "AIO",
+   "launch_ts": "2025-08-13T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "eb9dec0bc5cac2d2255f22ad",
+   "symbol": "USELESSUSDT",
+   "asset": "USELESS",
+   "launch_ts": "2025-08-15T12:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3ab4b81b6217c55a265126f3",
+   "symbol": "CUDISUSDT",
+   "asset": "CUDIS",
+   "launch_ts": "2025-08-20T11:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "ad7fac75381979219a635a4c",
+   "symbol": "XPLUSDT",
+   "asset": "XPL",
+   "launch_ts": "2025-08-22T09:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "248014c02180967fd21952b9",
+   "symbol": "SOMIUSDT",
+   "asset": "SOMI",
+   "launch_ts": "2025-08-25T09:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "35baa8d370bba89af695913f",
+   "symbol": "BASUSDT",
+   "asset": "BAS",
+   "launch_ts": "2025-08-26T13:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "87d2cc62a3d3cc1511a49aa7",
+   "symbol": "LINEAUSDT",
+   "asset": "LINEA",
+   "launch_ts": "2025-09-01T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "0e15ffddde62fa7a295cbb6d",
+   "symbol": "ARIAUSDT",
+   "asset": "ARIA",
+   "launch_ts": "2025-09-03T11:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "4a229f7de4c92b2cf15eae11",
+   "symbol": "FLOCKUSDT",
+   "asset": "FLOCK",
+   "launch_ts": "2025-09-09T06:48:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 3.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "1e02599c7e7dff4bc7bae2db",
+   "symbol": "XPINUSDT",
+   "asset": "XPIN",
+   "launch_ts": "2025-09-12T08:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "7e52b13d33a0a106da32a993",
+   "symbol": "TOSHIUSDT",
+   "asset": "TOSHI",
+   "launch_ts": "2025-09-17T05:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "85a8379a95e4b088606b6ca3",
+   "symbol": "0GUSDT",
+   "asset": "0G",
+   "launch_ts": "2025-09-17T15:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "354d589ae37b402ecc4e73f7",
+   "symbol": "ASTERUSDT",
+   "asset": "ASTER",
+   "launch_ts": "2025-09-19T12:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c0f0baa61eef4a5603702a44",
+   "symbol": "FLUIDUSDT",
+   "asset": "FLUID",
+   "launch_ts": "2025-09-24T10:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ccb44efc1570ecea59ac4e78",
+   "symbol": "AKEUSDT",
+   "asset": "AKE",
+   "launch_ts": "2025-09-26T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b5f18715adc950cb700816f1",
+   "symbol": "4USDT",
+   "asset": "4USDT",
+   "launch_ts": "2025-10-08T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "c08091058dd948d22d55c054",
+   "symbol": "GIGGLEUSDT",
+   "asset": "GIGGLE",
+   "launch_ts": "2025-10-09T09:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "0dc977ad3cfa07b0ca5cb79a",
+   "symbol": "MONUSDT",
+   "asset": "MON",
+   "launch_ts": "2025-10-10T07:17:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 2.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "fc7c14a24b9efda762f5ebe6",
+   "symbol": "YBUSDT",
+   "asset": "YB",
+   "launch_ts": "2025-10-10T14:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "373ad2eaf2fe234af0752a45",
+   "symbol": "METUSDT",
+   "asset": "MET",
+   "launch_ts": "2025-10-11T12:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "cd6794154b527f204b81a81c",
+   "symbol": "LABUSDT",
+   "asset": "LAB",
+   "launch_ts": "2025-10-17T14:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a1d2ccd3fc62843b613f65d4",
+   "symbol": "ATUSDT",
+   "asset": "AT",
+   "launch_ts": "2025-10-29T11:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "836da07cfc7720b44b314d9b",
+   "symbol": "KITEUSDT",
+   "asset": "KITE",
+   "launch_ts": "2025-10-29T10:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "8943396b63414fd5204926ea",
+   "symbol": "CCUSDT",
+   "asset": "CC",
+   "launch_ts": "2025-10-31T12:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "ff2c05cb1e517e68b481697b",
+   "symbol": "STABLEUSDT",
+   "asset": "STABLE",
+   "launch_ts": "2025-11-06T12:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "28bdb9c69e08176d20be77eb",
+   "symbol": "CLANKERUSDT",
+   "asset": "CLANKER",
+   "launch_ts": "2025-11-12T12:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "02db53cfca1b429e8af53a04",
+   "symbol": "SENTUSDT",
+   "asset": "SENT",
+   "launch_ts": "2025-11-14T12:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "362be738f0907a9bd73fb3ac",
+   "symbol": "BOBUSDT",
+   "asset": "BOB",
+   "launch_ts": "2025-11-21T10:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "16eae9c262c564b7f77e1c46",
+   "symbol": "IRYSUSDT",
+   "asset": "IRYS",
+   "launch_ts": "2025-11-26T16:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "1450c463b79e24c601a172ff",
+   "symbol": "RLSUSDT",
+   "asset": "RLS",
+   "launch_ts": "2025-12-02T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c9fd590ebdf9b49aef7a4c3c",
+   "symbol": "POWERUSDT",
+   "asset": "POWER",
+   "launch_ts": "2025-12-06T09:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a24c655fa10e4404e78232ae",
+   "symbol": "WETUSDT",
+   "asset": "WET",
+   "launch_ts": "2025-12-10T07:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "b6bf7597d3931b0f488abc54",
+   "symbol": "NIGHTUSDT",
+   "asset": "NIGHT",
+   "launch_ts": "2025-12-10T11:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3277a7bb4fc7bf6a8a7c77f4",
+   "symbol": "USUSDT",
+   "asset": "US",
+   "launch_ts": "2025-12-12T10:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "41ae58dd0b0e0e0417f6e585",
+   "symbol": "RAVEUSDT",
+   "asset": "RAVE",
+   "launch_ts": "2025-12-14T15:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "d36f75c5038388444182fb27",
+   "symbol": "GUAUSDT",
+   "asset": "GUA",
+   "launch_ts": "2025-12-21T10:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 15.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "0c7145de6321e6291d22c352",
+   "symbol": "LITUSDT",
+   "asset": "LIT",
+   "launch_ts": "2025-12-23T17:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3be3d929d343489f969e5605",
+   "symbol": "BREVUSDT",
+   "asset": "BREV",
+   "launch_ts": "2025-12-30T10:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "b10b4d2e924f842ca4c3d42f",
+   "symbol": "COLLECTUSDT",
+   "asset": "COLLECT",
+   "launch_ts": "2025-12-31T13:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "518fadb11e8948d1644b8898",
+   "symbol": "XAGUSDT",
+   "asset": "XAG",
+   "launch_ts": "2026-01-07T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "763c46556515bd213eeffec5",
+   "symbol": "ZAMAUSDT",
+   "asset": "ZAMA",
+   "launch_ts": "2026-01-09T09:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "701f9793a5920437c54aab4c",
+   "symbol": "FOGOUSDT",
+   "asset": "FOGO",
+   "launch_ts": "2026-01-10T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "1e56bc144c18fcd108d7e157",
+   "symbol": "SPORTFUNUSDT",
+   "asset": "SPORTFUN",
+   "launch_ts": "2026-01-16T13:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3e941568d54f2776e7028bbd",
+   "symbol": "AIAUSDT",
+   "asset": "AIA",
+   "launch_ts": "2026-01-20T11:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "5abc76df6e2d2a1b0c63b0a0",
+   "symbol": "ACUUSDT",
+   "asset": "ACU",
+   "launch_ts": "2026-01-21T12:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "5ee5dcd51b181f0ba234947b",
+   "symbol": "ELSAUSDT",
+   "asset": "ELSA",
+   "launch_ts": "2026-01-22T07:25:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ee0ff8e2e0adb92d34d183f6",
+   "symbol": "SKRUSDT",
+   "asset": "SKR",
+   "launch_ts": "2026-01-22T10:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "2df79d1ad5aba75fcb77f422",
+   "symbol": "SPACEUSDT",
+   "asset": "SPACE",
+   "launch_ts": "2026-01-23T11:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "aeb53715c4b9a92a0aaee948",
+   "symbol": "BIRBUSDT",
+   "asset": "BIRB",
+   "launch_ts": "2026-01-29T05:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "c5dff8660134fc9e4ef8fb2d",
+   "symbol": "XPTUSDT",
+   "asset": "XPT",
+   "launch_ts": "2026-01-30T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "62ac4b9ad3859d53823e2e50",
+   "symbol": "MEGAUSDT",
+   "asset": "MEGA",
+   "launch_ts": "2026-01-30T12:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8ff1068f61ea68e265c0dc5d",
+   "symbol": "INXUSDT",
+   "asset": "INX",
+   "launch_ts": "2026-01-30T19:04:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 4.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8580bf0f45e76926710e6d66",
+   "symbol": "TRIAUSDT",
+   "asset": "TRIA",
+   "launch_ts": "2026-02-06T12:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "39e53c142c32db3562f9c32a",
+   "symbol": "ESPUSDT",
+   "asset": "ESP",
+   "launch_ts": "2026-02-10T08:10:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "f3a8cfdbd0cf490022078019",
+   "symbol": "AZTECUSDT",
+   "asset": "AZTEC",
+   "launch_ts": "2026-02-11T04:29:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": -1.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "b58ff253b57614c58da55ec0",
+   "symbol": "OPNUSDT",
+   "asset": "OPN",
+   "launch_ts": "2026-02-21T15:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ffe0e6ccd0ef9616e1269051",
+   "symbol": "ROBOUSDT",
+   "asset": "ROBO",
+   "launch_ts": "2026-02-27T08:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "3e5ba01473f71c2c24066d67",
+   "symbol": "KATUSDT",
+   "asset": "KAT",
+   "launch_ts": "2026-03-02T05:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "a8187d0cf993805cfd2c093e",
+   "symbol": "COPPERUSDT",
+   "asset": "COPPER",
+   "launch_ts": "2026-03-06T09:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "552172d058d82a30ea33b8c5",
+   "symbol": "EDGEUSDT",
+   "asset": "EDGE",
+   "launch_ts": "2026-03-19T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "33d1502c53913a216cd2cd0b",
+   "symbol": "BSBUSDT",
+   "asset": "BSB",
+   "launch_ts": "2026-03-25T11:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "26ab833409026c6833e35671",
+   "symbol": "BASEDUSDT",
+   "asset": "BASED",
+   "launch_ts": "2026-03-30T10:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "2db85afffb39035b368afd91",
+   "symbol": "BZUSDT",
+   "asset": "BZ",
+   "launch_ts": "2026-04-01T09:10:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 10.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "522a952ef9eba0157e549954",
+   "symbol": "PRLUSDT",
+   "asset": "PRL",
+   "launch_ts": "2026-04-01T10:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "6c0f1dc85db6d011c883ed91",
+   "symbol": "GENIUSUSDT",
+   "asset": "GENIUS",
+   "launch_ts": "2026-04-16T03:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "0c2309bd4c1d478508f92129",
+   "symbol": "CHIPUSDT",
+   "asset": "CHIP",
+   "launch_ts": "2026-04-16T07:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ccb83aab3b96f19dedf813f2",
+   "symbol": "OPGUSDT",
+   "asset": "OPG",
+   "launch_ts": "2026-04-22T15:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "aa14e742e8cfb1efff510dc4",
+   "symbol": "AIGENSYNUSDT",
+   "asset": "AIGENSYN",
+   "launch_ts": "2026-04-29T14:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "742251cb77d37722f13a482f",
+   "symbol": "BILLUSDT",
+   "asset": "BILL",
+   "launch_ts": "2026-05-07T08:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "56f2f342b29eec0adafc21d9",
+   "symbol": "PHAROSUSDT",
+   "asset": "PHAROS",
+   "launch_ts": "2026-05-14T05:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "1a859f85a0722b921770c970",
+   "symbol": "SPCXUSDT",
+   "asset": "SPCX",
+   "launch_ts": "2026-05-21T04:45:00+00:00",
+   "classification": "PROVIDER_NEEDED",
+   "blocking": true,
+   "reasons": [
+    "core market state incomplete (mark, index reference or trades missing for part of the window)",
+    "what is missing is not published free"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 84,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "976b92e9c98390bef992d712",
+   "symbol": "OPENAIUSDT",
+   "asset": "OPENAI",
+   "launch_ts": "2026-05-26T08:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "572cd83f5720bcd5d1c2187c",
+   "symbol": "CTRUSDT",
+   "asset": "CTR",
+   "launch_ts": "2026-05-28T09:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "71e4da15c6c4a9bb54da9834",
+   "symbol": "QNTXUSDT",
+   "asset": "QNTX",
+   "launch_ts": "2026-05-29T08:15:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "03ba3fbc3b60d01293ced6b8",
+   "symbol": "SLXUSDT",
+   "asset": "SLX",
+   "launch_ts": "2026-06-01T07:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "d913e3b032076ea0acc1c625",
+   "symbol": "ANTHROPICUSDT",
+   "asset": "ANTHROPIC",
+   "launch_ts": "2026-06-02T04:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "baf507f943c3234dd3349b17",
+   "symbol": "ZESTUSDT",
+   "asset": "ZEST",
+   "launch_ts": "2026-06-04T14:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "ace902e11e083aed89453fd5",
+   "symbol": "ARXUSDT",
+   "asset": "ARX",
+   "launch_ts": "2026-06-23T04:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "dda6f21f5273653ecc988770",
+   "symbol": "OUSDT",
+   "asset": "OUSDT",
+   "launch_ts": "2026-06-24T11:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "c5b864cf4dd397c1d6ef3939",
+   "symbol": "CAPUSDT",
+   "asset": "CAP",
+   "launch_ts": "2026-06-27T11:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "230ce5a85a2127398ae882db",
+   "symbol": "DATAIPUSDT",
+   "asset": "DATAIP",
+   "launch_ts": "2026-07-03T06:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "NO_OTHER_VENUE"
+  },
+  {
+   "event_id": "ebcb069f413d87e3ef9e100d",
+   "symbol": "SKHYUSDT",
+   "asset": "SKHY",
+   "launch_ts": "2026-07-10T15:50:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "da994df5057188e2584557f8",
+   "symbol": "POPMARTUSDT",
+   "asset": "POPMART",
+   "launch_ts": "2026-07-23T02:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "236fa99f5592a4897da47982",
+   "symbol": "GRVTUSDT",
+   "asset": "GRVT",
+   "launch_ts": "2026-07-31T12:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "43f2c0248b765f05f8838aac",
+   "symbol": "GIGADEVUSDT",
+   "asset": "GIGADEV",
+   "launch_ts": "2026-08-03T05:30:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 79,
+   "venue_precedence": "UNKNOWN_PRECEDENCE"
+  },
+  {
+   "event_id": "59e06472fc86d6593e4f1ec7",
+   "symbol": "DOSUSDT",
+   "asset": "DOS",
+   "launch_ts": "2026-08-11T15:00:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "8e5439011d436434070c3559",
+   "symbol": "UNITREEUSDT",
+   "asset": "UNITREE",
+   "launch_ts": "2026-08-19T02:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 89,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "52458484e807a05d5e6a8195",
+   "symbol": "MARSCOINUSDT",
+   "asset": "MARSCOIN",
+   "launch_ts": "2026-09-01T09:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 84,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "9d284c44285f781ea3153bc1",
+   "symbol": "GPROUSDT",
+   "asset": "GPRO",
+   "launch_ts": "2026-09-03T13:45:00+00:00",
+   "classification": "BAD_TIMESTAMP",
+   "blocking": true,
+   "reasons": [
+    "announced time and first traded bar disagree by +825 min"
+   ],
+   "timestamp_gap_min": 825.0,
+   "coverage_score": 84,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  },
+  {
+   "event_id": "266efa4370e672325fa7860d",
+   "symbol": "PONSUSDT",
+   "asset": "PONS",
+   "launch_ts": "2026-09-06T06:45:00+00:00",
+   "classification": "INSUFFICIENT_EXECUTION_DATA",
+   "blocking": true,
+   "reasons": [
+    "the fee actually charged on this account is unknown (published schedule only)",
+    "capacity has not been measured (depth archives exist; nothing has been derived from them)"
+   ],
+   "timestamp_gap_min": 0.0,
+   "coverage_score": 84,
+   "venue_precedence": "OTHER_VENUE_FIRST"
+  }
+ ],
+ "no_alpha_test": true,
+ "no_return_computed": true,
+ "capital_deployable": false,
+ "freeze_sha256": "4f077025c30f6bfdb3deea0425b4c0d8837285b738367c799b232b798c42e39c"
+}
