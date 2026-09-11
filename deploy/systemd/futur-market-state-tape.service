@@ -7,6 +7,7 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=/home/qbee/futur
 ExecStart=/home/qbee/futur/.venv/bin/python -m data_lake.collectors.market_state_tape --mode lightweight_watch
+KillMode=process
 Restart=always
 RestartSec=10
 Nice=10

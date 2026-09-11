@@ -145,3 +145,11 @@ transition, onboardDate, shortability, death); it polls mark/index/funding (all 
 captures the microstructure of one market (L2, trades, bookTicker, mark/index, OI, funding, latency) from t0 − 30 min when anticipated
 to t0 + 6 h, with a hashed `triggered_window_manifest`. Everything is append-only; no signal, no verdict, no order, no join to any
 result. Validated sleeves: 0. Capital deployable: **false.** Budget: 0. The tape does not credit budget (no new independent episodes).
+
+
+## P5 — data completion router (2026-09-11): a map of what is missing, not an alpha
+
+P5 turns the P4 collection into indices: `CURRENT_COLLECTION_INVENTORY` (what the tape holds, hashed, with a health
+sheet), `H2_LAUNCH_COVERAGE_MATRIX` (one row per H2 launch: what is in hand, what is free to backfill, what needs a
+provider, what is live-only, scored on 100 points) and `H2_PROVIDER_REQUEST_WINDOWS` (the targeted request to send
+before paying anything). No price join, no signal, no verdict, no budget. Validated sleeves: 0. Capital deployable: **false.**

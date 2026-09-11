@@ -1,0 +1,618 @@
+{
+ "generated_at_utc": "2026-09-11T16:20:37+00:00",
+ "root": "/home/qbee/futur/data_lake/market_state",
+ "present": true,
+ "exchange_info": {
+  "binance_spot": {
+   "snapshots": 15,
+   "last_snapshot_at": "2026-09-11T06:33:38.826695+00:00",
+   "n_symbols": 3698,
+   "changes_logged": 16486,
+   "changes_by_type": {
+    "filters_changed": 12769,
+    "symbol_added": 3698,
+    "permissions_changed": 8,
+    "margin_trading_changed": 8,
+    "status_changed": 3
+   },
+   "last_view_sha256": "203a3a13876f214d4944115bd8400b55f5da36153261d44aa31e75243a65f468",
+   "changes_sha256": "fec695f22c45ce93a0a681bcf111da7da6575193431ce04b5e03b2c26fdb4d76"
+  },
+  "binance_um": {
+   "snapshots": 2,
+   "last_snapshot_at": "2026-09-11T05:08:02.302196+00:00",
+   "n_symbols": 897,
+   "changes_logged": 1794,
+   "changes_by_type": {
+    "symbol_added": 897,
+    "filters_changed": 897
+   },
+   "last_view_sha256": "f77ed0f1e98982aeef86f777469511049514a99ba68e8af3ab060cb1cb67bd48",
+   "changes_sha256": "416964c9295d477963019b493debe365f3aea96250a77a5889e942f244fd2fe4"
+  }
+ },
+ "lifecycle": {
+  "events": 13685,
+  "by_kind": {
+   "filters_change": 13674,
+   "status_change": 3,
+   "shortability_change": 8
+  },
+  "by_venue": {
+   "binance_spot": 12788,
+   "binance_um": 897
+  },
+  "by_change": {
+   "filters_changed": 13666,
+   "permissions_changed": 8
+  },
+  "last_event_at": "2026-09-11T06:33:39.320276+00:00",
+  "first_event_at": "2026-09-10T23:00:40.258495+00:00",
+  "symbols_tracked": 4521,
+  "dead": 0,
+  "max_history_len": 1,
+  "state_size_mb": 1.04,
+  "state_sha256": "eadac8b473a19d605e4c1b14a7439e09996ea2ab0e6fb6d0f17ffcfc67c13850",
+  "births": [],
+  "deaths": [],
+  "status_changes": [
+   [
+    "2026-09-11T03:00:18.385297+00:00",
+    "binance_spot",
+    "SAGAFDUSD",
+    "TRADING",
+    "BREAK"
+   ],
+   [
+    "2026-09-11T03:00:18.390920+00:00",
+    "binance_spot",
+    "VELODROMEUSDC",
+    "TRADING",
+    "BREAK"
+   ],
+   [
+    "2026-09-11T03:00:18.395024+00:00",
+    "binance_spot",
+    "OPENFDUSD",
+    "TRADING",
+    "BREAK"
+   ]
+  ]
+ },
+ "market_state_snapshot": {
+  "watch_open_interest": {
+   "files": 2,
+   "rows": 5269,
+   "symbols": 566,
+   "first_ts_local": "2026-09-10T22:50:48.365792+00:00",
+   "last_ts_local": "2026-09-10T23:56:13.497647+00:00",
+   "sources": {
+    "watch_open_interest": 5269
+   },
+   "bytes": 6101903,
+   "size_mb": 6.1
+  },
+  "watch_premium_index": {
+   "files": 2,
+   "rows": 59400,
+   "symbols": 900,
+   "first_ts_local": "2026-09-10T22:50:48.425049+00:00",
+   "last_ts_local": "2026-09-10T23:59:01.520364+00:00",
+   "sources": {
+    "watch_premium_index": 59400
+   },
+   "bytes": 69030032,
+   "size_mb": 69.0
+  }
+ },
+ "windows": {
+  "count": 16,
+  "final": 11,
+  "in_progress": 5,
+  "by_type": {
+   "funding_extreme": 2,
+   "liquidation_burst": 11,
+   "manual": 3
+  },
+  "mean_completeness_final": 0.8635,
+  "missing_fields_top": {
+   "depth_50bps_bid_usd": 6,
+   "depth_50bps_ask_usd": 6,
+   "depth_25bps_bid_usd": 4,
+   "depth_25bps_ask_usd": 4,
+   "open_interest": 1,
+   "depth_10bps_bid_usd": 1,
+   "depth_10bps_ask_usd": 1,
+   "imbalance_10bps": 1
+  },
+  "first_fields_missing_in_final": {
+   "first_oi_ts": 1
+  },
+  "total_size_mb": 1365.0,
+  "reconnects_total": 18,
+  "items": [
+   {
+    "trigger_id": "funding_extreme_NEWTUSDT_20260911T050801",
+    "trigger_type": "funding_extreme",
+    "symbol": "NEWTUSDT",
+    "start_ts": "2026-09-11T05:08:01+00:00",
+    "end_ts": "2026-09-11T11:08:11.996366+00:00",
+    "final": true,
+    "duration_s": 21610.996366,
+    "snapshots": 21542,
+    "completeness_score": 0.9987,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 114.0638427734375,
+    "pre_window_missing": true,
+    "files_hashed": 8,
+    "size_mb": 26.7,
+    "manifest_sha256": "f14e1c96e8fcddcb280a62b2bbb4ac1636c45555ca72a8f69641dabe975404ca"
+   },
+   {
+    "trigger_id": "funding_extreme_VTHOUSDT_20260911T111356",
+    "trigger_type": "funding_extreme",
+    "symbol": "VTHOUSDT",
+    "start_ts": "2026-09-11T11:13:56+00:00",
+    "end_ts": null,
+    "final": false,
+    "duration_s": null,
+    "snapshots": 18300,
+    "completeness_score": 0.9966,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 169.431640625,
+    "pre_window_missing": true,
+    "files_hashed": 0,
+    "size_mb": 84.5,
+    "manifest_sha256": "abf24921f7a6a611f44d72d9c59d68a09f079b38512f1e8a36a11e601f9c72ad"
+   },
+   {
+    "trigger_id": "liquidation_burst_AKEUSDT_20260911T051018",
+    "trigger_type": "liquidation_burst",
+    "symbol": "AKEUSDT",
+    "start_ts": "2026-09-11T05:10:18+00:00",
+    "end_ts": "2026-09-11T11:10:29.113260+00:00",
+    "final": true,
+    "duration_s": 21611.11326,
+    "snapshots": 21542,
+    "completeness_score": 0.996,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 113.4603271484375,
+    "pre_window_missing": true,
+    "files_hashed": 8,
+    "size_mb": 113.4,
+    "manifest_sha256": "de24da87e09d57d37885358abc19b8b250252b430140c02e85deab03994bdbff"
+   },
+   {
+    "trigger_id": "liquidation_burst_BEATUSDT_20260911T050415",
+    "trigger_type": "liquidation_burst",
+    "symbol": "BEATUSDT",
+    "start_ts": "2026-09-11T05:04:15+00:00",
+    "end_ts": null,
+    "final": false,
+    "duration_s": null,
+    "snapshots": 180,
+    "completeness_score": 0.9991,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 111.7216796875,
+    "pre_window_missing": true,
+    "files_hashed": 0,
+    "size_mb": 0.7,
+    "manifest_sha256": "2f5f8b9b9b82093e6c0e07de979caf280f57b2ad1b69e63acb62e6518714b898"
+   },
+   {
+    "trigger_id": "liquidation_burst_BTCUSDT_20260910T225909",
+    "trigger_type": "liquidation_burst",
+    "symbol": "BTCUSDT",
+    "start_ts": "2026-09-10T22:59:09+00:00",
+    "end_ts": "2026-09-11T04:59:20.266261+00:00",
+    "final": true,
+    "duration_s": 21611.266261,
+    "snapshots": 21546,
+    "completeness_score": 0.7866,
+    "missing_fields": [
+     "depth_25bps_bid_usd",
+     "depth_25bps_ask_usd",
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 4,
+    "latency_ms_median": 111.21923828125,
+    "pre_window_missing": true,
+    "files_hashed": 15,
+    "size_mb": 161.6,
+    "manifest_sha256": "32207f28cb3980c8c0680e306cc343071361079442bed183e090a2f067b6958d"
+   },
+   {
+    "trigger_id": "liquidation_burst_ETHUSDT_20260910T225909",
+    "trigger_type": "liquidation_burst",
+    "symbol": "ETHUSDT",
+    "start_ts": "2026-09-10T22:59:09+00:00",
+    "end_ts": "2026-09-11T04:59:19.672666+00:00",
+    "final": true,
+    "duration_s": 21610.672666,
+    "snapshots": 21548,
+    "completeness_score": 0.8848,
+    "missing_fields": [
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 4,
+    "latency_ms_median": 110.6983642578125,
+    "pre_window_missing": true,
+    "files_hashed": 15,
+    "size_mb": 176.1,
+    "manifest_sha256": "b545194691bb815f4a56939615e167599802b649b7d63afcdd70a258e06a3787"
+   },
+   {
+    "trigger_id": "liquidation_burst_LABUSDT_20260911T112406",
+    "trigger_type": "liquidation_burst",
+    "symbol": "LABUSDT",
+    "start_ts": "2026-09-11T11:24:06+00:00",
+    "end_ts": null,
+    "final": false,
+    "duration_s": null,
+    "snapshots": 17700,
+    "completeness_score": 0.9968,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 1,
+    "latency_ms_median": 180.0,
+    "pre_window_missing": true,
+    "files_hashed": 0,
+    "size_mb": 97.6,
+    "manifest_sha256": "dae118d6b4a9e2b357eb0b964c9845ce70ce08bb2f9d4d61ef98a0bc48700c4d"
+   },
+   {
+    "trigger_id": "liquidation_burst_METUSDT_20260911T111845",
+    "trigger_type": "liquidation_burst",
+    "symbol": "METUSDT",
+    "start_ts": "2026-09-11T11:18:45+00:00",
+    "end_ts": null,
+    "final": false,
+    "duration_s": null,
+    "snapshots": 18060,
+    "completeness_score": 1.0,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 110.897216796875,
+    "pre_window_missing": true,
+    "files_hashed": 0,
+    "size_mb": 94.1,
+    "manifest_sha256": "1a5866ddde4f46b14ee35c31a652bf291395b1250e38f543d0d6b9c11e4e5c66"
+   },
+   {
+    "trigger_id": "liquidation_burst_PUMPUSDT_20260910T225710",
+    "trigger_type": "liquidation_burst",
+    "symbol": "PUMPUSDT",
+    "start_ts": "2026-09-10T22:57:10+00:00",
+    "end_ts": "2026-09-11T04:57:19.139614+00:00",
+    "final": true,
+    "duration_s": 21609.139614,
+    "snapshots": 21547,
+    "completeness_score": 1.0,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 3,
+    "latency_ms_median": 111.0899658203125,
+    "pre_window_missing": true,
+    "files_hashed": 15,
+    "size_mb": 90.2,
+    "manifest_sha256": "c0d6e934af45ff8d7ba27097c1d5abed7cd6193aac9ca3ebecff8b4d3a6f3ac7"
+   },
+   {
+    "trigger_id": "liquidation_burst_RAYSOLUSDT_20260911T051618",
+    "trigger_type": "liquidation_burst",
+    "symbol": "RAYSOLUSDT",
+    "start_ts": "2026-09-11T05:16:18+00:00",
+    "end_ts": "2026-09-11T11:16:26.768956+00:00",
+    "final": true,
+    "duration_s": 21608.768956,
+    "snapshots": 21545,
+    "completeness_score": 0.9934,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 114.182861328125,
+    "pre_window_missing": true,
+    "files_hashed": 8,
+    "size_mb": 129.3,
+    "manifest_sha256": "fcac9c38f5f6e5a7c3de3d133cc5276ca92777dafd0a20c41269be3ca21fc605"
+   },
+   {
+    "trigger_id": "liquidation_burst_ZECUSDT_20260910T225847",
+    "trigger_type": "liquidation_burst",
+    "symbol": "ZECUSDT",
+    "start_ts": "2026-09-10T22:58:47+00:00",
+    "end_ts": "2026-09-11T04:58:57.653403+00:00",
+    "final": true,
+    "duration_s": 21610.653403,
+    "snapshots": 21540,
+    "completeness_score": 0.9877,
+    "missing_fields": [],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 4,
+    "latency_ms_median": 111.0797119140625,
+    "pre_window_missing": true,
+    "files_hashed": 15,
+    "size_mb": 161.8,
+    "manifest_sha256": "fa4c24241e99ab869aa10e2b9f077523d57726219f13c1ae8eafe1c8feaf7edf"
+   },
+   {
+    "trigger_id": "liquidation_burst_牛来USDT_20260911T050920",
+    "trigger_type": "liquidation_burst",
+    "symbol": "牛来USDT",
+    "start_ts": "2026-09-11T05:09:20+00:00",
+    "end_ts": "2026-09-11T11:09:29.339658+00:00",
+    "final": true,
+    "duration_s": 21609.339658,
+    "snapshots": 21553,
+    "completeness_score": 0.7368,
+    "missing_fields": [
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd",
+     "open_interest"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": false
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 114.314453125,
+    "pre_window_missing": true,
+    "files_hashed": 6,
+    "size_mb": 125.9,
+    "manifest_sha256": "f1f433d2e1430b4cd18e63cbd07e2a40cde335e36509f55883d9c7c30f1ebbfa"
+   },
+   {
+    "trigger_id": "liquidation_burst_牛来USDT_20260911T111916",
+    "trigger_type": "liquidation_burst",
+    "symbol": "牛来USDT",
+    "start_ts": "2026-09-11T11:19:16+00:00",
+    "end_ts": null,
+    "final": false,
+    "duration_s": null,
+    "snapshots": 17999,
+    "completeness_score": 0.7368,
+    "missing_fields": [
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd",
+     "open_interest"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": false
+    },
+    "ws_reconnects": 2,
+    "latency_ms_median": 111.61962890625,
+    "pre_window_missing": true,
+    "files_hashed": 0,
+    "size_mb": 102.4,
+    "manifest_sha256": "bd153b910ebcb65258b2ae69513dd984b82c344e00d1352770ffa0ca8b49d644"
+   },
+   {
+    "trigger_id": "manual_BTCUSDT_20260910T224418_f9bb40",
+    "trigger_type": "manual",
+    "symbol": "BTCUSDT",
+    "start_ts": "2026-09-10T22:44:18+00:00",
+    "end_ts": "2026-09-10T22:45:54.849759+00:00",
+    "final": true,
+    "duration_s": 96.849759,
+    "snapshots": 90,
+    "completeness_score": 0.6292,
+    "missing_fields": [
+     "depth_10bps_bid_usd",
+     "depth_10bps_ask_usd",
+     "depth_25bps_bid_usd",
+     "depth_25bps_ask_usd",
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd",
+     "imbalance_10bps"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 110.8643798828125,
+    "pre_window_missing": true,
+    "files_hashed": 5,
+    "size_mb": 0.1,
+    "manifest_sha256": "8d579682c4cbbe00f6e850caa262d4234b5f8d6250d12ba748ff835a292e51d2"
+   },
+   {
+    "trigger_id": "manual_BTCUSDT_20260910T224938_ad8af1",
+    "trigger_type": "manual",
+    "symbol": "BTCUSDT",
+    "start_ts": "2026-09-10T22:49:38+00:00",
+    "end_ts": "2026-09-10T22:50:47.797098+00:00",
+    "final": true,
+    "duration_s": 69.797098,
+    "snapshots": 60,
+    "completeness_score": 0.7,
+    "missing_fields": [
+     "depth_25bps_bid_usd",
+     "depth_25bps_ask_usd",
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 112.6431884765625,
+    "pre_window_missing": true,
+    "files_hashed": 7,
+    "size_mb": 0.3,
+    "manifest_sha256": "67a33cc82b03705a0220f3d6b9989eb881ea4517ed18d8dfa64e3be184929631"
+   },
+   {
+    "trigger_id": "manual_BTCUSDT_20260910T225257_07b0f1",
+    "trigger_type": "manual",
+    "symbol": "BTCUSDT",
+    "start_ts": "2026-09-10T22:52:57+00:00",
+    "end_ts": "2026-09-10T22:53:46.009203+00:00",
+    "final": true,
+    "duration_s": 49.009203,
+    "snapshots": 40,
+    "completeness_score": 0.7855,
+    "missing_fields": [
+     "depth_25bps_bid_usd",
+     "depth_25bps_ask_usd",
+     "depth_50bps_bid_usd",
+     "depth_50bps_ask_usd"
+    ],
+    "first_fields_present": {
+     "first_orderbook_ts": true,
+     "first_trade_ts": true,
+     "first_mark_ts": true,
+     "first_index_ts": true,
+     "first_oi_ts": true
+    },
+    "ws_reconnects": 0,
+    "latency_ms_median": 110.390380859375,
+    "pre_window_missing": true,
+    "files_hashed": 7,
+    "size_mb": 0.3,
+    "manifest_sha256": "a594526d2b1dc32824c32ffc51c7c4e6aa58b7e41a2fc3aa4eb7990688ea1f2f"
+   }
+  ]
+ },
+ "triggers": {
+  "total": 15279,
+  "fired": 13,
+  "logged_only": 4,
+  "skipped_by_reason": {
+   "max_concurrent_captures": 12368,
+   "cooldown": 2891,
+   "spot_symbol_no_ws_capture": 3
+  },
+  "by_type": {
+   "funding_extreme": 2621,
+   "liquidation_burst": 12653,
+   "status_change": 3,
+   "oi_spike": 2
+  },
+  "fired_by_type": {
+   "liquidation_burst": 11,
+   "funding_extreme": 2
+  },
+  "last_at": "2026-09-11T16:20:33.475161+00:00",
+  "sha256": "1f89301d14f9da803036bb7006b43155d1650dd9781486801bd90fe424d94dc4"
+ },
+ "watch_log": {
+  "heartbeats": 134,
+  "first_at": "2026-09-11T05:12:58.538697+00:00",
+  "last_at": "2026-09-11T16:19:33.771181+00:00",
+  "rss_mb_first": 347,
+  "rss_mb_last": 564,
+  "rss_mb_max": 564,
+  "errors_last": {},
+  "active_captures_last": 4,
+  "polls_last": {
+   "spot_polls": 650,
+   "oi_polls": 50940,
+   "premium_polls": 667,
+   "ticker_polls": 135,
+   "um_polls": 6680
+  },
+  "force_orders_last": 22868,
+  "light_snapshots_last": 600300
+ },
+ "disk": {
+  "tape_size_mb": 1741.4,
+  "free_gb": 43.0,
+  "total_gb": 982.3
+ },
+ "hashes": {},
+ "no_alpha_test": true
+}

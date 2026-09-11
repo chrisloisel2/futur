@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Deque, Dict, List, Optional, Tuple
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from data_lake.collectors.market_state_schema import (MARKET_STATE_SNAPSHOT, TAPE_ROOT, AppendOnlyJsonl, completeness,
@@ -164,7 +165,7 @@ class WindowCapture:
     async def rest_loop(self):
         while not self.stop.is_set():
             try:
-                await self.pacer.take(20); d = await asyncio.get_event_loop().run_in_executor(None, _get, f"{FAPI}/depth?symbol={self.symbol}&limit=1000")
+                await self.pacer.take(20); d = await asyncio.get_event_loop().run_in_executor(None, _get, f"{FAPI}/depth?symbol={quote(self.symbol)}&limit=1000")
                 self.book_rest = {"bids": parse_levels(d["bids"]), "asks": parse_levels(d["asks"]), "E": d.get("E"), "T": d.get("T")}; self.msgs["rest_depth"] += 1
                 self._first("first_orderbook_ts", d.get("E")); self.raw.write("raw_rest_depth", {"recv_ns": now_ns(), "msg": d}, venue=self.venue, name="rest_depth")
             except Exception:
@@ -174,7 +175,7 @@ class WindowCapture:
     async def oi_loop(self):
         while not self.stop.is_set():
             try:
-                await self.pacer.take(1); d = await asyncio.get_event_loop().run_in_executor(None, _get, f"{FAPI}/openInterest?symbol={self.symbol}")
+                await self.pacer.take(1); d = await asyncio.get_event_loop().run_in_executor(None, _get, f"{FAPI}/openInterest?symbol={quote(self.symbol)}")
                 self.oi = {"oi": float(d["openInterest"]), "time": d.get("time")}; self.msgs["rest_oi"] += 1; self._first("first_oi_ts", d.get("time"))
                 self.raw.write("raw_rest_oi", {"recv_ns": now_ns(), "msg": d}, venue=self.venue, name="rest_oi")
             except Exception:
