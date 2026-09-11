@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-10T07:31:31.437943+00:00",
-  "n_forward_intents_total": 256,
+  "generated_at": "2026-09-11T16:30:10.663061+00:00",
+  "n_forward_intents_total": 268,
   "screened_symbols": [
-    "SANDUSDT",
-    "UNIUSDT"
+    "DOGEUSDT",
+    "ENAUSDT"
   ],
   "vol_overlay_multiplier": 1.0,
   "forward_capital_eligibility": [
@@ -197,9 +197,9 @@
   "negative_expected_value_gate": [
     {
       "alpha_id": "LIQ_CASCADE_REPEAT_V1",
-      "n_decisions_in": 59,
+      "n_decisions_in": 71,
       "n_blocked_negative_ev": 0,
-      "n_decisions_sized": 59,
+      "n_decisions_sized": 71,
       "blocked_reason": "REJECT_NEGATIVE_EXPECTED_VALUE"
     },
     {
@@ -219,30 +219,30 @@
   ],
   "portfolios": {
     "P1_EQUAL_RISK": {
-      "status": "OK",
+      "status": "DEGRADED",
       "n_positions": 166,
-      "gross_exposure": 26876.670727749297,
-      "net_exposure": -2511.7102809354415,
-      "realized_pnl": 3153.0728392080377,
-      "unrealized_pnl": -108.41629792235533,
-      "total_pnl": 3044.6565412856826,
-      "cumulative_fees_usd": 1255.778983939448,
-      "cumulative_funding_usd": -9.199232905915647,
-      "cumulative_turnover_usd": 2511557.967878858,
+      "gross_exposure": 29260.551196025932,
+      "net_exposure": 14380.680397012895,
+      "realized_pnl": 3160.9489422034903,
+      "unrealized_pnl": 38.57217997374925,
+      "total_pnl": 3199.5211221772397,
+      "cumulative_fees_usd": 1266.9764145097276,
+      "cumulative_funding_usd": -10.02799878992794,
+      "cumulative_turnover_usd": 2533952.8290194185,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.3875152579169,
         "LIQ_CASCADE_REPEAT_V1": 295.8108028172802,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 17.58066586424418
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 28.778096434524212
       },
       "pnl_by_alpha": {
-        "UNATTRIBUTED": 1.4663342482140727,
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -15.754243015081933,
         "LIQ_CASCADE_REPEAT_V1": 2006.3781785622596,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -170.61882390663925,
-        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484
+        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484,
+        "UNATTRIBUTED": 1.4663342482140727
       },
-      "equity": 201779.67832444032,
-      "drawdown": -0.007597475341004919,
-      "n_equity_points": 642,
+      "equity": 201922.51670887755,
+      "drawdown": -0.006894960724514182,
+      "n_equity_points": 643,
       "overlay_status": "NO_OVERLAY",
       "overlay_steps": 0,
       "overlay_binding_steps": 0,
@@ -252,28 +252,28 @@
     "P1_CONTROL": {
       "status": "DEGRADED",
       "n_positions": 166,
-      "gross_exposure": 8056.3372763883535,
-      "net_exposure": -8056.3372763883535,
-      "realized_pnl": 3238.7185087608673,
-      "unrealized_pnl": -26.778233134291483,
-      "total_pnl": 3211.940275626576,
-      "cumulative_fees_usd": 1245.974151789575,
-      "cumulative_funding_usd": -9.207186417094777,
-      "cumulative_turnover_usd": 2491948.3035791353,
+      "gross_exposure": 29260.551196025932,
+      "net_exposure": 14380.680397012895,
+      "realized_pnl": 3246.59461175632,
+      "unrealized_pnl": 38.57217997374925,
+      "total_pnl": 3285.1667917300692,
+      "cumulative_fees_usd": 1257.1560473682237,
+      "cumulative_funding_usd": -10.03595230110707,
+      "cumulative_turnover_usd": 2514312.0947364336,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.5207540304615,
         "LIQ_CASCADE_REPEAT_V1": 295.81307326032925,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 7.6403244987823085
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 18.822220077431183
       },
       "pnl_by_alpha": {
-        "UNATTRIBUTED": 1.4663342482140727,
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -15.754243015081933,
         "LIQ_CASCADE_REPEAT_V1": 2010.9190646603197,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -88.98075911857542,
-        "SHORT_COVERING_CONTINUATION_V1": 1288.535635836618
+        "SHORT_COVERING_CONTINUATION_V1": 1288.535635836618,
+        "UNATTRIBUTED": 1.4663342482140727
       },
-      "equity": 201956.7589374199,
-      "drawdown": -0.0071443576653062,
-      "n_equity_points": 642,
+      "equity": 202017.97479206073,
+      "drawdown": -0.006843409546509452,
+      "n_equity_points": 643,
       "overlay_status": "NO_OVERLAY",
       "overlay_steps": 0,
       "overlay_binding_steps": 0,
@@ -283,30 +283,30 @@
     "P1_VOL_OVERLAY": {
       "status": "DEGRADED",
       "n_positions": 166,
-      "gross_exposure": 8056.3372763883535,
-      "net_exposure": -8056.3372763883535,
-      "realized_pnl": 3185.1473668489803,
-      "unrealized_pnl": -26.778233134291483,
-      "total_pnl": 3158.369133714689,
-      "cumulative_fees_usd": 1240.816859229772,
-      "cumulative_funding_usd": -9.332448770582094,
-      "cumulative_turnover_usd": 2481633.718459535,
+      "gross_exposure": 29260.551196025932,
+      "net_exposure": 14380.680397012895,
+      "realized_pnl": 3193.023469844433,
+      "unrealized_pnl": 38.57217997374925,
+      "total_pnl": 3231.595649818182,
+      "cumulative_fees_usd": 1251.9987548084207,
+      "cumulative_funding_usd": -10.161214654594387,
+      "cumulative_turnover_usd": 2503997.509616833,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 940.0731169473472,
         "LIQ_CASCADE_REPEAT_V1": 295.8144820406699,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 4.929260241754186
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 16.111155820403063
       },
       "pnl_by_alpha": {
-        "UNATTRIBUTED": 1.4663342482140727,
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -15.754243015081933,
         "LIQ_CASCADE_REPEAT_V1": 2013.7366253414807,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -88.98075911857542,
-        "SHORT_COVERING_CONTINUATION_V1": 1232.1469332435713
+        "SHORT_COVERING_CONTINUATION_V1": 1232.1469332435713,
+        "UNATTRIBUTED": 1.4663342482140727
       },
-      "equity": 201908.21982571433,
-      "drawdown": -0.007132826739019277,
-      "n_equity_points": 642,
+      "equity": 201969.43568035515,
+      "drawdown": -0.006831802775713339,
+      "n_equity_points": 643,
       "overlay_status": "OVERLAY_NEVER_BINDING",
-      "overlay_steps": 368,
+      "overlay_steps": 369,
       "overlay_binding_steps": 0,
       "overlay_multiplier_min": 1.0,
       "overlay_multiplier_mean": 1.0
@@ -314,28 +314,28 @@
     "P2_DIVERSIFIED": {
       "status": "DEGRADED",
       "n_positions": 166,
-      "gross_exposure": 8056.3372763883535,
-      "net_exposure": -8056.3372763883535,
-      "realized_pnl": 3232.9173473893957,
-      "unrealized_pnl": -26.778233134291483,
-      "total_pnl": 3206.1391142551042,
-      "cumulative_fees_usd": 1243.2696897835892,
-      "cumulative_funding_usd": -9.204993447258934,
-      "cumulative_turnover_usd": 2486539.379567171,
+      "gross_exposure": 29260.551196025932,
+      "net_exposure": 14380.680397012895,
+      "realized_pnl": 3240.7934503848483,
+      "unrealized_pnl": 38.57217997374925,
+      "total_pnl": 3279.3656303585976,
+      "cumulative_fees_usd": 1254.451585362238,
+      "cumulative_funding_usd": -10.033759331271227,
+      "cumulative_turnover_usd": 2508903.1707244692,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 942.5259999721351,
         "LIQ_CASCADE_REPEAT_V1": 295.81442956969954,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 4.929260241754186
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 16.111155820403063
       },
       "pnl_by_alpha": {
-        "UNATTRIBUTED": 1.4663342482140727,
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -15.754243015081933,
         "LIQ_CASCADE_REPEAT_V1": 2006.1578857405525,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -88.98075911857542,
-        "SHORT_COVERING_CONTINUATION_V1": 1287.495653384912
+        "SHORT_COVERING_CONTINUATION_V1": 1287.495653384912,
+        "UNATTRIBUTED": 1.4663342482140727
       },
-      "equity": 201953.66443102423,
-      "drawdown": -0.007131233121402792,
-      "n_equity_points": 642,
+      "equity": 202014.88028566507,
+      "drawdown": -0.006830276412932493,
+      "n_equity_points": 643,
       "overlay_status": "NO_OVERLAY",
       "overlay_steps": 0,
       "overlay_binding_steps": 0,
@@ -345,28 +345,28 @@
     "P3_ALL_CANDIDATES": {
       "status": "DEGRADED",
       "n_positions": 166,
-      "gross_exposure": 2417.337226450037,
-      "net_exposure": -2417.337226450037,
-      "realized_pnl": 1927.9744454240679,
-      "unrealized_pnl": -8.18059994400849,
-      "total_pnl": 1919.7938454800594,
-      "cumulative_fees_usd": 530.8753056719736,
-      "cumulative_funding_usd": -3.038092075536791,
-      "cumulative_turnover_usd": 1061750.6113439503,
+      "gross_exposure": 8842.638808441825,
+      "net_exposure": 4409.333008341013,
+      "realized_pnl": 1931.2630433864194,
+      "unrealized_pnl": 10.491782285993004,
+      "total_pnl": 1941.7548256724124,
+      "cumulative_fees_usd": 534.277660299273,
+      "cumulative_funding_usd": -3.263872075656661,
+      "cumulative_turnover_usd": 1068555.3205985487,
       "cumulative_cost_by_alpha": {
         "SHORT_COVERING_CONTINUATION_V1": 420.2228775376965,
         "LIQ_CASCADE_REPEAT_V1": 109.44784982102244,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 1.2045783132530143
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 4.606932940552363
       },
       "pnl_by_alpha": {
-        "UNATTRIBUTED": 0.43990027446421975,
-        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 13.78038024834456,
         "LIQ_CASCADE_REPEAT_V1": 879.1312013508666,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -8.18059994400849
+        "SHORT_COVERING_CONTINUATION_V1": 1048.4033437987357,
+        "UNATTRIBUTED": 0.43990027446421975
       },
-      "equity": 201385.88044773258,
-      "drawdown": -0.002575810643056733,
-      "n_equity_points": 642,
+      "equity": 201404.2132932975,
+      "drawdown": -0.00248501170727457,
+      "n_equity_points": 643,
       "overlay_status": "NO_OVERLAY",
       "overlay_steps": 0,
       "overlay_binding_steps": 0,
