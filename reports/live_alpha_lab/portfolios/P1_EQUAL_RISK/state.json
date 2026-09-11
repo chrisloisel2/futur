@@ -6,7 +6,7 @@
       "entry_price": 7.86494999534,
       "realized_pnl": -573.8215379444499,
       "fees_paid": 18.95560841468695,
-      "funding_paid": -1.7873960281253478,
+      "funding_paid": -1.7819163483589266,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "1000BONKUSDT": {
@@ -33,7 +33,7 @@
       "entry_price": 0.0034406817260000003,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.0006470456655820528,
+      "funding_paid": -0.01939767850965724,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "1000SATSUSDT": {
@@ -69,7 +69,7 @@
       "entry_price": 123.92521000000002,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.01864360492643897,
+      "funding_paid": 0.007176442819871658,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "ACEUSDT": {
@@ -114,7 +114,7 @@
       "entry_price": 0.21035792,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.02055343824015826,
+      "funding_paid": 0.011376545180961418,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "AEVOUSDT": {
@@ -164,11 +164,11 @@
     },
     "ALGOUSDT": {
       "instrument": "ALGOUSDT",
-      "quantity": 925.7364842788318,
-      "entry_price": 0.091686353604,
-      "realized_pnl": 11.986879286493314,
-      "fees_paid": 0.23653944334619031,
-      "funding_paid": 0.003047518967807733,
+      "quantity": -2049.0123760347556,
+      "entry_price": 0.09765396442153386,
+      "realized_pnl": 0.0,
+      "fees_paid": 0.1000470908342903,
+      "funding_paid": 0.014980482017835143,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "APTUSDT": {
@@ -177,7 +177,7 @@
       "entry_price": 0.6189643523660001,
       "realized_pnl": 0.0,
       "fees_paid": 0.1003815261044179,
-      "funding_paid": -0.010792420214291436,
+      "funding_paid": 0.003547941710726972,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "ARBUSDT": {
@@ -186,7 +186,7 @@
       "entry_price": 0.145921289904,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.005712091918833018,
+      "funding_paid": 0.0019922506670324073,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "ARIAUSDT": {
@@ -222,7 +222,7 @@
       "entry_price": 1.8336332000000004,
       "realized_pnl": 0.0,
       "fees_paid": 0.1003815261044179,
-      "funding_paid": -0.00738776656936985,
+      "funding_paid": 0.013001274014571549,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "ATUSDT": {
@@ -240,7 +240,7 @@
       "entry_price": 7.722652280576001,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.0008387948722684236,
+      "funding_paid": 0.00296787895651816,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "B2USDT": {
@@ -276,7 +276,7 @@
       "entry_price": 249.74004200000002,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.001527068453414692,
+      "funding_paid": 0.0037602051394508957,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "BEAMXUSDT": {
@@ -344,11 +344,11 @@
     },
     "BTCUSDT": {
       "instrument": "BTCUSDT",
-      "quantity": 0.14059212041452654,
-      "entry_price": 77618.0765157009,
-      "realized_pnl": 1.0186076116128175,
-      "fees_paid": 5.656498728322707,
-      "funding_paid": -0.28755607670660793,
+      "quantity": -0.002573426881517965,
+      "entry_price": 78013.8941,
+      "realized_pnl": 0.0,
+      "fees_paid": 0.1003815261044179,
+      "funding_paid": 0.011758131605157582,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "BTWUSDT": {
@@ -474,7 +474,7 @@
       "entry_price": 0.085222952,
       "realized_pnl": 0.0,
       "fees_paid": 0.1003815261044179,
-      "funding_paid": 0.007838188021865339,
+      "funding_paid": -0.00414430548398304,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "DOGSUSDT": {
@@ -510,7 +510,7 @@
       "entry_price": 1.10217952,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.016253430639231056,
+      "funding_paid": 0.013923233003355512,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "DRIFTUSDT": {
@@ -537,7 +537,7 @@
       "entry_price": 0.148680258,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.0044328012364357626,
+      "funding_paid": 0.0027722209085680773,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "ETHFIUSDT": {
@@ -555,7 +555,7 @@
       "entry_price": 2459.917918,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.01734856272614825,
+      "funding_paid": 0.008566479303468193,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "FARTCOINUSDT": {
@@ -573,7 +573,7 @@
       "entry_price": 0.16786642,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": -0.003673215072185088,
+      "funding_paid": 0.008654854626128914,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "FHEUSDT": {
@@ -600,7 +600,7 @@
       "entry_price": 0.8106378399999999,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.002318887259488923,
+      "funding_paid": 0.0038435627704213235,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "FLOWUSDT": {
@@ -681,7 +681,7 @@
       "entry_price": 0.076294738,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.012353361288602495,
+      "funding_paid": 0.00662641323235558,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "HEMIUSDT": {
@@ -726,7 +726,7 @@
       "entry_price": 2.730782714204,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.03636814837866275,
+      "funding_paid": 0.015260065855277746,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "INITUSDT": {
@@ -744,7 +744,7 @@
       "entry_price": 6.0097978,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.007345658587447874,
+      "funding_paid": 0.01492383464762106,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "INXUSDT": {
@@ -789,7 +789,7 @@
       "entry_price": 0.229477165386,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.00022966034893832406,
+      "funding_paid": -0.0023360386068063473,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "KAIAUSDT": {
@@ -812,10 +812,10 @@
     },
     "KATUSDT": {
       "instrument": "KATUSDT",
-      "quantity": 41406.993061430265,
-      "entry_price": 0.005600825841476381,
+      "quantity": 35001.431558550816,
+      "entry_price": 0.0057381474,
       "realized_pnl": 0.0,
-      "fees_paid": 0.11595667837814591,
+      "fees_paid": 0.10042168674698815,
       "funding_paid": 0.0,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
@@ -834,7 +834,7 @@
       "entry_price": 0.36862626000000004,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.02102227394857298,
+      "funding_paid": 0.009143601369241182,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "LINKUSDT": {
@@ -843,7 +843,7 @@
       "entry_price": 11.692517368732,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.002790393716669169,
+      "funding_paid": 0.0013690224451929297,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "LISTAUSDT": {
@@ -870,7 +870,7 @@
       "entry_price": 52.659466,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.016456989659430314,
+      "funding_paid": 0.009635107710499745,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "LYNUSDT": {
@@ -951,7 +951,7 @@
       "entry_price": 2.43804724301,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.02073784782631034,
+      "funding_paid": 0.008710518832408372,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "NXPCUSDT": {
@@ -978,7 +978,7 @@
       "entry_price": 0.097622361622,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": -0.015514547567626167,
+      "funding_paid": -0.011986272160835537,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "PAXGUSDT": {
@@ -996,7 +996,7 @@
       "entry_price": 1.9608824766457609,
       "realized_pnl": 0.0,
       "fees_paid": 0.10023443882486059,
-      "funding_paid": 0.013000087331524178,
+      "funding_paid": 0.014190522972150942,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "PENGUUSDT": {
@@ -1068,7 +1068,7 @@
       "entry_price": 1.430877307292,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.01206474492673623,
+      "funding_paid": 0.004455067641594495,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "RESOLVUSDT": {
@@ -1113,7 +1113,7 @@
       "entry_price": 0.036432712,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": -0.02109553770746018,
+      "funding_paid": -0.023995990604745863,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "SCRUSDT": {
@@ -1131,7 +1131,7 @@
       "entry_price": 0.046634001333999996,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": 0.013519563550537725,
+      "funding_paid": 0.00783471005450509,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "SHELLUSDT": {
@@ -1145,11 +1145,11 @@
     },
     "SOLUSDT": {
       "instrument": "SOLUSDT",
-      "quantity": 107.39549068077274,
-      "entry_price": 101.610318,
-      "realized_pnl": -1.772444513882671,
-      "fees_paid": 5.657894254385456,
-      "funding_paid": -0.4619410474894292,
+      "quantity": -1.993257187943437,
+      "entry_price": 100.721097820786,
+      "realized_pnl": 0.0,
+      "fees_paid": 0.10038152610441786,
+      "funding_paid": -0.009440799051000523,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "SOLVUSDT": {
@@ -1212,7 +1212,7 @@
       "entry_price": 0.7593481,
       "realized_pnl": 0.0,
       "fees_paid": 0.1003815261044179,
-      "funding_paid": -0.0074321751758422575,
+      "funding_paid": -0.002025379505784046,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "SWARMSUSDT": {
@@ -1257,7 +1257,7 @@
       "entry_price": 252.439502,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441786,
-      "funding_paid": -0.011294062811081926,
+      "funding_paid": 0.002620192802008194,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "TIAUSDT": {
@@ -1266,7 +1266,7 @@
       "entry_price": 0.37372524,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.0024859801911500897,
+      "funding_paid": 0.0011473320188379568,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "TOWNSUSDT": {
@@ -1302,7 +1302,7 @@
       "entry_price": 0.33905462551000004,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.11018878071912708,
+      "funding_paid": -0.005030517830392389,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "TUTUSDT": {
@@ -1320,7 +1320,7 @@
       "entry_price": 6.0007996,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.0052548337466746566,
+      "funding_paid": 0.002137359491426615,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "USDCUSDT": {
@@ -1374,7 +1374,7 @@
       "entry_price": 0.19996000000000003,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.01632378687828237,
+      "funding_paid": 0.0063075631742500375,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "WLDUSDT": {
@@ -1383,7 +1383,7 @@
       "entry_price": 0.40331932,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": -0.02084261159061503,
+      "funding_paid": -0.013213899066127707,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "WLFIUSDT": {
@@ -1464,7 +1464,7 @@
       "entry_price": 1.38002394,
       "realized_pnl": 0.0,
       "fees_paid": 0.10038152610441789,
-      "funding_paid": 0.004508535069942155,
+      "funding_paid": -0.005807416299761573,
       "owner_alpha": "AMIHUD_ILLIQUIDITY_PREMIUM_V1"
     },
     "YBUSDT": {
@@ -1497,20 +1497,20 @@
   },
   "cash": 200000.0,
   "peak_equity": 203324.43067270002,
-  "cumulative_fees_usd": 1267.04464121409,
-  "cumulative_turnover_usd": 2534089.282428143,
-  "cumulative_funding_usd": -10.048388641383168,
-  "cumulative_realized_pnl": 3164.305881592261,
+  "cumulative_fees_usd": 1255.778983939448,
+  "cumulative_turnover_usd": 2511557.967878858,
+  "cumulative_funding_usd": -9.199232905915647,
+  "cumulative_realized_pnl": 3153.0728392080377,
   "cumulative_cost_by_alpha": {
     "SHORT_COVERING_CONTINUATION_V1": 942.3875152579169,
     "LIQ_CASCADE_REPEAT_V1": 295.8108028172802,
-    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 28.84632313888656
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 17.58066586424418
   },
   "cumulative_pnl_by_alpha": {
     "UNATTRIBUTED": 1.4663342482140727,
     "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484,
     "LIQ_CASCADE_REPEAT_V1": 2006.3781785622596,
-    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -50.96948360006047
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -62.20252598428394
   },
   "equity_curve": [
     {
@@ -19515,113 +19515,9 @@
       },
       "suppressed_turnover_usd": 752866.0193535801,
       "suppressed_order_count": 4006
-    },
-    {
-      "ts": "2026-09-11T16:30:10.663061+00:00",
-      "status": "DEGRADED",
-      "cash": 200000.0,
-      "realized_pnl": 3160.9489422034903,
-      "unrealized_pnl": 38.57217997374925,
-      "pnl_by_alpha": {
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -15.754243015081933,
-        "LIQ_CASCADE_REPEAT_V1": 2006.3781785622596,
-        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484,
-        "UNATTRIBUTED": 1.4663342482140727
-      },
-      "fees": 1266.9764145097276,
-      "funding": -10.02799878992794,
-      "equity": 201922.51670887755,
-      "drawdown": -0.006894960724514182,
-      "gross_exposure": 29260.551196025932,
-      "net_exposure": 14380.680397012895,
-      "n_positions": 166,
-      "skipped_no_mark": [
-        "USDCUSDT",
-        "USUALUSDT",
-        "VELODROMEUSDT",
-        "VIRTUALUSDT",
-        "WCTUSDT",
-        "WLFIUSDT",
-        "XANUSDT",
-        "XAUTUSDT",
-        "XLMUSDT",
-        "XMRUSDT",
-        "XNYUSDT",
-        "XPINUSDT",
-        "XPLUSDT",
-        "YBUSDT",
-        "ZECUSDT",
-        "ZEREBROUSDT"
-      ],
-      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
-      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
-      "turnover_by_class": {
-        "EXIT": 314622.08809125266,
-        "ENTRY": 191144.37940612296,
-        "SIGNAL_RESIZE": 15274.811702833089,
-        "FILL_CONVERGENCE": 137719.459855265,
-        "MECHANICAL_RESIZE": 1342.0890451361997,
-        "FLIP": 22363.791157297754
-      },
-      "suppressed_turnover_usd": 753737.529244795,
-      "suppressed_order_count": 4152
-    },
-    {
-      "ts": "2026-09-11T16:41:35.661139+00:00",
-      "status": "DEGRADED",
-      "cash": 200000.0,
-      "realized_pnl": 3164.305881592261,
-      "unrealized_pnl": 50.95622996915053,
-      "pnl_by_alpha": {
-        "UNATTRIBUTED": 1.4663342482140727,
-        "AMIHUD_ILLIQUIDITY_PREMIUM_V1": -0.013253630909943581,
-        "LIQ_CASCADE_REPEAT_V1": 2006.3781785622596,
-        "SHORT_COVERING_CONTINUATION_V1": 1207.4308523818484
-      },
-      "fees": 1267.04464121409,
-      "funding": -10.048388641383168,
-      "equity": 201938.16908170594,
-      "drawdown": -0.006817978471193183,
-      "gross_exposure": 29303.82572605546,
-      "net_exposure": 14532.874795121765,
-      "n_positions": 166,
-      "skipped_no_mark": [
-        "TOWNSUSDT",
-        "TRADOORUSDT",
-        "TRUMPUSDT",
-        "TUTUSDT",
-        "USDCUSDT",
-        "USUALUSDT",
-        "VELODROMEUSDT",
-        "VIRTUALUSDT",
-        "WCTUSDT",
-        "WLFIUSDT",
-        "XANUSDT",
-        "XAUTUSDT",
-        "XLMUSDT",
-        "XMRUSDT",
-        "XNYUSDT",
-        "XPINUSDT",
-        "XPLUSDT",
-        "YBUSDT",
-        "ZECUSDT",
-        "ZEREBROUSDT"
-      ],
-      "sizing_rule": "PER_ALPHA_BUDGET_CAP_V2",
-      "no_trade_band_rule": "COST_OVER_EDGE_BAND_V1",
-      "turnover_by_class": {
-        "EXIT": 314622.08809125266,
-        "ENTRY": 191144.37940612296,
-        "SIGNAL_RESIZE": 15274.811702833089,
-        "FILL_CONVERGENCE": 137855.9132639897,
-        "MECHANICAL_RESIZE": 1342.0890451361997,
-        "FLIP": 22363.791157297754
-      },
-      "suppressed_turnover_usd": 754609.403419264,
-      "suppressed_order_count": 4297
     }
   ],
-  "last_step_ts": "2026-09-11T16:41:35.661139+00:00",
+  "last_step_ts": "2026-09-10T07:31:31.437943+00:00",
   "initialized": true,
   "orders": [
     {
@@ -72962,151 +72858,6 @@
       "refused_notional_usd": 0.0,
       "turnover_class": "FILL_CONVERGENCE",
       "no_trade_band_fraction": 0.13245033112582782
-    },
-    {
-      "order_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:30:10.663061+00:00:1",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp_decision": "2026-09-09T00:00:00+00:00",
-      "timestamp_submit": "2026-09-11T16:30:10.663061+00:00",
-      "timestamp_fill": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "ALGOUSDT",
-      "side": "BUY",
-      "requested_quantity": 120858.85554558397,
-      "filled_quantity": 1486.4858488511381,
-      "remaining_quantity": 119372.36969673283,
-      "requested_notional": 11098.468704750974,
-      "fill_price": 0.09184836599999999,
-      "mark_price_at_decision": 0.09183,
-      "spread_bps": 4.0,
-      "slippage_bps": 2.0,
-      "fee_bps": 5.0,
-      "fee_amount": 0.06826564814955,
-      "status": "PARTIALLY_FILLED",
-      "exit_reason": "TARGET_CHANGE",
-      "cap_policy": "TOP_OF_BOOK",
-      "cap_notional_usd": 136.5039955,
-      "refused_notional_usd": 10961.964709250975,
-      "turnover_class": "FLIP",
-      "no_trade_band_fraction": 0.5166051660516605
-    },
-    {
-      "order_id": "P1_EQUAL_RISK:BTCUSDT:2026-09-11T16:30:10.663061+00:00:2",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:BTCUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:BTCUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp_decision": "2026-09-09T00:00:00+00:00",
-      "timestamp_submit": "2026-09-11T16:30:10.663061+00:00",
-      "timestamp_fill": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "BTCUSDT",
-      "side": "BUY",
-      "requested_quantity": 0.1431655472960445,
-      "filled_quantity": 0.1431655472960445,
-      "remaining_quantity": 0.0,
-      "requested_notional": 11110.012401956186,
-      "fill_price": 77618.0765157009,
-      "mark_price_at_decision": 77602.5560045,
-      "spread_bps": 4.0,
-      "slippage_bps": 2.0,
-      "fee_bps": 5.0,
-      "fee_amount": 5.556117202218289,
-      "status": "FILLED",
-      "exit_reason": "TARGET_CHANGE",
-      "cap_policy": "TOP_OF_BOOK",
-      "cap_notional_usd": 444858.64950000006,
-      "refused_notional_usd": 0.0,
-      "turnover_class": "FLIP",
-      "no_trade_band_fraction": 0.5166051660516605
-    },
-    {
-      "order_id": "P1_EQUAL_RISK:KATUSDT:2026-09-11T16:30:10.663061+00:00:3",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:KATUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:KATUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp_decision": "2026-09-09T00:00:00+00:00",
-      "timestamp_submit": "2026-09-11T16:30:10.663061+00:00",
-      "timestamp_fill": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "KATUSDT",
-      "side": "BUY",
-      "requested_quantity": 6405.561502879449,
-      "filled_quantity": 6405.561502879449,
-      "remaining_quantity": 0.0,
-      "requested_notional": 31.063770508213885,
-      "fill_price": 0.0048504698999999995,
-      "mark_price_at_decision": 0.0048495,
-      "spread_bps": 4.0,
-      "slippage_bps": 2.0,
-      "fee_bps": 5.0,
-      "fee_amount": 0.015534991631157763,
-      "status": "FILLED",
-      "exit_reason": null,
-      "cap_policy": "TOP_OF_BOOK",
-      "cap_notional_usd": null,
-      "refused_notional_usd": 0.0,
-      "turnover_class": "FILL_CONVERGENCE",
-      "no_trade_band_fraction": 0.13245033112582782
-    },
-    {
-      "order_id": "P1_EQUAL_RISK:SOLUSDT:2026-09-11T16:30:10.663061+00:00:4",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:SOLUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:SOLUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp_decision": "2026-09-09T00:00:00+00:00",
-      "timestamp_submit": "2026-09-11T16:30:10.663061+00:00",
-      "timestamp_fill": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "SOLUSDT",
-      "side": "BUY",
-      "requested_quantity": 109.38874786871618,
-      "filled_quantity": 109.38874786871618,
-      "remaining_quantity": 0.0,
-      "requested_notional": 11112.802895982877,
-      "fill_price": 101.610318,
-      "mark_price_at_decision": 101.59,
-      "spread_bps": 4.0,
-      "slippage_bps": 2.0,
-      "fee_bps": 5.0,
-      "fee_amount": 5.557512728281037,
-      "status": "FILLED",
-      "exit_reason": "TARGET_CHANGE",
-      "cap_policy": "TOP_OF_BOOK",
-      "cap_notional_usd": 97575.69894999999,
-      "refused_notional_usd": 0.0,
-      "turnover_class": "FLIP",
-      "no_trade_band_fraction": 0.5166051660516605
-    },
-    {
-      "order_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:41:35.661139+00:00:1",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp_decision": "2026-09-09T00:00:00+00:00",
-      "timestamp_submit": "2026-09-11T16:41:35.661139+00:00",
-      "timestamp_fill": "2026-09-11T16:41:35.661139+00:00",
-      "symbol": "ALGOUSDT",
-      "side": "BUY",
-      "requested_quantity": 119582.31007066696,
-      "filled_quantity": 1488.2630114624492,
-      "remaining_quantity": 118094.04705920452,
-      "requested_notional": 10961.873591204101,
-      "fill_price": 0.091686353604,
-      "mark_price_at_decision": 0.09166802,
-      "spread_bps": 4.0,
-      "slippage_bps": 2.0,
-      "fee_bps": 5.0,
-      "fee_amount": 0.06822670436235001,
-      "status": "PARTIALLY_FILLED",
-      "exit_reason": "TARGET_CHANGE",
-      "cap_policy": "TOP_OF_BOOK",
-      "cap_notional_usd": 136.42612350000002,
-      "refused_notional_usd": 10825.447467704102,
-      "turnover_class": "FILL_CONVERGENCE",
-      "no_trade_band_fraction": 0.5166051660516605
     }
   ],
   "fills": [
@@ -104924,81 +104675,6 @@
       "fee_usd": 0.1396389234120728,
       "mark_source": "DERIVATIVES_RAW_MARK",
       "mark_stale": false
-    },
-    {
-      "fill_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:30:10.663061+00:00:1:F0",
-      "order_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:30:10.663061+00:00:1",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "ALGOUSDT",
-      "quantity": 1486.4858488511381,
-      "fill_price": 0.09184836599999999,
-      "fee_usd": 0.06826564814955,
-      "mark_source": "DERIVATIVES_RAW_MARK",
-      "mark_stale": false
-    },
-    {
-      "fill_id": "P1_EQUAL_RISK:BTCUSDT:2026-09-11T16:30:10.663061+00:00:2:F0",
-      "order_id": "P1_EQUAL_RISK:BTCUSDT:2026-09-11T16:30:10.663061+00:00:2",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:BTCUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:BTCUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "BTCUSDT",
-      "quantity": 0.1431655472960445,
-      "fill_price": 77618.0765157009,
-      "fee_usd": 5.556117202218289,
-      "mark_source": "DERIVATIVES_RAW_MARK",
-      "mark_stale": false
-    },
-    {
-      "fill_id": "P1_EQUAL_RISK:KATUSDT:2026-09-11T16:30:10.663061+00:00:3:F0",
-      "order_id": "P1_EQUAL_RISK:KATUSDT:2026-09-11T16:30:10.663061+00:00:3",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:KATUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:KATUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "KATUSDT",
-      "quantity": 6405.561502879449,
-      "fill_price": 0.0048504698999999995,
-      "fee_usd": 0.015534991631157763,
-      "mark_source": "REST_BOOKTICKER_MID",
-      "mark_stale": false
-    },
-    {
-      "fill_id": "P1_EQUAL_RISK:SOLUSDT:2026-09-11T16:30:10.663061+00:00:4:F0",
-      "order_id": "P1_EQUAL_RISK:SOLUSDT:2026-09-11T16:30:10.663061+00:00:4",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:SOLUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:SOLUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp": "2026-09-11T16:30:10.663061+00:00",
-      "symbol": "SOLUSDT",
-      "quantity": 109.38874786871618,
-      "fill_price": 101.610318,
-      "fee_usd": 5.557512728281037,
-      "mark_source": "DERIVATIVES_RAW_MARK",
-      "mark_stale": false
-    },
-    {
-      "fill_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:41:35.661139+00:00:1:F0",
-      "order_id": "P1_EQUAL_RISK:ALGOUSDT:2026-09-11T16:41:35.661139+00:00:1",
-      "intent_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "signal_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1:ALGOUSDT:2026-09-09T00:00:00+00:00",
-      "alpha_id": "AMIHUD_ILLIQUIDITY_PREMIUM_V1",
-      "portfolio_id": "P1_EQUAL_RISK",
-      "timestamp": "2026-09-11T16:41:35.661139+00:00",
-      "symbol": "ALGOUSDT",
-      "quantity": 1488.2630114624492,
-      "fill_price": 0.091686353604,
-      "fee_usd": 0.06822670436235001,
-      "mark_source": "DERIVATIVES_RAW_MARK",
-      "mark_stale": false
     }
   ],
   "accepted_target_notional": {
@@ -105020,7 +104696,7 @@
     "AIOTUSDT": 200.80321285140604,
     "AKEUSDT": -200.80321285140604,
     "AKTUSDT": 200.80321285140604,
-    "ALGOUSDT": 10910.307898259704,
+    "ALGOUSDT": -200.80321285140604,
     "APTUSDT": -200.80321285140604,
     "ARBUSDT": -200.80321285140604,
     "ARIAUSDT": 200.80321285140604,
@@ -105040,7 +104716,7 @@
     "BOMEUSDT": -200.80321285140604,
     "BROCCOLI714USDT": 200.80321285140604,
     "BSVUSDT": 200.80321285140604,
-    "BTCUSDT": 10910.307898259704,
+    "BTCUSDT": -200.80321285140604,
     "BTWUSDT": -200.80321285140604,
     "BUSDT": 200.80321285140604,
     "C98USDT": 200.80321285140604,
@@ -105129,7 +104805,7 @@
     "SCRUSDT": 200.80321285140604,
     "SEIUSDT": -200.80321285140604,
     "SHELLUSDT": 200.80321285140604,
-    "SOLUSDT": 10910.307898259704,
+    "SOLUSDT": -200.80321285140604,
     "SOLVUSDT": 200.80321285140604,
     "SOMIUSDT": 200.80321285140604,
     "SPACEUSDT": 200.80321285140604,
@@ -105187,7 +104863,7 @@
     "AIOTUSDT": "6ae5fa8db7b26fd8",
     "AKEUSDT": "4649ee4c762e6c4b",
     "AKTUSDT": "6ae5fa8db7b26fd8",
-    "ALGOUSDT": "8ab07c2e819abb94",
+    "ALGOUSDT": "4649ee4c762e6c4b",
     "APTUSDT": "4649ee4c762e6c4b",
     "ARBUSDT": "4649ee4c762e6c4b",
     "ARIAUSDT": "6ae5fa8db7b26fd8",
@@ -105207,7 +104883,7 @@
     "BOMEUSDT": "4649ee4c762e6c4b",
     "BROCCOLI714USDT": "6ae5fa8db7b26fd8",
     "BSVUSDT": "6ae5fa8db7b26fd8",
-    "BTCUSDT": "70db1b37d1262f2b",
+    "BTCUSDT": "4649ee4c762e6c4b",
     "BTWUSDT": "4649ee4c762e6c4b",
     "BUSDT": "6ae5fa8db7b26fd8",
     "C98USDT": "6ae5fa8db7b26fd8",
@@ -105297,7 +104973,7 @@
     "SCRUSDT": "6ae5fa8db7b26fd8",
     "SEIUSDT": "4649ee4c762e6c4b",
     "SHELLUSDT": "6ae5fa8db7b26fd8",
-    "SOLUSDT": "8298ad72143aeddf",
+    "SOLUSDT": "4649ee4c762e6c4b",
     "SOLVUSDT": "6ae5fa8db7b26fd8",
     "SOMIUSDT": "6ae5fa8db7b26fd8",
     "SPACEUSDT": "6ae5fa8db7b26fd8",
@@ -105356,7 +105032,7 @@
     "AIOTUSDT": false,
     "AKEUSDT": false,
     "AKTUSDT": false,
-    "ALGOUSDT": true,
+    "ALGOUSDT": false,
     "APTUSDT": false,
     "ARBUSDT": false,
     "ARIAUSDT": false,
@@ -105509,18 +105185,16 @@
     "EXIT": 314622.08809125266,
     "ENTRY": 191144.37940612296,
     "SIGNAL_RESIZE": 15274.811702833089,
-    "FILL_CONVERGENCE": 137855.9132639897,
-    "MECHANICAL_RESIZE": 1342.0890451361997,
-    "FLIP": 22363.791157297754
+    "FILL_CONVERGENCE": 137688.3898720027,
+    "MECHANICAL_RESIZE": 1342.0890451361997
   },
   "alpha_denominator_high_water": {
-    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 1.9999999999999953,
-    "LIQ_CASCADE_REPEAT_V1": 3.0
+    "AMIHUD_ILLIQUIDITY_PREMIUM_V1": 1.9999999999999953
   },
-  "suppressed_turnover_usd": 754609.403419264,
-  "suppressed_order_count": 4297,
-  "capped_order_count": 302,
-  "capped_notional_usd": 2864033.9480622774,
+  "suppressed_turnover_usd": 752866.0193535801,
+  "suppressed_order_count": 4006,
+  "capped_order_count": 300,
+  "capped_notional_usd": 2842242.178402887,
   "overlay_steps": 0,
   "overlay_binding_steps": 0,
   "overlay_multiplier_min": 1.0,
