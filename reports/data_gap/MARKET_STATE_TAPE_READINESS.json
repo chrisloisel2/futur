@@ -1,0 +1,139 @@
+{
+ "generated_at_utc": "2026-09-10T22:53:46.092761+00:00",
+ "tape_root": "data_lake/market_state",
+ "exchange_info": {
+  "binance_um": {
+   "snapshots": 1,
+   "changes_logged": 897,
+   "symbols": 897,
+   "last_snapshot_at": "2026-09-10T22:44:16.102464+00:00"
+  },
+  "binance_spot": {
+   "snapshots": 1,
+   "changes_logged": 3698,
+   "symbols": 3698,
+   "last_snapshot_at": "2026-09-10T22:44:18.232099+00:00"
+  }
+ },
+ "lifecycle_events": 0,
+ "light_snapshots_files": 2,
+ "windows": [
+  {
+   "trigger_id": "manual_BTCUSDT_20260910T224418_f9bb40",
+   "trigger_type": "manual",
+   "symbol": "BTCUSDT",
+   "start_ts": "2026-09-10T22:44:18+00:00",
+   "end_ts": "2026-09-10T22:45:54.849759+00:00",
+   "final": true,
+   "snapshots": 90,
+   "completeness_score": 0.6292,
+   "missing_fields": [
+    "depth_10bps_bid_usd",
+    "depth_10bps_ask_usd",
+    "depth_25bps_bid_usd",
+    "depth_25bps_ask_usd",
+    "depth_50bps_bid_usd",
+    "depth_50bps_ask_usd",
+    "imbalance_10bps"
+   ],
+   "first_timestamps": {
+    "first_orderbook_ts": "2026-09-10T22:44:19.001+00:00",
+    "first_trade_ts": "2026-09-10T22:44:19.743+00:00",
+    "first_mark_ts": "2026-09-10T22:44:20.000+00:00",
+    "first_index_ts": "2026-09-10T22:44:20.000+00:00",
+    "first_oi_ts": "2026-09-10T22:44:17.012+00:00",
+    "first_bookticker_ts": null
+   },
+   "pre_window_missing": true,
+   "latency_ms_median": 110.8643798828125,
+   "message_counts": {
+    "bookTicker": 0,
+    "aggTrade": 1463,
+    "depth20": 0,
+    "markPrice": 89,
+    "rest_depth": 40,
+    "rest_oi": 18,
+    "ws_reconnects": 0
+   }
+  },
+  {
+   "trigger_id": "manual_BTCUSDT_20260910T224938_ad8af1",
+   "trigger_type": "manual",
+   "symbol": "BTCUSDT",
+   "start_ts": "2026-09-10T22:49:38+00:00",
+   "end_ts": "2026-09-10T22:50:47.797098+00:00",
+   "final": true,
+   "snapshots": 60,
+   "completeness_score": 0.7,
+   "missing_fields": [
+    "depth_25bps_bid_usd",
+    "depth_25bps_ask_usd",
+    "depth_50bps_bid_usd",
+    "depth_50bps_ask_usd"
+   ],
+   "first_timestamps": {
+    "first_orderbook_ts": "2026-09-10T22:49:38.221+00:00",
+    "first_trade_ts": "2026-09-10T22:49:39.902+00:00",
+    "first_mark_ts": "2026-09-10T22:49:39.000+00:00",
+    "first_index_ts": "2026-09-10T22:49:39.000+00:00",
+    "first_oi_ts": "2026-09-10T22:49:34.421+00:00",
+    "first_bookticker_ts": "2026-09-10T22:49:38.957+00:00"
+   },
+   "pre_window_missing": true,
+   "latency_ms_median": 112.6431884765625,
+   "message_counts": {
+    "bookTicker": 9694,
+    "aggTrade": 300,
+    "depth20": 564,
+    "markPrice": 60,
+    "rest_depth": 9,
+    "rest_oi": 12,
+    "ws_reconnects": 0
+   }
+  },
+  {
+   "trigger_id": "manual_BTCUSDT_20260910T225257_07b0f1",
+   "trigger_type": "manual",
+   "symbol": "BTCUSDT",
+   "start_ts": "2026-09-10T22:52:57+00:00",
+   "end_ts": "2026-09-10T22:53:46.009203+00:00",
+   "final": true,
+   "snapshots": 40,
+   "completeness_score": 0.7855,
+   "missing_fields": [
+    "depth_25bps_bid_usd",
+    "depth_25bps_ask_usd",
+    "depth_50bps_bid_usd",
+    "depth_50bps_ask_usd"
+   ],
+   "first_timestamps": {
+    "first_orderbook_ts": "2026-09-10T22:52:57.943+00:00",
+    "first_trade_ts": "2026-09-10T22:52:58.481+00:00",
+    "first_mark_ts": "2026-09-10T22:52:59.005+00:00",
+    "first_index_ts": "2026-09-10T22:52:59.005+00:00",
+    "first_oi_ts": "2026-09-10T22:52:53.262+00:00",
+    "first_bookticker_ts": "2026-09-10T22:52:58.655+00:00"
+   },
+   "pre_window_missing": true,
+   "latency_ms_median": 110.390380859375,
+   "message_counts": {
+    "bookTicker": 11275,
+    "aggTrade": 551,
+    "depth20": 367,
+    "markPrice": 39,
+    "rest_depth": 8,
+    "rest_oi": 8,
+    "ws_reconnects": 0
+   }
+  }
+ ],
+ "triggers": {
+  "total": 4,
+  "fired": 0,
+  "by_type": {
+   "funding_extreme": 4
+  }
+ },
+ "no_alpha_test": true,
+ "no_orders": true
+}
