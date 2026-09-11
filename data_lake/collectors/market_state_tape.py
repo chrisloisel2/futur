@@ -44,8 +44,10 @@ TRIGGERS_LOG = TAPE_ROOT / "triggers" / "triggers.jsonl"
 DEFAULTS = {"exchange_info_interval": 5.0, "spot_interval": 60.0, "state_interval": 60.0, "oi_interval": 300.0, "ticker_interval": 300.0,
             "oi_spike_pct": 10.0, "funding_extreme_abs": 0.003, "liq_burst_per_symbol_10s": 5, "liq_burst_global_10s": 100,
             "cooldown_s": {"new_perp_listing": 6 * 3600, "status_change": 6 * 3600, "onboard_date_change": 6 * 3600, "delisting_detected": 6 * 3600,
-                           "oi_spike": 6 * 3600, "funding_extreme": 8 * 3600, "liquidation_burst": 3600, "manual": 0},
-            "max_concurrent_captures": 4, "post_window_s": 6 * 3600, "pre_window_s": 1800, "rest_budget_per_min": 600}
+                           "oi_spike": 6 * 3600, "funding_extreme": 8 * 3600, "liquidation_burst": 6 * 3600, "manual": 0},
+            "max_concurrent_captures": 4, "post_window_s": 6 * 3600, "pre_window_s": 1800, "rest_budget_per_min": 600,
+            "daily_caps": {"liquidation_burst": 6, "oi_spike": 6, "funding_extreme": 6, "status_change": 12, "new_perp_listing": None, "delisting_detected": None, "onboard_date_change": None, "manual": None},
+            "always_on_symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT"], "heartbeat_s": 300}
 
 
 def _get(url: str, timeout: int = 30):
@@ -81,20 +83,29 @@ class TriggerDispatcher:
             return False, f"max_concurrent_captures ({self.cfg['max_concurrent_captures']}) reached"
         if any(a["symbol"] == trig["symbol"] for a in self.state["active"].values()):
             return False, "capture already active for this symbol"
+        day = datetime.now(timezone.utc).strftime("%Y-%m-%d"); n_today = self.state.get("daily_counts", {}).get(day, {}).get(trig["trigger_type"], 0)
+        cap = self.cfg["daily_caps"].get(trig["trigger_type"])
+        if cap is not None and n_today >= cap:
+            return False, f"daily cap for {trig['trigger_type']} reached ({n_today}/{cap})"
+        if trig["trigger_type"] in ("liquidation_burst", "oi_spike", "funding_extreme") and trig["symbol"] in self.cfg["always_on_symbols"]:
+            return False, "symbol already covered 24/7 by microstructure_reduced (BBO + trades)"
         return True, "fire"
 
     def dispatch(self, trig: dict) -> dict:
         ok, why = self.should_fire(trig); rec = {**trig, "decided_at_local": now_local(), "fired": ok, "decision": why}
-        if ok:
+        if ok and not self.spawn:
+            rec["pid"] = None; rec["decision"] = "would fire (no-capture mode: logged only, no cooldown set)"
+        elif ok:
             tid = f"{trig['trigger_type']}_{trig['symbol']}_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
             rec["trigger_id"] = tid; key = f"{trig['venue']}|{trig['symbol']}|{trig['trigger_type']}"; self.state["last_fired"][key] = time.time()
+            self.state.setdefault("daily_counts", {}); day = datetime.now(timezone.utc).strftime("%Y-%m-%d"); dc = self.state["daily_counts"].setdefault(day, {}); dc[trig["trigger_type"]] = dc.get(trig["trigger_type"], 0) + 1
             post = self.cfg["post_window_s"]; ends = time.time() + post
             if trig.get("t0"):
                 try:
                     ends = datetime.fromisoformat(str(trig["t0"]).replace("Z", "+00:00")).timestamp() + post
                 except ValueError:
                     pass
-            if self.spawn:
+            if True:
                 cmd = [sys.executable, "-m", "data_lake.collectors.market_state_tape", "--mode", "triggered_microstructure_capture", "--symbol", trig["symbol"],
                        "--trigger-type", trig["trigger_type"], "--reason", trig.get("reason", ""), "--trigger-id", tid, "--post-window", str(post), "--pre-window", str(self.cfg["pre_window_s"])]
                 if trig.get("t0"):
@@ -102,8 +113,6 @@ class TriggerDispatcher:
                 logd = TAPE_ROOT / "windows" / tid; logd.mkdir(parents=True, exist_ok=True)
                 p = subprocess.Popen(cmd, cwd=str(ROOT), stdout=open(logd / "capture.log", "ab"), stderr=subprocess.STDOUT, start_new_session=True)
                 rec["pid"] = p.pid; self.state["active"][tid] = {"symbol": trig["symbol"], "pid": p.pid, "ends_at": ends, "started_at": now_local()}
-            else:
-                rec["pid"] = None; rec["decision"] = "fire (no-capture mode: logged only)"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.log_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False, default=str) + "\n")
@@ -245,10 +254,19 @@ class LightweightWatch:
             except Exception:
                 self.stats["liq_ws_errors"] += 1; await asyncio.sleep(3)
 
+    def heartbeat(self):
+        try:
+            rss_mb = int(open("/proc/self/statm").read().split()[1]) * 4096 // (1 << 20)
+        except Exception:
+            rss_mb = None
+        print(json.dumps({"ts": now_local(), "heartbeat": True, "rss_mb": rss_mb, **dict(self.stats), "active_captures": len(self.state.get("active", {})), "um_symbols": len(self.um.prev or {}), "spot_symbols": len(self.spot.prev or {})}, default=str), flush=True)
+
     async def run(self):
-        started = time.time(); tasks = [asyncio.ensure_future(c()) for c in (self.exchange_info_loop, self.spot_loop, self.state_loop, self.oi_loop, self.ticker_loop, self.liquidation_loop)]
+        started = time.time(); last_hb = time.time(); tasks = [asyncio.ensure_future(c()) for c in (self.exchange_info_loop, self.spot_loop, self.state_loop, self.oi_loop, self.ticker_loop, self.liquidation_loop)]
         while not self.stop.is_set():
             await asyncio.sleep(1)
+            if time.time() - last_hb >= self.cfg["heartbeat_s"]:
+                self.heartbeat(); last_hb = time.time()
             if self.seconds and time.time() - started >= self.seconds:
                 self.stop.set()
         for t in tasks:
@@ -315,7 +333,7 @@ def main():
         w = LightweightWatch(cfg, spawn=not a.no_capture, seconds=a.seconds if (a.dry_run or a.seconds) else None)
         res = asyncio.get_event_loop().run_until_complete(w.run()); print(json.dumps(res, indent=1, default=str))
     else:
-        print(json.dumps(readiness(write=True), indent=1, default=str)[:3000])
+        r = readiness(write=True); print(json.dumps({k: r[k] for k in ("generated_at_utc", "exchange_info", "lifecycle_events", "light_snapshots_files", "triggers")}, default=str)); print(f"windows: {len(r['windows'])} -> reports/data_gap/MARKET_STATE_TAPE_READINESS.md")
 
 
 if __name__ == "__main__":

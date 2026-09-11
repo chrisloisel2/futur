@@ -138,3 +138,15 @@ no live_lab file touched. A future preregistration may consume this tape only wi
 | watch (45 s, `--no-capture`) | exchangeInfo UM 8 polls / spot 1, premiumIndex 900 symbols → 900 light snapshots, 175 OI polls, 1 ticker pass, 14 forceOrder messages, 4 funding_extreme triggers journaled (not fired: no-capture mode) | none |
 
 Three manual dry-run windows remain on disk under `data_lake/market_state/windows/`; they are not analysis, they are the proof the pipeline writes what the schema says.
+
+## First six hours of the live watch (2026-09-10 22:54 → 2026-09-11 05:05 UTC)
+
+- The trigger → capture loop ran unattended: four `liquidation_burst` captures completed their 6-hour window
+  (PUMP 90 MB, ZEC 162 MB, ETH 176 MB, BTC 162 MB; 21 5xx one-second snapshots each; completeness 0.79–1.00;
+  median latency 111 ms; 3–4 WebSocket reconnects each, all logged in the manifest), a fifth (BEAT) started at 05:04.
+- Corrections applied after this run: `MARKET_LOT_SIZE.maxQty` removed from the watched spot filters (Binance
+  recomputes it continuously: 9 148 `filters_change` events in six hours were noise, kept on disk as append-only
+  history but no longer produced); `--no-capture` dry runs no longer set cooldowns; burst cooldown 6 h; daily caps
+  per trigger type (6 bursts / 6 OI spikes / 6 funding extremes / 12 status changes; births and delistings
+  unlimited); BTC / ETH / SOL excluded from stress captures (already recorded 24/7 by `microstructure_reduced`);
+  heartbeat line with RSS every 5 minutes in `watch.log` (RSS had grown from 201 MB to 569 MB without any log line).

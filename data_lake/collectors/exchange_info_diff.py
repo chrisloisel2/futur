@@ -23,7 +23,7 @@ from data_lake.collectors.market_state_schema import TAPE_ROOT, raw_hash, now_lo
 
 ENDPOINTS = {"binance_um": "https://fapi.binance.com/fapi/v1/exchangeInfo", "binance_spot": "https://api.binance.com/api/v3/exchangeInfo"}
 SNAP_DIR = TAPE_ROOT / "exchange_info"
-WATCHED_FILTERS = {"PRICE_FILTER": ("tickSize",), "LOT_SIZE": ("minQty", "stepSize"), "MIN_NOTIONAL": ("notional", "minNotional"), "MARKET_LOT_SIZE": ("maxQty",)}
+WATCHED_FILTERS = {"PRICE_FILTER": ("tickSize",), "LOT_SIZE": ("minQty", "stepSize"), "MIN_NOTIONAL": ("notional", "minNotional")}   # MARKET_LOT_SIZE.maxQty est recalcule en continu par Binance spot : bruit, pas un evenement
 
 
 def fetch(venue: str, timeout: int = 30) -> Dict[str, Any]:
