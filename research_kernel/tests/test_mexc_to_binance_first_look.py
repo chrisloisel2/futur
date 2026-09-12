@@ -12,17 +12,35 @@ _spec = ilu.spec_from_file_location("m2b_first_look", ROOT / "mechanisms" / "mex
 H = ilu.module_from_spec(_spec); _spec.loader.exec_module(H)
 
 
-def test_pins_block_names_every_input_and_refuses_an_unpinned_harness():
+def test_pins_block_names_code_rules_references_and_forward_inputs_and_refuses_an_unpinned_harness():
     p = H.pins()
-    for k in ("universe", "conditioning", "causal_matrix", "capacity", "wash", "fee_decision", "population", "harness", "harness_seq8", "harness_seq7", "look_ledger_tool", "multiplicity", "pre_binance_features"):
-        assert k in p and p[k]["path"]
-    if p["harness"]["sha256"] == "TO_BE_PINNED_BEFORE_SEAL" or p["harness"]["sha256"] != H.sha(ROOT / p["harness"]["path"]):
+    for k in ("harness", "forward_collector", "spec", "harness_seq8", "harness_seq7", "look_ledger_tool", "multiplicity", "pre_binance_features", "mexc_volume_trust", "depth_capacity_features", "fee_decision",
+              "historical_universe", "historical_conditioning", "historical_causal_matrix", "historical_capacity", "historical_wash", "population_dry_run",
+              "forward_universe", "forward_conditioning", "forward_causal_matrix", "forward_capacity", "forward_wash"):
+        assert k in p and p[k]["path"] and p[k]["role"]
+    fwd = {k: v for k, v in p.items() if v.get("role") == "forward_input"}; assert len(fwd) == 5 and all("sha256" not in v for v in fwd.values())
+    assert H.PREREG.name == "MEXC_TO_BINANCE_V1_FORWARD_SEAL.md" and H.WITNESS_BRANCH == "prereg/mexc-to-binance-v1-forward"
+    if p["harness"].get("sha256") != H.sha(ROOT / p["harness"]["path"]):
         with pytest.raises(SystemExit):
             H.check_pins(require_harness=True)
 
 
+def test_the_seal_document_states_the_forward_only_terms():
+    t = H.PREREG.read_text()
+    for line in ("MEXC_TO_BINANCE_V1 is sealed forward-only.", "Historical period 2017-07-21 -> 2026-09-10 is burned", "No historical read is authorized.", "First eligible event must occur after the seal timestamp",
+                 "Look condition: n_eligible >= 60 or date >= 2028-09-12", "Maximum verdict before the forward look: SEALED_NOT_TESTED.", "capital_deployable = false", "budget = 0"):
+        assert line in t, line
+    assert "burn_override" not in t.replace("No burn override", "")
+
+
+def test_no_historical_read_path_exists_in_the_harness():
+    src = (ROOT / "mechanisms" / "mexc_to_binance_migration_v1" / "first_look.py").read_text()
+    assert "OVERRIDES" not in src and "burn_override" not in src and "USER_DECISION_OUTSIDE_EPISODE_RULE" in src and 'source="forward"' in src[src.index("def run("):]
+    assert H.BURN_END == "2026-09-10" and H.N_FORWARD_MIN == 60 and H.FORWARD_LATEST_LOOK == "2028-09-12"
+
+
 def test_population_funnel_is_reproducible_from_the_pinned_files():
-    pop = H.build_population()
+    pop = H.build_population(source="historical")
     assert [n for _, n in pop["funnel"]] == [113, 107, 84, 84] and pop["n"] == 84 and pop["n_high"] == 30 and pop["n_low"] == 54
     assert pop["high_threshold"] == 0.20 and all((e["group"] == "HIGH") == (e["pre_announcement_return_24h"] >= 0.20) for e in pop["events"])
     assert all(e["hours_in_window"] >= H.MIN_CLOSES_24H and e["cost_rt_bps"] is not None for e in pop["events"]) and pop["n_cost_imputed"] == 5
@@ -92,16 +110,33 @@ def test_funding_for_a_short_reads_only_settlements_inside_the_window(tmp_path, 
     assert H.funding_bps_for_short("NOPEUSDT", 1706745600000, 1706803200000) is None
 
 
-def test_ledger_preconditions_refuse_on_a_chain_without_seq9(monkeypatch):
+def test_ledger_preconditions_refuse_burned_or_pre_seal_events_and_a_fiat_credit(monkeypatch, tmp_path):
     entries = [json.loads(l) for l in (ROOT / "reports" / "loop" / "LOOK_LEDGER.jsonl").read_text().splitlines() if l.strip()]
     if not any(e.get("hash") == H.SEQ9_HASH for e in entries):
         with pytest.raises(SystemExit) as ei:
-            H.check_ledgers(("2023-05-05T00:00:00+00:00", "2026-09-06T00:00:00+00:00"), "historical")
-        assert "seq 9" in str(ei.value)
+            H.check_ledgers(("2027-01-01T00:00:00+00:00", "2027-06-01T00:00:00+00:00"), 0)
+        assert "seq 9" in str(ei.value); return
+    monkeypatch.setattr(H, "seal_entry", lambda: {"ts": "2026-09-13T00:00:00+00:00", "configs": [{"branch": H.WITNESS_BRANCH}]})
+    with pytest.raises(SystemExit) as e1:
+        H.check_ledgers(("2026-09-06T00:00:00+00:00", "2027-01-01T00:00:00+00:00"), 1_800_000_000_000)              # dans la periode brulee
+    assert "brulee" in str(e1.value)
+    with pytest.raises(SystemExit) as e2:
+        H.check_ledgers(("2026-09-12T00:00:00+00:00", "2027-01-01T00:00:00+00:00"), 1_800_000_000_000)              # apres la brulure mais avant le scellement
+    assert "precede le scellement" in str(e2.value)
+    bl = tmp_path / "BUDGET_LEDGER.jsonl"; bl.write_text('{"source": "__CREDIT__USER_DECISION_OUTSIDE_EPISODE_RULE", "credited": 1}\n'); monkeypatch.setattr(H, "BUDGET_LEDGER", bl)
+    with pytest.raises(SystemExit) as e3:
+        H.check_ledgers(("2027-01-01T00:00:00+00:00", "2027-06-01T00:00:00+00:00"), 1_780_000_000_000)
+    assert "hors regle des episodes" in str(e3.value)
 
 
 def test_no_price_is_read_before_the_ledger_entry():
     src = (ROOT / "mechanisms" / "mexc_to_binance_migration_v1" / "first_look.py").read_text()
     run_body = src[src.index("def run("):src.index("def main(")]
     assert run_body.index("look_ledger.record(") < run_body.index("debit_budget(") < run_body.index("VisionStore4()") < run_body.index("evaluate(")
-    assert "check_ledgers(" in run_body and run_body.index("check_ledgers(") < run_body.index("look_ledger.record(")
+    assert "check_ledgers(" in run_body and run_body.index("check_ledgers(") < run_body.index("look_ledger.record(") and run_body.index("forward_cutoff_ms()") < run_body.index("build_population(")
+
+
+def test_status_is_sealed_not_tested_or_draft_and_never_deployable():
+    st = H.status()
+    assert st["status"] in ("SEALED_NOT_TESTED", "DRAFT_NOT_SEALED") and st["capital_deployable"] is False and st["no_historical_read"] is True and st["burned_until"] == "2026-09-10"
+    assert st["look_rule"] == "n_eligible >= 60 or date >= 2028-09-12" and (st["status"] == "DRAFT_NOT_SEALED" or st["look_allowed_now"] is False)

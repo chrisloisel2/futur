@@ -1,0 +1,10 @@
+[Unit]
+Description=Futur MEXC_TO_BINANCE_V1 forward collection, every 6 hours (Vision publishes with a 1-3 day lag; each pass completes pending steps)
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=6h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

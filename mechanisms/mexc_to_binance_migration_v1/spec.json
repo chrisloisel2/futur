@@ -13,7 +13,7 @@
   "binance_vision_um_fundingRate"
  ],
  "universe": [
-  "MEXC_FIRST_PRE_ANNOUNCEMENT_POPULATION_FROZEN"
+  "MEXC_FIRST_FORWARD_AFTER_SEAL"
  ],
  "timeframe": "1m",
  "horizon": "6h",
@@ -37,9 +37,9 @@
   "notes": "per event in the harness: 2 x 5 bps taker (official VIP0, tier confirmed by the spot account, BNB discount not applied: decision P13) + own effective spread at +15 min + own sell+buy slippage at 500 $ (P11, official_published; imputed for 5); mean round trip 26.6 bps (HIGH 22.9). Realised funding received by the short at settlements in (entry, exit] enters the net. The spread/slippage numbers here are population medians for the schema; the harness uses per-event values."
  },
  "validation_window": {
-  "start": "2023-05-05",
-  "end": "2026-09-06",
-  "nature": "historical first look on the frozen population ONLY with a recorded user override of the news-family burn (2017-07-21 -> 2026-09-10); otherwise forward-only: t0 after the seal, look when >= 60 eligible or on 2028-09-12"
+  "start": "2026-09-13",
+  "end": "2028-09-12",
+  "nature": "FORWARD-ONLY: events with t0 after the seal timestamp (LOOK_LEDGER seal entry, branch prereg/mexc-to-binance-v1-forward, 2026-09-13); one look when >= 60 eligible or on 2028-09-12; the historical period 2017-07-21 -> 2026-09-10 is burned for the news family and no historical read is authorized"
  },
  "placebo_tests": [
   "post_listing_drift_t0_plus_7d (veto-eligible)",
@@ -92,5 +92,5 @@
   ]
  },
  "declared_data_latency_ms": 60000,
- "notes": "Preregistration: reports/prereg/MEXC_TO_BINANCE_V1_PREREG.md (draft until sealed as an orphan commit). Sixth sealed hypothesis of the news family: threshold_t(6) = 2.3940, alpha/6 one-sided. Deviations from research_kernel/mechanisms/mexc_to_binance_migration_effect.py listed in the prereg section 2. Expected outcome at declared power: INDECIDABLE."
+ "notes": "Sealed forward-only: reports/loop/prereg/MEXC_TO_BINANCE_V1_FORWARD_SEAL.md (orphan commit). Sixth sealed hypothesis of the news family: threshold_t(6) = 2.3940, alpha/6 one-sided. Deviations from research_kernel/mechanisms/mexc_to_binance_migration_effect.py listed in the seal section 2. Maximum verdict before the look: SEALED_NOT_TESTED. No fiat credit, no burn override."
 }

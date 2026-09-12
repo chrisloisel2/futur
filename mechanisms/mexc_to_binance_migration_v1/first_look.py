@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """
-mexc_to_binance_migration_v1 / first_look.py -- MEXC_TO_BINANCE_V1 : le regard unique pre-enregistre.
+mexc_to_binance_migration_v1 / first_look.py -- MEXC_TO_BINANCE_V1 : le regard unique pre-enregistre, FORWARD-ONLY.
 
-    conditionnement (pre-annonce) -> population (pre-t0 + cout mesure) -> sceller -> controle positif -> regarder UNE fois
+    sceller -> collecter les lancements POSTERIEURS au scellement (forward_collect.py) -> regarder UNE fois
+    quand n_eligible >= 60 ou le 2028-09-12
+
+La periode 2017-07-21 -> 2026-09-10 est brulee pour la famille news (ledger du noyau) : AUCUN regard historique n'est
+autorise, aucun override n'existe dans ce code. Les fichiers historiques pinnes ne servent qu'a documenter la repetition a
+blanc de l'entonnoir (population.json) ; le regard lit le registre forward.
 
 Une seule hypothese, direction fixee (short), une seule variable (pre_announcement_return_24h), une seule entree
 (t0 + 15 min), un seul horizon primaire (6 h). Tout est dans reports/prereg/MEXC_TO_BINANCE_V1_PREREG.md.
@@ -13,12 +18,14 @@ reste donc invariante au niveau moyen que le regard seq 8 a deja revele. La port
 nette >= 3 x cout moyen) est la revendication negociable ; elle ne porte pas le seuil de famille.
 
 Modes :
-  --build-conditioning  pre_announcement_return_24h depuis les tapes MEXC closes (pre-t0). AUCUN rendement lu.
-  --build-population    l'entonnoir de la section 3 du prereg, listes HIGH/LOW figees. AUCUN rendement lu.
+  --build-conditioning  pre_announcement_return_24h (historique, repetition a blanc). AUCUN rendement lu.
+  --build-population    l'entonnoir sur les fichiers historiques pinnes (repetition a blanc, jamais regarde). AUCUN rendement lu.
+  --status              SEALED_NOT_TESTED + nombre d'evenements forward eligibles a ce jour (registre forward).
   --positive-control    prix synthetiques au regime du design (n, sigma) : effet retrouve, nul rejete, sur plusieurs seeds.
-  --run                 le regard : refuse sans temoin orphelin pousse, si un pin differe (ce fichier compris), si le ledger
-                        n'a pas le seq 9, si le budget n'a pas sa ligne de credit, si la periode est brulee sans override,
-                        ou si un resultat existe ; LOOK_LEDGER + kernel + debit AVANT le premier prix.
+  --run                 le regard forward : refuse sans entree `seal` dans le LOOK_LEDGER, si un pin differe (ce fichier
+                        compris), si un evenement a t0 <= scellement ou dans la periode brulee, si n < 60 avant 2028-09-12,
+                        si le budget (regle des episodes) est < 1, ou si un resultat existe ; LOOK_LEDGER + kernel + debit
+                        AVANT le premier prix.
 """
 from __future__ import annotations
 
@@ -51,9 +58,12 @@ MECH = ROOT / "mechanisms" / "mexc_to_binance_migration_v1"
 RESULTS = MECH / "results"
 POPULATION = MECH / "population.json"
 CONDITIONING = ROOT / "reports" / "data_acquisition" / "MEXC_PRE_ANNOUNCEMENT_RETURN_24H.json"
-PREREG = ROOT / "reports" / "prereg" / "MEXC_TO_BINANCE_V1_PREREG.md"
-OVERRIDES = ROOT / "reports" / "prereg" / "MEXC_TO_BINANCE_V1_OVERRIDES.json"
-WITNESS_BRANCH = "prereg/mexc-to-binance-v1"
+PREREG = ROOT / "reports" / "loop" / "prereg" / "MEXC_TO_BINANCE_V1_FORWARD_SEAL.md"
+WITNESS_BRANCH = "prereg/mexc-to-binance-v1-forward"
+FORWARD_DIR = ROOT / "reports" / "forward" / "mexc_to_binance_v1"
+FORWARD_INPUTS = {"universe": FORWARD_DIR / "UNIVERSE.json", "conditioning": FORWARD_DIR / "MEXC_PRE_ANNOUNCEMENT_RETURN_24H.json", "causal_matrix": FORWARD_DIR / "CAUSAL_MATRIX.json",
+                  "capacity": FORWARD_DIR / "CAPACITY_FEATURES.json", "wash": FORWARD_DIR / "WASH.json"}
+BURN_END = "2026-09-10"                                  # famille news brulee jusque-la (ledger du noyau) : rien avant n'est lisible
 EXCHANGE_INFO = ROOT / "data_lake" / "first_look" / "event_listing_perp_fade_v1" / "exchangeInfo.json"
 FUNDING_ROOT = ROOT / "data" / "vision_backfill" / "um" / "fundingRate"
 LOOK_LEDGER = ROOT / "reports" / "loop" / "LOOK_LEDGER.jsonl"
@@ -62,7 +72,6 @@ LOOP_STATE = ROOT / "reports" / "loop" / "LOOP_STATE.json"
 KERNEL_LEDGER = ROOT / "reports" / "research_kernel" / "multiplicity_ledger.json"
 MECHANISM_ID = "mexc_to_binance_migration_effect_v1"
 SEQ9_HASH = "033b2ab63d900eea14a9c89f8fc84189f0a96fc29e49fdbe10f2ad6498a227ec"     # regard seq 9 (P3B) : la chaine doit le porter
-SEQ9_DEBIT = "__DEBIT__FORCED_LIQUIDATION_FIRST_LOOK"
 
 FAMILY = "news"; N_FAMILY_TESTS = 6                      # sixieme hypothese scellee ; verifie contre le ledger du noyau au regard
 ALPHA_FAMILY = 0.05 / N_FAMILY_TESTS                     # 0.008333 unilateral
@@ -97,9 +106,15 @@ def pins() -> dict:
 
 
 def check_pins(require_harness: bool = True) -> dict:
+    """Code et regles : sha exact. References historiques : sha exact (jamais lues par le regard). Entrees forward : chemin
+    declare, sha enregistre au regard (elles grandissent avec les lancements ; elles ne peuvent pas etre pinnees)."""
     p = pins()
     for name, pin in p.items():
         path = ROOT / pin["path"]
+        if pin.get("role") == "forward_input":
+            continue
+        if not pin.get("sha256"):
+            raise SystemExit("REFUS : %s n'a pas de sha256 dans le prereg : rien n'est pinne" % pin["path"])
         if name == "harness":
             if require_harness and sha(Path(__file__)) != pin["sha256"]:
                 raise SystemExit("REFUS : ce harnais n'est pas celui que le prereg pinne")
@@ -154,14 +169,22 @@ def event_cost(cap_event: dict, median_slippage_rt: float | None = None, window_
     return None, None
 
 
-def build_population(p: dict | None = None, min_t0_ms: int | None = None) -> dict:
-    """L'entonnoir de la section 3, dans l'ordre, sans option. Fonction pure des fichiers pinnes ; aucun rendement."""
-    p = p or pins()
-    uni = {e["event_id"]: e for e in json.loads((ROOT / p["universe"]["path"]).read_text())["events"]}
-    cond = {r["event_id"]: r for r in json.loads((ROOT / p["conditioning"]["path"]).read_text())["rows"]}
-    causal = {r["event_id"]: r for r in json.loads((ROOT / p["causal_matrix"]["path"]).read_text())["rows"]}
-    cap = {e["event_id"]: e for e in json.loads((ROOT / p["capacity"]["path"]).read_text())["events"]}
-    wash = {r["event_id"]: r for r in json.loads((ROOT / p["wash"]["path"]).read_text())["rows"]}
+def _load_inputs(source: str, p: dict | None = None) -> dict:
+    """source = 'historical' (fichiers pinnes, repetition a blanc) ou 'forward' (registre forward, jamais pinne)."""
+    if source == "forward":
+        paths = FORWARD_INPUTS
+    else:
+        p = p or pins(); paths = {k: ROOT / p["historical_" + k]["path"] for k in ("universe", "conditioning", "causal_matrix", "capacity", "wash")}
+    def load(k, key):
+        return json.loads(paths[k].read_text()).get(key, []) if paths[k].exists() else []
+    return {"uni": {e["event_id"]: e for e in load("universe", "events")}, "cond": {r["event_id"]: r for r in load("conditioning", "rows")},
+            "causal": {r["event_id"]: r for r in load("causal_matrix", "rows")}, "cap": {e["event_id"]: e for e in load("capacity", "events")},
+            "wash": {r["event_id"]: r for r in load("wash", "rows")}, "paths": {k: str(v) for k, v in paths.items()}}
+
+
+def build_population(p: dict | None = None, min_t0_ms: int | None = None, source: str = "historical") -> dict:
+    """L'entonnoir de la section 3, dans l'ordre, sans option. Fonction pure des fichiers d'entree ; aucun rendement."""
+    inp = _load_inputs(source, p); uni, cond, causal, cap, wash = inp["uni"], inp["cond"], inp["causal"], inp["cap"], inp["wash"]
     funnel = []
     s0 = [e for e, r in causal.items() if r.get("population") == "MEXC_FIRST" and (min_t0_ms is None or uni[e]["tradable_start_ms"] > min_t0_ms)]; funnel.append(("MEXC_FIRST", len(s0)))
     s1 = [e for e in s0 if causal[e].get("class") != "BAD_TIMESTAMP"]; funnel.append(("not BAD_TIMESTAMP (announced vs first bar > 15 min)", len(s1)))
@@ -185,8 +208,8 @@ def build_population(p: dict | None = None, min_t0_ms: int | None = None) -> dic
                      "wash_volume_suspect": wash.get(e, {}).get("wash_volume_suspect"), "programme_like": wash.get(e, {}).get("programme_like")})
     lead = [r["lead_time_days"] for r in rows if r["lead_time_days"] is not None]; xs = [r["pre_announcement_return_24h"] for r in rows]
     high = sorted(r["event_id"] for r in rows if r["group"] == "HIGH"); low = sorted(r["event_id"] for r in rows if r["group"] == "LOW")
-    return {"mechanism_id": MECHANISM_ID, "built_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "t0_definition": "tradable_start_ts of the pinned universe (open_time of the first 1-min Vision bar)",
-            "funnel": funnel, "n": len(rows), "high_threshold": HIGH_THRESHOLD, "n_high": len(high), "n_low": len(low), "high_event_ids": high, "low_event_ids": low,
+    return {"mechanism_id": MECHANISM_ID, "source": source, "built_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), "t0_definition": "tradable_start_ts (open_time of the first 1-min Vision bar)",
+            "min_t0_ms": min_t0_ms, "input_paths": inp["paths"], "funnel": funnel, "n": len(rows), "high_threshold": HIGH_THRESHOLD, "n_high": len(high), "n_low": len(low), "high_event_ids": high, "low_event_ids": low,
             "high_sha256": hashlib.sha256(json.dumps(high).encode()).hexdigest(), "low_sha256": hashlib.sha256(json.dumps(low).encode()).hexdigest(),
             "median_return": statistics.median(xs) if xs else None, "mean_cost_rt_bps": statistics.mean(r["cost_rt_bps"] for r in rows) if rows else None,
             "mean_cost_rt_bps_high": statistics.mean(r["cost_rt_bps"] for r in rows if r["group"] == "HIGH") if high else None, "median_slippage_rt_bps_imputed": med_slip,
@@ -473,29 +496,45 @@ def positive_control(n: int = 84, sigma_6h_bps: float = 1546.0, seeds: tuple = (
 
 
 # ----------------------------------------------------------------------------- ledgers, budget, run
-def check_ledgers(pop_window: tuple, mode: str) -> dict:
-    """Les preconditions du regard, dans l'ordre : chaine avec seq 9, debit seq 9 present, credit nomme, solde coherent,
-    periode brulee -> override enregistre ou mode forward."""
+def seal_entry() -> dict:
+    """L'entree `seal` du LOOK_LEDGER pour cette branche orpheline : sa date est la coupure forward."""
+    for l in LOOK_LEDGER.read_text().splitlines():
+        if not l.strip():
+            continue
+        e = json.loads(l)
+        if e.get("kind") == "seal" and any(c.get("branch") == WITNESS_BRANCH for c in e.get("configs", [])):
+            return e
+    raise SystemExit("REFUS : aucune entree `seal` pour %s dans le LOOK_LEDGER : rien n'est scelle" % WITNESS_BRANCH)
+
+
+def forward_cutoff_ms() -> int:
+    return int(datetime.fromisoformat(seal_entry()["ts"].replace("Z", "+00:00")).timestamp() * 1000)
+
+
+def check_ledgers(pop_window: tuple, cutoff_ms: int) -> dict:
+    """Preconditions du regard forward, dans l'ordre : chaine avec seq 9, scellement present, chaque evenement APRES la
+    coupure ET apres la periode brulee, budget >= 1 par la regle des episodes (jamais un credit fiat), seuil derive du noyau."""
     entries = [json.loads(l) for l in LOOK_LEDGER.read_text().splitlines() if l.strip()]
     if not any(e.get("hash") == SEQ9_HASH for e in entries):
-        raise SystemExit("REFUS : le LOOK_LEDGER ne porte pas le regard seq 9 (%s…) : merger PR #10 d'abord" % SEQ9_HASH[:8])
+        raise SystemExit("REFUS : le LOOK_LEDGER ne porte pas le regard seq 9 (%s…)" % SEQ9_HASH[:8])
+    se = seal_entry()
+    if pop_window[0][:10] <= BURN_END:
+        raise SystemExit("REFUS : un evenement (%s) tombe dans la periode brulee de la famille %s (<= %s)" % (pop_window[0], FAMILY, BURN_END))
+    if int(datetime.fromisoformat(pop_window[0].replace("Z", "+00:00")).timestamp() * 1000) <= cutoff_ms:
+        raise SystemExit("REFUS : un evenement (%s) precede le scellement (%s)" % (pop_window[0], se["ts"]))
+    ml = MultiplicityLedger(KERNEL_LEDGER); burned = ml.is_burned(FAMILY, pop_window[0][:10], pop_window[1][:10])
+    if burned:
+        raise SystemExit("REFUS : fenetre %s brulee pour la famille %s : aucun override n'existe" % (burned, FAMILY))
     budget = [json.loads(l) for l in BUDGET_LEDGER.read_text().splitlines() if l.strip()]
-    if not any(b.get("source") == SEQ9_DEBIT for b in budget):
-        raise SystemExit("REFUS : le BUDGET_LEDGER ne porte pas le debit du seq 9")
-    credit = [b for b in budget if b.get("credited", 0) > 0 and "MEXC_TO_BINANCE_V1" in json.dumps(b)]
-    if not credit:
-        raise SystemExit("REFUS : aucune ligne de credit nommant MEXC_TO_BINANCE_V1 dans le BUDGET_LEDGER (decision utilisateur, hors regle des episodes)")
+    if any("USER_DECISION_OUTSIDE_EPISODE_RULE" in json.dumps(b) for b in budget):
+        raise SystemExit("REFUS : une ligne de credit hors regle des episodes existe : ce prereg refuse d'en beneficier")
     st = json.loads(LOOP_STATE.read_text()); bal = sum(b.get("credited", 0) for b in budget)
     if bal != st.get("budget_tests_remaining") or bal < 1:
-        raise SystemExit("REFUS : solde ledger %s != LOOP_STATE %s ou < 1" % (bal, st.get("budget_tests_remaining")))
-    ml = MultiplicityLedger(KERNEL_LEDGER); burned = ml.is_burned(FAMILY, pop_window[0][:10], pop_window[1][:10])
-    ov = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
-    if burned and mode == "historical" and not ov.get("burn_override"):
-        raise SystemExit("REFUS : periode %s brulee pour la famille %s (kernel ledger) et aucun override enregistre : regard historique interdit ; mode forward seulement" % (burned, FAMILY))
+        raise SystemExit("REFUS : budget %s (LOOP_STATE %s) < 1 : aucun regard tant que des episodes nouveaux n'ont pas credite un test" % (bal, st.get("budget_tests_remaining")))
     thr_ledger = ml.current_threshold(FAMILY, extra=1)
     if abs(thr_ledger - threshold_t(N_FAMILY_TESTS)) > 1e-6:
         raise SystemExit("REFUS : le ledger du noyau donne threshold %.4f pour la famille %s (+1), le prereg dit %.4f" % (thr_ledger, FAMILY, threshold_t(N_FAMILY_TESTS)))
-    return {"seq9": True, "credit": credit[-1], "balance": bal, "burned": burned, "override": ov, "threshold_from_kernel": thr_ledger}
+    return {"seq9": True, "seal_ts": se["ts"], "balance": bal, "threshold_from_kernel": thr_ledger}
 
 
 def debit_budget(n: int, note: str, seq: int):
@@ -511,35 +550,46 @@ def debit_budget(n: int, note: str, seq: int):
     LOOP_STATE.write_text(json.dumps(st, indent=2, ensure_ascii=False))
 
 
+def status() -> dict:
+    """SEALED_NOT_TESTED tant que le regard n'a pas eu lieu ; compte les evenements forward eligibles a ce jour."""
+    if (RESULTS / "verdict.json").exists():
+        return json.loads((RESULTS / "verdict.json").read_text())
+    try:
+        cutoff = forward_cutoff_ms(); sealed = True; seal_ts = seal_entry()["ts"]
+    except SystemExit:
+        cutoff, sealed, seal_ts = None, False, None
+    pop = build_population(min_t0_ms=cutoff, source="forward") if sealed else {"n": 0, "n_high": 0, "funnel": []}
+    return {"mechanism_id": MECHANISM_ID, "status": "SEALED_NOT_TESTED" if sealed else "DRAFT_NOT_SEALED", "seal_ts": seal_ts, "forward_cutoff_ms": cutoff,
+            "n_eligible": pop["n"], "n_high": pop["n_high"], "funnel": pop["funnel"], "look_rule": "n_eligible >= %d or date >= %s" % (N_FORWARD_MIN, FORWARD_LATEST_LOOK),
+            "look_allowed_now": bool(sealed and (pop["n"] >= N_FORWARD_MIN or datetime.now(timezone.utc).strftime("%Y-%m-%d") >= FORWARD_LATEST_LOOK)),
+            "capital_deployable": False, "budget_required_at_look": 1, "no_historical_read": True, "burned_until": BURN_END}
+
+
 def run(workers: int = 8) -> dict:
     import look_ledger
-    p = check_pins(require_harness=True)
-    ov = json.loads(OVERRIDES.read_text()) if OVERRIDES.exists() else {}
-    mode = "historical" if ov.get("burn_override") else "forward"
-    if mode == "historical":
-        pop = json.loads(POPULATION.read_text())
-        if sha(POPULATION) != p["population"]["sha256"]:
-            raise SystemExit("REFUS : population.json ne correspond pas au pin")
-    else:
-        seal_ms = int(datetime.fromisoformat(ov.get("seal_ts", "2026-09-13T00:00:00+00:00")).timestamp() * 1000)
-        pop = build_population(p, min_t0_ms=seal_ms)
-        if pop["n"] < N_FORWARD_MIN and datetime.now(timezone.utc).strftime("%Y-%m-%d") < FORWARD_LATEST_LOOK:
-            raise SystemExit("REFUS : mode forward, %d evenements eligibles < %d et date < %s" % (pop["n"], N_FORWARD_MIN, FORWARD_LATEST_LOOK))
-    ts = sorted(e["tradable_start_ts"] for e in pop["events"]); lg = check_ledgers((ts[0], ts[-1]), mode); thr = lg["threshold_from_kernel"]
-    cfg = [{"hypothesis": "MEXC_TO_BINANCE_V1", "mechanism_id": MECHANISM_ID, "mode": mode, "side": SIDE, "entry": "t0+%dm" % ENTRY_OFFSET_MIN, "primary": PRIMARY,
+    p = check_pins(require_harness=True); cutoff = forward_cutoff_ms()
+    pop = build_population(p, min_t0_ms=cutoff, source="forward")
+    if pop["n"] < N_FORWARD_MIN and datetime.now(timezone.utc).strftime("%Y-%m-%d") < FORWARD_LATEST_LOOK:
+        raise SystemExit("REFUS : %d evenements forward eligibles < %d et date < %s" % (pop["n"], N_FORWARD_MIN, FORWARD_LATEST_LOOK))
+    if pop["n"] < MIN_N:
+        raise SystemExit("REFUS : %d evenements forward eligibles < %d : le regard ne peut rien decider" % (pop["n"], MIN_N))
+    ts = sorted(e["tradable_start_ts"] for e in pop["events"]); lg = check_ledgers((ts[0], ts[-1]), cutoff); thr = lg["threshold_from_kernel"]
+    input_shas = {k: (sha(Path(v)) if Path(v).exists() else None) for k, v in pop["input_paths"].items()}
+    cfg = [{"hypothesis": "MEXC_TO_BINANCE_V1", "mechanism_id": MECHANISM_ID, "mode": "forward", "side": SIDE, "entry": "t0+%dm" % ENTRY_OFFSET_MIN, "primary": PRIMARY,
             "statistic": "spearman permutation, one-sided", "conditioning": "pre_announcement_return_24h", "high_threshold": HIGH_THRESHOLD, "n_universe": pop["n"], "n_high": pop["n_high"],
-            "family": FAMILY, "n_family": N_FAMILY_TESTS, "threshold_t": thr, "alpha_one_sided": ALPHA_FAMILY, "cost_rt_bps_mean": pop["mean_cost_rt_bps"], "burn_override": bool(ov.get("burn_override"))}]
+            "family": FAMILY, "n_family": N_FAMILY_TESTS, "threshold_t": thr, "alpha_one_sided": ALPHA_FAMILY, "cost_rt_bps_mean": pop["mean_cost_rt_bps"], "seal_ts": lg["seal_ts"],
+            "forward_input_sha256": input_shas, "population_high_sha256": pop["high_sha256"], "population_low_sha256": pop["low_sha256"]}]
     entry = look_ledger.record("confirm", (ts[0], ts[-1]), cfg, prereg=str(PREREG), require_witness=True, witness_branch=WITNESS_BRANCH,
-                               note="MEXC_TO_BINANCE_V1 first look (%s); re-test on a MEXC_FIRST subset of seq 8 with one pre-announcement conditioning; harness pinned" % mode)
+                               note="MEXC_TO_BINANCE_V1 forward look; every event after the seal %s; harness pinned" % lg["seal_ts"])
     ml = MultiplicityLedger(KERNEL_LEDGER); ml.record_trial(FAMILY, MECHANISM_ID, sha(PREREG), 1, note="LOOK_LEDGER seq %d, prereg orphan %s" % (entry["seq"], WITNESS_BRANCH))
-    debit_budget(1, "regard unique MEXC_TO_BINANCE_V1 (MEXC_FIRST, pre_announcement_return_24h, short +15m/6h), famille news n=6", entry["seq"])
+    debit_budget(1, "regard unique forward MEXC_TO_BINANCE_V1 (MEXC_FIRST apres scellement, pre_announcement_return_24h, short +15m/6h), famille news n=6", entry["seq"])
+    RESULTS.mkdir(parents=True, exist_ok=True); (RESULTS / "population_at_look.json").write_text(json.dumps(pop, indent=1, ensure_ascii=False))
     store = S8.VisionStore4(); res = evaluate(store, pop, workers=workers); pl = placebos(store, pop, workers=workers); ctl = other_venue_first_control(store, workers=workers)
     v, why = verdict_for(res, pl)
-    out = {"ledger_seq": entry["seq"], "ledger_hash": entry["hash"], "mode": mode, "threshold_t": thr, "alpha_one_sided": ALPHA_FAMILY, "family": FAMILY, "n_family_tests": N_FAMILY_TESTS, "verdict": v, "reasons": why,
-           "fee_provenance": "official_published", "fee_status": "official_published_vip0_confirmed_by_spot_tier", "started_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    out = {"ledger_seq": entry["seq"], "ledger_hash": entry["hash"], "mode": "forward", "seal_ts": lg["seal_ts"], "threshold_t": thr, "alpha_one_sided": ALPHA_FAMILY, "family": FAMILY, "n_family_tests": N_FAMILY_TESTS,
+           "verdict": v, "reasons": why, "fee_provenance": "official_published", "fee_status": "official_published_vip0_confirmed_by_spot_tier", "started_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
            **{k: v_ for k, v_ in res.items() if k != "per_event"}, "placebos": pl, "other_venue_first_control": ctl, "per_event": res["per_event"],
            "capital_deployable": False, "no_position": True, "finished_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")}
-    RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "first_look_results.json").write_text(json.dumps(out, indent=1, ensure_ascii=False, default=str))
     (RESULTS / "verdict.json").write_text(json.dumps({"mechanism_id": MECHANISM_ID, "status": v, "reasons": why, "primary": res["primary"], "economic_gate": {k: v_ for k, v_ in res["economic_gate"].items()},
                                                       "ledger_seq": entry["seq"], "first_look": True, "capital_deployable": False, "fee_provenance": "official_published"}, indent=1, default=str))
@@ -551,6 +601,7 @@ def run(workers: int = 8) -> dict:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--build-conditioning", action="store_true"); ap.add_argument("--build-population", action="store_true"); ap.add_argument("--positive-control", action="store_true"); ap.add_argument("--run", action="store_true")
+    ap.add_argument("--status", action="store_true")
     ap.add_argument("--workers", type=int, default=8); a = ap.parse_args()
     if a.build_conditioning:
         c = build_conditioning(); CONDITIONING.parent.mkdir(parents=True, exist_ok=True); CONDITIONING.write_text(json.dumps(c, indent=1, ensure_ascii=False))
@@ -562,6 +613,8 @@ def main():
     elif a.positive_control:
         r = positive_control(); RESULTS.mkdir(parents=True, exist_ok=True); (RESULTS / "positive_control.json").write_text(json.dumps(r, indent=1, default=str))
         print(json.dumps({k: v for k, v in r.items() if k != "seeds"}, indent=1, default=str)); sys.exit(0 if r["passed"] else 1)
+    elif a.status:
+        print(json.dumps(status(), indent=1, ensure_ascii=False, default=str))
     elif a.run:
         run(a.workers)
     else:
