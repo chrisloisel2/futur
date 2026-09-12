@@ -241,3 +241,23 @@ Step 3 of the plan: "wash-volume test MEXC vs OKX/Bybit". Descriptive covariates
   undetectable from candles; false-positive rate unknown.
 - **Nothing here is a look.** No post-t0 data is read (tested); the next allowed act is unchanged: a read-only key, then one
   preregistration for the MEXC_FIRST population with one price-only conditioning variable.
+
+## P13 — read-only reality, fee decision, and MEXC_TO_BINANCE_V1 sealed forward-only (2026-09-13)
+
+- **The first real read-only key answered.** Spot: VIP0 confirmed (`makerCommission = takerCommission = 10 bps`). Futures:
+  every `/fapi` endpoint refuses a key without "Enable Futures" — a trading permission. Decision
+  `USE_OFFICIAL_PUBLISHED_VIP0_FUTURES_FEES` (option B): official VIP0 fee at the spot-confirmed tier, BNB discount not applied,
+  residual 0.5 bps, **no futures trading key, ever**. The client was hardened before the key touched it (account flags
+  informational, sanitised errors, deny-by-default permissions, structural gate, no redirect).
+- **The cost chain left `unknown` by naming its window, not by a key.** Spread and slippage were declared; P11 measured them
+  per window. At t0 the round trip costs 52.9 bps at 500 $ (spec said 24); at +15 min 23.7. The H2 chain reads `confirmed` at
+  `official_published` grade for +15 min / 500 $; nothing else moved.
+- **The historical look was not bought.** Its conditioning variable, cut at the announcement, halves (+19 % → +5.6 %: the
+  run-up was mostly the reaction to the announcement); the kernel ledger burns family `news` on 2017-07-21 → 2026-09-10; the
+  synthetic positive control at the design regime gives CANDIDATE 2 times in 8 for a 700 bps injected fade. The user refused a
+  fiat budget credit and a burn override.
+- **MEXC_TO_BINANCE_V1 is sealed forward-only** (orphan commit `97d009bd`, LOOK_LEDGER seq 10): events with t0 after the
+  seal only, one look when ≥ 60 eligible events exist or on 2028-09-12; Spearman-permutation primary on the pre-announcement
+  24 h MEXC run-up, economic gate on the ≥ +20 % group, verdict ceiling `CANDIDATE_ALPHA_REQUIRES_FORWARD`. Status today:
+  `SEALED_NOT_TESTED`. Forward collection runs on a timer and reads no return.
+- Budget: **0**. Validated sleeves: 0. Capital deployable: **false.** No bot.
