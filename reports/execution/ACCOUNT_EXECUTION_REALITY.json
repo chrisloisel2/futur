@@ -1,0 +1,157 @@
+{
+ "generated_at_utc": "2026-09-11T23:06:16+00:00",
+ "published_vip0": {
+  "maker_bps": 2.0,
+  "taker_bps": 5.0,
+  "source_class": "official",
+  "as_of": "2026-09-10"
+ },
+ "account": {
+  "has_credentials": false,
+  "env_var": null,
+  "permission_check": {
+   "status": "no_credentials",
+   "usable": false,
+   "reason": "no API key in the environment"
+  },
+  "usable": false,
+  "endpoints": {
+   "commission_rate": {
+    "status": "no_credentials",
+    "endpoint": "GET /fapi/v1/commissionRate",
+    "reason": "no API key in the environment",
+    "would_give": "actual maker/taker fee for one futures symbol"
+   },
+   "leverage_brackets": {
+    "status": "no_credentials",
+    "endpoint": "GET /fapi/v1/leverageBracket",
+    "reason": "no API key in the environment",
+    "would_give": "leverage brackets and maintenance margin"
+   },
+   "futures_account": {
+    "status": "no_credentials",
+    "endpoint": "GET /fapi/v2/account",
+    "reason": "no API key in the environment",
+    "would_give": "account metadata: fee tier and permissions"
+   },
+   "spot_account": {
+    "status": "no_credentials",
+    "endpoint": "GET /api/v3/account",
+    "reason": "no API key in the environment",
+    "would_give": "spot commission rates"
+   },
+   "funding_income": {
+    "status": "no_credentials",
+    "endpoint": "GET /fapi/v1/income",
+    "reason": "no API key in the environment",
+    "would_give": "own income rows (funding fees, commissions)"
+   },
+   "own_fills": {
+    "status": "no_credentials",
+    "endpoint": "GET /fapi/v1/userTrades",
+    "reason": "no API key in the environment",
+    "would_give": "own fills"
+   },
+   "margin_pairs": {
+    "status": "no_credentials",
+    "endpoint": "GET /sapi/v1/margin/allPairs",
+    "reason": "no API key in the environment",
+    "would_give": "margin pairs (is the asset borrowable?)"
+   }
+  }
+ },
+ "key_redacted": "<absent>",
+ "costs": {
+  "fee_bps_per_side": 5.0,
+  "fee_provenance": "official_published",
+  "comparisons": {
+   "H2": {
+    "spec_declared_round_trip_bps": 24.0,
+    "cost_chain": {
+     "market_type": "perp",
+     "fee_bps_per_side": 5.0,
+     "fee_provenance": "official_published",
+     "spread_bps": 8.0,
+     "spread_provenance": "declared",
+     "slippage_bps": 6.0,
+     "slippage_provenance": "declared",
+     "round_trip_bps": 24.0,
+     "wall_3x_bps": 72.0,
+     "weakest_provenance": "declared",
+     "is_measured": false,
+     "note": "spread and slippage are still the values declared in the spec; only the fee has a stronger provenance"
+    },
+    "assumed_round_trip_bps": 24.0,
+    "measured_round_trip_bps": 24.0,
+    "difference_bps": 0.0,
+    "status": "unknown",
+    "weakest_provenance": "declared",
+    "note": "a cost chain that rests on a declared number cannot confirm or contradict anything"
+   },
+   "H3": {
+    "spec_declared_round_trip_bps": 18.0,
+    "cost_chain": {
+     "market_type": "perp",
+     "fee_bps_per_side": 5.0,
+     "fee_provenance": "official_published",
+     "spread_bps": 4.0,
+     "spread_provenance": "declared",
+     "slippage_bps": 4.0,
+     "slippage_provenance": "declared",
+     "round_trip_bps": 18.0,
+     "wall_3x_bps": 54.0,
+     "weakest_provenance": "declared",
+     "is_measured": false,
+     "note": "spread and slippage are still the values declared in the spec; only the fee has a stronger provenance"
+    },
+    "assumed_round_trip_bps": 18.0,
+    "measured_round_trip_bps": 18.0,
+    "difference_bps": 0.0,
+    "status": "unknown",
+    "weakest_provenance": "declared",
+    "note": "a cost chain that rests on a declared number cannot confirm or contradict anything"
+   }
+  }
+ },
+ "constraints_coverage": {
+  "h2_symbols": 174,
+  "h3_symbols": 53,
+  "with_public_constraints": 207,
+  "missing": [
+   "ACAUSDT",
+   "AERGOUSDT",
+   "AIONUSDT",
+   "AKROUSDT",
+   "ALCXUSDT",
+   "ANTUSDT",
+   "BEAMUSDT",
+   "BIFIUSDT",
+   "BTSUSDT",
+   "CVPUSDT",
+   "DREPUSDT",
+   "FOOTBALLUSDT",
+   "GFTUSDT",
+   "USDSUSDT"
+  ],
+  "n_missing": 14
+ },
+ "answers": {
+  "1_actual_futures_taker_fee_bps": null,
+  "2_actual_futures_maker_fee_bps": null,
+  "3_funding_payment_availability": "no_credentials",
+  "4_leverage_bracket_availability": "no_credentials",
+  "5_h2_h3_cost_assumptions": {
+   "H2": "unknown",
+   "H3": "unknown"
+  },
+  "6_what_remains_theoretical": [
+   "every account figure: no read-only API key in the environment (BINANCE_READONLY_API_KEY or BINANCE_API_KEY)",
+   "spread and slippage in both cost chains are the values declared in the specs; P6 depth archives can measure them, this phase does not",
+   "borrow availability and borrow cost for spot delisting shorts (sapi margin endpoints, key required)"
+  ]
+ },
+ "no_orders": true,
+ "no_trading_permission_used": true,
+ "no_secrets_stored": true,
+ "no_alpha_test": true
+}
