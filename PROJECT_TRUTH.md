@@ -153,3 +153,24 @@ P5 turns the P4 collection into indices: `CURRENT_COLLECTION_INVENTORY` (what th
 sheet), `H2_LAUNCH_COVERAGE_MATRIX` (one row per H2 launch: what is in hand, what is free to backfill, what needs a
 provider, what is live-only, scored on 100 points) and `H2_PROVIDER_REQUEST_WINDOWS` (the targeted request to send
 before paying anything). No price join, no signal, no verdict, no budget. Validated sleeves: 0. Capital deployable: **false.**
+
+
+## P6–P10 — data completion (2026-09-11/12): the gate is closed, and the reason is named
+
+Five phases of data completion, no test run, no budget consumed, no verdict changed.
+
+- **P6** backfilled the 174 H2 launch windows from Binance Vision: 1 364 files, 1.47 GB, every sha256 verified against
+  Vision's own `.CHECKSUM`, 173 of 174 windows with complete core state (mark, index reference, trades).
+- **P7** archived 230 announcement bodies: 174 of 174 launch times and 56 of 56 delisting times, the launch time agreeing
+  with the first traded bar within 5 minutes for 162 of 174. Instrument defect I22 is closed.
+- **P8** built the read-only execution module (GET only, whitelisted endpoints, refuses a key that can trade). No key exists
+  here, so the fee actually charged is **unknown**; the published VIP0 schedule is the strongest figure available.
+- **P9** settled cross-venue precedence for 143 of 174 assets: **137 were already priced elsewhere** before the Binance
+  perpetual opened (MEXC 113, median lead 11 days). Only 6 are first listings anywhere.
+- **P10** froze the dataset and ran the decision gate: **NO TEST**, 0 clean events against a threshold of 80. Two blockers,
+  both free to clear: no read-only key, and capacity never derived from the depth archives already on disk. If both were
+  cleared, 129 events would be clean — of which 123 are `OTHER_VENUE_FIRST` and 6 `TRUE_BINANCE_PERP_FIRST`.
+
+The finding that outlives the counts: `event_listing_perp_fade_v1` pooled two populations that are not the same
+phenomenon. That does not re-open regard seq 8 (burned, INDECIDABLE) and produces no signal; it means a future
+preregistration must state which population it tests. Validated sleeves: 0. Budget: 0. Capital deployable: **false.**
