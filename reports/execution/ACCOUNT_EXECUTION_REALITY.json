@@ -1,5 +1,5 @@
 {
- "generated_at_utc": "2026-09-12T20:35:15+00:00",
+ "generated_at_utc": "2026-09-12T20:45:45+00:00",
  "published_vip0": {
   "maker_bps": 2.0,
   "taker_bps": 5.0,
@@ -116,22 +116,22 @@
      "market_type": "perp",
      "fee_bps_per_side": 5.0,
      "fee_provenance": "official_published",
-     "spread_bps": 8.0,
-     "spread_provenance": "declared",
-     "slippage_bps": 6.0,
-     "slippage_provenance": "declared",
-     "round_trip_bps": 24.0,
-     "wall_3x_bps": 72.0,
-     "weakest_provenance": "declared",
-     "is_measured": false,
-     "note": "spread and slippage are still the values declared in the spec; only the fee has a stronger provenance"
+     "spread_bps": 10.31,
+     "spread_provenance": "official_published",
+     "slippage_bps": 3.35,
+     "slippage_provenance": "official_published",
+     "round_trip_bps": 23.66,
+     "wall_3x_bps": 70.98,
+     "weakest_provenance": "official_published",
+     "is_measured": true,
+     "note": "spread and round-trip slippage are P11 medians at window +15m for 500 USD (band upper bound 200.0 bps, 0 orders exceed the observed book)"
     },
     "assumed_round_trip_bps": 24.0,
-    "measured_round_trip_bps": 24.0,
-    "difference_bps": 0.0,
-    "status": "unknown",
-    "weakest_provenance": "declared",
-    "note": "a cost chain that rests on a declared number cannot confirm or contradict anything"
+    "measured_round_trip_bps": 23.66,
+    "difference_bps": -0.34,
+    "status": "confirmed",
+    "weakest_provenance": "official_published",
+    "note": ""
    },
    "H3": {
     "spec_declared_round_trip_bps": 18.0,
@@ -157,7 +157,30 @@
     "note": "a cost chain that rests on a declared number cannot confirm or contradict anything"
    }
   },
-  "capacity_links": null
+  "capacity_links": null,
+  "decision": "USE_OFFICIAL_PUBLISHED_VIP0_FUTURES_FEES",
+  "decision_window": {
+   "hypothesis": "H2",
+   "window_min": 15,
+   "notional_usd": 500,
+   "why": "t0 is too expensive (52.9 bps round trip at 500 $); +15 min confirms spread normalisation; +60 min risks missing the post-open mechanism; chosen on cost/capacity only, no return read",
+   "role": "default prereg candidate for MEXC_TO_BINANCE_V1; the preregistration may only restate it, never move it after a look"
+  },
+  "capacity_links_used": {
+   "H2": {
+    "window_min": 15,
+    "notional_usd": 500,
+    "n_events": 174,
+    "n_spread": 174,
+    "n_slippage": 164,
+    "n_order_exceeds_book": 0,
+    "spread_bps_median": 10.31,
+    "slippage_rt_bps_median": 3.35,
+    "slippage_rt_upper_bound_bps_median": 200.0,
+    "provenance": "official_published",
+    "source": "P11 H2_DEPTH_CAPACITY_FEATURES (Binance Vision bookDepth + aggTrades); slippage = linear estimate within the book band, uniform-within-band assumption"
+   }
+  }
  },
  "constraints_coverage": {
   "h2_symbols": 174,
@@ -187,7 +210,7 @@
   "3_funding_payment_availability": "error",
   "4_leverage_bracket_availability": "error",
   "5_h2_h3_cost_assumptions": {
-   "H2": "unknown",
+   "H2": "confirmed",
    "H3": "unknown"
   },
   "6_what_remains_theoretical": [

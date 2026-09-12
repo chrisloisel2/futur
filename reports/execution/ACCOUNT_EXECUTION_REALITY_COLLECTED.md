@@ -1,4 +1,4 @@
-# ACCOUNT EXECUTION REALITY — collected (2026-09-12T20:35:15 UTC)
+# ACCOUNT EXECUTION REALITY — collected (2026-09-12T20:45:45 UTC)
 
 Mode: **collected**.
 
@@ -12,6 +12,6 @@ Mode: **collected**.
 | leverage brackets available | False |
 | margin pairs / borrowability | True |
 | symbol constraints (public) | 207 symbols |
-| H2 cost chain | **unknown** |
+| H2 cost chain | **confirmed** |
 | H3 cost chain | **unknown** |
 

@@ -1,11 +1,15 @@
-# H2 / H3 COST CHAIN STATUS (2026-09-12T20:35:15 UTC)
+# H2 / H3 COST CHAIN STATUS (2026-09-12T20:45:45 UTC)
 
 A cost chain has three links — fee, spread, slippage — and is worth its weakest. `confirmed` and `contradicted` require every link measured (`account_actual`) or officially published; a chain that rests on a declared number is `unknown`. `unknown` is an honest state, not a defect.
 
 | hypothesis | spec declared round trip | chain round trip | fee | spread | slippage | weakest | status |
 |---|---|---|---|---|---|---|---|
-| H2 | 24.0 bps | 24.0 bps | `official_published` | `declared` | `declared` | `declared` | **unknown** |
+| H2 | 24.0 bps | 23.7 bps | `official_published` | `official_published` | `official_published` | `official_published` | **confirmed** |
 | H3 | 18.0 bps | 18.0 bps | `official_published` | `declared` | `declared` | `declared` | **unknown** |
+
+## Decision in force
+
+`USE_OFFICIAL_PUBLISHED_VIP0_FUTURES_FEES` (FUTURES_FEE_DECISION.md): official VIP0 futures fee at the tier confirmed by the spot account, BNB discount not applied, no futures trading key. Cost-chain window for H2: **+15 min, 500 $** — chosen on cost/capacity only.
 
 ## Fee link
 

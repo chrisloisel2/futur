@@ -1,5 +1,5 @@
 {
- "generated_at_utc": "2026-09-12T20:35:15+00:00",
+ "generated_at_utc": "2026-09-12T20:45:45+00:00",
  "mode": "collected",
  "env_var_used": "BINANCE_READONLY_API_KEY",
  "key_redacted": "0jJ…tp (64 chars)",
@@ -110,7 +110,7 @@
   "n_missing": 14
  },
  "cost_chain_status": {
-  "H2": "unknown",
+  "H2": "confirmed",
   "H3": "unknown"
  },
  "no_orders": true,

@@ -1,4 +1,4 @@
-# ACCOUNT EXECUTION REALITY — P8 (2026-09-12T20:35:15 UTC)
+# ACCOUNT EXECUTION REALITY — P8 (2026-09-12T20:45:45 UTC)
 
 What execution actually costs on this account, as opposed to what a spec declared. Read-only: the module implements GET and nothing else, calls only a whitelisted set of endpoints, and refuses a key that carries trading permission. No order, no signal, no verdict, no budget. Credentials come from the environment and are never written, logged or returned.
 
@@ -13,7 +13,7 @@ What execution actually costs on this account, as opposed to what a spec declare
 | 2 | actual futures maker fee | **unknown** — no usable key |
 | 3 | funding payments available | error |
 | 4 | leverage brackets available | error |
-| 5 | H2 / H3 cost assumptions | {'H2': 'unknown', 'H3': 'unknown'} |
+| 5 | H2 / H3 cost assumptions | {'H2': 'confirmed', 'H3': 'unknown'} |
 | 6 | what remains theoretical | see below |
 
 ### 6. What remains theoretical
@@ -29,7 +29,7 @@ A cost chain is worth its weakest link. `confirmed` and `contradicted` are only 
 
 | hypothesis | spec declared round trip | chain round trip | weakest provenance | status |
 |---|---|---|---|---|
-| H2 | 24.0 bps | 24.0 bps | `declared` | **unknown** |
+| H2 | 24.0 bps | 23.7 bps | `official_published` | **confirmed** |
 | H3 | 18.0 bps | 18.0 bps | `declared` | **unknown** |
 
 Fee link: 5.00 bps per side, provenance `official_published` (published VIP0, official, as of 2026-09-10).

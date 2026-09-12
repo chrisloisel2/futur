@@ -161,3 +161,17 @@ def test_rebuild_from_store_makes_no_network_call_and_reads_only_the_dumps(tmp_p
     acct = A.snapshot_from_store(store, coll)
     assert acct["rebuilt_from_store"] and acct["has_credentials"] and acct["usable"] and acct["spot_fees"]["taker_bps"] == 10.0 and acct["account_flags"]["spot_account"]["canWithdraw"] is True
     assert "balances" not in json.dumps(acct) and A.futures_permission_diagnosis(acct) == "futures_read_requires_enable_futures"
+
+
+def test_fee_decision_names_the_window_and_the_h2_chain_leaves_unknown_only_for_it(tmp_path):
+    d = A.fee_decision()
+    assert d["decision"] == "USE_OFFICIAL_PUBLISHED_VIP0_FUTURES_FEES" and d["schema"] == {"account_actual": False, "official_published": True, "tier_confirmed": "VIP0",
+                                                                                          "tier_evidence": d["schema"]["tier_evidence"], "bnb_discount_applied": False, "residual_uncertainty_bps": 0.5}
+    assert d["key_policy"]["futures_trading_key"] == "never" and d["cost_chain_window"] == {**d["cost_chain_window"], "hypothesis": "H2", "window_min": 15, "notional_usd": 500}
+    pub = {"maker_bps": 2.0, "taker_bps": 5.0}; acct = {"spot_fees": {"maker_bps": 10.0, "taker_bps": 10.0}}
+    if A.CAPACITY_FEATURES.exists() and "H2" in A.build_costs(pub, acct, decision={})["comparisons"]:
+        with_d = A.build_costs(pub, acct); without = A.build_costs(pub, acct, decision={})
+        assert with_d["comparisons"]["H2"]["weakest_provenance"] == "official_published" and with_d["comparisons"]["H2"]["status"] in ("confirmed", "contradicted")
+        assert without["comparisons"]["H2"]["status"] == "unknown" and with_d["comparisons"].get("H3", {}).get("status", "unknown") == "unknown"   # H3 : aucune fenetre nommee
+        assert with_d["capacity_links_used"]["H2"]["window_min"] == 15 and "H3" not in with_d.get("capacity_links_used", {})
+    assert A.fee_decision(tmp_path / "missing.json") == {}

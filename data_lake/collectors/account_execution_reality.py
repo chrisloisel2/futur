@@ -73,6 +73,16 @@ def published_vip0() -> Dict[str, Any]:
 #: seulement a identifier le palier depuis les champs makerCommission/takerCommission du compte (en bps, sans remise BNB)
 SPOT_PUBLISHED_BPS = {"VIP0": (10.0, 10.0), "VIP1": (9.0, 10.0), "VIP2": (8.0, 10.0), "VIP3": (4.2, 5.4), "VIP4": (4.2, 5.4), "VIP5": (3.6, 4.8), "VIP6": (3.0, 4.2), "VIP7": (2.4, 3.6), "VIP8": (1.8, 3.0), "VIP9": (1.2, 2.4)}
 CAPACITY_FEATURES = ROOT / "reports" / "data_acquisition" / "H2_DEPTH_CAPACITY_FEATURES.json"
+FEE_DECISION = ROOT / "reports" / "execution" / "FUTURES_FEE_DECISION.json"
+
+
+def fee_decision(path: Optional[Path] = None) -> Dict[str, Any]:
+    """La decision P13 (option B) : bareme officiel VIP0, remise BNB ignoree, fenetre de chaine nommee. Vide si absente."""
+    p = Path(path) if path else FEE_DECISION
+    try:
+        return json.loads(p.read_text()) if p.exists() else {}
+    except ValueError:
+        return {}
 FAPI_PERMISSION_NOTE = ("Binance serves every signed /fapi endpoint, reads included, only to a key with 'Enable Futures' -- a trading "
                         "permission. There is no futures-read-only key: a read-only key gets -2015 on /fapi and the futures fee cannot be "
                         "read as account_actual without accepting a trading-capable key (IP-restricted, --allow-trading-key, journaled).")
@@ -210,7 +220,7 @@ def account_snapshot(allow_trading_key: bool = False, fee_symbols: Optional[List
     return out
 
 
-def build_costs(pub: Dict[str, Any], acct: Dict[str, Any], capacity: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def build_costs(pub: Dict[str, Any], acct: Dict[str, Any], capacity: Optional[Dict[str, Any]] = None, decision: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """La chaine de cout, avec la provenance de chaque maillon, et la comparaison aux hypotheses H2/H3.
     Frais : account_actual si lu, sinon bareme officiel au palier INFERE du spot (official_published, palier confirme),
     sinon bareme VIP0. Spread/glissement : mesures P11 si une fenetre est nommee (`capacity`), sinon declares."""
@@ -223,15 +233,19 @@ def build_costs(pub: Dict[str, Any], acct: Dict[str, Any], capacity: Optional[Di
                     if tier.get("tier") == "VIP0" else "official VIP0 schedule; account tier %s" % (tier.get("tier") or "unknown"))
     else:
         fee, prov, fee_note = 5.0, "declared", "no schedule available"
-    out = {"fee_bps_per_side": fee, "fee_provenance": prov, "fee_note": fee_note, "fee_tier_inferred": tier, "comparisons": {}, "capacity_links": capacity}
+    decision = fee_decision() if decision is None else decision; dw = (decision.get("cost_chain_window") or {}) if decision else {}
+    out = {"fee_bps_per_side": fee, "fee_provenance": prov, "fee_note": fee_note, "fee_tier_inferred": tier, "comparisons": {}, "capacity_links": capacity,
+           "decision": decision.get("decision") if decision else None, "decision_window": dw or None}
     for which in ("H2", "H3"):
         sc = spec_cost(which)
         if not sc:
             continue
-        if capacity:
-            cost = S.build_cost("perp", fee, prov, capacity["spread_bps_median"], capacity["provenance"], capacity["slippage_rt_bps_median"], capacity["provenance"], sc["n_legs"],
+        cl = capacity if capacity else (capacity_links(int(dw["window_min"]), int(dw["notional_usd"])) if dw and dw.get("hypothesis") == which else None)
+        if cl:
+            out.setdefault("capacity_links_used", {})[which] = cl
+            cost = S.build_cost("perp", fee, prov, cl["spread_bps_median"], cl["provenance"], cl["slippage_rt_bps_median"], cl["provenance"], sc["n_legs"],
                                 note="spread and round-trip slippage are P11 medians at window +%dm for %d USD (band upper bound %s bps, %d orders exceed the observed book)" % (
-                                    capacity["window_min"], capacity["notional_usd"], capacity.get("slippage_rt_upper_bound_bps_median"), capacity["n_order_exceeds_book"]))
+                                    cl["window_min"], cl["notional_usd"], cl.get("slippage_rt_upper_bound_bps_median"), cl["n_order_exceeds_book"]))
         else:
             cost = S.build_cost("perp", fee, prov, sc["spread_bps"], "declared", sc["slippage_bps"], "declared", sc["n_legs"],
                                 note="spread and slippage are still the values declared in the spec; only the fee has a stronger provenance")
@@ -454,6 +468,10 @@ def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> 
         c = v["cost_chain"]
         cc.append(f"| {k} | {v['spec_declared_round_trip_bps']:.1f} bps | {c['round_trip_bps']:.1f} bps | `{c['fee_provenance']}` | `{c['spread_provenance']}` | `{c['slippage_provenance']}` | `{c['weakest_provenance']}` | **{v['status']}** |")
     tier = (doc["costs"].get("fee_tier_inferred") or {}); diag = ans.get("8_futures_permission_diagnosis"); pc = acct.get("permission_check") or {}
+    if doc["costs"].get("decision"):
+        dwd = doc["costs"].get("decision_window") or {}
+        cc += ["", "## Decision in force", "", f"`{doc['costs']['decision']}` (FUTURES_FEE_DECISION.md): official VIP0 futures fee at the tier confirmed by the spot account, BNB discount not applied, "
+               f"no futures trading key. Cost-chain window for {dwd.get('hypothesis')}: **+{dwd.get('window_min')} min, {dwd.get('notional_usd')} $** — chosen on cost/capacity only."]
     cc += ["", "## Fee link", "",
            f"- provenance now: `{doc['costs'].get('fee_provenance')}` — {doc['costs'].get('fee_note')}",
            f"- tier inferred from the account's spot commission: **{tier.get('tier') or 'unknown'}** ({tier.get('source')})"]
