@@ -1,0 +1,11 @@
+[Unit]
+Description=Futur MEXC_TO_BINANCE_V1 forward collection (launches after the seal only; announcement, Vision, precedence, MEXC tape, capacity; no return read)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/qbee/futur
+ExecStart=/home/qbee/futur/.venv/bin/python mechanisms/mexc_to_binance_migration_v1/forward_collect.py --collect
+StandardOutput=append:/home/qbee/futur/reports/forward/mexc_to_binance_v1/collector.log
+StandardError=append:/home/qbee/futur/reports/forward/mexc_to_binance_v1/collector.log
+TimeoutStartSec=1800

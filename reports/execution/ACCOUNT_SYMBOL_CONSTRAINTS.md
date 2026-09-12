@@ -1,4 +1,4 @@
-# ACCOUNT SYMBOL CONSTRAINTS — P8 (2026-09-12T14:45:56 UTC)
+# ACCOUNT SYMBOL CONSTRAINTS — P8 (2026-09-12T20:35:15 UTC)
 
 What the exchange lets an order be, per symbol: tick size, lot step, minimum notional, market-order bound, liquidation fee, maintenance margin. Public `exchangeInfo`, no key needed. These are the constraints any capacity or slippage estimate has to respect.
 

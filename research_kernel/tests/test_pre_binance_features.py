@@ -65,3 +65,16 @@ def test_hourly_gives_24h_and_full_coverage():
 def test_feature_list_is_the_declared_one():
     for k in ("pre_binance_return_30d", "pre_binance_return_24h", "pre_binance_pump_score", "pre_binance_exhaustion_score", "pre_binance_liquidity_proxy", "data_source", "coverage_status"):
         assert k in F.FEATURES
+
+
+def test_pre_announcement_return_is_cut_at_the_announcement_and_needs_twenty_closes():
+    base = (T0 // H) * H; t0 = base + 30 * 60_000; pub = t0 - 2 * H - 15 * 60_000            # bougies alignees sur l'heure ; t0 a HH:30 ; annonce 2 h 15 avant
+    hourly = [{"open_time_ms": base - (40 - i) * H, "open": 1, "high": 1, "low": 1, "close": 1.0 + 0.01 * i, "volume": 1, "quote_volume": 1} for i in range(40)]
+    r = F.pre_announcement_return(hourly, pub, t0)
+    end = (pub // H) * H
+    assert r["window_end_ms"] == end and r["hours_in_window"] == 24 and r["post_announcement_hours_dropped"] == 2   # les heures base-2h et base-1h closent apres l annonce
+    last = max((c for c in hourly if c["open_time_ms"] + H <= end), key=lambda c: c["open_time_ms"]); first = min((c for c in hourly if c["open_time_ms"] >= end - 24 * H), key=lambda c: c["open_time_ms"])
+    assert abs(r["pre_announcement_return_24h"] - (last["close"] / first["close"] - 1)) < 1e-6      # arrondi a 6 decimales
+    assert F.pre_announcement_return(hourly[-21:], pub, t0)["pre_announcement_return_24h"] is None                 # 19 bougies completes dans la fenetre < 20
+    with pytest.raises(F.PostT0Leak):
+        F.pre_announcement_return(hourly + [{"open_time_ms": t0 - 10 * 60_000, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "quote_volume": 1}], pub, t0)

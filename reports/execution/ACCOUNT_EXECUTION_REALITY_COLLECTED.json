@@ -1,64 +1,91 @@
 {
- "generated_at_utc": "2026-09-12T14:45:56+00:00",
- "mode": "no_credentials",
- "env_var_used": null,
- "key_redacted": "<absent>",
+ "generated_at_utc": "2026-09-12T20:45:45+00:00",
+ "mode": "collected",
+ "env_var_used": "BINANCE_READONLY_API_KEY",
+ "key_redacted": "0jJ…tp (64 chars)",
  "permission_check": {
-  "status": "no_credentials",
-  "usable": false,
-  "reason": "no API key in the environment"
+  "status": "ok",
+  "usable": true,
+  "granted_permissions": [],
+  "restrictions": {
+   "ipRestrict": false,
+   "enableSpotAndMarginTrading": false,
+   "enableWithdrawals": false,
+   "enableInternalTransfer": false,
+   "permitsUniversalTransfer": false,
+   "enableVanillaOptions": false,
+   "enablePortfolioMarginTrading": false,
+   "enableFixApiTrade": false,
+   "enableFixReadOnly": false,
+   "enableReading": true,
+   "enableFutures": false,
+   "enableMargin": false
+  },
+  "ip_restricted": false,
+  "note": "key is read-only"
  },
  "endpoints": {
   "commission_rate": {
-   "status": "no_credentials",
+   "status": "error",
    "endpoint": "GET /fapi/v1/commissionRate",
-   "reason": "no API key in the environment",
-   "would_give": "actual maker/taker fee for one futures symbol"
+   "error": "Invalid API-key, IP, or permissions for action",
+   "binance_code": -2015,
+   "has_rows": null
   },
   "leverage_brackets": {
-   "status": "no_credentials",
+   "status": "error",
    "endpoint": "GET /fapi/v1/leverageBracket",
-   "reason": "no API key in the environment",
-   "would_give": "leverage brackets and maintenance margin"
+   "error": "Invalid API-key, IP, or permissions for action",
+   "binance_code": -2015,
+   "has_rows": null
   },
   "futures_account": {
-   "status": "no_credentials",
+   "status": "error",
    "endpoint": "GET /fapi/v2/account",
-   "reason": "no API key in the environment",
-   "would_give": "futures account metadata: fee tier, canTrade / canWithdraw flags"
+   "error": "Invalid API-key, IP, or permissions for action",
+   "binance_code": -2015,
+   "has_rows": null
   },
   "spot_account": {
-   "status": "no_credentials",
+   "status": "ok",
    "endpoint": "GET /api/v3/account",
-   "reason": "no API key in the environment",
-   "would_give": "spot commission rates, canTrade / canWithdraw flags"
+   "error": null,
+   "binance_code": null,
+   "has_rows": null
   },
   "funding_income": {
-   "status": "no_credentials",
+   "status": "error",
    "endpoint": "GET /fapi/v1/income",
-   "reason": "no API key in the environment",
-   "would_give": "own income rows (funding fees, commissions)"
+   "error": "Invalid API-key, IP, or permissions for action",
+   "binance_code": -2015,
+   "has_rows": null
   },
   "own_fills": {
-   "status": "no_credentials",
+   "status": "error",
    "endpoint": "GET /fapi/v1/userTrades",
-   "reason": "no API key in the environment",
-   "would_give": "own fills"
+   "error": "Invalid API-key, IP, or permissions for action",
+   "binance_code": -2015,
+   "has_rows": null
   },
   "margin_pairs": {
-   "status": "no_credentials",
+   "status": "ok",
    "endpoint": "GET /sapi/v1/margin/allPairs",
-   "reason": "no API key in the environment",
-   "would_give": "margin pairs (is the asset borrowable?)"
+   "error": null,
+   "binance_code": null,
+   "has_rows": true
   }
  },
  "actual_futures_taker_fee_bps": null,
  "actual_futures_maker_fee_bps": null,
- "actual_spot_fee_bps": null,
+ "actual_spot_fee_bps": {
+  "maker_bps": 10.0,
+  "taker_bps": 10.0,
+  "unit": "makerCommission=10 means 10 bps"
+ },
  "funding_payments_available": false,
  "user_fills_available": false,
  "leverage_brackets_available": false,
- "margin_pairs_available": false,
+ "margin_pairs_available": true,
  "fee_tier": null,
  "symbol_constraints_public": {
   "h2_symbols": 174,
@@ -83,7 +110,7 @@
   "n_missing": 14
  },
  "cost_chain_status": {
-  "H2": "unknown",
+  "H2": "confirmed",
   "H3": "unknown"
  },
  "no_orders": true,

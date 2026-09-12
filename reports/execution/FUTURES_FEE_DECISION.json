@@ -1,0 +1,23 @@
+{
+ "decision": "USE_OFFICIAL_PUBLISHED_VIP0_FUTURES_FEES",
+ "decided_on": "2026-09-12",
+ "decided_by": "user (option B), recorded by P13",
+ "fee": {"taker_bps_per_side": 5.0, "maker_bps_per_side": 2.0, "round_trip_taker_fee_bps": 10.0, "bnb_discount_applied": false,
+         "fee_status": "official_published_vip0_confirmed_by_spot_tier"},
+ "schema": {"account_actual": false, "official_published": true, "tier_confirmed": "VIP0", "tier_evidence": "spot makerCommission = takerCommission = 10 bps (account_actual)",
+            "bnb_discount_applied": false, "residual_uncertainty_bps": 0.5},
+ "key_policy": {"futures_trading_key": "never", "allow_trading_key_flag": "never used", "order_capable_permission": "none",
+                "ip_whitelist_required_on_current_key": true},
+ "rationale": [
+  "spot account confirms VIP0",
+  "futures signed read endpoints require enabling futures permission",
+  "enabling futures permission creates an avoidable trading-key risk",
+  "expected uncertainty is <= 0.5 bps",
+  "spread/slippage dominate the cost chain",
+  "no alpha promotion may depend on the BNB discount"
+ ],
+ "cost_chain_window": {"hypothesis": "H2", "window_min": 15, "notional_usd": 500,
+                       "why": "t0 is too expensive (52.9 bps round trip at 500 $); +15 min confirms spread normalisation; +60 min risks missing the post-open mechanism; chosen on cost/capacity only, no return read",
+                       "role": "default prereg candidate for MEXC_TO_BINANCE_V1; the preregistration may only restate it, never move it after a look"},
+ "no_alpha_test": true, "no_orders": true
+}
