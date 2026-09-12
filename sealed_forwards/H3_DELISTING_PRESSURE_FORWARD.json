@@ -1,0 +1,70 @@
+{
+  "canonical_seal_file": "sealed_forwards/active/event_delisting_pressure_v1_2026-09-11.json",
+  "code_commit_sha": "9a65df26b3867f8eb83cc598d865970c011a0967",
+  "cost_wall": "gross >= 3 * executable_cost (measured)",
+  "created_at": "2026-09-10T19:53:20Z",
+  "data_sources": [
+    "binance_vision_spot_klines_1m",
+    "binance_vision_spot_klines_1m_btcusdt",
+    "binance_vision_um_klines_1m",
+    "official_event_tape_binance"
+  ],
+  "eligible_events": "official Binance delisting announcements published after 2026-09-11T00:00:00Z only",
+  "family_size_at_seal": 5,
+  "forbidden": [
+    "interim peeking",
+    "parameter changes",
+    "old events",
+    "live trading"
+  ],
+  "forward_end": "2028-09-11",
+  "forward_start": "2026-09-11",
+  "gross_threshold_bps": 30,
+  "kernel_version": "0.1.0",
+  "kill_thresholds": {
+    "gross_lt_cost_x": 3.0,
+    "median_gross_bps_lt": 30,
+    "placebo_minus_48h_gte_gross": true,
+    "pre_publication_drift_gte_gross": true
+  },
+  "mechanism_id": "event_delisting_pressure_v1",
+  "min_events": 30,
+  "multiplicity_family": "news",
+  "notes": "H3 forward seal after regard seq 7 (INDECIDABLE: n=56, mean +631 / median +67 bps, t 2.44, N_eff 21.6, top-1 13 %, capacity unpriced). Eligible events: official Binance asset delisting announcements ('Binance Will Delist', 'Binance Futures Will Delist') PUBLISHED AFTER THIS SEAL, collected by futur-event-tape.timer; no old event, no interim peeking, no parameter change, no live trading. One look at the earlier of 30 eligible events with a pre-existing Binance perp or forward_end. Budget: 1 test debited at the look.",
+  "origin_look": {
+    "ledger_seq": 7,
+    "mean_bps": 630.8,
+    "median_bps": 67.4,
+    "n": 56,
+    "n_eff": 21.6,
+    "placebo_48h_bps": 3.1,
+    "pre_publication_drift_bps": -11.1,
+    "t": 2.44,
+    "top1_share": 0.13,
+    "tradable_share": 0.82,
+    "verdict": "INDECIDABLE"
+  },
+  "promotion_thresholds": {
+    "after_cost_gross_over_cost_min": 3.0,
+    "benchmark": "BTCUSDT spot",
+    "cost": "MEASURED on the names concerned (depth at +-10 bps at announcement, forced-flow tape) \u2014 not the declared 4 + 4 bps",
+    "entry": "publication + 60s",
+    "executable_short_path_documented": true,
+    "gross_over_executable_cost_min": 3.0,
+    "horizon": "60m",
+    "median_gross_bps_min": 30,
+    "min_new_events": 30,
+    "min_new_events_with_binance_perp": 30,
+    "n_eff_min": 30,
+    "t_min_one_sided_family_bonferroni": "threshold_t(family size at look)",
+    "top1_event_share_max": 0.2
+  },
+  "rules_hash": "62b430899fd2f113712c614304b8be67fb47ea906f7f036ce8e530ceb0d1fea8",
+  "seal_hash": "11035f26c9d55d5aa5426915eea909711d05f7deb295398934f569f558fdc3f7",
+  "seal_id": "event_delisting_pressure_v1_2026-09-11",
+  "status": "SEALED_FORWARD_ACTIVE",
+  "threshold_t_at_seal": 2.3263,
+  "universe": [
+    "EVENT_TAPE_BINANCE_ASSET_DELISTINGS"
+  ]
+}

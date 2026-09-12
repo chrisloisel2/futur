@@ -15,3 +15,5 @@ starts two days inside the family's declared burn (see `PROJECT_TRUTH.md`).
 
 Verify a witness: `python3 tools/look_ledger.py --witness-orphan <file> <branch>`.
 Verify the look chain: `python3 tools/look_ledger.py --verify --list`.
+
+| `event_delisting_pressure_v1_2026-09-11` | `p3-h3-delisting-forward-seal` (normal branch, pushed) | see git log | **active** — one look at 30 eligible Binance delistings published after 2026-09-11, not before |
