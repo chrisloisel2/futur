@@ -73,8 +73,33 @@ def test_credentials_are_never_exposed(monkeypatch):
     r = RO.redact("SECRETKEY1234567890")
     assert "SECRETKEY1234567890" not in r and r.startswith("SEC") and "19 chars" in r
     assert RO.redact(None) == "<absent>"
+    monkeypatch.setattr(RO, "urlopen", lambda *a, **k: (_ for _ in ()).throw(ConnectionError("offline")))      # jamais de reseau dans un test
     acct = A.account_snapshot()
-    assert "SECRETKEY1234567890" not in json.dumps(acct, default=str)
+    assert "SECRETKEY1234567890" not in json.dumps(acct, default=str) and "SECRETSECRET123456" not in json.dumps(acct, default=str)
+
+
+def test_a_refusal_never_leaves_a_phantom_ok_on_later_endpoints(monkeypatch, tmp_path):
+    """Sonde refusee -> chaque endpoint de compte porte 'refused' avec la raison, jamais 'ok' avec reason None."""
+    monkeypatch.setenv(RO.ENV_KEY, "k" * 20); monkeypatch.setenv(RO.ENV_SECRET, "s" * 20); monkeypatch.setattr(A, "STORE", tmp_path)
+    monkeypatch.setattr(RO.ReadOnlyClient, "_request", lambda self, path, params=None: {"enableReading": True, "enableFutures": True})
+    acct = A.account_snapshot()
+    assert acct["usable"] is False and all(e["status"] == "refused" and "enableFutures" in (e.get("reason") or "") for e in acct["endpoints"].values())
+
+
+def test_a_normal_account_with_a_readonly_key_is_collected_not_refused(monkeypatch, tmp_path):
+    """canWithdraw est vrai sur un compte normal : la collecte doit aboutir, les frais doivent etre connus, les dumps 0600."""
+    monkeypatch.setenv(RO.ENV_KEY, "k" * 20); monkeypatch.setenv(RO.ENV_SECRET, "s" * 20); monkeypatch.setattr(A, "STORE", tmp_path / "acct")
+    payloads = {"/sapi/v1/account/apiRestrictions": {"enableReading": True, "ipRestrict": True, "createTime": 1},
+                "/fapi/v1/commissionRate": {"symbol": "BTCUSDT", "makerCommissionRate": "0.000200", "takerCommissionRate": "0.000500"},
+                "/fapi/v1/leverageBracket": [{"symbol": "BTCUSDT", "brackets": []}], "/fapi/v2/account": {"feeTier": 0, "canTrade": True, "canWithdraw": True, "assets": []},
+                "/api/v3/account": {"makerCommission": 10, "takerCommission": 10, "canWithdraw": True, "balances": []}, "/fapi/v1/income": [], "/fapi/v1/userTrades": [{"id": 1}],
+                "/sapi/v1/margin/allPairs": []}
+    monkeypatch.setattr(RO.ReadOnlyClient, "_request", lambda self, path, params=None: payloads[path])
+    acct = A.account_snapshot()
+    assert acct["usable"] is True and acct["actual_fees"] == {"symbol": "BTCUSDT", "maker_bps": 2.0, "taker_bps": 5.0} and acct["fee_tier"] == 0
+    assert acct["account_flags"]["spot_account"]["canWithdraw"] is True and acct["endpoints"]["own_fills"]["has_rows"] is True and "n_rows" not in acct["endpoints"]["own_fills"]
+    import stat
+    assert stat.S_IMODE((tmp_path / "acct" / "spot_account.json").stat().st_mode) == 0o600 and stat.S_IMODE((tmp_path / "acct").stat().st_mode) == 0o700
 
 
 def test_phase_runs_and_reports_without_credentials(tmp_path, monkeypatch):

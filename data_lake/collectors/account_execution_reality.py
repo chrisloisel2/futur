@@ -38,6 +38,15 @@ def _write_atomic(p: Path, text: str) -> None:
     tmp = p.with_suffix(p.suffix + ".tmp"); tmp.write_text(text, encoding="utf-8"); os.replace(tmp, p)
 
 
+def _write_private(p: Path, text: str) -> None:
+    """Dump brut de compte : hors depot ET lisible par l'utilisateur seul (0600, dossier 0700)."""
+    p.parent.mkdir(parents=True, exist_ok=True); os.chmod(p.parent, 0o700)
+    tmp = p.with_suffix(p.suffix + ".tmp"); fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(text)
+    os.replace(tmp, p); os.chmod(p, 0o600)
+
+
 def h2_symbols() -> List[str]:
     if not UNIVERSE_H2.exists():
         return []
@@ -108,26 +117,26 @@ def account_snapshot(allow_trading_key: bool = False, fee_symbols: Optional[List
             ("margin_pairs", "/sapi/v1/margin/allPairs", None)]
     for name, path, params in plan:
         if not out["usable"]:
-            out["endpoints"][name] = {"status": perm.get("status", "no_credentials"), "endpoint": "GET " + path,
-                                      "reason": perm.get("reason"), "would_give": RO.ALLOWED[path][2]}
+            pc = out["permission_check"]                                    # l'etat courant, jamais la sonde d'origine
+            out["endpoints"][name] = {"status": pc.get("status", "no_credentials") if pc.get("status") != "ok" else "refused", "endpoint": "GET " + path,
+                                      "reason": pc.get("reason"), "would_give": RO.ALLOWED[path][2]}
             continue
         r = cl.get(path, params)
-        out["endpoints"][name] = {"status": r["status"], "endpoint": "GET " + path, "error": r.get("error"),
-                                  "n_rows": (len(r["data"]) if isinstance(r.get("data"), list) else None)}
+        out["endpoints"][name] = {"status": r["status"], "endpoint": "GET " + path, "error": RO.sanitise_error(r.get("error")), "binance_code": r.get("binance_code"),
+                                  "has_rows": (len(r["data"]) > 0) if isinstance(r.get("data"), list) else None}
         if r["status"] == "ok":
-            STORE.mkdir(parents=True, exist_ok=True)
-            _write_atomic(STORE / ("%s.json" % name), json.dumps(r["data"], indent=1, default=str))   # hors depot
+            _write_private(STORE / ("%s.json" % name), json.dumps(r["data"], indent=1, default=str))   # hors depot, 0600
             if name == "commission_rate":
-                out["actual_fees"] = {"symbol": params["symbol"], "maker_bps": float(r["data"]["makerCommissionRate"]) * 1e4,
-                                      "taker_bps": float(r["data"]["takerCommissionRate"]) * 1e4}
+                d = r["data"] if isinstance(r["data"], dict) else {}
+                try:
+                    out["actual_fees"] = {"symbol": params["symbol"], "maker_bps": float(d["makerCommissionRate"]) * 1e4, "taker_bps": float(d["takerCommissionRate"]) * 1e4}
+                except (KeyError, TypeError, ValueError):
+                    out["endpoints"][name]["status"] = "schema_unexpected"; out["endpoints"][name]["error"] = "commissionRate payload without maker/takerCommissionRate"
             if name == "futures_account":
-                out["fee_tier"] = r["data"].get("feeTier")
-            if name in ("futures_account", "spot_account"):
-                x = RO.cross_check_account_flags(r["data"])
-                if x["refuse"]:
-                    cl.refused_reason = "account flags %s are set: the key is refused" % x["forbidden_flags_set"]; out["usable"] = False
-                    out["permission_check"] = {**perm, "status": "refused", "usable": False, "reason": cl.refused_reason}
-            if name == "spot_account":
+                out["fee_tier"] = r["data"].get("feeTier") if isinstance(r["data"], dict) else None
+            if name in ("futures_account", "spot_account") and isinstance(r["data"], dict):
+                out.setdefault("account_flags", {})[name] = RO.cross_check_account_flags(r["data"])["account_flags"]   # informatif, jamais un refus
+            if name == "spot_account" and isinstance(r["data"], dict):
                 mk, tk = r["data"].get("makerCommission"), r["data"].get("takerCommission")
                 if mk is not None and tk is not None:
                     out["spot_fees"] = {"maker_bps": float(mk), "taker_bps": float(tk), "unit": "makerCommission=10 means 10 bps"}
@@ -327,7 +336,12 @@ def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> 
           "| the seven prescribed account endpoints | " + ", ".join("`GET %s`" % e for e in RO.ACCOUNT_ENDPOINTS) + " | `test_whitelist_is_exactly_the_prescribed_set_plus_two_reads` |",
           "| two extra reads, justified | `GET /fapi/v1/exchangeInfo` is public and unsigned (symbol constraints); `GET /sapi/v1/account/apiRestrictions` is the **safety probe** that tells us what the key may do — without it a trading key could not be refused | same test |",
           f"| trading / withdrawal / transfer key refused | `check_permissions` reads the probe first; any of {', '.join(RO.FORBIDDEN_PERMISSIONS)} set → refused, and every later signed call returns `refused` | `test_a_key_that_can_trade_is_refused`, `test_withdrawal_and_transfer_keys_are_refused` |",
-          "| second barrier on account flags | `canWithdraw` on the account payloads → refuse even if the probe was silent | `test_account_flags_are_cross_checked` |",
+          "| account flags are informational | `canWithdraw` / `canTrade` are account capabilities, true on any normal account whatever the key: recorded, never a refusal | `test_account_flags_are_cross_checked` |",
+          "| deny-by-default permissions | any `enable*` / `permits*` flag that is true and is not a read permission refuses the key (enableFixApiTrade, future flags) | `test_unknown_permission_flags_refuse_by_default` |",
+          "| structural gate | an account endpoint cannot be called before a successful apiRestrictions probe on the same client | `test_account_endpoint_before_probe_is_refused` |",
+          "| no redirect | the opener refuses every 3xx: the API-key header is never re-sent to another host | `test_redirects_are_not_followed` |",
+          "| sanitised errors | Binance error text loses any IP address before it reaches a report (`-2015` carries the caller IP) | `test_error_messages_lose_ip_addresses` |",
+          "| half-set credentials | `BINANCE_READONLY_API_KEY` without its secret (or the reverse) is an error, never a fallback to the legacy pair | `test_half_set_readonly_pair_never_falls_back` |",
           "| no credentials → inert | signed endpoints return `no_credentials` without any request | `test_signed_endpoints_are_inert_without_credentials` |",
           "| secrets never logged, written or returned | credentials live only in the client instance; reports carry a redacted form (`abc…yz (n chars)`) | `test_credentials_are_never_exposed` |",
           "| raw account data | written under `data/account_execution/` which is gitignored; nothing account-specific is versioned | `.gitignore` `data/*` |", "",
