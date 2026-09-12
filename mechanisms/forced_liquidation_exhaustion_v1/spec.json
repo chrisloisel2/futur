@@ -1,26 +1,26 @@
 {
-  "mechanism_id": "forced_liquidation_reaction_v1",
-  "hypothesis": "In the 30 seconds after a Binance USDS-M liquidation of at least 50 000 USD, the price continues in the direction of the forced flow (down after a liquidated long, up after a liquidated short) by more than 10 bps gross, measured from the first trade at least 2 seconds after the exchange event timestamp, because the liquidation engine's market order and the stop-outs it triggers keep hitting a book that has just been emptied.",
-  "economic_reason": "A liquidation is a forced market order with no price sensitivity; large ones exhaust the near book and trigger further margin calls in the same direction (cascade). The participant who reacts within 2 seconds of the public forceOrder message trades ahead of the next forced orders. The payer is the next liquidated account. If the book refills within 2 seconds the continuation is gone and the verdict is REJECTED_NO_GROSS.",
+  "mechanism_id": "forced_liquidation_exhaustion_v1",
+  "hypothesis": "In the 5 minutes after a Binance USDS-M liquidation of at least 250 000 USD, the price reverses against the direction of the forced flow (up after a liquidated long, down after a liquidated short) by more than 10 bps gross, measured from the first trade at least 2 seconds after the exchange event timestamp, because an extreme forced order overshoots the fair price and liquidity providers fade it once the forced flow is absorbed.",
+  "economic_reason": "An extreme liquidation is a price-insensitive order far larger than the resting book; it prints an overshoot. Once the forced flow stops, market makers and arbitrageurs restore the price toward other venues and the index. The payer is the liquidated account (and the momentum traders who chased the print). If the overshoot is already gone 2 seconds after the message, the verdict is REJECTED_NO_GROSS.",
   "data_sources": [
     "forced_flow_tape_binance_frozen_b78d1b50",
     "binance_fapi_aggTrades"
   ],
   "universe": [
-    "FORCED_FLOW_TAPE_BINANCE_USDT_NOTIONAL_GE_50K"
+    "FORCED_FLOW_TAPE_BINANCE_USDT_NOTIONAL_GE_250K"
   ],
   "timeframe": "tick",
-  "horizon": "30s",
+  "horizon": "5m",
   "side_mode": "long_short",
   "entry_rule": {
-    "event_selection": "venue=binance, symbol *USDT, notional_usd >= 50000, enriched (spread_before, bbo_age >= 0), 30-min horizon observable at freeze, no post-event field filled",
+    "event_selection": "as forced_liquidation_reaction_v1 with notional_usd >= 250000",
     "entry_at": "event_ts_exchange + 2s",
     "price": "first aggTrade at or after entry time (10 s, then 60 s lookahead, else excluded)",
-    "direction": "sign of the forced flow: sell after a liquidated long, buy after a liquidated short",
+    "direction": "against the forced flow: buy after a liquidated long, sell after a liquidated short",
     "min_bps_expected": 10
   },
   "exit_rule": {
-    "exit_at": "entry + 30s",
+    "exit_at": "entry + 5m",
     "price": "last aggTrade at or before exit time",
     "no_stop": true
   },
@@ -65,10 +65,10 @@
   },
   "sensitivities": {
     "horizon": [
-      "5s",
-      "5m"
+      "30s",
+      "30m"
     ]
   },
   "declared_data_latency_ms": 2000,
-  "notes": "RESEARCH_ONLY. First-look hypothesis H1 of reports/first_look/forced_liquidation_reaction_v1_PREREG.md, sealed with forced_liquidation_exhaustion_v1 (threshold_t(2) = 1.96). Universe: 368 events, 51 clusters. Harness first_look.py pinned in the FREEZE. Bybit excluded (no sub-minute history)."
+  "notes": "RESEARCH_ONLY. First-look hypothesis H2 of the same PREREG. Universe: 62 events in 15 clusters: below the 20-cluster floor, so FORWARD_SEAL_REQUIRED is impossible on this tape by construction; only a rejection is a result here."
 }

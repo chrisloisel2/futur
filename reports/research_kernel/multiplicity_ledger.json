@@ -65,5 +65,126 @@
     "recorded_at": "2026-09-09T22:37:37Z",
     "rules_hash": "939325d0b46ae6e837b16e0ca3cdc3ebae253fe0504d3ea543e6a74bad50d1d7",
     "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "1c0bd142a67e4d90a86748a69a6b5e438a45b1583f0751d9c12d68455da057c3",
+    "family": "news",
+    "index": 5,
+    "kind": "trial",
+    "mechanism_id": "event_reaction_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 7 (prereg b74bcc3), one look executed 2026-09-10",
+    "prev_hash": "97445a5936f62fc88fcecbac0a4debfe896c523dafd514d3aa4b56df40d787bf",
+    "recorded_at": "2026-09-10T14:01:23Z",
+    "rules_hash": "9ebf0c309189d8aac201708522cf964ee8836ff98cfcb8f9ed600c269a1c2653",
+    "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "6e611f8ced1dfefa5ee9ad82a2565fc885eceea8cf3d372e8d8d6718b139e176",
+    "family": "news",
+    "index": 6,
+    "kind": "trial",
+    "mechanism_id": "event_listing_reversal_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 7 (prereg b74bcc3), one look executed 2026-09-10",
+    "prev_hash": "1c0bd142a67e4d90a86748a69a6b5e438a45b1583f0751d9c12d68455da057c3",
+    "recorded_at": "2026-09-10T14:01:23Z",
+    "rules_hash": "db741e1b75e4d8baf5484d2771dcc18c060d6141ca7fe360a2543e43e4b52076",
+    "threshold_at_seal": 1.96
+  },
+  {
+    "entry_hash": "222f1cfb70a40fb9e0d8a189f8a7a0d64ab847c5022093a1560df7602e5ce567",
+    "family": "news",
+    "index": 7,
+    "kind": "trial",
+    "mechanism_id": "event_delisting_pressure_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 7 (prereg b74bcc3), one look executed 2026-09-10",
+    "prev_hash": "6e611f8ced1dfefa5ee9ad82a2565fc885eceea8cf3d372e8d8d6718b139e176",
+    "recorded_at": "2026-09-10T14:01:23Z",
+    "rules_hash": "62b430899fd2f113712c614304b8be67fb47ea906f7f036ce8e530ceb0d1fea8",
+    "threshold_at_seal": 2.128
+  },
+  {
+    "entry_hash": "57e62e8a55ab821ab2c06cb9b2acd0f2fc0ee509e38dcb5627b6783871319871",
+    "family": "news",
+    "index": 8,
+    "kind": "trial",
+    "mechanism_id": "event_cross_venue_lag_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 7 (prereg b74bcc3), one look executed 2026-09-10",
+    "prev_hash": "222f1cfb70a40fb9e0d8a189f8a7a0d64ab847c5022093a1560df7602e5ce567",
+    "recorded_at": "2026-09-10T14:01:23Z",
+    "rules_hash": "7844c6529cac727ada1b88c3c33836fe22792d21773e88e56036b0d1402cb532",
+    "threshold_at_seal": 2.2414
+  },
+  {
+    "entry_hash": "11ffaa7af36b5cfd06af0b03b7cb5b3ce427e56bae2dd71c660308f10b9f4021",
+    "family": "news",
+    "index": 9,
+    "kind": "trial",
+    "mechanism_id": "event_listing_perp_fade_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 8 (prereg 7703101), one look executed 2026-09-10; spec on branch p3-h2-perp-first-executable",
+    "prev_hash": "57e62e8a55ab821ab2c06cb9b2acd0f2fc0ee509e38dcb5627b6783871319871",
+    "recorded_at": "2026-09-10T19:46:12Z",
+    "rules_hash": "85fb433cea0237e5d2122f034c889e1aaeafe6c832eb3c6b1b2d91c5927e4047",
+    "threshold_at_seal": 2.3263
+  },
+  {
+    "burned_periods": [
+      [
+        "2017-07-21",
+        "2026-09-10"
+      ]
+    ],
+    "entry_hash": "8a61d1f2fe68806b1732225c3f8017701379d90c3d6e91089ce7e77eacf65d4f",
+    "family": "news",
+    "index": 10,
+    "kind": "contamination",
+    "prev_hash": "11ffaa7af36b5cfd06af0b03b7cb5b3ce427e56bae2dd71c660308f10b9f4021",
+    "reason": "Regards seq 7 et 8 sur le tape officiel des evenements (snapshot 6e957851, 2017-07-21 -> 2026-09-10) : toute nouvelle hypothese news sur cette periode est un second regard.",
+    "recorded_at": ""
+  },
+  {
+    "entry_hash": "5741729fafced39fd1118aa80c1c61581956aa3422c09a255da80ceb0fdf079e",
+    "family": "liquidation",
+    "index": 11,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_reaction_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 9 (branch-local 8, re-chained at merge), one look executed 2026-09-10",
+    "prev_hash": "8a61d1f2fe68806b1732225c3f8017701379d90c3d6e91089ce7e77eacf65d4f",
+    "recorded_at": "2026-09-10T20:01:12Z",
+    "rules_hash": "bda1c326126e4c2a4905cfc841ed445b6fb461c1309c65b8a311f0bf7b216ee8",
+    "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "7715a45f07022844ecbb7d446ceba69a1487339be433cf173235a3606a162760",
+    "family": "liquidation",
+    "index": 12,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_exhaustion_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 9 (branch-local 8, re-chained at merge), one look executed 2026-09-10",
+    "prev_hash": "5741729fafced39fd1118aa80c1c61581956aa3422c09a255da80ceb0fdf079e",
+    "recorded_at": "2026-09-10T20:01:12Z",
+    "rules_hash": "6316b1eedcbbf106f5f6b0333e2dc3cb0d9f7ad03940fcb88deb52b6fd945c22",
+    "threshold_at_seal": 1.96
+  },
+  {
+    "burned_periods": [
+      [
+        "2026-09-10",
+        "2026-09-10"
+      ]
+    ],
+    "entry_hash": "971fdd71aa0512900eb921e1735dab6df9e6478b35ebe0c5a2a475a9a4f7c386",
+    "family": "liquidation",
+    "index": 13,
+    "kind": "contamination",
+    "prev_hash": "7715a45f07022844ecbb7d446ceba69a1487339be433cf173235a3606a162760",
+    "reason": "forced-flow first look seq 9 on the frozen liquidation tape b78d1b50 (one session 2026-09-10)",
+    "recorded_at": ""
   }
 ]

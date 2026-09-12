@@ -116,3 +116,8 @@ minuit du titre). Hypothèses suivantes dans `hypotheses/H-EVENT.md`, aucune sce
 ## Itération 12 (2026-09-10) — H2 exécutable sur perp-first
 
 Regard seq 8 : +251 / +230 bps, t 2,12 < 2,33 → INDECIDABLE (σ 1 546 bps). Budget 1. Pas de variante.
+
+
+## Itération 13 (2026-09-10) — premier regard forced-flow
+
+Regard seq 9 : H1 continuation −7 bps (t −1,45) REJECTED_NO_GROSS ; H2 exhaustion +13,8 bps < mur 43 REJECTED_COST_WALL. Budget 0. Sceau forward H3 actif. Ledgers réconciliés à la fusion (seq 8 → 9).

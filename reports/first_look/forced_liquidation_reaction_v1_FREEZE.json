@@ -1,0 +1,155 @@
+{
+  "name": "forced_liquidation_reaction_v1 first look (P3B, H1 + H2)",
+  "prereg_file": "reports/first_look/forced_liquidation_reaction_v1_PREREG.md",
+  "harness": "mechanisms/forced_liquidation_reaction_v1/first_look.py",
+  "run_command": "python mechanisms/forced_liquidation_reaction_v1/first_look.py --run",
+  "snapshot": {
+    "dataset": "forced_flow",
+    "name": "forced_liquidation_reaction_v1",
+    "frozen_at_utc": "2026-09-10T19:54:31+00:00",
+    "input_path": "data_lake/first_look/forced_liquidation_reaction_v1/liquidations_frozen.jsonl",
+    "row_count": 24930,
+    "min_event_ts": "2026-09-10T11:12:49.632000+00:00",
+    "max_event_ts": "2026-09-10T19:54:06.391000+00:00",
+    "sha256": "b78d1b509b9ceddf3b2a07771e687ac07aea23cfc1b8a9db7dd94f5819442758",
+    "git_commit": "9a65df26b3867f8eb83cc598d865970c011a0967",
+    "committed_blob": null,
+    "working_tree_dirty": false,
+    "gate_status": {
+      "dataset": "forced_flow",
+      "n_events": 24930,
+      "enriched_ratio": 0.9994,
+      "min_age_ms": 0,
+      "n_negative_age": 0,
+      "stream_delay_measured": true,
+      "stream_delay_median_ms": 1009,
+      "returns_left_null": true,
+      "venues": [
+        "binance",
+        "bybit"
+      ],
+      "n_ge_50k_usd": 555,
+      "criteria": {
+        "n_events_ge_300": true,
+        "enriched_ratio_ge_95pct": true,
+        "bbo_age_ge_0_everywhere": true,
+        "stream_delay_measured": true,
+        "no_post_event_contamination": true
+      },
+      "open": true
+    }
+  },
+  "universe": {
+    "path": "reports/first_look/forced_liquidation_reaction_v1_UNIVERSE.json",
+    "sha256": "a61be7254e2877396e9fbb817a76c1b098d6c7218fe0a58b55a64e02a4d203fc",
+    "n_H1": 368,
+    "clusters_H1": 51,
+    "n_H2": 62,
+    "clusters_H2": 15,
+    "exclusion_counts": {
+      "notional_lt_50k": 18488,
+      "not_usdt_quote": 725,
+      "horizon_30m_not_observable_at_freeze": 2,
+      "not_binance (bybit: no sub-minute history)": 5347
+    },
+    "by_hour_utc_H1": {
+      "11": 4,
+      "12": 221,
+      "13": 26,
+      "14": 7,
+      "15": 9,
+      "16": 61,
+      "17": 25,
+      "18": 11,
+      "19": 4
+    }
+  },
+  "hypothesis": {
+    "H1": {
+      "mechanism_id": "forced_liquidation_reaction_v1",
+      "text": "continuation in the direction of the forced flow, 30 s after entry (event + 2 s), liquidations >= 50 k$, gross > 10 bps and > 3x cost"
+    },
+    "H2": {
+      "mechanism_id": "forced_liquidation_exhaustion_v1",
+      "text": "reversal against the forced flow, 5 min after entry, liquidations >= 250 k$, gross > 10 bps and > 3x cost"
+    }
+  },
+  "horizons": {
+    "allowed": [
+      "5s",
+      "30s",
+      "5m",
+      "30m"
+    ],
+    "primary": {
+      "H1": "30s",
+      "H2": "5m"
+    },
+    "sensitivities": {
+      "H1": [
+        "5s",
+        "5m"
+      ],
+      "H2": [
+        "30s",
+        "30m"
+      ]
+    },
+    "entry": "event_ts_exchange + 2 s (first aggTrade at or after)",
+    "exit": "last aggTrade at or before entry + horizon"
+  },
+  "cost_model": {
+    "taker_fee_bps_per_side": 5.0,
+    "spread": "per event, spread_before_bps from the tape",
+    "slippage_bps": 4.0,
+    "round_trip": "10 + spread_i + 4",
+    "wall": "3 x event-weighted mean",
+    "basis": "P1.1 VIP0 official"
+  },
+  "promotion_criteria": {
+    "n_min": 30,
+    "gross_bps_min": 10,
+    "gross_over_cost_min": 3.0,
+    "t_min": 1.959963984540054,
+    "n_eff_min": 30,
+    "top1_share_max": 0.2,
+    "n_clusters_min": 20,
+    "top_cluster_share_max": 0.3,
+    "verdict": "FORWARD_SEAL_REQUIRED"
+  },
+  "rejection_criteria": {
+    "n_lt_30": "INDECIDABLE",
+    "gross_lt_10": "REJECTED_NO_GROSS",
+    "gross_lt_3x_cost": "REJECTED_COST_WALL",
+    "fails_t_neff_top1_clusters": "INDECIDABLE"
+  },
+  "multiplicity_family": {
+    "kernel_family": "liquidation",
+    "sealed_before": 0,
+    "sealed_now": 2,
+    "threshold_t": 1.959963984540054,
+    "declared_impossibility": "H2 has 15 clusters < 20: FORWARD_SEAL_REQUIRED impossible on this tape"
+  },
+  "budget": {
+    "tests_debited_at_run": 1,
+    "balance_before": 1,
+    "balance_after": 0
+  },
+  "pins": {
+    "reports/first_look/forced_liquidation_reaction_v1_PREREG.md": "de204957c1f44290f203776b91e04f7c18074bcee0b6c514576bcb4634fc3718",
+    "mechanisms/forced_liquidation_reaction_v1/first_look.py": "9abeb0cfbff28f2e9c5ff22b74ed36b1199ff58e3d982a61c6240c17dfa1d1b6",
+    "mechanisms/forced_liquidation_reaction_v1/spec.json": "b00a2e0e237d7b6808a0d5102d2cc8a09f11c3d8da88843c61d840598151933f",
+    "mechanisms/forced_liquidation_exhaustion_v1/spec.json": "e43a3d567e24106491357a26208c83d00be5a3b325a06f3eb2c2c5c9becc39f7",
+    "mechanisms/event_reaction_v1/first_look.py": "c6ad33d3c41f20b703f2f7a39e0280e5dc833c56f63509ce16119cecc363b06d",
+    "data_lake/collectors/first_look_gate.py": "026738ba0fa63254765ae8e0d2d71c9062fdacff381f85e6c730981e1cf41ebc",
+    "research_kernel/multiplicity.py": "31ff2ebf3b01230afb17479324537dc1c634e54e5493951efeeaa50cf88904cf",
+    "tools/look_ledger.py": "c9bb473326a812f27fb53f4b261c565a1fa4df1ad6085c165d87d01a5d058b14"
+  },
+  "positive_control": {
+    "recovered_bps": 39.837333333333376,
+    "effect_t": 52.96957416574793,
+    "null_verdict": "REJECTED_NO_GROSS",
+    "n": 200,
+    "effect_bps": 40
+  }
+}

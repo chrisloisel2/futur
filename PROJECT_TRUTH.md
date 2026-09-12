@@ -135,6 +135,25 @@ listings never priced before (universe frozen from metadata, prereg pushed). Mea
 net taker +228, capacity 55 M$ per window, N_eff 93 — **INDECIDABLE**: t 2.12 < threshold_t(5) 2.3263,
 because the per-event dispersion is 1 546 bps. No promotion, no seal. Validated sleeves: 0. Capital deployable: **false.**
 
+## Forward seals (2026-09-10)
+
+- `event_delisting_pressure_v1` — **SEALED_FORWARD_ACTIVE** 2026-09-11 → 2028-09-11 (`sealed_forwards/active/`,
+  human copy `sealed_forwards/H3_DELISTING_PRESSURE_FORWARD.json`): only Binance delisting announcements
+  published after the seal; one look at 30 eligible events; promotion needs measured cost, N_eff ≥ 30,
+  top-1 ≤ 20 %, median ≥ 30 bps, ≥ 3 × cost. Waiting for future events; not a short-term result.
+  Validated sleeves: 0. Capital deployable: **false.**
+
+
+
+## P3B — forced-flow first look (2026-09-10, regard seq 9): the cascade is over before the message is read
+
+One sealed look on the frozen liquidation tape (24 930 events, one session), two preregistered hypotheses,
+family `liquidation`, threshold_t(2) = 1.96, entry 2 s after the exchange timestamp via REST aggTrades:
+
+- `forced_liquidation_reaction_v1` (continuation, ≥ 50 k$, 30 s): **REJECTED_NO_GROSS** (−7 bps, n 368, 51 clusters, t −1.45).
+- `forced_liquidation_exhaustion_v1` (reversal, ≥ 250 k$, 5 min): **REJECTED_COST_WALL** (+13.8 bps, median +10.2, 71 % wins, wall 43 bps; one cluster 78 %).
+
+Budget: 0 tests. Validated sleeves: 0. Capital deployable: **false.** Only the H3 delisting forward seal is active.
 
 ## P4 — market_state_tape (2026-09-11): a data source, not an alpha
 
