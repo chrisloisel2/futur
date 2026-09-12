@@ -27,19 +27,23 @@ API = "https://api.binance.com"
 
 #: endpoint -> (base, signe ?, ce qu'il donne). RIEN d'autre n'est appelable.
 ALLOWED: Dict[str, Tuple[str, bool, str]] = {
-    "/fapi/v1/exchangeInfo": (FAPI, False, "symbol constraints (public)"),
+    # les sept endpoints de compte prescrits par la charte P11
     "/fapi/v1/commissionRate": (FAPI, True, "actual maker/taker fee for one futures symbol"),
     "/fapi/v1/leverageBracket": (FAPI, True, "leverage brackets and maintenance margin"),
-    "/fapi/v1/userTrades": (FAPI, True, "own fills"),
+    "/fapi/v2/account": (FAPI, True, "futures account metadata: fee tier, canTrade / canWithdraw flags"),
+    "/api/v3/account": (API, True, "spot commission rates, canTrade / canWithdraw flags"),
     "/fapi/v1/income": (FAPI, True, "own income rows (funding fees, commissions)"),
-    "/fapi/v2/account": (FAPI, True, "account metadata: fee tier and permissions"),
-    "/api/v3/account": (API, True, "spot commission rates"),
-    "/sapi/v1/account/apiRestrictions": (API, True, "what this key is allowed to do"),
+    "/fapi/v1/userTrades": (FAPI, True, "own fills"),
     "/sapi/v1/margin/allPairs": (API, True, "margin pairs (is the asset borrowable?)"),
-    "/sapi/v1/margin/interestRateHistory": (API, True, "borrow interest rate history"),
+    # deux lectures hors compte, justifiees dans READONLY_KEY_SAFETY_AUDIT.md
+    "/fapi/v1/exchangeInfo": (FAPI, False, "symbol constraints (public, unsigned)"),
+    "/sapi/v1/account/apiRestrictions": (API, True, "the safety probe: what this key is allowed to do; read BEFORE any account call"),
 }
+ACCOUNT_ENDPOINTS = ("/fapi/v1/commissionRate", "/fapi/v1/leverageBracket", "/fapi/v2/account", "/api/v3/account", "/fapi/v1/income", "/fapi/v1/userTrades", "/sapi/v1/margin/allPairs")
 #: ce que le compte NE DOIT PAS pouvoir faire pour qu'on utilise la cle
-FORBIDDEN_PERMISSIONS = ("enableSpotAndMarginTrading", "enableFutures", "enableMargin", "enableWithdrawals", "enableInternalTransfer", "permitsUniversalTransfer")
+FORBIDDEN_PERMISSIONS = ("enableSpotAndMarginTrading", "enableFutures", "enableMargin", "enableWithdrawals", "enableInternalTransfer", "permitsUniversalTransfer", "enableVanillaOptions", "enablePortfolioMarginTrading")
+#: drapeaux de compte croises avec la sonde : si l'un est vrai, la cle est refusee meme si la sonde s'est tue
+ACCOUNT_FLAGS_FORBIDDEN = ("canWithdraw",)
 ENV_KEY, ENV_SECRET = "BINANCE_READONLY_API_KEY", "BINANCE_READONLY_API_SECRET"
 FALLBACK_ENV = ("BINANCE_API_KEY", "BINANCE_API_SECRET")
 
@@ -135,8 +139,16 @@ class ReadOnlyClient:
             return {"status": r["status"], "usable": False, "reason": self.refused_reason, "detail": r.get("error")}
         self.restrictions = r["data"]
         granted = [p for p in FORBIDDEN_PERMISSIONS if r["data"].get(p)]
+        if not r["data"].get("enableReading", True):
+            self.refused_reason = "the key cannot even read"; return {"status": "refused", "usable": False, "reason": self.refused_reason, "restrictions": r["data"]}
         if granted and not self.allow_trading_key:
             self.refused_reason = "the key grants %s; a research repository must use a key that cannot trade" % ", ".join(granted)
             return {"status": "refused", "usable": False, "reason": self.refused_reason, "granted_permissions": granted, "restrictions": r["data"]}
         return {"status": "ok", "usable": True, "granted_permissions": granted, "restrictions": r["data"],
                 "note": "trading permissions present but explicitly allowed by the caller" if granted else "key is read-only"}
+
+
+def cross_check_account_flags(account_payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Seconde barriere, depuis /fapi/v2/account ou /api/v3/account : canWithdraw vrai => refus."""
+    bad = [f for f in ACCOUNT_FLAGS_FORBIDDEN if account_payload.get(f)]
+    return {"forbidden_flags_set": bad, "refuse": bool(bad)}

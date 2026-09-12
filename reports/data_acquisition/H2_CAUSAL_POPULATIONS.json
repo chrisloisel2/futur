@@ -1,0 +1,53 @@
+{
+ "built_at_utc": "2026-09-12T14:48:19+00:00",
+ "require_actual_fees": true,
+ "capacity_inputs": 174,
+ "summary": {
+  "n": 174,
+  "by_population": {
+   "TRUE_BINANCE_PERP_FIRST": 6,
+   "MEXC_FIRST": 113,
+   "OKX_FIRST": 8,
+   "BYBIT_FIRST": 10,
+   "KUCOIN_FIRST": 6,
+   "GATE_FIRST_UNKNOWN_DATE": 13,
+   "UNKNOWN_PRECEDENCE": 18
+  },
+  "by_class": {
+   "BAD_TIMESTAMP": 8,
+   "UNKNOWN_EXECUTION_COST": 153,
+   "NO_CAPACITY": 6,
+   "PROVIDER_NEEDED": 7
+  },
+  "by_lead_bucket": {
+   "30d-180d": 26,
+   "7d-30d": 22,
+   ">180d": 27,
+   "1d-7d": 46,
+   "1h-24h": 12,
+   "unknown": 37,
+   "< 1h": 4
+  },
+  "clean_now": 0,
+  "answers": {
+   "1_true_first_listings": 6,
+   "2_mexc_first": 113,
+   "3_other_venue_first_excluding_mexc": 24,
+   "4_bad_timestamps": 8,
+   "5_blocked_only_by_cost": 153,
+   "6_blocked_only_by_capacity": 0,
+   "6b_blocked_by_cost_and_capacity_only": 6,
+   "7_clean_per_population_if_cost_and_capacity_lifted": {
+    "OKX_FIRST": 7,
+    "MEXC_FIRST": 102,
+    "KUCOIN_FIRST": 6,
+    "UNKNOWN_PRECEDENCE": 17,
+    "BYBIT_FIRST": 8,
+    "GATE_FIRST_UNKNOWN_DATE": 13,
+    "TRUE_BINANCE_PERP_FIRST": 6
+   }
+  }
+ },
+ "no_alpha_test": true,
+ "no_return_computed": true
+}

@@ -1,0 +1,85 @@
+{
+ "generated_at_utc": "2026-09-12T14:57:00+00:00",
+ "other_venue_first_events": 137,
+ "by_first_venue": {
+  "bybit": 10,
+  "okx": 8,
+  "mexc": 113,
+  "kucoin": 6
+ },
+ "manifests_by_venue": {
+  "mexc": {
+   "collected": 112,
+   "not_collected": 1
+  },
+  "okx": {
+   "not_collected": 8
+  },
+  "bybit": {
+   "not_collected": 10
+  },
+  "kucoin": {
+   "not_collected": 6
+  },
+  "gate": {}
+ },
+ "placeholders_written": {
+  "existing": 24
+ },
+ "routes": {
+  "mexc": {
+   "spot": "GET https://api.mexc.com/api/v3/klines?symbol=<BASE>USDT&interval=<iv>&startTime=&endTime= (public, Binance-like, historical)",
+   "perp": "GET https://contract.mexc.com/api/v1/contract/kline/<BASE>_USDT?interval=Day1|Min60|Min5&start=&end= (public)",
+   "status": "collected_by_this_module",
+   "cost": "free"
+  },
+  "okx": {
+   "spot": "GET https://www.okx.com/api/v5/market/history-candles?instId=<BASE>-USDT&bar=1D|1H|5m&after=&before= (public, historical)",
+   "perp": "same with instId=<BASE>-USDT-SWAP",
+   "status": "route_documented_not_collected",
+   "cost": "free"
+  },
+  "bybit": {
+   "spot": "GET https://api.bybit.com/v5/market/kline?category=spot&symbol=<BASE>USDT&interval=D|60|5&start=&end= (public)",
+   "perp": "same with category=linear",
+   "status": "route_documented_not_collected",
+   "cost": "free"
+  },
+  "kucoin": {
+   "spot": "GET https://api.kucoin.com/api/v1/market/candles?symbol=<BASE>-USDT&type=1day|1hour|5min&startAt=&endAt= (public)",
+   "perp": "GET https://api-futures.kucoin.com/api/v1/kline/query?symbol=<BASE>USDTM&granularity=1440|60|5&from=&to=",
+   "status": "route_documented_not_collected",
+   "cost": "free"
+  },
+  "gate": {
+   "spot": "GET https://api.gateio.ws/api/v4/spot/candlesticks?currency_pair=<BASE>_USDT&interval=1d|1h|5m&from=&to= (public)",
+   "perp": "GET https://api.gateio.ws/api/v4/futures/usdt/candlesticks?contract=<BASE>_USDT&interval=1d|1h|5m&from=&to=",
+   "status": "route_documented_not_collected",
+   "cost": "free"
+  }
+ },
+ "windows": {
+  "30d": 2592000,
+  "14d": 1209600,
+  "7d": 604800,
+  "3d": 259200,
+  "24h": 86400,
+  "6h": 21600
+ },
+ "granularity": [
+  {
+   "interval": "1d",
+   "span_s": 2592000
+  },
+  {
+   "interval": "60m",
+   "span_s": 259200
+  },
+  {
+   "interval": "5m",
+   "span_s": 21600
+  }
+ ],
+ "no_post_t0_data": true,
+ "no_alpha_test": true
+}
