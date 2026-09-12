@@ -196,3 +196,29 @@ and what still stands between the repository and that place.
   published fee may reject, never promote.
 - **No test launched by this branch.** Final decision of the readiness report: `NO_ALPHA_TEST`. The next allowed act is a read-only
   key and then a preregistration for one named population — or forward-only collection. Not a bot.
+
+## Wash-volume control on the MEXC pre-Binance tape (P12, 2026-09-12)
+
+Step 3 of the plan: "wash-volume test MEXC vs OKX/Bybit". Descriptive covariates, no verdict, no return, budget 0,
+`capital_deployable` **false**. Spec and code were committed (`ba889fb`) before the first output existed.
+
+- **A pre-t0 boundary defect was found and fixed first.** P11 bounded candles on their open time: for 136/136 stored events the
+  last daily candle closed after Binance opened (median 12.2 h). Close-bounded (`open + interval <= t0`), the median pre-Binance
+  7-day return falls from +25.2 % to +9.2 %, the 3-day from +17.7 % to +2.2 %; the 24 h hourly figure stays at +19 %. The old
+  "pre-launch run-up" contained the launch day. `PRE_BINANCE_TAPE_CLOSE_BOUND_FIX.md`.
+- **No trust score exists, by design.** No labelled wash event exists on any venue, so no probability can be calibrated. The output
+  is within-MEXC percentile ranks of four candle-only covariates (volume floor, CV, volume-range coupling, volume per unit of
+  range) on the 72 h before the Binance announcement, after 24 h of MEXC burn-in, with a support gate of 36 hours.
+- **Support: 63 measured, 42 not computable, 8 without tape** out of 113 MEXC-first events. Not computable means
+  no value, no rank, no flag — never "clean" by default. Six BAD_TIMESTAMP events are excluded by rule.
+- **Flags are a pre-declared fraction, not a filter.** Top decile of the anomaly rank: 8 events; mechanical
+  rule floor ≥ 0.8 and CV ≤ 0.4: 6 events. Neither bans an event: the feature policy is global — price-only
+  features may condition a preregistration, MEXC volume features are covariates only, absolute USD volume is never compared across venues.
+- **The honest control is the same asset on a second venue, same hours**: 55 events have one (KuCoin spot mostly). Median
+  log10 volume multiple MEXC / other = -0.3575 (MEXC carries less hourly volume than the second venue for
+  the median asset); median coupling gap -0.0361. The 24 other-venue-first events give only a venue-level
+  difference: F4 lower on MEXC by -0.9678 log10, CI 95 % [-1.4546, -0.4809], labelled venue + market + fee + era, never per event.
+- **Declared power**: constant-rate volume programmes only; blind to organic-mimicking bots; event-specific inflation below ~10× is
+  undetectable from candles; false-positive rate unknown.
+- **Nothing here is a look.** No post-t0 data is read (tested); the next allowed act is unchanged: a read-only key, then one
+  preregistration for the MEXC_FIRST population with one price-only conditioning variable.
