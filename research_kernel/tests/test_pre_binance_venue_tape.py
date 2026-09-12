@@ -5,9 +5,10 @@ from data_lake.collectors import pre_binance_venue_tape as V
 from data_lake.collectors import venue_pre_binance_paths as VP
 
 
-def test_routes_are_documented_for_every_venue_and_only_mexc_is_collected():
+def test_routes_are_documented_for_every_venue_and_say_which_module_collects_them():
     assert set(VP.ROUTES) == set(VP.VENUES) and VP.ROUTES["mexc"]["status"] == "collected_by_this_module"
-    assert all(VP.ROUTES[v]["status"] == "route_documented_not_collected" for v in VP.VENUES if v != "mexc")
+    assert all(VP.ROUTES[v]["status"] in VP.ROUTE_STATUSES and VP.ROUTES[v]["status"] != "collected_by_this_module" for v in VP.VENUES if v != "mexc")
+    assert "1Dutc" in VP.ROUTES["okx"]["spot"] and "10 000" in VP.ROUTES["gate"]["limit"]
     assert all(VP.ROUTES[v]["cost"] == "free" for v in VP.VENUES)
 
 

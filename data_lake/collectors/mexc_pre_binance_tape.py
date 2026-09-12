@@ -6,6 +6,10 @@ Pour chaque lancement H2 dont MEXC fut la premiere place : bougies journalieres 
 5 min (6 h) jusqu'a t0 exclu. Brut sous data/pre_binance/mexc/ (gitignore), un manifeste par evenement,
 journal append-only. Rien apres t0 n'est demande : ce module ne peut pas, par construction, mesurer une
 performance post-Binance.
+
+Borne de cloture (P12) : une bougie est gardee seulement si open + intervalle <= t0. La version P11 bornait sur
+l'ouverture et gardait donc une bougie qui chevauchait t0 ; `refilter_store` retire ces bougies du stock existant
+et l'inscrit dans le manifeste (close_bounded, dropped_straddling) et le journal.
 """
 from __future__ import annotations
 
@@ -50,8 +54,8 @@ def _get(url: str, timeout: int = 30) -> Any:
         return json.loads(r.read().decode("utf-8", "replace"))
 
 
-def log(rec: Dict[str, Any], root: Optional[Path] = None) -> None:
-    p = (Path(root) if root else VP.STORE) / "mexc" / "tape_log.jsonl"; p.parent.mkdir(parents=True, exist_ok=True)
+def log(rec: Dict[str, Any], root: Optional[Path] = None, venue: str = "mexc") -> None:
+    p = (Path(root) if root else VP.STORE) / venue / "tape_log.jsonl"; p.parent.mkdir(parents=True, exist_ok=True)
     with open(p, "a", encoding="utf-8") as f:
         f.write(json.dumps({"ts_local": datetime.now(timezone.utc).isoformat(timespec="seconds"), **rec}, ensure_ascii=False, default=str) + "\n")
 
@@ -100,7 +104,7 @@ def fetch_window(symbol: str, market: str, interval: str, start_ms: int, end_ms:
     for attempt in range(4):
         try:
             payload = _get(url); rows = normalise_candles(payload, market)
-            rows = [r for r in rows if r["open_time_ms"] < end_ms]                # rien a ou apres t0, par construction
+            rows = VP.closed_by(rows, interval, end_ms, start_ms)                    # rien qui cloture apres t0, par construction
             return {"status": "ok" if rows else "empty", "url": url, "rows": rows, "raw_hash": hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest(), "error": None}
         except HTTPError as e:
             if e.code in (400, 404):
@@ -136,8 +140,42 @@ def collect_event(ev: Dict[str, Any], root: Optional[Path] = None, refetch: bool
     ok = [iv for iv, f in files.items() if f["status"] == "ok"]
     man = {"event_id": ev["event_id"], "venue": "mexc", "symbol": sym, "market": market, "t0": ev["t0"], "mexc_listed_ts": ev.get("mexc_listed_ts"), "lead_days": ev.get("lead_days"),
            "status": "collected" if "1d" in ok else ("partial" if ok else "not_collected"), "files": files, "written_at_local": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-           "no_post_t0_data": True, "no_alpha_test": True}
+           "no_post_t0_data": True, "no_alpha_test": True, "close_bounded": True}
     _write_atomic(mp, json.dumps(man, indent=1, ensure_ascii=False)); return man
+
+
+def refilter_store(venue: str = "mexc", root: Optional[Path] = None) -> Dict[str, Any]:
+    """Correctif de borne sur le stock deja telecharge : retire de chaque fichier les bougies qui chevauchent t0
+    (open < t0 < open + intervalle), marque le manifeste close_bounded et journalise. Idempotent."""
+    root = Path(root) if root else VP.STORE; mdir = root / venue / "manifests"
+    n = {"manifests": 0, "already": 0, "files": 0, "dropped": 0}
+    for mp in sorted(mdir.glob("*.json")) if mdir.exists() else []:
+        try:
+            man = json.loads(mp.read_text())
+        except ValueError:
+            continue
+        n["manifests"] += 1
+        if man.get("close_bounded") or man.get("status") not in ("collected", "partial"):
+            n["already"] += 1; continue
+        t0_ms = int(VP.parse_ts(man["t0"]).timestamp() * 1000); dropped: Dict[str, int] = {}
+        for iv, f in man.get("files", {}).items():
+            if not f.get("path"):
+                continue
+            fp = Path(f["path"]) if Path(f["path"]).is_absolute() else ROOT / f["path"]
+            if not fp.exists():
+                continue
+            doc = json.loads(fp.read_text()); kept = VP.closed_by(doc["rows"], iv, t0_ms)
+            dropped[iv] = len(doc["rows"]) - len(kept); n["files"] += 1; n["dropped"] += dropped[iv]
+            if dropped[iv]:
+                doc["rows"] = kept; doc["close_bounded"] = True; doc["dropped_straddling"] = dropped[iv]
+                _write_atomic(fp, json.dumps(doc, separators=(",", ":")))
+                f["rows"] = len(kept); f["last_open_ms"] = kept[-1]["open_time_ms"] if kept else None
+                if not kept:
+                    f["status"] = "empty"
+        man["close_bounded"] = True; man["dropped_straddling"] = dropped
+        _write_atomic(mp, json.dumps(man, indent=1, ensure_ascii=False))
+        log({"kind": "correction", "what": "close_bound_refilter", "event_id": man.get("event_id"), "dropped": dropped}, root, venue)
+    return n
 
 
 def collect_all(limit: Optional[int] = None, refetch: bool = False) -> Dict[str, Any]:
@@ -153,8 +191,11 @@ def collect_all(limit: Optional[int] = None, refetch: bool = False) -> Dict[str,
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__); ap.add_argument("--collect", action="store_true"); ap.add_argument("--limit", type=int); ap.add_argument("--refetch", action="store_true")
+    ap.add_argument("--refilter", action="store_true", help="applique la borne de cloture au stock existant")
     a = ap.parse_args()
-    if a.collect:
+    if a.refilter:
+        print(json.dumps(refilter_store(), indent=1))
+    elif a.collect:
         r = collect_all(a.limit, a.refetch); print(json.dumps({k: v for k, v in r.items() if k != "manifests"}, indent=1))
     else:
         print(json.dumps({"mexc_first_events": len(mexc_first_events())}))

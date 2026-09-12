@@ -1,5 +1,5 @@
 {
- "generated_at_utc": "2026-09-12T14:57:00+00:00",
+ "generated_at_utc": "2026-09-12T17:22:08+00:00",
  "other_venue_first_events": 137,
  "by_first_venue": {
   "bybit": 10,
@@ -13,13 +13,13 @@
    "not_collected": 1
   },
   "okx": {
-   "not_collected": 8
+   "collected": 8
   },
   "bybit": {
-   "not_collected": 10
+   "collected": 10
   },
   "kucoin": {
-   "not_collected": 6
+   "collected": 6
   },
   "gate": {}
  },
@@ -34,7 +34,7 @@
    "cost": "free"
   },
   "okx": {
-   "spot": "GET https://www.okx.com/api/v5/market/history-candles?instId=<BASE>-USDT&bar=1D|1H|5m&after=&before= (public, historical)",
+   "spot": "GET https://www.okx.com/api/v5/market/history-candles?instId=<BASE>-USDT&bar=1Dutc|1H|5m&after=&before= (public, historical)",
    "perp": "same with instId=<BASE>-USDT-SWAP",
    "status": "route_documented_not_collected",
    "cost": "free"
