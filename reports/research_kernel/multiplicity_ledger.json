@@ -145,5 +145,46 @@
     "prev_hash": "11ffaa7af36b5cfd06af0b03b7cb5b3ce427e56bae2dd71c660308f10b9f4021",
     "reason": "Regards seq 7 et 8 sur le tape officiel des evenements (snapshot 6e957851, 2017-07-21 -> 2026-09-10) : toute nouvelle hypothese news sur cette periode est un second regard.",
     "recorded_at": ""
+  },
+  {
+    "entry_hash": "5741729fafced39fd1118aa80c1c61581956aa3422c09a255da80ceb0fdf079e",
+    "family": "liquidation",
+    "index": 11,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_reaction_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 9 (branch-local 8, re-chained at merge), one look executed 2026-09-10",
+    "prev_hash": "8a61d1f2fe68806b1732225c3f8017701379d90c3d6e91089ce7e77eacf65d4f",
+    "recorded_at": "2026-09-10T20:01:12Z",
+    "rules_hash": "bda1c326126e4c2a4905cfc841ed445b6fb461c1309c65b8a311f0bf7b216ee8",
+    "threshold_at_seal": 1.6449
+  },
+  {
+    "entry_hash": "7715a45f07022844ecbb7d446ceba69a1487339be433cf173235a3606a162760",
+    "family": "liquidation",
+    "index": 12,
+    "kind": "trial",
+    "mechanism_id": "forced_liquidation_exhaustion_v1",
+    "n_trials": 1,
+    "note": "sealed first look, LOOK_LEDGER seq 9 (branch-local 8, re-chained at merge), one look executed 2026-09-10",
+    "prev_hash": "5741729fafced39fd1118aa80c1c61581956aa3422c09a255da80ceb0fdf079e",
+    "recorded_at": "2026-09-10T20:01:12Z",
+    "rules_hash": "6316b1eedcbbf106f5f6b0333e2dc3cb0d9f7ad03940fcb88deb52b6fd945c22",
+    "threshold_at_seal": 1.96
+  },
+  {
+    "burned_periods": [
+      [
+        "2026-09-10",
+        "2026-09-10"
+      ]
+    ],
+    "entry_hash": "971fdd71aa0512900eb921e1735dab6df9e6478b35ebe0c5a2a475a9a4f7c386",
+    "family": "liquidation",
+    "index": 13,
+    "kind": "contamination",
+    "prev_hash": "7715a45f07022844ecbb7d446ceba69a1487339be433cf173235a3606a162760",
+    "reason": "forced-flow first look seq 9 on the frozen liquidation tape b78d1b50 (one session 2026-09-10)",
+    "recorded_at": ""
   }
 ]
