@@ -174,3 +174,25 @@ Five phases of data completion, no test run, no budget consumed, no verdict chan
 The finding that outlives the counts: `event_listing_perp_fade_v1` pooled two populations that are not the same
 phenomenon. That does not re-open regard seq 8 (burned, INDECIDABLE) and produces no signal; it means a future
 preregistration must state which population it tests. Validated sleeves: 0. Budget: 0. Capital deployable: **false.**
+
+
+## Alpha zone foundation (P11, 2026-09-12)
+
+One branch, no test launched, budget 0, `capital_deployable` **false**. It built the bricks that say where an alpha could exist,
+and what still stands between the repository and that place.
+
+- **H2 pooled is invalid as a single population.** The 174 launches split into {'TRUE_BINANCE_PERP_FIRST': 6, 'MEXC_FIRST': 113, 'OKX_FIRST': 8, 'BYBIT_FIRST': 10, 'KUCOIN_FIRST': 6, 'GATE_FIRST_UNKNOWN_DATE': 13, 'UNKNOWN_PRECEDENCE': 18} — a MEXC migration, an OKX / Bybit / KuCoin
+  cross-listing, and six true births averaged into one number by regard seq 8. That result is retired, not re-read.
+- **No alpha validated.** Nothing in this branch computes a return after a launch; the three new mechanisms are definitions with
+  exclusions and failure modes, validated by the research kernel and never run.
+- **The closest research zone is `OTHER_VENUE_FIRST_BINANCE_PERP_EFFECT`**: 137 dated events, an external reference price before t0,
+  capacity measured for 160 of 174 launches, a pre-Binance tape for the MEXC majority.
+- **MEXC migration is a candidate mechanism** (`MEXC_TO_BINANCE_MIGRATION_EFFECT`): 113 MEXC-first events, tape collected for
+  112; the pre-Binance state is descriptive material for one conditioning named before any look.
+- **True first listing is forward-only**: 6 historical events; ~14 400 would be needed at the observed
+  dispersion; the P4 tape captures certified births live and the module refuses any historical verdict.
+- **Read-only fees and capacity remain required before any budget reopen.** Capacity is now measured (20 bps resolution only from 2026;
+  1 % before). The fee actually charged is still unknown: execution mode `no_credentials`, cost chains {'H2': 'unknown', 'H3': 'unknown'}. The
+  published fee may reject, never promote.
+- **No test launched by this branch.** Final decision of the readiness report: `NO_ALPHA_TEST`. The next allowed act is a read-only
+  key and then a preregistration for one named population — or forward-only collection. Not a bot.

@@ -34,7 +34,7 @@ def test_the_module_contains_no_order_path():
     for forbidden in ("/fapi/v1/order", "/api/v3/order", "newOrder", "cancelOrder", "POST", "DELETE", "PUT"):
         assert forbidden not in body, forbidden
     assert all(not p.endswith("/order") for p in RO.ALLOWED)
-    assert len(RO.ALLOWED) == 10 and all(isinstance(v, tuple) and len(v) == 3 for v in RO.ALLOWED.values())
+    assert len(RO.ALLOWED) == 9 and all(isinstance(v, tuple) and len(v) == 3 for v in RO.ALLOWED.values())
 
 
 def test_any_endpoint_outside_the_whitelist_raises_before_a_request(monkeypatch):

@@ -1,0 +1,92 @@
+{
+ "generated_at_utc": "2026-09-12T14:45:56+00:00",
+ "mode": "no_credentials",
+ "env_var_used": null,
+ "key_redacted": "<absent>",
+ "permission_check": {
+  "status": "no_credentials",
+  "usable": false,
+  "reason": "no API key in the environment"
+ },
+ "endpoints": {
+  "commission_rate": {
+   "status": "no_credentials",
+   "endpoint": "GET /fapi/v1/commissionRate",
+   "reason": "no API key in the environment",
+   "would_give": "actual maker/taker fee for one futures symbol"
+  },
+  "leverage_brackets": {
+   "status": "no_credentials",
+   "endpoint": "GET /fapi/v1/leverageBracket",
+   "reason": "no API key in the environment",
+   "would_give": "leverage brackets and maintenance margin"
+  },
+  "futures_account": {
+   "status": "no_credentials",
+   "endpoint": "GET /fapi/v2/account",
+   "reason": "no API key in the environment",
+   "would_give": "futures account metadata: fee tier, canTrade / canWithdraw flags"
+  },
+  "spot_account": {
+   "status": "no_credentials",
+   "endpoint": "GET /api/v3/account",
+   "reason": "no API key in the environment",
+   "would_give": "spot commission rates, canTrade / canWithdraw flags"
+  },
+  "funding_income": {
+   "status": "no_credentials",
+   "endpoint": "GET /fapi/v1/income",
+   "reason": "no API key in the environment",
+   "would_give": "own income rows (funding fees, commissions)"
+  },
+  "own_fills": {
+   "status": "no_credentials",
+   "endpoint": "GET /fapi/v1/userTrades",
+   "reason": "no API key in the environment",
+   "would_give": "own fills"
+  },
+  "margin_pairs": {
+   "status": "no_credentials",
+   "endpoint": "GET /sapi/v1/margin/allPairs",
+   "reason": "no API key in the environment",
+   "would_give": "margin pairs (is the asset borrowable?)"
+  }
+ },
+ "actual_futures_taker_fee_bps": null,
+ "actual_futures_maker_fee_bps": null,
+ "actual_spot_fee_bps": null,
+ "funding_payments_available": false,
+ "user_fills_available": false,
+ "leverage_brackets_available": false,
+ "margin_pairs_available": false,
+ "fee_tier": null,
+ "symbol_constraints_public": {
+  "h2_symbols": 174,
+  "h3_symbols": 53,
+  "with_public_constraints": 207,
+  "missing": [
+   "ACAUSDT",
+   "AERGOUSDT",
+   "AIONUSDT",
+   "AKROUSDT",
+   "ALCXUSDT",
+   "ANTUSDT",
+   "BEAMUSDT",
+   "BIFIUSDT",
+   "BTSUSDT",
+   "CVPUSDT",
+   "DREPUSDT",
+   "FOOTBALLUSDT",
+   "GFTUSDT",
+   "USDSUSDT"
+  ],
+  "n_missing": 14
+ },
+ "cost_chain_status": {
+  "H2": "unknown",
+  "H3": "unknown"
+ },
+ "no_orders": true,
+ "no_secrets_stored": true,
+ "raw_account_data_location": "data/account_execution/ (gitignored)"
+}

@@ -1,0 +1,113 @@
+zone,data_class,source,status,zone_verdict
+H2_POOLED,announcement_ts,P2 tape,have,dead / invalid population
+H2_POOLED,announced_opening_ts,P7 body,have,dead / invalid population
+H2_POOLED,first_traded_bar,P6 Vision,have,dead / invalid population
+H2_POOLED,mark_index_premium_1m,P6 Vision,have,dead / invalid population
+H2_POOLED,trades_tick,P6 Vision aggTrades,have,dead / invalid population
+H2_POOLED,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),dead / invalid population
+H2_POOLED,open_interest_5m,P6 Vision metrics,have,dead / invalid population
+H2_POOLED,funding,P6 Vision,have (3 pending),dead / invalid population
+H2_POOLED,capacity_features,P11,measured for 160,dead / invalid population
+H2_POOLED,venue_precedence,P9,143 settled,dead / invalid population
+H2_POOLED,pre_binance_tape,P11 MEXC,112 of 113,dead / invalid population
+H2_POOLED,actual_fees,P8,no_credentials,dead / invalid population
+H2_POOLED,leverage_brackets,P8,no_credentials,dead / invalid population
+H2_POOLED,borrowability,P8,no_credentials,dead / invalid population
+H2_POOLED,tick_l2_history,provider,not held; 7 windows P0,dead / invalid population
+H2_POOLED,live_market_state,P4 tape,running; no true birth captured yet,dead / invalid population
+TRUE_FIRST_LISTING,announcement_ts,P2 tape,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,announced_opening_ts,P7 body,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,first_traded_bar,P6 Vision,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,mark_index_premium_1m,P6 Vision,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,trades_tick,P6 Vision aggTrades,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),forward-only / too few historical events
+TRUE_FIRST_LISTING,open_interest_5m,P6 Vision metrics,have,forward-only / too few historical events
+TRUE_FIRST_LISTING,funding,P6 Vision,have (3 pending),forward-only / too few historical events
+TRUE_FIRST_LISTING,capacity_features,P11,measured for 160,forward-only / too few historical events
+TRUE_FIRST_LISTING,venue_precedence,P9,143 settled,forward-only / too few historical events
+TRUE_FIRST_LISTING,pre_binance_tape,P11 MEXC,112 of 113,forward-only / too few historical events
+TRUE_FIRST_LISTING,actual_fees,P8,no_credentials,forward-only / too few historical events
+TRUE_FIRST_LISTING,leverage_brackets,P8,no_credentials,forward-only / too few historical events
+TRUE_FIRST_LISTING,borrowability,P8,no_credentials,forward-only / too few historical events
+TRUE_FIRST_LISTING,tick_l2_history,provider,not held; 7 windows P0,forward-only / too few historical events
+TRUE_FIRST_LISTING,live_market_state,P4 tape,running; no true birth captured yet,forward-only / too few historical events
+OTHER_VENUE_FIRST,announcement_ts,P2 tape,have,closest research zone
+OTHER_VENUE_FIRST,announced_opening_ts,P7 body,have,closest research zone
+OTHER_VENUE_FIRST,first_traded_bar,P6 Vision,have,closest research zone
+OTHER_VENUE_FIRST,mark_index_premium_1m,P6 Vision,have,closest research zone
+OTHER_VENUE_FIRST,trades_tick,P6 Vision aggTrades,have,closest research zone
+OTHER_VENUE_FIRST,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),closest research zone
+OTHER_VENUE_FIRST,open_interest_5m,P6 Vision metrics,have,closest research zone
+OTHER_VENUE_FIRST,funding,P6 Vision,have (3 pending),closest research zone
+OTHER_VENUE_FIRST,capacity_features,P11,measured for 160,closest research zone
+OTHER_VENUE_FIRST,venue_precedence,P9,143 settled,closest research zone
+OTHER_VENUE_FIRST,pre_binance_tape,P11 MEXC,112 of 113,closest research zone
+OTHER_VENUE_FIRST,actual_fees,P8,no_credentials,closest research zone
+OTHER_VENUE_FIRST,leverage_brackets,P8,no_credentials,closest research zone
+OTHER_VENUE_FIRST,borrowability,P8,no_credentials,closest research zone
+OTHER_VENUE_FIRST,tick_l2_history,provider,not held; 7 windows P0,closest research zone
+OTHER_VENUE_FIRST,live_market_state,P4 tape,running; no true birth captured yet,closest research zone
+MEXC_TO_BINANCE,announcement_ts,P2 tape,have,highest mechanistic interest
+MEXC_TO_BINANCE,announced_opening_ts,P7 body,have,highest mechanistic interest
+MEXC_TO_BINANCE,first_traded_bar,P6 Vision,have,highest mechanistic interest
+MEXC_TO_BINANCE,mark_index_premium_1m,P6 Vision,have,highest mechanistic interest
+MEXC_TO_BINANCE,trades_tick,P6 Vision aggTrades,have,highest mechanistic interest
+MEXC_TO_BINANCE,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),highest mechanistic interest
+MEXC_TO_BINANCE,open_interest_5m,P6 Vision metrics,have,highest mechanistic interest
+MEXC_TO_BINANCE,funding,P6 Vision,have (3 pending),highest mechanistic interest
+MEXC_TO_BINANCE,capacity_features,P11,measured for 160,highest mechanistic interest
+MEXC_TO_BINANCE,venue_precedence,P9,143 settled,highest mechanistic interest
+MEXC_TO_BINANCE,pre_binance_tape,P11 MEXC,112 of 113,highest mechanistic interest
+MEXC_TO_BINANCE,actual_fees,P8,no_credentials,highest mechanistic interest
+MEXC_TO_BINANCE,leverage_brackets,P8,no_credentials,highest mechanistic interest
+MEXC_TO_BINANCE,borrowability,P8,no_credentials,highest mechanistic interest
+MEXC_TO_BINANCE,tick_l2_history,provider,not held; 7 windows P0,highest mechanistic interest
+MEXC_TO_BINANCE,live_market_state,P4 tape,running; no true birth captured yet,highest mechanistic interest
+H3_DELISTING,announcement_ts,P2 tape,have,forward sealed / needs future events
+H3_DELISTING,announced_opening_ts,P7 body,have,forward sealed / needs future events
+H3_DELISTING,first_traded_bar,P6 Vision,have,forward sealed / needs future events
+H3_DELISTING,mark_index_premium_1m,P6 Vision,have,forward sealed / needs future events
+H3_DELISTING,trades_tick,P6 Vision aggTrades,have,forward sealed / needs future events
+H3_DELISTING,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),forward sealed / needs future events
+H3_DELISTING,open_interest_5m,P6 Vision metrics,have,forward sealed / needs future events
+H3_DELISTING,funding,P6 Vision,have (3 pending),forward sealed / needs future events
+H3_DELISTING,capacity_features,P11,measured for 160,forward sealed / needs future events
+H3_DELISTING,venue_precedence,P9,143 settled,forward sealed / needs future events
+H3_DELISTING,pre_binance_tape,P11 MEXC,112 of 113,forward sealed / needs future events
+H3_DELISTING,actual_fees,P8,no_credentials,forward sealed / needs future events
+H3_DELISTING,leverage_brackets,P8,no_credentials,forward sealed / needs future events
+H3_DELISTING,borrowability,P8,no_credentials,forward sealed / needs future events
+H3_DELISTING,tick_l2_history,provider,not held; 7 windows P0,forward sealed / needs future events
+H3_DELISTING,live_market_state,P4 tape,running; no true birth captured yet,forward sealed / needs future events
+FORCED_FLOW_PUBLIC,announcement_ts,P2 tape,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,announced_opening_ts,P7 body,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,first_traded_bar,P6 Vision,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,mark_index_premium_1m,P6 Vision,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,trades_tick,P6 Vision aggTrades,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),rejected as direct signal
+FORCED_FLOW_PUBLIC,open_interest_5m,P6 Vision metrics,have,rejected as direct signal
+FORCED_FLOW_PUBLIC,funding,P6 Vision,have (3 pending),rejected as direct signal
+FORCED_FLOW_PUBLIC,capacity_features,P11,measured for 160,rejected as direct signal
+FORCED_FLOW_PUBLIC,venue_precedence,P9,143 settled,rejected as direct signal
+FORCED_FLOW_PUBLIC,pre_binance_tape,P11 MEXC,112 of 113,rejected as direct signal
+FORCED_FLOW_PUBLIC,actual_fees,P8,no_credentials,rejected as direct signal
+FORCED_FLOW_PUBLIC,leverage_brackets,P8,no_credentials,rejected as direct signal
+FORCED_FLOW_PUBLIC,borrowability,P8,no_credentials,rejected as direct signal
+FORCED_FLOW_PUBLIC,tick_l2_history,provider,not held; 7 windows P0,rejected as direct signal
+FORCED_FLOW_PUBLIC,live_market_state,P4 tape,running; no true birth captured yet,rejected as direct signal
+PRE_LIQUIDATION_PRESSURE,announcement_ts,P2 tape,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,announced_opening_ts,P7 body,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,first_traded_bar,P6 Vision,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,mark_index_premium_1m,P6 Vision,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,trades_tick,P6 Vision aggTrades,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,depth_1min_bands,P6 Vision bookDepth,have (20 bps only from 2026),"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,open_interest_5m,P6 Vision metrics,have,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,funding,P6 Vision,have (3 pending),"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,capacity_features,P11,measured for 160,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,venue_precedence,P9,143 settled,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,pre_binance_tape,P11 MEXC,112 of 113,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,actual_fees,P8,no_credentials,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,leverage_brackets,P8,no_credentials,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,borrowability,P8,no_credentials,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,tick_l2_history,provider,not held; 7 windows P0,"possible future family, not built here"
+PRE_LIQUIDATION_PRESSURE,live_market_state,P4 tape,running; no true birth captured yet,"possible future family, not built here"

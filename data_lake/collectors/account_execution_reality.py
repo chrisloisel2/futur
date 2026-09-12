@@ -122,6 +122,15 @@ def account_snapshot(allow_trading_key: bool = False, fee_symbols: Optional[List
                                       "taker_bps": float(r["data"]["takerCommissionRate"]) * 1e4}
             if name == "futures_account":
                 out["fee_tier"] = r["data"].get("feeTier")
+            if name in ("futures_account", "spot_account"):
+                x = RO.cross_check_account_flags(r["data"])
+                if x["refuse"]:
+                    cl.refused_reason = "account flags %s are set: the key is refused" % x["forbidden_flags_set"]; out["usable"] = False
+                    out["permission_check"] = {**perm, "status": "refused", "usable": False, "reason": cl.refused_reason}
+            if name == "spot_account":
+                mk, tk = r["data"].get("makerCommission"), r["data"].get("takerCommission")
+                if mk is not None and tk is not None:
+                    out["spot_fees"] = {"maker_bps": float(mk), "taker_bps": float(tk), "unit": "makerCommission=10 means 10 bps"}
     return out
 
 
@@ -253,7 +262,78 @@ def collect(allow_trading_key: bool = False, out: Optional[Path] = None) -> Dict
     syms = h2_symbols() + h3_symbols()
     pub = published_vip0(); acct = account_snapshot(allow_trading_key, fee_symbols=syms or ["BTCUSDT"])
     cons = public_constraints(sorted(set(syms))); costs = build_costs(pub, acct)
-    return write_reports(pub, acct, cons, costs, out)
+    doc = write_reports(pub, acct, cons, costs, out); write_collected_reports(doc, out)
+    return doc
+
+
+
+# ----------------------------------------------------------------------------- P11 : rapports complementaires
+def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> Dict[str, Path]:
+    """ACCOUNT_EXECUTION_REALITY_COLLECTED (l'instantane tel que collecte, ou 'no_credentials'),
+    H2_H3_COST_CHAIN_STATUS (confirmed / unknown / contradicted, maillon par maillon), READONLY_KEY_SAFETY_AUDIT."""
+    import data_lake.collectors.account_execution_reality as _self
+    out = Path(out) if out is not None else _self.OUT; out.mkdir(parents=True, exist_ok=True)
+    now = doc.get("generated_at_utc") or datetime.now(timezone.utc).isoformat(timespec="seconds")
+    acct, costs, ans = doc["account"], doc["costs"], doc["answers"]
+    has, usable = acct.get("has_credentials"), acct.get("usable")
+    mode = "collected" if usable else ("refused" if has else "no_credentials")
+    coll = {"generated_at_utc": now, "mode": mode, "env_var_used": acct.get("env_var"), "key_redacted": doc.get("key_redacted"),
+            "permission_check": acct.get("permission_check"), "endpoints": acct["endpoints"],
+            "actual_futures_taker_fee_bps": ans["1_actual_futures_taker_fee_bps"], "actual_futures_maker_fee_bps": ans["2_actual_futures_maker_fee_bps"],
+            "actual_spot_fee_bps": acct.get("spot_fees"), "funding_payments_available": ans["3_funding_payment_availability"] == "ok",
+            "user_fills_available": acct["endpoints"].get("own_fills", {}).get("status") == "ok", "leverage_brackets_available": ans["4_leverage_bracket_availability"] == "ok",
+            "margin_pairs_available": acct["endpoints"].get("margin_pairs", {}).get("status") == "ok", "fee_tier": acct.get("fee_tier"),
+            "symbol_constraints_public": doc.get("constraints_coverage"), "cost_chain_status": ans["5_h2_h3_cost_assumptions"],
+            "no_orders": True, "no_secrets_stored": True, "raw_account_data_location": "data/account_execution/ (gitignored)"}
+    _write_atomic(out / "ACCOUNT_EXECUTION_REALITY_COLLECTED.json", json.dumps(coll, indent=1, ensure_ascii=False, default=str) + "\n")
+    md = [f"# ACCOUNT EXECUTION REALITY — collected ({now[:19]} UTC)", "", f"Mode: **{mode}**.", ""]
+    if mode == "no_credentials":
+        md += ["No API key was found in the environment (`BINANCE_READONLY_API_KEY` / `BINANCE_READONLY_API_SECRET`, fallback "
+               "`BINANCE_API_KEY` / `BINANCE_API_SECRET`). No signed request was made. Every account figure below is therefore "
+               "`unknown`, which is the correct output, not a failure. The published VIP0 schedule remains the strongest figure "
+               "available and it is only strong enough to reject, never to promote.", ""]
+    elif mode == "refused":
+        md += [f"A key exists but was **refused**: {acct.get('permission_check', {}).get('reason')}. A research repository uses a key that cannot trade, withdraw or transfer.", ""]
+    md += ["| item | value |", "|---|---|",
+           f"| actual futures taker fee | {coll['actual_futures_taker_fee_bps'] if coll['actual_futures_taker_fee_bps'] is not None else 'unknown'} |",
+           f"| actual futures maker fee | {coll['actual_futures_maker_fee_bps'] if coll['actual_futures_maker_fee_bps'] is not None else 'unknown'} |",
+           f"| actual spot fee | {coll['actual_spot_fee_bps'] or 'unknown'} |",
+           f"| funding payments available | {coll['funding_payments_available']} |", f"| user fills available | {coll['user_fills_available']} |",
+           f"| leverage brackets available | {coll['leverage_brackets_available']} |", f"| margin pairs / borrowability | {coll['margin_pairs_available']} |",
+           f"| symbol constraints (public) | {(doc.get('constraints_coverage') or {}).get('with_public_constraints')} symbols |",
+           f"| H2 cost chain | **{ans['5_h2_h3_cost_assumptions'].get('H2')}** |", f"| H3 cost chain | **{ans['5_h2_h3_cost_assumptions'].get('H3')}** |", ""]
+    _write_atomic(out / "ACCOUNT_EXECUTION_REALITY_COLLECTED.md", "\n".join(md) + "\n")
+
+    cc = [f"# H2 / H3 COST CHAIN STATUS ({now[:19]} UTC)", "",
+          "A cost chain has three links — fee, spread, slippage — and is worth its weakest. `confirmed` and `contradicted` "
+          "require every link measured (`account_actual`) or officially published; a chain that rests on a declared number "
+          "is `unknown`. `unknown` is an honest state, not a defect.", "",
+          "| hypothesis | spec declared round trip | chain round trip | fee | spread | slippage | weakest | status |", "|---|---|---|---|---|---|---|---|"]
+    for k, v in costs["comparisons"].items():
+        c = v["cost_chain"]
+        cc.append(f"| {k} | {v['spec_declared_round_trip_bps']:.1f} bps | {c['round_trip_bps']:.1f} bps | `{c['fee_provenance']}` | `{c['spread_provenance']}` | `{c['slippage_provenance']}` | `{c['weakest_provenance']}` | **{v['status']}** |")
+    cc += ["", "## What would move each chain", "",
+           "- fee → `account_actual`: a read-only key and one `GET /fapi/v1/commissionRate` per symbol.",
+           "- spread, slippage → measured: P11 `depth_capacity_features` derives an effective-spread proxy and slippage bounds from the "
+           "Vision archives; they enter the chain as `official_published`-grade links once a preregistration names which window it uses.",
+           "- The official fee may serve to **reject** a hypothesis whose gross is below 3 × the published cost. It may never serve to promote one.", ""]
+    _write_atomic(out / "H2_H3_COST_CHAIN_STATUS.md", "\n".join(cc) + "\n")
+
+    au = [f"# READ-ONLY KEY SAFETY AUDIT ({now[:19]} UTC)", "",
+          "What `binance_account_readonly.py` can and cannot do, verified by tests on its own source, not by promise.", "",
+          "| property | how it is enforced | test |", "|---|---|---|",
+          "| no order, cancel or transfer code path | only GET is implemented; the source contains no POST / DELETE / PUT and no order endpoint (checked on the AST with docstrings removed) | `test_the_module_contains_no_order_path` |",
+          f"| whitelist | {len(RO.ALLOWED)} endpoints; anything else raises `ReadOnlyViolation` before a URL is built | `test_any_endpoint_outside_the_whitelist_raises_before_a_request` |",
+          "| the seven prescribed account endpoints | " + ", ".join("`GET %s`" % e for e in RO.ACCOUNT_ENDPOINTS) + " | `test_whitelist_is_exactly_the_prescribed_set_plus_two_reads` |",
+          "| two extra reads, justified | `GET /fapi/v1/exchangeInfo` is public and unsigned (symbol constraints); `GET /sapi/v1/account/apiRestrictions` is the **safety probe** that tells us what the key may do — without it a trading key could not be refused | same test |",
+          f"| trading / withdrawal / transfer key refused | `check_permissions` reads the probe first; any of {', '.join(RO.FORBIDDEN_PERMISSIONS)} set → refused, and every later signed call returns `refused` | `test_a_key_that_can_trade_is_refused`, `test_withdrawal_and_transfer_keys_are_refused` |",
+          "| second barrier on account flags | `canWithdraw` on the account payloads → refuse even if the probe was silent | `test_account_flags_are_cross_checked` |",
+          "| no credentials → inert | signed endpoints return `no_credentials` without any request | `test_signed_endpoints_are_inert_without_credentials` |",
+          "| secrets never logged, written or returned | credentials live only in the client instance; reports carry a redacted form (`abc…yz (n chars)`) | `test_credentials_are_never_exposed` |",
+          "| raw account data | written under `data/account_execution/` which is gitignored; nothing account-specific is versioned | `.gitignore` `data/*` |", "",
+          f"Credentials at audit time: {'present' if has else 'absent'} ({doc.get('key_redacted')}). Mode: **{mode}**.", ""]
+    _write_atomic(out / "READONLY_KEY_SAFETY_AUDIT.md", "\n".join(au) + "\n")
+    return {"collected": out / "ACCOUNT_EXECUTION_REALITY_COLLECTED.md", "chain": out / "H2_H3_COST_CHAIN_STATUS.md", "audit": out / "READONLY_KEY_SAFETY_AUDIT.md"}
 
 
 def main():

@@ -1,0 +1,323 @@
+{
+ "generated_at_utc": "2026-09-12T14:59:18+00:00",
+ "inputs": {
+  "populations": {
+   "TRUE_BINANCE_PERP_FIRST": 6,
+   "MEXC_FIRST": 113,
+   "OKX_FIRST": 8,
+   "BYBIT_FIRST": 10,
+   "KUCOIN_FIRST": 6,
+   "GATE_FIRST_UNKNOWN_DATE": 13,
+   "UNKNOWN_PRECEDENCE": 18
+  },
+  "answers": {
+   "1_true_first_listings": 6,
+   "2_mexc_first": 113,
+   "3_other_venue_first_excluding_mexc": 24,
+   "4_bad_timestamps": 8,
+   "5_blocked_only_by_cost": 153,
+   "6_blocked_only_by_capacity": 0,
+   "6b_blocked_by_cost_and_capacity_only": 6,
+   "7_clean_per_population_if_cost_and_capacity_lifted": {
+    "OKX_FIRST": 7,
+    "MEXC_FIRST": 102,
+    "KUCOIN_FIRST": 6,
+    "UNKNOWN_PRECEDENCE": 17,
+    "BYBIT_FIRST": 8,
+    "GATE_FIRST_UNKNOWN_DATE": 13,
+    "TRUE_BINANCE_PERP_FIRST": 6
+   }
+  },
+  "lead_buckets": {
+   "30d-180d": 26,
+   "7d-30d": 22,
+   ">180d": 27,
+   "1d-7d": 46,
+   "1h-24h": 12,
+   "unknown": 37,
+   "< 1h": 4
+  },
+  "capacity": {
+   "measured": 160,
+   "n": 174,
+   "ok_any_window": 47,
+   "ok_at_1h": 43,
+   "status_t0": {
+    "NO_DEPTH": 11,
+    "DEPTH_TOO_THIN": 47,
+    "UNKNOWN": 81,
+    "BAD_BOOK": 3,
+    "SPREAD_TOO_WIDE": 21,
+    "CAPACITY_OK": 11
+   },
+   "resolution": {
+    "20": 59,
+    "100": 115
+   },
+   "spread_median_bps": 28.368
+  },
+  "execution": {
+   "mode": "no_credentials",
+   "fee_known": false,
+   "cost_chain": {
+    "H2": "unknown",
+    "H3": "unknown"
+   }
+  },
+  "mexc": {
+   "n": 113,
+   "coverage": {
+    "full": 110,
+    "not_collected": 1,
+    "daily_only": 2
+   }
+  },
+  "p10": {
+   "decision": "NO_TEST",
+   "clean": 0,
+   "would_be": 129
+  },
+  "mechanisms": {
+   "other_venue_first": "other_venue_first_binance_perp_effect_v1",
+   "mexc": "mexc_to_binance_migration_effect_v1",
+   "true_first": "true_first_listing_forward_only_v1"
+  }
+ },
+ "executive_verdict": {
+  "H2_POOLED": "dead / invalid population",
+  "TRUE_FIRST_LISTING": "forward-only / too few historical events",
+  "OTHER_VENUE_FIRST": "closest research zone",
+  "MEXC_TO_BINANCE": "highest mechanistic interest",
+  "H3_DELISTING": "forward sealed / needs future events",
+  "FORCED_FLOW_PUBLIC": "rejected as direct signal",
+  "PRE_LIQUIDATION_PRESSURE": "possible future family, not built here"
+ },
+ "readiness": [
+  {
+   "zone": "H2_POOLED",
+   "event_count": 174,
+   "data_ready": true,
+   "execution_ready": false,
+   "capacity_ready": true,
+   "mechanism_ready": false,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "dead / invalid population",
+   "reason": "one number averaged over 113 MEXC-first, 24 other-venue-first and 6 true-first events; retired as a population (regard seq 8 burned)"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "event_count": 6,
+   "data_ready": false,
+   "execution_ready": false,
+   "capacity_ready": false,
+   "mechanism_ready": true,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "forward-only / too few historical events",
+   "reason": "6 historical events; ~14 400 needed at the observed dispersion; the P4 tape must capture certified births live"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "event_count": 137,
+   "data_ready": true,
+   "execution_ready": false,
+   "capacity_ready": true,
+   "mechanism_ready": true,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "closest research zone",
+   "reason": "137 dated events, external reference before t0, capacity measured for 160/174, mechanism defined; blocked by the actual fee (credential)"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "event_count": 113,
+   "data_ready": true,
+   "execution_ready": false,
+   "capacity_ready": true,
+   "mechanism_ready": true,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "highest mechanistic interest",
+   "reason": "113 MEXC-first events with a pre-Binance tape for 112; conditioning state exists; same credential blocker"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "event_count": 56,
+   "data_ready": true,
+   "execution_ready": false,
+   "capacity_ready": true,
+   "mechanism_ready": true,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "forward sealed / needs future events",
+   "reason": "sealed 2026-09-11 -> 2028-09-11; only announcements after the seal count; measured cost required at the look"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "event_count": 368,
+   "data_ready": true,
+   "execution_ready": false,
+   "capacity_ready": true,
+   "mechanism_ready": true,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "rejected as direct signal",
+   "reason": "regard seq 9: -7 bps continuation, +13.8 bps reversal under a 43 bps wall; the public message is the corpse, not the signal"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "event_count": 0,
+   "data_ready": false,
+   "execution_ready": false,
+   "capacity_ready": false,
+   "mechanism_ready": false,
+   "prereg_ready": false,
+   "alpha_test_allowed": false,
+   "verdict": "possible future family, not built here",
+   "reason": "would need OI build-up, mark/index divergence and thin depth BEFORE a liquidation; the P4 tape records the state but no mechanism is defined"
+  }
+ ],
+ "blockers": [
+  {
+   "kind": "credential_blocker",
+   "blocker": "actual account fees unknown (no read-only API key)",
+   "affects": [
+    "OTHER_VENUE_FIRST",
+    "MEXC_TO_BINANCE",
+    "H3_DELISTING",
+    "TRUE_FIRST_LISTING"
+   ],
+   "events": 153,
+   "route": "set BINANCE_READONLY_API_KEY / _SECRET to a key with no trading, withdrawal or transfer permission; re-run P8 --collect",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "free_blocker",
+   "blocker": "capacity at 20 bps not observable for pre-2026 launches (archive generation)",
+   "affects": [
+    "OTHER_VENUE_FIRST",
+    "MEXC_TO_BINANCE"
+   ],
+   "events": 115,
+   "route": "structural for history; the P4 live tape records 20 bps and tick L2 for every future launch; a preregistration may accept 1 % capacity as UNKNOWN-but-fills",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "free_blocker",
+   "blocker": "spread and slippage in the cost chains are still declared numbers",
+   "affects": [
+    "OTHER_VENUE_FIRST",
+    "MEXC_TO_BINANCE"
+   ],
+   "events": 160,
+   "route": "the depth features now carry an effective-spread proxy and slippage bounds per window; a preregistration must name which window it uses",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "free_blocker",
+   "blocker": "venue precedence unknown",
+   "affects": [
+    "OTHER_VENUE_FIRST"
+   ],
+   "events": 31,
+   "route": "Gate first-candle per pair; OKX/Bybit announcement archives via the P7 body archiver",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "free_blocker",
+   "blocker": "announced opening time and first traded bar disagree by more than 15 min",
+   "affects": [
+    "OTHER_VENUE_FIRST",
+    "MEXC_TO_BINANCE"
+   ],
+   "events": 8,
+   "route": "human decision per event on which timestamp is the event; excluded by rule until then",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "provider_blocker",
+   "blocker": "no free depth or index reference on the launch day",
+   "affects": [
+    "OTHER_VENUE_FIRST"
+   ],
+   "events": 7,
+   "route": "H2_PROVIDER_REQUEST_WINDOWS.csv, P0 rows only (targeted windows, never a subscription)",
+   "cost": "paid, small",
+   "cleared": false
+  },
+  {
+   "kind": "forward_only_blocker",
+   "blocker": "too few true first listings in history",
+   "affects": [
+    "TRUE_FIRST_LISTING"
+   ],
+   "events": 6,
+   "route": "P4 market_state_tape captures certified births live; no backfill can create more",
+   "cost": "time",
+   "cleared": false
+  },
+  {
+   "kind": "forward_only_blocker",
+   "blocker": "H3 seal counts only announcements after 2026-09-11",
+   "affects": [
+    "H3_DELISTING"
+   ],
+   "events": 0,
+   "route": "wait; ~18-20 months at the 2025 rate",
+   "cost": "time",
+   "cleared": false
+  },
+  {
+   "kind": "conceptual_blocker",
+   "blocker": "MEXC pre-Binance volume may be wash-traded; pump and volume features inherit it",
+   "affects": [
+    "MEXC_TO_BINANCE"
+   ],
+   "events": 113,
+   "route": "compare MEXC volume to OKX/Bybit-first events; treat volume features as suspect until then",
+   "cost": "free",
+   "cleared": false
+  },
+  {
+   "kind": "conceptual_blocker",
+   "blocker": "the public liquidation message arrives after the move",
+   "affects": [
+    "FORCED_FLOW_PUBLIC"
+   ],
+   "events": 368,
+   "route": "none: structural; the family is closed as a direct signal",
+   "cost": "none",
+   "cleared": false
+  }
+ ],
+ "final_decision": {
+  "decision": "NO_ALPHA_TEST",
+  "why": "actual fees unknown (no read-only key); the published fee may reject, never promote",
+  "fees_confirmed": false,
+  "capacity_confirmed": true,
+  "capital_deployable": false,
+  "budget": 0,
+  "alpha_test_launched_by_this_branch": false
+ },
+ "answers": {
+  "1_closest_alpha_zone": "OTHER_VENUE_FIRST (137 dated events; mechanism other_venue_first_binance_perp_effect_v1); its MEXC_TO_BINANCE sub-zone (113 events) is where the mechanism is most specific",
+  "2_dead_zone": "H2_POOLED (invalid as a single population) and FORCED_FLOW_PUBLIC as a direct signal",
+  "3_forward_only_zone": "TRUE_FIRST_LISTING (6 historical events) and H3_DELISTING (sealed, future announcements only)",
+  "4_data_ready_not_execution_ready": "OTHER_VENUE_FIRST and MEXC_TO_BINANCE: reference price, capacity, pre-Binance tape and announcement times exist; the fee actually charged does not",
+  "5_free_blockers": "capacity at 20 bps not observable for pre-2026 launches (archive generation); spread and slippage in the cost chains are still declared numbers; venue precedence unknown; announced opening time and first traded bar disagree by more than 15 min",
+  "6_provider_blockers": "no free depth or index reference on the launch day (7 events)",
+  "7_hypothesis_worth_a_future_prereg": "mexc_to_binance_migration_effect_v1 with ONE pre-Binance conditioning named in advance, or other_venue_first_binance_perp_effect_v1 on the full dated population with the first venue's price as reference",
+  "8_hypothesis_not_to_test": "H2_POOLED again at any horizon; TRUE_FIRST_LISTING on history; any hypothesis whose reference is BTC instead of the first venue; anything conditioned after a look",
+  "9_next_concrete_act": "configure a read-only key (no trading / withdrawal / transfer) and re-run P8; then write a preregistration for one named population with the first venue's price as reference — not a bot, not a test",
+  "10_capital_deployable_remains_false": "yes; budget 0; no test launched by this branch; decision NO_ALPHA_TEST"
+ },
+ "no_alpha_test": true,
+ "no_return_computed": true,
+ "capital_deployable": false
+}
