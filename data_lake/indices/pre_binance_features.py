@@ -3,7 +3,8 @@
 pre_binance_features.py -- l'etat d'un marche AVANT que Binance ouvre son perpetuel, decrit depuis les bougies
 d'une autre place. Fonctions pures sur des bougies deja stockees.
 
-Borne structurelle : toute bougie dont l'ouverture est >= t0 est REJETEE avant tout calcul. Ce module ne peut
+Borne structurelle : toute bougie qui ne CLOTURE pas au plus tard a t0 (open + intervalle > t0) est REJETEE avant
+tout calcul -- y compris la bougie qui chevauche t0, qui contient de l'apres (correctif P12). Ce module ne peut
 donc pas decrire ce qui se passe apres l'arrivee de Binance ; il ne produit ni signal ni verdict. Les
 rendements calcules ici sont des rendements PASSES sur une AUTRE place : une description, pas une prediction.
 """
@@ -23,11 +24,12 @@ class PostT0Leak(ValueError):
     pass
 
 
-def strictly_before(candles: List[Dict[str, Any]], t0_ms: int) -> List[Dict[str, Any]]:
-    """Refuse -- ne filtre pas en silence -- toute bougie a ou apres t0."""
+def strictly_before(candles: List[Dict[str, Any]], t0_ms: int, interval_ms: int = 0) -> List[Dict[str, Any]]:
+    """Refuse -- ne filtre pas en silence -- toute bougie qui ne cloture pas au plus tard a t0 (open + interval_ms
+    <= t0). Avec interval_ms = 0 on ne verifie que l'ouverture (bougie ponctuelle)."""
     for c in candles:
-        if c["open_time_ms"] >= t0_ms:
-            raise PostT0Leak("candle at %d is not before t0 %d" % (c["open_time_ms"], t0_ms))
+        if c["open_time_ms"] >= t0_ms or c["open_time_ms"] + interval_ms > t0_ms:
+            raise PostT0Leak("candle opening at %d closes at %d, after t0 %d" % (c["open_time_ms"], c["open_time_ms"] + interval_ms, t0_ms))
     return sorted(candles, key=lambda c: c["open_time_ms"])
 
 
@@ -47,8 +49,8 @@ def _window(candles: List[Dict[str, Any]], span_ms: int, t0_ms: int) -> List[Dic
 
 
 def compute(daily: List[Dict[str, Any]], hourly: List[Dict[str, Any]], t0_ms: int, first_venue: str, listing_age_days: Optional[float], source: str) -> Dict[str, Any]:
-    d = strictly_before(daily, t0_ms); h = strictly_before(hourly, t0_ms)
     D, H = 86_400_000, 3_600_000
+    d = strictly_before(daily, t0_ms, D); h = strictly_before(hourly, t0_ms, H)
     f: Dict[str, Any] = {k: None for k in FEATURES}
     f["first_venue"] = first_venue; f["listing_age_days_at_binance_open"] = listing_age_days; f["data_source"] = source
     if not d and not h:

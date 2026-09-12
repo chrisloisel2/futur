@@ -23,6 +23,20 @@ def test_a_candle_at_or_after_t0_is_refused():
         F.compute(_daily(3) + [{"open_time_ms": T0 + D, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "quote_volume": 1}], [], T0, "mexc", 1.0, "x")
 
 
+def test_a_candle_that_straddles_t0_is_refused_too():
+    """t0 a HH:30 : la daily ouverte a 00:00 le jour de t0 et l'horaire ouverte a HH:00 CLOTURENT apres t0 -> refusees."""
+    t0 = T0 + 30 * 60_000                                                         # T0 est aligne sur l'heure ; t0 = HH:30
+    day0 = (t0 // D) * D                                                           # ouverture 00:00 du jour de t0
+    straddling_daily = {"open_time_ms": day0, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "quote_volume": 1}
+    with pytest.raises(F.PostT0Leak):
+        F.strictly_before([straddling_daily], t0, D)
+    straddling_hour = {"open_time_ms": t0 - 30 * 60_000, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "quote_volume": 1}
+    with pytest.raises(F.PostT0Leak):
+        F.compute([], [straddling_hour], t0, "mexc", 1.0, "x")
+    closing_exactly_at_t0 = {"open_time_ms": t0 - H, "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1, "quote_volume": 1}
+    assert F.strictly_before([closing_exactly_at_t0], t0, H) == [closing_exactly_at_t0]
+
+
 def test_returns_are_pre_t0_and_windows_respected():
     f = F.compute(_daily(31, step=0.0), [], T0, "mexc", 30.0, "mexc spot")
     assert f["pre_binance_return_30d"] == 0.0 and f["pre_binance_return_7d"] == 0.0 and f["coverage_status"] == "daily_only"

@@ -1,0 +1,315 @@
+{
+ "generated_at_utc": "2026-09-12T17:31:40+00:00",
+ "role": "control",
+ "events": 24,
+ "by_status": {
+  "collected": 24
+ },
+ "by_venue_market": {
+  "okx perp": 3,
+  "okx spot": 5,
+  "bybit perp": 10,
+  "kucoin spot": 6
+ },
+ "files_ok_by_interval": {
+  "1d": 24,
+  "60m": 24,
+  "5m": 24
+ },
+ "dropped_straddling_total": 26,
+ "okx_daily_bar": "1Dutc",
+ "events_list": [
+  {
+   "event_id": "1a859f85a0722b921770c970",
+   "venue": "okx",
+   "market": "perp",
+   "symbol": "SPCX-USDT-SWAP",
+   "status": "collected",
+   "rows": {
+    "1d": 14,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "27b63ec2126b71570873365d",
+   "venue": "okx",
+   "market": "spot",
+   "symbol": "BLUR-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "2db85afffb39035b368afd91",
+   "venue": "okx",
+   "market": "perp",
+   "symbol": "BZ-USDT-SWAP",
+   "status": "collected",
+   "rows": {
+    "1d": 8,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "373ad2eaf2fe234af0752a45",
+   "venue": "okx",
+   "market": "perp",
+   "symbol": "MET-USDT-SWAP",
+   "status": "collected",
+   "rows": {
+    "1d": 1,
+    "60m": 28,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "43408296c17706df4a86d951",
+   "venue": "okx",
+   "market": "spot",
+   "symbol": "ATH-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "525708299058a330fb701cef",
+   "venue": "okx",
+   "market": "spot",
+   "symbol": "ORBS-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "6c20de43f56e37f8ca8be6d0",
+   "venue": "okx",
+   "market": "spot",
+   "symbol": "BIGTIME-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 1,
+    "60m": 36,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "d588cda01954d01fe6318c95",
+   "venue": "okx",
+   "market": "spot",
+   "symbol": "ZETA-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 1,
+    "60m": 29,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "4504cb146c6018bec3d3d9ec",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "BRETTUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "8ff1068f61ea68e265c0dc5d",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "INXUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 1,
+    "60m": 34,
+    "5m": 71
+   }
+  },
+  {
+   "event_id": "9d284c44285f781ea3153bc1",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "GPROUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 1,
+    "60m": 29,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "a24c655fa10e4404e78232ae",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "WETUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 6,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "af59f00dfd69336d12ec1c53",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "HYPEUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "b58ff253b57614c58da55ec0",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "OPNUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 10,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "c1986e1b2f5a7b124976006e",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "INITUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 2,
+    "60m": 43,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "e3fdaf3c4fc6fe49ad83a2b2",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "LUNA2USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "ee0ff8e2e0adb92d34d183f6",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "SKRUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 2,
+    "60m": 47,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "ffe0e6ccd0ef9616e1269051",
+   "venue": "bybit",
+   "market": "perp",
+   "symbol": "ROBOUSDT",
+   "status": "collected",
+   "rows": {
+    "1d": 2,
+    "60m": 46,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "37579a9fb49ede269bf8f628",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "MEW-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "7ae90f464d9d3ad74c14c360",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "ONDO-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 2,
+    "60m": 49,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "8c5cf6e313e24b24e0ae548e",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "RATS-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 25,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "a95a9d746860bc6de0bd1040",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "SAFE-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 71,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "bd02f81f806b61964ad28fa1",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "SATS-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 72,
+    "5m": 72
+   }
+  },
+  {
+   "event_id": "de0cd69adb47be97865353eb",
+   "venue": "kucoin",
+   "market": "spot",
+   "symbol": "HIPPO-USDT",
+   "status": "collected",
+   "rows": {
+    "1d": 29,
+    "60m": 71,
+    "5m": 72
+   }
+  }
+ ],
+ "not_a_negative_control": "other asset, other market type, other fee regime, other era: usable only for a venue-level descriptive difference with CI",
+ "no_post_t0_data": true,
+ "close_bounded": true,
+ "no_alpha_test": true
+}
