@@ -110,7 +110,8 @@ def test_phase_runs_and_reports_without_credentials(tmp_path, monkeypatch):
     doc = A.collect()
     a = doc["answers"]
     assert a["1_actual_futures_taker_fee_bps"] is None and a["3_funding_payment_availability"] == "no_credentials"
-    assert a["5_h2_h3_cost_assumptions"] == {"H2": "unknown", "H3": "unknown"}             # declare => on ne conclut pas
+    assert a["5_h2_h3_cost_assumptions"]["H3"] == "unknown"                                  # H3 : spread/slippage declares => on ne conclut pas
+    assert a["5_h2_h3_cost_assumptions"]["H2"] in (("confirmed", "contradicted") if A.fee_decision() and A.CAPACITY_FEATURES.exists() else ("unknown",))   # H2 : fenetre decidee (P13) => chaine mesuree, cle ou pas
     assert any("no read-only API key" in t for t in a["6_what_remains_theoretical"])
     assert doc["no_orders"] is True and doc["no_secrets_stored"] is True
     for f in ("ACCOUNT_EXECUTION_REALITY.md", "ACCOUNT_EXECUTION_REALITY.json", "ACCOUNT_FEE_TABLE.md", "ACCOUNT_SYMBOL_CONSTRAINTS.md"):
@@ -122,7 +123,7 @@ def test_published_schedule_is_used_as_the_fee_link_when_no_key():
     assert pub["taker_bps"] == 5.0 and pub["source_class"] == "official"
     costs = A.build_costs(pub, {"endpoints": {}})
     assert costs["fee_provenance"] == "official_published"
-    assert all(v["status"] == "unknown" for v in costs["comparisons"].values())            # spread/slippage restent declares
+    assert all(v["status"] == "unknown" for v in A.build_costs(pub, {"endpoints": {}}, decision={})["comparisons"].values())   # sans fenetre decidee : spread/slippage declares
 
 
 def test_tier_is_inferred_from_spot_commission_and_futures_permission_model_is_diagnosed():
@@ -145,7 +146,7 @@ def test_capacity_links_build_a_measured_chain_only_when_a_window_is_named(tmp_p
     assert c["n_events"] == 6 and c["n_slippage"] == 5 and c["n_order_exceeds_book"] == 1 and c["spread_bps_median"] == 12.5 and c["slippage_rt_bps_median"] == 4.0 and c["slippage_rt_upper_bound_bps_median"] == 200.0
     assert A.capacity_links(15, 500, path=p) is None
     pub = {"maker_bps": 2.0, "taker_bps": 5.0}; acct = {"spot_fees": {"maker_bps": 10.0, "taker_bps": 10.0}}
-    declared = A.build_costs(pub, acct); measured = A.build_costs(pub, acct, c)
+    declared = A.build_costs(pub, acct, decision={}); measured = A.build_costs(pub, acct, c, decision={})
     assert declared["fee_provenance"] == "official_published" and "VIP0" in declared["fee_note"] and declared["fee_tier_inferred"]["tier"] == "VIP0"
     if "H2" in declared["comparisons"]:
         assert declared["comparisons"]["H2"]["status"] == "unknown" and declared["comparisons"]["H2"]["weakest_provenance"] == "declared"

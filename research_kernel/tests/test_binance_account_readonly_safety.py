@@ -150,7 +150,8 @@ def test_no_credentials_mode_writes_all_three_p11_reports(tmp_path, monkeypatch)
     for f in ("ACCOUNT_EXECUTION_REALITY_COLLECTED.md", "ACCOUNT_EXECUTION_REALITY_COLLECTED.json", "H2_H3_COST_CHAIN_STATUS.md", "READONLY_KEY_SAFETY_AUDIT.md"):
         assert (tmp_path / f).exists(), f
     c = json.loads((tmp_path / "ACCOUNT_EXECUTION_REALITY_COLLECTED.json").read_text())
-    assert c["mode"] == "no_credentials" and c["cost_chain_status"] == {"H2": "unknown", "H3": "unknown"} and c["no_secrets_stored"] is True
+    assert c["mode"] == "no_credentials" and c["cost_chain_status"]["H3"] == "unknown" and c["no_secrets_stored"] is True
+    assert c["cost_chain_status"]["H2"] in (("confirmed", "contradicted") if A.fee_decision() and A.CAPACITY_FEATURES.exists() else ("unknown",))   # P13 : fenetre decidee, chaine mesuree
     chain = (tmp_path / "H2_H3_COST_CHAIN_STATUS.md").read_text()
     assert "never serve to promote" in chain
 
