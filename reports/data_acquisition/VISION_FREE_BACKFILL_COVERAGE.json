@@ -1,0 +1,162 @@
+{
+ "generated_at_utc": "2026-09-11T22:46:44+00:00",
+ "events": 174,
+ "manifests": 174,
+ "events_core_covered_free": 173,
+ "core_definition": "markPriceKlines + aggTrades + (indexPriceKlines or premiumIndexKlines), every day of the window",
+ "files_ok_by_dataset": {
+  "markPriceKlines": 177,
+  "indexPriceKlines": 147,
+  "premiumIndexKlines": 170,
+  "aggTrades": 177,
+  "metrics": 177,
+  "fundingRate": 171,
+  "bookDepth": 168,
+  "klines": 177
+ },
+ "files_expected_by_dataset": {
+  "markPriceKlines": 177,
+  "indexPriceKlines": 177,
+  "premiumIndexKlines": 177,
+  "aggTrades": 177,
+  "metrics": 177,
+  "fundingRate": 174,
+  "bookDepth": 177,
+  "klines": 177
+ },
+ "checksum_verified_by_dataset": {
+  "markPriceKlines": 177,
+  "indexPriceKlines": 147,
+  "premiumIndexKlines": 170,
+  "aggTrades": 177,
+  "metrics": 177,
+  "fundingRate": 171,
+  "bookDepth": 168,
+  "klines": 177
+ },
+ "checksum_unverified_by_dataset": {
+  "markPriceKlines": 0,
+  "indexPriceKlines": 0,
+  "premiumIndexKlines": 0,
+  "aggTrades": 0,
+  "metrics": 0,
+  "fundingRate": 0,
+  "bookDepth": 0,
+  "klines": 0
+ },
+ "not_yet_published": {
+  "fundingRate@2026-09": 3
+ },
+ "bytes_on_disk": 1466182550,
+ "answers": {
+  "1_events_covered_by_free_data": 173,
+  "2_become_clean_ge_90": 0,
+  "3_remain_near_usable_70_89": 85,
+  "3b_partial_40_69": 89,
+  "3c_unusable_lt_40": 0,
+  "4_require_announcement_body": 174,
+  "5_require_account_fees": 174,
+  "6_require_cross_venue_precedence": 84,
+  "7_still_need_paid_provider_windows": 9,
+  "7_provider_symbols": [
+   "LUNA2USDT",
+   "BANKUSDT",
+   "DEEPUSDT",
+   "MEMEFIUSDT",
+   "DOLOUSDT",
+   "SXTUSDT",
+   "B2USDT",
+   "ZKJUSDT",
+   "SPCXUSDT"
+  ]
+ },
+ "score_distribution_after_vision": {
+  "51": 5,
+  "59": 2,
+  "61": 3,
+  "64": 77,
+  "69": 2,
+  "74": 85
+ },
+ "projected_after_p7_body": {
+  "66": 5,
+  "74": 2,
+  "76": 3,
+  "79": 77,
+  "84": 2,
+  "89": 85
+ },
+ "projected_after_p7_p8": {
+  "69": 5,
+  "77": 2,
+  "79": 3,
+  "82": 77,
+  "87": 2,
+  "92": 85
+ },
+ "p5_summary_for_reference": {
+  "n_events": 174,
+  "buckets_now": {
+   "unusable": 174
+  },
+  "buckets_after_free": {
+   "partial": 5,
+   "clean": 85,
+   "near_usable": 84
+  },
+  "score_now": {
+   "min": 20,
+   "median": 30,
+   "max": 30
+  },
+  "score_after_free": {
+   "min": 66,
+   "median": 87,
+   "max": 92
+  },
+  "clean_after_free_and_key": 87,
+  "near_usable_or_better_after_free": 169,
+  "dominant_missing_now": {
+   "first_trade_ts_present": 174,
+   "first_mark_ts_present": 174,
+   "first_index_ts_present": 174,
+   "trades_t0_t6h_present": 174,
+   "body_trading_time_present": 174,
+   "first_orderbook_ts_present": 174,
+   "first_oi_ts_present": 174,
+   "funding_present": 174,
+   "l2_t0_t6h_present": 174,
+   "actual_fee_present": 174
+  },
+  "missing_p0_now": {
+   "first_trade_ts_present": 174,
+   "first_mark_ts_present": 174,
+   "first_index_ts_present": 174,
+   "trades_t0_t6h_present": 174,
+   "body_trading_time_present": 174
+  },
+  "actions": {
+   "collect": 174
+  },
+  "backfill_source": {
+   "paid": 5,
+   "free": 169
+  },
+  "vision_missing": {
+   "bookDepth": 8,
+   "indexPriceKlines": 30,
+   "premiumIndexKlines": 7,
+   "fundingRate": 3
+  },
+  "other_venue_known": 90,
+  "by_year": {
+   "2022": 1,
+   "2023": 11,
+   "2024": 26,
+   "2025": 85,
+   "2026": 51
+  }
+ },
+ "no_alpha_test": true,
+ "no_return_computed": true
+}

@@ -148,9 +148,11 @@ def p4_live_fields(symbol: str, ms: Path = MS) -> Dict[str, bool]:
     return out
 
 
-def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str, Optional[str]], ms: Path = MS, account_key: bool = False, bodies: Optional[Dict[str, dict]] = None) -> List[dict]:
+def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str, Optional[str]], ms: Path = MS, account_key: bool = False, bodies: Optional[Dict[str, dict]] = None, downloaded: Optional[Dict[str, set]] = None) -> List[dict]:
+    """downloaded : event_id -> datasets Vision REELLEMENT sur disque (fenetre complete) ; ils comptent comme en main."""
     rows = []
     for e in events:
+        dl = (downloaded or {}).get(e["event_id"], set())
         day = e["launch_ts"][:10]; v = {ds: vision.get(f"{ds}|{e['symbol']}|{day}") for ds in DATASETS + ("fundingRate",)}
         live = p4_live_fields(e["symbol"], ms); body = (bodies or {}).get(e["event_id"]) or {}
         have = {  # en main MAINTENANT
@@ -160,6 +162,12 @@ def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str,
             "funding_present": False, "l2_t0_t6h_present": live["l2"], "trades_t0_t6h_present": live["trades"], "actual_fee_present": account_key, "capacity_present": False,
             "spot_existed_before": True,   # verifie a la construction de l'univers (aucun spot Binance avant le perp) : le champ est connu
             "other_venue_existed_before": precedence.get(e["asset"]) is not None, "announcement_body_present": bool(body.get("body_text")), "body_trading_time_present": bool(body.get("trading_start_ts"))}
+        if dl:   # fichiers Vision deja telecharges et hashes pour toute la fenetre : en main
+            have["first_trade_ts_present"] |= "aggTrades" in dl; have["trades_t0_t6h_present"] |= "aggTrades" in dl
+            have["first_orderbook_ts_present"] |= "bookDepth" in dl; have["l2_t0_t6h_present"] |= "bookDepth" in dl
+            have["first_mark_ts_present"] |= "markPriceKlines" in dl; have["first_index_ts_present"] |= ("indexPriceKlines" in dl or "premiumIndexKlines" in dl)
+            have["first_oi_ts_present"] |= "metrics" in dl; have["funding_present"] |= "fundingRate" in dl
+            # capacity_present reste faux : le champ est DERIVE (profondeur x volume) et P6 ne calcule rien.
         free = dict(have)   # apres backfill gratuit (Vision + scrape du corps + calcul)
         free["first_trade_ts_present"] |= v["aggTrades"] == "ok"; free["trades_t0_t6h_present"] |= v["aggTrades"] == "ok"
         free["first_orderbook_ts_present"] |= v["bookDepth"] == "ok"; free["l2_t0_t6h_present"] |= v["bookDepth"] == "ok"
