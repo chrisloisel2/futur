@@ -1,0 +1,4817 @@
+{
+ "resolved_at_utc": "2026-09-11T23:11:37+00:00",
+ "venues": {
+  "okx": {
+   "status": "ok",
+   "instruments": 1446,
+   "with_listing_date": 1446,
+   "by_market": {
+    "spot": 983,
+    "perp": 463
+   },
+   "native_listing_time": true
+  },
+  "bybit": {
+   "status": "ok",
+   "instruments": 1314,
+   "with_listing_date": 829,
+   "by_market": {
+    "perp": 829,
+    "spot": 485
+   },
+   "native_listing_time": true
+  },
+  "gate": {
+   "status": "ok",
+   "instruments": 3139,
+   "with_listing_date": 0,
+   "by_market": {
+    "spot": 2158,
+    "perp": 981
+   },
+   "native_listing_time": false
+  },
+  "mexc": {
+   "status": "ok",
+   "instruments": 3038,
+   "with_listing_date": 2996,
+   "by_market": {
+    "spot": 1882,
+    "perp": 1156
+   },
+   "native_listing_time": true
+  },
+  "kucoin": {
+   "status": "ok",
+   "instruments": 1570,
+   "with_listing_date": 1465,
+   "by_market": {
+    "perp": 682,
+    "spot": 888
+   },
+   "native_listing_time": true
+  }
+ },
+ "n_instruments": 10507,
+ "resolved_by_first_candle": 0,
+ "decisions": [
+  {
+   "asset": "LUNA2",
+   "normalised_base": "LUNA2",
+   "binance_launch_ts": "2022-09-10T03:00:00+00:00",
+   "venues_matched": [
+    "bybit"
+   ],
+   "n_instruments": 1,
+   "n_dated_before": 1,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2022-05-31T07:50:03+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "LUNA2USDT",
+   "lead_days": 101.8,
+   "evidence": "bybit perp LUNA2USDT listed 2022-05-31T07:50:03+00:00 (launchTime)"
+  },
+  {
+   "asset": "BLUR",
+   "normalised_base": "BLUR",
+   "binance_launch_ts": "2023-04-28T12:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 7,
+   "n_dated_after": 2,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-02-01T05:44",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-02-14T06:25:47+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BLUR-USDT",
+   "lead_days": 73.23,
+   "evidence": "okx spot BLUR-USDT listed 2023-02-14T06:25:47+00:00 (listTime)"
+  },
+  {
+   "asset": "1000PEPE",
+   "normalised_base": "PEPE",
+   "binance_launch_ts": "2023-05-05T16:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 19,
+   "n_dated_before": 6,
+   "n_dated_after": 7,
+   "n_undated": 6,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2023-05-03T04:22",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-04-19T07:35:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "PEPEUSDT",
+   "lead_days": 16.37,
+   "evidence": "mexc spot PEPEUSDT listed 2023-04-19T07:35:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "ARK",
+   "normalised_base": "ARK",
+   "binance_launch_ts": "2023-09-19T16:03:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 3,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2022-02-18T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ARKUSDT",
+   "lead_days": 578.09,
+   "evidence": "mexc spot ARKUSDT listed 2022-02-18T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "BIGTIME",
+   "normalised_base": "BIGTIME",
+   "binance_launch_ts": "2023-10-12T14:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 7,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-10-11T02:00:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BIGTIME-USDT",
+   "lead_days": 1.52,
+   "evidence": "okx spot BIGTIME-USDT listed 2023-10-11T02:00:00+00:00 (listTime)"
+  },
+  {
+   "asset": "ORBS",
+   "normalised_base": "ORBS",
+   "binance_launch_ts": "2023-10-17T06:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 2,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate",
+    "kucoin"
+   ],
+   "announcement_evidence": "okx listing announced 2023-03-03T07:42",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2021-01-29T08:08:06+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ORBS-USDT",
+   "lead_days": 990.91,
+   "evidence": "okx spot ORBS-USDT listed 2021-01-29T08:08:06+00:00 (listTime)"
+  },
+  {
+   "asset": "BSV",
+   "normalised_base": "BSV",
+   "binance_launch_ts": "2023-10-20T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 4,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2018-11-07T05:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BSVUSDT",
+   "lead_days": 1808.31,
+   "evidence": "mexc spot BSVUSDT listed 2018-11-07T05:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "TOKEN",
+   "normalised_base": "TOKEN",
+   "binance_launch_ts": "2023-11-03T15:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-11-02T09:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-11-03T10:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "TOKENUSDT",
+   "lead_days": 0.21,
+   "evidence": "mexc spot TOKENUSDT listed 2023-11-03T10:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "KAS",
+   "normalised_base": "KAS",
+   "binance_launch_ts": "2023-11-17T02:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 4,
+   "n_dated_after": 3,
+   "n_undated": 5,
+   "undated_venues": [
+    "bybit",
+    "gate",
+    "mexc"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-09-06T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2022-11-28T11:52:18+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "KAS_USDT",
+   "lead_days": 353.59,
+   "evidence": "mexc perp KAS_USDT listed 2022-11-28T11:52:18+00:00 (createTime)"
+  },
+  {
+   "asset": "ETHW",
+   "normalised_base": "ETHW",
+   "binance_launch_ts": "2023-11-28T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2022-09-15T09:33",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2022-08-08T04:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ETHWUSDT",
+   "lead_days": 477.35,
+   "evidence": "mexc spot ETHWUSDT listed 2022-08-08T04:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "1000SATS",
+   "normalised_base": "SATS",
+   "binance_launch_ts": "2023-12-12T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 4,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-11-09T10:00:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SATS-USDT",
+   "lead_days": 33.17,
+   "evidence": "kucoin spot SATS-USDT listed 2023-11-09T10:00:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "1000RATS",
+   "normalised_base": "RATS",
+   "binance_launch_ts": "2023-12-15T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-11-20T12:00:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "RATS-USDT",
+   "lead_days": 25.08,
+   "evidence": "kucoin spot RATS-USDT listed 2023-11-20T12:00:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "WIF",
+   "normalised_base": "WIF",
+   "binance_launch_ts": "2024-01-18T14:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 18,
+   "n_dated_before": 4,
+   "n_dated_after": 9,
+   "n_undated": 5,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-01-11T12:34",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-12-19T13:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "WIFUSDT",
+   "lead_days": 30.05,
+   "evidence": "mexc spot WIFUSDT listed 2023-12-19T13:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "ONDO",
+   "normalised_base": "ONDO",
+   "binance_launch_ts": "2024-01-20T13:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 17,
+   "n_dated_before": 3,
+   "n_dated_after": 10,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-01-17T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-01-18T12:00:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ONDO-USDT",
+   "lead_days": 2.04,
+   "evidence": "kucoin spot ONDO-USDT listed 2024-01-18T12:00:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "ZETA",
+   "normalised_base": "ZETA",
+   "binance_launch_ts": "2024-02-02T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 7,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "okx listing announced 2024-01-30T09:54",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-02-01T03:00:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ZETA-USDT",
+   "lead_days": 1.23,
+   "evidence": "okx spot ZETA-USDT listed 2024-02-01T03:00:00+00:00 (listTime)"
+  },
+  {
+   "asset": "TON",
+   "normalised_base": "TON",
+   "binance_launch_ts": "2024-03-01T12:31:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit listing announced 2022-12-21T04:24",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit listing announced 2022-12-21T04:24"
+  },
+  {
+   "asset": "MYRO",
+   "normalised_base": "MYRO",
+   "binance_launch_ts": "2024-03-05T08:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-01-18T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-11-21T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MYROUSDT",
+   "lead_days": 104.77,
+   "evidence": "mexc spot MYROUSDT listed 2023-11-21T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "BOME",
+   "normalised_base": "BOME",
+   "binance_launch_ts": "2024-03-16T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 5,
+   "n_dated_after": 5,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-03-15T08:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-03-14T16:30:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BOMEUSDT",
+   "lead_days": 1.83,
+   "evidence": "mexc spot BOMEUSDT listed 2024-03-14T16:30:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MEW",
+   "normalised_base": "MEW",
+   "binance_launch_ts": "2024-06-17T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 7,
+   "n_dated_after": 2,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-04-18T03:31",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-04-03T13:00:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MEW-USDT",
+   "lead_days": 75.04,
+   "evidence": "kucoin spot MEW-USDT listed 2024-04-03T13:00:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "BRETT",
+   "normalised_base": "BRETT",
+   "binance_launch_ts": "2024-08-20T10:35:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-04-18T10:34",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-04-26T08:17:24+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BRETTUSDT",
+   "lead_days": 116.1,
+   "evidence": "bybit perp BRETTUSDT listed 2024-04-26T08:17:24+00:00 (launchTime)"
+  },
+  {
+   "asset": "NEIROETH",
+   "normalised_base": "NEIROETH",
+   "binance_launch_ts": "2024-09-06T14:00:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit futures_listing announced 2024-08-15T10:00",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit futures_listing announced 2024-08-15T10:00"
+  },
+  {
+   "asset": "UXLINK",
+   "normalised_base": "UXLINK",
+   "binance_launch_ts": "2024-09-15T15:00:00+00:00",
+   "venues_matched": [
+    "gate"
+   ],
+   "n_instruments": 1,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-07-16T05:32",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published; tape shows an earlier announcement: bybit listing announced 2024-07-16T05:32"
+  },
+  {
+   "asset": "1000CAT",
+   "normalised_base": "CAT",
+   "binance_launch_ts": "2024-10-21T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-09-25T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-08-22T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "CATUSDT",
+   "lead_days": 59.94,
+   "evidence": "mexc spot CATUSDT listed 2024-08-22T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "GOAT",
+   "normalised_base": "GOAT",
+   "binance_launch_ts": "2024-10-24T13:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 3,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-10-23T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-13T12:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "GOATUSDT",
+   "lead_days": 11.06,
+   "evidence": "mexc spot GOATUSDT listed 2024-10-13T12:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MOODENG",
+   "normalised_base": "MOODENG",
+   "binance_launch_ts": "2024-10-25T10:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 6,
+   "n_dated_after": 6,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-10-01T08:32",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-09-19T04:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MOODENGUSDT",
+   "lead_days": 36.25,
+   "evidence": "mexc spot MOODENGUSDT listed 2024-09-19T04:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "SAFE",
+   "normalised_base": "SAFE",
+   "binance_launch_ts": "2024-10-25T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-04-23T06:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-04-23T06:25:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SAFE-USDT",
+   "lead_days": 185.25,
+   "evidence": "kucoin spot SAFE-USDT listed 2024-04-23T06:25:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "PONKE",
+   "normalised_base": "PONKE",
+   "binance_launch_ts": "2024-11-04T12:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-05-10T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-12-25T16:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "PONKEUSDT",
+   "lead_days": 314.85,
+   "evidence": "mexc spot PONKEUSDT listed 2023-12-25T16:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "1000000MOG",
+   "normalised_base": "MOG",
+   "binance_launch_ts": "2024-11-07T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-05-16T10:40",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-02-16T15:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MOGUSDT",
+   "lead_days": 264.9,
+   "evidence": "mexc spot MOGUSDT listed 2024-02-16T15:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "SWELL",
+   "normalised_base": "SWELL",
+   "binance_launch_ts": "2024-11-08T16:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-11-07T11:30",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-11-07T10:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SWELLUSDT",
+   "lead_days": 1.25,
+   "evidence": "mexc spot SWELLUSDT listed 2024-11-07T10:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "HIPPO",
+   "normalised_base": "HIPPO",
+   "binance_launch_ts": "2024-11-13T12:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin"
+   ],
+   "n_instruments": 2,
+   "n_dated_before": 1,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-10T10:00:00+00:00",
+   "first_elsewhere_venue": "kucoin",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "HIPPO-USDT",
+   "lead_days": 34.1,
+   "evidence": "kucoin spot HIPPO-USDT listed 2024-10-10T10:00:00+00:00 (tradingStartTime)"
+  },
+  {
+   "asset": "DEGEN",
+   "normalised_base": "DEGEN",
+   "binance_launch_ts": "2024-11-15T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-03-28T06:32",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-03-26T08:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "DEGENUSDT",
+   "lead_days": 234.15,
+   "evidence": "mexc spot DEGENUSDT listed 2024-03-26T08:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "BAN",
+   "normalised_base": "BAN",
+   "binance_launch_ts": "2024-11-18T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-11-18T09:07",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-27T13:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BANUSDT",
+   "lead_days": 21.94,
+   "evidence": "mexc spot BANUSDT listed 2024-10-27T13:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "SLERF",
+   "normalised_base": "SLERF",
+   "binance_launch_ts": "2024-11-21T11:30:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit futures_listing announced 2024-03-18T13:00",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit futures_listing announced 2024-03-18T13:00"
+  },
+  {
+   "asset": "1000WHY",
+   "normalised_base": "WHY",
+   "binance_launch_ts": "2024-11-25T11:31:00+00:00",
+   "venues_matched": [
+    "gate"
+   ],
+   "n_instruments": 1,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-10-04T10:45",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published; tape shows an earlier announcement: bybit futures_listing announced 2024-10-04T10:45"
+  },
+  {
+   "asset": "MORPHO",
+   "normalised_base": "MORPHO",
+   "binance_launch_ts": "2024-11-27T14:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 7,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-11-22T09:07",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-11-19T08:08:24+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "MORPHO_USDT",
+   "lead_days": 8.27,
+   "evidence": "mexc perp MORPHO_USDT listed 2024-11-19T08:08:24+00:00 (createTime)"
+  },
+  {
+   "asset": "SPX",
+   "normalised_base": "SPX",
+   "binance_launch_ts": "2024-12-10T12:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 4,
+   "n_dated_after": 5,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-10-29T09:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-10T13:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SPXUSDT",
+   "lead_days": 60.99,
+   "evidence": "mexc spot SPXUSDT listed 2024-10-10T13:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MOCA",
+   "normalised_base": "MOCA",
+   "binance_launch_ts": "2024-12-16T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-07-12T10:52",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-07-11T09:45:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MOCAUSDT",
+   "lead_days": 158.07,
+   "evidence": "mexc spot MOCAUSDT listed 2024-07-11T09:45:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "KMNO",
+   "normalised_base": "KMNO",
+   "binance_launch_ts": "2024-12-20T19:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 4,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-04-23T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-04-30T12:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "KMNOUSDT",
+   "lead_days": 234.29,
+   "evidence": "mexc spot KMNOUSDT listed 2024-04-30T12:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "AI16Z",
+   "normalised_base": "AI16Z",
+   "binance_launch_ts": "2025-01-02T13:45:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit futures_listing announced 2024-12-30T08:28",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit futures_listing announced 2024-12-30T08:28"
+  },
+  {
+   "asset": "SWARMS",
+   "normalised_base": "SWARMS",
+   "binance_launch_ts": "2025-01-07T12:15:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 3,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-06T09:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-12-20T09:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SWARMSUSDT",
+   "lead_days": 18.14,
+   "evidence": "mexc spot SWARMSUSDT listed 2024-12-20T09:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "SONIC",
+   "normalised_base": "SONIC",
+   "binance_launch_ts": "2025-01-08T07:01:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-12-31T13:02",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-06T05:04:57+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SONIC_USDT",
+   "lead_days": 2.08,
+   "evidence": "mexc perp SONIC_USDT listed 2025-01-06T05:04:57+00:00 (createTime)"
+  },
+  {
+   "asset": "ARC",
+   "normalised_base": "ARC",
+   "binance_launch_ts": "2025-01-17T13:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 2,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-03T09:05",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2023-07-28T15:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ARCUSDT",
+   "lead_days": 538.92,
+   "evidence": "mexc spot ARCUSDT listed 2023-07-28T15:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "TRUMP",
+   "normalised_base": "TRUMP",
+   "binance_launch_ts": "2025-01-18T13:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 16,
+   "n_dated_before": 3,
+   "n_dated_after": 9,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-18T06:49",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-18T03:20:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "TRUMPUSDT",
+   "lead_days": 0.4,
+   "evidence": "mexc spot TRUMPUSDT listed 2025-01-18T03:20:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MELANIA",
+   "normalised_base": "MELANIA",
+   "binance_launch_ts": "2025-01-20T09:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-20T05:30",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-20T01:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MELANIAUSDT",
+   "lead_days": 0.35,
+   "evidence": "mexc spot MELANIAUSDT listed 2025-01-20T01:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "VINE",
+   "normalised_base": "VINE",
+   "binance_launch_ts": "2025-01-24T10:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 1,
+   "n_dated_after": 3,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-23T12:02",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-23T04:20:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "VINEUSDT",
+   "lead_days": 1.24,
+   "evidence": "mexc spot VINEUSDT listed 2025-01-23T04:20:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "VVV",
+   "normalised_base": "VVV",
+   "binance_launch_ts": "2025-01-29T08:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 4,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-28T04:47",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-28T01:20:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "VVVUSDT",
+   "lead_days": 1.29,
+   "evidence": "mexc spot VVVUSDT listed 2025-01-28T01:20:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "B3",
+   "normalised_base": "B3",
+   "binance_launch_ts": "2025-02-13T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 3,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2025-02-07T15:21",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-02-08T15:19:24+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "B3_USDT",
+   "lead_days": 4.84,
+   "evidence": "mexc perp B3_USDT listed 2025-02-08T15:19:24+00:00 (createTime)"
+  },
+  {
+   "asset": "IP",
+   "normalised_base": "IP",
+   "binance_launch_ts": "2025-02-13T17:00:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit futures_listing announced 2025-02-07T08:29",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit futures_listing announced 2025-02-07T08:29"
+  },
+  {
+   "asset": "GPS",
+   "normalised_base": "GPS",
+   "binance_launch_ts": "2025-02-17T17:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 3,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2025-01-15T13:04",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-15T10:26:23+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "GPS_USDT",
+   "lead_days": 33.27,
+   "evidence": "mexc perp GPS_USDT listed 2025-01-15T10:26:23+00:00 (createTime)"
+  },
+  {
+   "asset": "BMT",
+   "normalised_base": "BMT",
+   "binance_launch_ts": "2025-03-17T13:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2025-03-10T06:10",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-03-10T08:53:30+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BMT_USDT",
+   "lead_days": 7.19,
+   "evidence": "mexc perp BMT_USDT listed 2025-03-10T08:53:30+00:00 (createTime)"
+  },
+  {
+   "asset": "BR",
+   "normalised_base": "BR",
+   "binance_launch_ts": "2025-03-21T12:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2025-03-20T09:23",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-03-20T10:32:59+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BR_USDT",
+   "lead_days": 1.09,
+   "evidence": "mexc perp BR_USDT listed 2025-03-20T10:32:59+00:00 (createTime)"
+  },
+  {
+   "asset": "JELLYJELLY",
+   "normalised_base": "JELLYJELLY",
+   "binance_launch_ts": "2025-03-26T16:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-30T06:59",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-30T01:10:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "JELLYJELLYUSDT",
+   "lead_days": 55.62,
+   "evidence": "mexc spot JELLYJELLYUSDT listed 2025-01-30T01:10:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "WAL",
+   "normalised_base": "WAL",
+   "binance_launch_ts": "2025-03-27T15:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2025-03-24T14:28",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-03-24T06:57:36+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "WAL_USDT",
+   "lead_days": 3.36,
+   "evidence": "mexc perp WAL_USDT listed 2025-03-24T06:57:36+00:00 (createTime)"
+  },
+  {
+   "asset": "ATH",
+   "normalised_base": "ATH",
+   "binance_launch_ts": "2025-04-02T15:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 8,
+   "n_dated_after": 1,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-06-11T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-06-12T10:00:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ATH-USDT",
+   "lead_days": 294.24,
+   "evidence": "okx spot ATH-USDT listed 2024-06-12T10:00:00+00:00 (listTime)"
+  },
+  {
+   "asset": "BABY",
+   "normalised_base": "BABY",
+   "binance_launch_ts": "2025-04-05T13:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 2,
+   "n_dated_after": 8,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-04-03T09:47",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2021-11-17T16:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BABY_USDT",
+   "lead_days": 1234.9,
+   "evidence": "mexc perp BABY_USDT listed 2021-11-17T16:00:00+00:00 (createTime)"
+  },
+  {
+   "asset": "PROMPT",
+   "normalised_base": "PROMPT",
+   "binance_launch_ts": "2025-04-11T06:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 5,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-04-10T14:25",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-10T08:41:25+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "PROMPT_USDT",
+   "lead_days": 0.91,
+   "evidence": "mexc perp PROMPT_USDT listed 2025-04-10T08:41:25+00:00 (createTime)"
+  },
+  {
+   "asset": "XCN",
+   "normalised_base": "XCN",
+   "binance_launch_ts": "2025-04-11T15:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2022-03-01T02:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "XCNUSDT",
+   "lead_days": 1137.56,
+   "evidence": "mexc spot XCNUSDT listed 2022-03-01T02:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "INIT",
+   "normalised_base": "INIT",
+   "binance_launch_ts": "2025-04-16T06:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 1,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-04-14T07:30",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-14T07:34:53+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "INITUSDT",
+   "lead_days": 1.95,
+   "evidence": "bybit perp INITUSDT listed 2025-04-14T07:34:53+00:00 (launchTime)"
+  },
+  {
+   "asset": "BANK",
+   "normalised_base": "BANK",
+   "binance_launch_ts": "2025-04-18T18:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 2,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-18T07:20:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BANK_USDT",
+   "lead_days": 0.47,
+   "evidence": "mexc perp BANK_USDT listed 2025-04-18T07:20:00+00:00 (createTime)"
+  },
+  {
+   "asset": "DEEP",
+   "normalised_base": "DEEP",
+   "binance_launch_ts": "2025-04-22T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-10-10T05:39",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-14T09:45:22+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "DEEP_USDT",
+   "lead_days": 189.95,
+   "evidence": "mexc perp DEEP_USDT listed 2024-10-14T09:45:22+00:00 (createTime)"
+  },
+  {
+   "asset": "MEMEFI",
+   "normalised_base": "MEMEFI",
+   "binance_launch_ts": "2025-04-25T07:15:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": "bybit futures_listing announced 2024-11-12T07:53",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue; the tape shows an earlier announcement: bybit futures_listing announced 2024-11-12T07:53"
+  },
+  {
+   "asset": "DOLO",
+   "normalised_base": "DOLO",
+   "binance_launch_ts": "2025-05-01T03:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-24T11:35:15+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "DOLO_USDT",
+   "lead_days": 6.64,
+   "evidence": "mexc perp DOLO_USDT listed 2025-04-24T11:35:15+00:00 (createTime)"
+  },
+  {
+   "asset": "SXT",
+   "normalised_base": "SXT",
+   "binance_launch_ts": "2025-05-02T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 1,
+   "n_dated_after": 5,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-05-02T06:43:34+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SXT_USDT",
+   "lead_days": 0.07,
+   "evidence": "mexc perp SXT_USDT listed 2025-05-02T06:43:34+00:00 (createTime)"
+  },
+  {
+   "asset": "B2",
+   "normalised_base": "B2",
+   "binance_launch_ts": "2025-05-06T13:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-30T03:19:47+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "B2_USDT",
+   "lead_days": 6.42,
+   "evidence": "mexc perp B2_USDT listed 2025-04-30T03:19:47+00:00 (createTime)"
+  },
+  {
+   "asset": "ZKJ",
+   "normalised_base": "ZKJ",
+   "binance_launch_ts": "2025-05-13T09:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 4,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-06-17T11:36",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-03-19T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "ZKJUSDT",
+   "lead_days": 419.81,
+   "evidence": "mexc spot ZKJUSDT listed 2024-03-19T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "AGT",
+   "normalised_base": "AGT",
+   "binance_launch_ts": "2025-05-20T10:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 3,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-05-16T06:44:57+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "AGT_USDT",
+   "lead_days": 4.16,
+   "evidence": "mexc perp AGT_USDT listed 2025-05-16T06:44:57+00:00 (createTime)"
+  },
+  {
+   "asset": "BUSDT",
+   "normalised_base": "BUSDT",
+   "binance_launch_ts": "2025-05-22T16:30:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "SOON",
+   "normalised_base": "SOON",
+   "binance_launch_ts": "2025-05-23T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 1,
+   "n_dated_after": 4,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-05-23T07:30:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SOONUSDT",
+   "lead_days": 0.04,
+   "evidence": "mexc spot SOONUSDT listed 2025-05-23T07:30:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MERL",
+   "normalised_base": "MERL",
+   "binance_launch_ts": "2025-05-29T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 8,
+   "n_dated_after": 2,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-04-19T02:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-04-19T09:40:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MERLUSDT",
+   "lead_days": 404.95,
+   "evidence": "mexc spot MERLUSDT listed 2024-04-19T09:40:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "HYPE",
+   "normalised_base": "HYPE",
+   "binance_launch_ts": "2025-05-30T10:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 16,
+   "n_dated_before": 9,
+   "n_dated_after": 4,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-12-04T11:25",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-12-04T12:52:20+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "HYPEUSDT",
+   "lead_days": 176.9,
+   "evidence": "bybit perp HYPEUSDT listed 2024-12-04T12:52:20+00:00 (launchTime)"
+  },
+  {
+   "asset": "PUFFER",
+   "normalised_base": "PUFFER",
+   "binance_launch_ts": "2025-06-04T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 4,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-10-14T13:11",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-10-14T11:44:01+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "PUFFER_USDT",
+   "lead_days": 232.87,
+   "evidence": "mexc perp PUFFER_USDT listed 2024-10-14T11:44:01+00:00 (createTime)"
+  },
+  {
+   "asset": "1000000BOB",
+   "normalised_base": "BOB",
+   "binance_launch_ts": "2025-06-05T08:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 0,
+   "n_dated_after": 2,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-05-12T09:20",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published; tape shows an earlier announcement: bybit listing announced 2023-05-12T09:20"
+  },
+  {
+   "asset": "LA",
+   "normalised_base": "LA",
+   "binance_launch_ts": "2025-06-05T09:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 5,
+   "n_dated_after": 1,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-06-05T06:02",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-06-03T10:07:11+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "LA_USDT",
+   "lead_days": 1.95,
+   "evidence": "mexc perp LA_USDT listed 2025-06-03T10:07:11+00:00 (createTime)"
+  },
+  {
+   "asset": "TAIKO",
+   "normalised_base": "TAIKO",
+   "binance_launch_ts": "2025-06-11T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-05-29T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-06-05T13:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "TAIKOUSDT",
+   "lead_days": 370.98,
+   "evidence": "mexc spot TAIKOUSDT listed 2024-06-05T13:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MYX",
+   "normalised_base": "MYX",
+   "binance_launch_ts": "2025-06-18T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-05-06T03:13:18+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "MYX_USDT",
+   "lead_days": 43.39,
+   "evidence": "mexc perp MYX_USDT listed 2025-05-06T03:13:18+00:00 (createTime)"
+  },
+  {
+   "asset": "NEWT",
+   "normalised_base": "NEWT",
+   "binance_launch_ts": "2025-06-19T14:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 1,
+   "n_dated_after": 4,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-06-19T13:16:54+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "NEWT_USDT",
+   "lead_days": 0.05,
+   "evidence": "mexc perp NEWT_USDT listed 2025-06-19T13:16:54+00:00 (createTime)"
+  },
+  {
+   "asset": "OL",
+   "normalised_base": "OL",
+   "binance_launch_ts": "2025-06-25T11:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 2,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-11-18T05:21",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-11-19T06:10:58+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "OL_USDT",
+   "lead_days": 218.22,
+   "evidence": "mexc perp OL_USDT listed 2024-11-19T06:10:58+00:00 (createTime)"
+  },
+  {
+   "asset": "BULLA",
+   "normalised_base": "BULLA",
+   "binance_launch_ts": "2025-07-04T09:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-06-06T11:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BULLAUSDT",
+   "lead_days": 27.92,
+   "evidence": "mexc spot BULLAUSDT listed 2025-06-06T11:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MUSDT",
+   "normalised_base": "MUSDT",
+   "binance_launch_ts": "2025-07-07T09:30:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "CROSS",
+   "normalised_base": "CROSS",
+   "binance_launch_ts": "2025-07-10T10:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-07-04T07:58:54+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "CROSS_USDT",
+   "lead_days": 6.1,
+   "evidence": "mexc perp CROSS_USDT listed 2025-07-04T07:58:54+00:00 (createTime)"
+  },
+  {
+   "asset": "VELVET",
+   "normalised_base": "VELVET",
+   "binance_launch_ts": "2025-07-15T09:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-07-10T07:06:03+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "VELVET_USDT",
+   "lead_days": 5.09,
+   "evidence": "mexc perp VELVET_USDT listed 2025-07-10T07:06:03+00:00 (createTime)"
+  },
+  {
+   "asset": "ZORA",
+   "normalised_base": "ZORA",
+   "binance_launch_ts": "2025-07-25T11:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 5,
+   "n_dated_after": 4,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-04-25T11:04",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-22T09:07:55+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ZORA_USDT",
+   "lead_days": 94.08,
+   "evidence": "mexc perp ZORA_USDT listed 2025-04-22T09:07:55+00:00 (createTime)"
+  },
+  {
+   "asset": "ZRC",
+   "normalised_base": "ZRC",
+   "binance_launch_ts": "2025-07-29T09:45:00+00:00",
+   "venues_matched": [
+    "gate"
+   ],
+   "n_instruments": 1,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-11-22T05:45",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published; tape shows an earlier announcement: bybit listing announced 2024-11-22T05:45"
+  },
+  {
+   "asset": "YALA",
+   "normalised_base": "YALA",
+   "binance_launch_ts": "2025-08-07T16:30:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "AIO",
+   "normalised_base": "AIO",
+   "binance_launch_ts": "2025-08-13T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-02T11:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "AIOUSDT",
+   "lead_days": 11.02,
+   "evidence": "mexc spot AIOUSDT listed 2025-08-02T11:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "USELESS",
+   "normalised_base": "USELESS",
+   "binance_launch_ts": "2025-08-15T12:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 7,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-07-10T11:26",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-05-11T06:15:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "USELESSUSDT",
+   "lead_days": 96.25,
+   "evidence": "mexc spot USELESSUSDT listed 2025-05-11T06:15:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "CUDIS",
+   "normalised_base": "CUDIS",
+   "binance_launch_ts": "2025-08-20T11:15:00+00:00",
+   "venues_matched": [
+    "gate"
+   ],
+   "n_instruments": 1,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-06-12T08:47",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published; tape shows an earlier announcement: bybit futures_listing announced 2025-06-12T08:47"
+  },
+  {
+   "asset": "XPL",
+   "normalised_base": "XPL",
+   "binance_launch_ts": "2025-08-22T09:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 2,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-22T09:22:14+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "XPL_USDT",
+   "lead_days": 0.01,
+   "evidence": "mexc perp XPL_USDT listed 2025-08-22T09:22:14+00:00 (createTime)"
+  },
+  {
+   "asset": "SOMI",
+   "normalised_base": "SOMI",
+   "binance_launch_ts": "2025-08-25T09:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 0,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "BAS",
+   "normalised_base": "BAS",
+   "binance_launch_ts": "2025-08-26T13:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 3,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-19T06:05:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BASUSDT",
+   "lead_days": 7.31,
+   "evidence": "mexc spot BASUSDT listed 2025-08-19T06:05:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "LINEA",
+   "normalised_base": "LINEA",
+   "binance_launch_ts": "2025-09-01T08:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 0,
+   "n_dated_after": 10,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "ARIA",
+   "normalised_base": "ARIA",
+   "binance_launch_ts": "2025-09-03T11:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-21T02:52:55+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ARIA_USDT",
+   "lead_days": 13.34,
+   "evidence": "mexc perp ARIA_USDT listed 2025-08-21T02:52:55+00:00 (createTime)"
+  },
+  {
+   "asset": "FLOCK",
+   "normalised_base": "FLOCK",
+   "binance_launch_ts": "2025-09-09T06:48:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-01-09T08:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-12-27T10:42:43+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "FLOCK_USDT",
+   "lead_days": 255.84,
+   "evidence": "mexc perp FLOCK_USDT listed 2024-12-27T10:42:43+00:00 (createTime)"
+  },
+  {
+   "asset": "XPIN",
+   "normalised_base": "XPIN",
+   "binance_launch_ts": "2025-09-12T08:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-22T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "XPINUSDT",
+   "lead_days": 20.75,
+   "evidence": "mexc spot XPINUSDT listed 2025-08-22T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "TOSHI",
+   "normalised_base": "TOSHI",
+   "binance_launch_ts": "2025-09-17T05:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 5,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2024-12-05T10:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-11-21T09:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "TOSHIUSDT",
+   "lead_days": 299.85,
+   "evidence": "mexc spot TOSHIUSDT listed 2024-11-21T09:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "0G",
+   "normalised_base": "0G",
+   "binance_launch_ts": "2025-09-17T15:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 0,
+   "n_dated_after": 6,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "ASTER",
+   "normalised_base": "ASTER",
+   "binance_launch_ts": "2025-09-19T12:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 4,
+   "n_dated_after": 7,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-09-19T07:54",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-09-17T07:35:19+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ASTER_USDT",
+   "lead_days": 2.18,
+   "evidence": "mexc perp ASTER_USDT listed 2025-09-17T07:35:19+00:00 (createTime)"
+  },
+  {
+   "asset": "FLUID",
+   "normalised_base": "FLUID",
+   "binance_launch_ts": "2025-09-24T10:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 4,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-12-17T14:40",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2021-06-17T07:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "FLUIDUSDT",
+   "lead_days": 1560.14,
+   "evidence": "mexc spot FLUIDUSDT listed 2021-06-17T07:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "AKE",
+   "normalised_base": "AKE",
+   "binance_launch_ts": "2025-09-26T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-08-20T07:36:21+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "AKE_USDT",
+   "lead_days": 37.2,
+   "evidence": "mexc perp AKE_USDT listed 2025-08-20T07:36:21+00:00 (createTime)"
+  },
+  {
+   "asset": "4USDT",
+   "normalised_base": "4USDT",
+   "binance_launch_ts": "2025-10-08T11:30:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "GIGGLE",
+   "normalised_base": "GIGGLE",
+   "binance_launch_ts": "2025-10-09T09:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 2,
+   "n_dated_after": 4,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-09-22T04:25:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "GIGGLEUSDT",
+   "lead_days": 17.22,
+   "evidence": "mexc spot GIGGLEUSDT listed 2025-09-22T04:25:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "MON",
+   "normalised_base": "MON",
+   "binance_launch_ts": "2025-10-10T07:17:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 0,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2024-05-24T10:00",
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "medium",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published; tape shows an earlier announcement: bybit listing announced 2024-05-24T10:00"
+  },
+  {
+   "asset": "YB",
+   "normalised_base": "YB",
+   "binance_launch_ts": "2025-10-10T14:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 0,
+   "n_dated_after": 10,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "MET",
+   "normalised_base": "MET",
+   "binance_launch_ts": "2025-10-11T12:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 3,
+   "n_dated_after": 6,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-10-10T10:02",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-10-10T08:15:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "MET-USDT-SWAP",
+   "lead_days": 1.18,
+   "evidence": "okx perp MET-USDT-SWAP listed 2025-10-10T08:15:00+00:00 (listTime)"
+  },
+  {
+   "asset": "LAB",
+   "normalised_base": "LAB",
+   "binance_launch_ts": "2025-10-17T14:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 4,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-10-14T12:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "LABUSDT",
+   "lead_days": 3.1,
+   "evidence": "mexc spot LABUSDT listed 2025-10-14T12:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "AT",
+   "normalised_base": "AT",
+   "binance_launch_ts": "2025-10-29T11:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-10-24T07:49:40+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "AT_USDT",
+   "lead_days": 5.15,
+   "evidence": "mexc perp AT_USDT listed 2025-10-24T07:49:40+00:00 (createTime)"
+  },
+  {
+   "asset": "KITE",
+   "normalised_base": "KITE",
+   "binance_launch_ts": "2025-10-29T10:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 0,
+   "n_dated_after": 9,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "CC",
+   "normalised_base": "CC",
+   "binance_launch_ts": "2025-10-31T12:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 0,
+   "n_dated_after": 10,
+   "n_undated": 4,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "STABLE",
+   "normalised_base": "STABLE",
+   "binance_launch_ts": "2025-11-06T12:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 0,
+   "n_dated_after": 7,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "CLANKER",
+   "normalised_base": "CLANKER",
+   "binance_launch_ts": "2025-11-12T12:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-04-28T10:50",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2024-11-27T10:30:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "CLANKERUSDT",
+   "lead_days": 350.06,
+   "evidence": "mexc spot CLANKERUSDT listed 2024-11-27T10:30:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "SENT",
+   "normalised_base": "SENT",
+   "binance_launch_ts": "2025-11-14T12:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 0,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "BOB",
+   "normalised_base": "BOB",
+   "binance_launch_ts": "2025-11-21T10:45:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2023-05-12T09:20",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-11-20T12:15:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BOBUSDT",
+   "lead_days": 0.94,
+   "evidence": "mexc spot BOBUSDT listed 2025-11-20T12:15:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "IRYS",
+   "normalised_base": "IRYS",
+   "binance_launch_ts": "2025-11-26T16:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 4,
+   "n_dated_after": 6,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-11-25T07:41:10+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "IRYS_USDT",
+   "lead_days": 1.35,
+   "evidence": "mexc perp IRYS_USDT listed 2025-11-25T07:41:10+00:00 (createTime)"
+  },
+  {
+   "asset": "RLS",
+   "normalised_base": "RLS",
+   "binance_launch_ts": "2025-12-02T10:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-01T09:48:20+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "RLS_USDT",
+   "lead_days": 1.01,
+   "evidence": "mexc perp RLS_USDT listed 2025-12-01T09:48:20+00:00 (createTime)"
+  },
+  {
+   "asset": "POWER",
+   "normalised_base": "POWER",
+   "binance_launch_ts": "2025-12-06T09:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 6,
+   "n_dated_before": 2,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-01-08T07:10:16+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "POWER_USDT",
+   "lead_days": 332.08,
+   "evidence": "mexc perp POWER_USDT listed 2025-01-08T07:10:16+00:00 (createTime)"
+  },
+  {
+   "asset": "WET",
+   "normalised_base": "WET",
+   "binance_launch_ts": "2025-12-10T07:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 8,
+   "n_dated_after": 1,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-12-04T11:05",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-04T10:59:56+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "WETUSDT",
+   "lead_days": 5.83,
+   "evidence": "bybit perp WETUSDT listed 2025-12-04T10:59:56+00:00 (launchTime)"
+  },
+  {
+   "asset": "NIGHT",
+   "normalised_base": "NIGHT",
+   "binance_launch_ts": "2025-12-10T11:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 14,
+   "n_dated_before": 8,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-12-09T11:12",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-09T08:37:37+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "NIGHT_USDT",
+   "lead_days": 1.1,
+   "evidence": "mexc perp NIGHT_USDT listed 2025-12-09T08:37:37+00:00 (createTime)"
+  },
+  {
+   "asset": "US",
+   "normalised_base": "US",
+   "binance_launch_ts": "2025-12-12T10:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-11T10:39:39+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "US_USDT",
+   "lead_days": 1.0,
+   "evidence": "mexc perp US_USDT listed 2025-12-11T10:39:39+00:00 (createTime)"
+  },
+  {
+   "asset": "RAVE",
+   "normalised_base": "RAVE",
+   "binance_launch_ts": "2025-12-14T15:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 2,
+   "n_dated_after": 4,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-12T06:57:33+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "RAVE_USDT",
+   "lead_days": 2.36,
+   "evidence": "mexc perp RAVE_USDT listed 2025-12-12T06:57:33+00:00 (createTime)"
+  },
+  {
+   "asset": "GUA",
+   "normalised_base": "GUA",
+   "binance_launch_ts": "2025-12-21T10:15:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-11-26T03:31:19+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "GUA_USDT",
+   "lead_days": 25.28,
+   "evidence": "mexc perp GUA_USDT listed 2025-11-26T03:31:19+00:00 (createTime)"
+  },
+  {
+   "asset": "LIT",
+   "normalised_base": "LIT",
+   "binance_launch_ts": "2025-12-23T17:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 1,
+   "n_dated_after": 8,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2021-02-18T08:59:57+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "LIT_USDT",
+   "lead_days": 1769.35,
+   "evidence": "mexc perp LIT_USDT listed 2021-02-18T08:59:57+00:00 (createTime)"
+  },
+  {
+   "asset": "BREV",
+   "normalised_base": "BREV",
+   "binance_launch_ts": "2025-12-30T10:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 0,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "COLLECT",
+   "normalised_base": "COLLECT",
+   "binance_launch_ts": "2025-12-31T13:15:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-12-27T10:03:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "COLLECTUSDT",
+   "lead_days": 4.13,
+   "evidence": "mexc spot COLLECTUSDT listed 2025-12-27T10:03:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "XAG",
+   "normalised_base": "XAG",
+   "binance_launch_ts": "2026-01-07T10:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 0,
+   "n_dated_after": 3,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "ZAMA",
+   "normalised_base": "ZAMA",
+   "binance_launch_ts": "2026-01-09T09:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 0,
+   "n_dated_after": 10,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "FOGO",
+   "normalised_base": "FOGO",
+   "binance_launch_ts": "2026-01-10T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 0,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "SPORTFUN",
+   "normalised_base": "SPORTFUN",
+   "binance_launch_ts": "2026-01-16T13:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 1,
+   "n_dated_after": 2,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-15T06:32:14+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SPORTFUN_USDT",
+   "lead_days": 1.3,
+   "evidence": "mexc perp SPORTFUN_USDT listed 2026-01-15T06:32:14+00:00 (createTime)"
+  },
+  {
+   "asset": "AIA",
+   "normalised_base": "AIA",
+   "binance_launch_ts": "2026-01-20T11:15:00+00:00",
+   "venues_matched": [
+    "gate",
+    "mexc"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-09-18T10:14",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-09-17T07:34:50+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "AIA_USDT",
+   "lead_days": 125.15,
+   "evidence": "mexc perp AIA_USDT listed 2025-09-17T07:34:50+00:00 (createTime)"
+  },
+  {
+   "asset": "ACU",
+   "normalised_base": "ACU",
+   "binance_launch_ts": "2026-01-21T12:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-20T06:55:11+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ACU_USDT",
+   "lead_days": 1.24,
+   "evidence": "mexc perp ACU_USDT listed 2026-01-20T06:55:11+00:00 (createTime)"
+  },
+  {
+   "asset": "ELSA",
+   "normalised_base": "ELSA",
+   "binance_launch_ts": "2026-01-22T07:25:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-19T07:39:43+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ELSA_USDT",
+   "lead_days": 2.99,
+   "evidence": "mexc perp ELSA_USDT listed 2026-01-19T07:39:43+00:00 (createTime)"
+  },
+  {
+   "asset": "SKR",
+   "normalised_base": "SKR",
+   "binance_launch_ts": "2026-01-22T10:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 5,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-01-20T10:33",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-20T10:29:47+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SKRUSDT",
+   "lead_days": 2.01,
+   "evidence": "bybit perp SKRUSDT listed 2026-01-20T10:29:47+00:00 (launchTime)"
+  },
+  {
+   "asset": "SPACE",
+   "normalised_base": "SPACE",
+   "binance_launch_ts": "2026-01-23T11:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 2,
+   "n_dated_after": 7,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-22T12:45:44+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SPACE_USDT",
+   "lead_days": 0.96,
+   "evidence": "mexc perp SPACE_USDT listed 2026-01-22T12:45:44+00:00 (createTime)"
+  },
+  {
+   "asset": "BIRB",
+   "normalised_base": "BIRB",
+   "binance_launch_ts": "2026-01-29T05:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 6,
+   "n_dated_after": 0,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-01-28T04:09",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-28T08:27:29+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BIRB_USDT",
+   "lead_days": 0.87,
+   "evidence": "mexc perp BIRB_USDT listed 2026-01-28T08:27:29+00:00 (createTime)"
+  },
+  {
+   "asset": "XPT",
+   "normalised_base": "XPT",
+   "binance_launch_ts": "2026-01-30T10:00:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 0,
+   "n_dated_after": 3,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "MEGA",
+   "normalised_base": "MEGA",
+   "binance_launch_ts": "2026-01-30T12:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 2,
+   "n_dated_after": 8,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2025-10-23T11:50",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-10-22T15:58:36+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "MEGA_USDT",
+   "lead_days": 99.84,
+   "evidence": "mexc perp MEGA_USDT listed 2025-10-22T15:58:36+00:00 (createTime)"
+  },
+  {
+   "asset": "INX",
+   "normalised_base": "INX",
+   "binance_launch_ts": "2026-01-30T19:04:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "okx listing announced 2023-03-03T07:22",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-29T08:39:51+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "INXUSDT",
+   "lead_days": 1.43,
+   "evidence": "bybit perp INXUSDT listed 2026-01-29T08:39:51+00:00 (launchTime)"
+  },
+  {
+   "asset": "TRIA",
+   "normalised_base": "TRIA",
+   "binance_launch_ts": "2026-02-06T12:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 6,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-02-05T10:28",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-02-03T02:40:27+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "TRIA_USDT",
+   "lead_days": 3.4,
+   "evidence": "mexc perp TRIA_USDT listed 2026-02-03T02:40:27+00:00 (createTime)"
+  },
+  {
+   "asset": "ESP",
+   "normalised_base": "ESP",
+   "binance_launch_ts": "2026-02-10T08:10:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 0,
+   "n_dated_after": 6,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "AZTEC",
+   "normalised_base": "AZTEC",
+   "binance_launch_ts": "2026-02-11T04:29:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 10,
+   "n_dated_before": 0,
+   "n_dated_after": 7,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on bybit, gate but no listing date is published"
+  },
+  {
+   "asset": "OPN",
+   "normalised_base": "OPN",
+   "binance_launch_ts": "2026-02-21T15:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 2,
+   "n_dated_after": 4,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-02-11T09:51",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-02-11T09:49:29+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "OPNUSDT",
+   "lead_days": 10.22,
+   "evidence": "bybit perp OPNUSDT listed 2026-02-11T09:49:29+00:00 (launchTime)"
+  },
+  {
+   "asset": "ROBO",
+   "normalised_base": "ROBO",
+   "binance_launch_ts": "2026-02-27T08:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 5,
+   "n_dated_after": 5,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-02-25T09:34",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-02-25T09:31:02+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ROBOUSDT",
+   "lead_days": 1.97,
+   "evidence": "bybit perp ROBOUSDT listed 2026-02-25T09:31:02+00:00 (launchTime)"
+  },
+  {
+   "asset": "KAT",
+   "normalised_base": "KAT",
+   "binance_launch_ts": "2026-03-02T05:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 1,
+   "n_dated_after": 8,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-03-02T04:52:47+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "KAT_USDT",
+   "lead_days": 0.01,
+   "evidence": "mexc perp KAT_USDT listed 2026-03-02T04:52:47+00:00 (createTime)"
+  },
+  {
+   "asset": "COPPER",
+   "normalised_base": "COPPER",
+   "binance_launch_ts": "2026-03-06T09:00:00+00:00",
+   "venues_matched": [
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 2,
+   "n_dated_before": 1,
+   "n_dated_after": 1,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-01-29T11:08:50+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "COPPER_USDT",
+   "lead_days": 35.91,
+   "evidence": "mexc perp COPPER_USDT listed 2026-01-29T11:08:50+00:00 (createTime)"
+  },
+  {
+   "asset": "EDGE",
+   "normalised_base": "EDGE",
+   "binance_launch_ts": "2026-03-19T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 1,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2025-04-03T11:23:32+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "EDGE_USDT",
+   "lead_days": 350.11,
+   "evidence": "mexc perp EDGE_USDT listed 2025-04-03T11:23:32+00:00 (createTime)"
+  },
+  {
+   "asset": "BSB",
+   "normalised_base": "BSB",
+   "binance_launch_ts": "2026-03-25T11:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 2,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-03-03T08:56",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-03-04T08:21:22+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BSB_USDT",
+   "lead_days": 21.14,
+   "evidence": "mexc perp BSB_USDT listed 2026-03-04T08:21:22+00:00 (createTime)"
+  },
+  {
+   "asset": "BASED",
+   "normalised_base": "BASED",
+   "binance_launch_ts": "2026-03-30T10:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 4,
+   "n_dated_after": 5,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-03-30T08:36",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-03-30T03:45:25+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BASED_USDT",
+   "lead_days": 0.26,
+   "evidence": "mexc perp BASED_USDT listed 2026-03-30T03:45:25+00:00 (createTime)"
+  },
+  {
+   "asset": "BZ",
+   "normalised_base": "BZ",
+   "binance_launch_ts": "2026-04-01T09:10:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-03-24T10:00:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "BZ-USDT-SWAP",
+   "lead_days": 7.97,
+   "evidence": "okx perp BZ-USDT-SWAP listed 2026-03-24T10:00:00+00:00 (listTime)"
+  },
+  {
+   "asset": "PRL",
+   "normalised_base": "PRL",
+   "binance_launch_ts": "2026-04-01T10:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 6,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-03-27T05:01",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-03-25T08:25:36+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "PRL_USDT",
+   "lead_days": 7.09,
+   "evidence": "mexc perp PRL_USDT listed 2026-03-25T08:25:36+00:00 (createTime)"
+  },
+  {
+   "asset": "GENIUS",
+   "normalised_base": "GENIUS",
+   "binance_launch_ts": "2026-04-16T03:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 3,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-13T15:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "GENIUSUSDT",
+   "lead_days": 2.52,
+   "evidence": "mexc spot GENIUSUSDT listed 2026-04-13T15:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "CHIP",
+   "normalised_base": "CHIP",
+   "binance_launch_ts": "2026-04-16T07:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 13,
+   "n_dated_before": 1,
+   "n_dated_after": 9,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-16T07:05:51+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "CHIP_USDT",
+   "lead_days": 0.01,
+   "evidence": "mexc perp CHIP_USDT listed 2026-04-16T07:05:51+00:00 (createTime)"
+  },
+  {
+   "asset": "OPG",
+   "normalised_base": "OPG",
+   "binance_launch_ts": "2026-04-22T15:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 2,
+   "n_dated_after": 3,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-04-21T03:13",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-20T14:51:07+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "OPG_USDT",
+   "lead_days": 2.03,
+   "evidence": "mexc perp OPG_USDT listed 2026-04-20T14:51:07+00:00 (createTime)"
+  },
+  {
+   "asset": "AIGENSYN",
+   "normalised_base": "AIGENSYN",
+   "binance_launch_ts": "2026-04-29T14:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-29T12:31:19+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "AIGENSYN_USDT",
+   "lead_days": 0.07,
+   "evidence": "mexc perp AIGENSYN_USDT listed 2026-04-29T12:31:19+00:00 (createTime)"
+  },
+  {
+   "asset": "BILL",
+   "normalised_base": "BILL",
+   "binance_launch_ts": "2026-05-07T08:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 7,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-05-04T05:38",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-05-04T07:03:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "BILLUSDT",
+   "lead_days": 3.05,
+   "evidence": "mexc spot BILLUSDT listed 2026-05-04T07:03:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "PHAROS",
+   "normalised_base": "PHAROS",
+   "binance_launch_ts": "2026-05-14T05:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "mexc"
+   ],
+   "n_instruments": 2,
+   "n_dated_before": 1,
+   "n_dated_after": 1,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-28T14:21:54+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "PHAROS_USDT",
+   "lead_days": 15.62,
+   "evidence": "mexc perp PHAROS_USDT listed 2026-04-28T14:21:54+00:00 (createTime)"
+  },
+  {
+   "asset": "SPCX",
+   "normalised_base": "SPCX",
+   "binance_launch_ts": "2026-05-21T04:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 1,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-05-07T09:00:00+00:00",
+   "first_elsewhere_venue": "okx",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "SPCX-USDT-SWAP",
+   "lead_days": 13.82,
+   "evidence": "okx perp SPCX-USDT-SWAP listed 2026-05-07T09:00:00+00:00 (listTime)"
+  },
+  {
+   "asset": "OPENAI",
+   "normalised_base": "OPENAI",
+   "binance_launch_ts": "2026-05-26T08:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 5,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-14T03:05:34+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "OPENAI_USDT",
+   "lead_days": 42.23,
+   "evidence": "mexc perp OPENAI_USDT listed 2026-04-14T03:05:34+00:00 (createTime)"
+  },
+  {
+   "asset": "CTR",
+   "normalised_base": "CTR",
+   "binance_launch_ts": "2026-05-28T09:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 3,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-05-26T03:13:55+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "CTR_USDT",
+   "lead_days": 2.26,
+   "evidence": "mexc perp CTR_USDT listed 2026-05-26T03:13:55+00:00 (createTime)"
+  },
+  {
+   "asset": "QNTX",
+   "normalised_base": "QNTX",
+   "binance_launch_ts": "2026-05-29T08:15:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin"
+   ],
+   "n_instruments": 3,
+   "n_dated_before": 0,
+   "n_dated_after": 2,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "SLX",
+   "normalised_base": "SLX",
+   "binance_launch_ts": "2026-06-01T07:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 11,
+   "n_dated_before": 4,
+   "n_dated_after": 4,
+   "n_undated": 3,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-05-25T14:00:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "SLXUSDT",
+   "lead_days": 6.73,
+   "evidence": "mexc spot SLXUSDT listed 2026-05-25T14:00:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "ANTHROPIC",
+   "normalised_base": "ANTHROPIC",
+   "binance_launch_ts": "2026-06-02T04:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-04-14T03:04:26+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ANTHROPIC_USDT",
+   "lead_days": 49.06,
+   "evidence": "mexc perp ANTHROPIC_USDT listed 2026-04-14T03:04:26+00:00 (createTime)"
+  },
+  {
+   "asset": "ZEST",
+   "normalised_base": "ZEST",
+   "binance_launch_ts": "2026-06-04T14:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 4,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-05-19T11:14:04+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ZEST_USDT",
+   "lead_days": 16.12,
+   "evidence": "mexc perp ZEST_USDT listed 2026-05-19T11:14:04+00:00 (createTime)"
+  },
+  {
+   "asset": "ARX",
+   "normalised_base": "ARX",
+   "binance_launch_ts": "2026-06-23T04:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 9,
+   "n_dated_before": 7,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-06-22T13:30",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-06-22T04:16:48+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "ARX_USDT",
+   "lead_days": 1.02,
+   "evidence": "mexc perp ARX_USDT listed 2026-06-22T04:16:48+00:00 (createTime)"
+  },
+  {
+   "asset": "OUSDT",
+   "normalised_base": "OUSDT",
+   "binance_launch_ts": "2026-06-24T11:45:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "CAP",
+   "normalised_base": "CAP",
+   "binance_launch_ts": "2026-06-27T11:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 4,
+   "n_dated_after": 2,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-06-25T13:43",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-06-26T05:57:55+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "CAP_USDT",
+   "lead_days": 1.24,
+   "evidence": "mexc perp CAP_USDT listed 2026-06-26T05:57:55+00:00 (createTime)"
+  },
+  {
+   "asset": "DATAIP",
+   "normalised_base": "DATAIP",
+   "binance_launch_ts": "2026-07-03T06:45:00+00:00",
+   "venues_matched": [],
+   "n_instruments": 0,
+   "n_dated_before": 0,
+   "n_dated_after": 0,
+   "n_undated": 0,
+   "undated_venues": [],
+   "announcement_evidence": null,
+   "classification": "NO_OTHER_VENUE",
+   "confidence": "high",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "no instrument on any collected venue"
+  },
+  {
+   "asset": "SKHY",
+   "normalised_base": "SKHY",
+   "binance_launch_ts": "2026-07-10T15:50:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 0,
+   "n_dated_after": 3,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "POPMART",
+   "normalised_base": "POPMART",
+   "binance_launch_ts": "2026-07-23T02:30:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 0,
+   "n_dated_after": 3,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "GRVT",
+   "normalised_base": "GRVT",
+   "binance_launch_ts": "2026-07-31T12:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 9,
+   "n_dated_after": 1,
+   "n_undated": 2,
+   "undated_venues": [
+    "bybit",
+    "gate"
+   ],
+   "announcement_evidence": "bybit listing announced 2026-07-29T00:00",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-07-30T11:55:37+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "GRVT_USDT",
+   "lead_days": 1.03,
+   "evidence": "mexc perp GRVT_USDT listed 2026-07-30T11:55:37+00:00 (createTime)"
+  },
+  {
+   "asset": "GIGADEV",
+   "normalised_base": "GIGADEV",
+   "binance_launch_ts": "2026-08-03T05:30:00+00:00",
+   "venues_matched": [
+    "gate",
+    "kucoin"
+   ],
+   "n_instruments": 2,
+   "n_dated_before": 0,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "UNKNOWN_PRECEDENCE",
+   "confidence": "low",
+   "first_elsewhere_ts": null,
+   "first_elsewhere_venue": null,
+   "first_elsewhere_market": null,
+   "first_elsewhere_symbol": null,
+   "lead_days": null,
+   "evidence": "market exists on gate but no listing date is published"
+  },
+  {
+   "asset": "DOS",
+   "normalised_base": "DOS",
+   "binance_launch_ts": "2026-08-11T15:00:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 12,
+   "n_dated_before": 5,
+   "n_dated_after": 5,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-08-10T09:07:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "DOSUSDT",
+   "lead_days": 1.25,
+   "evidence": "mexc spot DOSUSDT listed 2026-08-10T09:07:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "UNITREE",
+   "normalised_base": "UNITREE",
+   "binance_launch_ts": "2026-08-19T02:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 2,
+   "n_dated_after": 1,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-08-03T01:53",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-07-31T07:11:08+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "UNITREE_USDT",
+   "lead_days": 18.82,
+   "evidence": "mexc perp UNITREE_USDT listed 2026-07-31T07:11:08+00:00 (createTime)"
+  },
+  {
+   "asset": "MARSCOIN",
+   "normalised_base": "MARSCOIN",
+   "binance_launch_ts": "2026-09-01T09:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc"
+   ],
+   "n_instruments": 7,
+   "n_dated_before": 2,
+   "n_dated_after": 3,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": null,
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-07-30T09:30:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "MARSCOINUSDT",
+   "lead_days": 33.01,
+   "evidence": "mexc spot MARSCOINUSDT listed 2026-07-30T09:30:00+00:00 (firstOpenTime)"
+  },
+  {
+   "asset": "GPRO",
+   "normalised_base": "GPRO",
+   "binance_launch_ts": "2026-09-03T13:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "okx"
+   ],
+   "n_instruments": 4,
+   "n_dated_before": 1,
+   "n_dated_after": 2,
+   "n_undated": 1,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-09-02T08:24",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-09-02T08:14:26+00:00",
+   "first_elsewhere_venue": "bybit",
+   "first_elsewhere_market": "perp",
+   "first_elsewhere_symbol": "GPROUSDT",
+   "lead_days": 1.23,
+   "evidence": "bybit perp GPROUSDT listed 2026-09-02T08:14:26+00:00 (launchTime)"
+  },
+  {
+   "asset": "PONS",
+   "normalised_base": "PONS",
+   "binance_launch_ts": "2026-09-06T06:45:00+00:00",
+   "venues_matched": [
+    "bybit",
+    "gate",
+    "kucoin",
+    "mexc",
+    "okx"
+   ],
+   "n_instruments": 8,
+   "n_dated_before": 6,
+   "n_dated_after": 0,
+   "n_undated": 2,
+   "undated_venues": [
+    "gate"
+   ],
+   "announcement_evidence": "bybit futures_listing announced 2026-08-31T09:39",
+   "classification": "OTHER_VENUE_FIRST",
+   "confidence": "high",
+   "first_elsewhere_ts": "2026-07-15T06:20:00+00:00",
+   "first_elsewhere_venue": "mexc",
+   "first_elsewhere_market": "spot",
+   "first_elsewhere_symbol": "PONSUSDT",
+   "lead_days": 53.02,
+   "evidence": "mexc spot PONSUSDT listed 2026-07-15T06:20:00+00:00 (firstOpenTime)"
+  }
+ ],
+ "summary": {
+  "n": 174,
+  "by_classification": {
+   "OTHER_VENUE_FIRST": 137,
+   "UNKNOWN_PRECEDENCE": 31,
+   "NO_OTHER_VENUE": 6
+  },
+  "known": 143,
+  "unknown": 31,
+  "by_confidence": {
+   "high": 143,
+   "low": 25,
+   "medium": 6
+  },
+  "first_venue": {
+   "bybit": 10,
+   "okx": 8,
+   "mexc": 113,
+   "kucoin": 6
+  },
+  "lead_days": {
+   "min": 0.01,
+   "median": 11.02,
+   "max": 1808.31
+  }
+ },
+ "no_alpha_test": true,
+ "no_price_join": true
+}
