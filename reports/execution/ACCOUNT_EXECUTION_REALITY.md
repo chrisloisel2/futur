@@ -1,9 +1,9 @@
-# ACCOUNT EXECUTION REALITY — P8 (2026-09-12T14:45:56 UTC)
+# ACCOUNT EXECUTION REALITY — P8 (2026-09-12T20:35:15 UTC)
 
 What execution actually costs on this account, as opposed to what a spec declared. Read-only: the module implements GET and nothing else, calls only a whitelisted set of endpoints, and refuses a key that carries trading permission. No order, no signal, no verdict, no budget. Credentials come from the environment and are never written, logged or returned.
 
-**Credentials: absent** (<absent>).
-Set `BINANCE_READONLY_API_KEY` and `BINANCE_READONLY_API_SECRET` (or `BINANCE_API_KEY` / `BINANCE_API_SECRET`) to a key with **no** trading permission, then re-run `--collect`.
+**Credentials: present** (0jJ…tp (64 chars)).
+
 
 ## The six questions
 
@@ -11,15 +11,16 @@ Set `BINANCE_READONLY_API_KEY` and `BINANCE_READONLY_API_SECRET` (or `BINANCE_AP
 |---|---|---|
 | 1 | actual futures taker fee | **unknown** — no usable key |
 | 2 | actual futures maker fee | **unknown** — no usable key |
-| 3 | funding payments available | no_credentials |
-| 4 | leverage brackets available | no_credentials |
+| 3 | funding payments available | error |
+| 4 | leverage brackets available | error |
 | 5 | H2 / H3 cost assumptions | {'H2': 'unknown', 'H3': 'unknown'} |
 | 6 | what remains theoretical | see below |
 
 ### 6. What remains theoretical
 
-- every account figure: no read-only API key in the environment (BINANCE_READONLY_API_KEY or BINANCE_API_KEY)
-- spread and slippage in both cost chains are the values declared in the specs; P6 depth archives can measure them, this phase does not
+- actual futures fee (account_actual): Binance serves every signed /fapi endpoint, reads included, only to a key with 'Enable Futures' -- a trading permission. There is no futures-read-only key: a read-only key gets -2015 on /fapi and the futures fee cannot be read as account_actual without accepting a trading-capable key (IP-restricted, --allow-trading-key, journaled).
+- the key has NO IP restriction (ipRestrict=false): restrict it to this machine before any further use
+- spread and slippage in both cost chains are the values declared in the specs; P11 measured them per window (see 9_cost_chain_by_window): the chain leaves 'unknown' only once a preregistration names the window and notional
 - borrow availability and borrow cost for spot delisting shorts (sapi margin endpoints, key required)
 
 ## Cost chains
@@ -37,13 +38,13 @@ Fee link: 5.00 bps per side, provenance `official_published` (published VIP0, of
 
 | name | endpoint | status | what it would give |
 |---|---|---|---|
-| commission_rate | `GET /fapi/v1/commissionRate` | no_credentials | actual maker/taker fee for one futures symbol |
-| leverage_brackets | `GET /fapi/v1/leverageBracket` | no_credentials | leverage brackets and maintenance margin |
-| futures_account | `GET /fapi/v2/account` | no_credentials | futures account metadata: fee tier, canTrade / canWithdraw flags |
-| spot_account | `GET /api/v3/account` | no_credentials | spot commission rates, canTrade / canWithdraw flags |
-| funding_income | `GET /fapi/v1/income` | no_credentials | own income rows (funding fees, commissions) |
-| own_fills | `GET /fapi/v1/userTrades` | no_credentials | own fills |
-| margin_pairs | `GET /sapi/v1/margin/allPairs` | no_credentials | margin pairs (is the asset borrowable?) |
+| commission_rate | `GET /fapi/v1/commissionRate` | error | actual maker/taker fee for one futures symbol |
+| leverage_brackets | `GET /fapi/v1/leverageBracket` | error | leverage brackets and maintenance margin |
+| futures_account | `GET /fapi/v2/account` | error | futures account metadata: fee tier, canTrade / canWithdraw flags |
+| spot_account | `GET /api/v3/account` | ok | spot commission rates, canTrade / canWithdraw flags |
+| funding_income | `GET /fapi/v1/income` | error | own income rows (funding fees, commissions) |
+| own_fills | `GET /fapi/v1/userTrades` | error | own fills |
+| margin_pairs | `GET /sapi/v1/margin/allPairs` | ok | margin pairs (is the asset borrowable?) |
 
 ## Safety properties of this module
 

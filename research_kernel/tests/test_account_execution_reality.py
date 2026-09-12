@@ -123,3 +123,41 @@ def test_published_schedule_is_used_as_the_fee_link_when_no_key():
     costs = A.build_costs(pub, {"endpoints": {}})
     assert costs["fee_provenance"] == "official_published"
     assert all(v["status"] == "unknown" for v in costs["comparisons"].values())            # spread/slippage restent declares
+
+
+def test_tier_is_inferred_from_spot_commission_and_futures_permission_model_is_diagnosed():
+    assert A.infer_tier_from_spot({"maker_bps": 10.0, "taker_bps": 10.0})["tier"] == "VIP0"
+    assert A.infer_tier_from_spot({"maker_bps": 9.0, "taker_bps": 10.0})["tier"] == "VIP1"
+    assert A.infer_tier_from_spot({"maker_bps": 7.5, "taker_bps": 7.5})["tier"] is None and A.infer_tier_from_spot(None)["tier"] is None
+    acct = {"permission_check": {"status": "ok", "restrictions": {"enableReading": True, "enableFutures": False}},
+            "endpoints": {"commission_rate": {"endpoint": "GET /fapi/v1/commissionRate", "binance_code": -2015}, "spot_account": {"endpoint": "GET /api/v3/account", "binance_code": None},
+                          "funding_income": {"endpoint": "GET /fapi/v1/income", "binance_code": -2015}}}
+    assert A.futures_permission_diagnosis(acct) == "futures_read_requires_enable_futures"
+    acct["permission_check"]["restrictions"]["enableFutures"] = True; assert A.futures_permission_diagnosis(acct) is None   # avec Enable Futures, -2015 serait autre chose (IP)
+
+
+def test_capacity_links_build_a_measured_chain_only_when_a_window_is_named(tmp_path):
+    cap = {"events": [{"event_id": "e%d" % i, "windows": [{"window_min": 5, "book_ok": True, "effective_spread_bps": 10.0 + i, "sell_slippage_500_usd_bps": 2.0, "buy_slippage_500_usd_bps": 2.0,
+                                                             "sell_slippage_500_usd_ub_bps": 100.0, "buy_slippage_500_usd_ub_bps": 100.0}]} for i in range(5)]
+                     + [{"event_id": "e9", "windows": [{"window_min": 5, "book_ok": True, "effective_spread_bps": 50.0, "sell_slippage_500_usd_bps": None, "buy_slippage_500_usd_bps": None}]}]}
+    p = tmp_path / "cap.json"; p.write_text(json.dumps(cap))
+    c = A.capacity_links(5, 500, path=p)
+    assert c["n_events"] == 6 and c["n_slippage"] == 5 and c["n_order_exceeds_book"] == 1 and c["spread_bps_median"] == 12.5 and c["slippage_rt_bps_median"] == 4.0 and c["slippage_rt_upper_bound_bps_median"] == 200.0
+    assert A.capacity_links(15, 500, path=p) is None
+    pub = {"maker_bps": 2.0, "taker_bps": 5.0}; acct = {"spot_fees": {"maker_bps": 10.0, "taker_bps": 10.0}}
+    declared = A.build_costs(pub, acct); measured = A.build_costs(pub, acct, c)
+    assert declared["fee_provenance"] == "official_published" and "VIP0" in declared["fee_note"] and declared["fee_tier_inferred"]["tier"] == "VIP0"
+    if "H2" in declared["comparisons"]:
+        assert declared["comparisons"]["H2"]["status"] == "unknown" and declared["comparisons"]["H2"]["weakest_provenance"] == "declared"
+        assert measured["comparisons"]["H2"]["status"] in ("confirmed", "contradicted") and measured["comparisons"]["H2"]["weakest_provenance"] == "official_published"
+        assert measured["comparisons"]["H2"]["measured_round_trip_bps"] == 2 * 5.0 + 12.5 + 4.0
+
+
+def test_rebuild_from_store_makes_no_network_call_and_reads_only_the_dumps(tmp_path, monkeypatch):
+    monkeypatch.setattr(RO, "urlopen", lambda *a, **k: pytest.fail("network call during --from-store"))
+    store = tmp_path / "store"; store.mkdir(); (store / "spot_account.json").write_text(json.dumps({"makerCommission": 10, "takerCommission": 10, "canWithdraw": True, "balances": [{"asset": "X", "free": "1"}]}))
+    coll = tmp_path / "COLLECTED.json"; coll.write_text(json.dumps({"key_redacted": "abc…yz (64 chars)", "env_var_used": RO.ENV_KEY, "permission_check": {"status": "ok", "usable": True, "restrictions": {"enableReading": True, "enableFutures": False}, "ip_restricted": False},
+                                                                     "endpoints": {"commission_rate": {"status": "error", "endpoint": "GET /fapi/v1/commissionRate", "binance_code": -2015}}}))
+    acct = A.snapshot_from_store(store, coll)
+    assert acct["rebuilt_from_store"] and acct["has_credentials"] and acct["usable"] and acct["spot_fees"]["taker_bps"] == 10.0 and acct["account_flags"]["spot_account"]["canWithdraw"] is True
+    assert "balances" not in json.dumps(acct) and A.futures_permission_diagnosis(acct) == "futures_read_requires_enable_futures"

@@ -18,7 +18,7 @@ import os
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from data_lake.collectors import binance_account_readonly as RO
 from data_lake.collectors import execution_cost_schema as S
@@ -67,6 +67,73 @@ def published_vip0() -> Dict[str, Any]:
     v = ((m.get("venues") or {}).get("binance") or {}).get("published_schedule") or {}
     return {"maker_bps": (v.get("vip0") or {}).get("maker"), "taker_bps": (v.get("vip0") or {}).get("taker"),
             "source_class": (v.get("vip0") or {}).get("source_class"), "as_of": m.get("as_of") or m.get("fetched_at_utc")}
+
+
+#: bareme SPOT officiel (https://www.binance.com/en/fee/trading, VIP0 0,1000 %/0,1000 %, VIP1 0,0900 %/0,1000 %) : sert
+#: seulement a identifier le palier depuis les champs makerCommission/takerCommission du compte (en bps, sans remise BNB)
+SPOT_PUBLISHED_BPS = {"VIP0": (10.0, 10.0), "VIP1": (9.0, 10.0), "VIP2": (8.0, 10.0), "VIP3": (4.2, 5.4), "VIP4": (4.2, 5.4), "VIP5": (3.6, 4.8), "VIP6": (3.0, 4.2), "VIP7": (2.4, 3.6), "VIP8": (1.8, 3.0), "VIP9": (1.2, 2.4)}
+CAPACITY_FEATURES = ROOT / "reports" / "data_acquisition" / "H2_DEPTH_CAPACITY_FEATURES.json"
+FAPI_PERMISSION_NOTE = ("Binance serves every signed /fapi endpoint, reads included, only to a key with 'Enable Futures' -- a trading "
+                        "permission. There is no futures-read-only key: a read-only key gets -2015 on /fapi and the futures fee cannot be "
+                        "read as account_actual without accepting a trading-capable key (IP-restricted, --allow-trading-key, journaled).")
+
+
+def infer_tier_from_spot(spot_fees: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Le palier VIP depuis les commissions spot du compte (account_actual) confrontees au bareme spot officiel.
+    Le palier est commun au spot et aux futures USDS-M ; le frais futures reste ensuite un chiffre PUBLIE a ce palier."""
+    if not spot_fees or spot_fees.get("maker_bps") is None or spot_fees.get("taker_bps") is None:
+        return {"tier": None, "source": "no spot commission in the account payload"}
+    pair = (float(spot_fees["maker_bps"]), float(spot_fees["taker_bps"]))
+    for tier, ref in SPOT_PUBLISHED_BPS.items():
+        if abs(pair[0] - ref[0]) < 1e-9 and abs(pair[1] - ref[1]) < 1e-9:
+            return {"tier": tier, "source": "spot makerCommission/takerCommission (account_actual) matched to the official spot schedule", "spot_bps": pair}
+    return {"tier": None, "source": "spot commission %s matches no published tier (BNB discount or promotion applied?)" % (pair,)}
+
+
+def futures_permission_diagnosis(acct: Dict[str, Any]) -> Optional[str]:
+    """Explique -2015 sur /fapi quand la cle est read-only sans 'Enable Futures' : ce n'est pas une panne, c'est le modele de permissions."""
+    pc = acct.get("permission_check") or {}
+    if pc.get("status") != "ok":
+        return None
+    fapi = [v for k, v in (acct.get("endpoints") or {}).items() if v.get("endpoint", "").startswith("GET /fapi")]
+    if fapi and all(v.get("binance_code") == -2015 for v in fapi) and not (pc.get("restrictions") or {}).get("enableFutures"):
+        return "futures_read_requires_enable_futures"
+    return None
+
+
+def capacity_links(window_min: int, notional_usd: int, events: Optional[List[str]] = None, path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+    """Spread et glissement MESURES par P11 (Binance Vision : archives officielles) pour une fenetre et un notionnel
+    nommes, en ALLER-RETOUR comme le schema l'attend : spread effectif complet, glissement vente + achat (entree short,
+    sortie achat) au notionnel donne. Medianes sur les evenements H2 (ou la liste donnee) ; la borne haute (bande du
+    carnet) est donnee a cote ; un ordre qui depasse le carnet observe est compte, pas estime. La preregistration nomme
+    la fenetre et le notionnel ; ce module ne choisit pas."""
+    p = Path(path) if path else CAPACITY_FEATURES
+    if not p.exists():
+        return None
+    import statistics
+    doc = json.loads(p.read_text()); sp, rt, ub, n, no_fill = [], [], [], 0, 0
+    for e in doc.get("events", []):
+        if events is not None and e.get("event_id") not in events:
+            continue
+        w = next((w for w in e.get("windows", []) if w.get("window_min") == window_min), None)
+        if not w:
+            continue
+        n += 1
+        if w.get("effective_spread_bps") is not None:
+            sp.append(float(w["effective_spread_bps"]))
+        ks, kb = "sell_slippage_%d_usd_bps" % notional_usd, "buy_slippage_%d_usd_bps" % notional_usd
+        if w.get(ks) is not None and w.get(kb) is not None:
+            rt.append(float(w[ks]) + float(w[kb]))
+            if w.get(ks + "_ub") is None and w.get(ks.replace("_bps", "_ub_bps")) is not None and w.get(kb.replace("_bps", "_ub_bps")) is not None:
+                ub.append(float(w[ks.replace("_bps", "_ub_bps")]) + float(w[kb.replace("_bps", "_ub_bps")]))
+        elif w.get("book_ok"):
+            no_fill += 1
+    if not sp or not rt:
+        return None
+    return {"window_min": window_min, "notional_usd": notional_usd, "n_events": n, "n_spread": len(sp), "n_slippage": len(rt), "n_order_exceeds_book": no_fill,
+            "spread_bps_median": round(statistics.median(sp), 2), "slippage_rt_bps_median": round(statistics.median(rt), 2),
+            "slippage_rt_upper_bound_bps_median": round(statistics.median(ub), 1) if ub else None,
+            "provenance": "official_published", "source": "P11 H2_DEPTH_CAPACITY_FEATURES (Binance Vision bookDepth + aggTrades); slippage = linear estimate within the book band, uniform-within-band assumption"}
 
 
 def spec_cost(which: str) -> Optional[Dict[str, Any]]:
@@ -143,25 +210,51 @@ def account_snapshot(allow_trading_key: bool = False, fee_symbols: Optional[List
     return out
 
 
-def build_costs(pub: Dict[str, Any], acct: Dict[str, Any]) -> Dict[str, Any]:
-    """La chaine de cout, avec la provenance de chaque maillon, et la comparaison aux hypotheses H2/H3."""
-    actual = acct.get("actual_fees")
+def build_costs(pub: Dict[str, Any], acct: Dict[str, Any], capacity: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """La chaine de cout, avec la provenance de chaque maillon, et la comparaison aux hypotheses H2/H3.
+    Frais : account_actual si lu, sinon bareme officiel au palier INFERE du spot (official_published, palier confirme),
+    sinon bareme VIP0. Spread/glissement : mesures P11 si une fenetre est nommee (`capacity`), sinon declares."""
+    actual = acct.get("actual_fees"); tier = infer_tier_from_spot(acct.get("spot_fees"))
     if actual:
-        fee, prov = actual["taker_bps"], "account_actual"
+        fee, prov, fee_note = actual["taker_bps"], "account_actual", "GET /fapi/v1/commissionRate"
     elif pub.get("taker_bps") is not None:
         fee, prov = float(pub["taker_bps"]), "official_published"
+        fee_note = ("official VIP0 schedule; tier %s confirmed from the account's spot commission; BNB discount not applied (status unknown: conservative)" % tier["tier"]
+                    if tier.get("tier") == "VIP0" else "official VIP0 schedule; account tier %s" % (tier.get("tier") or "unknown"))
     else:
-        fee, prov = 5.0, "declared"
-    out = {"fee_bps_per_side": fee, "fee_provenance": prov, "comparisons": {}}
+        fee, prov, fee_note = 5.0, "declared", "no schedule available"
+    out = {"fee_bps_per_side": fee, "fee_provenance": prov, "fee_note": fee_note, "fee_tier_inferred": tier, "comparisons": {}, "capacity_links": capacity}
     for which in ("H2", "H3"):
         sc = spec_cost(which)
         if not sc:
             continue
-        cost = S.build_cost("perp", fee, prov, sc["spread_bps"], "declared", sc["slippage_bps"], "declared", sc["n_legs"],
-                            note="spread and slippage are still the values declared in the spec; only the fee has a stronger provenance")
+        if capacity:
+            cost = S.build_cost("perp", fee, prov, capacity["spread_bps_median"], capacity["provenance"], capacity["slippage_rt_bps_median"], capacity["provenance"], sc["n_legs"],
+                                note="spread and round-trip slippage are P11 medians at window +%dm for %d USD (band upper bound %s bps, %d orders exceed the observed book)" % (
+                                    capacity["window_min"], capacity["notional_usd"], capacity.get("slippage_rt_upper_bound_bps_median"), capacity["n_order_exceeds_book"]))
+        else:
+            cost = S.build_cost("perp", fee, prov, sc["spread_bps"], "declared", sc["slippage_bps"], "declared", sc["n_legs"],
+                                note="spread and slippage are still the values declared in the spec; only the fee has a stronger provenance")
         out["comparisons"][which] = {"spec_declared_round_trip_bps": sc["declared_round_trip_bps"], "cost_chain": cost,
                                      **S.compare_to_assumption(cost, sc["declared_round_trip_bps"])}
     return out
+
+
+def chains_by_window(pub: Dict[str, Any], acct: Dict[str, Any], which: str = "H2", notionals: Tuple[int, ...] = (100, 500, 1000), windows: Tuple[int, ...] = (0, 1, 5, 15, 30, 60)) -> List[Dict[str, Any]]:
+    """Table DESCRIPTIVE : la chaine de cout mesuree pour chaque fenetre x notionnel que la preregistration pourrait nommer.
+    Aucune fenetre n'est choisie ici ; aucun rendement n'entre dans ce calcul."""
+    rows = []
+    for w in windows:
+        for n in notionals:
+            cap = capacity_links(w, n)
+            if not cap:
+                continue
+            c = build_costs(pub, acct, cap)["comparisons"].get(which)
+            if c:
+                rows.append({"window_min": w, "notional_usd": n, "n_events": cap["n_events"], "fee_bps": c["cost_chain"]["fee_bps_per_side"], "fee_provenance": c["cost_chain"]["fee_provenance"],
+                             "spread_bps": cap["spread_bps_median"], "slippage_rt_bps": cap["slippage_rt_bps_median"], "slippage_rt_ub_bps": cap["slippage_rt_upper_bound_bps_median"], "n_order_exceeds_book": cap["n_order_exceeds_book"],
+                             "round_trip_bps": c["measured_round_trip_bps"], "spec_declared_round_trip_bps": c["assumed_round_trip_bps"], "status_vs_spec": c["status"], "weakest_provenance": c["weakest_provenance"]})
+    return rows
 
 
 def write_reports(pub: Dict[str, Any], acct: Dict[str, Any], cons: Dict[str, Any], costs: Dict[str, Any], out: Optional[Path] = None) -> Dict[str, Any]:
@@ -178,12 +271,20 @@ def write_reports(pub: Dict[str, Any], acct: Dict[str, Any], cons: Dict[str, Any
         "5_h2_h3_cost_assumptions": {k: v["status"] for k, v in costs["comparisons"].items()},
         "6_what_remains_theoretical": [],
     }
-    theo = answers["6_what_remains_theoretical"]
+    theo = answers["6_what_remains_theoretical"]; diag = futures_permission_diagnosis(acct)
+    answers["7_fee_tier_inferred_from_spot"] = costs.get("fee_tier_inferred"); answers["8_futures_permission_diagnosis"] = diag
+    answers["9_cost_chain_by_window"] = chains_by_window(pub, acct, "H2") if usable or not has else []
     if not has:
         theo.append("every account figure: no read-only API key in the environment (%s or %s)" % (RO.ENV_KEY, RO.FALLBACK_ENV[0]))
     elif not usable:
         theo.append("every account figure: the key was refused — %s" % acct["permission_check"].get("reason"))
-    theo.append("spread and slippage in both cost chains are the values declared in the specs; P6 depth archives can measure them, this phase does not")
+    if diag == "futures_read_requires_enable_futures":
+        theo.append("actual futures fee (account_actual): " + FAPI_PERMISSION_NOTE)
+    if not (acct.get("permission_check") or {}).get("ip_restricted", True) and has:
+        theo.append("the key has NO IP restriction (ipRestrict=false): restrict it to this machine before any further use")
+    if not costs.get("capacity_links"):
+        theo.append("spread and slippage in both cost chains are the values declared in the specs; P11 measured them per window (see 9_cost_chain_by_window): "
+                    "the chain leaves 'unknown' only once a preregistration names the window and notional")
     theo.append("borrow availability and borrow cost for spot delisting shorts (sapi margin endpoints, key required)")
     doc = {"generated_at_utc": now, "published_vip0": pub, "account": {k: v for k, v in acct.items() if k != "key_redacted"},
            "key_redacted": acct.get("key_redacted"), "costs": costs, "constraints_coverage": {"h2_symbols": len(h2_symbols()), "h3_symbols": len(h3_symbols()),
@@ -275,6 +376,37 @@ def collect(allow_trading_key: bool = False, out: Optional[Path] = None) -> Dict
     return doc
 
 
+def snapshot_from_store(store: Optional[Path] = None, collected: Optional[Path] = None) -> Dict[str, Any]:
+    """Reconstruit l'instantane de compte depuis les dumps bruts deja collectes (0600, hors depot) et le dernier
+    permission_check publie : AUCUN appel reseau, aucune cle lue. Sert a regenerer les rapports apres un correctif."""
+    import data_lake.collectors.account_execution_reality as _self
+    store = Path(store) if store else _self.STORE; last = json.loads(Path(collected or (_self.OUT / "ACCOUNT_EXECUTION_REALITY_COLLECTED.json")).read_text()) if (collected or (_self.OUT / "ACCOUNT_EXECUTION_REALITY_COLLECTED.json")).exists() else {}
+    perm = last.get("permission_check") or {"status": "unknown", "usable": False, "reason": "no previous collection"}
+    out: Dict[str, Any] = {"has_credentials": bool(last.get("key_redacted") and last.get("key_redacted") != "<absent>"), "env_var": last.get("env_var_used"), "key_redacted": last.get("key_redacted"),
+                           "permission_check": perm, "usable": bool(perm.get("usable")), "endpoints": dict(last.get("endpoints") or {}), "rebuilt_from_store": True}
+    for name in ("commission_rate", "leverage_brackets", "futures_account", "spot_account", "funding_income", "own_fills", "margin_pairs"):
+        p = store / ("%s.json" % name)
+        if not p.exists():
+            continue
+        data = json.loads(p.read_text())
+        if name == "commission_rate" and isinstance(data, dict) and "makerCommissionRate" in data:
+            out["actual_fees"] = {"symbol": data.get("symbol"), "maker_bps": float(data["makerCommissionRate"]) * 1e4, "taker_bps": float(data["takerCommissionRate"]) * 1e4}
+        if name == "futures_account" and isinstance(data, dict):
+            out["fee_tier"] = data.get("feeTier")
+        if name in ("futures_account", "spot_account") and isinstance(data, dict):
+            out.setdefault("account_flags", {})[name] = RO.cross_check_account_flags(data)["account_flags"]
+        if name == "spot_account" and isinstance(data, dict) and data.get("makerCommission") is not None:
+            out["spot_fees"] = {"maker_bps": float(data["makerCommission"]), "taker_bps": float(data["takerCommission"]), "unit": "makerCommission=10 means 10 bps"}
+    return out
+
+
+def rebuild_from_store(out: Optional[Path] = None) -> Dict[str, Any]:
+    syms = h2_symbols() + h3_symbols(); pub = published_vip0(); acct = snapshot_from_store()
+    cons = public_constraints(sorted(set(syms))); costs = build_costs(pub, acct)
+    doc = write_reports(pub, acct, cons, costs, out); write_collected_reports(doc, out)
+    return doc
+
+
 
 # ----------------------------------------------------------------------------- P11 : rapports complementaires
 def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> Dict[str, Path]:
@@ -321,8 +453,27 @@ def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> 
     for k, v in costs["comparisons"].items():
         c = v["cost_chain"]
         cc.append(f"| {k} | {v['spec_declared_round_trip_bps']:.1f} bps | {c['round_trip_bps']:.1f} bps | `{c['fee_provenance']}` | `{c['spread_provenance']}` | `{c['slippage_provenance']}` | `{c['weakest_provenance']}` | **{v['status']}** |")
+    tier = (doc["costs"].get("fee_tier_inferred") or {}); diag = ans.get("8_futures_permission_diagnosis"); pc = acct.get("permission_check") or {}
+    cc += ["", "## Fee link", "",
+           f"- provenance now: `{doc['costs'].get('fee_provenance')}` — {doc['costs'].get('fee_note')}",
+           f"- tier inferred from the account's spot commission: **{tier.get('tier') or 'unknown'}** ({tier.get('source')})"]
+    if diag == "futures_read_requires_enable_futures":
+        cc += ["- `account_actual` for the futures fee is **not reachable with a read-only key**: " + FAPI_PERMISSION_NOTE,
+               "- consequence: the fee link stays `official_published` at the confirmed tier; on VIP0 the only residual is the 10 % BNB discount (0.5 bps taker), not applied here (conservative)."]
+    if acct.get("has_credentials") and not pc.get("ip_restricted", True):
+        cc += ["- **the key has no IP restriction** (`ipRestrict=false`): restrict it to this machine before any further use."]
+    rows = ans.get("9_cost_chain_by_window") or []
+    if rows:
+        cc += ["", "## Measured chain by window and notional (H2, P11 depth archives) — descriptive, no window chosen here", "",
+               "Spread = median effective spread (full, round trip); slippage = median of sell + buy linear estimates within the book band "
+               "(band upper bound alongside); fee = 2 × per-side fee. `status` compares to the spec's declared round trip at ±0.5 bps.", "",
+               "| window | notional | n | fee/side | spread | slippage rt | band ub | round trip | spec declared | status | weakest |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for r in rows:
+            cc.append(f"| +{r['window_min']} min | {r['notional_usd']} $ | {r['n_events']} | {r['fee_bps']:.1f} | {r['spread_bps']:.1f} | {r['slippage_rt_bps']:.1f} | {r['slippage_rt_ub_bps'] if r['slippage_rt_ub_bps'] is not None else '—'} | **{r['round_trip_bps']:.1f}** | {r['spec_declared_round_trip_bps']:.1f} | {r['status_vs_spec']} | `{r['weakest_provenance']}` |")
+        cc += ["", "The chain leaves `unknown` the moment a preregistration names one window and one notional from this table; it then reads `confirmed` "
+               "or `contradicted` against the spec at `official_published` grade. This table chooses nothing and reads no return."]
     cc += ["", "## What would move each chain", "",
-           "- fee → `account_actual`: a read-only key and one `GET /fapi/v1/commissionRate` per symbol.",
+           "- fee → `account_actual`: only a key with 'Enable Futures' (a trading permission) can read `GET /fapi/v1/commissionRate`; the repository does not require it.",
            "- spread, slippage → measured: P11 `depth_capacity_features` derives an effective-spread proxy and slippage bounds from the "
            "Vision archives; they enter the chain as `official_published`-grade links once a preregistration names which window it uses.",
            "- The official fee may serve to **reject** a hypothesis whose gross is below 3 × the published cost. It may never serve to promote one.", ""]
@@ -353,7 +504,10 @@ def write_collected_reports(doc: Dict[str, Any], out: Optional[Path] = None) -> 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--collect", action="store_true"); ap.add_argument("--status", action="store_true"); ap.add_argument("--allow-trading-key", action="store_true")
+    ap.add_argument("--from-store", action="store_true", help="regenere les rapports depuis les dumps deja collectes, sans reseau ni cle")
     a = ap.parse_args()
+    if a.from_store:
+        d = rebuild_from_store(); print(json.dumps(d["answers"], indent=1, ensure_ascii=False, default=str)); return
     if a.status:
         cl = RO.ReadOnlyClient()
         print(json.dumps({"has_credentials": RO.has_credentials(), "env_var": cl.env_var, "key": RO.redact(cl._key),

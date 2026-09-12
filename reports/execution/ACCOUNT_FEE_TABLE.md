@@ -1,4 +1,4 @@
-# ACCOUNT FEE TABLE — P8 (2026-09-12T14:45:56 UTC)
+# ACCOUNT FEE TABLE — P8 (2026-09-12T20:35:15 UTC)
 
 Every fee carries its provenance. `account_actual` is what this account is charged; `official_published` is the venue's schedule; `declared` is a number a spec wrote down. Only the first two can settle a cost-wall question.
 

@@ -1,5 +1,5 @@
 {
- "generated_at_utc": "2026-09-12T14:45:56+00:00",
+ "generated_at_utc": "2026-09-12T20:35:15+00:00",
  "published_vip0": {
   "maker_bps": 2.0,
   "taker_bps": 5.0,
@@ -7,63 +7,108 @@
   "as_of": "2026-09-10"
  },
  "account": {
-  "has_credentials": false,
-  "env_var": null,
+  "has_credentials": true,
+  "env_var": "BINANCE_READONLY_API_KEY",
   "permission_check": {
-   "status": "no_credentials",
-   "usable": false,
-   "reason": "no API key in the environment"
+   "status": "ok",
+   "usable": true,
+   "granted_permissions": [],
+   "restrictions": {
+    "ipRestrict": false,
+    "enableSpotAndMarginTrading": false,
+    "enableWithdrawals": false,
+    "enableInternalTransfer": false,
+    "permitsUniversalTransfer": false,
+    "enableVanillaOptions": false,
+    "enablePortfolioMarginTrading": false,
+    "enableFixApiTrade": false,
+    "enableFixReadOnly": false,
+    "enableReading": true,
+    "enableFutures": false,
+    "enableMargin": false
+   },
+   "ip_restricted": false,
+   "note": "key is read-only"
   },
-  "usable": false,
+  "usable": true,
   "endpoints": {
    "commission_rate": {
-    "status": "no_credentials",
+    "status": "error",
     "endpoint": "GET /fapi/v1/commissionRate",
-    "reason": "no API key in the environment",
-    "would_give": "actual maker/taker fee for one futures symbol"
+    "error": "Invalid API-key, IP, or permissions for action",
+    "binance_code": -2015,
+    "has_rows": null
    },
    "leverage_brackets": {
-    "status": "no_credentials",
+    "status": "error",
     "endpoint": "GET /fapi/v1/leverageBracket",
-    "reason": "no API key in the environment",
-    "would_give": "leverage brackets and maintenance margin"
+    "error": "Invalid API-key, IP, or permissions for action",
+    "binance_code": -2015,
+    "has_rows": null
    },
    "futures_account": {
-    "status": "no_credentials",
+    "status": "error",
     "endpoint": "GET /fapi/v2/account",
-    "reason": "no API key in the environment",
-    "would_give": "futures account metadata: fee tier, canTrade / canWithdraw flags"
+    "error": "Invalid API-key, IP, or permissions for action",
+    "binance_code": -2015,
+    "has_rows": null
    },
    "spot_account": {
-    "status": "no_credentials",
+    "status": "ok",
     "endpoint": "GET /api/v3/account",
-    "reason": "no API key in the environment",
-    "would_give": "spot commission rates, canTrade / canWithdraw flags"
+    "error": null,
+    "binance_code": null,
+    "has_rows": null
    },
    "funding_income": {
-    "status": "no_credentials",
+    "status": "error",
     "endpoint": "GET /fapi/v1/income",
-    "reason": "no API key in the environment",
-    "would_give": "own income rows (funding fees, commissions)"
+    "error": "Invalid API-key, IP, or permissions for action",
+    "binance_code": -2015,
+    "has_rows": null
    },
    "own_fills": {
-    "status": "no_credentials",
+    "status": "error",
     "endpoint": "GET /fapi/v1/userTrades",
-    "reason": "no API key in the environment",
-    "would_give": "own fills"
+    "error": "Invalid API-key, IP, or permissions for action",
+    "binance_code": -2015,
+    "has_rows": null
    },
    "margin_pairs": {
-    "status": "no_credentials",
+    "status": "ok",
     "endpoint": "GET /sapi/v1/margin/allPairs",
-    "reason": "no API key in the environment",
-    "would_give": "margin pairs (is the asset borrowable?)"
+    "error": null,
+    "binance_code": null,
+    "has_rows": true
    }
+  },
+  "rebuilt_from_store": true,
+  "account_flags": {
+   "spot_account": {
+    "canWithdraw": true,
+    "canTrade": true,
+    "canDeposit": true
+   }
+  },
+  "spot_fees": {
+   "maker_bps": 10.0,
+   "taker_bps": 10.0,
+   "unit": "makerCommission=10 means 10 bps"
   }
  },
- "key_redacted": "<absent>",
+ "key_redacted": "0jJ…tp (64 chars)",
  "costs": {
   "fee_bps_per_side": 5.0,
   "fee_provenance": "official_published",
+  "fee_note": "official VIP0 schedule; tier VIP0 confirmed from the account's spot commission; BNB discount not applied (status unknown: conservative)",
+  "fee_tier_inferred": {
+   "tier": "VIP0",
+   "source": "spot makerCommission/takerCommission (account_actual) matched to the official spot schedule",
+   "spot_bps": [
+    10.0,
+    10.0
+   ]
+  },
   "comparisons": {
    "H2": {
     "spec_declared_round_trip_bps": 24.0,
@@ -111,7 +156,8 @@
     "weakest_provenance": "declared",
     "note": "a cost chain that rests on a declared number cannot confirm or contradict anything"
    }
-  }
+  },
+  "capacity_links": null
  },
  "constraints_coverage": {
   "h2_symbols": 174,
@@ -138,16 +184,298 @@
  "answers": {
   "1_actual_futures_taker_fee_bps": null,
   "2_actual_futures_maker_fee_bps": null,
-  "3_funding_payment_availability": "no_credentials",
-  "4_leverage_bracket_availability": "no_credentials",
+  "3_funding_payment_availability": "error",
+  "4_leverage_bracket_availability": "error",
   "5_h2_h3_cost_assumptions": {
    "H2": "unknown",
    "H3": "unknown"
   },
   "6_what_remains_theoretical": [
-   "every account figure: no read-only API key in the environment (BINANCE_READONLY_API_KEY or BINANCE_API_KEY)",
-   "spread and slippage in both cost chains are the values declared in the specs; P6 depth archives can measure them, this phase does not",
+   "actual futures fee (account_actual): Binance serves every signed /fapi endpoint, reads included, only to a key with 'Enable Futures' -- a trading permission. There is no futures-read-only key: a read-only key gets -2015 on /fapi and the futures fee cannot be read as account_actual without accepting a trading-capable key (IP-restricted, --allow-trading-key, journaled).",
+   "the key has NO IP restriction (ipRestrict=false): restrict it to this machine before any further use",
+   "spread and slippage in both cost chains are the values declared in the specs; P11 measured them per window (see 9_cost_chain_by_window): the chain leaves 'unknown' only once a preregistration names the window and notional",
    "borrow availability and borrow cost for spot delisting shorts (sapi margin endpoints, key required)"
+  ],
+  "7_fee_tier_inferred_from_spot": {
+   "tier": "VIP0",
+   "source": "spot makerCommission/takerCommission (account_actual) matched to the official spot schedule",
+   "spot_bps": [
+    10.0,
+    10.0
+   ]
+  },
+  "8_futures_permission_diagnosis": "futures_read_requires_enable_futures",
+  "9_cost_chain_by_window": [
+   {
+    "window_min": 0,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 28.37,
+    "slippage_rt_bps": 2.92,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 3,
+    "round_trip_bps": 41.29,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 0,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 28.37,
+    "slippage_rt_bps": 14.54,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 4,
+    "round_trip_bps": 52.91,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 0,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 28.37,
+    "slippage_rt_bps": 28.91,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 5,
+    "round_trip_bps": 67.28,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 1,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 17.67,
+    "slippage_rt_bps": 1.73,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 1,
+    "round_trip_bps": 29.4,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 1,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 17.67,
+    "slippage_rt_bps": 8.64,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 1,
+    "round_trip_bps": 36.31,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 1,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 17.67,
+    "slippage_rt_bps": 17.07,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 2,
+    "round_trip_bps": 44.74,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 5,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.45,
+    "slippage_rt_bps": 0.86,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 21.31,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 5,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.45,
+    "slippage_rt_bps": 4.33,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 24.78,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 5,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.45,
+    "slippage_rt_bps": 8.65,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 29.1,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 15,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.31,
+    "slippage_rt_bps": 0.67,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 20.98,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 15,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.31,
+    "slippage_rt_bps": 3.35,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 23.66,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "confirmed",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 15,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 10.31,
+    "slippage_rt_bps": 6.69,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 27.0,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 30,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 8.62,
+    "slippage_rt_bps": 0.55,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 19.17,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 30,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 8.62,
+    "slippage_rt_bps": 2.75,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 21.37,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 30,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 8.62,
+    "slippage_rt_bps": 5.5,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 24.12,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "confirmed",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 60,
+    "notional_usd": 100,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 6.35,
+    "slippage_rt_bps": 0.45,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 16.8,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 60,
+    "notional_usd": 500,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 6.35,
+    "slippage_rt_bps": 2.25,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 18.6,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   },
+   {
+    "window_min": 60,
+    "notional_usd": 1000,
+    "n_events": 174,
+    "fee_bps": 5.0,
+    "fee_provenance": "official_published",
+    "spread_bps": 6.35,
+    "slippage_rt_bps": 4.49,
+    "slippage_rt_ub_bps": 200.0,
+    "n_order_exceeds_book": 0,
+    "round_trip_bps": 20.84,
+    "spec_declared_round_trip_bps": 24.0,
+    "status_vs_spec": "contradicted",
+    "weakest_provenance": "official_published"
+   }
   ]
  },
  "no_orders": true,

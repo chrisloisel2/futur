@@ -1,4 +1,4 @@
-# READ-ONLY KEY SAFETY AUDIT (2026-09-12T19:28:23 UTC)
+# READ-ONLY KEY SAFETY AUDIT (2026-09-12T20:35:15 UTC)
 
 What `binance_account_readonly.py` can and cannot do, verified by tests on its own source, not by promise.
 
@@ -19,5 +19,5 @@ What `binance_account_readonly.py` can and cannot do, verified by tests on its o
 | secrets never logged, written or returned | credentials live only in the client instance; reports carry a redacted form (`abc…yz (n chars)`) | `test_credentials_are_never_exposed` |
 | raw account data | written under `data/account_execution/` which is gitignored; nothing account-specific is versioned | `.gitignore` `data/*` |
 
-Credentials at audit time: absent (<absent>). Mode: **no_credentials**.
+Credentials at audit time: present (0jJ…tp (64 chars)). Mode: **collected**.
 
