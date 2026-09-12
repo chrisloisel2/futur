@@ -1,5 +1,5 @@
 {
- "generated_at_utc": "2026-09-11T23:06:16+00:00",
+ "generated_at_utc": "2026-09-12T14:45:56+00:00",
  "published_vip0": {
   "maker_bps": 2.0,
   "taker_bps": 5.0,
@@ -32,13 +32,13 @@
     "status": "no_credentials",
     "endpoint": "GET /fapi/v2/account",
     "reason": "no API key in the environment",
-    "would_give": "account metadata: fee tier and permissions"
+    "would_give": "futures account metadata: fee tier, canTrade / canWithdraw flags"
    },
    "spot_account": {
     "status": "no_credentials",
     "endpoint": "GET /api/v3/account",
     "reason": "no API key in the environment",
-    "would_give": "spot commission rates"
+    "would_give": "spot commission rates, canTrade / canWithdraw flags"
    },
    "funding_income": {
     "status": "no_credentials",

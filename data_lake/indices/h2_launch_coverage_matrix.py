@@ -148,8 +148,9 @@ def p4_live_fields(symbol: str, ms: Path = MS) -> Dict[str, bool]:
     return out
 
 
-def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str, Optional[str]], ms: Path = MS, account_key: bool = False, bodies: Optional[Dict[str, dict]] = None, downloaded: Optional[Dict[str, set]] = None) -> List[dict]:
-    """downloaded : event_id -> datasets Vision REELLEMENT sur disque (fenetre complete) ; ils comptent comme en main."""
+def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str, Optional[str]], ms: Path = MS, account_key: bool = False, bodies: Optional[Dict[str, dict]] = None, downloaded: Optional[Dict[str, set]] = None, capacity: Optional[Dict[str, bool]] = None) -> List[dict]:
+    """downloaded : event_id -> datasets Vision REELLEMENT sur disque (fenetre complete) ; ils comptent comme en main.
+    capacity : event_id -> True si la capacite a ete MESUREE (P11) ; le champ derive n'est credite que par une mesure."""
     rows = []
     for e in events:
         dl = (downloaded or {}).get(e["event_id"], set())
@@ -167,7 +168,9 @@ def build_rows(events: List[dict], vision: Dict[str, str], precedence: Dict[str,
             have["first_orderbook_ts_present"] |= "bookDepth" in dl; have["l2_t0_t6h_present"] |= "bookDepth" in dl
             have["first_mark_ts_present"] |= "markPriceKlines" in dl; have["first_index_ts_present"] |= ("indexPriceKlines" in dl or "premiumIndexKlines" in dl)
             have["first_oi_ts_present"] |= "metrics" in dl; have["funding_present"] |= "fundingRate" in dl
-            # capacity_present reste faux : le champ est DERIVE (profondeur x volume) et P6 ne calcule rien.
+            # capacity_present n'est credite que par une mesure (P11 depth_capacity_features), jamais par la presence des archives.
+        if (capacity or {}).get(e["event_id"]):
+            have["capacity_present"] = True
         free = dict(have)   # apres backfill gratuit (Vision + scrape du corps + calcul)
         free["first_trade_ts_present"] |= v["aggTrades"] == "ok"; free["trades_t0_t6h_present"] |= v["aggTrades"] == "ok"
         free["first_orderbook_ts_present"] |= v["bookDepth"] == "ok"; free["l2_t0_t6h_present"] |= v["bookDepth"] == "ok"

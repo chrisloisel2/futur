@@ -1,0 +1,790 @@
+{
+ "generated_at_utc": "2026-09-12T14:59:18+00:00",
+ "rows": [
+  {
+   "zone": "H2_POOLED",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "H2_POOLED",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "dead / invalid population"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "TRUE_FIRST_LISTING",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "forward-only / too few historical events"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "OTHER_VENUE_FIRST",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "closest research zone"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "MEXC_TO_BINANCE",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "highest mechanistic interest"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "H3_DELISTING",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "forward sealed / needs future events"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "FORCED_FLOW_PUBLIC",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "rejected as direct signal"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "announcement_ts",
+   "source": "P2 tape",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "announced_opening_ts",
+   "source": "P7 body",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "first_traded_bar",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "mark_index_premium_1m",
+   "source": "P6 Vision",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "trades_tick",
+   "source": "P6 Vision aggTrades",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "depth_1min_bands",
+   "source": "P6 Vision bookDepth",
+   "status": "have (20 bps only from 2026)",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "open_interest_5m",
+   "source": "P6 Vision metrics",
+   "status": "have",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "funding",
+   "source": "P6 Vision",
+   "status": "have (3 pending)",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "capacity_features",
+   "source": "P11",
+   "status": "measured for 160",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "venue_precedence",
+   "source": "P9",
+   "status": "143 settled",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "pre_binance_tape",
+   "source": "P11 MEXC",
+   "status": "112 of 113",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "actual_fees",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "leverage_brackets",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "borrowability",
+   "source": "P8",
+   "status": "no_credentials",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "tick_l2_history",
+   "source": "provider",
+   "status": "not held; 7 windows P0",
+   "zone_verdict": "possible future family, not built here"
+  },
+  {
+   "zone": "PRE_LIQUIDATION_PRESSURE",
+   "data_class": "live_market_state",
+   "source": "P4 tape",
+   "status": "running; no true birth captured yet",
+   "zone_verdict": "possible future family, not built here"
+  }
+ ],
+ "no_alpha_test": true
+}
