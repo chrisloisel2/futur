@@ -1,0 +1,193 @@
+{
+ "seeds": [
+  {
+   "seed": 1,
+   "effect": {
+    "rho": 0.1908879214336337,
+    "p": 0.04997501249375312,
+    "high_n": 51,
+    "high_gross_mean": 665.6268434216762,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.0500 > alpha/6 = 0.0083 (rho 0.191)"
+    ]
+   },
+   "null": {
+    "rho": -0.06182039080692518,
+    "p": 0.7141429285357321,
+    "high_n": 51,
+    "high_gross_mean": -16.74142382611102,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.0618 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   }
+  },
+  {
+   "seed": 2,
+   "effect": {
+    "rho": 0.24376092127261728,
+    "p": 0.014992503748125937,
+    "high_n": 53,
+    "high_gross_mean": 726.162737554432,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.0150 > alpha/6 = 0.0083 (rho 0.244)"
+    ]
+   },
+   "null": {
+    "rho": 0.019928609715208993,
+    "p": 0.43228385807096453,
+    "high_n": 53,
+    "high_gross_mean": -10.514617445924538,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.4323 > alpha/6 = 0.0083 (rho 0.020)"
+    ]
+   }
+  },
+  {
+   "seed": 3,
+   "effect": {
+    "rho": 0.2207192613444582,
+    "p": 0.01899050474762619,
+    "high_n": 44,
+    "high_gross_mean": 286.563639907199,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.0190 > alpha/6 = 0.0083 (rho 0.221)"
+    ]
+   },
+   "null": {
+    "rho": -0.04096468492659073,
+    "p": 0.6261869065467266,
+    "high_n": 44,
+    "high_gross_mean": -388.37842414517485,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.041 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   }
+  },
+  {
+   "seed": 4,
+   "effect": {
+    "rho": 0.2961474210244654,
+    "p": 0.004497751124437781,
+    "high_n": 46,
+    "high_gross_mean": 759.0970936756661,
+    "verdict": "CANDIDATE_ALPHA_REQUIRES_FORWARD",
+    "reasons": [
+     "all criteria met; forward-only collection, no position"
+    ]
+   },
+   "null": {
+    "rho": 0.08640712814191212,
+    "p": 0.2178910544727636,
+    "high_n": 46,
+    "high_gross_mean": 46.65412018710465,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.2179 > alpha/6 = 0.0083 (rho 0.086)"
+    ]
+   }
+  },
+  {
+   "seed": 5,
+   "effect": {
+    "rho": 0.24441114536033123,
+    "p": 0.01199400299850075,
+    "high_n": 47,
+    "high_gross_mean": 282.7943771598198,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.0120 > alpha/6 = 0.0083 (rho 0.244)"
+    ]
+   },
+   "null": {
+    "rho": -0.030434958697313823,
+    "p": 0.607696151924038,
+    "high_n": 47,
+    "high_gross_mean": -439.62612772902287,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.0304 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   }
+  },
+  {
+   "seed": 6,
+   "effect": {
+    "rho": 0.28838716209375315,
+    "p": 0.001999000499750125,
+    "high_n": 47,
+    "high_gross_mean": 720.9775502336513,
+    "verdict": "CANDIDATE_ALPHA_REQUIRES_FORWARD",
+    "reasons": [
+     "all criteria met; forward-only collection, no position"
+    ]
+   },
+   "null": {
+    "rho": 0.0973979953427154,
+    "p": 0.16591704147926037,
+    "high_n": 47,
+    "high_gross_mean": 8.832351190816967,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.1659 > alpha/6 = 0.0083 (rho 0.097)"
+    ]
+   }
+  },
+  {
+   "seed": 7,
+   "effect": {
+    "rho": 0.16053538795076588,
+    "p": 0.07946026986506746,
+    "high_n": 49,
+    "high_gross_mean": 607.6406590725176,
+    "verdict": "INDECIDABLE",
+    "reasons": [
+     "permutation p 0.0795 > alpha/6 = 0.0083 (rho 0.161)"
+    ]
+   },
+   "null": {
+    "rho": -0.058682083032457054,
+    "p": 0.7006496751624188,
+    "high_n": 49,
+    "high_gross_mean": -24.93981786211224,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.0587 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   }
+  },
+  {
+   "seed": 8,
+   "effect": {
+    "rho": -0.052974231830148134,
+    "p": 0.6836581709145427,
+    "high_n": 45,
+    "high_gross_mean": 223.75787279607502,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.053 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   },
+   "null": {
+    "rho": -0.29128739975564444,
+    "p": 0.9960019990004998,
+    "high_n": 45,
+    "high_gross_mean": -507.22668625345307,
+    "verdict": "REJECTED",
+    "reasons": [
+     "spearman rho -0.2913 <= 0: the pre-announcement run-up does not order the fade"
+    ]
+   }
+  }
+ ],
+ "n": 84,
+ "sigma_6h_bps": 1546.0,
+ "effect_candidate_share": 0.25,
+ "null_candidate_share": 0.0,
+ "passed": false
+}

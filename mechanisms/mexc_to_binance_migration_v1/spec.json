@@ -1,0 +1,96 @@
+{
+ "mechanism_id": "mexc_to_binance_migration_v1",
+ "hypothesis": "On Binance USDS-M perpetual launches whose asset was first listed on MEXC, the MEXC run-up over the 24 h ending at the last complete hour before the Binance announcement orders the fade of the Binance perpetual between t0+15 min and t0+6 h (short, raw); in the high-run-up group (>= +20 %) the mean net fade exceeds 3x the measured taker cost at 500 $.",
+ "economic_reason": "Holders accumulated on MEXC without a liquid short path; the Binance perpetual brings leverage, short access and a reference price. The move that was bought on MEXC is sold back once it can be shorted. Nobody is forced to trade: a crowd-positioning story, hence a forward-only ceiling.",
+ "data_sources": [
+  "reports/first_look/event_listing_perp_fade_v1_UNIVERSE.json",
+  "reports/data_acquisition/MEXC_PRE_ANNOUNCEMENT_RETURN_24H.json",
+  "reports/data_acquisition/H2_CAUSAL_POPULATION_MATRIX.json",
+  "reports/data_acquisition/H2_DEPTH_CAPACITY_FEATURES.json",
+  "reports/wash_volume/MEXC_VOLUME_TRUST.json",
+  "reports/execution/FUTURES_FEE_DECISION.json",
+  "binance_vision_um_klines_1m",
+  "binance_vision_um_fundingRate"
+ ],
+ "universe": [
+  "MEXC_FIRST_PRE_ANNOUNCEMENT_POPULATION_FROZEN"
+ ],
+ "timeframe": "1m",
+ "horizon": "6h",
+ "side_mode": "short",
+ "entry_rule": {
+  "event_selection": "population.json (84 events): MEXC_FIRST, not BAD_TIMESTAMP, pre_announcement_return_24h defined (>= 20 complete MEXC hourly closes before the announcement), effective spread measured at +15 min (slippage imputed at the population median for 5, flagged); HIGH = variable >= +0.20 (30), LOW = 54, lists frozen by sha256",
+  "entry_at": "tradable_start + 15 min (open of the first 1-min bar >= entry time, tolerance 5 min, else excluded and counted); t0 = tradable_start_ts = first Vision bar"
+ },
+ "exit_rule": {
+  "exit_at": "tradable_start + 6 h (open of the first bar >= exit time, tolerance 5 min; missing exit = excluded and counted)",
+  "no_stop": true
+ },
+ "cost_model": {
+  "maker_fee_bps": 2.0,
+  "taker_fee_bps": 5.0,
+  "maker_ratio": 0.0,
+  "spread_bps": 10.3,
+  "slippage_bps": 6.0,
+  "adverse_selection_bps": 0.0,
+  "n_legs": 1,
+  "notes": "per event in the harness: 2 x 5 bps taker (official VIP0, tier confirmed by the spot account, BNB discount not applied: decision P13) + own effective spread at +15 min + own sell+buy slippage at 500 $ (P11, official_published; imputed for 5); mean round trip 26.6 bps (HIGH 22.9). Realised funding received by the short at settlements in (entry, exit] enters the net. The spread/slippage numbers here are population medians for the schema; the harness uses per-event values."
+ },
+ "validation_window": {
+  "start": "2023-05-05",
+  "end": "2026-09-06",
+  "nature": "historical first look on the frozen population ONLY with a recorded user override of the news-family burn (2017-07-21 -> 2026-09-10); otherwise forward-only: t0 after the seal, look when >= 60 eligible or on 2028-09-12"
+ },
+ "placebo_tests": [
+  "post_listing_drift_t0_plus_7d (veto-eligible)",
+  "post_listing_drift_t0_plus_30d (reported)",
+  "fake_symbol_seeded_from_pinned_exchangeInfo (veto-eligible)",
+  "other_venue_first_control (reported)",
+  "lead_time_split (reported)",
+  "conditioning_permutation (= primary null, 20 000 seeded permutations)",
+  "synthetic_positive_control_at_design_regime"
+ ],
+ "declustering_rule": {
+  "method": "cluster_by_launch_day",
+  "window_seconds": 86400,
+  "note": "84 distinct launch days: cluster-robust SE equals iid SE"
+ },
+ "multiplicity_family": "news",
+ "kill_criteria": {
+  "n_measured_lt": 30,
+  "spearman_rho_le": 0.0,
+  "permutation_p_gt": 0.008333,
+  "n_high_lt": 15,
+  "high_median_gross_bps_lt": 30,
+  "high_net_lt_cost_x": 3.0,
+  "n_eff_lt_share_of_n_high": 0.45,
+  "top1_share_gt": 0.2,
+  "mean_net_without_largest_le": 0.0,
+  "placebo_veto": "veto-eligible placebo with n >= 30, t >= 1.0 and gross >= 50 % of HIGH gross, or not computable"
+ },
+ "promotion_criteria": {
+  "primary": "spearman(pre_announcement_return_24h, short gross raw 6h return) on all measured events, one-sided rho > 0, permutation p <= 0.05/6 (20 000 seeded permutations)",
+  "economic_gate": "HIGH mean net >= 3 x mean cost(HIGH), reported with iid SE; t on the gross series, not tested",
+  "n_min": 30,
+  "n_high_min": 15,
+  "high_median_gross_bps_min": 30,
+  "t_min_one_sided_family_bonferroni": 2.394,
+  "n_eff_min_share": 0.45,
+  "top1_share_max": 0.2,
+  "verdict_if_all_met": "CANDIDATE_ALPHA_REQUIRES_FORWARD",
+  "deployable": false,
+  "capital_deployable": false
+ },
+ "sensitivities": {
+  "horizon": [
+   "60m",
+   "24h"
+  ],
+  "robustness": [
+   "HIGH ex wash-flagged",
+   "HIGH ex cost-imputed"
+  ]
+ },
+ "declared_data_latency_ms": 60000,
+ "notes": "Preregistration: reports/prereg/MEXC_TO_BINANCE_V1_PREREG.md (draft until sealed as an orphan commit). Sixth sealed hypothesis of the news family: threshold_t(6) = 2.3940, alpha/6 one-sided. Deviations from research_kernel/mechanisms/mexc_to_binance_migration_effect.py listed in the prereg section 2. Expected outcome at declared power: INDECIDABLE."
+}

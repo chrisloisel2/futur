@@ -88,3 +88,20 @@ def compute(daily: List[Dict[str, Any]], hourly: List[Dict[str, Any]], t0_ms: in
     have_d, have_h = bool(w7), bool(w24)
     f["coverage_status"] = "full" if (have_d and have_h) else ("daily_only" if have_d else ("partial" if (d or h) else "not_collected"))
     return f
+
+
+def pre_announcement_return(hourly: List[Dict[str, Any]], publication_ms: int, t0_ms: int, hours: int = 24, min_closes: int = 20) -> Dict[str, Any]:
+    """Rendement MEXC sur les `hours` heures qui se terminent a la derniere heure COMPLETE avant l'annonce Binance
+    (floor_hour(publication_ms)) : la variable de conditionnement de MEXC_TO_BINANCE_V1. Strictement avant l'annonce,
+    donc avant t0 ; les heures entre l'annonce et t0 sont comptees a part (reaction, pas conditionnement). Sous
+    `min_closes` bougies completes dans la fenetre : None (la variable ne serait pas la meme quantite)."""
+    H = 3_600_000
+    h = strictly_before(hourly, t0_ms, H)
+    end = (int(publication_ms) // H) * H if publication_ms else (int(t0_ms) // H) * H
+    end = min(end, (int(t0_ms) // H) * H)
+    win = [c for c in h if c["open_time_ms"] >= end - hours * H and c["open_time_ms"] + H <= end]
+    dropped_post_announcement = sum(1 for c in h if c["open_time_ms"] + H > end)
+    out = {"pre_announcement_return_24h": None, "hours_in_window": len(win), "window_end_ms": end, "post_announcement_hours_dropped": dropped_post_announcement, "announcement_cut": bool(publication_ms)}
+    if len(win) >= min_closes and win[0]["close"] > 0:
+        out["pre_announcement_return_24h"] = round(win[-1]["close"] / win[0]["close"] - 1.0, 6)
+    return out
