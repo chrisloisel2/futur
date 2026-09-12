@@ -96,7 +96,7 @@ def same_asset_rows(rows: List[Dict[str, Any]], root: Optional[Path] = None) -> 
     root = Path(root) if root else VP.STORE; out: Dict[str, Dict[str, Any]] = {}
     for r in rows:
         mp = sv_manifest_path(r["event_id"], root)
-        if not mp.exists():
+        if not mp.exists() or r.get("status") != "MEASURED":                 # spec §7 : seulement les evenements MEASURED cote MEXC
             continue
         man = json.loads(mp.read_text()); usable = [a for a in man.get("attempts", []) if a.get("usable")]
         if not usable:
@@ -182,7 +182,7 @@ def write_reports(doc: Optional[Dict[str, Any]] = None, out: Optional[Path] = No
           "## Support", "", "| statut | n |", "|---|---|"] + ["| %s | %d |" % (k, v) for k, v in sorted(s["by_status"].items())] + ["",
           "Raisons de non‑mesure : " + "; ".join("%s ×%d" % (k, v) for k, v in sorted(s["reasons"].items(), key=lambda kv: -kv[1])) if s["reasons"] else "", "",
           "## Drapeaux (fraction pré‑déclarée, jamais un filtre)", "",
-          "- `wash_volume_suspect` (décile supérieur du rang d'anomalie, sur %d MEASURED) : **%d**" % (s["n_measured"], s["n_wash_volume_suspect"]),
+          "- `wash_volume_suspect` (décile supérieur du rang d'anomalie, sur %d MEASURED, soit ⌈%d × %.2f⌉ = %d rangs, ex æquo au seuil inclus) : **%d**" % (s["n_measured"], s["n_measured"], M.TOP_FRACTION, -(-s["n_measured"] * M.TOP_FRACTION // 1) if s["n_measured"] >= M.MIN_RANKED else 0, s["n_wash_volume_suspect"]),
           "- `programme_like` (plancher ≥ %.1f et CV ≤ %.1f) : **%d**" % (M.PROGRAMME_FLOOR, M.PROGRAMME_CV, s["n_programme_like"]), "",
           "## Médianes des événements MEASURED", "", "| covariable | médiane |", "|---|---|"] + ["| %s | %s |" % (k, _f(v)) for k, v in s["feature_medians_measured"].items()] + ["",
           "## Contrôle même actif, second venue, mêmes heures", "",
