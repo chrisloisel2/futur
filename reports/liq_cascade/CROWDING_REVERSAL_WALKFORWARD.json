@@ -1,6 +1,6 @@
 {
   "engine": "CROWDING_REVERSAL",
-  "events_total": 2282,
+  "events_total": 2290,
   "config": {
     "cost_rt": 0.0014,
     "selection": "top20%_val",
@@ -35,11 +35,11 @@
       },
       "portfolio_sim": {
         "n": 96,
-        "pf": 2.804,
+        "pf": 2.857,
         "wr": 0.656,
-        "mean_net_bps": 264.6,
-        "roi_sized": 0.2856,
-        "roi_portfolio_style": 0.2856,
+        "mean_net_bps": 272.3,
+        "roi_sized": 0.2951,
+        "roi_portfolio_style": 0.2951,
         "n_taken": 96
       },
       "threshold_ladder": {
@@ -199,7 +199,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2031,
-      "n_test": 248,
+      "n_test": 257,
       "ml_gated": {
         "n": 42,
         "pf": 0.843,
@@ -218,11 +218,11 @@
       },
       "threshold_ladder": {
         "top30%": {
-          "n": 86,
-          "pf": 0.849,
-          "wr": 0.488,
-          "mean_net_bps": -34.2,
-          "roi_sized": -0.0304
+          "n": 89,
+          "pf": 0.878,
+          "wr": 0.494,
+          "mean_net_bps": -27.0,
+          "roi_sized": -0.0252
         },
         "top20%": {
           "n": 42,
@@ -246,7 +246,7 @@
           "roi_sized": 0.0183
         }
       },
-      "ml_auc_test": 0.5384,
+      "ml_auc_test": 0.544,
       "top_features": [
         [
           "btc_vol_24h",
@@ -310,11 +310,11 @@
       },
       "portfolio_sim": {
         "n": 127,
-        "pf": 1.535,
-        "wr": 0.583,
-        "mean_net_bps": 106.9,
-        "roi_sized": 0.1419,
-        "roi_portfolio_style": 0.1419,
+        "pf": 1.608,
+        "wr": 0.591,
+        "mean_net_bps": 121.4,
+        "roi_sized": 0.1629,
+        "roi_portfolio_style": 0.1629,
         "n_taken": 127
       },
       "threshold_ladder": {
@@ -474,7 +474,7 @@
       "year": 2026,
       "skip": false,
       "n_train": 2031,
-      "n_test": 248,
+      "n_test": 257,
       "ml_gated": {
         "n": 46,
         "pf": 0.96,
@@ -493,11 +493,11 @@
       },
       "threshold_ladder": {
         "top30%": {
-          "n": 80,
-          "pf": 0.892,
-          "wr": 0.463,
-          "mean_net_bps": -25.9,
-          "roi_sized": -0.0219
+          "n": 81,
+          "pf": 0.895,
+          "wr": 0.469,
+          "mean_net_bps": -24.8,
+          "roi_sized": -0.0213
         },
         "top20%": {
           "n": 46,
@@ -521,7 +521,7 @@
           "roi_sized": 0.0174
         }
       },
-      "ml_auc_test": 0.5393,
+      "ml_auc_test": 0.5441,
       "top_features": [
         [
           "btc_vol_24h",

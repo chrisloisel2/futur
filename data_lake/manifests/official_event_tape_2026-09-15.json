@@ -1,0 +1,39 @@
+{
+  "generated_at_utc": "2026-09-15T00:06:26+00:00",
+  "file": "data_lake/events/official_event_tape.jsonl",
+  "sha256": "37e7b931453c4214aa5d32638a46345a6d55604bfa902fb16246f8863d082440",
+  "n_records": 7464,
+  "by_source_type": {
+    "binance/alpha": 59,
+    "binance/delisting": 512,
+    "binance/futures_delisting": 90,
+    "binance/futures_listing": 610,
+    "binance/launchpool": 64,
+    "binance/listing": 1471,
+    "binance/product_add": 147,
+    "bybit/delisting": 272,
+    "bybit/futures_delisting": 274,
+    "bybit/futures_listing": 828,
+    "bybit/launchpool": 19,
+    "bybit/listing": 921,
+    "bybit/other": 229,
+    "bybit/suspension": 3,
+    "bybit/tick_size_change": 2,
+    "coinbase/snapshot_baseline": 837,
+    "coinbase/status_change": 8,
+    "hyperliquid/snapshot_baseline": 234,
+    "okx/delisting": 21,
+    "okx/futures_delisting": 8,
+    "okx/futures_listing": 68,
+    "okx/listing": 355,
+    "okx/other": 372,
+    "okx/suspension": 24,
+    "okx/tick_size_change": 36
+  },
+  "publication_ts_range": [
+    "2017-07-21T00:06:19+00:00",
+    "2026-09-14T09:30:06.783000+00:00"
+  ],
+  "backfilled_share": 0.855,
+  "schema_version": 1
+}
